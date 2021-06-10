@@ -10,10 +10,6 @@
 #import "SettingsViewController.h"
 #import "AppUserData.h"
 
-static inline SettingsViewController *getSettingsViewController(UINavigationController *controller) {
-    return (SettingsViewController *) controller.viewControllers[0];
-}
-
 SettingsViewModel *settingsViewModel_init(SettingsTabCoordinator *delegate);
 void settingsViewModel_free(SettingsViewModel *model);
 
@@ -38,11 +34,6 @@ void settingsCoordinator_start(SettingsTabCoordinator *coordinator) {
     SettingsViewController *vc = [[SettingsViewController alloc] initWithViewModel:coordinator->viewModel];
     [coordinator->navigationController setViewControllers:@[vc]];
     [vc release];
-}
-
-void settingsCoordinator_updateNavBarTokens(SettingsTabCoordinator *coordinator, NSString *label) {
-    SettingsViewController *vc = getSettingsViewController(coordinator->navigationController);
-    [vc updateNavBarCoins:label];
 }
 
 SettingsViewModel *settingsViewModel_init(SettingsTabCoordinator *delegate) {

@@ -25,7 +25,6 @@ HistoryTabCoordinator *historyCoordinator_init(UINavigationController *navVC, Ap
 void historyCoordinator_free(HistoryTabCoordinator *coordinator);
 void historyCoordinator_start(HistoryTabCoordinator *coordinator);
 
-void historyCoordinator_updateNavBarTokens(HistoryTabCoordinator *coordinator, NSString *label);
 void historyCoordinator_performForegroundUpdate(HistoryTabCoordinator *coordinator);
 void historyCoordinator_handleUserInfoChange(HistoryTabCoordinator *coordinator);
 void historyCoordinator_handleDataDeletion(HistoryTabCoordinator *coordinator);

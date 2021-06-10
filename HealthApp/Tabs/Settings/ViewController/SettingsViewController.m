@@ -9,7 +9,6 @@
 #import "SettingsViewModel.h"
 #import "ViewControllerHelpers.h"
 #import "SettingsTabCoordinator.h"
-#import "NavBarCoinsView.h"
 #import "AppCoordinator.h"
 #import "AppUserData.h"
 #import "PersistenceService.h"
@@ -17,7 +16,6 @@
 
 @interface SettingsViewController() {
     SettingsViewModel *viewModel;
-    NavBarCoinsView *navBarCoinsView;
     UILabel *tokenGoalLabel;
     UIStepper *tokenStepper;
     UITextField *usernameTextField;
@@ -35,7 +33,6 @@
 }
 
 - (void) dealloc {
-    [navBarCoinsView release];
     [usernameTextField release];
     [tokenGoalLabel release];
     [tokenStepper release];
@@ -139,9 +136,6 @@
     [vStack setCustomSpacing:40 afterView:hStackUsername];
     [vStack setCustomSpacing:40 afterView:saveButton];
 
-    navBarCoinsView = [[NavBarCoinsView alloc] init];
-    UIBarButtonItem *leftBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:navBarCoinsView];
-    self.navigationItem.leftBarButtonItem = leftBarButtonItem;
     UITextField *fields[] = {usernameTextField, nil};
     viewController_createToolbar(self, @selector(dismissKeyboard), fields);
 
@@ -159,11 +153,6 @@
     [hStackUsername release];
     [usernameLabel release];
     [hStackTokenGoal release];
-    [leftBarButtonItem release];
-}
-
-- (void) updateNavBarCoins: (NSString *)text {
-    [navBarCoinsView updateTokens:text];
 }
 
 #pragma mark - Selectors
@@ -179,10 +168,9 @@
 
 - (void) saveButtonPressed {
     int goal = tokenStepper.value;
-    NSString *name = [[NSString alloc] initWithString:usernameTextField.text];
     AppCoordinator *delegate = viewModel->delegate->delegate;
 
-    AlertDetails *details = settingsViewModel_getAlertDetailsForSaveButton(goal, name);
+    AlertDetails *details = settingsViewModel_getAlertDetailsForSaveButton(goal, usernameTextField.text);
     UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"Save" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action _U_) {
         appCoordinator_updatedUserInfo(delegate);
     }];

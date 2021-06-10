@@ -9,7 +9,8 @@
 #define ActivityType_h
 
 #import "Constants.h"
+#import <Foundation/Foundation.h>
 
-NSString *activityType_getString(ActivityType type, bool shortString);
+NSString *activityType_getString(ActivityType type, unsigned char shortString);
 
 #endif /* ActivityType_h */

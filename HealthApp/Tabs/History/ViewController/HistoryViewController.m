@@ -9,7 +9,6 @@
 #import "HistoryViewModel.h"
 #import "HistoryTabCoordinator.h"
 #import "AppCoordinator.h"
-#import "NavBarCoinsView.h"
 #import "ChartSeparatorView.h"
 #import "HistoryPieChartView.h"
 #import "HistoryGradientChartView.h"
@@ -17,7 +16,6 @@
 
 @interface HistoryViewController() {
     HistoryViewModel *viewModel;
-    NavBarCoinsView *navBarCoinsView;
     UIScrollView *scrollView;
     UISegmentedControl *rangePicker;
     HistoryGradientChartView *gradientChart;
@@ -36,7 +34,6 @@
 }
 
 - (void) dealloc {
-    [navBarCoinsView release];
     [scrollView release];
     [rangePicker release];
     [gradientChart release];
@@ -102,11 +99,6 @@
         [rangePicker.heightAnchor constraintEqualToConstant:30]
     ]];
 
-    navBarCoinsView = [[NavBarCoinsView alloc] init];
-    UIBarButtonItem *leftBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:navBarCoinsView];
-    self.navigationItem.leftBarButtonItem = leftBarButtonItem;
-
-    [leftBarButtonItem release];
     [vStack release];
     [gradientChartSeparator release];
     [areaChartSeparator release];
@@ -128,10 +120,6 @@
     [gradientChart updateChart:shouldAnimate];
     [areaChart updateChart:shouldAnimate];
     [pieChart updateChart];
-}
-
-- (void) updateNavBarCoins: (NSString *)text {
-    [navBarCoinsView updateTokens:text];
 }
 
 @end

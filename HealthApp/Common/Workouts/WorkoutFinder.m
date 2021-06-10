@@ -6,8 +6,9 @@
 //
 
 #import "WorkoutFinder.h"
+#import "AppUserData.h"
 
-Array_workout *workoutFinder_get_weekly_workouts(signed char plan, size_t week) {
+Array_workout *workoutFinder_get_weekly_workouts(signed char plan, unsigned int week) {
     NSString *planStr;
     switch (plan) {
         case FitnessPlanBaseBuilding:
@@ -38,6 +39,7 @@ Array_workout *workoutFinder_get_weekly_workouts(signed char plan, size_t week) 
         unsigned idx = [day[@"index"] unsignedIntValue];
         unsigned sets = [day[@"sets"] unsignedIntValue];
         unsigned reps = [day[@"reps"] unsignedIntValue];
+        double weightMultiplier = (double) [day[@"weight"] unsignedIntValue] / 100.0;
         Workout wk = { .type = (unsigned char) [day[@"type"] unsignedIntValue], .weight = [day[@"weight"] unsignedIntValue] };
 
         NSString *libraryKey;
@@ -77,7 +79,7 @@ Array_workout *workoutFinder_get_weekly_workouts(signed char plan, size_t week) 
                 NSDictionary *ex = foundExercises[k];
                 ExerciseEntry exercise = {
                     .type = (unsigned char) [ex[@"type"] unsignedIntValue],
-                    //.reps = [ex[@"reps"] unsignedIntValue],
+                    .reps = [ex[@"reps"] unsignedIntValue],
                     .sets = 1,
                     .rest = [ex[@"rest"] unsignedIntValue],
                     .name = [[NSString alloc] initWithString:ex[@"name"]]
@@ -88,21 +90,45 @@ Array_workout *workoutFinder_get_weekly_workouts(signed char plan, size_t week) 
             array_push_back(exGroup, wk.activities, activities);
         }
 
+        if (!wk.activities->size) {
+            array_push_back(workout, resultArr, wk);
+            continue;
+        }
+
         ExerciseEntry *e;
         Array_exEntry *exercises = wk.activities->arr[0].exercises;
+
         switch (wk.type) {
             case WorkoutTypeStrength:
-                exercises = wk.activities->arr[0].exercises;
                 array_iter(exercises, e) {
                     e->sets = sets;
                     e->reps = reps;
                 }
+
+                if (exercises->size >= 3 && idx <= 1) {
+                    exercises->arr[0].weight = (unsigned int) (weightMultiplier * (double) appUserDataShared->squatMax);
+                    exercises->arr[1].weight = (unsigned int) (weightMultiplier * (double) appUserDataShared->benchMax);
+                    if (idx == 0) {
+                        exercises->arr[2].weight = (unsigned int) (weightMultiplier * (double) appUserDataShared->pullUpMax);
+                    } else {
+                        exercises->arr[2].weight = (unsigned int) (weightMultiplier * (double) appUserDataShared->deadliftMax);
+                    }
+                } else if (exercises->size >= 4 && idx == 2) {
+                    exercises->arr[0].weight = (unsigned int) (weightMultiplier * (double) appUserDataShared->squatMax);
+                    exercises->arr[1].weight = (unsigned int) (weightMultiplier * (double) appUserDataShared->pullUpMax);
+                    exercises->arr[2].weight = (unsigned int) (weightMultiplier * (double) appUserDataShared->benchMax);
+                    exercises->arr[3].weight = (unsigned int) (weightMultiplier * (double) appUserDataShared->deadliftMax);
+                }
                 break;
             case WorkoutTypeSE:
                 wk.activities->arr[0].reps = sets;
-                exercises = wk.activities->arr[0].exercises;
                 array_iter(exercises, e) {
                     e->reps = reps;
+                }
+                break;
+            case WorkoutTypeEndurance:
+                array_iter(exercises, e) {
+                    e->reps = reps * 60;
                 }
                 break;
             default:

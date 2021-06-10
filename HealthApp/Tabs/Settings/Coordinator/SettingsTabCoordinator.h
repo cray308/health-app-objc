@@ -25,6 +25,4 @@ SettingsTabCoordinator *settingsCoordinator_init(UINavigationController *navVC, 
 void settingsCoordinator_free(SettingsTabCoordinator *coordinator);
 void settingsCoordinator_start(SettingsTabCoordinator *coordinator);
 
-void settingsCoordinator_updateNavBarTokens(SettingsTabCoordinator *coordinator, NSString *label);
-
 #endif /* SettingsTabCoordinator_h */

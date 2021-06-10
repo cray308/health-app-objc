@@ -8,21 +8,17 @@
 #ifndef AddWorkoutViewModel_h
 #define AddWorkoutViewModel_h
 
-#import "Constants.h"
-#import <Foundation/Foundation.h>
-#import "HomeViewModel.h"
+#import "Exercise.h"
 
 typedef struct AddWorkoutViewModel AddWorkoutViewModel;
 typedef struct AddWorkoutCoordinator AddWorkoutCoordinator;
 
 struct AddWorkoutViewModel {
-    int newTokens;
-    int durations[3];
-    NSString *intensityStrings[3];
-    Array_SingleActivityModel *workouts;
+    Workout *workout;
     AddWorkoutCoordinator *delegate;
 };
 
-void addWorkoutViewModel_tappedSaveButton(AddWorkoutViewModel *model);
+void addWorkoutViewModel_stoppedWorkout(AddWorkoutViewModel *model, unsigned int duration);
+void addWorkoutViewModel_completedWorkout(AddWorkoutViewModel *model, unsigned int duration);
 
 #endif /* AddWorkoutViewModel_h */

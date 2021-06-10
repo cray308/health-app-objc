@@ -34,7 +34,6 @@ AppCoordinator *appCoordinator_init(UIWindow *window) {
     CFCalendarRef calendar = CFCalendarCopyCurrent();
     double date = CFAbsoluteTimeGetCurrent();
     coordinator->currentDay = date_getDayOfWeek(date, calendar);
-    coordinator->weekStart = date_calcStartOfWeek(date, calendar, DateSearchDirection_Previous, true);
     CFRelease(calendar);
     return coordinator;
 }
@@ -56,11 +55,19 @@ void appCoordinator_start(AppCoordinator *coordinator) {
     [coordinator->window setRootViewController:coordinator->tabVC];
     [coordinator->window makeKeyAndVisible];
 
-    UserInfo *info = userInfo_initFromStorage();
-    if (!info) return;
-    appUserDataShared = info;
+    appUserDataShared = userInfo_initFromStorage();
+    if (!appUserDataShared) return;
 
-    persistenceService_downsample();
+    CFCalendarRef calendar = CFCalendarCopyCurrent();
+    double weekStart = date_calcStartOfWeek(CFAbsoluteTimeGetCurrent(), calendar, DateSearchDirection_Previous, true);
+    if ((int) weekStart != (int) appUserDataShared->weekStart) {
+        appUserData_handleNewWeek(weekStart);
+    }
+    CFRelease(calendar);
+
+    NSLog(@"Remove this line in appCoordinator_start\n\n");
+    appUserData_setWorkoutPlan(0); //this line
+
     persistenceService_performForegroundUpdate();
     coordinator->controllers[0] = [[UINavigationController alloc] initWithNibName:nil bundle:nil];
     if (!(coordinator->homeCoordinator = (startHome(coordinator, coordinator->controllers[0])))) return;
@@ -74,55 +81,10 @@ void appCoordinator_start(AppCoordinator *coordinator) {
     [coordinator->tabVC setViewControllers:@[
         coordinator->controllers[0], coordinator->controllers[1], coordinator->controllers[2]
     ] animated:false];
-
-
-    Array_workout *dummyWorkouts = workoutFinder_get_weekly_workouts(FitnessPlanContinuation, 0); // remove
-    if (!dummyWorkouts) { NSLog(@"workouts returned nil"); return; }
-    NSLog(@"size is %d", array_size(dummyWorkouts));
-    for (int i = 0; i < array_size(dummyWorkouts); ++i) {
-        NSLog(@"\n\n\n Workout for day %u", dummyWorkouts->arr[i].day);
-        NSLog(@"Workout type: %u", dummyWorkouts->arr[i].type);
-        NSLog(@"Reps %u", dummyWorkouts->arr[i].reps);
-        NSLog(@"Sets: %u", dummyWorkouts->arr[i].sets);
-        NSLog(@"Title: %@", dummyWorkouts->arr[i].title);
-
-        Array_exGroup *activities = dummyWorkouts->arr[i].activities;
-        for (int j = 0; j < array_size(activities); ++j) {
-            NSLog(@"\n\n Type for activity %d: %u", j, activities->arr[j].type);
-            NSLog(@"Reps for activity: %u", activities->arr[j].reps);
-
-            Array_exEntry *exercises = activities->arr[j].exercises;
-            for (int k = 0; k < array_size(exercises); ++k) {
-                 NSLog(@"\n Type for exercise %d: %u", k, exercises->arr[k].type);
-                 NSLog(@"Reps %u", exercises->arr[k].reps);
-                 NSLog(@"Sets: %u", exercises->arr[k].sets);
-                 NSLog(@"Rest: %u", exercises->arr[k].rest);
-                 NSLog(@"Name: %@", exercises->arr[k].name);
-            }
-        }
-    }
-    array_free(workout, dummyWorkouts);
 }
 
 void appCoordinator_setTabToLoaded(AppCoordinator *coordinator, LoadedViewController controller) {
     coordinator->loadedViewControllers |= controller;
-    appCoordinator_updateNavBarTokens(coordinator, coordinator->totalTokens);
-}
-
-void appCoordinator_updateNavBarTokens(AppCoordinator *coordinator, int value) {
-    coordinator->totalTokens = value;
-    unsigned char loadedVCs = coordinator->loadedViewControllers;
-    NSString *label = [[NSString alloc] initWithFormat:@"%d", value];
-    if (loadedVCs & LoadedViewController_Home) {
-        homeCoordinator_updateNavBarTokens(coordinator->homeCoordinator, label);
-    }
-    if (loadedVCs & LoadedViewController_History) {
-        historyCoordinator_updateNavBarTokens(coordinator->historyCoordinator, label);
-    }
-    if (loadedVCs & LoadedViewController_Settings) {
-        settingsCoordinator_updateNavBarTokens(coordinator->settingsCoordinator, label);
-    }
-    [label release];
 }
 
 void appCoordinator_handleForegroundUpdate(AppCoordinator *coordinator) {
@@ -130,11 +92,10 @@ void appCoordinator_handleForegroundUpdate(AppCoordinator *coordinator) {
     double now = CFAbsoluteTimeGetCurrent();
     int currentDay;
     double weekStart = date_calcStartOfWeek(now, calendar, DateSearchDirection_Previous, true);
-    if ((int) weekStart != (int) coordinator->weekStart) { // new week
-        coordinator->weekStart = weekStart;
+    if ((int) weekStart != (int) appUserDataShared->weekStart) { // new week
         coordinator->currentDay = date_getDayOfWeek(now, calendar);
-        //persistenceService_performForegroundUpdate();
-        persistenceService_downsample();
+        persistenceService_performForegroundUpdate();
+        appUserData_handleNewWeek(weekStart);
 
         if (coordinator->loadedViewControllers & LoadedViewController_Home) {
             homeCoordinator_updateForNewWeek(coordinator->homeCoordinator);
@@ -145,11 +106,10 @@ void appCoordinator_handleForegroundUpdate(AppCoordinator *coordinator) {
         }
 
     } else if ((currentDay = (date_getDayOfWeek(now, calendar))) != coordinator->currentDay) { // new day
-        int mostRecentDay = coordinator->currentDay;
         coordinator->currentDay = currentDay;
 
         if (coordinator->loadedViewControllers & LoadedViewController_Home) {
-            homeCoordinator_updateForNewDay(coordinator->homeCoordinator, mostRecentDay, currentDay);
+            homeCoordinator_updateForNewDay(coordinator->homeCoordinator);
         }
 
     } else if (coordinator->loadedViewControllers & LoadedViewController_Home) {
@@ -161,14 +121,13 @@ void appCoordinator_handleForegroundUpdate(AppCoordinator *coordinator) {
 void appCoordinator_updatedUserInfo(AppCoordinator *coordinator) {
     NSLog(@"%u", coordinator->loadedViewControllers);
     //appUserData_setUserInfo(name, goal);
-//    homeCoordinator_handleUserInfoChange(coordinator->homeCoordinator);
-//    if (coordinator->loadedViewControllers & LoadedViewController_History) {
-//        historyCoordinator_handleUserInfoChange(coordinator->historyCoordinator);
-//    }
+    //    homeCoordinator_handleUserInfoChange(coordinator->homeCoordinator);
+    //    if (coordinator->loadedViewControllers & LoadedViewController_History) {
+    //        historyCoordinator_handleUserInfoChange(coordinator->historyCoordinator);
+    //    }
 }
 
 void appCoordinator_deletedAppData(AppCoordinator *coordinator) {
-    appCoordinator_updateNavBarTokens(coordinator, 0);
     homeCoordinator_handleDataDeletion(coordinator->homeCoordinator);
     if (coordinator->loadedViewControllers & LoadedViewController_History) {
         historyCoordinator_handleDataDeletion(coordinator->historyCoordinator);

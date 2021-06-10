@@ -23,7 +23,9 @@
 		61594D652606C7C6000D01A1 /* AppUserData.m in Sources */ = {isa = PBXBuildFile; fileRef = 61594D642606C7C6000D01A1 /* AppUserData.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61594D782606FEED000D01A1 /* ActivityType.m in Sources */ = {isa = PBXBuildFile; fileRef = 61594D772606FEED000D01A1 /* ActivityType.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		615A1C4C2608406100858C32 /* PersistenceService.m in Sources */ = {isa = PBXBuildFile; fileRef = 615A1C4B2608406100858C32 /* PersistenceService.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		616DC23E267152BA00EFD3D4 /* WorkoutViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 616DC23D267152BA00EFD3D4 /* WorkoutViewController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		6176277F266D44D50079A17E /* Exercise.m in Sources */ = {isa = PBXBuildFile; fileRef = 6176277E266D44D50079A17E /* Exercise.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		617E806726706DD80042BF18 /* HomeWorkoutDayButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 617E806626706DD80042BF18 /* HomeWorkoutDayButton.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61808C332610FEEF00BAF7AB /* DataApproximator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61808B982610FEEF00BAF7AB /* DataApproximator.swift */; };
 		61808C342610FEEF00BAF7AB /* DataApproximator+N.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61808B992610FEEF00BAF7AB /* DataApproximator+N.swift */; };
 		61808C362610FEEF00BAF7AB /* LegendRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61808B9C2610FEEF00BAF7AB /* LegendRenderer.swift */; };
@@ -124,7 +126,6 @@
 		61C778BE260FE3FB001326A1 /* StringHelpers.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C778BD260FE3FB001326A1 /* StringHelpers.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61C778D826102220001326A1 /* ChartSeparatorView.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C778D726102220001326A1 /* ChartSeparatorView.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61C778DE26102235001326A1 /* Divider.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C778DD26102235001326A1 /* Divider.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		61C778E42610224A001326A1 /* NavBarCoinsView.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C778E32610224A001326A1 /* NavBarCoinsView.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61C7793626102C19001326A1 /* HistoryTabCoordinator.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C7793526102C19001326A1 /* HistoryTabCoordinator.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61C7794426102C52001326A1 /* HistoryAreaChartView.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C7794326102C52001326A1 /* HistoryAreaChartView.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61C7794826102C5F001326A1 /* HistoryGradientChartView.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C7794726102C5F001326A1 /* HistoryGradientChartView.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
@@ -135,20 +136,10 @@
 		61C7795C26102CB8001326A1 /* HistoryPieChartViewModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C7795B26102CB8001326A1 /* HistoryPieChartViewModel.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61C7796026102CC6001326A1 /* HistoryViewModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C7795F26102CC6001326A1 /* HistoryViewModel.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61C7796426102CFF001326A1 /* ConfettiEmitterView.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C7796326102CFF001326A1 /* ConfettiEmitterView.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		61C7796826102D0D001326A1 /* HomePieChartView.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C7796726102D0D001326A1 /* HomePieChartView.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		61C7796C26102D18001326A1 /* HomeBarChartView.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C7796B26102D18001326A1 /* HomeBarChartView.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		61C7797026102D27001326A1 /* HomeBarChartViewModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C7796F26102D27001326A1 /* HomeBarChartViewModel.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		61C7797426102D36001326A1 /* HomePieChartViewModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C7797326102D36001326A1 /* HomePieChartViewModel.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61C7797826102D45001326A1 /* HomeViewModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C7797726102D45001326A1 /* HomeViewModel.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61C7797C26102D5F001326A1 /* HomeTabCoordinator.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C7797B26102D5F001326A1 /* HomeTabCoordinator.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61C7798426102D85001326A1 /* HomeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C7798326102D85001326A1 /* HomeViewController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61C7798826102DB5001326A1 /* AddWorkoutViewModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C7798726102DB5001326A1 /* AddWorkoutViewModel.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		61C7798C26102DC0001326A1 /* CustomTokenPopupViewModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C7798B26102DC0001326A1 /* CustomTokenPopupViewModel.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		61C7799026102DCC001326A1 /* SingleActivityViewModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C7798F26102DCC001326A1 /* SingleActivityViewModel.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		61C7799426102DDC001326A1 /* AddWorkoutViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C7799326102DDC001326A1 /* AddWorkoutViewController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		61C7799826102DEC001326A1 /* AddSingleActivityModalViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C7799726102DEC001326A1 /* AddSingleActivityModalViewController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		61C7799C26102E05001326A1 /* SingleActivityTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C7799B26102E05001326A1 /* SingleActivityTableViewCell.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		61C779A026102E0F001326A1 /* CustomTokenPopup.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C7799F26102E0F001326A1 /* CustomTokenPopup.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61C779A426102E20001326A1 /* AddWorkoutCoordinator.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C779A326102E20001326A1 /* AddWorkoutCoordinator.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61C779AC26102E51001326A1 /* SettingsTabCoordinator.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C779AB26102E51001326A1 /* SettingsTabCoordinator.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61C779B426102E97001326A1 /* SettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C779B326102E97001326A1 /* SettingsViewController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
@@ -199,8 +190,12 @@
 		61594D772606FEED000D01A1 /* ActivityType.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ActivityType.m; sourceTree = "<group>"; };
 		615A1C4A2608403900858C32 /* PersistenceService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PersistenceService.h; sourceTree = "<group>"; };
 		615A1C4B2608406100858C32 /* PersistenceService.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PersistenceService.m; sourceTree = "<group>"; };
+		616DC23C267152A800EFD3D4 /* WorkoutViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WorkoutViewController.h; sourceTree = "<group>"; };
+		616DC23D267152BA00EFD3D4 /* WorkoutViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WorkoutViewController.m; sourceTree = "<group>"; };
 		6176277D266D44C60079A17E /* Exercise.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Exercise.h; sourceTree = "<group>"; };
 		6176277E266D44D50079A17E /* Exercise.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Exercise.m; sourceTree = "<group>"; };
+		617E806526706D930042BF18 /* HomeWorkoutDayButton.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HomeWorkoutDayButton.h; sourceTree = "<group>"; };
+		617E806626706DD80042BF18 /* HomeWorkoutDayButton.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HomeWorkoutDayButton.m; sourceTree = "<group>"; };
 		61808B982610FEEF00BAF7AB /* DataApproximator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataApproximator.swift; sourceTree = "<group>"; };
 		61808B992610FEEF00BAF7AB /* DataApproximator+N.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "DataApproximator+N.swift"; sourceTree = "<group>"; };
 		61808B9C2610FEEF00BAF7AB /* LegendRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LegendRenderer.swift; sourceTree = "<group>"; };
@@ -307,27 +302,15 @@
 		61BC6F52266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "WeeklyData+CoreDataClass.m"; sourceTree = "<group>"; };
 		61C778BC260FE3EA001326A1 /* StringHelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StringHelpers.h; sourceTree = "<group>"; };
 		61C778BD260FE3FB001326A1 /* StringHelpers.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StringHelpers.m; sourceTree = "<group>"; };
-		61C778D4261021DE001326A1 /* NavBarCoinsView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NavBarCoinsView.h; sourceTree = "<group>"; };
 		61C778D5261021F1001326A1 /* Divider.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Divider.h; sourceTree = "<group>"; };
 		61C778D626102206001326A1 /* ChartSeparatorView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ChartSeparatorView.h; sourceTree = "<group>"; };
 		61C778D726102220001326A1 /* ChartSeparatorView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ChartSeparatorView.m; sourceTree = "<group>"; };
 		61C778DD26102235001326A1 /* Divider.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Divider.m; sourceTree = "<group>"; };
-		61C778E32610224A001326A1 /* NavBarCoinsView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NavBarCoinsView.m; sourceTree = "<group>"; };
 		61C77914261028BE001326A1 /* HomeTabCoordinator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HomeTabCoordinator.h; sourceTree = "<group>"; };
 		61C77916261028F3001326A1 /* HomeViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HomeViewController.h; sourceTree = "<group>"; };
-		61C7791726102916001326A1 /* HomePieChartView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HomePieChartView.h; sourceTree = "<group>"; };
-		61C7791826102939001326A1 /* HomeBarChartView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HomeBarChartView.h; sourceTree = "<group>"; };
 		61C779192610294E001326A1 /* ConfettiEmitterView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ConfettiEmitterView.h; sourceTree = "<group>"; };
 		61C7791A26102960001326A1 /* HomeViewModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HomeViewModel.h; sourceTree = "<group>"; };
-		61C7791B2610297B001326A1 /* HomeBarChartViewModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HomeBarChartViewModel.h; sourceTree = "<group>"; };
-		61C7791C2610298A001326A1 /* HomePieChartViewModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HomePieChartViewModel.h; sourceTree = "<group>"; };
 		61C7791D261029C6001326A1 /* AddWorkoutCoordinator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AddWorkoutCoordinator.h; sourceTree = "<group>"; };
-		61C7791F26102A03001326A1 /* SingleActivityTableViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SingleActivityTableViewCell.h; sourceTree = "<group>"; };
-		61C7792026102A15001326A1 /* CustomTokenPopup.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CustomTokenPopup.h; sourceTree = "<group>"; };
-		61C7792126102A26001326A1 /* AddWorkoutViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AddWorkoutViewController.h; sourceTree = "<group>"; };
-		61C7792226102A3D001326A1 /* AddSingleActivityModalViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AddSingleActivityModalViewController.h; sourceTree = "<group>"; };
-		61C7792326102A62001326A1 /* CustomTokenPopupViewModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CustomTokenPopupViewModel.h; sourceTree = "<group>"; };
-		61C7792426102A72001326A1 /* SingleActivityViewModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SingleActivityViewModel.h; sourceTree = "<group>"; };
 		61C7792526102A7F001326A1 /* AddWorkoutViewModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AddWorkoutViewModel.h; sourceTree = "<group>"; };
 		61C7792626102AAE001326A1 /* HistoryTabCoordinator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HistoryTabCoordinator.h; sourceTree = "<group>"; };
 		61C7792826102AD7001326A1 /* HistoryGradientChartView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HistoryGradientChartView.h; sourceTree = "<group>"; };
@@ -351,20 +334,10 @@
 		61C7795B26102CB8001326A1 /* HistoryPieChartViewModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HistoryPieChartViewModel.m; sourceTree = "<group>"; };
 		61C7795F26102CC6001326A1 /* HistoryViewModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HistoryViewModel.m; sourceTree = "<group>"; };
 		61C7796326102CFF001326A1 /* ConfettiEmitterView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ConfettiEmitterView.m; sourceTree = "<group>"; };
-		61C7796726102D0D001326A1 /* HomePieChartView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HomePieChartView.m; sourceTree = "<group>"; };
-		61C7796B26102D18001326A1 /* HomeBarChartView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HomeBarChartView.m; sourceTree = "<group>"; };
-		61C7796F26102D27001326A1 /* HomeBarChartViewModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HomeBarChartViewModel.m; sourceTree = "<group>"; };
-		61C7797326102D36001326A1 /* HomePieChartViewModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HomePieChartViewModel.m; sourceTree = "<group>"; };
 		61C7797726102D45001326A1 /* HomeViewModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HomeViewModel.m; sourceTree = "<group>"; };
 		61C7797B26102D5F001326A1 /* HomeTabCoordinator.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HomeTabCoordinator.m; sourceTree = "<group>"; };
 		61C7798326102D85001326A1 /* HomeViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HomeViewController.m; sourceTree = "<group>"; };
 		61C7798726102DB5001326A1 /* AddWorkoutViewModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AddWorkoutViewModel.m; sourceTree = "<group>"; };
-		61C7798B26102DC0001326A1 /* CustomTokenPopupViewModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CustomTokenPopupViewModel.m; sourceTree = "<group>"; };
-		61C7798F26102DCC001326A1 /* SingleActivityViewModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SingleActivityViewModel.m; sourceTree = "<group>"; };
-		61C7799326102DDC001326A1 /* AddWorkoutViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AddWorkoutViewController.m; sourceTree = "<group>"; };
-		61C7799726102DEC001326A1 /* AddSingleActivityModalViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AddSingleActivityModalViewController.m; sourceTree = "<group>"; };
-		61C7799B26102E05001326A1 /* SingleActivityTableViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SingleActivityTableViewCell.m; sourceTree = "<group>"; };
-		61C7799F26102E0F001326A1 /* CustomTokenPopup.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CustomTokenPopup.m; sourceTree = "<group>"; };
 		61C779A326102E20001326A1 /* AddWorkoutCoordinator.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AddWorkoutCoordinator.m; sourceTree = "<group>"; };
 		61C779AB26102E51001326A1 /* SettingsTabCoordinator.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SettingsTabCoordinator.m; sourceTree = "<group>"; };
 		61C779B326102E97001326A1 /* SettingsViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SettingsViewController.m; sourceTree = "<group>"; };
@@ -757,7 +730,6 @@
 			isa = PBXGroup;
 			children = (
 				61C778EF261024DC001326A1 /* Coordinator */,
-				61C778F1261024F0001326A1 /* View */,
 				61C778F826102580001326A1 /* ViewController */,
 				61C778F2261024FA001326A1 /* ViewModel */,
 			);
@@ -773,26 +745,11 @@
 			path = Coordinator;
 			sourceTree = "<group>";
 		};
-		61C778F1261024F0001326A1 /* View */ = {
-			isa = PBXGroup;
-			children = (
-				61C7792026102A15001326A1 /* CustomTokenPopup.h */,
-				61C7799F26102E0F001326A1 /* CustomTokenPopup.m */,
-				61C7791F26102A03001326A1 /* SingleActivityTableViewCell.h */,
-				61C7799B26102E05001326A1 /* SingleActivityTableViewCell.m */,
-			);
-			path = View;
-			sourceTree = "<group>";
-		};
 		61C778F2261024FA001326A1 /* ViewModel */ = {
 			isa = PBXGroup;
 			children = (
 				61C7792526102A7F001326A1 /* AddWorkoutViewModel.h */,
 				61C7798726102DB5001326A1 /* AddWorkoutViewModel.m */,
-				61C7792326102A62001326A1 /* CustomTokenPopupViewModel.h */,
-				61C7798B26102DC0001326A1 /* CustomTokenPopupViewModel.m */,
-				61C7792426102A72001326A1 /* SingleActivityViewModel.h */,
-				61C7798F26102DCC001326A1 /* SingleActivityViewModel.m */,
 			);
 			path = ViewModel;
 			sourceTree = "<group>";
@@ -811,10 +768,8 @@
 			children = (
 				61C779192610294E001326A1 /* ConfettiEmitterView.h */,
 				61C7796326102CFF001326A1 /* ConfettiEmitterView.m */,
-				61C7791726102916001326A1 /* HomePieChartView.h */,
-				61C7796726102D0D001326A1 /* HomePieChartView.m */,
-				61C7791826102939001326A1 /* HomeBarChartView.h */,
-				61C7796B26102D18001326A1 /* HomeBarChartView.m */,
+				617E806526706D930042BF18 /* HomeWorkoutDayButton.h */,
+				617E806626706DD80042BF18 /* HomeWorkoutDayButton.m */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -831,10 +786,6 @@
 		61C778F72610255C001326A1 /* ViewModel */ = {
 			isa = PBXGroup;
 			children = (
-				61C7791B2610297B001326A1 /* HomeBarChartViewModel.h */,
-				61C7796F26102D27001326A1 /* HomeBarChartViewModel.m */,
-				61C7791C2610298A001326A1 /* HomePieChartViewModel.h */,
-				61C7797326102D36001326A1 /* HomePieChartViewModel.m */,
 				61C7791A26102960001326A1 /* HomeViewModel.h */,
 				61C7797726102D45001326A1 /* HomeViewModel.m */,
 			);
@@ -844,10 +795,8 @@
 		61C778F826102580001326A1 /* ViewController */ = {
 			isa = PBXGroup;
 			children = (
-				61C7792226102A3D001326A1 /* AddSingleActivityModalViewController.h */,
-				61C7799726102DEC001326A1 /* AddSingleActivityModalViewController.m */,
-				61C7792126102A26001326A1 /* AddWorkoutViewController.h */,
-				61C7799326102DDC001326A1 /* AddWorkoutViewController.m */,
+				616DC23C267152A800EFD3D4 /* WorkoutViewController.h */,
+				616DC23D267152BA00EFD3D4 /* WorkoutViewController.m */,
 			);
 			path = ViewController;
 			sourceTree = "<group>";
@@ -879,6 +828,8 @@
 		61C778FB2610259F001326A1 /* View */ = {
 			isa = PBXGroup;
 			children = (
+				61C778D626102206001326A1 /* ChartSeparatorView.h */,
+				61C778D726102220001326A1 /* ChartSeparatorView.m */,
 				61C7792926102AE5001326A1 /* HistoryAreaChartView.h */,
 				61C7794326102C52001326A1 /* HistoryAreaChartView.m */,
 				61C7792826102AD7001326A1 /* HistoryGradientChartView.h */,
@@ -975,12 +926,8 @@
 		61C7790526102727001326A1 /* View */ = {
 			isa = PBXGroup;
 			children = (
-				61C778D626102206001326A1 /* ChartSeparatorView.h */,
-				61C778D726102220001326A1 /* ChartSeparatorView.m */,
 				61C778D5261021F1001326A1 /* Divider.h */,
 				61C778DD26102235001326A1 /* Divider.m */,
-				61C778D4261021DE001326A1 /* NavBarCoinsView.h */,
-				61C778E32610224A001326A1 /* NavBarCoinsView.m */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -1120,6 +1067,7 @@
 				61808C5C2610FEEF00BAF7AB /* Highlighter.swift in Sources */,
 				61808C602610FEEF00BAF7AB /* LineChartView.swift in Sources */,
 				61808CBD2610FEEF00BAF7AB /* BarLineScatterCandleBubbleChartDataProvider.swift in Sources */,
+				616DC23E267152BA00EFD3D4 /* WorkoutViewController.m in Sources */,
 				61808C7D2610FEEF00BAF7AB /* Platform+Color.swift in Sources */,
 				61808C342610FEEF00BAF7AB /* DataApproximator+N.swift in Sources */,
 				61808C912610FEEF00BAF7AB /* BarChartDataEntry.swift in Sources */,
@@ -1221,24 +1169,19 @@
 				61C7795C26102CB8001326A1 /* HistoryPieChartViewModel.m in Sources */,
 				61C7798826102DB5001326A1 /* AddWorkoutViewModel.m in Sources */,
 				61C7795026102C8C001326A1 /* HistoryViewController.m in Sources */,
-				61C7796826102D0D001326A1 /* HomePieChartView.m in Sources */,
-				61C7797026102D27001326A1 /* HomeBarChartViewModel.m in Sources */,
 				61594D5726068C41000D01A1 /* AppCoordinator.m in Sources */,
+				617E806726706DD80042BF18 /* HomeWorkoutDayButton.m in Sources */,
 				61C7797826102D45001326A1 /* HomeViewModel.m in Sources */,
 				61C7795826102CA8001326A1 /* HistoryGradientChartViewModel.m in Sources */,
-				61C7799026102DCC001326A1 /* SingleActivityViewModel.m in Sources */,
 				61C779AC26102E51001326A1 /* SettingsTabCoordinator.m in Sources */,
 				6194017E260EEEE300015EFC /* ActivityEntry+CoreDataClass.m in Sources */,
-				61C778E42610224A001326A1 /* NavBarCoinsView.m in Sources */,
 				615A1C4C2608406100858C32 /* PersistenceService.m in Sources */,
-				61C7799426102DDC001326A1 /* AddWorkoutViewController.m in Sources */,
 				61C7796426102CFF001326A1 /* ConfettiEmitterView.m in Sources */,
 				61C778DE26102235001326A1 /* Divider.m in Sources */,
 				61C7798426102D85001326A1 /* HomeViewController.m in Sources */,
 				61C779B426102E97001326A1 /* SettingsViewController.m in Sources */,
 				61C7796026102CC6001326A1 /* HistoryViewModel.m in Sources */,
 				61594D782606FEED000D01A1 /* ActivityType.m in Sources */,
-				61C7798C26102DC0001326A1 /* CustomTokenPopupViewModel.m in Sources */,
 				61594D652606C7C6000D01A1 /* AppUserData.m in Sources */,
 				613946912610F16700552422 /* ChartHelpers.m in Sources */,
 				6151A317260EFE8300D88F1B /* WeekStats+CoreDataClass.m in Sources */,
@@ -1246,18 +1189,13 @@
 				61C7795426102C9C001326A1 /* HistoryAreaChartViewModel.m in Sources */,
 				614DC13026082BBE00B9588E /* ViewControllerHelpers.m in Sources */,
 				61C7793626102C19001326A1 /* HistoryTabCoordinator.m in Sources */,
-				61C7797426102D36001326A1 /* HomePieChartViewModel.m in Sources */,
-				61C7799826102DEC001326A1 /* AddSingleActivityModalViewController.m in Sources */,
 				61C7794C26102C72001326A1 /* HistoryPieChartView.m in Sources */,
-				61C779A026102E0F001326A1 /* CustomTokenPopup.m in Sources */,
 				61C7797C26102D5F001326A1 /* HomeTabCoordinator.m in Sources */,
 				61594D0C26068105000D01A1 /* AppDelegate.m in Sources */,
 				61C779B826102EA4001326A1 /* SettingsViewModel.m in Sources */,
 				61C778BE260FE3FB001326A1 /* StringHelpers.m in Sources */,
 				61C779A426102E20001326A1 /* AddWorkoutCoordinator.m in Sources */,
 				61C7794826102C5F001326A1 /* HistoryGradientChartView.m in Sources */,
-				61C7799C26102E05001326A1 /* SingleActivityTableViewCell.m in Sources */,
-				61C7796C26102D18001326A1 /* HomeBarChartView.m in Sources */,
 				61594D2026068106000D01A1 /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

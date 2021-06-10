@@ -7,6 +7,7 @@
 
 #import "HistoryTabCoordinator.h"
 #import "AppCoordinator.h"
+#import "ChartHelpers.h"
 #import "HistoryViewModel.h"
 #import "HistoryViewController.h"
 #import "HistoryAreaChartViewModel.h"
@@ -29,6 +30,7 @@ void historyCoordinator_updateUI(HistoryTabCoordinator *coordinator, unsigned ch
 HistoryTabCoordinator *historyCoordinator_init(UINavigationController *navVC, AppCoordinator *delegate) {
     HistoryTabCoordinator *coordinator = calloc(1, sizeof(HistoryTabCoordinator));
     if (!coordinator) return NULL;
+    sharedHistoryXAxisFormatter_setup();
     coordinator->viewModel = historyViewModel_init(coordinator);
     if (!coordinator->viewModel) {
         free(coordinator);
@@ -41,6 +43,7 @@ HistoryTabCoordinator *historyCoordinator_init(UINavigationController *navVC, Ap
 
 void historyCoordinator_free(HistoryTabCoordinator *coordinator) {
     historyViewModel_free(coordinator->viewModel);
+    sharedHistoryXAxisFormatter_free();
     free(coordinator);
 }
 
@@ -48,11 +51,6 @@ void historyCoordinator_start(HistoryTabCoordinator *coordinator) {
     HistoryViewController *vc = [[HistoryViewController alloc] initWithViewModel:coordinator->viewModel];
     [coordinator->navigationController setViewControllers:@[vc]];
     [vc release];
-}
-
-void historyCoordinator_updateNavBarTokens(HistoryTabCoordinator *coordinator, NSString *label) {
-    HistoryViewController *vc = getHistoryViewController(coordinator->navigationController);
-    [vc updateNavBarCoins:label];
 }
 
 void historyCoordinator_performForegroundUpdate(HistoryTabCoordinator *coordinator) {

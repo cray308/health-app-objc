@@ -42,7 +42,11 @@ typedef enum {
 #define freeExerciseGroup(x) array_free(exEntry, (x).exercises)
 #define freeWorkout(x) do { array_free(exGroup, (x).activities); [(x).title release]; } while (0)
 
-typedef struct {
+typedef struct ExerciseEntry ExerciseEntry;
+typedef struct ExerciseGroup ExerciseGroup;
+typedef struct Workout Workout;
+
+struct ExerciseEntry {
     unsigned char type;
     unsigned int weight;
     unsigned int reps;
@@ -50,29 +54,29 @@ typedef struct {
     unsigned int rest;
     unsigned int completedSets;
     NSString *name;
-} ExerciseEntry;
+};
 
 gen_array(exEntry, ExerciseEntry, DSDefault_shallowCopy, freeExerciseEntry)
 
-typedef struct {
+struct ExerciseGroup {
     unsigned char type;
     unsigned int reps;
     unsigned int completedReps;
     Array_exEntry *exercises;
-} ExerciseGroup;
+};
 
 gen_array(exGroup, ExerciseGroup, DSDefault_shallowCopy, freeExerciseGroup)
 
-typedef struct {
+struct Workout {
     unsigned char type;
+    signed char day;
     unsigned int weight;
     unsigned int sets;
     unsigned int reps;
     unsigned int completedReps;
-    unsigned int day;
     NSString *title;
     Array_exGroup *activities;
-} Workout;
+};
 
 gen_array(workout, Workout, DSDefault_shallowCopy, freeWorkout)
 

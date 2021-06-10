@@ -26,7 +26,6 @@ struct AppCoordinator {
     unsigned char loadedViewControllers;
     int totalTokens;
     int currentDay;
-    double weekStart;
     UIWindow *window;
     UITabBarController *tabVC;
     UINavigationController *controllers[3];
@@ -41,7 +40,6 @@ void appCoordinator_start(AppCoordinator *coordinator);
 
 void appCoordinator_setTabToLoaded(AppCoordinator *coordinator, LoadedViewController controller);
 void appCoordinator_handleForegroundUpdate(AppCoordinator *coordinator);
-void appCoordinator_updateNavBarTokens(AppCoordinator *coordinator, int value);
 
 void appCoordinator_updatedUserInfo(AppCoordinator *coordinator);
 void appCoordinator_deletedAppData(AppCoordinator *coordinator);

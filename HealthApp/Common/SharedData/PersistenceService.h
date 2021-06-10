@@ -19,7 +19,6 @@ void persistenceService_setup(void);
 void persistenceService_free(void);
 void persistenceService_saveContext(void);
 void persistenceService_performForegroundUpdate(void);
-void persistenceService_downsample(void);
 void persistenceService_deleteUserData(void);
 
 WeeklyData *persistenceService_getWeeklyDataForThisWeek(void);

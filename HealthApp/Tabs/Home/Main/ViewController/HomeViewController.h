@@ -15,11 +15,10 @@ typedef struct HomeViewModel HomeViewModel;
 @interface HomeViewController: UIViewController
 
 - (id) initWithViewModel: (HomeViewModel *)model;
-- (void) updateNavBarCoins: (NSString *)text;
-- (void) updateCharts;
-- (void) runNavBarAnimation;
 - (void) showConfetti;
 - (void) updateGreeting;
+- (void) createWorkoutsList;
+- (void) updateWorkoutsList;
 
 @end
 

@@ -100,46 +100,27 @@ void persistenceService_performForegroundUpdate(void) {
     persistenceService_saveContext();
 }
 
-void persistenceService_downsample(void) {
-    CFCalendarRef calendar = CFCalendarCopyCurrent();
-
-    NSFetchRequest *fetchRequest = [WeekStats fetchRequest];
-    fetchRequest.predicate = [NSPredicate predicateWithFormat:@"end < %f", date_lastYear(calendar)];
-    removeOldData(fetchRequest);
-
-    double date = date_calcStartOfWeek(CFAbsoluteTimeGetCurrent(), calendar, DateSearchDirection_Previous, true);
-    fetchRequest = [ActivityEntry fetchRequest];
-    NSSortDescriptor *descriptor = [[NSSortDescriptor alloc] initWithKey:@"timestamp" ascending:true];
-    fetchRequest.predicate = [NSPredicate predicateWithFormat:@"timestamp < %f", date];
-    fetchRequest.sortDescriptors = @[descriptor];
-    downsample(calendar, fetchRequest);
-    [descriptor release];
-
-    CFRelease(calendar);
-}
-
 void persistenceService_deleteUserData(void) {
-    //WeeklyData *currWeek = persistenceService_getWeeklyDataForThisWeek(void);
-    /*
+    size_t count = 0;
+    NSFetchRequest *request = WeeklyData.fetchRequest;
+    NSArray<WeeklyData *> *data = [persistenceService_sharedContainer.viewContext executeFetchRequest:request error:nil];
+    if ((data && (count = (data.count)) != 0)) {
+        for (size_t i = 0; i < count; ++i) {
+            [persistenceService_sharedContainer.viewContext deleteObject:data[i]];
+        }
+    }
 
-     @property (nonatomic) int16_t bestBench;
-     @property (nonatomic) int16_t bestPullup;
-     @property (nonatomic) int16_t bestSquat;
-     @property (nonatomic) int16_t timeEndurance;
-     @property (nonatomic) int16_t timeHIC;
-     @property (nonatomic) int16_t timeSE;
-     @property (nonatomic) int16_t timeStrength;
-     @property (nonatomic) int16_t totalWorkouts;
-     @property (nonatomic) double weekEnd;
-     @property (nonatomic) double weekStart;
+    WeeklyData *currWeek = persistenceService_getWeeklyDataForThisWeek();
+    if (currWeek) {
+        currWeek.timeEndurance = 0;
+        currWeek.timeHIC = 0;
+        currWeek.timeSE = 0;
+        currWeek.timeStrength = 0;
+        currWeek.totalWorkouts = 0;
+    }
 
-
-     */
-//    deleteAllActivityEntries([ActivityEntry fetchRequest]);
-//    deleteAllWeekStats([WeekStats fetchRequest]);
-//    persistenceService_saveContext();
+    persistenceService_saveContext();
 }
-
 
 WeeklyData *persistenceService_getWeeklyDataForThisWeek(void) {
     CFCalendarRef calendar = CFCalendarCopyCurrent();
@@ -147,9 +128,6 @@ WeeklyData *persistenceService_getWeeklyDataForThisWeek(void) {
     CFRelease(calendar);
     return getCurrentWeeklyData(weekStart);
 }
-
-
-
 
 #pragma mark - Helper Functions
 
@@ -159,86 +137,4 @@ WeeklyData *getCurrentWeeklyData(double weekStart) {
     NSArray<WeeklyData *> *currentWeeks = [persistenceService_sharedContainer.viewContext executeFetchRequest:request error:nil];
     if (!(currentWeeks && currentWeeks.count)) return nil;
     return currentWeeks[0];
-}
-
-void downsample(CFCalendarRef calendar, NSFetchRequest *fetchRequest) {
-    size_t count = 0;
-    NSArray<ActivityEntry*> *oldActivities = [persistenceService_sharedContainer.viewContext executeFetchRequest:fetchRequest error:nil];
-    if (!oldActivities) return;
-    else if (!(count = (oldActivities.count))) return;
-
-    WeeklyActivitySummaryModel model = {0};
-    date_calcWeekEndpoints(oldActivities[0].timestamp, calendar, DateSearchDirection_Previous, true,
-                           &model.weekStart, &model.weekEnd);
-
-    for (size_t i = 0; i < count; ++i) {
-        ActivityEntry *object = oldActivities[i];
-        double date = object.timestamp;
-
-        if (date > model.weekEnd) { // past the end date, save empty data for these weeks
-            WeekStats *weekStats = [[WeekStats alloc] initWithContext:persistenceService_sharedContainer.viewContext];
-            [weekStats setProperties:&model];
-
-            model.tokensEarned = 0;
-            memset(model.durationByDay, 0, 7 * sizeof(int));
-            memset(model.durationByIntensity, 0, 3 * sizeof(int));
-            model.weekStart = model.weekEnd + 1;
-            model.weekEnd += WeekSeconds;
-            [weekStats release];
-
-            while (date > model.weekEnd) {
-                weekStats = [[WeekStats alloc] initWithContext:persistenceService_sharedContainer.viewContext];
-                [weekStats setProperties:&model];
-                model.weekStart += 1;
-                model.weekEnd += WeekSeconds;
-                [weekStats release];
-            }
-        }
-
-        int dayIdx = date_getDayOfWeek(date, calendar) - 1;
-        model.tokensEarned += object.tokens;
-        model.durationByIntensity[object.type] += object.duration;
-        model.durationByDay[dayIdx] += object.duration;
-        [persistenceService_sharedContainer.viewContext deleteObject:object];
-    }
-
-    // save WeekStats from the end of the loop (most recent)
-    WeekStats *weekStats = [[WeekStats alloc] initWithContext:persistenceService_sharedContainer.viewContext];
-    [weekStats setProperties:&model];
-    [weekStats release];
-    persistenceService_saveContext();
-}
-
-void removeOldData(NSFetchRequest *fetchRequest) {
-    size_t count = 0;
-    NSArray<WeekStats*> *stats = [persistenceService_sharedContainer.viewContext executeFetchRequest:fetchRequest error:nil];
-    if (!stats) return;
-    else if (!(count = (stats.count))) return;
-
-    for (size_t i = 0; i < count; ++i) {
-        [persistenceService_sharedContainer.viewContext deleteObject:stats[i]];
-    }
-    persistenceService_saveContext();
-}
-
-void deleteAllActivityEntries(NSFetchRequest *fetchRequest) {
-    size_t count = 0;
-    NSArray<ActivityEntry*> *data = [persistenceService_sharedContainer.viewContext executeFetchRequest:fetchRequest error:nil];
-    if (!data) return;
-    else if (!(count = (data.count))) return;
-
-    for (size_t i = 0; i < count; ++i) {
-        [persistenceService_sharedContainer.viewContext deleteObject:data[i]];
-    }
-}
-
-void deleteAllWeekStats(NSFetchRequest *fetchRequest) {
-    size_t count = 0;
-    NSArray<WeekStats*> *data = [persistenceService_sharedContainer.viewContext executeFetchRequest:fetchRequest error:nil];
-    if (!data) return;
-    else if (!(count = (data.count))) return;
-
-    for (size_t i = 0; i < count; ++i) {
-        [persistenceService_sharedContainer.viewContext deleteObject:data[i]];
-    }
 }

@@ -10,7 +10,7 @@
 
 #import "Exercise.h"
 
-Array_workout *workoutFinder_get_weekly_workouts(signed char plan, size_t week);
+Array_workout *workoutFinder_get_weekly_workouts(signed char plan, unsigned int week);
 
 
 #endif /* WorkoutFinder_h */

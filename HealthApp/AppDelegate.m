@@ -9,13 +9,12 @@
 #import "AppCoordinator.h"
 #import "AppUserData.h"
 #import "PersistenceService.h"
-#import "ChartHelpers.h"
-#import "TabCoordinator.h"
-
-
-#import "Exercise.h"
 #import "CalendarDateHelpers.h"
+
+//#if DEBUG
+#import "Exercise.h"
 #import "WeeklyData+CoreDataClass.h"
+//#endif
 
 void setupData(void);
 
@@ -31,7 +30,6 @@ void setupData(void);
 -(void) dealloc {
     appUserData_free();
     persistenceService_free();
-    sharedHistoryXAxisFormatter_free();
     appCoordinator_free(_coordinator);
     [window setRootViewController:nil];
     [window release];
@@ -44,7 +42,6 @@ void setupData(void);
     _coordinator = appCoordinator_init(window);
     if (!_coordinator) return false;
 
-    sharedHistoryXAxisFormatter_setup();
     persistenceService_setup();
     if (![[NSUserDefaults standardUserDefaults] boolForKey:@"hasLaunched"]) {
         setupData();
@@ -59,45 +56,83 @@ void setupData(void);
 }
 
 - (void) applicationWillEnterForeground: (UIApplication *)application {
-    if (_coordinator->currentlyActiveCoordinator != AppCoordinatorChild_Tabs) return;
-    tabCoordinator_handleForegroundUpdate((TabCoordinator *) _coordinator->childCoordinator);
+    appCoordinator_handleForegroundUpdate(_coordinator);
 }
 
 @end
 
 void setupData(void) {
-    int bench = 115, pullup = 20, squat = 300, i = 0;
     CFCalendarRef calendar = CFCalendarCopyCurrent();
+    //#if DEBUG
+    int bench = 185, pullup = 20, squat = 300, deadlift = 235, i = 0;
+    unsigned char plan = 0;
     double start = date_calcStartOfWeek(CFAbsoluteTimeGetCurrent() - 126489600, calendar, DateSearchDirection_Previous, true);
     double end = date_lastMonth(calendar);
-    CFRelease(calendar);
 
     while ( (int) start < (int) end) {
         WeeklyData *data = [[WeeklyData alloc] initWithContext:persistenceService_sharedContainer.viewContext];
         data.weekStart = start;
         data.weekEnd = start + (WeekSeconds - 1);
+
+        for (int j = 0; j < 6; ++j) {
+            switch (j) {
+                case 0:
+                    if (plan == 0) { data.timeSE += ((rand() % 20) + 10); } else { data.timeStrength += ((rand() % 20) + 20); }
+                    data.totalWorkouts += 1;
+                    break;
+                case 1:
+                    if (plan == 0) { data.timeEndurance += ((rand() % 30) + 30); } else { data.timeHIC += ((rand() % 20) + 15); }
+                    data.totalWorkouts += 1;
+                    break;
+                case 2:
+                    if (plan == 0) { data.timeEndurance += ((rand() % 30) + 30); } else { data.timeStrength += ((rand() % 20) + 20); }
+                    data.totalWorkouts += 1;
+                    break;
+                case 3:
+                    if (plan == 0) { data.timeSE += ((rand() % 20) + 10); } else { data.timeHIC += ((rand() % 20) + 15); }
+                    data.totalWorkouts += 1;
+                    break;
+                case 4:
+                    if (plan == 0) { if (rand() % 10 >= 5) { data.timeSE += (rand() % 20); data.totalWorkouts += 1; } } else { data.timeStrength += ((rand() % 20) + 20); data.totalWorkouts += 1; }
+                    break;
+                case 5:
+                    if (plan == 0) { data.timeEndurance += ((rand() % 30) + 30); } else { data.timeEndurance += ((rand() % 30) + 60); }
+                    data.totalWorkouts += 1;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        if (i == 7) {
+            plan = 1;
+        } else if (i == 20 || i == 32 || i == 44) {
+            bench = 185 + (rand() % 50);
+            pullup = 20 + (rand() % 20);
+            squat = 300 + (rand() % 80);
+            deadlift = 235 + (rand() % 50);
+        }
         data.bestBench = bench;
         data.bestPullup = pullup;
         data.bestSquat = squat;
+        data.bestDeadlift = deadlift;
         [data release];
 
-        if (i % 10 == 0) {
-            bench += 5; pullup += 5; squat += 5;
+        if (++i == 52) {
+            i = 0; plan = 0;
         }
-        ++i;
         start += WeekSeconds;
     }
+    //#endif
 
-    //[NSUserDefaults.standardUserDefaults setBool:true forKey:@"hasLaunched"];
-
-    /*
-
-     signed char currentPlan;
-     unsigned char workoutGoal;
-     unsigned char completedWorkouts[6];
-     unsigned short squatMax, pullUpMax, benchMax;
-
-     UserInfo info = {.currentPlan = -1, .completedWorkouts = 0};
-     userInfo_saveData(&info);
-     */
+    [NSUserDefaults.standardUserDefaults setBool:true forKey:@"hasLaunched"];
+    NSLog(@"app delegate: remove setting maxes here!!!");
+    //squatMax, pullUpMax, benchMax, deadliftMax;
+    UserInfo info = {
+        .currentPlan = -1,
+        .weekStart = date_calcStartOfWeek(CFAbsoluteTimeGetCurrent(), calendar, DateSearchDirection_Previous, 1),
+        .squatMax = 300, .pullUpMax = 42, .benchMax = 185, .deadliftMax = 234
+    };
+    userInfo_saveData(&info);
+    CFRelease(calendar);
 }

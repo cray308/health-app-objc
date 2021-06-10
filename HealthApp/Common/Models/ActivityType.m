@@ -9,7 +9,7 @@
 
 static char const *FullStrs[] = {"Low-Intensity", "Medium-Intensity", "High-Intensity"};
 
-NSString *activityType_getString(ActivityType type, bool shortString) {
+NSString *activityType_getString(ActivityType type, unsigned char shortString) {
     const char *str = NULL;
     switch (type) {
         case ActivityType_Low:

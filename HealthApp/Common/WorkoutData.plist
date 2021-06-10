@@ -1744,7 +1744,7 @@
 				</dict>
 				<dict>
 					<key>index</key>
-					<integer>0</integer>
+					<integer>2</integer>
 					<key>reps</key>
 					<integer>1</integer>
 					<key>sets</key>
@@ -4206,6 +4206,62 @@
 				</array>
 				<key>title</key>
 				<string>Aux Strength</string>
+			</dict>
+			<dict>
+				<key>activities</key>
+				<array>
+					<dict>
+						<key>exercises</key>
+						<array>
+							<dict>
+								<key>name</key>
+								<string>Front squat</string>
+								<key>reps</key>
+								<integer>1</integer>
+								<key>rest</key>
+								<integer>120</integer>
+								<key>type</key>
+								<integer>0</integer>
+							</dict>
+							<dict>
+								<key>name</key>
+								<string>Weighted pull-up</string>
+								<key>reps</key>
+								<integer>1</integer>
+								<key>rest</key>
+								<integer>120</integer>
+								<key>type</key>
+								<integer>0</integer>
+							</dict>
+							<dict>
+								<key>name</key>
+								<string>Bench press</string>
+								<key>reps</key>
+								<integer>1</integer>
+								<key>rest</key>
+								<integer>120</integer>
+								<key>type</key>
+								<integer>0</integer>
+							</dict>
+							<dict>
+								<key>name</key>
+								<string>Deadlift</string>
+								<key>reps</key>
+								<integer>1</integer>
+								<key>rest</key>
+								<integer>120</integer>
+								<key>type</key>
+								<integer>0</integer>
+							</dict>
+						</array>
+						<key>reps</key>
+						<integer>1</integer>
+						<key>type</key>
+						<integer>0</integer>
+					</dict>
+				</array>
+				<key>title</key>
+				<string>Test Day</string>
 			</dict>
 		</array>
 	</dict>

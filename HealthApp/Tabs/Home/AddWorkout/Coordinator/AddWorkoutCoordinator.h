@@ -14,6 +14,7 @@
 typedef struct AddWorkoutCoordinator AddWorkoutCoordinator;
 typedef struct HomeTabCoordinator HomeTabCoordinator;
 typedef struct AddWorkoutViewModel AddWorkoutViewModel;
+typedef struct Workout Workout;
 
 struct AddWorkoutCoordinator {
     UINavigationController *navigationController;
@@ -21,14 +22,10 @@ struct AddWorkoutCoordinator {
     HomeTabCoordinator *parent;
 };
 
-AddWorkoutCoordinator *addWorkoutCoordinator_init(UINavigationController *navigationController, HomeTabCoordinator *delegate);
+AddWorkoutCoordinator *addWorkoutCoordinator_init(UINavigationController *navigationController, HomeTabCoordinator *delegate, Workout *workout);
 void addWorkoutCoordinator_start(AddWorkoutCoordinator *coordinator);
 void addWorkoutCoordinator_free(AddWorkoutCoordinator *coordinator);
 
-void addWorkoutCoordinator_pushModalViewController(AddWorkoutCoordinator *coordinator);
-void addWorkoutCoordinator_didFinishAddingActivity(AddWorkoutCoordinator *coordinator, UIViewController *presenter, int newIndex);
-
-void addWorkoutCoordinator_didFinishAddingWorkouts(AddWorkoutCoordinator *coordinator);
-void addWorkoutCoordinator_didDismissAlert(AddWorkoutCoordinator *coordinator);
+void addWorkoutCoordinator_didFinishAddingWorkout(AddWorkoutCoordinator *coordinator, int totalCompletedWorkouts);
 
 #endif /* AddWorkoutCoordinator_h */

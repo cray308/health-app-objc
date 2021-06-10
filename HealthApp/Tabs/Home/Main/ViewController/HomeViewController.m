@@ -9,21 +9,18 @@
 #import "HomeViewModel.h"
 #import "HomeTabCoordinator.h"
 #import "AddWorkoutCoordinator.h"
+#import "Divider.h"
 #import "AppCoordinator.h"
-#import "NavBarCoinsView.h"
-#import "ChartSeparatorView.h"
 #import "ConfettiEmitterView.h"
-#import "HomeBarChartView.h"
-#import "HomePieChartView.h"
+#import "HomeWorkoutDayButton.h"
 #import "ViewControllerHelpers.h"
+#import "CalendarDateHelpers.h"
+#import "AppUserData.h"
 
 @interface HomeViewController() {
     HomeViewModel *viewModel;
-    NavBarCoinsView *navBarCoinsView;
     UILabel *greetingLabel;
-    UILabel *weeklyTokensText;
-    HomeBarChartView *barChart;
-    HomePieChartView *pieChart;
+    UIStackView *weeklyWorkoutsStack;
 }
 
 @end
@@ -37,11 +34,8 @@
 }
 
 - (void) dealloc {
-    [navBarCoinsView release];
     [greetingLabel release];
-    [weeklyTokensText release];
-    [barChart release];
-    [pieChart release];
+    [weeklyWorkoutsStack release];
     [super dealloc];
 }
 
@@ -53,7 +47,7 @@
     appCoordinator_setTabToLoaded(viewModel->delegate->delegate, LoadedViewController_Home);
     [self updateGreeting];
     homeViewModel_fetchData(viewModel);
-    [self updateCharts];
+    [self createWorkoutsList];
 }
 
 - (void) viewWillAppear: (BOOL)animated {
@@ -74,32 +68,13 @@
     greetingLabel.adjustsFontSizeToFitWidth = true;
     greetingLabel.textColor = UIColor.labelColor;
 
-    UIButton *addWorkoutsButton = [UIButton buttonWithType:UIButtonTypeSystem];
-    addWorkoutsButton.translatesAutoresizingMaskIntoConstraints = false;
-    [addWorkoutsButton setTitle:@"Add Workouts" forState:UIControlStateNormal];
-    [addWorkoutsButton setTitleColor:UIColor.labelColor forState: UIControlStateNormal];
-    addWorkoutsButton.titleLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleHeadline];
-    addWorkoutsButton.backgroundColor = UIColor.systemBlueColor;
-    addWorkoutsButton.layer.cornerRadius = 10;
-    [addWorkoutsButton addTarget:self action: @selector(didPushAddWorkouts) forControlEvents:UIControlEventTouchUpInside];
+    weeklyWorkoutsStack = [[UIStackView alloc] initWithFrame:CGRectZero];
+    weeklyWorkoutsStack.axis = UILayoutConstraintAxisVertical;
+    weeklyWorkoutsStack.spacing = 5;
+    [weeklyWorkoutsStack setLayoutMarginsRelativeArrangement:true];
+    weeklyWorkoutsStack.layoutMargins = UIEdgeInsetsMake(5, 4, 4, 0);
 
-    UIView *addWorkoutBtnContainer = [[UIView alloc] initWithFrame:CGRectZero];
-    [addWorkoutBtnContainer addSubview:addWorkoutsButton];
-
-    weeklyTokensText = [[UILabel alloc] initWithFrame:CGRectZero];
-    weeklyTokensText.font = [UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline];
-    weeklyTokensText.textAlignment = NSTextAlignmentCenter;
-    weeklyTokensText.adjustsFontSizeToFitWidth = true;
-    weeklyTokensText.textColor = UIColor.labelColor;
-
-    ChartSeparatorView *barChartSeparator = [[ChartSeparatorView alloc] initWithTitle:@"Cumulative Tokens This Week"];
-    barChart = [[HomeBarChartView alloc] initWithViewModel:viewModel->barChartViewModel];
-    ChartSeparatorView *pieChartSeparator = [[ChartSeparatorView alloc] initWithTitle:@"Workout Time By Intensity"];
-    pieChart = [[HomePieChartView alloc] initWithViewModel:viewModel->pieChartViewModel];
-
-    UIStackView *vStack = [[UIStackView alloc] initWithArrangedSubviews:@[
-        greetingLabel, addWorkoutBtnContainer, weeklyTokensText, barChartSeparator, barChart, pieChartSeparator, pieChart
-    ]];
+    UIStackView *vStack = [[UIStackView alloc] initWithArrangedSubviews:@[greetingLabel, weeklyWorkoutsStack]];
     vStack.translatesAutoresizingMaskIntoConstraints = false;
     vStack.axis = UILayoutConstraintAxisVertical;
     vStack.spacing = 5;
@@ -127,51 +102,86 @@
         [vStack.bottomAnchor constraintEqualToAnchor:scrollView.bottomAnchor],
         [vStack.widthAnchor constraintEqualToAnchor:scrollView.widthAnchor],
 
-        [greetingLabel.heightAnchor constraintEqualToConstant:50],
-
-        [addWorkoutsButton.topAnchor constraintEqualToAnchor:addWorkoutBtnContainer.topAnchor],
-        [addWorkoutsButton.bottomAnchor constraintEqualToAnchor:addWorkoutBtnContainer.bottomAnchor],
-        [addWorkoutsButton.centerXAnchor constraintEqualToAnchor:addWorkoutBtnContainer.centerXAnchor],
-        [addWorkoutsButton.heightAnchor constraintEqualToConstant:70],
-        [addWorkoutsButton.widthAnchor constraintEqualToConstant:170],
-
-        [weeklyTokensText.heightAnchor constraintEqualToConstant:30]
+        [greetingLabel.heightAnchor constraintEqualToConstant:50]
     ]];
 
-    navBarCoinsView = [[NavBarCoinsView alloc] init];
-    UIBarButtonItem *leftBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:navBarCoinsView];
-    self.navigationItem.leftBarButtonItem = leftBarButtonItem;
-
-    [addWorkoutBtnContainer release];
-    [barChartSeparator release];
-    [pieChartSeparator release];
+    [weeklyWorkoutsStack setHidden:true];
     [vStack release];
     [scrollView release];
-    [leftBarButtonItem release];
 }
 
-- (void) updateNavBarCoins: (NSString *)text {
-    [navBarCoinsView updateTokens:text];
+- (void) createWorkoutsList {
+    NSArray<UIView *> *subviews = weeklyWorkoutsStack.arrangedSubviews;
+    for (size_t i = 0; i < subviews.count; ++i) {
+        [subviews[i] removeFromSuperview];
+    }
+
+    if (!(viewModel->workouts && viewModel->workouts->size)) {
+        [weeklyWorkoutsStack setHidden:true];
+        return;
+    }
+
+    UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+    headerLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleTitle2];
+    headerLabel.text = @"Workouts this week";
+    headerLabel.adjustsFontSizeToFitWidth = true;
+    headerLabel.textColor = UIColor.labelColor;
+    [weeklyWorkoutsStack addArrangedSubview:headerLabel];
+
+    Divider *divider = [[Divider alloc] init];
+    [weeklyWorkoutsStack addArrangedSubview:divider];
+
+    Array_workout *workouts = viewModel->workouts;
+    Workout *w;
+    NSString **weekDays = calendar_getWeekDaySymbols(false);
+    int i = 0;
+
+    array_iter(workouts, w) {
+        HomeWorkoutDayButton *dayBtn = [[HomeWorkoutDayButton alloc] initWithTitle:w->title day:weekDays[w->day]];
+        UIButton *btn = [dayBtn getButton];
+        btn.tag = i++;
+        [btn addTarget:self action:@selector(workoutButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
+
+        [weeklyWorkoutsStack addArrangedSubview:dayBtn];
+        [dayBtn release];
+    }
+
+    for (i = 0; i < 7; ++i) {
+        [weekDays[i] release];
+    }
+    free(weekDays);
+
+    [NSLayoutConstraint activateConstraints:@[
+        [headerLabel.heightAnchor constraintEqualToConstant:40],
+    ]];
+    [headerLabel release];
+    [divider release];
+    [weeklyWorkoutsStack setHidden:false];
+    [self updateWorkoutsList];
 }
 
-- (void) didPushAddWorkouts {
-    homeCoordinator_navigateToAddWorkouts(viewModel->delegate);
+- (void) updateWorkoutsList {
+    NSArray<UIView *> *subviews = weeklyWorkoutsStack.arrangedSubviews;
+    if (!(viewModel->workouts && viewModel->workouts->size && subviews.count > 2)) return;
+
+    const unsigned char completed = appUserDataShared->completedWorkouts;
+    Array_workout *workouts = viewModel->workouts;
+    Workout *w;
+    int i = 2;
+
+    array_iter(workouts, w) {
+        HomeWorkoutDayButton *btn = (HomeWorkoutDayButton *) subviews[i++];
+        if (!btn) continue;
+        [btn setEnabled:!(completed & (1 << w->day))];
+    }
 }
 
-- (void) updateCharts {
-    NSString *tokensText = homeViewModel_getCurrentTokensText(viewModel);
-    weeklyTokensText.text = tokensText;
-    [tokensText release];
-    [barChart updateChart];
-    [pieChart updateChart];
-}
-
-- (void) runNavBarAnimation {
-    [navBarCoinsView runAnimation];
+- (void) workoutButtonTapped: (UIButton *)btn {
+    homeCoordinator_navigateToAddWorkout(viewModel->delegate, (int) btn.tag);
 }
 
 - (void) showConfetti {
-    AlertDetails *details = homeViewModel_getAlertDetailsForMeetingTokenGoal();
+    AlertDetails *details = alertDetails_init(@"Nicely done!", @"Great job meeting your workout goal this week.");
     UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil];
 
     CGRect frame = CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height);

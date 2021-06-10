@@ -6,21 +6,45 @@
 //
 
 #import "AddWorkoutViewModel.h"
-#import "ActivityEntry+CoreDataClass.h"
+#import "AppUserData.h"
+#import "WeeklyData+CoreDataClass.h"
 #import "PersistenceService.h"
 #import "AddWorkoutCoordinator.h"
 
-void addWorkoutViewModel_tappedSaveButton(AddWorkoutViewModel *model) {
-    SingleActivityModel *activity;
-    array_iter(model->workouts, activity) {
-        activity->date = CFAbsoluteTimeGetCurrent();
-        model->newTokens += activity->tokens;
-        model->durations[activity->intensity] += activity->duration;
+void updateStoredData(unsigned int duration, unsigned char type) {
+    WeeklyData *data = persistenceService_getWeeklyDataForThisWeek();
+    if (!(duration && data)) return;
 
-        ActivityEntry *entry = [[ActivityEntry alloc] initWithContext:persistenceService_sharedContainer.viewContext];
-        [entry setProperties:activity];
-        [entry release];
+    switch (type) {
+        case WorkoutTypeSE:
+            data.timeSE += duration;
+            break;
+        case WorkoutTypeHIC:
+            data.timeHIC += duration;
+            break;
+        case WorkoutTypeStrength:
+            data.timeStrength += duration;
+            break;
+        default:
+            data.timeEndurance += duration;
+            break;
     }
+    data.totalWorkouts += 1;
     persistenceService_saveContext();
-    addWorkoutCoordinator_didFinishAddingWorkouts(model->delegate);
+}
+
+void addWorkoutViewModel_stoppedWorkout(AddWorkoutViewModel *model, unsigned int duration) {
+    updateStoredData(duration, model->workout->type);
+    addWorkoutCoordinator_didFinishAddingWorkout(model->delegate, 0);
+}
+
+void addWorkoutViewModel_completedWorkout(AddWorkoutViewModel *model, unsigned int duration) {
+    updateStoredData(duration, model->workout->type);
+    const signed char day = model->workout->day;
+    if (day >= 0) {
+        unsigned char totalCompleted = appUserData_addCompletedWorkout((unsigned char) day);
+        addWorkoutCoordinator_didFinishAddingWorkout(model->delegate, totalCompleted);
+        return;
+    }
+    addWorkoutCoordinator_didFinishAddingWorkout(model->delegate, 0);
 }

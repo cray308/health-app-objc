@@ -27,15 +27,14 @@ HomeTabCoordinator *homeCoordinator_init(UINavigationController *navVC, AppCoord
 void homeCoordinator_free(HomeTabCoordinator *coordinator);
 void homeCoordinator_start(HomeTabCoordinator *coordinator);
 
-void homeCoordinator_updateNavBarTokens(HomeTabCoordinator *coordinator, NSString *label);
 void homeCoordinator_performForegroundUpdate(HomeTabCoordinator *coordinator);
 void homeCoordinator_updateForNewWeek(HomeTabCoordinator *coordinator);
-void homeCoordinator_updateForNewDay(HomeTabCoordinator *coordinator, int mostRecentDay, int currentDay);
+void homeCoordinator_updateForNewDay(HomeTabCoordinator *coordinator);
 
 void homeCoordinator_handleUserInfoChange(HomeTabCoordinator *coordinator);
 void homeCoordinator_handleDataDeletion(HomeTabCoordinator *coordinator);
 
-void homeCoordinator_navigateToAddWorkouts(HomeTabCoordinator *coordinator);
-void homeCoordinator_didFinishAddingWorkouts(HomeTabCoordinator *coordinator, int newTokens, int *durations);
+void homeCoordinator_navigateToAddWorkout(HomeTabCoordinator *coordinator, int index);
+void homeCoordinator_didFinishAddingWorkout(HomeTabCoordinator *coordinator, int totalCompletedWorkouts);
 
 #endif /* HomeTabCoordinator_h */
