@@ -16,7 +16,7 @@ typedef struct HistoryViewModel HistoryViewModel;
 
 - (id) initWithViewModel: (HistoryViewModel *)model;
 - (void) performForegroundUpdate;
-- (void) updateChartsWithAnimation: (bool)shouldAnimate;
+- (void) updateCharts;
 
 @end
 

@@ -10,7 +10,6 @@
 #import "AddWorkoutCoordinator.h"
 #import "HomeViewModel.h"
 #import "HomeViewController.h"
-#import "ActivityType.h"
 #import "CalendarDateHelpers.h"
 #import "AppUserData.h"
 
@@ -86,7 +85,7 @@ void homeCoordinator_performForegroundUpdate(HomeTabCoordinator *coordinator) {
 }
 
 void homeCoordinator_updateForNewWeek(HomeTabCoordinator *coordinator) {
-    homeViewModel_clear(coordinator->viewModel);
+    //homeViewModel_clear(coordinator->viewModel);
     homeCoordinator_updateUI(coordinator, ResetWorkouts | UpdateGreeting);
 }
 
@@ -95,11 +94,10 @@ void homeCoordinator_updateForNewDay(HomeTabCoordinator *coordinator) {
 }
 
 void homeCoordinator_handleUserInfoChange(HomeTabCoordinator *coordinator) {
-    homeCoordinator_updateUI(coordinator, ResetWorkouts | UpdateGreeting);
+    homeCoordinator_updateUI(coordinator, ResetWorkouts);
 }
 
 void homeCoordinator_handleDataDeletion(HomeTabCoordinator *coordinator) {
-    homeViewModel_clear(coordinator->viewModel);
     homeCoordinator_updateUI(coordinator, UpdateWorkouts);
 }
 
@@ -108,9 +106,12 @@ void homeCoordinator_handleDataDeletion(HomeTabCoordinator *coordinator) {
 void homeCoordinator_updateUI(HomeTabCoordinator *coordinator, unsigned char updates) {
     HomeViewController *homeVC = getHomeViewController(coordinator->navigationController);
     if (updates & UpdateGreeting) {
-        [homeVC updateGreeting];
+        if (homeViewModel_updateTimeOfDay(coordinator->viewModel)) {
+            [homeVC updateGreeting];
+        }
     }
     if (updates & ResetWorkouts) {
+        homeViewModel_fetchData(coordinator->viewModel);
         [homeVC createWorkoutsList];
     }
     if (updates & UpdateWorkouts) {

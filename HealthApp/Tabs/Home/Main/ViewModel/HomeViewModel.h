@@ -9,7 +9,6 @@
 #define HomeViewModel_h
 
 #import <Foundation/Foundation.h>
-#import "Constants.h"
 #import "Exercise.h"
 
 typedef struct HomeViewModel HomeViewModel;

@@ -24,7 +24,6 @@
 
 - (void) dealloc {
     [checkbox release];
-    [button release];
     [super dealloc];
 }
 

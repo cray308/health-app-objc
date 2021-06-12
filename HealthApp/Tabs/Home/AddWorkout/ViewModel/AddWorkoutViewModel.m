@@ -48,3 +48,17 @@ void addWorkoutViewModel_completedWorkout(AddWorkoutViewModel *model, unsigned i
     }
     addWorkoutCoordinator_didFinishAddingWorkout(model->delegate, 0);
 }
+
+void addWorkoutViewModel_finishedAddingNewWeights(AddWorkoutViewModel *model, UIViewController *presenter, unsigned short *weights) {
+    WeeklyData *data = persistenceService_getWeeklyDataForThisWeek();
+    if (data) {
+        data.bestSquat = weights[0];
+        data.bestPullup = weights[1];
+        data.bestBench = weights[2];
+        data.bestDeadlift = weights[3];
+        persistenceService_saveContext();
+    }
+
+    appUserData_updateWeightMaxes(weights);
+    addWorkoutCoordinator_finishedUpdatingWeights(model->delegate, presenter);
+}

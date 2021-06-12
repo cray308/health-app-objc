@@ -6,11 +6,10 @@
 //
 
 #import "PersistenceService.h"
-#import "Constants.h"
 #import "CalendarDateHelpers.h"
-#import "WeekStats+CoreDataClass.h"
-#import "ActivityEntry+CoreDataClass.h"
 #import "WeeklyData+CoreDataClass.h"
+
+#define _U_ __attribute__((__unused__))
 
 NSPersistentContainer *persistenceService_sharedContainer = nil;
 
@@ -102,7 +101,12 @@ void persistenceService_performForegroundUpdate(void) {
 
 void persistenceService_deleteUserData(void) {
     size_t count = 0;
+    CFCalendarRef calendar = CFCalendarCopyCurrent();
+    double weekStart = date_calcStartOfWeek(CFAbsoluteTimeGetCurrent(), calendar, DateSearchDirection_Previous, true);
+    CFRelease(calendar);
     NSFetchRequest *request = WeeklyData.fetchRequest;
+    request.predicate = [NSPredicate predicateWithFormat:@"weekStart < %f", weekStart - 2];
+
     NSArray<WeeklyData *> *data = [persistenceService_sharedContainer.viewContext executeFetchRequest:request error:nil];
     if ((data && (count = (data.count)) != 0)) {
         for (size_t i = 0; i < count; ++i) {

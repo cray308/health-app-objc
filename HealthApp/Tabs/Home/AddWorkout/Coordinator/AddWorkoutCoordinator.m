@@ -39,3 +39,9 @@ void addWorkoutCoordinator_free(AddWorkoutCoordinator *coordinator) {
 void addWorkoutCoordinator_didFinishAddingWorkout(AddWorkoutCoordinator *coordinator, int totalCompletedWorkouts) {
     homeCoordinator_didFinishAddingWorkout(coordinator->parent, totalCompletedWorkouts);
 }
+
+void addWorkoutCoordinator_finishedUpdatingWeights(AddWorkoutCoordinator *coordinator, UIViewController *presenter) {
+    [presenter dismissViewControllerAnimated:true completion:nil];
+    WorkoutViewController *vc = (WorkoutViewController *) [coordinator->navigationController topViewController];
+    if (vc) [vc finishedAddingNewWeights];
+}

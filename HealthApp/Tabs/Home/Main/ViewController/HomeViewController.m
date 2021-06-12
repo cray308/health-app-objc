@@ -41,7 +41,7 @@
 
 - (void) viewDidLoad {
     [super viewDidLoad];
-    self.view.backgroundColor = UIColor.systemBackgroundColor;
+    self.view.backgroundColor = UIColor.systemGroupedBackgroundColor;
     self.navigationItem.title = @"Home";
     [self setupSubviews];
     appCoordinator_setTabToLoaded(viewModel->delegate->delegate, LoadedViewController_Home);

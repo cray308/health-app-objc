@@ -10,15 +10,6 @@
 
 DateXAxisFormatter *sharedHistoryXAxisFormatter = nil;
 
-ChartLegendEntry *createLegendEntry(NSString *label, UIColor *color) {
-    ChartLegendEntry *entry = [[ChartLegendEntry alloc] initWithLabel:label];
-    entry.formColor = color;
-    entry.formLineDashPhase = NAN;
-    entry.formSize = 20;
-    entry.labelColor = UIColor.labelColor;
-    return entry;
-}
-
 void sharedHistoryXAxisFormatter_setup(void) {
     sharedHistoryXAxisFormatter = [[DateXAxisFormatter alloc] init];
 }

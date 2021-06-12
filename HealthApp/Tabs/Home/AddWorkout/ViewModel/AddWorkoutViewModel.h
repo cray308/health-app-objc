@@ -9,6 +9,7 @@
 #define AddWorkoutViewModel_h
 
 #import "Exercise.h"
+#import <UIKit/UIKit.h>
 
 typedef struct AddWorkoutViewModel AddWorkoutViewModel;
 typedef struct AddWorkoutCoordinator AddWorkoutCoordinator;
@@ -20,5 +21,6 @@ struct AddWorkoutViewModel {
 
 void addWorkoutViewModel_stoppedWorkout(AddWorkoutViewModel *model, unsigned int duration);
 void addWorkoutViewModel_completedWorkout(AddWorkoutViewModel *model, unsigned int duration);
+void addWorkoutViewModel_finishedAddingNewWeights(AddWorkoutViewModel *model, UIViewController *presenter, unsigned short *weights);
 
 #endif /* AddWorkoutViewModel_h */

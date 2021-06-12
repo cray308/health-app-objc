@@ -9,12 +9,12 @@
 
 void alertDetails_free(AlertDetails *details);
 
-void viewController_createToolbar(UIViewController *vc, SEL doneSelector, UITextField **fields) {
+void createToolbar(id target, SEL doneSelector, UITextField **fields) {
     UIToolbar *toolbar = [[UIToolbar alloc] initWithFrame:CGRectZero];
     [toolbar sizeToFit];
 
     UIBarButtonItem *flexSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
-    UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithTitle:@"Done" style:UIBarButtonItemStylePlain target:vc action:doneSelector];
+    UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithTitle:@"Done" style:UIBarButtonItemStylePlain target:target action:doneSelector];
 
     [toolbar setItems:@[flexSpace, doneButton] animated:false];
     [toolbar setUserInteractionEnabled:true];

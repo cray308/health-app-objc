@@ -66,7 +66,9 @@ void appCoordinator_start(AppCoordinator *coordinator) {
     CFRelease(calendar);
 
     NSLog(@"Remove this line in appCoordinator_start\n\n");
-    appUserData_setWorkoutPlan(0); //this line
+    //appUserData_setWorkoutPlan(0); //this line
+
+    NSLog(@"Maxes: \n bench: %u \n deadlift: %u \n squat: %u \n pullup: %u \n", appUserDataShared->benchMax, appUserDataShared->deadliftMax, appUserDataShared->squatMax, appUserDataShared->pullUpMax);
 
     persistenceService_performForegroundUpdate();
     coordinator->controllers[0] = [[UINavigationController alloc] initWithNibName:nil bundle:nil];
@@ -119,12 +121,7 @@ void appCoordinator_handleForegroundUpdate(AppCoordinator *coordinator) {
 }
 
 void appCoordinator_updatedUserInfo(AppCoordinator *coordinator) {
-    NSLog(@"%u", coordinator->loadedViewControllers);
-    //appUserData_setUserInfo(name, goal);
-    //    homeCoordinator_handleUserInfoChange(coordinator->homeCoordinator);
-    //    if (coordinator->loadedViewControllers & LoadedViewController_History) {
-    //        historyCoordinator_handleUserInfoChange(coordinator->historyCoordinator);
-    //    }
+    homeCoordinator_handleUserInfoChange(coordinator->homeCoordinator);
 }
 
 void appCoordinator_deletedAppData(AppCoordinator *coordinator) {

@@ -11,7 +11,6 @@
 #import "AppUserData.h"
 
 SettingsViewModel *settingsViewModel_init(SettingsTabCoordinator *delegate);
-void settingsViewModel_free(SettingsViewModel *model);
 
 SettingsTabCoordinator *settingsCoordinator_init(UINavigationController *navVC, AppCoordinator *delegate) {
     SettingsTabCoordinator *coordinator = calloc(1, sizeof(SettingsTabCoordinator));
@@ -26,7 +25,7 @@ SettingsTabCoordinator *settingsCoordinator_init(UINavigationController *navVC, 
 }
 
 void settingsCoordinator_free(SettingsTabCoordinator *coordinator) {
-    settingsViewModel_free(coordinator->viewModel);
+    free(coordinator->viewModel);
     free(coordinator);
 }
 
@@ -40,11 +39,5 @@ SettingsViewModel *settingsViewModel_init(SettingsTabCoordinator *delegate) {
     SettingsViewModel *model = malloc(sizeof(SettingsViewModel));
     if (!model) return NULL;
     model->delegate = delegate;
-    model->tokenGoalLabelFormat = [[NSString alloc] initWithString:@"Token Goal: %d"];
     return model;
-}
-
-void settingsViewModel_free(SettingsViewModel *model) {
-    [model->tokenGoalLabelFormat release];
-    free(model);
 }

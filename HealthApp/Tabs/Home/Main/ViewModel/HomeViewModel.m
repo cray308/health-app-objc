@@ -11,7 +11,6 @@
 #import "AppUserData.h"
 #import "PersistenceService.h"
 #import "CalendarDateHelpers.h"
-#import "ActivityEntry+CoreDataClass.h"
 #import "WorkoutFinder.h"
 
 void homeViewModel_clear(HomeViewModel *model) {

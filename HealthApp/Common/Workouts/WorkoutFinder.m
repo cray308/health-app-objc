@@ -40,7 +40,7 @@ Array_workout *workoutFinder_get_weekly_workouts(signed char plan, unsigned int 
         unsigned sets = [day[@"sets"] unsignedIntValue];
         unsigned reps = [day[@"reps"] unsignedIntValue];
         double weightMultiplier = (double) [day[@"weight"] unsignedIntValue] / 100.0;
-        Workout wk = { .type = (unsigned char) [day[@"type"] unsignedIntValue], .weight = [day[@"weight"] unsignedIntValue] };
+        Workout wk = { .type = (unsigned char) [day[@"type"] unsignedIntValue] };
 
         NSString *libraryKey;
         switch (wk.type) {

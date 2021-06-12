@@ -8,7 +8,6 @@
 #ifndef ChartHelpers_h
 #define ChartHelpers_h
 
-#import "Constants.h"
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 #import "HealthApp-Swift.h"
@@ -29,7 +28,5 @@ extern DateXAxisFormatter *sharedHistoryXAxisFormatter;
 
 void sharedHistoryXAxisFormatter_setup(void);
 void sharedHistoryXAxisFormatter_free(void);
-
-ChartLegendEntry *createLegendEntry(NSString *label, UIColor *color);
 
 #endif /* ChartHelpers_h */

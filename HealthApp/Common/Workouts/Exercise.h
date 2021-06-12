@@ -36,8 +36,6 @@ typedef enum {
     FitnessPlanContinuation
 } FitnessPlan;
 
-
-
 #define freeExerciseEntry(x) [(x).name release]
 #define freeExerciseGroup(x) array_free(exEntry, (x).exercises)
 #define freeWorkout(x) do { array_free(exGroup, (x).activities); [(x).title release]; } while (0)
@@ -70,10 +68,6 @@ gen_array(exGroup, ExerciseGroup, DSDefault_shallowCopy, freeExerciseGroup)
 struct Workout {
     unsigned char type;
     signed char day;
-    unsigned int weight;
-    unsigned int sets;
-    unsigned int reps;
-    unsigned int completedReps;
     NSString *title;
     Array_exGroup *activities;
 };

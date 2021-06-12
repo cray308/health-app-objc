@@ -12,7 +12,7 @@
 
 typedef struct AlertDetails AlertDetails;
 
-void viewController_createToolbar(UIViewController *vc, SEL doneSelector, UITextField **fields);
+void createToolbar(id target, SEL doneSelector, UITextField **fields);
 
 struct AlertDetails {
     NSString *title;

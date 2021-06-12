@@ -9,6 +9,7 @@
 #define AppUserData_h
 
 #import <Foundation/Foundation.h>
+//#include <CoreFoundation/CoreFoundation.h>
 
 typedef struct UserInfo UserInfo;
 
@@ -32,6 +33,7 @@ void appUserData_handleNewWeek(double weekStart);
 unsigned char appUserData_addCompletedWorkout(unsigned char day);
 unsigned int appUserData_getWeekInPlan(void);
 unsigned char appUserData_hasWorkoutPlan(void);
+void appUserData_updateWeightMaxes(unsigned short *weights);
 
 
 

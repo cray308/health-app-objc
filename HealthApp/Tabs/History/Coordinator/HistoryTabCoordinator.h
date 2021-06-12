@@ -26,7 +26,6 @@ void historyCoordinator_free(HistoryTabCoordinator *coordinator);
 void historyCoordinator_start(HistoryTabCoordinator *coordinator);
 
 void historyCoordinator_performForegroundUpdate(HistoryTabCoordinator *coordinator);
-void historyCoordinator_handleUserInfoChange(HistoryTabCoordinator *coordinator);
 void historyCoordinator_handleDataDeletion(HistoryTabCoordinator *coordinator);
 
 #endif /* HistoryTabCoordinator_h */

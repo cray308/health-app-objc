@@ -1,11 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="17709" systemVersion="19E287" minimumToolsVersion="Automatic" sourceLanguage="Objective-C" userDefinedModelVersionIdentifier="">
-    <entity name="ActivityEntry" representedClassName="ActivityEntry" syncable="YES">
-        <attribute name="duration" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
-        <attribute name="timestamp" attributeType="Double" defaultValueString="0" usesScalarValueType="YES"/>
-        <attribute name="tokens" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
-        <attribute name="type" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
-    </entity>
     <entity name="WeeklyData" representedClassName="WeeklyData" syncable="YES">
         <attribute name="bestBench" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="bestDeadlift" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
@@ -19,24 +13,7 @@
         <attribute name="weekEnd" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="weekStart" attributeType="Double" defaultValueString="0" usesScalarValueType="YES"/>
     </entity>
-    <entity name="WeekStats" representedClassName="WeekStats" syncable="YES">
-        <attribute name="end" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
-        <attribute name="start" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
-        <attribute name="timeFriday" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
-        <attribute name="timeHigh" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
-        <attribute name="timeLow" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
-        <attribute name="timeMedium" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
-        <attribute name="timeMonday" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
-        <attribute name="timeSaturday" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
-        <attribute name="timeSunday" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
-        <attribute name="timeThursday" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
-        <attribute name="timeTuesday" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
-        <attribute name="timeWednesday" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
-        <attribute name="tokens" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
-    </entity>
     <elements>
-        <element name="ActivityEntry" positionX="-63" positionY="-18" width="128" height="103"/>
         <element name="WeeklyData" positionX="9" positionY="-117" width="128" height="208"/>
-        <element name="WeekStats" positionX="86.7578125" positionY="-272.44140625" width="128" height="238"/>
     </elements>
 </model>

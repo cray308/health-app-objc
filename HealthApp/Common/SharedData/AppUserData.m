@@ -31,6 +31,29 @@ UserInfo *userInfo_initFromStorage(void) {
 }
 
 void userInfo_saveData(UserInfo *info) {
+    /*
+     CFStringRef keys[] = {CFNumberCreate(NULL, kCFNumberDoubleType, &info->planStart),
+     CFNumberCreate(NULL, kCFNumberDoubleType, &info->weekStart),
+     CFNumberCreate(NULL, kCFNumberCharType, &info->currentPlan),
+     CFNumberCreate(NULL, kCFNumberCharType, &info->completedWorkouts),
+     CFNumberCreate(NULL, kCFNumberShortType, &info->squatMax),
+     CFNumberCreate(NULL, kCFNumberShortType, &info->pullUpMax),
+     CFNumberCreate(NULL, kCFNumberShortType, &info->benchMax),
+     CFNumberCreate(NULL, kCFNumberShortType, &info->deadliftMax)};
+     CFNumberRef values[] = {CFSTR("planStart"), CFSTR("weekStart"), CFSTR("currentPlan"), CFSTR("completedWorkouts"),
+     CFSTR("squatMax"), CFSTR("pullUpMax"), CFSTR("benchMax"), CFSTR("deadliftMax")};
+
+     CFDictionaryRef dict = CFDictionaryCreate(NULL, (void **) keys, (void **) values, 8,
+     &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+
+     [NSUserDefaults.standardUserDefaults setObject:(__bridge NSDictionary*)dict forKey:@"userinfo"];
+     [NSUserDefaults.standardUserDefaults synchronize];
+     CFRelease(dict);
+     for (int i = 0; i < 8; ++i) {
+     CFRelease(keys[i]);
+     CFRelease(values[i]);
+     }
+     */
     NSDictionary<NSString *, id> *dict = @{
         @"planStart": [NSNumber numberWithDouble:info->planStart],
         @"weekStart": [NSNumber numberWithDouble:info->weekStart],
@@ -103,4 +126,20 @@ unsigned char appUserData_addCompletedWorkout(unsigned char day) { // returns ne
 
 unsigned int appUserData_getWeekInPlan(void) {
     return ((unsigned int) (appUserDataShared->weekStart - appUserDataShared->planStart)) / WeekSeconds;
+}
+
+void appUserData_updateWeightMaxes(unsigned short *weights) {
+    if (weights[0] > appUserDataShared->squatMax) {
+        appUserDataShared->squatMax = weights[0];
+    }
+    if (weights[1] > appUserDataShared->pullUpMax) {
+        appUserDataShared->pullUpMax = weights[1];
+    }
+    if (weights[2] > appUserDataShared->benchMax) {
+        appUserDataShared->benchMax = weights[2];
+    }
+    if (weights[3] > appUserDataShared->deadliftMax) {
+        appUserDataShared->deadliftMax = weights[3];
+    }
+    userInfo_saveData(appUserDataShared);
 }
