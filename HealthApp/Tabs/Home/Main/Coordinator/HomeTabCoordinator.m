@@ -10,15 +10,14 @@
 #import "AddWorkoutCoordinator.h"
 #import "HomeViewModel.h"
 #import "HomeViewController.h"
-#import "CalendarDateHelpers.h"
+#import "HomeSetupWorkoutModalViewController.h"
+#include "CalendarDateHelpers.h"
 #import "AppUserData.h"
 
 #define UpdateGreeting 0x1
 #define ResetWorkouts 0x2
 #define UpdateWorkouts 0x4
 
-HomeViewModel *homeViewModel_init(HomeTabCoordinator *delegate);
-void homeViewModel_free(HomeViewModel *model);
 void homeCoordinator_updateUI(HomeTabCoordinator *coordinator, unsigned char updates);
 
 static inline HomeViewController *getHomeViewController(UINavigationController *controller) {
@@ -28,10 +27,11 @@ static inline HomeViewController *getHomeViewController(UINavigationController *
 HomeTabCoordinator *homeCoordinator_init(UINavigationController *navVC, AppCoordinator *delegate) {
     HomeTabCoordinator *coordinator = calloc(1, sizeof(HomeTabCoordinator));
     if (!coordinator) return NULL;
-    if (!(coordinator->viewModel = homeViewModel_init(coordinator))) {
+    if (!(coordinator->viewModel = homeViewModel_init())) {
         free(coordinator);
         return NULL;
     }
+    coordinator->viewModel->delegate = coordinator;
     coordinator->delegate = delegate;
     coordinator->navigationController = navVC;
     return coordinator;
@@ -49,11 +49,8 @@ void homeCoordinator_start(HomeTabCoordinator *coordinator) {
     [vc release];
 }
 
-void homeCoordinator_navigateToAddWorkout(HomeTabCoordinator *coordinator, int index) {
-    Array_workout *workouts = coordinator->viewModel->workouts;
-    Workout *workout = array_at(workout, workouts, index);
-    if (!workout) return;
-
+void homeCoordinator_navigateToAddWorkout(HomeTabCoordinator *coordinator, UIViewController *presenter, Workout *workout) {
+    if (presenter) [presenter dismissViewControllerAnimated:true completion:nil];
     AddWorkoutCoordinator *child = addWorkoutCoordinator_init(coordinator->navigationController, coordinator, workout);
     if (!child) return;
     coordinator->childCoordinator = child;
@@ -64,9 +61,7 @@ void homeCoordinator_didFinishAddingWorkout(HomeTabCoordinator *coordinator, int
     HomeViewController *homeVC = getHomeViewController(coordinator->navigationController);
     [homeVC updateWorkoutsList];
 
-    unsigned char showConfetti = 0;
-    Array_workout *workouts = coordinator->viewModel->workouts;
-    if (workouts && array_size(workouts) == totalCompletedWorkouts) showConfetti = 1;
+    const unsigned char showConfetti = homeViewModel_shouldShowConfetti(coordinator->viewModel, totalCompletedWorkouts);
 
     addWorkoutCoordinator_free(coordinator->childCoordinator);
     coordinator->childCoordinator = NULL;
@@ -80,12 +75,19 @@ void homeCoordinator_didFinishAddingWorkout(HomeTabCoordinator *coordinator, int
     }
 }
 
+void homeCoordinator_showWorkoutPickerVC(HomeTabCoordinator *coordinator, unsigned char type, CFStringRef *names, unsigned int count) {
+    HomeSetupWorkoutModalViewController *modal = [[HomeSetupWorkoutModalViewController alloc] initWithViewModel:coordinator->viewModel type:type names:names count:count];
+    UINavigationController *container = [[UINavigationController alloc] initWithRootViewController:modal];
+    [coordinator->navigationController.viewControllers[0] presentViewController:container animated:true completion:nil];
+    [container release];
+    [modal release];
+}
+
 void homeCoordinator_performForegroundUpdate(HomeTabCoordinator *coordinator) {
     homeCoordinator_updateUI(coordinator, UpdateGreeting);
 }
 
 void homeCoordinator_updateForNewWeek(HomeTabCoordinator *coordinator) {
-    //homeViewModel_clear(coordinator->viewModel);
     homeCoordinator_updateUI(coordinator, ResetWorkouts | UpdateGreeting);
 }
 
@@ -117,19 +119,4 @@ void homeCoordinator_updateUI(HomeTabCoordinator *coordinator, unsigned char upd
     if (updates & UpdateWorkouts) {
         [homeVC updateWorkoutsList];
     }
-}
-
-HomeViewModel *homeViewModel_init(HomeTabCoordinator *delegate) {
-    HomeViewModel *model = malloc(sizeof(HomeViewModel));
-    if (!model) return NULL;
-    model->workouts = NULL;
-    model->timeOfDay = 0;
-    model->delegate = delegate;
-    homeViewModel_updateTimeOfDay(model);
-    return model;
-}
-
-void homeViewModel_free(HomeViewModel *model) {
-    homeViewModel_clear(model);
-    free(model);
 }

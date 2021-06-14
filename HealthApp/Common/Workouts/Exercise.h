@@ -8,8 +8,7 @@
 #ifndef Exercise_h
 #define Exercise_h
 
-#include "array.h"
-#import <Foundation/Foundation.h>
+#include <CoreFoundation/CoreFoundation.h>
 
 typedef enum {
     ExerciseTypeReps,
@@ -36,12 +35,10 @@ typedef enum {
     FitnessPlanContinuation
 } FitnessPlan;
 
-#define freeExerciseEntry(x) [(x).name release]
-#define freeExerciseGroup(x) array_free(exEntry, (x).exercises)
-#define freeWorkout(x) do { array_free(exGroup, (x).activities); [(x).title release]; } while (0)
-
 typedef struct ExerciseEntry ExerciseEntry;
+typedef struct Array_exEntry Array_exEntry;
 typedef struct ExerciseGroup ExerciseGroup;
+typedef struct Array_exGroup Array_exGroup;
 typedef struct Workout Workout;
 
 struct ExerciseEntry {
@@ -51,10 +48,8 @@ struct ExerciseEntry {
     unsigned int sets;
     unsigned int rest;
     unsigned int completedSets;
-    NSString *name;
+    CFStringRef name;
 };
-
-gen_array(exEntry, ExerciseEntry, DSDefault_shallowCopy, freeExerciseEntry)
 
 struct ExerciseGroup {
     unsigned char type;
@@ -63,15 +58,24 @@ struct ExerciseGroup {
     Array_exEntry *exercises;
 };
 
-gen_array(exGroup, ExerciseGroup, DSDefault_shallowCopy, freeExerciseGroup)
-
 struct Workout {
     unsigned char type;
     signed char day;
-    NSString *title;
+    CFStringRef title;
     Array_exGroup *activities;
 };
 
-gen_array(workout, Workout, DSDefault_shallowCopy, freeWorkout)
+void workout_setup_activities(Workout *w);
+void workout_add_activity(Workout *w, ExerciseGroup *g);
+void workout_free(Workout *w);
+int workout_getNumberOfActivities(Workout *w);
+void workout_setSetsAndRepsForExercises(Workout *w, unsigned int sets, unsigned int reps);
+void workout_setWeightsForExercises(Workout *w, unsigned int *weights, int size);
+ExerciseGroup *workout_getExerciseGroup(Workout *w, int i);
+
+void exerciseGroup_setup_exercises(ExerciseGroup *g);
+void exerciseGroup_add_exercise(ExerciseGroup *g, ExerciseEntry *e);
+int exerciseGroup_getNumberOfExercises(ExerciseGroup *g);
+ExerciseEntry *exerciseGroup_getExercise(ExerciseGroup *g, int i);
 
 #endif /* Exercise_h */

@@ -8,7 +8,7 @@
 #ifndef CalendarDateHelpers_h
 #define CalendarDateHelpers_h
 
-#import <Foundation/Foundation.h>
+#include <CoreFoundation/CoreFoundation.h>
 
 #define DaySeconds 86400
 #define WeekSeconds 604800
@@ -22,12 +22,8 @@ static inline int date_getDayOfWeek(double date, CFCalendarRef calendar) {
     return (int) CFCalendarGetOrdinalityOfUnit(calendar, kCFCalendarUnitWeekday, kCFCalendarUnitWeekOfYear, date);
 }
 
-NSString **calendar_getWeekDaySymbols(bool shortSymbols);
-
 void date_calcWeekEndpoints(double date, CFCalendarRef calendar, DateSearchDirection direction, bool considerToday, double *start, double *end);
 double date_calcStartOfWeek(double date, CFCalendarRef calendar, DateSearchDirection direction, bool considerToday);
-int date_indexForDate(double date, CFCalendarRef calendar);
-int date_indexForWeekday(int dayIndex);
 
 #define date_lastMonth(calendar) date_calcStartOfWeek(CFAbsoluteTimeGetCurrent() - 2678400, calendar, DateSearchDirection_Previous, true)
 

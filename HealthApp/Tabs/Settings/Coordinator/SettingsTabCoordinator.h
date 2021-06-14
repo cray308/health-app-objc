@@ -24,5 +24,6 @@ struct SettingsTabCoordinator {
 SettingsTabCoordinator *settingsCoordinator_init(UINavigationController *navVC, AppCoordinator *delegate);
 void settingsCoordinator_free(SettingsTabCoordinator *coordinator);
 void settingsCoordinator_start(SettingsTabCoordinator *coordinator);
+void settingsCoordinator_updateWeightText(SettingsTabCoordinator *coordinator);
 
 #endif /* SettingsTabCoordinator_h */

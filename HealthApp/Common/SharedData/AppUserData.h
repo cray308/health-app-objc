@@ -8,9 +8,6 @@
 #ifndef AppUserData_h
 #define AppUserData_h
 
-#import <Foundation/Foundation.h>
-//#include <CoreFoundation/CoreFoundation.h>
-
 typedef struct UserInfo UserInfo;
 
 struct UserInfo {
@@ -34,8 +31,5 @@ unsigned char appUserData_addCompletedWorkout(unsigned char day);
 unsigned int appUserData_getWeekInPlan(void);
 unsigned char appUserData_hasWorkoutPlan(void);
 void appUserData_updateWeightMaxes(unsigned short *weights);
-
-
-
 
 #endif /* AppUserData_h */

@@ -15,6 +15,7 @@ typedef struct SettingsViewModel SettingsViewModel;
 @interface SettingsViewController: UIViewController<UITextFieldDelegate>
 
 - (id) initWithViewModel: (SettingsViewModel *)model;
+- (void) updateWeightFields;
 
 @end
 

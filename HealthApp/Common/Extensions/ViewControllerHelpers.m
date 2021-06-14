@@ -6,8 +6,19 @@
 //
 
 #import "ViewControllerHelpers.h"
+#include "unordered_set.h"
 
-void alertDetails_free(AlertDetails *details);
+gen_uset(char, unsigned short, ds_cmp_num_eq, DSDefault_addrOfVal, DSDefault_sizeOfVal, DSDefault_shallowCopy, DSDefault_shallowDelete)
+
+static USet_char *validChars;
+
+void viewControllerHelper_setupValidNumericChars(void) {
+    validChars = uset_new_fromArray(char, ((unsigned short[]){'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'}), 10);
+}
+
+void viewControllerHelper_cleanupValidNumericChars(void) {
+    uset_free(char, validChars);
+}
 
 void createToolbar(id target, SEL doneSelector, UITextField **fields) {
     UIToolbar *toolbar = [[UIToolbar alloc] initWithFrame:CGRectZero];
@@ -28,32 +39,38 @@ void createToolbar(id target, SEL doneSelector, UITextField **fields) {
     [doneButton release];
 }
 
-AlertDetails *alertDetails_init(NSString *title, NSString *message) {
+AlertDetails *alertDetails_init(CFStringRef title, CFStringRef message) {
     AlertDetails *details = calloc(1, sizeof(AlertDetails));
     if (!details) return NULL;
 
     details->style = UIAlertControllerStyleAlert;
-    if (title) details->title = [[NSString alloc] initWithString:title];
-    if (message) details->message = [[NSString alloc] initWithString:message];
+    if (title) details->title = CFStringCreateCopy(NULL, title);
+    if (message) details->message = CFStringCreateCopy(NULL, message);
     return details;
-}
-
-void alertDetails_free(AlertDetails *details) {
-    if (!details) return;
-    if (details->title)  [details->title release];
-    if (details->message) [details->message release];
-    free(details);
 }
 
 void viewController_showAlert(UIViewController *presenter, AlertDetails *details,
                               UIAlertAction *defaultAction, UIAlertAction *secondaryAction) {
-    UIAlertController *ctrl = [UIAlertController alertControllerWithTitle:details->title
-                                                                  message:details->message
+    UIAlertController *ctrl = [UIAlertController alertControllerWithTitle:(__bridge NSString*)details->title
+                                                                  message:(__bridge NSString*)details->message
                                                            preferredStyle:details->style];
 
     [ctrl addAction:defaultAction];
     if (secondaryAction) [ctrl addAction:secondaryAction];
-    alertDetails_free(details);
-
+    if (details->title) CFRelease(details->title);
+    if (details->message) CFRelease(details->message);
+    free(details);
     [presenter presentViewController:ctrl animated:true completion:nil];
+}
+
+unsigned char viewController_validateNumericInput(CFStringRef str) {
+    long len = CFStringGetLength(str);
+    if (!len) return 1;
+
+    CFStringInlineBuffer buf;
+    CFStringInitInlineBuffer(str, &buf, CFRangeMake(0, len));
+    for (long i = 0; i < len; ++i) {
+        if (!uset_contains(char, validChars, CFStringGetCharacterFromInlineBuffer(&buf, i))) return 0;
+    }
+    return 1;
 }

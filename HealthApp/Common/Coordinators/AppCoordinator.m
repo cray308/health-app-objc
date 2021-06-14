@@ -13,10 +13,8 @@
 #import "HistoryViewController.h"
 #import "SettingsTabCoordinator.h"
 #import "SettingsViewController.h"
-#import "CalendarDateHelpers.h"
+#include "CalendarDateHelpers.h"
 #import "PersistenceService.h"
-
-#import "WorkoutFinder.h" // remove
 
 typedef enum {
     TabHome, TabHistory, TabSettings
@@ -64,11 +62,6 @@ void appCoordinator_start(AppCoordinator *coordinator) {
         appUserData_handleNewWeek(weekStart);
     }
     CFRelease(calendar);
-
-    NSLog(@"Remove this line in appCoordinator_start\n\n");
-    //appUserData_setWorkoutPlan(0); //this line
-
-    NSLog(@"Maxes: \n bench: %u \n deadlift: %u \n squat: %u \n pullup: %u \n", appUserDataShared->benchMax, appUserDataShared->deadliftMax, appUserDataShared->squatMax, appUserDataShared->pullUpMax);
 
     persistenceService_performForegroundUpdate();
     coordinator->controllers[0] = [[UINavigationController alloc] initWithNibName:nil bundle:nil];
@@ -131,6 +124,12 @@ void appCoordinator_deletedAppData(AppCoordinator *coordinator) {
     }
 }
 
+void appCoordinator_updateMaxWeights(AppCoordinator *coordinator) {
+    if (coordinator->loadedViewControllers & LoadedViewController_Settings) {
+        settingsCoordinator_updateWeightText(coordinator->settingsCoordinator);
+    }
+}
+
 #pragma mark - Helpers
 
 HomeTabCoordinator *startHome(AppCoordinator *coordinator, UINavigationController *navVC) {
@@ -168,4 +167,3 @@ SettingsTabCoordinator *startSettings(AppCoordinator *coordinator, UINavigationC
     settingsCoordinator_start(child);
     return child;
 }
-

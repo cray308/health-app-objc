@@ -8,7 +8,7 @@
 #import "HistoryViewModel.h"
 #import "PersistenceService.h"
 #import "AppUserData.h"
-#import "CalendarDateHelpers.h"
+#include "CalendarDateHelpers.h"
 #import "ChartHelpers.h"
 #import "WeeklyData+CoreDataClass.h"
 #include "array.h"

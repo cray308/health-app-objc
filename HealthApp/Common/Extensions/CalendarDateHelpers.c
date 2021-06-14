@@ -1,13 +1,11 @@
 //
-//  CalendarDateHelpers.m
+//  CalendarDateHelpers.c
 //  HealthApp
 //
 //  Created by Christopher Ray on 3/27/21.
 //
 
-#import "CalendarDateHelpers.h"
-#import "AppUserData.h"
-#import "CustomOperators.h"
+#include "CalendarDateHelpers.h"
 
 static inline double getStartOfDay(CFCalendarRef calendar, double date) {
     double result = 0;
@@ -17,18 +15,6 @@ static inline double getStartOfDay(CFCalendarRef calendar, double date) {
 
 static inline double date_calcEndOfWeek(double startOfWeek) {
     return startOfWeek + (double) (WeekSeconds - 1);
-}
-
-NSString **calendar_getWeekDaySymbols(bool shortSymbols) {
-    NSString **days = malloc(7 * sizeof(NSString*));
-    NSCalendar *calendar = [NSCalendar currentCalendar];
-    NSArray<NSString*> *daySymbols = shortSymbols ? [calendar shortWeekdaySymbols] : [calendar weekdaySymbols];
-
-    int dayIdx = 0;
-    for (int i = 1; i < 8; ++i) {
-        days[dayIdx++] = [[NSString alloc] initWithString:daySymbols[mod(i, 7)]];
-    }
-    return days;
 }
 
 void date_calcWeekEndpoints(double date, CFCalendarRef calendar, DateSearchDirection direction, bool considerToday, double *start, double *end) {
@@ -61,12 +47,4 @@ double date_calcStartOfWeek(double date, CFCalendarRef calendar, DateSearchDirec
             break;
     }
     return getStartOfDay(calendar, result);
-}
-
-int date_indexForDate(double date, CFCalendarRef calendar) {
-    return date_indexForWeekday(date_getDayOfWeek(date, calendar));
-}
-
-int date_indexForWeekday(int dayIndex) {
-    return mod(dayIndex - 2, 7);
 }

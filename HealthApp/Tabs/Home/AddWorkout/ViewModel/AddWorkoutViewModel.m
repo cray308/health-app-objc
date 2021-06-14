@@ -11,7 +11,8 @@
 #import "PersistenceService.h"
 #import "AddWorkoutCoordinator.h"
 
-void updateStoredData(unsigned int duration, unsigned char type) {
+void updateStoredData(AddWorkoutViewModel *model, unsigned char type) {
+    unsigned int duration = (unsigned int) ((model->stopTime - model->startTime) / 60.0);
     WeeklyData *data = persistenceService_getWeeklyDataForThisWeek();
     if (!(duration && data)) return;
 
@@ -33,20 +34,32 @@ void updateStoredData(unsigned int duration, unsigned char type) {
     persistenceService_saveContext();
 }
 
-void addWorkoutViewModel_stoppedWorkout(AddWorkoutViewModel *model, unsigned int duration) {
-    updateStoredData(duration, model->workout->type);
-    addWorkoutCoordinator_didFinishAddingWorkout(model->delegate, 0);
+AddWorkoutViewModel *addWorkoutViewModel_init(Workout *w) {
+    AddWorkoutViewModel *model = calloc(1, sizeof(AddWorkoutViewModel));
+    if (!model) return NULL;
+    model->workout = w;
+    return model;
 }
 
-void addWorkoutViewModel_completedWorkout(AddWorkoutViewModel *model, unsigned int duration) {
-    updateStoredData(duration, model->workout->type);
+void addWorkoutViewModel_free(AddWorkoutViewModel *model) {
+    workout_free(model->workout);
+    free(model);
+}
+
+void addWorkoutViewModel_stoppedWorkout(AddWorkoutViewModel *model) {
+    updateStoredData(model, model->workout->type);
+    addWorkoutCoordinator_didFinishAddingWorkout(model->delegate, nil, 0);
+}
+
+void addWorkoutViewModel_completedWorkout(AddWorkoutViewModel *model, UIViewController *presenter) {
+    updateStoredData(model, model->workout->type);
     const signed char day = model->workout->day;
     if (day >= 0) {
         unsigned char totalCompleted = appUserData_addCompletedWorkout((unsigned char) day);
-        addWorkoutCoordinator_didFinishAddingWorkout(model->delegate, totalCompleted);
+        addWorkoutCoordinator_didFinishAddingWorkout(model->delegate, presenter, totalCompleted);
         return;
     }
-    addWorkoutCoordinator_didFinishAddingWorkout(model->delegate, 0);
+    addWorkoutCoordinator_didFinishAddingWorkout(model->delegate, presenter, 0);
 }
 
 void addWorkoutViewModel_finishedAddingNewWeights(AddWorkoutViewModel *model, UIViewController *presenter, unsigned short *weights) {
@@ -60,5 +73,5 @@ void addWorkoutViewModel_finishedAddingNewWeights(AddWorkoutViewModel *model, UI
     }
 
     appUserData_updateWeightMaxes(weights);
-    addWorkoutCoordinator_finishedUpdatingWeights(model->delegate, presenter);
+    addWorkoutViewModel_completedWorkout(model, presenter);
 }

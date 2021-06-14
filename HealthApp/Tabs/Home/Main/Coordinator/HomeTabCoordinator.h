@@ -15,6 +15,7 @@ typedef struct AppCoordinator AppCoordinator;
 typedef struct HomeTabCoordinator HomeTabCoordinator;
 typedef struct HomeViewModel HomeViewModel;
 typedef struct AddWorkoutCoordinator AddWorkoutCoordinator;
+typedef struct Workout Workout;
 
 struct HomeTabCoordinator {
     UINavigationController *navigationController;
@@ -34,7 +35,8 @@ void homeCoordinator_updateForNewDay(HomeTabCoordinator *coordinator);
 void homeCoordinator_handleUserInfoChange(HomeTabCoordinator *coordinator);
 void homeCoordinator_handleDataDeletion(HomeTabCoordinator *coordinator);
 
-void homeCoordinator_navigateToAddWorkout(HomeTabCoordinator *coordinator, int index);
+void homeCoordinator_showWorkoutPickerVC(HomeTabCoordinator *coordinator, unsigned char type, CFStringRef *names, unsigned int count);
+void homeCoordinator_navigateToAddWorkout(HomeTabCoordinator *coordinator, UIViewController *presenter, Workout *workout);
 void homeCoordinator_didFinishAddingWorkout(HomeTabCoordinator *coordinator, int totalCompletedWorkouts);
 
 #endif /* HomeTabCoordinator_h */

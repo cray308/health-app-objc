@@ -9,12 +9,12 @@
 #import "AppCoordinator.h"
 #import "AppUserData.h"
 #import "PersistenceService.h"
-#import "CalendarDateHelpers.h"
+#import "ViewControllerHelpers.h"
+#include "CalendarDateHelpers.h"
 
-//#if DEBUG
-#import "Exercise.h"
+#if DEBUG
 #import "WeeklyData+CoreDataClass.h"
-//#endif
+#endif
 
 void setupData(void);
 
@@ -30,6 +30,7 @@ void setupData(void);
 -(void) dealloc {
     appUserData_free();
     persistenceService_free();
+    viewControllerHelper_cleanupValidNumericChars();
     appCoordinator_free(_coordinator);
     [window setRootViewController:nil];
     [window release];
@@ -43,6 +44,7 @@ void setupData(void);
     if (!_coordinator) return false;
 
     persistenceService_setup();
+    viewControllerHelper_setupValidNumericChars();
     if (![[NSUserDefaults standardUserDefaults] boolForKey:@"hasLaunched"]) {
         setupData();
     }
@@ -59,11 +61,15 @@ void setupData(void);
     appCoordinator_handleForegroundUpdate(_coordinator);
 }
 
+- (AppCoordinator *) getAppCoordinator {
+    return _coordinator;
+}
+
 @end
 
 void setupData(void) {
     CFCalendarRef calendar = CFCalendarCopyCurrent();
-    //#if DEBUG
+    #if DEBUG
     int bench = 185, pullup = 20, squat = 300, deadlift = 235, i = 0;
     unsigned char plan = 0;
     double start = date_calcStartOfWeek(CFAbsoluteTimeGetCurrent() - 126489600, calendar, DateSearchDirection_Previous, true);
@@ -123,15 +129,12 @@ void setupData(void) {
         }
         start += WeekSeconds;
     }
-    //#endif
+    #endif
 
     [NSUserDefaults.standardUserDefaults setBool:true forKey:@"hasLaunched"];
-    NSLog(@"app delegate: remove setting maxes here!!!");
-    //squatMax, pullUpMax, benchMax, deadliftMax;
     UserInfo info = {
         .currentPlan = -1,
         .weekStart = date_calcStartOfWeek(CFAbsoluteTimeGetCurrent(), calendar, DateSearchDirection_Previous, 1),
-        .squatMax = 300, .pullUpMax = 42, .benchMax = 185, .deadliftMax = 234
     };
     userInfo_saveData(&info);
     CFRelease(calendar);

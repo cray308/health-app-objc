@@ -41,3 +41,8 @@ SettingsViewModel *settingsViewModel_init(SettingsTabCoordinator *delegate) {
     model->delegate = delegate;
     return model;
 }
+
+void settingsCoordinator_updateWeightText(SettingsTabCoordinator *coordinator) {
+    SettingsViewController *vc = (SettingsViewController *) coordinator->navigationController.viewControllers[0];
+    if (vc) [vc updateWeightFields];
+}

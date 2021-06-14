@@ -16,7 +16,6 @@ typedef struct AddWorkoutViewModel AddWorkoutViewModel;
 
 - (id) initWithViewModel: (AddWorkoutViewModel *)model;
 - (void) finishedExerciseGroup;
-- (void) finishedAddingNewWeights;
 
 @end
 

@@ -10,7 +10,6 @@
 
 #import <UIKit/UIKit.h>
 
-typedef struct UserInfo UserInfo;
 typedef struct AppCoordinator AppCoordinator;
 typedef struct HomeTabCoordinator HomeTabCoordinator;
 typedef struct HistoryTabCoordinator HistoryTabCoordinator;
@@ -43,5 +42,6 @@ void appCoordinator_handleForegroundUpdate(AppCoordinator *coordinator);
 
 void appCoordinator_updatedUserInfo(AppCoordinator *coordinator);
 void appCoordinator_deletedAppData(AppCoordinator *coordinator);
+void appCoordinator_updateMaxWeights(AppCoordinator *coordinator);
 
 #endif /* AppCoordinator_h */

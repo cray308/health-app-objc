@@ -6,7 +6,7 @@
 //
 
 #import "ChartHelpers.h"
-#import "CalendarDateHelpers.h"
+#include "CalendarDateHelpers.h"
 
 DateXAxisFormatter *sharedHistoryXAxisFormatter = nil;
 

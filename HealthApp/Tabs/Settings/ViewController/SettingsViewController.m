@@ -12,16 +12,12 @@
 #import "AppCoordinator.h"
 #import "AppUserData.h"
 #import "PersistenceService.h"
-#include "unordered_set.h"
 
 #define _U_ __attribute__((__unused__))
-
-gen_uset(char, unsigned short, ds_cmp_num_eq, DSDefault_addrOfVal, DSDefault_sizeOfVal, DSDefault_shallowCopy, DSDefault_shallowDelete)
 
 @interface SettingsViewController() {
     SettingsViewModel *viewModel;
     UISegmentedControl *planPicker;
-    USet_char *durationChars;
     UITextField *textFields[4];
     unsigned char validInput[4];
     unsigned short results[4];
@@ -35,12 +31,10 @@ gen_uset(char, unsigned short, ds_cmp_num_eq, DSDefault_addrOfVal, DSDefault_siz
 - (id) initWithViewModel: (SettingsViewModel *)model {
     if (!(self = [super initWithNibName:nil bundle:nil])) return nil;
     viewModel = model;
-    durationChars = uset_new_fromArray(char, ((unsigned short[]){'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'}), 10);
     return self;
 }
 
 - (void) dealloc {
-    uset_free(char, durationChars);
     for (int i = 0; i < 4; ++i) { [textFields[i] release]; }
     [planPicker release];
     [super dealloc];
@@ -96,17 +90,7 @@ gen_uset(char, unsigned short, ds_cmp_num_eq, DSDefault_addrOfVal, DSDefault_siz
         stacks[i].layoutMargins = UIEdgeInsetsMake(4, 5, 4, 8);
 
         [label release];
-        validInput[i] = 1;
     }
-
-    textFields[0].text = [NSString stringWithFormat:@"%u", appUserDataShared->squatMax];
-    textFields[1].text = [NSString stringWithFormat:@"%u", appUserDataShared->pullUpMax];
-    textFields[2].text = [NSString stringWithFormat:@"%u", appUserDataShared->benchMax];
-    textFields[3].text = [NSString stringWithFormat:@"%u", appUserDataShared->deadliftMax];
-    results[0] = appUserDataShared->squatMax;
-    results[1] = appUserDataShared->pullUpMax;
-    results[2] = appUserDataShared->benchMax;
-    results[3] = appUserDataShared->deadliftMax;
 
     saveButton = [UIButton buttonWithType:UIButtonTypeSystem];
     saveButton.backgroundColor = UIColor.secondarySystemGroupedBackgroundColor;
@@ -116,6 +100,7 @@ gen_uset(char, unsigned short, ds_cmp_num_eq, DSDefault_addrOfVal, DSDefault_siz
     [saveButton setTitleColor:UIColor.systemBlueColor forState: UIControlStateNormal];
     [saveButton setTitleColor:UIColor.systemGrayColor forState: UIControlStateDisabled];
     [saveButton addTarget:self action:@selector(saveButtonPressed) forControlEvents:UIControlEventTouchUpInside];
+    [self updateWeightFields];
 
     UIButton *deleteDataButton = [UIButton buttonWithType:UIButtonTypeSystem];
     deleteDataButton.backgroundColor = UIColor.secondarySystemGroupedBackgroundColor;
@@ -182,6 +167,19 @@ gen_uset(char, unsigned short, ds_cmp_num_eq, DSDefault_addrOfVal, DSDefault_siz
     for (int i = 0; i < 4; ++i) { [stacks[i] release]; }
 }
 
+- (void) updateWeightFields {
+    textFields[0].text = [NSString stringWithFormat:@"%u", appUserDataShared->squatMax];
+    textFields[1].text = [NSString stringWithFormat:@"%u", appUserDataShared->pullUpMax];
+    textFields[2].text = [NSString stringWithFormat:@"%u", appUserDataShared->benchMax];
+    textFields[3].text = [NSString stringWithFormat:@"%u", appUserDataShared->deadliftMax];
+    results[0] = appUserDataShared->squatMax;
+    results[1] = appUserDataShared->pullUpMax;
+    results[2] = appUserDataShared->benchMax;
+    results[3] = appUserDataShared->deadliftMax;
+    memset(validInput, 1, 4 * sizeof(unsigned char));
+    [saveButton setEnabled:true];
+}
+
 #pragma mark - Selectors
 
 - (void) dismissKeyboard {
@@ -193,7 +191,7 @@ gen_uset(char, unsigned short, ds_cmp_num_eq, DSDefault_addrOfVal, DSDefault_siz
     signed char plan = segment == 0 ? -1 : segment - 1;
     AppCoordinator *delegate = viewModel->delegate->delegate;
 
-    AlertDetails *details = alertDetails_init(@"Are you sure?", @"This will save the currently entered data.");
+    AlertDetails *details = alertDetails_init(CFSTR("Are you sure?"), CFSTR("This will save the currently entered data."));
     UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"Save" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action _U_) {
         appUserData_updateWeightMaxes(results);
         appUserData_setWorkoutPlan(plan);
@@ -206,7 +204,7 @@ gen_uset(char, unsigned short, ds_cmp_num_eq, DSDefault_addrOfVal, DSDefault_siz
 - (void) deleteButtonPressed {
     AppCoordinator *delegate = viewModel->delegate->delegate;
 
-    AlertDetails *details = alertDetails_init(@"Are you sure?", @"This will delete all workout history. This action cannot be undone.");
+    AlertDetails *details = alertDetails_init(CFSTR("Are you sure?"), CFSTR("This will delete all workout history. This action cannot be undone."));
     UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"Delete" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action _U_) {
         persistenceService_deleteUserData();
         appUserData_deleteSavedData();
@@ -219,15 +217,7 @@ gen_uset(char, unsigned short, ds_cmp_num_eq, DSDefault_addrOfVal, DSDefault_siz
 #pragma mark - TextField Delegate
 
 - (BOOL) textField: (UITextField *)textField shouldChangeCharactersInRange: (NSRange)range replacementString: (NSString *)string {
-    size_t len = string.length;
-    if (len) {
-        unsigned short buf[len + 1];
-        [string getCharacters:buf range:NSMakeRange(0, len)];
-        buf[len] = 0;
-        for (unsigned short *ptr = buf; *ptr; ++ptr) {
-            if (!uset_contains(char, durationChars, *ptr)) return false;
-        }
-    }
+    if (!viewController_validateNumericInput((__bridge CFStringRef) string)) return false;
 
     int i = 0;
     for (; i < 4; ++i) {

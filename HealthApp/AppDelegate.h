@@ -6,7 +6,10 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "AppCoordinator.h"
 
 @interface AppDelegate: UIResponder <UIApplicationDelegate>
+
+- (AppCoordinator *) getAppCoordinator;
 
 @end

@@ -10,21 +10,41 @@
 #import "AppCoordinator.h"
 #import "AppUserData.h"
 #import "PersistenceService.h"
-#import "CalendarDateHelpers.h"
+#include "CalendarDateHelpers.h"
 #import "WorkoutFinder.h"
 
-void homeViewModel_clear(HomeViewModel *model) {
-    if (model->workouts) {
-        array_free(workout, model->workouts);
-        model->workouts = NULL;
+typedef enum {
+    CustomWorkoutIndexTestMax,
+    CustomWorkoutIndexEndurance,
+    CustomWorkoutIndexStrength,
+    CustomWorkoutIndexSE,
+    CustomWorkoutIndexHIC
+} CustomWorkoutIndex;
+
+void clearNames(CFStringRef *names) {
+    for (int i = 0; i < 7; ++i) {
+        if (names[i]) CFRelease(names[i]);
+        names[i] = NULL;
     }
 }
 
-void homeViewModel_fetchData(HomeViewModel *model) {
-    homeViewModel_clear(model);
+HomeViewModel *homeViewModel_init(void) {
+    HomeViewModel *model = calloc(1, sizeof(HomeViewModel));
+    if (!model) return NULL;
+    homeViewModel_updateTimeOfDay(model);
+    return model;
+}
 
+void homeViewModel_free(HomeViewModel *model) {
+    clearNames(model->workoutNames);
+    free(model);
+}
+
+void homeViewModel_fetchData(HomeViewModel *model) {
+    clearNames(model->workoutNames);
     if (!appUserData_hasWorkoutPlan()) return;
-    model->workouts = workoutFinder_get_weekly_workouts(appUserDataShared->currentPlan, appUserData_getWeekInPlan());
+    unsigned char plan = (unsigned char) appUserDataShared->currentPlan;
+    workoutFinder_setWeeklyWorkoutNames(plan, appUserData_getWeekInPlan(), model->workoutNames);
 }
 
 bool homeViewModel_updateTimeOfDay(HomeViewModel *model) {
@@ -59,4 +79,69 @@ NSString *homeViewModel_getGreeting(HomeViewModel *model) {
             break;
     }
     return [[NSString alloc] initWithFormat:@"Good %@!", greet];
+}
+
+void homeViewModel_handleDayWorkoutButtonTap(HomeViewModel *model, int index) {
+    unsigned char plan = (unsigned char) appUserDataShared->currentPlan;
+    Workout *w = workoutFinder_getWeeklyWorkoutAtIndex(plan, appUserData_getWeekInPlan(), index);
+    if (w) homeCoordinator_navigateToAddWorkout(model->delegate, nil, w);
+}
+
+unsigned char homeViewModel_hasWorkoutsForThisWeek(HomeViewModel *model) {
+    CFStringRef *names = model->workoutNames;
+    for (int i = 0; i < 7; ++i) {
+        if (names[i]) return 1;
+    }
+    return 0;
+}
+
+unsigned char homeViewModel_shouldShowConfetti(HomeViewModel *model, int totalCompletedWorkouts) {
+    if (!totalCompletedWorkouts) return 0;
+
+    int nWorkouts = 0;
+    CFStringRef *names = model->workoutNames;
+    for (int i = 0; i < 7; ++i) {
+        if (names[i]) ++nWorkouts;
+    }
+    return nWorkouts == totalCompletedWorkouts;
+}
+
+void homeViewModel_handleCustomWorkoutButtonTap(HomeViewModel *model, int index) {
+    unsigned char type = WorkoutTypeStrength;
+    switch (index) {
+        case CustomWorkoutIndexSE:
+            type = WorkoutTypeSE;
+            break;
+        case CustomWorkoutIndexHIC:
+            type = WorkoutTypeHIC;
+            break;
+        case CustomWorkoutIndexTestMax: ;
+            Workout *w = workoutFinder_get_workout_from_library(WorkoutTypeStrength, 2, 1, 1, 100);
+            if (w) homeCoordinator_navigateToAddWorkout(model->delegate, nil, w);
+            //homeCoordinator_navigateToAddWorkoutWithCustom(model->delegate, nil, w);
+            return;
+        case CustomWorkoutIndexEndurance:
+            type = WorkoutTypeEndurance;
+            break;
+        default:
+            break;
+    }
+
+    unsigned int count = 0;
+    CFStringRef *names = workoutFinder_get_workout_names(type, &count);
+    if (!names) return;
+    else if (!count) {
+        free(names);
+        return;
+    }
+    homeCoordinator_showWorkoutPickerVC(model->delegate, type, names, count);
+}
+
+void homeViewModel_finishedSettingUpCustomWorkout(HomeViewModel *model, UIViewController *presenter, unsigned char type, unsigned int index, unsigned int sets, unsigned int reps, unsigned int weight) {
+    Workout *w = workoutFinder_get_workout_from_library(type, index, reps, sets, weight);
+    if (w) homeCoordinator_navigateToAddWorkout(model->delegate, presenter, w);
+}
+
+void homeViewModel_cancelCustomWorkout(UIViewController *presenter) {
+    [presenter dismissViewControllerAnimated:true completion:nil];
 }

@@ -9,9 +9,8 @@
 #import "AddWorkoutViewModel.h"
 #import "Divider.h"
 #import "ViewControllerHelpers.h"
-#include "unordered_set.h"
 
-gen_uset(char, unsigned short, ds_cmp_num_eq, DSDefault_addrOfVal, DSDefault_sizeOfVal, DSDefault_shallowCopy, DSDefault_shallowDelete)
+static CFStringRef testDayStr = CFSTR("test day");
 
 @interface UpdateMaxesViewController: UIViewController<UITextFieldDelegate>
 
@@ -42,8 +41,7 @@ NSString *exercise_getTitleString(ExerciseEntry *e) {
 
 @interface ExerciseView: UIView
 
-- (id) initWithExercise: (ExerciseEntry *)exercise;
-- (UIButton *) getButton;
+- (id) initWithExercise: (ExerciseEntry *)exercise tag: (int)tag target: (id)target action: (SEL)action;
 - (bool) handleTap;
 - (void) reset;
 
@@ -63,32 +61,24 @@ NSString *exercise_getTitleString(ExerciseEntry *e) {
 
 @implementation ExerciseView
 
-- (id) initWithExercise: (ExerciseEntry *)exerciseEntry {
+- (id) initWithExercise: (ExerciseEntry *)exerciseEntry tag: (int)tag target: (id)target action: (SEL)action {
     if (!(self = [super initWithFrame:CGRectZero])) return nil;
     exercise = exerciseEntry;
     if (exerciseEntry->rest) {
         restStr = [[NSString alloc] initWithFormat:@"Rest: %u s", exerciseEntry->rest];
     }
-    [self setupSubviews];
-    return self;
-}
 
-- (void) dealloc {
-    [setsLabel release];
-    [checkbox release];
-    if (restStr) [restStr release];
-    [super dealloc];
-}
-
-- (void) setupSubviews {
     button = [UIButton buttonWithType:UIButtonTypeSystem];
     button.translatesAutoresizingMaskIntoConstraints = false;
     [button setTitle:@"" forState:UIControlStateNormal];
     [button setTitleColor:UIColor.labelColor forState: UIControlStateNormal];
     [button setTitleColor:UIColor.secondaryLabelColor forState:UIControlStateDisabled];
     button.titleLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleHeadline];
+    button.titleLabel.adjustsFontSizeToFitWidth = true;
     button.backgroundColor = UIColor.secondarySystemGroupedBackgroundColor;
     button.layer.cornerRadius = 5;
+    button.tag = tag;
+    [button addTarget:target action:action forControlEvents:UIControlEventTouchUpInside];
 
     setsLabel = [[UILabel alloc] initWithFrame:CGRectZero];
     setsLabel.translatesAutoresizingMaskIntoConstraints = false;
@@ -127,6 +117,14 @@ NSString *exercise_getTitleString(ExerciseEntry *e) {
         [checkbox.widthAnchor constraintEqualToConstant:20],
         [checkbox.heightAnchor constraintEqualToAnchor:checkbox.widthAnchor]
     ]];
+    return self;
+}
+
+- (void) dealloc {
+    [setsLabel release];
+    [checkbox release];
+    if (restStr) [restStr release];
+    [super dealloc];
 }
 
 - (bool) handleTap {
@@ -155,10 +153,6 @@ NSString *exercise_getTitleString(ExerciseEntry *e) {
     return false;
 }
 
-- (UIButton *) getButton {
-    return button;
-}
-
 - (void) reset {
     checkbox.backgroundColor = UIColor.systemGrayColor;
     [button setEnabled:false];
@@ -185,6 +179,7 @@ NSString *exercise_getTitleString(ExerciseEntry *e) {
     ExerciseView **viewsArr;
     UIButton *amrapBtn;
     int currentIndex;
+    int size;
 }
 
 @end
@@ -196,16 +191,17 @@ NSString *exercise_getTitleString(ExerciseEntry *e) {
     group = exerciseGroup;
     parent = parentVC;
     if (exerciseGroup->type == ExerciseContainerTypeDecrement) {
-        ExerciseEntry *e = array_at(exEntry, group->exercises, 0);
+        ExerciseEntry *e = exerciseGroup_getExercise(group, 0); // array_at(exEntry, group->exercises, 0);
         group->completedReps = e ? e->reps : 10;
     }
-    viewsArr = calloc(group->exercises->size, sizeof(ExerciseView *));
+    size = exerciseGroup_getNumberOfExercises(group); // group->exercises->size;
+    viewsArr = calloc(size, sizeof(ExerciseView *));
     [self setupSubviews];
     return self;
 }
 
 - (void) dealloc {
-    for (size_t i = 0; i < group->exercises->size; ++i) { [viewsArr[i] release]; }
+    for (int i = 0; i < size; ++i) { [viewsArr[i] release]; }
     free(viewsArr);
     [headerLabel release];
     [super dealloc];
@@ -268,17 +264,11 @@ NSString *exercise_getTitleString(ExerciseEntry *e) {
         [amrapBtn setEnabled:false];
     }
 
-    ExerciseEntry *e;
-    Array_exEntry *exercises = group->exercises;
-    int i = 0;
-    array_iter(exercises, e) {
-        ExerciseView *v = [[ExerciseView alloc] initWithExercise:e];
-        UIButton *btn = [v getButton];
-        btn.tag = i;
-        [btn addTarget:self action:@selector(handleTap:) forControlEvents:UIControlEventTouchUpInside];
+    for (int i = 0; i < size; ++i) {
+        ExerciseView *v = [[ExerciseView alloc] initWithExercise:exerciseGroup_getExercise(group, i) tag:i target:self action:@selector(handleTap:)];
         [v reset];
         [exerciseStack addArrangedSubview:v];
-        viewsArr[i++] = v;
+        viewsArr[i] = v;
     }
     [exerciseStack release];
 }
@@ -286,7 +276,7 @@ NSString *exercise_getTitleString(ExerciseEntry *e) {
 - (void) startCircuit {
     currentIndex = 0;
     if (amrapBtn) [amrapBtn setEnabled:true];
-    for (int i = 0; i < array_size(group->exercises); ++i) {
+    for (int i = 0; i < size; ++i) {
         [viewsArr[i] reset];
     }
     [viewsArr[0] handleTap];
@@ -299,7 +289,7 @@ NSString *exercise_getTitleString(ExerciseEntry *e) {
 - (void) handleTap: (UIButton *)btn {
     ExerciseView *v = viewsArr[btn.tag];
     if ([v handleTap]) {
-        if (++currentIndex == array_size(group->exercises)) {
+        if (++currentIndex == size) {
             switch (group->type) {
                 case ExerciseContainerTypeRounds:
                     if (++group->completedReps == group->reps) {
@@ -317,12 +307,9 @@ NSString *exercise_getTitleString(ExerciseEntry *e) {
                         [self finishGroup];
                         return;
                     }
-                    ExerciseEntry *e;
-                    Array_exEntry *exercises = group->exercises;
-                    array_iter(exercises, e) {
-                        if (e->type == ExerciseTypeReps) {
-                            e->reps -= 1;
-                        }
+                    for (int i = 0; i < size; ++i) {
+                        ExerciseEntry *e = exerciseGroup_getExercise(group, i);
+                        if (e->type == ExerciseTypeReps) e->reps -= 1;
                     }
                     break;
 
@@ -341,9 +328,6 @@ NSString *exercise_getTitleString(ExerciseEntry *e) {
 @interface WorkoutViewController() {
     AddWorkoutViewModel *viewModel;
     UIStackView *groupsStack;
-    int currentIndex;
-    double startTime;
-    double stopTime;
 }
 
 @end
@@ -364,7 +348,7 @@ NSString *exercise_getTitleString(ExerciseEntry *e) {
 - (void) viewDidLoad {
     [super viewDidLoad];
     self.view.backgroundColor = UIColor.systemGroupedBackgroundColor;
-    self.navigationItem.title = viewModel->workout->title;
+    self.navigationItem.title = (__bridge NSString*) viewModel->workout->title;
     [self setupSubviews];
 }
 
@@ -387,15 +371,14 @@ NSString *exercise_getTitleString(ExerciseEntry *e) {
     [groupsStack setLayoutMarginsRelativeArrangement:true];
     groupsStack.layoutMargins = UIEdgeInsetsMake(0, 4, 4, 0);
 
-    Array_exGroup *groups = viewModel->workout->activities;
-    ExerciseGroup *g;
-    int i = 0;
-    array_iter(groups, g) {
-        if (i++ > 0) {
+    Workout *w = viewModel->workout;
+    for (int i = 0; i < workout_getNumberOfActivities(viewModel->workout); ++i) {
+        if (i > 0) {
             Divider *d = [[Divider alloc] init];
             [groupsStack addArrangedSubview:d];
             [d release];
         }
+        ExerciseGroup *g = workout_getExerciseGroup(w, i);
         ExerciseContainer *v = [[ExerciseContainer alloc] initWithGroup:g parent:self];
         [groupsStack addArrangedSubview:v];
         [v release];
@@ -445,12 +428,11 @@ NSString *exercise_getTitleString(ExerciseEntry *e) {
         [btn setTitle:@"End" forState:UIControlStateNormal];
         [btn setTitleColor:UIColor.systemRedColor forState:UIControlStateNormal];
         ExerciseContainer *v =  (ExerciseContainer *) groupsStack.arrangedSubviews[0];
-        startTime = CFAbsoluteTimeGetCurrent();
+        viewModel->startTime = CFAbsoluteTimeGetCurrent();
         [v startCircuit];
     } else {
-        NSLog(@"early exit");
-        unsigned int minutes = (unsigned int) ((CFAbsoluteTimeGetCurrent() - startTime) / 60.0);
-        addWorkoutViewModel_stoppedWorkout(viewModel, minutes);
+        viewModel->stopTime = CFAbsoluteTimeGetCurrent();
+        addWorkoutViewModel_stoppedWorkout(viewModel);
     }
 }
 
@@ -463,9 +445,9 @@ NSString *exercise_getTitleString(ExerciseEntry *e) {
         [views[1] removeFromSuperview];
         [next startCircuit];
     } else {
-        stopTime = CFAbsoluteTimeGetCurrent();
+        viewModel->stopTime = CFAbsoluteTimeGetCurrent();
 
-        if ([viewModel->workout->title caseInsensitiveCompare:@"test day"] == NSOrderedSame) {
+        if (CFStringCompareWithOptions(viewModel->workout->title, testDayStr, CFRangeMake(0, CFStringGetLength(viewModel->workout->title)), kCFCompareCaseInsensitive) == kCFCompareEqualTo) {
             UpdateMaxesViewController *modal = [[UpdateMaxesViewController alloc] initWithViewModel:viewModel];
             UINavigationController *container = [[UINavigationController alloc] initWithRootViewController:modal];
             [self.navigationController presentViewController:container animated:true completion:nil];
@@ -473,20 +455,14 @@ NSString *exercise_getTitleString(ExerciseEntry *e) {
             [modal release];
             return;
         }
-        [self finishedAddingNewWeights];
+        addWorkoutViewModel_completedWorkout(viewModel, nil);
     }
-}
-
-- (void) finishedAddingNewWeights {
-    unsigned int minutes = (unsigned int) ((stopTime - startTime) / 60.0);
-    addWorkoutViewModel_completedWorkout(viewModel, minutes);
 }
 
 @end
 
 @interface UpdateMaxesViewController() {
     AddWorkoutViewModel *viewModel;
-    USet_char *durationChars;
     UITextField *textFields[4];
     unsigned char validInput[4];
     unsigned short results[4];
@@ -500,12 +476,10 @@ NSString *exercise_getTitleString(ExerciseEntry *e) {
 - (id) initWithViewModel: (AddWorkoutViewModel *)model {
     if (!(self = [super initWithNibName:nil bundle:nil])) return nil;
     viewModel = model;
-    durationChars = uset_new_fromArray(char, ((unsigned short[]){'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'}), 10);
     return self;
 }
 
 - (void) dealloc {
-    uset_free(char, durationChars);
     for (int i = 0; i < 4; ++i) { [textFields[i] release]; }
     [super dealloc];
 }
@@ -587,15 +561,7 @@ NSString *exercise_getTitleString(ExerciseEntry *e) {
 }
 
 - (BOOL) textField: (UITextField *)textField shouldChangeCharactersInRange: (NSRange)range replacementString: (NSString *)string {
-    size_t len = string.length;
-    if (len) {
-        unsigned short buf[len + 1];
-        [string getCharacters:buf range:NSMakeRange(0, len)];
-        buf[len] = 0;
-        for (unsigned short *ptr = buf; *ptr; ++ptr) {
-            if (!uset_contains(char, durationChars, *ptr)) return false;
-        }
-    }
+    if (!viewController_validateNumericInput((__bridge CFStringRef) string)) return false;
 
     int i = 0;
     for (; i < 4; ++i) {

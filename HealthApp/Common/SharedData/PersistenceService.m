@@ -6,17 +6,13 @@
 //
 
 #import "PersistenceService.h"
-#import "CalendarDateHelpers.h"
+#include "CalendarDateHelpers.h"
 #import "WeeklyData+CoreDataClass.h"
 
 #define _U_ __attribute__((__unused__))
 
 NSPersistentContainer *persistenceService_sharedContainer = nil;
 
-void removeOldData(NSFetchRequest *fetchRequest);
-void downsample(CFCalendarRef calendar, NSFetchRequest *fetchRequest);
-void deleteAllActivityEntries(NSFetchRequest *fetchRequest);
-void deleteAllWeekStats(NSFetchRequest *fetchRequest);
 WeeklyData *getCurrentWeeklyData(double weekStart);
 
 void persistenceService_setup(void) {
