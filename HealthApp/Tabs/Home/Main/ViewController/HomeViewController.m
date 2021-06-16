@@ -16,6 +16,7 @@
 #import "AppUserData.h"
 
 static NSString *weekDays[] = {@"Monday", @"Tuesday", @"Wednesday", @"Thursday", @"Friday", @"Saturday", @"Sunday"};
+static NSString *greetings[] = {@"Good morning!", @"Good afternoon!", @"Good evening!"};
 
 @interface DayWorkoutButton: UIView
 
@@ -230,9 +231,7 @@ static NSString *weekDays[] = {@"Monday", @"Tuesday", @"Wednesday", @"Thursday",
 }
 
 - (void) updateGreeting {
-    NSString *greeting = homeViewModel_getGreeting(viewModel);
-    greetingLabel.text = greeting;
-    [greeting release];
+    greetingLabel.text = greetings[viewModel->timeOfDay];
 }
 
 @end

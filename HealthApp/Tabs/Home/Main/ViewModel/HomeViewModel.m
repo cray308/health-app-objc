@@ -65,22 +65,6 @@ bool homeViewModel_updateTimeOfDay(HomeViewModel *model) {
     return false;
 }
 
-NSString *homeViewModel_getGreeting(HomeViewModel *model) {
-    NSString *greet;
-    switch (model->timeOfDay) {
-        case Morning:
-            greet = @"morning";
-            break;
-        case Afternoon:
-            greet = @"afternoon";
-            break;
-        default:
-            greet = @"evening";
-            break;
-    }
-    return [[NSString alloc] initWithFormat:@"Good %@!", greet];
-}
-
 void homeViewModel_handleDayWorkoutButtonTap(HomeViewModel *model, int index) {
     unsigned char plan = (unsigned char) appUserDataShared->currentPlan;
     Workout *w = workoutFinder_getWeeklyWorkoutAtIndex(plan, appUserData_getWeekInPlan(), index);
@@ -118,7 +102,6 @@ void homeViewModel_handleCustomWorkoutButtonTap(HomeViewModel *model, int index)
         case CustomWorkoutIndexTestMax: ;
             Workout *w = workoutFinder_get_workout_from_library(WorkoutTypeStrength, 2, 1, 1, 100);
             if (w) homeCoordinator_navigateToAddWorkout(model->delegate, nil, w);
-            //homeCoordinator_navigateToAddWorkoutWithCustom(model->delegate, nil, w);
             return;
         case CustomWorkoutIndexEndurance:
             type = WorkoutTypeEndurance;

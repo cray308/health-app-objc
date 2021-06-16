@@ -8,36 +8,7 @@
 #import "WorkoutViewController.h"
 #import "AddWorkoutViewModel.h"
 #import "Divider.h"
-#import "ViewControllerHelpers.h"
-
-static CFStringRef testDayStr = CFSTR("test day");
-
-@interface UpdateMaxesViewController: UIViewController<UITextFieldDelegate>
-
-- (id) initWithViewModel: (AddWorkoutViewModel *)model;
-
-@end
-
-NSString *exercise_getTitleString(ExerciseEntry *e) {
-    switch (e->type) {
-        case ExerciseTypeReps:
-            if (e->weight > 1) {
-                return [[NSString alloc] initWithFormat:@"%@ x %u @ %u lbs", e->name, e->reps, e->weight];
-            }
-            return [[NSString alloc] initWithFormat:@"%@ x %u", e->name, e->reps];
-
-        case ExerciseTypeDuration:
-            if (e->reps > 120) {
-                double minutes = (double) e->reps / 60.0;
-                return [[NSString alloc] initWithFormat:@"%@ for %.1f mins", e->name, minutes];
-            }
-            return [[NSString alloc] initWithFormat:@"%@ for %u sec", e->name, e->reps];
-
-        default: ;
-            unsigned int rowingDist = (5 * e->reps) / 4;
-            return [[NSString alloc] initWithFormat:@"%@ %u/%u meters", e->name, e->reps, rowingDist];
-    }
-}
+#include <pthread.h>
 
 @interface ExerciseView: UIView
 
@@ -47,17 +18,106 @@ NSString *exercise_getTitleString(ExerciseEntry *e) {
 
 @end
 
+@interface ExerciseContainer: UIView
+
+- (id) initWithGroup: (ExerciseGroup *)exerciseGroup parent: (WorkoutViewController *)parentVC;
+- (void) startCircuit;
+- (void) handleTap: (UIButton *)btn;
+- (void) stopExercise;
+- (void) finishGroup;
+
+@end
+
 @interface ExerciseView() {
-    ExerciseEntry *exercise;
+    @public ExerciseEntry *exercise;
     int completedSets;
     bool resting;
     NSString *restStr;
     UILabel *setsLabel;
     UIView *checkbox;
-    UIButton *button;
+    @public UIButton *button;
 }
 
 @end
+
+@interface ExerciseContainer() {
+    WorkoutViewController *parent;
+    @public ExerciseGroup *group;
+    UILabel *headerLabel;
+    @public ExerciseView **viewsArr;
+    @public int currentIndex;
+    @public int size;
+}
+
+@end
+
+typedef enum {
+    TimerTypeGroup,
+    TimerTypeExercise
+} TimerType;
+
+typedef struct {
+    WorkoutViewController *parent;
+    const unsigned char type;
+    unsigned char active;
+    unsigned char stop;
+    unsigned int duration;
+    pthread_mutex_t lock;
+    pthread_cond_t cond;
+} WorkoutTimer;
+
+static pthread_t exerciseTimerThread;
+static pthread_t groupTimerThread;
+
+static WorkoutTimer groupTimer = { .type = TimerTypeGroup };
+static WorkoutTimer exerciseTimer = { .type = TimerTypeExercise };
+
+static WorkoutTimer *gPtr = &groupTimer;
+static WorkoutTimer *ePtr = &exerciseTimer;
+
+static pthread_mutex_t sharedLock;
+
+void handle_exercise_timer_interrupt(int n __attribute__((__unused__))) {
+    ePtr->active = 0;
+}
+
+void handle_group_timer_interrupt(int n __attribute__((__unused__))) {
+    gPtr->active = 0;
+}
+
+void timer_start(WorkoutTimer *t, unsigned int duration) {
+    pthread_mutex_lock(&t->lock);
+    t->duration = duration;
+    t->stop = !duration;
+    t->active = 1;
+    pthread_cond_signal(&t->cond);
+    pthread_mutex_unlock(&t->lock);
+}
+
+void *timer_loop(void *arg) {
+    WorkoutTimer *t = (WorkoutTimer *) arg;
+    unsigned int res = 0;
+    while (!t->stop) {
+        pthread_mutex_lock(&t->lock);
+        while (!t->active) pthread_cond_wait(&t->cond, &t->lock);
+        unsigned int duration = t->duration;
+        pthread_mutex_unlock(&t->lock);
+
+        if (!duration) continue;
+
+        res = sleep(duration);
+        t->active = 0;
+        if (!res) {
+            if (t->type == TimerTypeGroup && exerciseTimer.active) {
+                pthread_kill(exerciseTimerThread, SIGUSR1);
+            }
+            dispatch_async(dispatch_get_main_queue(), ^ (void) {
+                [t->parent finishedWorkoutTimerForType:t->type];
+            });
+        }
+    }
+    return NULL;
+}
 
 @implementation ExerciseView
 
@@ -84,10 +144,10 @@ NSString *exercise_getTitleString(ExerciseEntry *e) {
     setsLabel.translatesAutoresizingMaskIntoConstraints = false;
     setsLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline];
     setsLabel.adjustsFontSizeToFitWidth = true;
-    if (exercise->sets > 1) {
-        NSString *s = [[NSString alloc] initWithFormat:@"Set 1 of %u", exercise->sets];
-        setsLabel.text = s;
-        [s release];
+    CFStringRef setsStr = exercise_createSetsString(exercise);
+    if (setsStr) {
+        setsLabel.text = (__bridge NSString*) setsStr;
+        CFRelease(setsStr);
     }
     setsLabel.textColor = UIColor.labelColor;
 
@@ -131,24 +191,32 @@ NSString *exercise_getTitleString(ExerciseEntry *e) {
     if (!button.enabled) {
         [button setEnabled:true];
         checkbox.backgroundColor = UIColor.systemOrangeColor;
-    } else if (restStr && !resting) {
-        resting = true;
-        [button setTitle:restStr forState:UIControlStateNormal];
-    } else {
-        resting = false;
-        if (++exercise->completedSets == exercise->sets) {
-            [button setEnabled:false];
-            checkbox.backgroundColor = UIColor.systemGreenColor;
-            return true;
+        if (exercise->type == ExerciseTypeDuration) { // start timer
+            button.userInteractionEnabled = false;
+            timer_start(ePtr, exercise->reps);
+
         }
+    } else {
+        button.userInteractionEnabled = true;
 
-        NSString *setsText = [[NSString alloc] initWithFormat:@"Set %u of %u", exercise->completedSets + 1, exercise->sets];
-        setsLabel.text = setsText;
-        [setsText release];
+        if (restStr && !resting) {
+            resting = true;
+            [button setTitle:restStr forState:UIControlStateNormal];
+        } else {
+            resting = false;
+            if (++exercise->completedSets == exercise->sets) {
+                [button setEnabled:false];
+                checkbox.backgroundColor = UIColor.systemGreenColor;
+                return true;
+            }
 
-        NSString *title = exercise_getTitleString(exercise);
-        [button setTitle:title forState:UIControlStateNormal];
-        [title release];
+            CFStringRef setsStr = exercise_createSetsString(exercise);
+            CFStringRef title = exercise_createTitleString(exercise);
+            setsLabel.text = (__bridge NSString*) setsStr;
+            [button setTitle:(__bridge NSString*)title forState:UIControlStateNormal];
+            CFRelease(setsStr);
+            CFRelease(title);
+        }
     }
     return false;
 }
@@ -158,28 +226,9 @@ NSString *exercise_getTitleString(ExerciseEntry *e) {
     [button setEnabled:false];
     resting = false;
     exercise->completedSets = 0;
-    NSString *title = exercise_getTitleString(exercise);
-    [button setTitle:title forState:UIControlStateNormal];
-    [title release];
-}
-
-@end
-
-@interface ExerciseContainer: UIView
-
-- (id) initWithGroup: (ExerciseGroup *)exerciseGroup parent: (WorkoutViewController *)parentVC;
-- (void) startCircuit;
-
-@end
-
-@interface ExerciseContainer() {
-    WorkoutViewController *parent;
-    ExerciseGroup *group;
-    UILabel *headerLabel;
-    ExerciseView **viewsArr;
-    UIButton *amrapBtn;
-    int currentIndex;
-    int size;
+    CFStringRef title = exercise_createTitleString(exercise);
+    [button setTitle:(__bridge NSString*)title forState:UIControlStateNormal];
+    CFRelease(title);
 }
 
 @end
@@ -190,11 +239,7 @@ NSString *exercise_getTitleString(ExerciseEntry *e) {
     if (!(self = [super initWithFrame:CGRectZero])) return nil;
     group = exerciseGroup;
     parent = parentVC;
-    if (exerciseGroup->type == ExerciseContainerTypeDecrement) {
-        ExerciseEntry *e = exerciseGroup_getExercise(group, 0); // array_at(exEntry, group->exercises, 0);
-        group->completedReps = e ? e->reps : 10;
-    }
-    size = exerciseGroup_getNumberOfExercises(group); // group->exercises->size;
+    size = exerciseGroup_getNumberOfExercises(group);
     viewsArr = calloc(size, sizeof(ExerciseView *));
     [self setupSubviews];
     return self;
@@ -212,14 +257,10 @@ NSString *exercise_getTitleString(ExerciseEntry *e) {
     headerLabel.translatesAutoresizingMaskIntoConstraints = false;
     headerLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleTitle3];
     headerLabel.adjustsFontSizeToFitWidth = true;
-    if (group->type == ExerciseContainerTypeRounds && group->reps > 1) {
-        NSString *s = [[NSString alloc] initWithFormat:@"Round 1 of %u", group->reps];
-        headerLabel.text = s;
-        [s release];
-    } else if (group->type == ExerciseContainerTypeAMRAP) {
-        NSString *s = [[NSString alloc] initWithFormat:@"AMRAP %u mins", group->reps];
-        headerLabel.text = s;
-        [s release];
+    CFStringRef headerStr = exerciseGroup_createHeaderText(group);
+    if (headerStr) {
+        headerLabel.text = (__bridge NSString*) headerStr;
+        CFRelease(headerStr);
     }
     headerLabel.textColor = UIColor.labelColor;
     [self addSubview:headerLabel];
@@ -235,7 +276,7 @@ NSString *exercise_getTitleString(ExerciseEntry *e) {
     [NSLayoutConstraint activateConstraints:@[
         [headerLabel.topAnchor constraintEqualToAnchor:self.topAnchor],
         [headerLabel.leadingAnchor constraintEqualToAnchor:self.leadingAnchor constant:8],
-        [headerLabel.widthAnchor constraintEqualToAnchor:self.widthAnchor multiplier:0.6],
+        [headerLabel.trailingAnchor constraintEqualToAnchor:self.trailingAnchor constant:-8],
         [headerLabel.heightAnchor constraintEqualToConstant: 20],
 
         [exerciseStack.topAnchor constraintEqualToAnchor:headerLabel.bottomAnchor],
@@ -243,26 +284,6 @@ NSString *exercise_getTitleString(ExerciseEntry *e) {
         [exerciseStack.trailingAnchor constraintEqualToAnchor:self.trailingAnchor],
         [exerciseStack.bottomAnchor constraintEqualToAnchor:self.bottomAnchor],
     ]];
-
-    if (group->type == ExerciseContainerTypeAMRAP) {
-        amrapBtn = [UIButton buttonWithType:UIButtonTypeSystem];
-        amrapBtn.translatesAutoresizingMaskIntoConstraints = false;
-        [amrapBtn setTitle:@"Finish Circuit" forState:UIControlStateNormal];
-        [amrapBtn setTitleColor:UIColor.systemBlueColor forState: UIControlStateNormal];
-        [amrapBtn setTitleColor:UIColor.secondaryLabelColor forState:UIControlStateDisabled];
-        amrapBtn.titleLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline];
-        amrapBtn.backgroundColor = UIColor.secondarySystemGroupedBackgroundColor;
-        amrapBtn.layer.cornerRadius = 5;
-        [amrapBtn addTarget:self action:@selector(finishGroup) forControlEvents:UIControlEventTouchUpInside];
-        [self addSubview:amrapBtn];
-        [NSLayoutConstraint activateConstraints:@[
-            [amrapBtn.topAnchor constraintEqualToAnchor:self.topAnchor],
-            [amrapBtn.leadingAnchor constraintEqualToAnchor:headerLabel.trailingAnchor],
-            [amrapBtn.trailingAnchor constraintEqualToAnchor:self.trailingAnchor constant:-8],
-            [amrapBtn.heightAnchor constraintEqualToConstant: 20]
-        ]];
-        [amrapBtn setEnabled:false];
-    }
 
     for (int i = 0; i < size; ++i) {
         ExerciseView *v = [[ExerciseView alloc] initWithExercise:exerciseGroup_getExercise(group, i) tag:i target:self action:@selector(handleTap:)];
@@ -275,51 +296,75 @@ NSString *exercise_getTitleString(ExerciseEntry *e) {
 
 - (void) startCircuit {
     currentIndex = 0;
-    if (amrapBtn) [amrapBtn setEnabled:true];
     for (int i = 0; i < size; ++i) {
         [viewsArr[i] reset];
+    }
+    if (group->type == ExerciseContainerTypeAMRAP && !groupTimer.active) {
+        timer_start(gPtr, 60 * group->reps);
     }
     [viewsArr[0] handleTap];
 }
 
+- (void) stopExercise {
+    if (currentIndex >= size) return;
+    ExerciseView *v = viewsArr[currentIndex];
+    if (v->exercise->type == ExerciseTypeDuration) {
+        [self handleTap:v->button];
+    }
+}
+
 - (void) finishGroup {
+    pthread_mutex_lock(&sharedLock);
+    group = NULL;
+    pthread_mutex_unlock(&sharedLock);
     [parent finishedExerciseGroup];
 }
 
 - (void) handleTap: (UIButton *)btn {
-    ExerciseView *v = viewsArr[btn.tag];
-    if ([v handleTap]) {
-        if (++currentIndex == size) {
-            switch (group->type) {
-                case ExerciseContainerTypeRounds:
-                    if (++group->completedReps == group->reps) {
-                        [self finishGroup];
-                        return;
-                    }
+    unsigned char isDone = 0;
+    pthread_mutex_lock(&sharedLock);
+    if (group && (int) btn.tag == currentIndex) {
+        ExerciseView *v = viewsArr[currentIndex];
+        if ([v handleTap]) {
+            if (++currentIndex == size) {
+                switch (group->type) {
+                    case ExerciseContainerTypeRounds:
+                        if (++group->completedReps == group->reps) {
+                            isDone = 1;
+                            group = NULL;
+                        } else {
+                            CFStringRef headerStr = exerciseGroup_createHeaderText(group);
+                            headerLabel.text = (__bridge NSString*) headerStr;
+                            CFRelease(headerStr);
+                        }
+                        break;
 
-                    NSString *h = [[NSString alloc] initWithFormat:@"Round %u of %u", group->completedReps + 1, group->reps];
-                    headerLabel.text = h;
-                    [h release];
-                    break;
+                    case ExerciseContainerTypeDecrement:
+                        if (--group->completedReps == 0) {
+                            isDone = 1;
+                            group = NULL;
+                        } else {
+                            for (int i = 0; i < size; ++i) {
+                                ExerciseEntry *e = exerciseGroup_getExercise(group, i);
+                                if (e->type == ExerciseTypeReps) e->reps -= 1;
+                            }
+                        }
+                        break;
 
-                case ExerciseContainerTypeDecrement:
-                    if (--group->completedReps == 0) {
-                        [self finishGroup];
-                        return;
-                    }
-                    for (int i = 0; i < size; ++i) {
-                        ExerciseEntry *e = exerciseGroup_getExercise(group, i);
-                        if (e->type == ExerciseTypeReps) e->reps -= 1;
-                    }
-                    break;
-
-                default:
-                    break;
+                    default:
+                        break;
+                }
+                if (group) {
+                    [self startCircuit];
+                }
+            } else {
+                [viewsArr[currentIndex] handleTap];
             }
-            [self startCircuit];
-        } else {
-            [viewsArr[currentIndex] handleTap];
         }
+    }
+    pthread_mutex_unlock(&sharedLock);
+    if (isDone) {
+        [parent finishedExerciseGroup];
     }
 }
 
@@ -328,6 +373,8 @@ NSString *exercise_getTitleString(ExerciseEntry *e) {
 @interface WorkoutViewController() {
     AddWorkoutViewModel *viewModel;
     UIStackView *groupsStack;
+    int currentIndex;
+    int size;
 }
 
 @end
@@ -337,11 +384,46 @@ NSString *exercise_getTitleString(ExerciseEntry *e) {
 - (id) initWithViewModel: (AddWorkoutViewModel *)model {
     if (!(self = [super initWithNibName:nil bundle:nil])) return nil;
     viewModel = model;
+    size = (int) workout_getNumberOfActivities(viewModel->workout);
+    groupTimer.parent = exerciseTimer.parent = self;
+    groupTimer.stop = exerciseTimer.stop = 0;
+
+    struct sigaction sa;
+    sa.sa_handler = handle_exercise_timer_interrupt;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+    sigaction(SIGUSR1, &sa, NULL);
+    sa.sa_handler = handle_group_timer_interrupt;
+    sigaction(SIGUSR2, &sa, NULL);
+
+    pthread_mutex_init(&exerciseTimer.lock, NULL);
+    pthread_mutex_init(&groupTimer.lock, NULL);
+    pthread_cond_init(&exerciseTimer.cond, NULL);
+    pthread_cond_init(&groupTimer.cond, NULL);
+    pthread_mutex_init(&sharedLock, NULL);
+
+    pthread_create(&exerciseTimerThread, NULL, timer_loop, &exerciseTimer);
+    pthread_create(&groupTimerThread, NULL, timer_loop, &groupTimer);
     return self;
 }
 
 - (void) dealloc {
     [groupsStack release];
+    if (exerciseTimer.active) pthread_kill(exerciseTimerThread, SIGUSR1);
+    if (groupTimer.active) pthread_kill(groupTimerThread, SIGUSR2);
+    timer_start(gPtr, 0);
+    timer_start(ePtr, 0);
+    pthread_join(exerciseTimerThread, NULL);
+    pthread_join(groupTimerThread, NULL);
+    signal(SIGUSR1, SIG_DFL);
+    signal(SIGUSR2, SIG_DFL);
+    pthread_cond_destroy(&groupTimer.cond);
+    pthread_cond_destroy(&exerciseTimer.cond);
+    pthread_mutex_destroy(&groupTimer.lock);
+    pthread_mutex_destroy(&exerciseTimer.lock);
+    pthread_mutex_destroy(&sharedLock);
+    groupTimer.parent = exerciseTimer.parent = nil;
+    groupTimer.active = exerciseTimer.active = 0;
     [super dealloc];
 }
 
@@ -372,14 +454,13 @@ NSString *exercise_getTitleString(ExerciseEntry *e) {
     groupsStack.layoutMargins = UIEdgeInsetsMake(0, 4, 4, 0);
 
     Workout *w = viewModel->workout;
-    for (int i = 0; i < workout_getNumberOfActivities(viewModel->workout); ++i) {
+    for (int i = 0; i < workout_getNumberOfActivities(w); ++i) {
         if (i > 0) {
             Divider *d = [[Divider alloc] init];
             [groupsStack addArrangedSubview:d];
             [d release];
         }
-        ExerciseGroup *g = workout_getExerciseGroup(w, i);
-        ExerciseContainer *v = [[ExerciseContainer alloc] initWithGroup:g parent:self];
+        ExerciseContainer *v = [[ExerciseContainer alloc] initWithGroup:workout_getExerciseGroup(w, i) parent:self];
         [groupsStack addArrangedSubview:v];
         [v release];
     }
@@ -431,178 +512,76 @@ NSString *exercise_getTitleString(ExerciseEntry *e) {
         viewModel->startTime = CFAbsoluteTimeGetCurrent();
         [v startCircuit];
     } else {
-        viewModel->stopTime = CFAbsoluteTimeGetCurrent();
-        addWorkoutViewModel_stoppedWorkout(viewModel);
+        AddWorkoutViewModel *m = NULL;
+        pthread_mutex_lock(&sharedLock);
+        if (viewModel) {
+            m = viewModel;
+            m->stopTime = CFAbsoluteTimeGetCurrent();
+            viewModel = NULL;
+        }
+        pthread_mutex_unlock(&sharedLock);
+        if (m) {
+            addWorkoutViewModel_stoppedWorkout(m);
+        }
     }
 }
 
 - (void) finishedExerciseGroup {
-    NSArray<UIView *> *views = groupsStack.arrangedSubviews;
-
-    if (views.count >= 3) {
-        ExerciseContainer *next = (ExerciseContainer *) views[2];
-        [views[0] removeFromSuperview];
-        [views[1] removeFromSuperview];
-        [next startCircuit];
-    } else {
-        viewModel->stopTime = CFAbsoluteTimeGetCurrent();
-
-        if (CFStringCompareWithOptions(viewModel->workout->title, testDayStr, CFRangeMake(0, CFStringGetLength(viewModel->workout->title)), kCFCompareCaseInsensitive) == kCFCompareEqualTo) {
-            UpdateMaxesViewController *modal = [[UpdateMaxesViewController alloc] initWithViewModel:viewModel];
-            UINavigationController *container = [[UINavigationController alloc] initWithRootViewController:modal];
-            [self.navigationController presentViewController:container animated:true completion:nil];
-            [container release];
-            [modal release];
-            return;
-        }
-        addWorkoutViewModel_completedWorkout(viewModel, nil);
-    }
-}
-
-@end
-
-@interface UpdateMaxesViewController() {
-    AddWorkoutViewModel *viewModel;
-    UITextField *textFields[4];
-    unsigned char validInput[4];
-    unsigned short results[4];
-    UIButton *finishButton;
-}
-
-@end
-
-@implementation UpdateMaxesViewController
-
-- (id) initWithViewModel: (AddWorkoutViewModel *)model {
-    if (!(self = [super initWithNibName:nil bundle:nil])) return nil;
-    viewModel = model;
-    return self;
-}
-
-- (void) dealloc {
-    for (int i = 0; i < 4; ++i) { [textFields[i] release]; }
-    [super dealloc];
-}
-
-- (void) viewDidLoad {
-    [super viewDidLoad];
-    self.view.backgroundColor = UIColor.secondarySystemBackgroundColor;
-    [self setupSubviews];
-    UITextField *fields[] = {textFields[0], textFields[1], textFields[2], textFields[3], nil};
-    createToolbar(self, @selector(dismissKeyboard), fields);
-
-}
-
-- (void) setupSubviews {
-    NSString *titles[] = {@"Squat", @"Pull-up", @"Bench", @"Deadlift"};
-    UIStackView *stacks[4];
-
-    for (int i = 0; i < 4; ++i) {
-        UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
-        label.text = titles[i];
-        label.font = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
-
-        textFields[i] = [[UITextField alloc] initWithFrame:CGRectZero];
-        textFields[i].delegate = self;
-        textFields[i].backgroundColor = UIColor.tertiarySystemBackgroundColor;
-        textFields[i].placeholder = @"Weight";
-        textFields[i].textAlignment = NSTextAlignmentLeft;
-        textFields[i].borderStyle = UITextBorderStyleRoundedRect;
-        textFields[i].keyboardType = UIKeyboardTypeNumberPad;
-
-        stacks[i] = [[UIStackView alloc] initWithArrangedSubviews:@[label, textFields[i]]];
-        stacks[i].translatesAutoresizingMaskIntoConstraints = false;
-        stacks[i].backgroundColor = UIColor.secondarySystemBackgroundColor;
-        stacks[i].spacing = 5;
-        stacks[i].distribution = UIStackViewDistributionFillEqually;
-        [stacks[i] setLayoutMarginsRelativeArrangement:true];
-        stacks[i].layoutMargins = UIEdgeInsetsMake(4, 8, 4, 8);
-        [self.view addSubview:stacks[i]];
-
-        [label release];
-    }
-
-    finishButton = [UIButton buttonWithType:UIButtonTypeSystem];
-    finishButton.translatesAutoresizingMaskIntoConstraints = false;
-    [finishButton setTitle:@"Finish" forState:UIControlStateNormal];
-    [finishButton setTitleColor:UIColor.systemBlueColor forState:UIControlStateNormal];
-    [finishButton setTitleColor:UIColor.systemGrayColor forState:UIControlStateDisabled];
-    finishButton.frame = CGRectMake(0, 0, self.view.frame.size.width / 3, 30);
-    [finishButton addTarget:self action:@selector(didPressFinish) forControlEvents:UIControlEventTouchUpInside];
-    UIBarButtonItem *rightItem = [[UIBarButtonItem alloc] initWithCustomView:finishButton];
-    [finishButton setEnabled:false];
-    self.navigationItem.rightBarButtonItem = rightItem;
-
-    [NSLayoutConstraint activateConstraints:@[
-        [stacks[0].topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor constant:30],
-        [stacks[0].leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor],
-        [stacks[0].trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor],
-        [stacks[0].heightAnchor constraintEqualToConstant:40]
-    ]];
-    for (int i = 1; i < 4; ++i) {
-        [NSLayoutConstraint activateConstraints:@[
-            [stacks[i].topAnchor constraintEqualToAnchor:stacks[i - 1].bottomAnchor constant:20],
-            [stacks[i].leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor],
-            [stacks[i].trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor],
-            [stacks[i].heightAnchor constraintEqualToConstant:40]
-        ]];
-    }
-
-    for (int i = 0; i < 4; ++i) { [stacks[i] release]; }
-    [rightItem release];
-}
-
-- (void) didPressFinish {
-    addWorkoutViewModel_finishedAddingNewWeights(viewModel, self, results);
-}
-
-- (void) dismissKeyboard {
-    [self.view endEditing:true];
-}
-
-- (BOOL) textField: (UITextField *)textField shouldChangeCharactersInRange: (NSRange)range replacementString: (NSString *)string {
-    if (!viewController_validateNumericInput((__bridge CFStringRef) string)) return false;
-
-    int i = 0;
-    for (; i < 4; ++i) {
-        if (textField == textFields[i]) break;
-    }
-
-    NSString *initialText = textField.text ? textField.text : @"";
-    CFStringRef newText = CFBridgingRetain([initialText stringByReplacingCharactersInRange:range withString:string]);
-    if (!CFStringGetLength(newText)) {
-        CFRelease(newText);
-        [finishButton setEnabled:false];
-        validInput[i] = 0;
-        return true;
-    }
-
-    int newWeight = CFStringGetIntValue(newText);
-    CFRelease(newText);
-
-    if (newWeight < 0 || newWeight > 999) {
-        [finishButton setEnabled:false];
-        validInput[i] = 0;
-        return true;
-    }
-
-    validInput[i] = 1;
-    results[i] = (unsigned short) newWeight;
-
-    for (i = 0; i < 4; ++i) {
-        if (!validInput[i]) {
-            [finishButton setEnabled:false];
-            return true;
+    AddWorkoutViewModel *m = NULL;
+    pthread_mutex_lock(&sharedLock);
+    if (viewModel) {
+        if (size - currentIndex <= 1) {
+            m = viewModel;
+            m->stopTime = CFAbsoluteTimeGetCurrent();
+            currentIndex = size;
+            viewModel = NULL;
+        } else {
+            NSArray<UIView *> *views = groupsStack.arrangedSubviews;
+            [views[currentIndex] setHidden:true];
+            [views[currentIndex + 1] setHidden:true];
+            ExerciseContainer *next = (ExerciseContainer *) views[currentIndex + 2];
+            currentIndex += 2;
+            [next startCircuit];
         }
     }
+    pthread_mutex_unlock(&sharedLock);
 
-    [finishButton setEnabled:true];
-    return true;
+    if (m) {
+        addWorkoutViewModel_completedWorkout(m, nil, true);
+    }
 }
 
-- (BOOL) textFieldShouldReturn: (UITextField *)textField {
-    [textField resignFirstResponder];
-    return true;
+- (void) finishedWorkoutTimerForType: (unsigned char)type {
+    ExerciseContainer *v = nil;
+    UIButton *b = nil;
+    pthread_mutex_lock(&sharedLock);
+
+    if (viewModel) {
+        NSArray<UIView *> *views = groupsStack.arrangedSubviews;
+        v = (ExerciseContainer *) views[currentIndex];
+
+        if (type == TimerTypeGroup) {
+            if (v->group->type != ExerciseContainerTypeAMRAP) {
+                v = nil;
+            }
+        } else {
+            if (v->currentIndex < v->size) {
+                ExerciseView *temp = v->viewsArr[v->currentIndex];
+                if (temp->exercise->type == ExerciseTypeDuration) {
+                    b = temp->button;
+                }
+            }
+        }
+    }
+    pthread_mutex_unlock(&sharedLock);
+
+    if (v) {
+        if (type == TimerTypeGroup) {
+            [v finishGroup];
+        } else if (b) {
+            [v handleTap:b];
+        }
+    }
 }
 
 @end

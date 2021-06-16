@@ -24,6 +24,7 @@
 		616DC23E267152BA00EFD3D4 /* WorkoutViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 616DC23D267152BA00EFD3D4 /* WorkoutViewController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		616E2F6826755D2B00342CD8 /* HomeSetupWorkoutModalViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 616E2F6726755D2B00342CD8 /* HomeSetupWorkoutModalViewController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		616E2F842676A22700342CD8 /* Exercise.c in Sources */ = {isa = PBXBuildFile; fileRef = 616E2F832676A22700342CD8 /* Exercise.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		616E2F9B2677195C00342CD8 /* AddWorkoutUpdateMaxesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 616E2F9A2677195C00342CD8 /* AddWorkoutUpdateMaxesViewController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61808C332610FEEF00BAF7AB /* DataApproximator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61808B982610FEEF00BAF7AB /* DataApproximator.swift */; };
 		61808C342610FEEF00BAF7AB /* DataApproximator+N.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61808B992610FEEF00BAF7AB /* DataApproximator+N.swift */; };
 		61808C362610FEEF00BAF7AB /* LegendRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61808B9C2610FEEF00BAF7AB /* LegendRenderer.swift */; };
@@ -177,6 +178,8 @@
 		616E2F6626755D1F00342CD8 /* HomeSetupWorkoutModalViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HomeSetupWorkoutModalViewController.h; sourceTree = "<group>"; };
 		616E2F6726755D2B00342CD8 /* HomeSetupWorkoutModalViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HomeSetupWorkoutModalViewController.m; sourceTree = "<group>"; };
 		616E2F832676A22700342CD8 /* Exercise.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = Exercise.c; sourceTree = "<group>"; };
+		616E2F992677194D00342CD8 /* AddWorkoutUpdateMaxesViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AddWorkoutUpdateMaxesViewController.h; sourceTree = "<group>"; };
+		616E2F9A2677195C00342CD8 /* AddWorkoutUpdateMaxesViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AddWorkoutUpdateMaxesViewController.m; sourceTree = "<group>"; };
 		6176277D266D44C60079A17E /* Exercise.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Exercise.h; sourceTree = "<group>"; };
 		61808B982610FEEF00BAF7AB /* DataApproximator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataApproximator.swift; sourceTree = "<group>"; };
 		61808B992610FEEF00BAF7AB /* DataApproximator+N.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "DataApproximator+N.swift"; sourceTree = "<group>"; };
@@ -724,6 +727,8 @@
 			children = (
 				61C77916261028F3001326A1 /* HomeViewController.h */,
 				61C7798326102D85001326A1 /* HomeViewController.m */,
+				616E2F6626755D1F00342CD8 /* HomeSetupWorkoutModalViewController.h */,
+				616E2F6726755D2B00342CD8 /* HomeSetupWorkoutModalViewController.m */,
 			);
 			path = ViewController;
 			sourceTree = "<group>";
@@ -742,8 +747,8 @@
 			children = (
 				616DC23C267152A800EFD3D4 /* WorkoutViewController.h */,
 				616DC23D267152BA00EFD3D4 /* WorkoutViewController.m */,
-				616E2F6626755D1F00342CD8 /* HomeSetupWorkoutModalViewController.h */,
-				616E2F6726755D2B00342CD8 /* HomeSetupWorkoutModalViewController.m */,
+				616E2F992677194D00342CD8 /* AddWorkoutUpdateMaxesViewController.h */,
+				616E2F9A2677195C00342CD8 /* AddWorkoutUpdateMaxesViewController.m */,
 			);
 			path = ViewController;
 			sourceTree = "<group>";
@@ -1094,6 +1099,7 @@
 				61C7795026102C8C001326A1 /* HistoryViewController.m in Sources */,
 				61594D5726068C41000D01A1 /* AppCoordinator.m in Sources */,
 				61C7797826102D45001326A1 /* HomeViewModel.m in Sources */,
+				616E2F9B2677195C00342CD8 /* AddWorkoutUpdateMaxesViewController.m in Sources */,
 				61C779AC26102E51001326A1 /* SettingsTabCoordinator.m in Sources */,
 				615A1C4C2608406100858C32 /* PersistenceService.m in Sources */,
 				61C7796426102CFF001326A1 /* ConfettiEmitterView.m in Sources */,

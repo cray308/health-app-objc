@@ -27,8 +27,6 @@ void homeViewModel_fetchData(HomeViewModel *model);
 
 bool homeViewModel_updateTimeOfDay(HomeViewModel *model);
 
-NSString *homeViewModel_getGreeting(HomeViewModel *model);
-
 void homeViewModel_handleDayWorkoutButtonTap(HomeViewModel *model, int index);
 
 unsigned char homeViewModel_hasWorkoutsForThisWeek(HomeViewModel *model);

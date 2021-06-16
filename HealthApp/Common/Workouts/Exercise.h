@@ -65,17 +65,17 @@ struct Workout {
     Array_exGroup *activities;
 };
 
-void workout_setup_activities(Workout *w);
-void workout_add_activity(Workout *w, ExerciseGroup *g);
+void workout_buildFromDictionary(CFDictionaryRef dict, unsigned int index, unsigned char type, unsigned int sets, unsigned int reps, unsigned int weight, Workout *w);
+
 void workout_free(Workout *w);
 int workout_getNumberOfActivities(Workout *w);
-void workout_setSetsAndRepsForExercises(Workout *w, unsigned int sets, unsigned int reps);
-void workout_setWeightsForExercises(Workout *w, unsigned int *weights, int size);
 ExerciseGroup *workout_getExerciseGroup(Workout *w, int i);
 
-void exerciseGroup_setup_exercises(ExerciseGroup *g);
-void exerciseGroup_add_exercise(ExerciseGroup *g, ExerciseEntry *e);
 int exerciseGroup_getNumberOfExercises(ExerciseGroup *g);
 ExerciseEntry *exerciseGroup_getExercise(ExerciseGroup *g, int i);
+
+CFStringRef exercise_createTitleString(ExerciseEntry *e);
+CFStringRef exercise_createSetsString(ExerciseEntry *e);
+CFStringRef exerciseGroup_createHeaderText(ExerciseGroup *g);
 
 #endif /* Exercise_h */

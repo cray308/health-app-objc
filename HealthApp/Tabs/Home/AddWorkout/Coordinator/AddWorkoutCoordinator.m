@@ -8,6 +8,7 @@
 #import "AddWorkoutCoordinator.h"
 #import "AddWorkoutViewModel.h"
 #import "WorkoutViewController.h"
+#import "AddWorkoutUpdateMaxesViewController.h"
 #import "HomeTabCoordinator.h"
 #import "AppDelegate.h"
 #import "AppCoordinator.h"
@@ -36,6 +37,16 @@ void addWorkoutCoordinator_start(AddWorkoutCoordinator *coordinator) {
 void addWorkoutCoordinator_free(AddWorkoutCoordinator *coordinator) {
     addWorkoutViewModel_free(coordinator->viewModel);
     free(coordinator);
+}
+
+void addWorkoutCoordinator_showUpdateWeightsModal(AddWorkoutCoordinator *coordinator) {
+    //coordinator->navigationController.topViewController;
+
+    AddWorkoutUpdateMaxesViewController *modal = [[AddWorkoutUpdateMaxesViewController alloc] initWithViewModel:coordinator->viewModel];
+    UINavigationController *container = [[UINavigationController alloc] initWithRootViewController:modal];
+    [coordinator->navigationController presentViewController:container animated:true completion:nil];
+    [container release];
+    [modal release];
 }
 
 void addWorkoutCoordinator_didFinishAddingWorkout(AddWorkoutCoordinator *coordinator, UIViewController *presenter, int totalCompletedWorkouts) {
