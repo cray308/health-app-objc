@@ -21,7 +21,7 @@ void viewControllerHelper_cleanupValidNumericChars(void) {
 }
 
 void createToolbar(id target, SEL doneSelector, UITextField **fields) {
-    UIToolbar *toolbar = [[UIToolbar alloc] initWithFrame:CGRectZero];
+    UIToolbar *toolbar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, UIScreen.mainScreen.bounds.size.width, 50)];
     [toolbar sizeToFit];
 
     UIBarButtonItem *flexSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];

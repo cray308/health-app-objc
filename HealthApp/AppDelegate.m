@@ -8,8 +8,10 @@
 #import "AppDelegate.h"
 #import "AppCoordinator.h"
 #import "AppUserData.h"
+#import "NotificationHelpers.h"
 #import "PersistenceService.h"
 #import "ViewControllerHelpers.h"
+#import "WorkoutViewController.h"
 #include "CalendarDateHelpers.h"
 
 #if DEBUG
@@ -18,20 +20,13 @@
 
 void setupData(void);
 
-@interface AppDelegate () {
-    AppCoordinator *_coordinator;
-    UIWindow *window;
-}
-
-@end
-
 @implementation AppDelegate
 
 -(void) dealloc {
     appUserData_free();
     persistenceService_free();
     viewControllerHelper_cleanupValidNumericChars();
-    appCoordinator_free(_coordinator);
+    appCoordinator_free(coordinator);
     [window setRootViewController:nil];
     [window release];
     [super dealloc];
@@ -40,29 +35,31 @@ void setupData(void);
 - (BOOL) application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     window = [[UIWindow alloc] initWithFrame:UIScreen.mainScreen.bounds];
 
-    _coordinator = appCoordinator_init(window);
-    if (!_coordinator) return false;
+    coordinator = appCoordinator_init(window);
+    if (!coordinator) return true;
 
+    unsigned char hasLaunched = [NSUserDefaults.standardUserDefaults boolForKey:@"hasLaunched"];
     persistenceService_setup();
     viewControllerHelper_setupValidNumericChars();
-    if (![[NSUserDefaults standardUserDefaults] boolForKey:@"hasLaunched"]) {
-        setupData();
-    }
-    appCoordinator_start(_coordinator);
+
+    if (!hasLaunched) setupData();
+    appCoordinator_start(coordinator);
+    if (!hasLaunched) notifications_requestAccess();
     return true;
 }
 
-- (UIInterfaceOrientationMask) application:(UIApplication *)application supportedInterfaceOrientationsForWindow:(UIWindow *)window {
+- (UIInterfaceOrientationMask) application: (UIApplication *)application supportedInterfaceOrientationsForWindow: (UIWindow *)window {
     return ([[UIDevice currentDevice] userInterfaceIdiom] != UIUserInterfaceIdiomPad) ?
     UIInterfaceOrientationMaskAllButUpsideDown : UIInterfaceOrientationMaskPortrait;
 }
 
-- (void) applicationWillEnterForeground: (UIApplication *)application {
-    appCoordinator_handleForegroundUpdate(_coordinator);
+- (void) applicationDidBecomeActive: (UIApplication *)application {
+    appCoordinator_handleForegroundUpdate(coordinator);
+    if (workoutVC) [workoutVC restartTimers];
 }
 
-- (AppCoordinator *) getAppCoordinator {
-    return _coordinator;
+- (void) applicationWillResignActive: (UIApplication *)application {
+    if (workoutVC) [workoutVC stopTimers];
 }
 
 @end

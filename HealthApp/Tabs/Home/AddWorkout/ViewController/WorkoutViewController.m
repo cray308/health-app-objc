@@ -8,24 +8,24 @@
 #import "WorkoutViewController.h"
 #import "AddWorkoutViewModel.h"
 #import "Divider.h"
+#import "NotificationHelpers.h"
+#import "AppDelegate.h"
 #include <pthread.h>
 
 @interface ExerciseView: UIView
-
-- (id) initWithExercise: (ExerciseEntry *)exercise tag: (int)tag target: (id)target action: (SEL)action;
+- (id) initWithExercise: (ExerciseEntry *)exercise;
 - (bool) handleTap;
 - (void) reset;
-
 @end
 
 @interface ExerciseContainer: UIView
-
-- (id) initWithGroup: (ExerciseGroup *)exerciseGroup parent: (WorkoutViewController *)parentVC;
-- (void) startCircuit;
+- (id) initWithGroup: (ExerciseGroup *)exerciseGroup;
+- (void) startCircuitAndTimer: (unsigned char)startTimer;
 - (void) handleTap: (UIButton *)btn;
-- (void) stopExercise;
-- (void) finishGroup;
-
+- (void) stopExerciseAtIndex: (int)index moveToNext: (unsigned char)moveToNext;
+- (void) finishGroupAtIndex: (int)index;
+- (void) restartExerciseAtIndex: (int)index moveToNext: (unsigned char)moveToNext refTime: (int64_t)refTime;
+- (void) restartGroupAtIndex: (int)index refTime: (int64_t)refTime;
 @end
 
 @interface ExerciseView() {
@@ -37,18 +37,16 @@
     UIView *checkbox;
     @public UIButton *button;
 }
-
 @end
 
 @interface ExerciseContainer() {
-    WorkoutViewController *parent;
-    @public ExerciseGroup *group;
+    @public WorkoutViewController *parent;
+    ExerciseGroup *group;
     UILabel *headerLabel;
-    @public ExerciseView **viewsArr;
-    @public int currentIndex;
-    @public int size;
+    ExerciseView **viewsArr;
+    int currentIndex;
+    int size;
 }
-
 @end
 
 typedef enum {
@@ -61,33 +59,42 @@ typedef struct {
     const unsigned char type;
     unsigned char active;
     unsigned char stop;
+    int container;
+    int exercise;
     unsigned int duration;
+    int64_t refTime;
     pthread_mutex_t lock;
     pthread_cond_t cond;
 } WorkoutTimer;
 
 static pthread_t exerciseTimerThread;
 static pthread_t groupTimerThread;
-
-static WorkoutTimer groupTimer = { .type = TimerTypeGroup };
-static WorkoutTimer exerciseTimer = { .type = TimerTypeExercise };
-
-static WorkoutTimer *gPtr = &groupTimer;
-static WorkoutTimer *ePtr = &exerciseTimer;
-
+static WorkoutTimer *gPtr = NULL;
+static WorkoutTimer *ePtr = NULL;
 static pthread_mutex_t sharedLock;
 
 void handle_exercise_timer_interrupt(int n __attribute__((__unused__))) {
-    ePtr->active = 0;
 }
 
 void handle_group_timer_interrupt(int n __attribute__((__unused__))) {
-    gPtr->active = 0;
 }
 
-void timer_start(WorkoutTimer *t, unsigned int duration) {
+void startTimerForGroup(WorkoutTimer *t, unsigned int duration, int container) {
     pthread_mutex_lock(&t->lock);
+    t->refTime = CFAbsoluteTimeGetCurrent();
     t->duration = duration;
+    t->container = container;
+    t->stop = !duration;
+    t->active = 1;
+    pthread_cond_signal(&t->cond);
+    pthread_mutex_unlock(&t->lock);
+}
+
+void startTimerForExercise(WorkoutTimer *t, unsigned int duration, int exercise) {
+    pthread_mutex_lock(&t->lock);
+    t->refTime = CFAbsoluteTimeGetCurrent();
+    t->duration = duration;
+    t->exercise = exercise;
     t->stop = !duration;
     t->active = 1;
     pthread_cond_signal(&t->cond);
@@ -96,23 +103,25 @@ void timer_start(WorkoutTimer *t, unsigned int duration) {
 
 void *timer_loop(void *arg) {
     WorkoutTimer *t = (WorkoutTimer *) arg;
-    unsigned int res = 0;
+    unsigned int res = 0, duration = 0;
+    int container = -1, exercise = -1;
     while (!t->stop) {
         pthread_mutex_lock(&t->lock);
-        while (!t->active) pthread_cond_wait(&t->cond, &t->lock);
-        unsigned int duration = t->duration;
+        while (t->active != 1) pthread_cond_wait(&t->cond, &t->lock);
+        duration = t->duration;
+        container = t->container;
+        exercise = t->exercise;
         pthread_mutex_unlock(&t->lock);
 
         if (!duration) continue;
-
         res = sleep(duration);
-        t->active = 0;
+        t->active = 2;
         if (!res) {
-            if (t->type == TimerTypeGroup && exerciseTimer.active) {
+            if (t->type == TimerTypeGroup && ePtr->active == 1) {
                 pthread_kill(exerciseTimerThread, SIGUSR1);
             }
             dispatch_async(dispatch_get_main_queue(), ^ (void) {
-                [t->parent finishedWorkoutTimerForType:t->type];
+                [t->parent finishedWorkoutTimerForType:t->type container:container exercise:exercise];
             });
         }
     }
@@ -120,8 +129,7 @@ void *timer_loop(void *arg) {
 }
 
 @implementation ExerciseView
-
-- (id) initWithExercise: (ExerciseEntry *)exerciseEntry tag: (int)tag target: (id)target action: (SEL)action {
+- (id) initWithExercise: (ExerciseEntry *)exerciseEntry {
     if (!(self = [super initWithFrame:CGRectZero])) return nil;
     exercise = exerciseEntry;
     if (exerciseEntry->rest) {
@@ -137,8 +145,6 @@ void *timer_loop(void *arg) {
     button.titleLabel.adjustsFontSizeToFitWidth = true;
     button.backgroundColor = UIColor.secondarySystemGroupedBackgroundColor;
     button.layer.cornerRadius = 5;
-    button.tag = tag;
-    [button addTarget:target action:action forControlEvents:UIControlEventTouchUpInside];
 
     setsLabel = [[UILabel alloc] initWithFrame:CGRectZero];
     setsLabel.translatesAutoresizingMaskIntoConstraints = false;
@@ -153,7 +159,6 @@ void *timer_loop(void *arg) {
 
     checkbox = [[UIView alloc] initWithFrame:CGRectZero];
     checkbox.translatesAutoresizingMaskIntoConstraints = false;
-    checkbox.backgroundColor = UIColor.systemGrayColor;
     checkbox.layer.cornerRadius = 5;
 
     [self addSubview:setsLabel];
@@ -177,6 +182,7 @@ void *timer_loop(void *arg) {
         [checkbox.widthAnchor constraintEqualToConstant:20],
         [checkbox.heightAnchor constraintEqualToAnchor:checkbox.widthAnchor]
     ]];
+    [self reset];
     return self;
 }
 
@@ -193,8 +199,8 @@ void *timer_loop(void *arg) {
         checkbox.backgroundColor = UIColor.systemOrangeColor;
         if (exercise->type == ExerciseTypeDuration) { // start timer
             button.userInteractionEnabled = false;
-            timer_start(ePtr, exercise->reps);
-
+            startTimerForExercise(ePtr, exercise->reps, (int) button.tag);
+            notifications_schedule(exercise->reps, WorkoutNotificationExerciseCompleted);
         }
     } else {
         button.userInteractionEnabled = true;
@@ -230,15 +236,12 @@ void *timer_loop(void *arg) {
     [button setTitle:(__bridge NSString*)title forState:UIControlStateNormal];
     CFRelease(title);
 }
-
 @end
 
 @implementation ExerciseContainer
-
-- (id) initWithGroup: (ExerciseGroup *)exerciseGroup parent: (WorkoutViewController *)parentVC {
+- (id) initWithGroup: (ExerciseGroup *)exerciseGroup {
     if (!(self = [super initWithFrame:CGRectZero])) return nil;
     group = exerciseGroup;
-    parent = parentVC;
     size = exerciseGroup_getNumberOfExercises(group);
     viewsArr = calloc(size, sizeof(ExerciseView *));
     [self setupSubviews];
@@ -286,38 +289,104 @@ void *timer_loop(void *arg) {
     ]];
 
     for (int i = 0; i < size; ++i) {
-        ExerciseView *v = [[ExerciseView alloc] initWithExercise:exerciseGroup_getExercise(group, i) tag:i target:self action:@selector(handleTap:)];
-        [v reset];
+        ExerciseView *v = [[ExerciseView alloc] initWithExercise:exerciseGroup_getExercise(group, i)];
+        v->button.tag = i;
+        [v->button addTarget:self action:@selector(handleTap:) forControlEvents:UIControlEventTouchUpInside];
         [exerciseStack addArrangedSubview:v];
         viewsArr[i] = v;
     }
     [exerciseStack release];
 }
 
-- (void) startCircuit {
+- (void) startCircuitAndTimer: (unsigned char)startTimer {
+    ePtr->container = (int) self.tag;
     currentIndex = 0;
     for (int i = 0; i < size; ++i) {
         [viewsArr[i] reset];
     }
-    if (group->type == ExerciseContainerTypeAMRAP && !groupTimer.active) {
-        timer_start(gPtr, 60 * group->reps);
+    if (group->type == ExerciseContainerTypeAMRAP && startTimer) {
+        unsigned int duration = 60 * group->reps;
+        startTimerForGroup(gPtr, duration, (int) self.tag);
+        notifications_schedule(duration, WorkoutNotificationAMRAPCompleted);
     }
     [viewsArr[0] handleTap];
 }
 
-- (void) stopExercise {
-    if (currentIndex >= size) return;
-    ExerciseView *v = viewsArr[currentIndex];
-    if (v->exercise->type == ExerciseTypeDuration) {
-        [self handleTap:v->button];
+- (void) restartExerciseAtIndex: (int)index moveToNext: (unsigned char)moveToNext refTime: (int64_t)refTime {
+    ExerciseView *v = nil;
+    unsigned char endExercise = 0;
+    pthread_mutex_lock(&sharedLock);
+
+    if (group && index == currentIndex) {
+        ExerciseView *temp = viewsArr[index];
+        if (temp->exercise->type == ExerciseTypeDuration) {
+            v = temp;
+            unsigned int diff = (unsigned int)(refTime - ePtr->refTime);
+            if (diff >= ePtr->duration) {
+                endExercise = 1;
+            } else {
+                unsigned int duration = ePtr->duration - diff;
+                startTimerForExercise(ePtr, duration, (int) v->button.tag);
+            }
+        }
+    }
+    pthread_mutex_unlock(&sharedLock);
+
+    if (v && endExercise) {
+        [self stopExerciseAtIndex:index moveToNext:moveToNext];
     }
 }
 
-- (void) finishGroup {
+- (void) restartGroupAtIndex: (int)index refTime: (int64_t)refTime {
+    WorkoutViewController *p = nil;
+    unsigned char endGroup = 0;
     pthread_mutex_lock(&sharedLock);
-    group = NULL;
+
+    if (group && index == self.tag && group->type == ExerciseContainerTypeAMRAP) {
+        p = parent;
+        unsigned int diff = (unsigned int)(refTime - gPtr->refTime);
+        if (diff >= gPtr->duration) {
+            endGroup = 1;
+        } else {
+            unsigned int duration = gPtr->duration - diff;
+            startTimerForGroup(gPtr, duration, (int) self.tag);
+        }
+    }
     pthread_mutex_unlock(&sharedLock);
-    [parent finishedExerciseGroup];
+
+    if (p && endGroup) {
+        [self finishGroupAtIndex:index];
+    }
+}
+
+- (void) stopExerciseAtIndex: (int)index moveToNext: (unsigned char)moveToNext {
+    ExerciseView *v = nil;
+    pthread_mutex_lock(&sharedLock);
+    if (group && index == currentIndex) {
+        ExerciseView *temp = viewsArr[index];
+        if (temp->exercise->type == ExerciseTypeDuration) {
+            v = temp;
+        }
+    }
+    pthread_mutex_unlock(&sharedLock);
+    if (v) {
+        if (moveToNext) {
+            [self handleTap:v->button];
+        } else {
+            v->button.userInteractionEnabled = true;
+        }
+    }
+}
+
+- (void) finishGroupAtIndex: (int)index {
+    WorkoutViewController *p = nil;
+    pthread_mutex_lock(&sharedLock);
+    if (group && index == self.tag && group->type == ExerciseContainerTypeAMRAP) {
+        p = parent;
+        group = NULL;
+    }
+    pthread_mutex_unlock(&sharedLock);
+    if (p) [p finishedExerciseGroup];
 }
 
 - (void) handleTap: (UIButton *)btn {
@@ -355,7 +424,7 @@ void *timer_loop(void *arg) {
                         break;
                 }
                 if (group) {
-                    [self startCircuit];
+                    [self startCircuitAndTimer:0];
                 }
             } else {
                 [viewsArr[currentIndex] handleTap];
@@ -367,26 +436,28 @@ void *timer_loop(void *arg) {
         [parent finishedExerciseGroup];
     }
 }
-
 @end
 
 @interface WorkoutViewController() {
     AddWorkoutViewModel *viewModel;
     UIStackView *groupsStack;
-    int currentIndex;
-    int size;
+    int workoutType;
+    WorkoutTimer timers[2];
+    struct savedInfo {
+        int groupTag;
+        struct exerciseInfo {
+            int group;
+            int tag;
+        } exerciseInfo;
+    } savedInfo;
 }
-
 @end
 
 @implementation WorkoutViewController
-
 - (id) initWithViewModel: (AddWorkoutViewModel *)model {
     if (!(self = [super initWithNibName:nil bundle:nil])) return nil;
     viewModel = model;
-    size = (int) workout_getNumberOfActivities(viewModel->workout);
-    groupTimer.parent = exerciseTimer.parent = self;
-    groupTimer.stop = exerciseTimer.stop = 0;
+    workoutType = viewModel->workout->type;
 
     struct sigaction sa;
     sa.sa_handler = handle_exercise_timer_interrupt;
@@ -396,34 +467,44 @@ void *timer_loop(void *arg) {
     sa.sa_handler = handle_group_timer_interrupt;
     sigaction(SIGUSR2, &sa, NULL);
 
-    pthread_mutex_init(&exerciseTimer.lock, NULL);
-    pthread_mutex_init(&groupTimer.lock, NULL);
-    pthread_cond_init(&exerciseTimer.cond, NULL);
-    pthread_cond_init(&groupTimer.cond, NULL);
+    WorkoutTimer groupTimer = { .type = TimerTypeGroup, .parent = self };
+    WorkoutTimer exerciseTimer = { .type = TimerTypeExercise, .parent = self };
+    memcpy(&timers[TimerTypeGroup], &groupTimer, sizeof(WorkoutTimer));
+    memcpy(&timers[TimerTypeExercise], &exerciseTimer, sizeof(WorkoutTimer));
+    for (int i = 0; i < 2; ++i) {
+        pthread_mutex_init(&timers[i].lock, NULL);
+        pthread_cond_init(&timers[i].cond, NULL);
+    }
+    gPtr = &timers[TimerTypeGroup];
+    ePtr = &timers[TimerTypeExercise];
     pthread_mutex_init(&sharedLock, NULL);
 
-    pthread_create(&exerciseTimerThread, NULL, timer_loop, &exerciseTimer);
-    pthread_create(&groupTimerThread, NULL, timer_loop, &groupTimer);
+    pthread_create(&exerciseTimerThread, NULL, timer_loop, &timers[TimerTypeExercise]);
+    pthread_create(&groupTimerThread, NULL, timer_loop, &timers[TimerTypeGroup]);
+    AppDelegate *delegate = (AppDelegate *) UIApplication.sharedApplication.delegate;
+    if (delegate) delegate->workoutVC = self;
     return self;
 }
 
 - (void) dealloc {
-    [groupsStack release];
-    if (exerciseTimer.active) pthread_kill(exerciseTimerThread, SIGUSR1);
-    if (groupTimer.active) pthread_kill(groupTimerThread, SIGUSR2);
-    timer_start(gPtr, 0);
-    timer_start(ePtr, 0);
+    AppDelegate *delegate = (AppDelegate *) UIApplication.sharedApplication.delegate;
+    if (delegate) delegate->workoutVC = nil;
+    if (timers[TimerTypeGroup].active == 1) pthread_kill(groupTimerThread, SIGUSR2);
+    if (timers[TimerTypeExercise].active == 1) pthread_kill(exerciseTimerThread, SIGUSR1);
+    startTimerForGroup(&timers[TimerTypeGroup], 0, 0);
+    startTimerForExercise(&timers[TimerTypeExercise], 0, 0);
     pthread_join(exerciseTimerThread, NULL);
     pthread_join(groupTimerThread, NULL);
     signal(SIGUSR1, SIG_DFL);
     signal(SIGUSR2, SIG_DFL);
-    pthread_cond_destroy(&groupTimer.cond);
-    pthread_cond_destroy(&exerciseTimer.cond);
-    pthread_mutex_destroy(&groupTimer.lock);
-    pthread_mutex_destroy(&exerciseTimer.lock);
+    for (int i = 0; i < 2; ++i) {
+        pthread_cond_destroy(&timers[i].cond);
+        pthread_mutex_destroy(&timers[i].lock);
+    }
+    gPtr = ePtr = NULL;
     pthread_mutex_destroy(&sharedLock);
-    groupTimer.parent = exerciseTimer.parent = nil;
-    groupTimer.active = exerciseTimer.active = 0;
+    notifications_cleanup();
+    [groupsStack release];
     [super dealloc];
 }
 
@@ -460,7 +541,9 @@ void *timer_loop(void *arg) {
             [groupsStack addArrangedSubview:d];
             [d release];
         }
-        ExerciseContainer *v = [[ExerciseContainer alloc] initWithGroup:workout_getExerciseGroup(w, i) parent:self];
+        ExerciseContainer *v = [[ExerciseContainer alloc] initWithGroup:workout_getExerciseGroup(w, i)];
+        v.tag = i;
+        v->parent = self;
         [groupsStack addArrangedSubview:v];
         [v release];
     }
@@ -510,7 +593,7 @@ void *timer_loop(void *arg) {
         [btn setTitleColor:UIColor.systemRedColor forState:UIControlStateNormal];
         ExerciseContainer *v =  (ExerciseContainer *) groupsStack.arrangedSubviews[0];
         viewModel->startTime = CFAbsoluteTimeGetCurrent();
-        [v startCircuit];
+        [v startCircuitAndTimer:1];
     } else {
         AddWorkoutViewModel *m = NULL;
         pthread_mutex_lock(&sharedLock);
@@ -530,18 +613,16 @@ void *timer_loop(void *arg) {
     AddWorkoutViewModel *m = NULL;
     pthread_mutex_lock(&sharedLock);
     if (viewModel) {
-        if (size - currentIndex <= 1) {
+        NSArray<UIView *> *views = groupsStack.arrangedSubviews;
+        if (views.count >= 3) {
+            ExerciseContainer *next = (ExerciseContainer *) views[2];
+            [views[0] removeFromSuperview];
+            [views[1] removeFromSuperview];
+            [next startCircuitAndTimer:1];
+        } else {
             m = viewModel;
             m->stopTime = CFAbsoluteTimeGetCurrent();
-            currentIndex = size;
             viewModel = NULL;
-        } else {
-            NSArray<UIView *> *views = groupsStack.arrangedSubviews;
-            [views[currentIndex] setHidden:true];
-            [views[currentIndex + 1] setHidden:true];
-            ExerciseContainer *next = (ExerciseContainer *) views[currentIndex + 2];
-            currentIndex += 2;
-            [next startCircuit];
         }
     }
     pthread_mutex_unlock(&sharedLock);
@@ -551,37 +632,65 @@ void *timer_loop(void *arg) {
     }
 }
 
-- (void) finishedWorkoutTimerForType: (unsigned char)type {
+- (void) finishedWorkoutTimerForType: (unsigned char)type container: (int)container exercise: (int)exercise {
     ExerciseContainer *v = nil;
-    UIButton *b = nil;
     pthread_mutex_lock(&sharedLock);
-
     if (viewModel) {
         NSArray<UIView *> *views = groupsStack.arrangedSubviews;
-        v = (ExerciseContainer *) views[currentIndex];
-
-        if (type == TimerTypeGroup) {
-            if (v->group->type != ExerciseContainerTypeAMRAP) {
-                v = nil;
-            }
-        } else {
-            if (v->currentIndex < v->size) {
-                ExerciseView *temp = v->viewsArr[v->currentIndex];
-                if (temp->exercise->type == ExerciseTypeDuration) {
-                    b = temp->button;
-                }
-            }
-        }
+        v = (ExerciseContainer *) views[0];
     }
     pthread_mutex_unlock(&sharedLock);
 
     if (v) {
-        if (type == TimerTypeGroup) {
-            [v finishGroup];
-        } else if (b) {
-            [v handleTap:b];
+        switch (type) {
+            case TimerTypeGroup:
+                [v finishGroupAtIndex:container];
+                break;
+            default:
+                [v stopExerciseAtIndex:exercise moveToNext:workoutType != WorkoutTypeEndurance];
+                break;
         }
     }
 }
 
+- (void) stopTimers {
+    pthread_mutex_lock(&sharedLock);
+    if (timers[TimerTypeGroup].active == 1) {
+        savedInfo.groupTag = timers[TimerTypeGroup].container;
+        pthread_kill(groupTimerThread, SIGUSR2);
+    } else {
+        savedInfo.groupTag = -1;
+    }
+
+    if (timers[TimerTypeExercise].active == 1) {
+        savedInfo.exerciseInfo.group = timers[TimerTypeExercise].container;
+        savedInfo.exerciseInfo.tag = timers[TimerTypeExercise].exercise;
+        pthread_kill(exerciseTimerThread, SIGUSR1);
+    } else {
+        savedInfo.exerciseInfo.group = savedInfo.exerciseInfo.tag = -1;
+    }
+    pthread_mutex_unlock(&sharedLock);
+}
+
+- (void) restartTimers {
+    ExerciseContainer *v = nil;
+    unsigned char eTimerActive = 0, gTimerActive = 0;
+    pthread_mutex_lock(&sharedLock);
+    if (viewModel) {
+        gTimerActive = savedInfo.groupTag >= 0;
+        eTimerActive = savedInfo.exerciseInfo.group >= 0;
+        v = (ExerciseContainer *) groupsStack.arrangedSubviews[0];
+    }
+    pthread_mutex_unlock(&sharedLock);
+
+    if (v) {
+        int64_t now = CFAbsoluteTimeGetCurrent();
+        if (eTimerActive && v.tag == savedInfo.exerciseInfo.group) {
+            [v restartExerciseAtIndex:savedInfo.exerciseInfo.tag moveToNext:workoutType != WorkoutTypeEndurance refTime:now];
+        }
+        if (gTimerActive) {
+            [v restartGroupAtIndex:savedInfo.groupTag refTime:now];
+        }
+    }
+}
 @end

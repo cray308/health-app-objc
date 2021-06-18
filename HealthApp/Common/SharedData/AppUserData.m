@@ -68,7 +68,7 @@ void appUserData_setWorkoutPlan(signed char plan) {
 
 unsigned char appUserData_hasWorkoutPlan(void) {
     if (appUserDataShared->currentPlan < 0) return 0;
-    return ((int) appUserDataShared->weekStart <= (int) CFAbsoluteTimeGetCurrent());
+    return ((int) appUserDataShared->planStart <= (int) CFAbsoluteTimeGetCurrent());
 }
 
 void appUserData_deleteSavedData(void) {

@@ -26,5 +26,6 @@ void addWorkoutViewModel_free(AddWorkoutViewModel *model);
 void addWorkoutViewModel_stoppedWorkout(AddWorkoutViewModel *model);
 void addWorkoutViewModel_completedWorkout(AddWorkoutViewModel *model, UIViewController *presenter, unsigned char showModalIfRequired);
 void addWorkoutViewModel_finishedAddingNewWeights(AddWorkoutViewModel *model, UIViewController *presenter, unsigned short *weights);
+void addWorkoutViewModel_stoppedWorkoutFromBackButton(AddWorkoutViewModel *model);
 
 #endif /* AddWorkoutViewModel_h */

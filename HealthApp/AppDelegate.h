@@ -6,10 +6,16 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "AppCoordinator.h"
+
+@class WorkoutViewController;
+typedef struct AppCoordinator AppCoordinator;
 
 @interface AppDelegate: UIResponder <UIApplicationDelegate>
+@end
 
-- (AppCoordinator *) getAppCoordinator;
-
+@interface AppDelegate() {
+    @public AppCoordinator *coordinator;
+    UIWindow *window;
+    @public WorkoutViewController *workoutVC;
+}
 @end

@@ -40,8 +40,6 @@ void addWorkoutCoordinator_free(AddWorkoutCoordinator *coordinator) {
 }
 
 void addWorkoutCoordinator_showUpdateWeightsModal(AddWorkoutCoordinator *coordinator) {
-    //coordinator->navigationController.topViewController;
-
     AddWorkoutUpdateMaxesViewController *modal = [[AddWorkoutUpdateMaxesViewController alloc] initWithViewModel:coordinator->viewModel];
     UINavigationController *container = [[UINavigationController alloc] initWithRootViewController:modal];
     [coordinator->navigationController presentViewController:container animated:true completion:nil];
@@ -54,8 +52,13 @@ void addWorkoutCoordinator_didFinishAddingWorkout(AddWorkoutCoordinator *coordin
         [presenter dismissViewControllerAnimated:true completion:nil];
         AppDelegate *delegate = (AppDelegate *) UIApplication.sharedApplication.delegate;
         if (delegate) {
-            appCoordinator_updateMaxWeights([delegate getAppCoordinator]);
+            appCoordinator_updateMaxWeights(delegate->coordinator);
         }
     }
     homeCoordinator_didFinishAddingWorkout(coordinator->parent, totalCompletedWorkouts);
+}
+
+void addWorkoutCoordinator_stopWorkoutFromBackButtonPress(AddWorkoutCoordinator *coordinator) {
+    addWorkoutViewModel_stoppedWorkoutFromBackButton(coordinator->viewModel);
+    addWorkoutCoordinator_free(coordinator);
 }

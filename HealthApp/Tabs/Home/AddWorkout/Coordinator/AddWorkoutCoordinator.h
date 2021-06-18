@@ -28,5 +28,6 @@ void addWorkoutCoordinator_free(AddWorkoutCoordinator *coordinator);
 
 void addWorkoutCoordinator_showUpdateWeightsModal(AddWorkoutCoordinator *coordinator);
 void addWorkoutCoordinator_didFinishAddingWorkout(AddWorkoutCoordinator *coordinator, UIViewController *presenter, int totalCompletedWorkouts);
+void addWorkoutCoordinator_stopWorkoutFromBackButtonPress(AddWorkoutCoordinator *coordinator);
 
 #endif /* AddWorkoutCoordinator_h */

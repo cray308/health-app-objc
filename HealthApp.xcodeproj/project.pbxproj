@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		6114EA752615544000B4A472 /* AreaChartRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6114EA742615544000B4A472 /* AreaChartRenderer.swift */; };
 		612FD048266DAF25002C9993 /* WorkoutData.plist in Resources */ = {isa = PBXBuildFile; fileRef = 612FD047266DAF25002C9993 /* WorkoutData.plist */; };
+		61321C7F267A9AF9003B46E7 /* NotificationHelpers.m in Sources */ = {isa = PBXBuildFile; fileRef = 61321C7E267A9AF9003B46E7 /* NotificationHelpers.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		613946912610F16700552422 /* ChartHelpers.m in Sources */ = {isa = PBXBuildFile; fileRef = 613946902610F16700552422 /* ChartHelpers.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		614DC13026082BBE00B9588E /* ViewControllerHelpers.m in Sources */ = {isa = PBXBuildFile; fileRef = 614DC12F26082BBE00B9588E /* ViewControllerHelpers.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		6151A323260F012300D88F1B /* CalendarDateHelpers.c in Sources */ = {isa = PBXBuildFile; fileRef = 6151A322260F012300D88F1B /* CalendarDateHelpers.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
@@ -150,6 +151,8 @@
 		6121523026690C94002BFA52 /* unordered_set.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = unordered_set.h; sourceTree = "<group>"; };
 		6121523126690CA6002BFA52 /* hash_table.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = hash_table.h; sourceTree = "<group>"; };
 		612FD047266DAF25002C9993 /* WorkoutData.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = WorkoutData.plist; sourceTree = "<group>"; };
+		61321C7D267A9AE7003B46E7 /* NotificationHelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NotificationHelpers.h; sourceTree = "<group>"; };
+		61321C7E267A9AF9003B46E7 /* NotificationHelpers.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NotificationHelpers.m; sourceTree = "<group>"; };
 		6139468F2610F15800552422 /* ChartHelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ChartHelpers.h; sourceTree = "<group>"; };
 		613946902610F16700552422 /* ChartHelpers.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ChartHelpers.m; sourceTree = "<group>"; };
 		614DC12826081E9E00B9588E /* ViewControllerHelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewControllerHelpers.h; sourceTree = "<group>"; };
@@ -849,6 +852,8 @@
 				613946902610F16700552422 /* ChartHelpers.m */,
 				614DC12826081E9E00B9588E /* ViewControllerHelpers.h */,
 				614DC12F26082BBE00B9588E /* ViewControllerHelpers.m */,
+				61321C7D267A9AE7003B46E7 /* NotificationHelpers.h */,
+				61321C7E267A9AF9003B46E7 /* NotificationHelpers.m */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -1018,6 +1023,7 @@
 				61808C942610FEEF00BAF7AB /* BarLineScatterCandleBubbleChartDataSet.swift in Sources */,
 				61808C3F2610FEEF00BAF7AB /* XAxisRenderer.swift in Sources */,
 				61808C812610FEEF00BAF7AB /* Legend.swift in Sources */,
+				61321C7F267A9AF9003B46E7 /* NotificationHelpers.m in Sources */,
 				61808CAA2610FEEF00BAF7AB /* BarChartData.swift in Sources */,
 				61808C6D2610FEEF00BAF7AB /* DefaultValueFormatter.swift in Sources */,
 				61808C8A2610FEEF00BAF7AB /* AnimatedZoomViewJob.swift in Sources */,
@@ -1199,7 +1205,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -1252,7 +1258,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -1307,6 +1313,7 @@
 				DEVELOPMENT_TEAM = 77YYP4528L;
 				GCC_CHAR_IS_UNSIGNED_CHAR = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = HealthApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (

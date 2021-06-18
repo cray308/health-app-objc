@@ -16,7 +16,9 @@ typedef struct AddWorkoutViewModel AddWorkoutViewModel;
 
 - (id) initWithViewModel: (AddWorkoutViewModel *)model;
 - (void) finishedExerciseGroup;
-- (void) finishedWorkoutTimerForType: (unsigned char)type;
+- (void) finishedWorkoutTimerForType: (unsigned char)type container: (int)container exercise: (int)exercise;
+- (void) stopTimers;
+- (void) restartTimers;
 
 @end
 

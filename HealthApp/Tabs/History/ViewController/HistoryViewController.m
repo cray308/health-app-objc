@@ -23,49 +23,73 @@ ChartLegendEntry *createLegendEntry(UIColor *color) {
     return entry;
 }
 
+void disableLineChartView(LineChartView *v) {
+    v.legend.enabled = false;
+    v.data = nil;
+    [v notifyDataSetChanged];
+}
+
 @interface ChartSeparatorView: UIView
-
 - (id) initWithTitle: (NSString *)title;
-
 @end
 
 @interface TotalWorkoutsChartView: UIView
-
 - (id) initWithViewModel: (HistoryGradientChartViewModel *)model;
 - (void) updateChart;
-- (void) disable;
-
 @end
 
 @interface DurationAreaChartView: UIView<ChartAxisValueFormatter, ChartValueFormatter>
-
 - (id) initWithViewModel: (HistoryAreaChartViewModel *)model;
 - (void) updateChart;
-- (void) disable;
-
 @end
 
 @interface LiftChartView: UIView
-
 - (id) initWithViewModel: (HistoryLiftChartViewModel *)model;
 - (void) updateChart;
-- (void) disable;
+@end
 
+@interface ChartSeparatorView()
+@end
+
+@interface TotalWorkoutsChartView() {
+    HistoryGradientChartViewModel *viewModel;
+    @public LineChartView *chartView;
+    LineChartData *chartData;
+    LineChartDataSet *dataSet;
+    ChartLimitLine *limitLine;
+    NSArray<ChartLegendEntry*> *legendEntries;
+}
+@end
+
+@interface DurationAreaChartView() {
+    HistoryAreaChartViewModel *viewModel;
+    @public LineChartView *chartView;
+    LineChartData *chartData;
+    LineChartDataSet *dataSets[5];
+    NSArray<ChartLegendEntry*> *legendEntries;
+    NSDateComponentsFormatter *yAxisFormatter;
+}
+@end
+
+@interface LiftChartView() {
+    HistoryLiftChartViewModel *viewModel;
+    @public LineChartView *chartView;
+    LineChartData *chartData;
+    LineChartDataSet *dataSets[4];
+    NSArray<ChartLegendEntry *> *legendEntries;
+}
 @end
 
 @interface HistoryViewController() {
     HistoryViewModel *viewModel;
-    UIScrollView *scrollView;
     UISegmentedControl *rangePicker;
     TotalWorkoutsChartView *gradientChart;
     DurationAreaChartView *areaChart;
     LiftChartView *liftChart;
 }
-
 @end
 
 @implementation HistoryViewController
-
 - (id) initWithViewModel: (HistoryViewModel *)model {
     if (!(self = [super initWithNibName:nil bundle:nil])) return nil;
     viewModel = model;
@@ -73,7 +97,6 @@ ChartLegendEntry *createLegendEntry(UIColor *color) {
 }
 
 - (void) dealloc {
-    [scrollView release];
     [rangePicker release];
     [gradientChart release];
     [areaChart release];
@@ -115,7 +138,7 @@ ChartLegendEntry *createLegendEntry(UIColor *color) {
     [vStack setLayoutMarginsRelativeArrangement:true];
     vStack.layoutMargins = UIEdgeInsetsMake(10, 8, 10, 8);
 
-    scrollView = [[UIScrollView alloc] initWithFrame:CGRectZero];
+    UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:CGRectZero];
     scrollView.translatesAutoresizingMaskIntoConstraints = false;
     scrollView.autoresizingMask = UIViewAutoresizingFlexibleHeight;
     scrollView.bounces = true;
@@ -143,6 +166,7 @@ ChartLegendEntry *createLegendEntry(UIColor *color) {
     [gradientChartSeparator release];
     [areaChartSeparator release];
     [liftChartSeparator release];
+    [scrollView release];
 }
 
 - (void) updateSelectedSegment: (UISegmentedControl *)sender {
@@ -158,32 +182,23 @@ ChartLegendEntry *createLegendEntry(UIColor *color) {
 
 - (void) updateCharts {
     if (!historyViewModel_shouldShowCharts(viewModel)) {
-        [gradientChart disable];
-        [areaChart disable];
-        [liftChart disable];
+        disableLineChartView(gradientChart->chartView);
+        disableLineChartView(areaChart->chartView);
+        disableLineChartView(liftChart->chartView);
         return;
     }
     [gradientChart updateChart];
     [areaChart updateChart];
     [liftChart updateChart];
 }
-
 @end
 
 #pragma mark - Separator View
 
-@interface ChartSeparatorView()
-@end
-
 @implementation ChartSeparatorView
-
 - (id) initWithTitle: (NSString *)title {
     if (!(self = [super initWithFrame:CGRectZero])) return nil;
-    [self setupSubviews:title];
-    return self;
-}
 
-- (void) setupSubviews: (NSString *)title {
     Divider *topDivider = [[Divider alloc] init];
     [self addSubview:topDivider];
 
@@ -207,29 +222,15 @@ ChartLegendEntry *createLegendEntry(UIColor *color) {
         [chartTitleLabel.heightAnchor constraintEqualToConstant:40],
         [chartTitleLabel.bottomAnchor constraintEqualToAnchor:self.bottomAnchor]
     ]];
-
     [topDivider release];
     [chartTitleLabel release];
+    return self;
 }
-
 @end
 
 #pragma mark - Total Workouts Chart
 
-@interface TotalWorkoutsChartView() {
-    int currentLegendWidth;
-    HistoryGradientChartViewModel *viewModel;
-    LineChartView *chartView;
-    LineChartData *chartData;
-    LineChartDataSet *dataSet;
-    ChartLimitLine *limitLine;
-    NSArray<ChartLegendEntry*> *legendEntries;
-}
-
-@end
-
 @implementation TotalWorkoutsChartView
-
 - (id) initWithViewModel: (HistoryGradientChartViewModel *)model {
     if (!(self = [super initWithFrame:CGRectZero])) return nil;
     viewModel = model;
@@ -318,40 +319,19 @@ ChartLegendEntry *createLegendEntry(UIColor *color) {
 
 - (void) layoutSubviews {
     int width = self.bounds.size.width;
-    if (width && width != currentLegendWidth) {
-        currentLegendWidth = width - 16;
-        chartView.legend.xEntrySpace = currentLegendWidth;
+    if (width && width != chartView.legend.xEntrySpace + 16) {
+        chartView.legend.xEntrySpace = width - 16;
     }
-}
-
-- (void) disable {
-    chartView.legend.enabled = false;
-    chartView.data = nil;
-    [chartView notifyDataSetChanged];
 }
 
 - (void) updateChart {
     historyViewModel_applyUpdatesForTotalWorkouts(viewModel, chartView, chartData, dataSet, limitLine, legendEntries);
 }
-
 @end
 
 #pragma mark - Duration Area Chart
 
-@interface DurationAreaChartView() {
-    int currentLegendWidth;
-    HistoryAreaChartViewModel *viewModel;
-    LineChartView *chartView;
-    LineChartData *chartData;
-    LineChartDataSet *dataSets[5];
-    NSArray<ChartLegendEntry*> *legendEntries;
-    NSDateComponentsFormatter *yAxisFormatter;
-}
-
-@end
-
 @implementation DurationAreaChartView
-
 - (id) initWithViewModel: (HistoryAreaChartViewModel *)model {
     if (!(self = [super initWithFrame:CGRectZero])) return nil;
     viewModel = model;
@@ -445,16 +425,9 @@ ChartLegendEntry *createLegendEntry(UIColor *color) {
 
 - (void) layoutSubviews {
     int width = self.bounds.size.width;
-    if (width && width != currentLegendWidth) {
-        currentLegendWidth = width - 16;
-        chartView.legend.xEntrySpace = currentLegendWidth;
+    if (width && width != chartView.legend.xEntrySpace + 16) {
+        chartView.legend.xEntrySpace = width - 16;
     }
-}
-
-- (void) disable {
-    chartView.legend.enabled = false;
-    chartView.data = nil;
-    [chartView notifyDataSetChanged];
 }
 
 - (void) updateChart {
@@ -470,24 +443,11 @@ ChartLegendEntry *createLegendEntry(UIColor *color) {
                        viewPortHandler: (ChartViewPortHandler * _Nullable)viewPortHandler {
     return [yAxisFormatter stringFromTimeInterval:60 * value];
 }
-
 @end
 
 #pragma mark - Lift Line Chart
 
-@interface LiftChartView() {
-    int currentLegendWidth;
-    HistoryLiftChartViewModel *viewModel;
-    LineChartView *chartView;
-    LineChartData *chartData;
-    LineChartDataSet *dataSets[4];
-    NSArray<ChartLegendEntry *> *legendEntries;
-}
-
-@end
-
 @implementation LiftChartView
-
 - (id) initWithViewModel: (HistoryLiftChartViewModel *)model {
     if (!(self = [super initWithFrame:CGRectZero])) return nil;
     viewModel = model;
@@ -508,20 +468,17 @@ ChartLegendEntry *createLegendEntry(UIColor *color) {
         dataSets[i].valueTextColor = UIColor.labelColor;
         dataSets[i].mode = LineChartModeLinear;
         dataSets[i].lineWidth = 2;
-        //dataSets[i].drawFilledEnabled = true;
         [dataSets[i] setCircleColor:colors[i]];
         dataSets[i].circleHoleColor = colors[i];
         dataSets[i].circleRadius = 2;
     }
     chartData = [[LineChartData alloc] initWithDataSets:@[dataSets[0], dataSets[1], dataSets[2], dataSets[3]]];
-    //[chartData setValueFormatter:self];
-
     [self setupSubviews];
     return self;
 }
 
 - (void) dealloc {
-    for (int i = 0; i < 4; ++i) { [dataSets[i] release]; }
+    for (int i = 0; i < 4; ++i) [dataSets[i] release];
     [chartData release];
     [chartView release];
     [super dealloc];
@@ -533,7 +490,6 @@ ChartLegendEntry *createLegendEntry(UIColor *color) {
     chartView.noDataText = @"No data is available";
 
     chartView.leftAxis.axisMinimum = 0;
-    //chartView.leftAxis.valueFormatter = self;
     chartView.rightAxis.enabled = false;
 
     chartView.legend.horizontalAlignment = ChartLegendHorizontalAlignmentCenter;
@@ -566,20 +522,12 @@ ChartLegendEntry *createLegendEntry(UIColor *color) {
 
 - (void) layoutSubviews {
     int width = self.bounds.size.width;
-    if (width && width != currentLegendWidth) {
-        currentLegendWidth = width - 16;
-        chartView.legend.xEntrySpace = currentLegendWidth;
+    if (width && width != chartView.legend.xEntrySpace + 16) {
+        chartView.legend.xEntrySpace = width - 16;
     }
-}
-
-- (void) disable {
-    chartView.legend.enabled = false;
-    chartView.data = nil;
-    [chartView notifyDataSetChanged];
 }
 
 - (void) updateChart {
     historyViewModel_applyUpdatesForLifts(viewModel, chartView, chartData, dataSets, legendEntries);
 }
-
 @end

@@ -19,10 +19,13 @@ static NSString *weekDays[] = {@"Monday", @"Tuesday", @"Wednesday", @"Thursday",
 static NSString *greetings[] = {@"Good morning!", @"Good afternoon!", @"Good evening!"};
 
 @interface DayWorkoutButton: UIView
+- (id) initWithTitle: (NSString *)title day: (NSString *)day;
+@end
 
-- (id) initWithTitle: (NSString *)title day: (NSString *)day tag: (int)tag target: (id)target action: (SEL)action;
-- (void) setEnabled: (bool)enabled;
-
+@interface DayWorkoutButton() {
+    @public UIView *checkbox;
+    @public UIButton *button;
+}
 @end
 
 @interface HomeViewController() {
@@ -30,11 +33,9 @@ static NSString *greetings[] = {@"Good morning!", @"Good afternoon!", @"Good eve
     UILabel *greetingLabel;
     UIStackView *weeklyWorkoutsStack;
 }
-
 @end
 
 @implementation HomeViewController
-
 - (id) initWithViewModel: (HomeViewModel *)model {
     if (!(self = [super initWithNibName:nil bundle:nil])) return nil;
     viewModel = model;
@@ -61,7 +62,7 @@ static NSString *greetings[] = {@"Good morning!", @"Good afternoon!", @"Good eve
 - (void) viewWillAppear: (BOOL)animated {
     [super viewWillAppear:animated];
     if (viewModel->delegate->childCoordinator) {
-        addWorkoutCoordinator_free(viewModel->delegate->childCoordinator);
+        addWorkoutCoordinator_stopWorkoutFromBackButtonPress(viewModel->delegate->childCoordinator);
         viewModel->delegate->childCoordinator = NULL;
     }
     if (homeViewModel_updateTimeOfDay(viewModel)) {
@@ -176,7 +177,10 @@ static NSString *greetings[] = {@"Good morning!", @"Good afternoon!", @"Good eve
     CFStringRef *names = viewModel->workoutNames;
     for (int i = 0; i < 7; ++i) {
         if (!names[i]) continue;
-        DayWorkoutButton *dayBtn = [[DayWorkoutButton alloc] initWithTitle:(__bridge NSString*)names[i] day:weekDays[i] tag:i target:self action:@selector(workoutButtonTapped:)];
+        DayWorkoutButton *dayBtn = [[DayWorkoutButton alloc] initWithTitle:(__bridge NSString*)names[i] day:weekDays[i]];
+        dayBtn.tag = i;
+        dayBtn->button.tag = i;
+        [dayBtn->button addTarget:self action:@selector(workoutButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
         [weeklyWorkoutsStack addArrangedSubview:dayBtn];
         [dayBtn release];
     }
@@ -198,10 +202,12 @@ static NSString *greetings[] = {@"Good morning!", @"Good afternoon!", @"Good eve
     const unsigned char completed = appUserDataShared->completedWorkouts;
 
     for (int i = 2; i < len; ++i) {
-        DayWorkoutButton *btn = (DayWorkoutButton *) subviews[i];
-        if (!btn) continue;
-        int day = (int) btn.tag;
-        [btn setEnabled:!(completed & (1 << day))];
+        DayWorkoutButton *v = (DayWorkoutButton *) subviews[i];
+        if (!v) continue;
+        int day = (int) v.tag;
+        unsigned char enabled = !(completed & (1 << day));
+        [v->button setEnabled:enabled];
+        v->checkbox.backgroundColor = enabled ? UIColor.systemGrayColor : UIColor.systemGreenColor;
     }
 }
 
@@ -233,21 +239,12 @@ static NSString *greetings[] = {@"Good morning!", @"Good afternoon!", @"Good eve
 - (void) updateGreeting {
     greetingLabel.text = greetings[viewModel->timeOfDay];
 }
-
 @end
 
 #pragma mark - Day Workout Button
 
-@interface DayWorkoutButton() {
-    UIView *checkbox;
-    UIButton *button;
-}
-
-@end
-
 @implementation DayWorkoutButton
-
-- (id) initWithTitle: (NSString *)title day: (NSString *)day tag: (int)tag target: (id)target action: (SEL)action {
+- (id) initWithTitle: (NSString *)title day: (NSString *)day {
     if (!(self = [super initWithFrame:CGRectZero])) return nil;
     button = [UIButton buttonWithType:UIButtonTypeSystem];
     button.translatesAutoresizingMaskIntoConstraints = false;
@@ -257,9 +254,6 @@ static NSString *greetings[] = {@"Good morning!", @"Good afternoon!", @"Good eve
     button.titleLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleHeadline];
     button.backgroundColor = UIColor.secondarySystemGroupedBackgroundColor;
     button.layer.cornerRadius = 5;
-    button.tag = tag;
-    self.tag = tag;
-    [button addTarget:target action:action forControlEvents:UIControlEventTouchUpInside];
 
     UILabel *topLabel = [[UILabel alloc] initWithFrame:CGRectZero];
     topLabel.translatesAutoresizingMaskIntoConstraints = false;
@@ -302,10 +296,4 @@ static NSString *greetings[] = {@"Good morning!", @"Good afternoon!", @"Good eve
     [checkbox release];
     [super dealloc];
 }
-
-- (void) setEnabled: (bool)enabled {
-    [button setEnabled:enabled];
-    checkbox.backgroundColor = enabled ? UIColor.systemGrayColor : UIColor.systemGreenColor;
-}
-
 @end

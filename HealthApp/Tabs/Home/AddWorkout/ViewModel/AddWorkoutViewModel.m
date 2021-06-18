@@ -83,3 +83,10 @@ void addWorkoutViewModel_finishedAddingNewWeights(AddWorkoutViewModel *model, UI
     appUserData_updateWeightMaxes(weights);
     addWorkoutViewModel_completedWorkout(model, presenter, 0);
 }
+
+void addWorkoutViewModel_stoppedWorkoutFromBackButton(AddWorkoutViewModel *model) {
+    if (model->startTime) {
+        model->stopTime = CFAbsoluteTimeGetCurrent();
+        updateStoredData(model, model->workout->type);
+    }
+}
