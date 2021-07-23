@@ -12,7 +12,7 @@
 @interface AddWorkoutUpdateMaxesViewController() {
     AddWorkoutViewModel *viewModel;
     UITextField *textFields[4];
-    unsigned char validInput[4];
+    bool validInput[4];
     unsigned short results[4];
     UIButton *finishButton;
 }
@@ -121,7 +121,7 @@
     if (!CFStringGetLength(newText)) {
         CFRelease(newText);
         [finishButton setEnabled:false];
-        validInput[i] = 0;
+        validInput[i] = false;
         return true;
     }
 
@@ -130,11 +130,11 @@
 
     if (newWeight < 0 || newWeight > 999) {
         [finishButton setEnabled:false];
-        validInput[i] = 0;
+        validInput[i] = false;
         return true;
     }
 
-    validInput[i] = 1;
+    validInput[i] = true;
     results[i] = (unsigned short) newWeight;
 
     for (i = 0; i < 4; ++i) {

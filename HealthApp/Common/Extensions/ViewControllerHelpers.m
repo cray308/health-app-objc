@@ -63,14 +63,14 @@ void viewController_showAlert(UIViewController *presenter, AlertDetails *details
     [presenter presentViewController:ctrl animated:true completion:nil];
 }
 
-unsigned char viewController_validateNumericInput(CFStringRef str) {
+bool viewController_validateNumericInput(CFStringRef str) {
     long len = CFStringGetLength(str);
-    if (!len) return 1;
+    if (!len) return true;
 
     CFStringInlineBuffer buf;
     CFStringInitInlineBuffer(str, &buf, CFRangeMake(0, len));
     for (long i = 0; i < len; ++i) {
-        if (!uset_contains(char, validChars, CFStringGetCharacterFromInlineBuffer(&buf, i))) return 0;
+        if (!uset_contains(char, validChars, CFStringGetCharacterFromInlineBuffer(&buf, i))) return false;
     }
-    return 1;
+    return true;
 }

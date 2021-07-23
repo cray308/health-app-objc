@@ -6,12 +6,22 @@
 //
 
 #import <Foundation/Foundation.h>
+#include "Exercise.h"
 #import "AppUserData.h"
 #include "CalendarDateHelpers.h"
 
 UserInfo *appUserDataShared = NULL;
 
-static CFStringRef const keys[] = {CFSTR("planStart"), CFSTR("weekStart"), CFSTR("currentPlan"), CFSTR("completedWorkouts"), CFSTR("squatMax"), CFSTR("pullUpMax"), CFSTR("benchMax"), CFSTR("deadliftMax")};
+static CFStringRef const keys[] = {
+    CFSTR("planStart"),
+    CFSTR("weekStart"),
+    CFSTR("currentPlan"),
+    CFSTR("completedWorkouts"),
+    CFSTR("squatMax"),
+    CFSTR("pullUpMax"),
+    CFSTR("benchMax"),
+    CFSTR("deadliftMax")
+};
 
 UserInfo *userInfo_initFromStorage(void) {
     CFDictionaryRef savedInfo = (__bridge CFDictionaryRef)[NSUserDefaults.standardUserDefaults dictionaryForKey:@"userinfo"];
@@ -29,21 +39,27 @@ UserInfo *userInfo_initFromStorage(void) {
     CFNumberGetValue(value, kCFNumberCharType, &info->currentPlan);
     value = CFDictionaryGetValue(savedInfo, keys[3]);
     CFNumberGetValue(value, kCFNumberCharType, &info->completedWorkouts);
-    value = CFDictionaryGetValue(savedInfo, keys[4]);
-    CFNumberGetValue(value, kCFNumberShortType, &info->squatMax);
-    value = CFDictionaryGetValue(savedInfo, keys[5]);
-    CFNumberGetValue(value, kCFNumberShortType, &info->pullUpMax);
-    value = CFDictionaryGetValue(savedInfo, keys[6]);
-    CFNumberGetValue(value, kCFNumberShortType, &info->benchMax);
-    value = CFDictionaryGetValue(savedInfo, keys[7]);
-    CFNumberGetValue(value, kCFNumberShortType, &info->deadliftMax);
+    for (int i = 0; i < 4; ++i) {
+        value = CFDictionaryGetValue(savedInfo, keys[4 + i]);
+        CFNumberGetValue(value, kCFNumberShortType, &info->liftMaxes[i]);
+    }
     return info;
 }
 
 void userInfo_saveData(UserInfo *info) {
-    CFNumberRef values[] = {CFNumberCreate(NULL, kCFNumberDoubleType, &info->planStart), CFNumberCreate(NULL, kCFNumberDoubleType, &info->weekStart), CFNumberCreate(NULL, kCFNumberCharType, &info->currentPlan), CFNumberCreate(NULL, kCFNumberCharType, &info->completedWorkouts), CFNumberCreate(NULL, kCFNumberShortType, &info->squatMax), CFNumberCreate(NULL, kCFNumberShortType, &info->pullUpMax), CFNumberCreate(NULL, kCFNumberShortType, &info->benchMax), CFNumberCreate(NULL, kCFNumberShortType, &info->deadliftMax)};
+    CFNumberRef values[] = {
+        CFNumberCreate(NULL, kCFNumberDoubleType, &info->planStart),
+        CFNumberCreate(NULL, kCFNumberDoubleType, &info->weekStart),
+        CFNumberCreate(NULL, kCFNumberCharType, &info->currentPlan),
+        CFNumberCreate(NULL, kCFNumberCharType, &info->completedWorkouts),
+        CFNumberCreate(NULL, kCFNumberShortType, &info->liftMaxes[LiftTypeSquat]),
+        CFNumberCreate(NULL, kCFNumberShortType, &info->liftMaxes[LiftTypePullup]),
+        CFNumberCreate(NULL, kCFNumberShortType, &info->liftMaxes[LiftTypeBench]),
+        CFNumberCreate(NULL, kCFNumberShortType, &info->liftMaxes[LiftTypeDeadlift])
+    };
 
-    CFDictionaryRef dict = CFDictionaryCreate(NULL, (const void **)keys, (const void **)values, 8, &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+    CFDictionaryRef dict = CFDictionaryCreate(NULL, (const void **)keys, (const void **)values, 8,
+                                              &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
 
     [NSUserDefaults.standardUserDefaults setObject:(__bridge NSDictionary*)dict forKey:@"userinfo"];
     [NSUserDefaults.standardUserDefaults synchronize];
@@ -59,15 +75,16 @@ void appUserData_free(void) {
 void appUserData_setWorkoutPlan(signed char plan) {
     if (plan >= 0 && plan != appUserDataShared->currentPlan) {
         CFCalendarRef calendar = CFCalendarCopyCurrent();
-        appUserDataShared->planStart = date_calcStartOfWeek(CFAbsoluteTimeGetCurrent(), calendar, DateSearchDirection_Next, 1);
+        appUserDataShared->planStart = date_calcStartOfWeek(CFAbsoluteTimeGetCurrent(), calendar,
+                                                            DateSearchDirection_Next, 1);
         CFRelease(calendar);
     }
     appUserDataShared->currentPlan = plan;
     userInfo_saveData(appUserDataShared);
 }
 
-unsigned char appUserData_hasWorkoutPlan(void) {
-    if (appUserDataShared->currentPlan < 0) return 0;
+bool appUserData_hasWorkoutPlan(void) {
+    if (appUserDataShared->currentPlan < 0) return false;
     return ((int) appUserDataShared->planStart <= (int) CFAbsoluteTimeGetCurrent());
 }
 
@@ -110,17 +127,10 @@ unsigned int appUserData_getWeekInPlan(void) {
 }
 
 void appUserData_updateWeightMaxes(unsigned short *weights) {
-    if (weights[0] > appUserDataShared->squatMax) {
-        appUserDataShared->squatMax = weights[0];
-    }
-    if (weights[1] > appUserDataShared->pullUpMax) {
-        appUserDataShared->pullUpMax = weights[1];
-    }
-    if (weights[2] > appUserDataShared->benchMax) {
-        appUserDataShared->benchMax = weights[2];
-    }
-    if (weights[3] > appUserDataShared->deadliftMax) {
-        appUserDataShared->deadliftMax = weights[3];
+    for (int i = 0; i < 4; ++i) {
+        if (weights[i] > appUserDataShared->liftMaxes[i]) {
+            appUserDataShared->liftMaxes[i] = weights[i];
+        }
     }
     userInfo_saveData(appUserDataShared);
 }

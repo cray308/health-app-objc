@@ -213,14 +213,14 @@ void historyViewModel_formatDataForTimeRange(HistoryViewModel *model, int index)
     }
 }
 
-unsigned char historyViewModel_shouldShowCharts(HistoryViewModel *model) {
+bool historyViewModel_shouldShowCharts(HistoryViewModel *model) {
     return model->data->size > 0;
 }
 
 void historyViewModel_applyUpdatesForTotalWorkouts(HistoryGradientChartViewModel *model, LineChartView *view, LineChartData *data,
                                                    LineChartDataSet *dataSet, ChartLimitLine *limitLine, NSArray<ChartLegendEntry*> *legendEntries) {
     int entryCount = array_size(model->entries);
-    unsigned char isSmallDataSet = entryCount < SmallDataSetCutoff;
+    bool isSmallDataSet = entryCount < SmallDataSetCutoff;
     dataSet.drawCirclesEnabled = isSmallDataSet;
     [dataSet replaceEntries:[NSArray arrayWithObjects:model->entries->arr count:entryCount]];
     [data setDrawValues:isSmallDataSet];
@@ -244,7 +244,7 @@ void historyViewModel_applyUpdatesForTotalWorkouts(HistoryGradientChartViewModel
 void historyViewModel_applyUpdatesForDurations(HistoryAreaChartViewModel *model, LineChartView *view, LineChartData *data,
                                                LineChartDataSet **dataSets, NSArray<ChartLegendEntry*> *legendEntries) {
     int entryCount = array_size(model->entries[0]);
-    unsigned char isSmallDataSet = entryCount < SmallDataSetCutoff;
+    bool isSmallDataSet = entryCount < SmallDataSetCutoff;
 
     [dataSets[0] replaceEntries:[NSArray arrayWithObjects:model->entries[0]->arr count:entryCount]];
     for (int i = 1; i < 5; ++i) {
@@ -280,7 +280,7 @@ void historyViewModel_applyUpdatesForDurations(HistoryAreaChartViewModel *model,
 void historyViewModel_applyUpdatesForLifts(HistoryLiftChartViewModel *model, LineChartView *view, LineChartData *data,
                                            LineChartDataSet **dataSets, NSArray<ChartLegendEntry*> *legendEntries) {
     int entryCount = array_size(model->entries[0]);
-    unsigned char isSmallDataSet = entryCount < SmallDataSetCutoff;
+    bool isSmallDataSet = entryCount < SmallDataSetCutoff;
 
     for (int i = 0; i < 4; ++i) {
         dataSets[i].drawCirclesEnabled = isSmallDataSet;

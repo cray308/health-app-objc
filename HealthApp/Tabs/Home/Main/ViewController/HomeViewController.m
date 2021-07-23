@@ -205,7 +205,7 @@ static NSString *greetings[] = {@"Good morning!", @"Good afternoon!", @"Good eve
         DayWorkoutButton *v = (DayWorkoutButton *) subviews[i];
         if (!v) continue;
         int day = (int) v.tag;
-        unsigned char enabled = !(completed & (1 << day));
+        bool enabled = !(completed & (1 << day));
         [v->button setEnabled:enabled];
         v->checkbox.backgroundColor = enabled ? UIColor.systemGrayColor : UIColor.systemGreenColor;
     }

@@ -19,7 +19,7 @@
     SettingsViewModel *viewModel;
     UISegmentedControl *planPicker;
     UITextField *textFields[4];
-    unsigned char validInput[4];
+    bool validInput[4];
     unsigned short results[4];
     UIButton *saveButton;
 }
@@ -176,7 +176,7 @@
     results[1] = appUserDataShared->pullUpMax;
     results[2] = appUserDataShared->benchMax;
     results[3] = appUserDataShared->deadliftMax;
-    memset(validInput, 1, 4 * sizeof(unsigned char));
+    memset(validInput, true, 4 * sizeof(bool));
     [saveButton setEnabled:true];
 }
 
@@ -229,7 +229,7 @@
     if (!CFStringGetLength(newText)) {
         CFRelease(newText);
         [saveButton setEnabled:false];
-        validInput[i] = 0;
+        validInput[i] = false;
         return true;
     }
 
@@ -238,11 +238,11 @@
 
     if (newWeight < 0 || newWeight > 999) {
         [saveButton setEnabled:false];
-        validInput[i] = 0;
+        validInput[i] = false;
         return true;
     }
 
-    validInput[i] = 1;
+    validInput[i] = true;
     results[i] = (unsigned short) newWeight;
 
     for (i = 0; i < 4; ++i) {

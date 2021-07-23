@@ -71,16 +71,16 @@ void homeViewModel_handleDayWorkoutButtonTap(HomeViewModel *model, int index) {
     if (w) homeCoordinator_navigateToAddWorkout(model->delegate, nil, w);
 }
 
-unsigned char homeViewModel_hasWorkoutsForThisWeek(HomeViewModel *model) {
+bool homeViewModel_hasWorkoutsForThisWeek(HomeViewModel *model) {
     CFStringRef *names = model->workoutNames;
     for (int i = 0; i < 7; ++i) {
-        if (names[i]) return 1;
+        if (names[i]) return true;
     }
-    return 0;
+    return false;
 }
 
-unsigned char homeViewModel_shouldShowConfetti(HomeViewModel *model, int totalCompletedWorkouts) {
-    if (!totalCompletedWorkouts) return 0;
+bool homeViewModel_shouldShowConfetti(HomeViewModel *model, int totalCompletedWorkouts) {
+    if (!totalCompletedWorkouts) return false;
 
     int nWorkouts = 0;
     CFStringRef *names = model->workoutNames;

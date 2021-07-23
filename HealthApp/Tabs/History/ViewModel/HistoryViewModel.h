@@ -57,7 +57,7 @@ void historyViewModel_free(HistoryViewModel *model);
 void historyViewModel_fetchData(HistoryViewModel *model);
 void historyViewModel_formatDataForTimeRange(HistoryViewModel *model, int index);
 
-unsigned char historyViewModel_shouldShowCharts(HistoryViewModel *model);
+bool historyViewModel_shouldShowCharts(HistoryViewModel *model);
 void historyViewModel_applyUpdatesForTotalWorkouts(HistoryGradientChartViewModel *model, LineChartView *view, LineChartData *data, LineChartDataSet *dataSet, ChartLimitLine *limitLine, NSArray<ChartLegendEntry*> *legendEntries);
 void historyViewModel_applyUpdatesForDurations(HistoryAreaChartViewModel *model, LineChartView *view, LineChartData *data, LineChartDataSet **dataSets, NSArray<ChartLegendEntry*> *legendEntries);
 void historyViewModel_applyUpdatesForLifts(HistoryLiftChartViewModel *model, LineChartView *view, LineChartData *data, LineChartDataSet **dataSets, NSArray<ChartLegendEntry*> *legendEntries);

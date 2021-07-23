@@ -9,12 +9,12 @@
 #define AppUserData_h
 
 typedef struct UserInfo UserInfo;
-
 struct UserInfo {
     double planStart;
     double weekStart;
     signed char currentPlan;
     unsigned char completedWorkouts;
+    unsigned short liftMaxes[4];
     unsigned short squatMax, pullUpMax, benchMax, deadliftMax;
 };
 
@@ -29,7 +29,7 @@ void appUserData_deleteSavedData(void);
 void appUserData_handleNewWeek(double weekStart);
 unsigned char appUserData_addCompletedWorkout(unsigned char day);
 unsigned int appUserData_getWeekInPlan(void);
-unsigned char appUserData_hasWorkoutPlan(void);
+bool appUserData_hasWorkoutPlan(void);
 void appUserData_updateWeightMaxes(unsigned short *weights);
 
 #endif /* AppUserData_h */

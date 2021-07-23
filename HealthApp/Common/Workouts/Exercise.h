@@ -11,6 +11,13 @@
 #include <CoreFoundation/CoreFoundation.h>
 
 typedef enum {
+    LiftTypeSquat,
+    LiftTypePullup,
+    LiftTypeBench,
+    LiftTypeDeadlift
+} LiftType;
+
+typedef enum {
     ExerciseTypeReps,
     ExerciseTypeDuration,
     ExerciseTypeDistance

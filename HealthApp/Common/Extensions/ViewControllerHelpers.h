@@ -26,6 +26,6 @@ struct AlertDetails {
 AlertDetails *alertDetails_init(CFStringRef title, CFStringRef message);
 
 void viewController_showAlert(UIViewController *presenter, AlertDetails *details, UIAlertAction *defaultAction, UIAlertAction *secondaryAction);
-unsigned char viewController_validateNumericInput(CFStringRef str);
+bool viewController_validateNumericInput(CFStringRef str);
 
 #endif /* ViewControllerHelpers_h */

@@ -8,9 +8,11 @@
 #import "WorkoutViewController.h"
 #import "AddWorkoutViewModel.h"
 #import "Divider.h"
-#import "NotificationHelpers.h"
 #import "AppDelegate.h"
+#include <UserNotifications/UserNotifications.h>
 #include <pthread.h>
+
+#define _U_ __attribute__((__unused__))
 
 @interface ExerciseView: UIView
 - (id) initWithExercise: (ExerciseEntry *)exercise;
@@ -20,11 +22,11 @@
 
 @interface ExerciseContainer: UIView
 - (id) initWithGroup: (ExerciseGroup *)exerciseGroup;
-- (void) startCircuitAndTimer: (unsigned char)startTimer;
+- (void) startCircuitAndTimer: (bool)startTimer;
 - (void) handleTap: (UIButton *)btn;
-- (void) stopExerciseAtIndex: (int)index moveToNext: (unsigned char)moveToNext;
+- (void) stopExerciseAtIndex: (int)index moveToNext: (bool)moveToNext;
 - (void) finishGroupAtIndex: (int)index;
-- (void) restartExerciseAtIndex: (int)index moveToNext: (unsigned char)moveToNext refTime: (int64_t)refTime;
+- (void) restartExerciseAtIndex: (int)index moveToNext: (bool)moveToNext refTime: (int64_t)refTime;
 - (void) restartGroupAtIndex: (int)index refTime: (int64_t)refTime;
 @end
 
@@ -54,11 +56,16 @@ typedef enum {
     TimerTypeExercise
 } TimerType;
 
+typedef enum {
+    WorkoutNotificationExerciseCompleted,
+    WorkoutNotificationAMRAPCompleted
+} WorkoutNotification;
+
 typedef struct {
     WorkoutViewController *parent;
     const unsigned char type;
     unsigned char active;
-    unsigned char stop;
+    bool stop;
     int container;
     int exercise;
     unsigned int duration;
@@ -126,6 +133,29 @@ void *timer_loop(void *arg) {
         }
     }
     return NULL;
+}
+
+void scheduleNotification(unsigned int secondsFromNow, unsigned char messageType) {
+    static CFStringRef const messages[] = {CFSTR("Finished exercise!"), CFSTR("Finished AMRAP circuit!")};
+    static CFStringRef const idFormat = CFSTR("%u");
+    static unsigned int identifier = 0;
+    CFStringRef idString = CFStringCreateWithFormat(NULL, NULL, idFormat, identifier++);
+
+    UNMutableNotificationContent *content = [[UNMutableNotificationContent alloc] init];
+    content.title = @"Workout Update";
+    content.subtitle = (__bridge NSString*) messages[messageType];
+    content.sound = UNNotificationSound.defaultSound;
+
+    UNTimeIntervalNotificationTrigger *trigger = [UNTimeIntervalNotificationTrigger triggerWithTimeInterval:secondsFromNow
+                                                                                                    repeats:false];
+    UNNotificationRequest *req = [UNNotificationRequest requestWithIdentifier:(__bridge NSString*)idString
+                                                                      content:content
+                                                                      trigger:trigger];
+
+    [UNUserNotificationCenter.currentNotificationCenter addNotificationRequest:req
+                                                         withCompletionHandler:^(NSError *_Nullable error _U_) {}];
+    CFRelease(idString);
+    [content release];
 }
 
 @implementation ExerciseView
@@ -200,7 +230,7 @@ void *timer_loop(void *arg) {
         if (exercise->type == ExerciseTypeDuration) { // start timer
             button.userInteractionEnabled = false;
             startTimerForExercise(ePtr, exercise->reps, (int) button.tag);
-            notifications_schedule(exercise->reps, WorkoutNotificationExerciseCompleted);
+            scheduleNotification(exercise->reps, WorkoutNotificationExerciseCompleted);
         }
     } else {
         button.userInteractionEnabled = true;
@@ -298,7 +328,7 @@ void *timer_loop(void *arg) {
     [exerciseStack release];
 }
 
-- (void) startCircuitAndTimer: (unsigned char)startTimer {
+- (void) startCircuitAndTimer: (bool)startTimer {
     ePtr->container = (int) self.tag;
     currentIndex = 0;
     for (int i = 0; i < size; ++i) {
@@ -307,14 +337,14 @@ void *timer_loop(void *arg) {
     if (group->type == ExerciseContainerTypeAMRAP && startTimer) {
         unsigned int duration = 60 * group->reps;
         startTimerForGroup(gPtr, duration, (int) self.tag);
-        notifications_schedule(duration, WorkoutNotificationAMRAPCompleted);
+        scheduleNotification(duration, WorkoutNotificationAMRAPCompleted);
     }
     [viewsArr[0] handleTap];
 }
 
-- (void) restartExerciseAtIndex: (int)index moveToNext: (unsigned char)moveToNext refTime: (int64_t)refTime {
+- (void) restartExerciseAtIndex: (int)index moveToNext: (bool)moveToNext refTime: (int64_t)refTime {
     ExerciseView *v = nil;
-    unsigned char endExercise = 0;
+    bool endExercise = false;
     pthread_mutex_lock(&sharedLock);
 
     if (group && index == currentIndex) {
@@ -323,7 +353,7 @@ void *timer_loop(void *arg) {
             v = temp;
             unsigned int diff = (unsigned int)(refTime - ePtr->refTime);
             if (diff >= ePtr->duration) {
-                endExercise = 1;
+                endExercise = true;
             } else {
                 unsigned int duration = ePtr->duration - diff;
                 startTimerForExercise(ePtr, duration, (int) v->button.tag);
@@ -339,14 +369,14 @@ void *timer_loop(void *arg) {
 
 - (void) restartGroupAtIndex: (int)index refTime: (int64_t)refTime {
     WorkoutViewController *p = nil;
-    unsigned char endGroup = 0;
+    bool endGroup = false;
     pthread_mutex_lock(&sharedLock);
 
     if (group && index == self.tag && group->type == ExerciseContainerTypeAMRAP) {
         p = parent;
         unsigned int diff = (unsigned int)(refTime - gPtr->refTime);
         if (diff >= gPtr->duration) {
-            endGroup = 1;
+            endGroup = true;
         } else {
             unsigned int duration = gPtr->duration - diff;
             startTimerForGroup(gPtr, duration, (int) self.tag);
@@ -359,7 +389,7 @@ void *timer_loop(void *arg) {
     }
 }
 
-- (void) stopExerciseAtIndex: (int)index moveToNext: (unsigned char)moveToNext {
+- (void) stopExerciseAtIndex: (int)index moveToNext: (bool)moveToNext {
     ExerciseView *v = nil;
     pthread_mutex_lock(&sharedLock);
     if (group && index == currentIndex) {
@@ -390,7 +420,7 @@ void *timer_loop(void *arg) {
 }
 
 - (void) handleTap: (UIButton *)btn {
-    unsigned char isDone = 0;
+    bool isDone = false;
     pthread_mutex_lock(&sharedLock);
     if (group && (int) btn.tag == currentIndex) {
         ExerciseView *v = viewsArr[currentIndex];
@@ -399,7 +429,7 @@ void *timer_loop(void *arg) {
                 switch (group->type) {
                     case ExerciseContainerTypeRounds:
                         if (++group->completedReps == group->reps) {
-                            isDone = 1;
+                            isDone = true;
                             group = NULL;
                         } else {
                             CFStringRef headerStr = exerciseGroup_createHeaderText(group);
@@ -410,7 +440,7 @@ void *timer_loop(void *arg) {
 
                     case ExerciseContainerTypeDecrement:
                         if (--group->completedReps == 0) {
-                            isDone = 1;
+                            isDone = true;
                             group = NULL;
                         } else {
                             for (int i = 0; i < size; ++i) {
@@ -503,7 +533,8 @@ void *timer_loop(void *arg) {
     }
     gPtr = ePtr = NULL;
     pthread_mutex_destroy(&sharedLock);
-    notifications_cleanup();
+    [UNUserNotificationCenter.currentNotificationCenter removeAllPendingNotificationRequests];
+    [UNUserNotificationCenter.currentNotificationCenter removeAllDeliveredNotifications];
     [groupsStack release];
     [super dealloc];
 }
@@ -674,7 +705,7 @@ void *timer_loop(void *arg) {
 
 - (void) restartTimers {
     ExerciseContainer *v = nil;
-    unsigned char eTimerActive = 0, gTimerActive = 0;
+    bool eTimerActive = false, gTimerActive = false;
     pthread_mutex_lock(&sharedLock);
     if (viewModel) {
         gTimerActive = savedInfo.groupTag >= 0;

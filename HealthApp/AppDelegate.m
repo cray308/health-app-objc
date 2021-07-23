@@ -8,21 +8,23 @@
 #import "AppDelegate.h"
 #import "AppCoordinator.h"
 #import "AppUserData.h"
-#import "NotificationHelpers.h"
 #import "PersistenceService.h"
 #import "ViewControllerHelpers.h"
 #import "WorkoutViewController.h"
 #include "CalendarDateHelpers.h"
+#include <UserNotifications/UserNotifications.h>
 
 #if DEBUG
 #import "WeeklyData+CoreDataClass.h"
 #endif
 
+#define _U_ __attribute__((__unused__))
+
 void setupData(void);
 
 @implementation AppDelegate
 
--(void) dealloc {
+- (void) dealloc {
     appUserData_free();
     persistenceService_free();
     viewControllerHelper_cleanupValidNumericChars();
@@ -32,24 +34,28 @@ void setupData(void);
     [super dealloc];
 }
 
-- (BOOL) application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+- (BOOL) application: (UIApplication *)application didFinishLaunchingWithOptions: (NSDictionary *)launchOptions {
     window = [[UIWindow alloc] initWithFrame:UIScreen.mainScreen.bounds];
 
     coordinator = appCoordinator_init(window);
     if (!coordinator) return true;
 
-    unsigned char hasLaunched = [NSUserDefaults.standardUserDefaults boolForKey:@"hasLaunched"];
+    bool hasLaunched = [NSUserDefaults.standardUserDefaults boolForKey:@"hasLaunched"];
     persistenceService_setup();
     viewControllerHelper_setupValidNumericChars();
 
     if (!hasLaunched) setupData();
     appCoordinator_start(coordinator);
-    if (!hasLaunched) notifications_requestAccess();
+    if (!hasLaunched) {
+        [UNUserNotificationCenter.currentNotificationCenter requestAuthorizationWithOptions:UNAuthorizationOptionAlert | UNAuthorizationOptionSound
+                                                                          completionHandler:^(BOOL granted _U_, NSError *_Nullable error _U_) {}];
+    }
     return true;
 }
 
-- (UIInterfaceOrientationMask) application: (UIApplication *)application supportedInterfaceOrientationsForWindow: (UIWindow *)window {
-    return ([[UIDevice currentDevice] userInterfaceIdiom] != UIUserInterfaceIdiomPad) ?
+- (UIInterfaceOrientationMask) application: (UIApplication *)application
+   supportedInterfaceOrientationsForWindow: (UIWindow *)window {
+    return (UIDevice.currentDevice.userInterfaceIdiom != UIUserInterfaceIdiomPad) ?
     UIInterfaceOrientationMaskAllButUpsideDown : UIInterfaceOrientationMaskPortrait;
 }
 

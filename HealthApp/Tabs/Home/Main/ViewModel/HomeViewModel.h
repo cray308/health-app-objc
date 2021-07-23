@@ -29,8 +29,8 @@ bool homeViewModel_updateTimeOfDay(HomeViewModel *model);
 
 void homeViewModel_handleDayWorkoutButtonTap(HomeViewModel *model, int index);
 
-unsigned char homeViewModel_hasWorkoutsForThisWeek(HomeViewModel *model);
-unsigned char homeViewModel_shouldShowConfetti(HomeViewModel *model, int totalCompletedWorkouts);
+bool homeViewModel_hasWorkoutsForThisWeek(HomeViewModel *model);
+bool homeViewModel_shouldShowConfetti(HomeViewModel *model, int totalCompletedWorkouts);
 
 void homeViewModel_handleCustomWorkoutButtonTap(HomeViewModel *model, int index);
 void homeViewModel_finishedSettingUpCustomWorkout(HomeViewModel *model, UIViewController *presenter, unsigned char type, unsigned int index, unsigned int sets, unsigned int reps, unsigned int weight);

@@ -18,7 +18,7 @@
     UIButton *submitButton;
     UITextField *workoutTextField;
     UITextField *fields[3];
-    unsigned char validInput[3];
+    bool validInput[3];
     unsigned int inputs[3];
     int maxes[3];
 }
@@ -101,7 +101,7 @@
         case WorkoutTypeSE:
             titles[0] = @"Sets";
             titles[1] = @"Reps";
-            validInput[2] = 1;
+            validInput[2] = true;
             inputs[2] = 1;
             maxes[0] = 3;
             maxes[1] = 50;
@@ -109,13 +109,13 @@
 
         case WorkoutTypeEndurance:
             titles[1] = @"Duration (mins)";
-            validInput[0] = validInput[2] = 1;
+            validInput[0] = validInput[2] = true;
             inputs[0] = inputs[2] = 1;
             maxes[1] = 180;
             break;
 
         case WorkoutTypeHIC:
-            memset(validInput, 1, 3 * sizeof(unsigned char));
+            memset(validInput, true, 3 * sizeof(bool));
             memset(inputs, 1, 3 * sizeof(unsigned int));
             [submitButton setEnabled:true];
             break;
@@ -227,7 +227,7 @@
     if (!CFStringGetLength(newText)) {
         CFRelease(newText);
         [submitButton setEnabled:false];
-        validInput[i] = 0;
+        validInput[i] = false;
         return true;
     }
 
@@ -236,11 +236,11 @@
 
     if (value < 0 || value > maxes[i]) {
         [submitButton setEnabled:false];
-        validInput[i] = 0;
+        validInput[i] = false;
         return true;
     }
 
-    validInput[i] = 1;
+    validInput[i] = true;
     inputs[i] = (unsigned int) value;
 
     for (i = 0; i < 3; ++i) {

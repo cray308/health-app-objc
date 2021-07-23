@@ -61,7 +61,7 @@ void homeCoordinator_didFinishAddingWorkout(HomeTabCoordinator *coordinator, int
     HomeViewController *homeVC = getHomeViewController(coordinator->navigationController);
     [homeVC updateWorkoutsList];
 
-    const unsigned char showConfetti = homeViewModel_shouldShowConfetti(coordinator->viewModel, totalCompletedWorkouts);
+    const bool showConfetti = homeViewModel_shouldShowConfetti(coordinator->viewModel, totalCompletedWorkouts);
 
     addWorkoutCoordinator_free(coordinator->childCoordinator);
     coordinator->childCoordinator = NULL;
