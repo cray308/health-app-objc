@@ -9,17 +9,14 @@
 #define WorkoutViewController_h
 
 #import <UIKit/UIKit.h>
-
-typedef struct AddWorkoutViewModel AddWorkoutViewModel;
+#include "AddWorkoutCoordinator.h"
 
 @interface WorkoutViewController: UIViewController
-
-- (id) initWithViewModel: (AddWorkoutViewModel *)model;
+- (id) initWithDelegate: (AddWorkoutCoordinator *)_delegate;
 - (void) finishedExerciseGroup;
 - (void) finishedWorkoutTimerForType: (unsigned char)type container: (int)container exercise: (int)exercise;
 - (void) stopTimers;
 - (void) restartTimers;
-
 @end
 
 #endif /* WorkoutViewController_h */

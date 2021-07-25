@@ -10,10 +10,6 @@
 
 #import <UIKit/UIKit.h>
 
-@interface Divider: UIView
-
-- (id) init;
-
-@end
+UIView *createDivider(void);
 
 #endif /* Divider_h */

@@ -6,24 +6,21 @@
 //
 
 #import "AddWorkoutUpdateMaxesViewController.h"
-#import "AddWorkoutViewModel.h"
 #import "ViewControllerHelpers.h"
 
 @interface AddWorkoutUpdateMaxesViewController() {
-    AddWorkoutViewModel *viewModel;
+    AddWorkoutCoordinator *delegate;
     UITextField *textFields[4];
     bool validInput[4];
-    unsigned short results[4];
+    short results[4];
     UIButton *finishButton;
 }
-
 @end
 
 @implementation AddWorkoutUpdateMaxesViewController
-
-- (id) initWithViewModel: (AddWorkoutViewModel *)model {
+- (id) initWithDelegate: (AddWorkoutCoordinator *)_delegate {
     if (!(self = [super initWithNibName:nil bundle:nil])) return nil;
-    viewModel = model;
+    delegate = _delegate;
     return self;
 }
 
@@ -64,7 +61,7 @@
         stacks[i].spacing = 5;
         stacks[i].distribution = UIStackViewDistributionFillEqually;
         [stacks[i] setLayoutMarginsRelativeArrangement:true];
-        stacks[i].layoutMargins = UIEdgeInsetsMake(4, 8, 4, 8);
+        stacks[i].layoutMargins = (UIEdgeInsets){.top = 4, .left = 8, .bottom = 4, .right = 8};
         [self.view addSubview:stacks[i]];
 
         [label release];
@@ -75,7 +72,7 @@
     [finishButton setTitle:@"Finish" forState:UIControlStateNormal];
     [finishButton setTitleColor:UIColor.systemBlueColor forState:UIControlStateNormal];
     [finishButton setTitleColor:UIColor.systemGrayColor forState:UIControlStateDisabled];
-    finishButton.frame = CGRectMake(0, 0, self.view.frame.size.width / 3, 30);
+    finishButton.frame = (CGRect){.size = {.width = self.view.frame.size.width / 3, .height = 30}};
     [finishButton addTarget:self action:@selector(didPressFinish) forControlEvents:UIControlEventTouchUpInside];
     UIBarButtonItem *rightItem = [[UIBarButtonItem alloc] initWithCustomView:finishButton];
     [finishButton setEnabled:false];
@@ -96,19 +93,20 @@
         ]];
     }
 
-    for (int i = 0; i < 4; ++i) { [stacks[i] release]; }
+    for (int i = 0; i < 4; ++i) [stacks[i] release];
     [rightItem release];
 }
 
 - (void) didPressFinish {
-    addWorkoutViewModel_finishedAddingNewWeights(viewModel, self, results);
+    addWorkoutCoordinator_finishedAddingNewWeights(delegate, self, results);
 }
 
 - (void) dismissKeyboard {
     [self.view endEditing:true];
 }
 
-- (BOOL) textField: (UITextField *)textField shouldChangeCharactersInRange: (NSRange)range replacementString: (NSString *)string {
+- (BOOL) textField: (UITextField *)textField shouldChangeCharactersInRange: (NSRange)range
+ replacementString: (NSString *)string {
     if (!viewController_validateNumericInput((__bridge CFStringRef) string)) return false;
 
     int i = 0;
@@ -135,7 +133,7 @@
     }
 
     validInput[i] = true;
-    results[i] = (unsigned short) newWeight;
+    results[i] = (short) newWeight;
 
     for (i = 0; i < 4; ++i) {
         if (!validInput[i]) {
@@ -152,5 +150,4 @@
     [textField resignFirstResponder];
     return true;
 }
-
 @end

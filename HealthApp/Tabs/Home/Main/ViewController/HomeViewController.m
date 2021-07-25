@@ -6,17 +6,49 @@
 //
 
 #import "HomeViewController.h"
-#import "HomeViewModel.h"
-#import "HomeTabCoordinator.h"
-#import "AddWorkoutCoordinator.h"
 #import "Divider.h"
-#import "AppCoordinator.h"
-#import "ConfettiEmitterView.h"
 #import "ViewControllerHelpers.h"
-#import "AppUserData.h"
+#import "AppDelegate.h"
+#include "AppUserData.h"
+#include <math.h>
 
-static NSString *weekDays[] = {@"Monday", @"Tuesday", @"Wednesday", @"Thursday", @"Friday", @"Saturday", @"Sunday"};
-static NSString *greetings[] = {@"Good morning!", @"Good afternoon!", @"Good evening!"};
+UIView *createConfettiView(CGRect frame) {
+    UIView *this = [[UIView alloc] initWithFrame:frame];
+    this.backgroundColor = [UIColor.systemGrayColor colorWithAlphaComponent:0.8];
+
+    UIColor const* colors[] = {UIColor.systemRedColor, UIColor.systemBlueColor, UIColor.systemGreenColor,
+        UIColor.systemYellowColor};
+    UIImage const* images[] = {[UIImage imageNamed:@"Box"], [UIImage imageNamed:@"Triangle"],
+        [UIImage imageNamed:@"Circle"], [UIImage imageNamed:@"Spiral"]};
+    int const velocities[] = {100, 90, 150, 200};
+
+    CAEmitterCell *cells[16];
+    for (int i = 0; i < 16; ++i) {
+        CAEmitterCell *cell = [[CAEmitterCell alloc] init];
+        cell.birthRate = 4;
+        cell.lifetime = 14;
+        cell.velocity = velocities[arc4random_uniform(4)];
+        cell.emissionLongitude = M_PI;
+        cell.emissionRange = 0.5;
+        cell.spin = 3.5;
+        cell.color = colors[i / 4].CGColor;
+        cell.contents = (id) images[i % 4].CGImage;
+        cell.scaleRange = 0.25;
+        cell.scale = 0.1;
+        cells[i] = cell;
+    }
+
+    CAEmitterLayer *particleLayer = [[CAEmitterLayer alloc] init];
+    [this.layer addSublayer:particleLayer];
+    particleLayer.emitterPosition = CGPointMake(frame.size.width / 2, 0);
+    particleLayer.emitterShape = kCAEmitterLayerLine;
+    particleLayer.emitterSize = CGSizeMake(frame.size.width - 16, 1);
+    particleLayer.emitterCells = [NSArray arrayWithObjects:cells count:16];
+
+    [particleLayer release];
+    for (int i = 0; i < 16; ++i) [cells[i] release];
+    return this;
+}
 
 @interface DayWorkoutButton: UIView
 - (id) initWithTitle: (NSString *)title day: (NSString *)day;
@@ -30,15 +62,17 @@ static NSString *greetings[] = {@"Good morning!", @"Good afternoon!", @"Good eve
 
 @interface HomeViewController() {
     HomeViewModel *viewModel;
+    HomeTabCoordinator *delegate;
     UILabel *greetingLabel;
     UIStackView *weeklyWorkoutsStack;
 }
 @end
 
 @implementation HomeViewController
-- (id) initWithViewModel: (HomeViewModel *)model {
+- (id) initWithDelegate: (HomeTabCoordinator *)_delegate {
     if (!(self = [super initWithNibName:nil bundle:nil])) return nil;
-    viewModel = model;
+    delegate = _delegate;
+    viewModel = &_delegate->viewModel;
     return self;
 }
 
@@ -53,18 +87,17 @@ static NSString *greetings[] = {@"Good morning!", @"Good afternoon!", @"Good eve
     self.view.backgroundColor = UIColor.systemGroupedBackgroundColor;
     self.navigationItem.title = @"Home";
     [self setupSubviews];
-    appCoordinator_setTabToLoaded(viewModel->delegate->delegate, LoadedViewController_Home);
     [self updateGreeting];
     homeViewModel_fetchData(viewModel);
     [self createWorkoutsList];
+
+    AppDelegate *app = (AppDelegate *) UIApplication.sharedApplication.delegate;
+    if (app) app->coordinator.loadedViewControllers |= LoadedViewController_Home;
 }
 
 - (void) viewWillAppear: (BOOL)animated {
     [super viewWillAppear:animated];
-    if (viewModel->delegate->childCoordinator) {
-        addWorkoutCoordinator_stopWorkoutFromBackButtonPress(viewModel->delegate->childCoordinator);
-        viewModel->delegate->childCoordinator = NULL;
-    }
+    homeCoordinator_checkForChildCoordinator(delegate);
     if (homeViewModel_updateTimeOfDay(viewModel)) {
         [self updateGreeting];
     }
@@ -81,15 +114,15 @@ static NSString *greetings[] = {@"Good morning!", @"Good afternoon!", @"Good eve
     weeklyWorkoutsStack.axis = UILayoutConstraintAxisVertical;
     weeklyWorkoutsStack.spacing = 5;
     [weeklyWorkoutsStack setLayoutMarginsRelativeArrangement:true];
-    weeklyWorkoutsStack.layoutMargins = UIEdgeInsetsMake(5, 8, 5, 8);
+    weeklyWorkoutsStack.layoutMargins = (UIEdgeInsets){.top = 5, .left = 8, .bottom = 5, .right = 8};
 
     UIStackView *customWorkoutStack = [[UIStackView alloc] initWithFrame:CGRectZero];
     customWorkoutStack.axis = UILayoutConstraintAxisVertical;
     customWorkoutStack.spacing = 20;
     [customWorkoutStack setLayoutMarginsRelativeArrangement:true];
-    customWorkoutStack.layoutMargins = UIEdgeInsetsMake(5, 8, 5, 8);
+    customWorkoutStack.layoutMargins = (UIEdgeInsets){.top = 5, .left = 8, .bottom = 5, .right = 8};
     {
-        Divider *divider = [[Divider alloc] init];
+        UIView *divider = createDivider();
         [customWorkoutStack addArrangedSubview:divider];
 
         UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectZero];
@@ -110,19 +143,21 @@ static NSString *greetings[] = {@"Good morning!", @"Good afternoon!", @"Good eve
             btn.layer.cornerRadius = 5;
             [btn.heightAnchor constraintEqualToConstant:50].active = true;
             btn.tag = i;
-            [btn addTarget:self action:@selector(customWorkoutButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
+            [btn addTarget:self
+                    action:@selector(customWorkoutButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
             [customWorkoutStack addArrangedSubview:btn];
         }
         [headerLabel release];
         [divider release];
     }
 
-    UIStackView *vStack = [[UIStackView alloc] initWithArrangedSubviews:@[greetingLabel, weeklyWorkoutsStack, customWorkoutStack]];
+    UIStackView *vStack = [[UIStackView alloc] initWithArrangedSubviews:@[
+        greetingLabel, weeklyWorkoutsStack, customWorkoutStack]];
     vStack.translatesAutoresizingMaskIntoConstraints = false;
     vStack.axis = UILayoutConstraintAxisVertical;
     vStack.spacing = 5;
     [vStack setLayoutMarginsRelativeArrangement:true];
-    vStack.layoutMargins = UIEdgeInsetsMake(10, 0, 16, 0);
+    vStack.layoutMargins = (UIEdgeInsets){.top = 10, .bottom = 16};
 
     UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:CGRectZero];
     scrollView.translatesAutoresizingMaskIntoConstraints = false;
@@ -171,23 +206,24 @@ static NSString *greetings[] = {@"Good morning!", @"Good afternoon!", @"Good eve
     headerLabel.textColor = UIColor.labelColor;
     [weeklyWorkoutsStack addArrangedSubview:headerLabel];
 
-    Divider *divider = [[Divider alloc] init];
+    UIView *divider = createDivider();
     [weeklyWorkoutsStack addArrangedSubview:divider];
 
+    CFStringRef *weekdays = viewModel->weekdays;
     CFStringRef *names = viewModel->workoutNames;
     for (int i = 0; i < 7; ++i) {
         if (!names[i]) continue;
-        DayWorkoutButton *dayBtn = [[DayWorkoutButton alloc] initWithTitle:(__bridge NSString*)names[i] day:weekDays[i]];
+        DayWorkoutButton *dayBtn = [[DayWorkoutButton alloc] initWithTitle:(__bridge NSString*)names[i]
+                                                                       day:(__bridge NSString*)weekdays[i]];
         dayBtn.tag = i;
         dayBtn->button.tag = i;
-        [dayBtn->button addTarget:self action:@selector(workoutButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
+        [dayBtn->button addTarget:self action:@selector(workoutButtonTapped:)
+                 forControlEvents:UIControlEventTouchUpInside];
         [weeklyWorkoutsStack addArrangedSubview:dayBtn];
         [dayBtn release];
     }
 
-    [NSLayoutConstraint activateConstraints:@[
-        [headerLabel.heightAnchor constraintEqualToConstant:40],
-    ]];
+    [NSLayoutConstraint activateConstraints:@[[headerLabel.heightAnchor constraintEqualToConstant:40]]];
     [headerLabel release];
     [divider release];
     [weeklyWorkoutsStack setHidden:false];
@@ -212,32 +248,30 @@ static NSString *greetings[] = {@"Good morning!", @"Good afternoon!", @"Good eve
 }
 
 - (void) workoutButtonTapped: (UIButton *)btn {
-    homeViewModel_handleDayWorkoutButtonTap(viewModel, (int) btn.tag);
+    homeCoordinator_addWorkoutFromPlan(delegate, (int) btn.tag);
 }
 
 - (void) customWorkoutButtonTapped: (UIButton *)btn {
-    homeViewModel_handleCustomWorkoutButtonTap(viewModel, (int) btn.tag);
+    homeCoordinator_addWorkoutFromCustomButton(delegate, (int) btn.tag);
 }
 
 - (void) showConfetti {
-    AlertDetails *details = alertDetails_init(CFSTR("Nicely done!"), CFSTR("Great job meeting your workout goal this week."));
+    AlertDetails details = {CFSTR("Nicely done!"), CFSTR("Great job meeting your workout goal this week.")};
     UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil];
 
-    CGRect frame = CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height);
-    ConfettiEmitterView *confettiView = [[ConfettiEmitterView alloc] initWithFrame:frame];
+    UIView *confettiView = createConfettiView(
+        (CGRect){.size = {.width = self.view.frame.size.width, .height = self.view.frame.size.height}});
     [self.view addSubview:confettiView];
-    [confettiView startAnimation];
 
-    dispatch_time_t endTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t) NSEC_PER_SEC * 5);
-    dispatch_after(endTime, dispatch_get_main_queue(), ^ (void) {
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 5), dispatch_get_main_queue(), ^ (void) {
         [confettiView removeFromSuperview];
         [confettiView release];
-        viewController_showAlert(self, details, okAction, NULL);
+        viewController_showAlert(self, &details, okAction, NULL);
     });
 }
 
 - (void) updateGreeting {
-    greetingLabel.text = greetings[viewModel->timeOfDay];
+    greetingLabel.text = (__bridge NSString*) viewModel->greetings[viewModel->timeOfDay];
 }
 @end
 

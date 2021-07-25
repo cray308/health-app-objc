@@ -8,15 +8,10 @@
 #ifndef HomeSetupWorkoutModalViewController_h
 #define HomeSetupWorkoutModalViewController_h
 
-#import <UIKit/UIKit.h>
-
-typedef struct HomeViewModel HomeViewModel;
+#include "HomeTabCoordinator.h"
 
 @interface HomeSetupWorkoutModalViewController: UIViewController<UIPickerViewDelegate, UIPickerViewDataSource, UITextFieldDelegate>
-
-- (id) initWithViewModel: (HomeViewModel *)model type: (unsigned char)_type names: (CFStringRef *)_names count: (unsigned int)_count;
-
+- (id) initWithDelegate: (HomeTabCoordinator *)_delegate type: (unsigned char)_type names: (CFStringRef *)_names count: (int)_count;
 @end
-
 
 #endif /* HomeSetupWorkoutModalViewController_h */

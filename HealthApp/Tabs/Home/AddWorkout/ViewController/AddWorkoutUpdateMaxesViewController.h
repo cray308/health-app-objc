@@ -9,14 +9,10 @@
 #define AddWorkoutUpdateMaxesViewController_h
 
 #import <UIKit/UIKit.h>
-
-typedef struct AddWorkoutViewModel AddWorkoutViewModel;
+#include "AddWorkoutCoordinator.h"
 
 @interface AddWorkoutUpdateMaxesViewController: UIViewController<UITextFieldDelegate>
-
-- (id) initWithViewModel: (AddWorkoutViewModel *)model;
-
+- (id) initWithDelegate: (AddWorkoutCoordinator *)_delegate;
 @end
-
 
 #endif /* AddWorkoutUpdateMaxesViewController_h */

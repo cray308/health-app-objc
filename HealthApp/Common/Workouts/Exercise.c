@@ -6,46 +6,49 @@
 //
 
 #include "Exercise.h"
-#include "array.h"
 #include "AppUserData.h"
+#include "CocoaBridging.h"
 
 #define freeExerciseEntry(x) CFRelease((x).name)
 #define freeExerciseGroup(x) array_free(exEntry, (x).exercises)
 
-gen_array(exEntry, ExerciseEntry, DSDefault_shallowCopy, freeExerciseEntry)
-gen_array(exGroup, ExerciseGroup, DSDefault_shallowCopy, freeExerciseGroup)
+gen_array_source(exEntry, ExerciseEntry, DSDefault_shallowCopy, freeExerciseEntry)
+gen_array_source(exGroup, ExerciseGroup, DSDefault_shallowCopy, freeExerciseGroup)
 
-static CFStringRef repsKey = CFSTR("reps");
-static CFStringRef typeKey = CFSTR("type");
-static CFStringRef titleKey = CFSTR("title");
-static CFStringRef activitiesKey = CFSTR("activities");
-static CFStringRef exercisesKey = CFSTR("exercises");
-static CFStringRef restKey = CFSTR("rest");
-static CFStringRef nameKey = CFSTR("name");
+static CFStringRef const repsKey = CFSTR("reps");
+static CFStringRef const typeKey = CFSTR("type");
+static CFStringRef const libraryKey = CFSTR("library");
+static CFStringRef const indexKey = CFSTR("index");
+static CFStringRef const titleKey = CFSTR("title");
 
-static CFStringRef titleFormatWeight = CFSTR("%@ x %u @ %u lbs");
-static CFStringRef titleFormatReps = CFSTR("%@ x %u");
-static CFStringRef titleFormatDurationMins = CFSTR("%@ for %.1f mins");
-static CFStringRef titleFormatDurationSec = CFSTR("%@ for %u sec");
-static CFStringRef titleFormatDistance = CFSTR("%@ %u/%u meters");
+CFArrayRef getLibraryArrayForType(CFDictionaryRef libDict, unsigned char type) {
+    static CFStringRef const keys[] = {CFSTR("st"), CFSTR("se"), CFSTR("en"), CFSTR("hi")};
+    if (type > 3) return NULL;
+    return CFDictionaryGetValue(libDict, keys[type]);
+}
 
-static CFStringRef setsTextFormat = CFSTR("Set %u of %u");
-static CFStringRef roundsTextFormat = CFSTR("Round %u of %u");
-static CFStringRef amrapTextFormat = CFSTR("AMRAP %u mins");
+CFArrayRef getCurrentWeekForPlan(CFDictionaryRef root, unsigned char plan, int week) {
+    CFDictionaryRef plans = CFDictionaryGetValue(root, CFSTR("plans"));
+    CFArrayRef weeks = CFDictionaryGetValue(plans, plan == 0 ? CFSTR("bb") : CFSTR("cc"));
+    if (week >= CFArrayGetCount(weeks)) return NULL;
+    return CFArrayGetValueAtIndex(weeks, week);
+}
 
-void workout_buildFromDictionary(CFDictionaryRef dict, unsigned int index, unsigned char type, unsigned int sets, unsigned int reps, unsigned int weight, Workout *w) {
-    CFArrayRef foundActivities = CFDictionaryGetValue(dict, activitiesKey);
+void buildWorkoutFromDict(CFDictionaryRef dict, int index, unsigned char type, int sets, int reps, int weight,
+                          Workout *w) {
+    CFArrayRef foundActivities = CFDictionaryGetValue(dict, CFSTR("activities"));
     CFNumberRef number;
     CFStringRef str;
     unsigned int tempInt = 0;
 
     int nActivities = (int) CFArrayGetCount(foundActivities);
-    if (nActivities <= 0) return;
 
     w->type = type;
     w->activities = array_new(exGroup);
     str = CFDictionaryGetValue(dict, titleKey);
     w->title = CFStringCreateCopy(NULL, str);
+
+    if (nActivities <= 0) return;
 
     for (int i = 0; i < nActivities; ++i) {
         CFDictionaryRef act = CFArrayGetValueAtIndex(foundActivities, i);
@@ -57,7 +60,7 @@ void workout_buildFromDictionary(CFDictionaryRef dict, unsigned int index, unsig
         number = CFDictionaryGetValue(act, repsKey);
         CFNumberGetValue(number, kCFNumberIntType, &activities.reps);
 
-        CFArrayRef foundExercises = CFDictionaryGetValue(act, exercisesKey);
+        CFArrayRef foundExercises = CFDictionaryGetValue(act, CFSTR("exercises"));
         for (int j = 0; j < CFArrayGetCount(foundExercises); ++j) {
             CFDictionaryRef ex = CFArrayGetValueAtIndex(foundExercises, j);
             ExerciseEntry exercise = { .sets = 1 };
@@ -67,9 +70,9 @@ void workout_buildFromDictionary(CFDictionaryRef dict, unsigned int index, unsig
             exercise.type = (unsigned char) tempInt;
             number = CFDictionaryGetValue(ex, repsKey);
             CFNumberGetValue(number, kCFNumberIntType, &exercise.reps);
-            number = CFDictionaryGetValue(ex, restKey);
+            number = CFDictionaryGetValue(ex, CFSTR("rest"));
             CFNumberGetValue(number, kCFNumberIntType, &exercise.rest);
-            str = CFDictionaryGetValue(ex, nameKey);
+            str = CFDictionaryGetValue(ex, CFSTR("name"));
             exercise.name = CFStringCreateCopy(NULL, str);
             array_push_back(exEntry, activities.exercises, exercise);
         }
@@ -79,6 +82,8 @@ void workout_buildFromDictionary(CFDictionaryRef dict, unsigned int index, unsig
         }
         array_push_back(exGroup, w->activities, activities);
     }
+
+
 
     Array_exEntry *exercises = w->activities->arr[0].exercises;
     ExerciseEntry *e;
@@ -91,19 +96,19 @@ void workout_buildFromDictionary(CFDictionaryRef dict, unsigned int index, unsig
                 e->reps = reps;
             }
             ExerciseEntry *entries = exercises->arr;
-            entries[0].weight = (unsigned int) (weightMultiplier * (double) appUserDataShared->squatMax);
+            entries[0].weight = (int) (weightMultiplier * (double) appUserDataShared->liftMaxes[0]);
 
             if (nExercises >= 3 && index <= 1) {
-                entries[1].weight = (unsigned int) (weightMultiplier * (double) appUserDataShared->benchMax);
+                entries[1].weight = (int) (weightMultiplier * (double) appUserDataShared->liftMaxes[LiftTypeBench]);
                 if (index == 0) {
-                    entries[2].weight = (unsigned int) (weightMultiplier * (double) appUserDataShared->pullUpMax);
+                    entries[2].weight = (int) (weightMultiplier * (double) appUserDataShared->liftMaxes[LiftTypePullup]);
                 } else {
-                    entries[2].weight = (unsigned int) (weightMultiplier * (double) appUserDataShared->deadliftMax);
+                    entries[2].weight = (int) (weightMultiplier * (double) appUserDataShared->liftMaxes[LiftTypeDeadlift]);
                 }
             } else if (nExercises >= 4 && index == 2) {
-                entries[1].weight = (appUserDataShared->pullUpMax);
-                entries[2].weight = (unsigned int) (appUserDataShared->benchMax);
-                entries[3].weight = (unsigned int) (appUserDataShared->deadliftMax);
+                for (int i = 1; i < 4; ++i) {
+                    entries[i].weight = (appUserDataShared->liftMaxes[i]);
+                }
             }
             break;
         case WorkoutTypeSE:
@@ -113,7 +118,7 @@ void workout_buildFromDictionary(CFDictionaryRef dict, unsigned int index, unsig
             }
             break;
         case WorkoutTypeEndurance: ;
-            unsigned int duration = reps * 60;
+            int duration = reps * 60;
             array_iter(exercises, e) {
                 e->reps = duration;
             }
@@ -123,58 +128,105 @@ void workout_buildFromDictionary(CFDictionaryRef dict, unsigned int index, unsig
     }
 }
 
-void workout_free(Workout *w) {
-    array_free(exGroup, w->activities);
-    CFRelease(w->title);
-    free(w);
-}
+void exerciseManager_setWeeklyWorkoutNames(unsigned char plan, int week, CFStringRef *names) {
+    CFDictionaryRef root = workoutJsonDictionaryCreate();
+    CFDictionaryRef lib = CFDictionaryGetValue(root, libraryKey);
 
-int workout_getNumberOfActivities(Workout *w) {
-    return w->activities ? (int) w->activities->size : 0;
-}
+    CFArrayRef currWeek = getCurrentWeekForPlan(root, plan, week);
+    if (!currWeek) goto cleanup;
+    int index = 0, tempInt = 0;
 
-ExerciseGroup *workout_getExerciseGroup(Workout *w, int i) {
-    return array_at(exGroup, w->activities, i);
-}
+    for (int i = 0; i < 7; ++i) {
+        CFDictionaryRef day = CFArrayGetValueAtIndex(currWeek, i);
 
-ExerciseEntry *exerciseGroup_getExercise(ExerciseGroup *g, int i) {
-    return array_at(exEntry, g->exercises, i);
-}
+        CFNumberRef number = CFDictionaryGetValue(day, typeKey);
+        CFNumberGetValue(number, kCFNumberIntType, &tempInt);
+        unsigned char type = (unsigned char) tempInt;
+        number = CFDictionaryGetValue(day, indexKey);
+        CFNumberGetValue(number, kCFNumberIntType, &index);
 
-int exerciseGroup_getNumberOfExercises(ExerciseGroup *g) {
-    return array_size(g->exercises);
-}
+        CFArrayRef libArr = getLibraryArrayForType(lib, type);
+        if (!libArr) continue;
 
-CFStringRef exercise_createTitleString(ExerciseEntry *e) {
-    switch (e->type) {
-        case ExerciseTypeReps:
-            if (e->weight > 1) {
-                return CFStringCreateWithFormat(NULL, NULL, titleFormatWeight, e->name, e->reps, e->weight);
-            }
-            return CFStringCreateWithFormat(NULL, NULL, titleFormatReps, e->name, e->reps);
-
-        case ExerciseTypeDuration:
-            if (e->reps > 120) {
-                double minutes = (double) e->reps / 60.0;
-                return CFStringCreateWithFormat(NULL, NULL, titleFormatDurationMins, e->name, minutes);
-            }
-            return CFStringCreateWithFormat(NULL, NULL, titleFormatDurationSec, e->name, e->reps);
-
-        default: ;
-            unsigned int rowingDist = (5 * e->reps) / 4;
-            return CFStringCreateWithFormat(NULL, NULL, titleFormatDistance, e->name, e->reps, rowingDist);
+        CFDictionaryRef foundWorkout = CFArrayGetValueAtIndex(libArr, index);
+        CFStringRef str = CFDictionaryGetValue(foundWorkout, titleKey);
+        names[i] = CFStringCreateCopy(NULL, str);
     }
+cleanup:
+    CFRelease(root);
 }
 
-CFStringRef exercise_createSetsString(ExerciseEntry *e) {
-    return (e->sets > 1) ? CFStringCreateWithFormat(NULL, NULL, setsTextFormat, e->completedSets + 1, e->sets) : NULL;
+Workout *exerciseManager_getWeeklyWorkoutAtIndex(unsigned char plan, int week, int index) {
+    Workout *w = NULL;
+    CFDictionaryRef root = workoutJsonDictionaryCreate();
+    CFDictionaryRef lib = CFDictionaryGetValue(root, libraryKey);
+
+    CFArrayRef currWeek = getCurrentWeekForPlan(root, plan, week);
+    if (!currWeek) goto cleanup;
+    CFDictionaryRef day = CFArrayGetValueAtIndex(currWeek, index);
+    int idx = 0, sets = 0, reps = 0, weight = 0;
+    unsigned char type = 0;
+
+    CFNumberRef number = CFDictionaryGetValue(day, typeKey);
+    CFNumberGetValue(number, kCFNumberIntType, &idx);
+    type = (unsigned char) idx;
+
+    CFArrayRef libArr = getLibraryArrayForType(lib, type);
+    if (!libArr) goto cleanup;
+
+    number = CFDictionaryGetValue(day, indexKey);
+    CFNumberGetValue(number, kCFNumberIntType, &idx);
+    number = CFDictionaryGetValue(day, CFSTR("sets"));
+    CFNumberGetValue(number, kCFNumberIntType, &sets);
+    number = CFDictionaryGetValue(day, repsKey);
+    CFNumberGetValue(number, kCFNumberIntType, &reps);
+    number = CFDictionaryGetValue(day, CFSTR("weight"));
+    CFNumberGetValue(number, kCFNumberIntType, &weight);
+
+    w = calloc(1, sizeof(Workout));
+    w->day = index;
+
+    CFDictionaryRef foundWorkout = CFArrayGetValueAtIndex(libArr, idx);
+    buildWorkoutFromDict(foundWorkout, idx, type, sets, reps, weight, w);
+cleanup:
+    CFRelease(root);
+    return w;
 }
 
-CFStringRef exerciseGroup_createHeaderText(ExerciseGroup *g) {
-    if (g->type == ExerciseContainerTypeRounds && g->reps > 1) {
-        return CFStringCreateWithFormat(NULL, NULL, roundsTextFormat, g->completedReps + 1, g->reps);
-    } else if (g->type == ExerciseContainerTypeAMRAP) {
-        return CFStringCreateWithFormat(NULL, NULL, amrapTextFormat, g->reps);
+CFStringRef *exerciseManager_getWorkoutNamesForType(unsigned char type, int *size) {
+    CFStringRef *results = NULL;
+    CFDictionaryRef root = workoutJsonDictionaryCreate();
+    CFDictionaryRef lib = CFDictionaryGetValue(root, libraryKey);
+
+    long len = 0;
+    CFArrayRef libArr = getLibraryArrayForType(lib, type);
+    if (!(libArr && (len = CFArrayGetCount(libArr)))) goto cleanup;
+
+    if (type == WorkoutTypeStrength) len = 2;
+
+    results = calloc(len, sizeof(CFStringRef));
+    *size = (int) len;
+    for (long i = 0; i < len; ++i) {
+        CFDictionaryRef week = CFArrayGetValueAtIndex(libArr, i);
+        CFStringRef title = CFDictionaryGetValue(week, titleKey);
+        results[i] = CFStringCreateCopy(NULL, title);
     }
-    return NULL;
+cleanup:
+    CFRelease(root);
+    return results;
+}
+
+Workout *exerciseManager_getWorkoutFromLibrary(unsigned char type, int index, int reps, int sets, int weight) {
+    Workout *w = NULL;
+    CFDictionaryRef root = workoutJsonDictionaryCreate();
+    CFDictionaryRef lib = CFDictionaryGetValue(root, libraryKey);
+    CFArrayRef libArr = getLibraryArrayForType(lib, type);
+    if (!libArr) goto cleanup;
+    w = calloc(1, sizeof(Workout));
+    w->day = -1;
+    CFDictionaryRef foundWorkout = CFArrayGetValueAtIndex(libArr, index);
+    buildWorkoutFromDict(foundWorkout, index, type, sets, reps, weight, w);
+cleanup:
+    CFRelease(root);
+    return w;
 }

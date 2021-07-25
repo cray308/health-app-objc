@@ -6,117 +6,144 @@
 //
 
 #import "HomeTabCoordinator.h"
-#import "AppCoordinator.h"
+#import "AppDelegate.h"
 #import "AddWorkoutCoordinator.h"
-#import "HomeViewModel.h"
 #import "HomeViewController.h"
 #import "HomeSetupWorkoutModalViewController.h"
+#include "AppUserData.h"
 #include "CalendarDateHelpers.h"
-#import "AppUserData.h"
 
 #define UpdateGreeting 0x1
 #define ResetWorkouts 0x2
 #define UpdateWorkouts 0x4
 
-void homeCoordinator_updateUI(HomeTabCoordinator *coordinator, unsigned char updates);
+typedef enum {
+    CustomWorkoutIndexTestMax,
+    CustomWorkoutIndexEndurance,
+    CustomWorkoutIndexStrength,
+    CustomWorkoutIndexSE,
+    CustomWorkoutIndexHIC
+} CustomWorkoutIndex;
 
 static inline HomeViewController *getHomeViewController(UINavigationController *controller) {
     return (HomeViewController *) controller.viewControllers[0];
 }
 
-HomeTabCoordinator *homeCoordinator_init(UINavigationController *navVC, AppCoordinator *delegate) {
-    HomeTabCoordinator *coordinator = calloc(1, sizeof(HomeTabCoordinator));
-    if (!coordinator) return NULL;
-    if (!(coordinator->viewModel = homeViewModel_init())) {
-        free(coordinator);
-        return NULL;
-    }
-    coordinator->viewModel->delegate = coordinator;
-    coordinator->delegate = delegate;
-    coordinator->navigationController = navVC;
-    return coordinator;
-}
-
-void homeCoordinator_free(HomeTabCoordinator *coordinator) {
-    if (coordinator->childCoordinator) addWorkoutCoordinator_free(coordinator->childCoordinator);
-    homeViewModel_free(coordinator->viewModel);
-    free(coordinator);
-}
-
-void homeCoordinator_start(HomeTabCoordinator *coordinator) {
-    HomeViewController *vc = [[HomeViewController alloc] initWithViewModel:coordinator->viewModel];
-    [coordinator->navigationController setViewControllers:@[vc]];
-    [vc release];
-}
-
-void homeCoordinator_navigateToAddWorkout(HomeTabCoordinator *coordinator, UIViewController *presenter, Workout *workout) {
-    if (presenter) [presenter dismissViewControllerAnimated:true completion:nil];
-    AddWorkoutCoordinator *child = addWorkoutCoordinator_init(coordinator->navigationController, coordinator, workout);
-    if (!child) return;
-    coordinator->childCoordinator = child;
-    addWorkoutCoordinator_start(child);
-}
-
-void homeCoordinator_didFinishAddingWorkout(HomeTabCoordinator *coordinator, int totalCompletedWorkouts) {
-    HomeViewController *homeVC = getHomeViewController(coordinator->navigationController);
-    [homeVC updateWorkoutsList];
-
-    const bool showConfetti = homeViewModel_shouldShowConfetti(coordinator->viewModel, totalCompletedWorkouts);
-
-    addWorkoutCoordinator_free(coordinator->childCoordinator);
-    coordinator->childCoordinator = NULL;
-    [coordinator->navigationController popViewControllerAnimated:true];
-
-    if (showConfetti) {
-        dispatch_time_t endTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t) NSEC_PER_SEC * 0.75);
-        dispatch_after(endTime, dispatch_get_main_queue(), ^ (void) {
-            [homeVC showConfetti];
-        });
-    }
-}
-
-void homeCoordinator_showWorkoutPickerVC(HomeTabCoordinator *coordinator, unsigned char type, CFStringRef *names, unsigned int count) {
-    HomeSetupWorkoutModalViewController *modal = [[HomeSetupWorkoutModalViewController alloc] initWithViewModel:coordinator->viewModel type:type names:names count:count];
-    UINavigationController *container = [[UINavigationController alloc] initWithRootViewController:modal];
-    [coordinator->navigationController.viewControllers[0] presentViewController:container animated:true completion:nil];
-    [container release];
-    [modal release];
-}
-
-void homeCoordinator_performForegroundUpdate(HomeTabCoordinator *coordinator) {
-    homeCoordinator_updateUI(coordinator, UpdateGreeting);
-}
-
-void homeCoordinator_updateForNewWeek(HomeTabCoordinator *coordinator) {
-    homeCoordinator_updateUI(coordinator, ResetWorkouts | UpdateGreeting);
-}
-
-void homeCoordinator_updateForNewDay(HomeTabCoordinator *coordinator) {
-    homeCoordinator_updateUI(coordinator, UpdateGreeting);
-}
-
-void homeCoordinator_handleUserInfoChange(HomeTabCoordinator *coordinator) {
-    homeCoordinator_updateUI(coordinator, ResetWorkouts);
-}
-
-void homeCoordinator_handleDataDeletion(HomeTabCoordinator *coordinator) {
-    homeCoordinator_updateUI(coordinator, UpdateWorkouts);
-}
-
-#pragma mark - Helpers
-
-void homeCoordinator_updateUI(HomeTabCoordinator *coordinator, unsigned char updates) {
-    HomeViewController *homeVC = getHomeViewController(coordinator->navigationController);
-    if (updates & UpdateGreeting) {
-        if (homeViewModel_updateTimeOfDay(coordinator->viewModel)) {
-            [homeVC updateGreeting];
-        }
-    }
+void updateUI(HomeTabCoordinator *this, unsigned char updates) {
+    HomeViewController *homeVC = getHomeViewController(this->navigationController);
     if (updates & ResetWorkouts) {
-        homeViewModel_fetchData(coordinator->viewModel);
+        homeViewModel_fetchData(&this->viewModel);
         [homeVC createWorkoutsList];
     }
     if (updates & UpdateWorkouts) {
         [homeVC updateWorkoutsList];
     }
+}
+
+void navigateToAddWorkout(HomeTabCoordinator *this, UIViewController *presenter, Workout *workout) {
+    if (presenter) [presenter dismissViewControllerAnimated:true completion:nil];
+    AddWorkoutCoordinator *child = malloc(sizeof(AddWorkoutCoordinator));
+    if (!child) return;
+
+    child->navigationController = this->navigationController;
+    child->parent = this;
+    child->viewModel.workout = workout;
+    this->childCoordinator = child;
+    addWorkoutCoordinator_start(child);
+}
+
+void homeCoordinator_free(HomeTabCoordinator *this) {
+    if (this->childCoordinator) addWorkoutCoordinator_free(this->childCoordinator);
+    homeViewModel_free(&this->viewModel);
+    free(this);
+}
+
+void homeCoordinator_start(HomeTabCoordinator *this) {
+    homeViewModel_init(&this->viewModel);
+    HomeViewController *vc = [[HomeViewController alloc] initWithDelegate:this];
+    [this->navigationController setViewControllers:@[vc]];
+    [vc release];
+}
+
+void homeCoordinator_didFinishAddingWorkout(HomeTabCoordinator *this, int totalCompletedWorkouts) {
+    HomeViewController *homeVC = getHomeViewController(this->navigationController);
+    [homeVC updateWorkoutsList];
+
+    const bool showConfetti = homeViewModel_shouldShowConfetti(&this->viewModel, totalCompletedWorkouts);
+
+    addWorkoutCoordinator_free(this->childCoordinator);
+    this->childCoordinator = NULL;
+    [this->navigationController popViewControllerAnimated:true];
+
+    if (showConfetti) {
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 0.75), dispatch_get_main_queue(), ^ (void) {
+            [homeVC showConfetti];
+        });
+    }
+}
+
+void homeCoordinator_addWorkoutFromPlan(HomeTabCoordinator *this, int index) {
+    unsigned char plan = (unsigned char) appUserDataShared->currentPlan;
+    Workout *w = exerciseManager_getWeeklyWorkoutAtIndex(plan, appUserData_getWeekInPlan(), index);
+    if (w) navigateToAddWorkout(this, nil, w);
+}
+
+void homeCoordinator_addWorkoutFromCustomButton(HomeTabCoordinator *this, int index) {
+    unsigned char type = WorkoutTypeStrength;
+    switch (index) {
+        case CustomWorkoutIndexSE:
+            type = WorkoutTypeSE;
+            break;
+        case CustomWorkoutIndexHIC:
+            type = WorkoutTypeHIC;
+            break;
+        case CustomWorkoutIndexTestMax: ;
+            Workout *w = exerciseManager_getWorkoutFromLibrary(WorkoutTypeStrength, 2, 1, 1, 100);
+            if (w) navigateToAddWorkout(this, nil, w);
+            return;
+        case CustomWorkoutIndexEndurance:
+            type = WorkoutTypeEndurance;
+        default:
+            break;
+    }
+
+    int count = 0;
+    CFStringRef *names = exerciseManager_getWorkoutNamesForType(type, &count);
+    if (!names) return;
+    else if (!count) {
+        free(names);
+        return;
+    }
+
+    UIViewController *modal = [[HomeSetupWorkoutModalViewController alloc] initWithDelegate:this type:type names:names
+                                                                                      count:count];
+    UINavigationController *container = [[UINavigationController alloc] initWithRootViewController:modal];
+    [this->navigationController.viewControllers[0] presentViewController:container animated:true completion:nil];
+    [container release];
+    [modal release];
+}
+
+void homeCoordinator_finishedSettingUpCustomWorkout(HomeTabCoordinator *this, UIViewController *presenter,
+                                                    unsigned char type, int index, int sets, int reps, int weight) {
+    Workout *w = exerciseManager_getWorkoutFromLibrary(type, index, reps, sets, weight);
+    if (w) navigateToAddWorkout(this, presenter, w);
+}
+
+void homeCoordinator_checkForChildCoordinator(HomeTabCoordinator *this) {
+    AddWorkoutCoordinator *child = this->childCoordinator;
+    if (child) {
+        addWorkoutCoordinator_stopWorkoutFromBackButtonPress(child);
+        this->childCoordinator = NULL;
+    }
+}
+
+void homeCoordinator_resetUI(HomeTabCoordinator *this) {
+    HomeViewController *homeVC = getHomeViewController(this->navigationController);
+    homeViewModel_fetchData(&this->viewModel);
+    [homeVC createWorkoutsList];
+}
+
+void homeCoordinator_updateUI(HomeTabCoordinator *this) {
+    HomeViewController *homeVC = getHomeViewController(this->navigationController);
+    [homeVC updateWorkoutsList];
 }

@@ -8,16 +8,16 @@
 #ifndef HistoryViewController_h
 #define HistoryViewController_h
 
-#import <UIKit/UIKit.h>
+#include "HistoryTabCoordinator.h"
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation"
+#import "HealthApp-Swift.h"
+#pragma clang diagnostic pop
 
-typedef struct HistoryViewModel HistoryViewModel;
-
-@interface HistoryViewController: UIViewController
-
-- (id) initWithViewModel: (HistoryViewModel *)model;
+@interface HistoryViewController: UIViewController<ChartAxisValueFormatter>
+- (id) initWithDelegate: (HistoryTabCoordinator *)_delegate;
 - (void) performForegroundUpdate;
 - (void) updateCharts;
-
 @end
 
 #endif /* HistoryViewController_h */

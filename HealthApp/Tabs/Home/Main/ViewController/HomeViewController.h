@@ -9,17 +9,14 @@
 #define HomeViewController_h
 
 #import <UIKit/UIKit.h>
-
-typedef struct HomeViewModel HomeViewModel;
+#include "HomeTabCoordinator.h"
 
 @interface HomeViewController: UIViewController
-
-- (id) initWithViewModel: (HomeViewModel *)model;
+- (id) initWithDelegate: (HomeTabCoordinator *)_delegate;
 - (void) showConfetti;
 - (void) updateGreeting;
 - (void) createWorkoutsList;
 - (void) updateWorkoutsList;
-
 @end
 
 #endif /* HomeViewController_h */

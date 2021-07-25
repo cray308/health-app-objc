@@ -5,16 +5,15 @@
 //  Created by Christopher Ray on 3/20/21.
 //
 
-#import <UIKit/UIKit.h>
+#include "AppCoordinator.h"
 
 @class WorkoutViewController;
-typedef struct AppCoordinator AppCoordinator;
 
 @interface AppDelegate: UIResponder <UIApplicationDelegate>
 @end
 
 @interface AppDelegate() {
-    @public AppCoordinator *coordinator;
+    @public AppCoordinator coordinator;
     UIWindow *window;
     @public WorkoutViewController *workoutVC;
 }

@@ -21,11 +21,14 @@ void viewControllerHelper_cleanupValidNumericChars(void) {
 }
 
 void createToolbar(id target, SEL doneSelector, UITextField **fields) {
-    UIToolbar *toolbar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, UIScreen.mainScreen.bounds.size.width, 50)];
+    UIToolbar *toolbar = [[UIToolbar alloc] initWithFrame:
+                          (CGRect){.size = {.width = UIScreen.mainScreen.bounds.size.width, .height = 50}}];
     [toolbar sizeToFit];
 
-    UIBarButtonItem *flexSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
-    UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithTitle:@"Done" style:UIBarButtonItemStylePlain target:target action:doneSelector];
+    UIBarButtonItem *flexSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace
+                                                                               target:nil action:nil];
+    UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithTitle:@"Done" style:UIBarButtonItemStylePlain
+                                                                  target:target action:doneSelector];
 
     [toolbar setItems:@[flexSpace, doneButton] animated:false];
     [toolbar setUserInteractionEnabled:true];
@@ -39,27 +42,14 @@ void createToolbar(id target, SEL doneSelector, UITextField **fields) {
     [doneButton release];
 }
 
-AlertDetails *alertDetails_init(CFStringRef title, CFStringRef message) {
-    AlertDetails *details = calloc(1, sizeof(AlertDetails));
-    if (!details) return NULL;
-
-    details->style = UIAlertControllerStyleAlert;
-    if (title) details->title = CFStringCreateCopy(NULL, title);
-    if (message) details->message = CFStringCreateCopy(NULL, message);
-    return details;
-}
-
-void viewController_showAlert(UIViewController *presenter, AlertDetails *details,
-                              UIAlertAction *defaultAction, UIAlertAction *secondaryAction) {
+void viewController_showAlert(UIViewController *presenter, AlertDetails const* details, UIAlertAction *defaultAction,
+                              UIAlertAction *secondaryAction) {
     UIAlertController *ctrl = [UIAlertController alertControllerWithTitle:(__bridge NSString*)details->title
                                                                   message:(__bridge NSString*)details->message
-                                                           preferredStyle:details->style];
+                                                           preferredStyle:UIAlertControllerStyleAlert];
 
     [ctrl addAction:defaultAction];
     if (secondaryAction) [ctrl addAction:secondaryAction];
-    if (details->title) CFRelease(details->title);
-    if (details->message) CFRelease(details->message);
-    free(details);
     [presenter presentViewController:ctrl animated:true completion:nil];
 }
 

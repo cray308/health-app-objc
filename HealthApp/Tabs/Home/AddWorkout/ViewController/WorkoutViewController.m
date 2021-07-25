@@ -6,7 +6,6 @@
 //
 
 #import "WorkoutViewController.h"
-#import "AddWorkoutViewModel.h"
 #import "Divider.h"
 #import "AppDelegate.h"
 #include <UserNotifications/UserNotifications.h>
@@ -34,7 +33,7 @@
     @public ExerciseEntry *exercise;
     int completedSets;
     bool resting;
-    NSString *restStr;
+    CFStringRef restStr;
     UILabel *setsLabel;
     UIView *checkbox;
     @public UIButton *button;
@@ -68,7 +67,7 @@ typedef struct {
     bool stop;
     int container;
     int exercise;
-    unsigned int duration;
+    int duration;
     int64_t refTime;
     pthread_mutex_t lock;
     pthread_cond_t cond;
@@ -86,7 +85,7 @@ void handle_exercise_timer_interrupt(int n __attribute__((__unused__))) {
 void handle_group_timer_interrupt(int n __attribute__((__unused__))) {
 }
 
-void startTimerForGroup(WorkoutTimer *t, unsigned int duration, int container) {
+void startTimerForGroup(WorkoutTimer *t, int duration, int container) {
     pthread_mutex_lock(&t->lock);
     t->refTime = CFAbsoluteTimeGetCurrent();
     t->duration = duration;
@@ -97,7 +96,7 @@ void startTimerForGroup(WorkoutTimer *t, unsigned int duration, int container) {
     pthread_mutex_unlock(&t->lock);
 }
 
-void startTimerForExercise(WorkoutTimer *t, unsigned int duration, int exercise) {
+void startTimerForExercise(WorkoutTimer *t, int duration, int exercise) {
     pthread_mutex_lock(&t->lock);
     t->refTime = CFAbsoluteTimeGetCurrent();
     t->duration = duration;
@@ -110,8 +109,7 @@ void startTimerForExercise(WorkoutTimer *t, unsigned int duration, int exercise)
 
 void *timer_loop(void *arg) {
     WorkoutTimer *t = (WorkoutTimer *) arg;
-    unsigned int res = 0, duration = 0;
-    int container = -1, exercise = -1;
+    int res = 0, duration = 0, container = -1, exercise = -1;
     while (!t->stop) {
         pthread_mutex_lock(&t->lock);
         while (t->active != 1) pthread_cond_wait(&t->cond, &t->lock);
@@ -135,19 +133,17 @@ void *timer_loop(void *arg) {
     return NULL;
 }
 
-void scheduleNotification(unsigned int secondsFromNow, unsigned char messageType) {
-    static CFStringRef const messages[] = {CFSTR("Finished exercise!"), CFSTR("Finished AMRAP circuit!")};
-    static CFStringRef const idFormat = CFSTR("%u");
-    static unsigned int identifier = 0;
-    CFStringRef idString = CFStringCreateWithFormat(NULL, NULL, idFormat, identifier++);
+void scheduleNotification(int secondsFromNow, CFStringRef message) {
+    static int identifier = 0;
+    CFStringRef idString = CFStringCreateWithFormat(NULL, NULL, CFSTR("%d"), identifier++);
 
     UNMutableNotificationContent *content = [[UNMutableNotificationContent alloc] init];
     content.title = @"Workout Update";
-    content.subtitle = (__bridge NSString*) messages[messageType];
+    content.subtitle = (__bridge NSString*) message;
     content.sound = UNNotificationSound.defaultSound;
 
-    UNTimeIntervalNotificationTrigger *trigger = [UNTimeIntervalNotificationTrigger triggerWithTimeInterval:secondsFromNow
-                                                                                                    repeats:false];
+    UNTimeIntervalNotificationTrigger *trigger = [UNTimeIntervalNotificationTrigger
+                                                  triggerWithTimeInterval:secondsFromNow repeats:false];
     UNNotificationRequest *req = [UNNotificationRequest requestWithIdentifier:(__bridge NSString*)idString
                                                                       content:content
                                                                       trigger:trigger];
@@ -158,12 +154,46 @@ void scheduleNotification(unsigned int secondsFromNow, unsigned char messageType
     [content release];
 }
 
+static inline CFStringRef createSetsString(ExerciseEntry *e) {
+    return CFStringCreateWithFormat(NULL, NULL, CFSTR("Set %d of %d"), e->completedSets + 1, e->sets);
+}
+
+CFStringRef createExerciseGroupHeader(ExerciseGroup *g) {
+    if (g->type == ExerciseContainerTypeRounds && g->reps > 1) {
+        return CFStringCreateWithFormat(NULL, NULL, CFSTR("Round %d of %d"), g->completedReps + 1, g->reps);
+    } else if (g->type == ExerciseContainerTypeAMRAP) {
+        return CFStringCreateWithFormat(NULL, NULL, CFSTR("AMRAP %d mins"), g->reps);
+    }
+    return NULL;
+}
+
+CFStringRef createExerciseTitle(ExerciseEntry *e) {
+    switch (e->type) {
+        case ExerciseTypeReps:
+            if (e->weight > 1) {
+                return CFStringCreateWithFormat(NULL, NULL, CFSTR("%@ x %d @ %d lbs"), e->name, e->reps, e->weight);
+            }
+            return CFStringCreateWithFormat(NULL, NULL, CFSTR("%@ x %d"), e->name, e->reps);
+
+        case ExerciseTypeDuration:
+            if (e->reps > 120) {
+                double minutes = (double) e->reps / 60.0;
+                return CFStringCreateWithFormat(NULL, NULL, CFSTR("%@ for %.1f mins"), e->name, minutes);
+            }
+            return CFStringCreateWithFormat(NULL, NULL, CFSTR("%@ for %d sec"), e->name, e->reps);
+
+        default: ;
+            int rowingDist = (5 * e->reps) / 4;
+            return CFStringCreateWithFormat(NULL, NULL, CFSTR("Run/row %d/%d meters"), e->reps, rowingDist);
+    }
+}
+
 @implementation ExerciseView
 - (id) initWithExercise: (ExerciseEntry *)exerciseEntry {
     if (!(self = [super initWithFrame:CGRectZero])) return nil;
     exercise = exerciseEntry;
     if (exerciseEntry->rest) {
-        restStr = [[NSString alloc] initWithFormat:@"Rest: %u s", exerciseEntry->rest];
+        restStr = CFStringCreateWithFormat(NULL, NULL, CFSTR("Rest: %d s"), exerciseEntry->rest);
     }
 
     button = [UIButton buttonWithType:UIButtonTypeSystem];
@@ -180,8 +210,8 @@ void scheduleNotification(unsigned int secondsFromNow, unsigned char messageType
     setsLabel.translatesAutoresizingMaskIntoConstraints = false;
     setsLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline];
     setsLabel.adjustsFontSizeToFitWidth = true;
-    CFStringRef setsStr = exercise_createSetsString(exercise);
-    if (setsStr) {
+    if (exercise->sets > 1) {
+        CFStringRef setsStr = createSetsString(exercise);
         setsLabel.text = (__bridge NSString*) setsStr;
         CFRelease(setsStr);
     }
@@ -219,7 +249,7 @@ void scheduleNotification(unsigned int secondsFromNow, unsigned char messageType
 - (void) dealloc {
     [setsLabel release];
     [checkbox release];
-    if (restStr) [restStr release];
+    if (restStr) CFRelease(restStr);
     [super dealloc];
 }
 
@@ -230,14 +260,14 @@ void scheduleNotification(unsigned int secondsFromNow, unsigned char messageType
         if (exercise->type == ExerciseTypeDuration) { // start timer
             button.userInteractionEnabled = false;
             startTimerForExercise(ePtr, exercise->reps, (int) button.tag);
-            scheduleNotification(exercise->reps, WorkoutNotificationExerciseCompleted);
+            scheduleNotification(exercise->reps, CFSTR("Finished exercise!"));
         }
     } else {
         button.userInteractionEnabled = true;
 
         if (restStr && !resting) {
             resting = true;
-            [button setTitle:restStr forState:UIControlStateNormal];
+            [button setTitle:(__bridge NSString*)restStr forState:UIControlStateNormal];
         } else {
             resting = false;
             if (++exercise->completedSets == exercise->sets) {
@@ -246,8 +276,8 @@ void scheduleNotification(unsigned int secondsFromNow, unsigned char messageType
                 return true;
             }
 
-            CFStringRef setsStr = exercise_createSetsString(exercise);
-            CFStringRef title = exercise_createTitleString(exercise);
+            CFStringRef setsStr = createSetsString(exercise);
+            CFStringRef title = createExerciseTitle(exercise);
             setsLabel.text = (__bridge NSString*) setsStr;
             [button setTitle:(__bridge NSString*)title forState:UIControlStateNormal];
             CFRelease(setsStr);
@@ -262,7 +292,7 @@ void scheduleNotification(unsigned int secondsFromNow, unsigned char messageType
     [button setEnabled:false];
     resting = false;
     exercise->completedSets = 0;
-    CFStringRef title = exercise_createTitleString(exercise);
+    CFStringRef title = createExerciseTitle(exercise);
     [button setTitle:(__bridge NSString*)title forState:UIControlStateNormal];
     CFRelease(title);
 }
@@ -272,7 +302,7 @@ void scheduleNotification(unsigned int secondsFromNow, unsigned char messageType
 - (id) initWithGroup: (ExerciseGroup *)exerciseGroup {
     if (!(self = [super initWithFrame:CGRectZero])) return nil;
     group = exerciseGroup;
-    size = exerciseGroup_getNumberOfExercises(group);
+    size = (int) group->exercises->size;
     viewsArr = calloc(size, sizeof(ExerciseView *));
     [self setupSubviews];
     return self;
@@ -290,7 +320,8 @@ void scheduleNotification(unsigned int secondsFromNow, unsigned char messageType
     headerLabel.translatesAutoresizingMaskIntoConstraints = false;
     headerLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleTitle3];
     headerLabel.adjustsFontSizeToFitWidth = true;
-    CFStringRef headerStr = exerciseGroup_createHeaderText(group);
+
+    CFStringRef headerStr = createExerciseGroupHeader(group);
     if (headerStr) {
         headerLabel.text = (__bridge NSString*) headerStr;
         CFRelease(headerStr);
@@ -303,7 +334,7 @@ void scheduleNotification(unsigned int secondsFromNow, unsigned char messageType
     exerciseStack.axis = UILayoutConstraintAxisVertical;
     exerciseStack.spacing = 5;
     [exerciseStack setLayoutMarginsRelativeArrangement:true];
-    exerciseStack.layoutMargins = UIEdgeInsetsMake(5, 4, 4, 0);
+    exerciseStack.layoutMargins = (UIEdgeInsets){.top = 5, .left = 4, .bottom = 4};
     [self addSubview:exerciseStack];
 
     [NSLayoutConstraint activateConstraints:@[
@@ -319,7 +350,7 @@ void scheduleNotification(unsigned int secondsFromNow, unsigned char messageType
     ]];
 
     for (int i = 0; i < size; ++i) {
-        ExerciseView *v = [[ExerciseView alloc] initWithExercise:exerciseGroup_getExercise(group, i)];
+        ExerciseView *v = [[ExerciseView alloc] initWithExercise:&group->exercises->arr[i]];
         v->button.tag = i;
         [v->button addTarget:self action:@selector(handleTap:) forControlEvents:UIControlEventTouchUpInside];
         [exerciseStack addArrangedSubview:v];
@@ -335,9 +366,9 @@ void scheduleNotification(unsigned int secondsFromNow, unsigned char messageType
         [viewsArr[i] reset];
     }
     if (group->type == ExerciseContainerTypeAMRAP && startTimer) {
-        unsigned int duration = 60 * group->reps;
+        int duration = 60 * group->reps;
         startTimerForGroup(gPtr, duration, (int) self.tag);
-        scheduleNotification(duration, WorkoutNotificationAMRAPCompleted);
+        scheduleNotification(duration, CFSTR("Finished AMRAP circuit!"));
     }
     [viewsArr[0] handleTap];
 }
@@ -351,12 +382,11 @@ void scheduleNotification(unsigned int secondsFromNow, unsigned char messageType
         ExerciseView *temp = viewsArr[index];
         if (temp->exercise->type == ExerciseTypeDuration) {
             v = temp;
-            unsigned int diff = (unsigned int)(refTime - ePtr->refTime);
+            int diff = (int) (refTime - ePtr->refTime);
             if (diff >= ePtr->duration) {
                 endExercise = true;
             } else {
-                unsigned int duration = ePtr->duration - diff;
-                startTimerForExercise(ePtr, duration, (int) v->button.tag);
+                startTimerForExercise(ePtr, ePtr->duration - diff, (int) v->button.tag);
             }
         }
     }
@@ -374,12 +404,11 @@ void scheduleNotification(unsigned int secondsFromNow, unsigned char messageType
 
     if (group && index == self.tag && group->type == ExerciseContainerTypeAMRAP) {
         p = parent;
-        unsigned int diff = (unsigned int)(refTime - gPtr->refTime);
+        int diff = (int) (refTime - gPtr->refTime);
         if (diff >= gPtr->duration) {
             endGroup = true;
         } else {
-            unsigned int duration = gPtr->duration - diff;
-            startTimerForGroup(gPtr, duration, (int) self.tag);
+            startTimerForGroup(gPtr, gPtr->duration - diff, (int) self.tag);
         }
     }
     pthread_mutex_unlock(&sharedLock);
@@ -432,7 +461,7 @@ void scheduleNotification(unsigned int secondsFromNow, unsigned char messageType
                             isDone = true;
                             group = NULL;
                         } else {
-                            CFStringRef headerStr = exerciseGroup_createHeaderText(group);
+                            CFStringRef headerStr = createExerciseGroupHeader(group);
                             headerLabel.text = (__bridge NSString*) headerStr;
                             CFRelease(headerStr);
                         }
@@ -443,8 +472,8 @@ void scheduleNotification(unsigned int secondsFromNow, unsigned char messageType
                             isDone = true;
                             group = NULL;
                         } else {
-                            for (int i = 0; i < size; ++i) {
-                                ExerciseEntry *e = exerciseGroup_getExercise(group, i);
+                            ExerciseEntry *e;
+                            array_iter(group->exercises, e) {
                                 if (e->type == ExerciseTypeReps) e->reps -= 1;
                             }
                         }
@@ -469,6 +498,7 @@ void scheduleNotification(unsigned int secondsFromNow, unsigned char messageType
 @end
 
 @interface WorkoutViewController() {
+    AddWorkoutCoordinator *delegate;
     AddWorkoutViewModel *viewModel;
     UIStackView *groupsStack;
     int workoutType;
@@ -484,9 +514,10 @@ void scheduleNotification(unsigned int secondsFromNow, unsigned char messageType
 @end
 
 @implementation WorkoutViewController
-- (id) initWithViewModel: (AddWorkoutViewModel *)model {
+- (id) initWithDelegate: (AddWorkoutCoordinator *)_delegate {
     if (!(self = [super initWithNibName:nil bundle:nil])) return nil;
-    viewModel = model;
+    delegate = _delegate;
+    viewModel = &delegate->viewModel;
     workoutType = viewModel->workout->type;
 
     struct sigaction sa;
@@ -563,16 +594,16 @@ void scheduleNotification(unsigned int secondsFromNow, unsigned char messageType
     groupsStack.axis = UILayoutConstraintAxisVertical;
     groupsStack.spacing = 20;
     [groupsStack setLayoutMarginsRelativeArrangement:true];
-    groupsStack.layoutMargins = UIEdgeInsetsMake(0, 4, 4, 0);
+    groupsStack.layoutMargins = (UIEdgeInsets){.left = 4, .bottom = 4};
 
     Workout *w = viewModel->workout;
-    for (int i = 0; i < workout_getNumberOfActivities(w); ++i) {
+    for (int i = 0; i < (int) w->activities->size; ++i) {
         if (i > 0) {
-            Divider *d = [[Divider alloc] init];
+            UIView *d = createDivider();
             [groupsStack addArrangedSubview:d];
             [d release];
         }
-        ExerciseContainer *v = [[ExerciseContainer alloc] initWithGroup:workout_getExerciseGroup(w, i)];
+        ExerciseContainer *v = [[ExerciseContainer alloc] initWithGroup:&w->activities->arr[i]];
         v.tag = i;
         v->parent = self;
         [groupsStack addArrangedSubview:v];
@@ -584,7 +615,7 @@ void scheduleNotification(unsigned int secondsFromNow, unsigned char messageType
     vStack.axis = UILayoutConstraintAxisVertical;
     vStack.spacing = 20;
     [vStack setLayoutMarginsRelativeArrangement:true];
-    vStack.layoutMargins = UIEdgeInsetsMake(10, 0, 0, 0);
+    vStack.layoutMargins = (UIEdgeInsets){.top = 10};
 
     UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:CGRectZero];
     scrollView.translatesAutoresizingMaskIntoConstraints = false;
@@ -635,7 +666,7 @@ void scheduleNotification(unsigned int secondsFromNow, unsigned char messageType
         }
         pthread_mutex_unlock(&sharedLock);
         if (m) {
-            addWorkoutViewModel_stoppedWorkout(m);
+            addWorkoutCoordinator_stoppedWorkout(delegate);
         }
     }
 }
@@ -659,7 +690,7 @@ void scheduleNotification(unsigned int secondsFromNow, unsigned char messageType
     pthread_mutex_unlock(&sharedLock);
 
     if (m) {
-        addWorkoutViewModel_completedWorkout(m, nil, true);
+        addWorkoutCoordinator_completedWorkout(delegate, nil, true);
     }
 }
 
@@ -717,7 +748,8 @@ void scheduleNotification(unsigned int secondsFromNow, unsigned char messageType
     if (v) {
         int64_t now = CFAbsoluteTimeGetCurrent();
         if (eTimerActive && v.tag == savedInfo.exerciseInfo.group) {
-            [v restartExerciseAtIndex:savedInfo.exerciseInfo.tag moveToNext:workoutType != WorkoutTypeEndurance refTime:now];
+            [v restartExerciseAtIndex:savedInfo.exerciseInfo.tag moveToNext:workoutType != WorkoutTypeEndurance
+                              refTime:now];
         }
         if (gTimerActive) {
             [v restartGroupAtIndex:savedInfo.groupTag refTime:now];

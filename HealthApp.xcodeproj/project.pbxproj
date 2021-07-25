@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		6114EA752615544000B4A472 /* AreaChartRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6114EA742615544000B4A472 /* AreaChartRenderer.swift */; };
 		612FD048266DAF25002C9993 /* WorkoutData.plist in Resources */ = {isa = PBXBuildFile; fileRef = 612FD047266DAF25002C9993 /* WorkoutData.plist */; };
-		613946912610F16700552422 /* ChartHelpers.m in Sources */ = {isa = PBXBuildFile; fileRef = 613946902610F16700552422 /* ChartHelpers.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		614DC13026082BBE00B9588E /* ViewControllerHelpers.m in Sources */ = {isa = PBXBuildFile; fileRef = 614DC12F26082BBE00B9588E /* ViewControllerHelpers.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		6151A323260F012300D88F1B /* CalendarDateHelpers.c in Sources */ = {isa = PBXBuildFile; fileRef = 6151A322260F012300D88F1B /* CalendarDateHelpers.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61594D0C26068105000D01A1 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 61594D0B26068105000D01A1 /* AppDelegate.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
@@ -19,8 +18,9 @@
 		61594D2026068106000D01A1 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 61594D1F26068106000D01A1 /* main.m */; };
 		61594D2A26068106000D01A1 /* HealthAppTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 61594D2926068106000D01A1 /* HealthAppTests.m */; };
 		61594D5726068C41000D01A1 /* AppCoordinator.m in Sources */ = {isa = PBXBuildFile; fileRef = 61594D5626068C41000D01A1 /* AppCoordinator.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		61594D652606C7C6000D01A1 /* AppUserData.m in Sources */ = {isa = PBXBuildFile; fileRef = 61594D642606C7C6000D01A1 /* AppUserData.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		61594D652606C7C6000D01A1 /* AppUserData.c in Sources */ = {isa = PBXBuildFile; fileRef = 61594D642606C7C6000D01A1 /* AppUserData.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		615A1C4C2608406100858C32 /* PersistenceService.m in Sources */ = {isa = PBXBuildFile; fileRef = 615A1C4B2608406100858C32 /* PersistenceService.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		6161838226AC80A0001587B2 /* CocoaBridging.m in Sources */ = {isa = PBXBuildFile; fileRef = 6161838126AC80A0001587B2 /* CocoaBridging.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		616DC23E267152BA00EFD3D4 /* WorkoutViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 616DC23D267152BA00EFD3D4 /* WorkoutViewController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		616E2F6826755D2B00342CD8 /* HomeSetupWorkoutModalViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 616E2F6726755D2B00342CD8 /* HomeSetupWorkoutModalViewController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		616E2F842676A22700342CD8 /* Exercise.c in Sources */ = {isa = PBXBuildFile; fileRef = 616E2F832676A22700342CD8 /* Exercise.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
@@ -118,21 +118,20 @@
 		61808CB92610FEEF00BAF7AB /* ChartDataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61808C2C2610FEEF00BAF7AB /* ChartDataProvider.swift */; };
 		61808CBC2610FEEF00BAF7AB /* LineChartDataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61808C2F2610FEEF00BAF7AB /* LineChartDataProvider.swift */; };
 		61808CBD2610FEEF00BAF7AB /* BarLineScatterCandleBubbleChartDataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61808C302610FEEF00BAF7AB /* BarLineScatterCandleBubbleChartDataProvider.swift */; };
+		6197B5DB26ADFF0F00F97B98 /* HistoryDataManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 6197B5DA26ADFF0F00F97B98 /* HistoryDataManager.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		6197B5EF26AE314400F97B98 /* hash.c in Sources */ = {isa = PBXBuildFile; fileRef = 6197B5EE26AE314400F97B98 /* hash.c */; };
 		61BC6F55266EA9A80022D6F7 /* WeeklyData+CoreDataClass.h in Headers */ = {isa = PBXBuildFile; fileRef = 61BC6F51266EA9A80022D6F7 /* WeeklyData+CoreDataClass.h */; };
 		61BC6F56266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m in Sources */ = {isa = PBXBuildFile; fileRef = 61BC6F52266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61C778DE26102235001326A1 /* Divider.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C778DD26102235001326A1 /* Divider.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61C7793626102C19001326A1 /* HistoryTabCoordinator.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C7793526102C19001326A1 /* HistoryTabCoordinator.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61C7795026102C8C001326A1 /* HistoryViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C7794F26102C8C001326A1 /* HistoryViewController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		61C7796026102CC6001326A1 /* HistoryViewModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C7795F26102CC6001326A1 /* HistoryViewModel.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		61C7796426102CFF001326A1 /* ConfettiEmitterView.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C7796326102CFF001326A1 /* ConfettiEmitterView.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		61C7797826102D45001326A1 /* HomeViewModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C7797726102D45001326A1 /* HomeViewModel.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		61C7796026102CC6001326A1 /* HistoryViewModel.c in Sources */ = {isa = PBXBuildFile; fileRef = 61C7795F26102CC6001326A1 /* HistoryViewModel.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		61C7797826102D45001326A1 /* HomeViewModel.c in Sources */ = {isa = PBXBuildFile; fileRef = 61C7797726102D45001326A1 /* HomeViewModel.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61C7797C26102D5F001326A1 /* HomeTabCoordinator.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C7797B26102D5F001326A1 /* HomeTabCoordinator.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61C7798426102D85001326A1 /* HomeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C7798326102D85001326A1 /* HomeViewController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		61C7798826102DB5001326A1 /* AddWorkoutViewModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C7798726102DB5001326A1 /* AddWorkoutViewModel.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61C779A426102E20001326A1 /* AddWorkoutCoordinator.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C779A326102E20001326A1 /* AddWorkoutCoordinator.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61C779AC26102E51001326A1 /* SettingsTabCoordinator.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C779AB26102E51001326A1 /* SettingsTabCoordinator.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61C779B426102E97001326A1 /* SettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C779B326102E97001326A1 /* SettingsViewController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		61DE8BAA266F0DBE007294FF /* WorkoutFinder.m in Sources */ = {isa = PBXBuildFile; fileRef = 61DE8BA9266F0DBE007294FF /* WorkoutFinder.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -150,8 +149,6 @@
 		6121523026690C94002BFA52 /* unordered_set.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = unordered_set.h; sourceTree = "<group>"; };
 		6121523126690CA6002BFA52 /* hash_table.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = hash_table.h; sourceTree = "<group>"; };
 		612FD047266DAF25002C9993 /* WorkoutData.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = WorkoutData.plist; sourceTree = "<group>"; };
-		6139468F2610F15800552422 /* ChartHelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ChartHelpers.h; sourceTree = "<group>"; };
-		613946902610F16700552422 /* ChartHelpers.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ChartHelpers.m; sourceTree = "<group>"; };
 		614DC12826081E9E00B9588E /* ViewControllerHelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewControllerHelpers.h; sourceTree = "<group>"; };
 		614DC12F26082BBE00B9588E /* ViewControllerHelpers.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewControllerHelpers.m; sourceTree = "<group>"; };
 		6151A321260F010F00D88F1B /* CalendarDateHelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CalendarDateHelpers.h; sourceTree = "<group>"; };
@@ -170,9 +167,11 @@
 		61594D5526068BFD000D01A1 /* AppCoordinator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppCoordinator.h; sourceTree = "<group>"; };
 		61594D5626068C41000D01A1 /* AppCoordinator.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppCoordinator.m; sourceTree = "<group>"; };
 		61594D632606C7AE000D01A1 /* AppUserData.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppUserData.h; sourceTree = "<group>"; };
-		61594D642606C7C6000D01A1 /* AppUserData.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppUserData.m; sourceTree = "<group>"; };
+		61594D642606C7C6000D01A1 /* AppUserData.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = AppUserData.c; sourceTree = "<group>"; };
 		615A1C4A2608403900858C32 /* PersistenceService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PersistenceService.h; sourceTree = "<group>"; };
 		615A1C4B2608406100858C32 /* PersistenceService.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PersistenceService.m; sourceTree = "<group>"; };
+		6161838026AC8089001587B2 /* CocoaBridging.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CocoaBridging.h; sourceTree = "<group>"; };
+		6161838126AC80A0001587B2 /* CocoaBridging.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CocoaBridging.m; sourceTree = "<group>"; };
 		616DC23C267152A800EFD3D4 /* WorkoutViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WorkoutViewController.h; sourceTree = "<group>"; };
 		616DC23D267152BA00EFD3D4 /* WorkoutViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WorkoutViewController.m; sourceTree = "<group>"; };
 		616E2F6626755D1F00342CD8 /* HomeSetupWorkoutModalViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HomeSetupWorkoutModalViewController.h; sourceTree = "<group>"; };
@@ -278,35 +277,32 @@
 		61808D412611275400BAF7AB /* array.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = array.h; sourceTree = "<group>"; };
 		61808D422611287100BAF7AB /* iterator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = iterator.h; sourceTree = "<group>"; };
 		61808D432611288300BAF7AB /* alg_helper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = alg_helper.h; sourceTree = "<group>"; };
+		6197B5DA26ADFF0F00F97B98 /* HistoryDataManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HistoryDataManager.m; sourceTree = "<group>"; };
+		6197B5DE26ADFF2000F97B98 /* HistoryDataManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HistoryDataManager.h; sourceTree = "<group>"; };
+		6197B5ED26AE312500F97B98 /* hash.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = hash.h; sourceTree = "<group>"; };
+		6197B5EE26AE314400F97B98 /* hash.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = hash.c; sourceTree = "<group>"; };
 		61BC6F51266EA9A80022D6F7 /* WeeklyData+CoreDataClass.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "WeeklyData+CoreDataClass.h"; sourceTree = "<group>"; };
 		61BC6F52266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "WeeklyData+CoreDataClass.m"; sourceTree = "<group>"; };
 		61C778D5261021F1001326A1 /* Divider.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Divider.h; sourceTree = "<group>"; };
 		61C778DD26102235001326A1 /* Divider.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Divider.m; sourceTree = "<group>"; };
 		61C77914261028BE001326A1 /* HomeTabCoordinator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HomeTabCoordinator.h; sourceTree = "<group>"; };
 		61C77916261028F3001326A1 /* HomeViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HomeViewController.h; sourceTree = "<group>"; };
-		61C779192610294E001326A1 /* ConfettiEmitterView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ConfettiEmitterView.h; sourceTree = "<group>"; };
 		61C7791A26102960001326A1 /* HomeViewModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HomeViewModel.h; sourceTree = "<group>"; };
 		61C7791D261029C6001326A1 /* AddWorkoutCoordinator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AddWorkoutCoordinator.h; sourceTree = "<group>"; };
-		61C7792526102A7F001326A1 /* AddWorkoutViewModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AddWorkoutViewModel.h; sourceTree = "<group>"; };
 		61C7792626102AAE001326A1 /* HistoryTabCoordinator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HistoryTabCoordinator.h; sourceTree = "<group>"; };
 		61C7792C26102B11001326A1 /* HistoryViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HistoryViewController.h; sourceTree = "<group>"; };
 		61C7792D26102B28001326A1 /* HistoryViewModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HistoryViewModel.h; sourceTree = "<group>"; };
 		61C7793126102B8B001326A1 /* SettingsTabCoordinator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SettingsTabCoordinator.h; sourceTree = "<group>"; };
 		61C7793326102BAA001326A1 /* SettingsViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SettingsViewController.h; sourceTree = "<group>"; };
-		61C7793426102BBC001326A1 /* SettingsViewModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SettingsViewModel.h; sourceTree = "<group>"; };
 		61C7793526102C19001326A1 /* HistoryTabCoordinator.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HistoryTabCoordinator.m; sourceTree = "<group>"; };
 		61C7794F26102C8C001326A1 /* HistoryViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HistoryViewController.m; sourceTree = "<group>"; };
-		61C7795F26102CC6001326A1 /* HistoryViewModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HistoryViewModel.m; sourceTree = "<group>"; };
-		61C7796326102CFF001326A1 /* ConfettiEmitterView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ConfettiEmitterView.m; sourceTree = "<group>"; };
-		61C7797726102D45001326A1 /* HomeViewModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HomeViewModel.m; sourceTree = "<group>"; };
+		61C7795F26102CC6001326A1 /* HistoryViewModel.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = HistoryViewModel.c; sourceTree = "<group>"; };
+		61C7797726102D45001326A1 /* HomeViewModel.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = HomeViewModel.c; sourceTree = "<group>"; };
 		61C7797B26102D5F001326A1 /* HomeTabCoordinator.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HomeTabCoordinator.m; sourceTree = "<group>"; };
 		61C7798326102D85001326A1 /* HomeViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HomeViewController.m; sourceTree = "<group>"; };
-		61C7798726102DB5001326A1 /* AddWorkoutViewModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AddWorkoutViewModel.m; sourceTree = "<group>"; };
 		61C779A326102E20001326A1 /* AddWorkoutCoordinator.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AddWorkoutCoordinator.m; sourceTree = "<group>"; };
 		61C779AB26102E51001326A1 /* SettingsTabCoordinator.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SettingsTabCoordinator.m; sourceTree = "<group>"; };
 		61C779B326102E97001326A1 /* SettingsViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SettingsViewController.m; sourceTree = "<group>"; };
-		61DE8BA8266F0DAF007294FF /* WorkoutFinder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WorkoutFinder.h; sourceTree = "<group>"; };
-		61DE8BA9266F0DBE007294FF /* WorkoutFinder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WorkoutFinder.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -332,8 +328,6 @@
 			children = (
 				6176277D266D44C60079A17E /* Exercise.h */,
 				616E2F832676A22700342CD8 /* Exercise.c */,
-				61DE8BA8266F0DAF007294FF /* WorkoutFinder.h */,
-				61DE8BA9266F0DBE007294FF /* WorkoutFinder.m */,
 			);
 			path = Workouts;
 			sourceTree = "<group>";
@@ -618,6 +612,8 @@
 				61808D432611288300BAF7AB /* alg_helper.h */,
 				61808D412611275400BAF7AB /* array.h */,
 				61808D402611274000BAF7AB /* ds.h */,
+				6197B5ED26AE312500F97B98 /* hash.h */,
+				6197B5EE26AE314400F97B98 /* hash.c */,
 				6121523126690CA6002BFA52 /* hash_table.h */,
 				61808D422611287100BAF7AB /* iterator.h */,
 				6121523026690C94002BFA52 /* unordered_set.h */,
@@ -660,7 +656,6 @@
 			children = (
 				61C77901261025E0001326A1 /* Coordinator */,
 				61C778FF261025D1001326A1 /* ViewController */,
-				61C778FE261025C7001326A1 /* ViewModel */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -669,7 +664,6 @@
 			isa = PBXGroup;
 			children = (
 				61C778F32610250C001326A1 /* Coordinator */,
-				61C778F526102525001326A1 /* View */,
 				61C778F62610254E001326A1 /* ViewController */,
 				61C778F72610255C001326A1 /* ViewModel */,
 			);
@@ -681,7 +675,6 @@
 			children = (
 				61C778EF261024DC001326A1 /* Coordinator */,
 				61C778F826102580001326A1 /* ViewController */,
-				61C778F2261024FA001326A1 /* ViewModel */,
 			);
 			path = AddWorkout;
 			sourceTree = "<group>";
@@ -695,15 +688,6 @@
 			path = Coordinator;
 			sourceTree = "<group>";
 		};
-		61C778F2261024FA001326A1 /* ViewModel */ = {
-			isa = PBXGroup;
-			children = (
-				61C7792526102A7F001326A1 /* AddWorkoutViewModel.h */,
-				61C7798726102DB5001326A1 /* AddWorkoutViewModel.m */,
-			);
-			path = ViewModel;
-			sourceTree = "<group>";
-		};
 		61C778F32610250C001326A1 /* Coordinator */ = {
 			isa = PBXGroup;
 			children = (
@@ -711,15 +695,6 @@
 				61C7797B26102D5F001326A1 /* HomeTabCoordinator.m */,
 			);
 			path = Coordinator;
-			sourceTree = "<group>";
-		};
-		61C778F526102525001326A1 /* View */ = {
-			isa = PBXGroup;
-			children = (
-				61C779192610294E001326A1 /* ConfettiEmitterView.h */,
-				61C7796326102CFF001326A1 /* ConfettiEmitterView.m */,
-			);
-			path = View;
 			sourceTree = "<group>";
 		};
 		61C778F62610254E001326A1 /* ViewController */ = {
@@ -737,7 +712,7 @@
 			isa = PBXGroup;
 			children = (
 				61C7791A26102960001326A1 /* HomeViewModel.h */,
-				61C7797726102D45001326A1 /* HomeViewModel.m */,
+				61C7797726102D45001326A1 /* HomeViewModel.c */,
 			);
 			path = ViewModel;
 			sourceTree = "<group>";
@@ -756,8 +731,10 @@
 		61C778F926102591001326A1 /* ViewModel */ = {
 			isa = PBXGroup;
 			children = (
+				6197B5DE26ADFF2000F97B98 /* HistoryDataManager.h */,
+				6197B5DA26ADFF0F00F97B98 /* HistoryDataManager.m */,
 				61C7792D26102B28001326A1 /* HistoryViewModel.h */,
-				61C7795F26102CC6001326A1 /* HistoryViewModel.m */,
+				61C7795F26102CC6001326A1 /* HistoryViewModel.c */,
 			);
 			path = ViewModel;
 			sourceTree = "<group>";
@@ -786,14 +763,6 @@
 				61C7793526102C19001326A1 /* HistoryTabCoordinator.m */,
 			);
 			path = Coordinator;
-			sourceTree = "<group>";
-		};
-		61C778FE261025C7001326A1 /* ViewModel */ = {
-			isa = PBXGroup;
-			children = (
-				61C7793426102BBC001326A1 /* SettingsViewModel.h */,
-			);
-			path = ViewModel;
 			sourceTree = "<group>";
 		};
 		61C778FF261025D1001326A1 /* ViewController */ = {
@@ -833,7 +802,7 @@
 			isa = PBXGroup;
 			children = (
 				61594D632606C7AE000D01A1 /* AppUserData.h */,
-				61594D642606C7C6000D01A1 /* AppUserData.m */,
+				61594D642606C7C6000D01A1 /* AppUserData.c */,
 				615A1C4A2608403900858C32 /* PersistenceService.h */,
 				615A1C4B2608406100858C32 /* PersistenceService.m */,
 			);
@@ -845,8 +814,8 @@
 			children = (
 				6151A321260F010F00D88F1B /* CalendarDateHelpers.h */,
 				6151A322260F012300D88F1B /* CalendarDateHelpers.c */,
-				6139468F2610F15800552422 /* ChartHelpers.h */,
-				613946902610F16700552422 /* ChartHelpers.m */,
+				6161838026AC8089001587B2 /* CocoaBridging.h */,
+				6161838126AC80A0001587B2 /* CocoaBridging.m */,
 				614DC12826081E9E00B9588E /* ViewControllerHelpers.h */,
 				614DC12F26082BBE00B9588E /* ViewControllerHelpers.m */,
 			);
@@ -1000,6 +969,7 @@
 				616DC23E267152BA00EFD3D4 /* WorkoutViewController.m in Sources */,
 				61808C7D2610FEEF00BAF7AB /* Platform+Color.swift in Sources */,
 				61808C342610FEEF00BAF7AB /* DataApproximator+N.swift in Sources */,
+				6197B5DB26ADFF0F00F97B98 /* HistoryDataManager.m in Sources */,
 				61808C912610FEEF00BAF7AB /* BarChartDataEntry.swift in Sources */,
 				61808C782610FEEF00BAF7AB /* Platform+Graphics.swift in Sources */,
 				61808C8B2610FEEF00BAF7AB /* ViewPortJob.swift in Sources */,
@@ -1034,7 +1004,7 @@
 				61808C7F2610FEEF00BAF7AB /* Description.swift in Sources */,
 				61808C562610FEEF00BAF7AB /* PieHighlighter.swift in Sources */,
 				61808C7B2610FEEF00BAF7AB /* ChartColorTemplates.swift in Sources */,
-				61DE8BAA266F0DBE007294FF /* WorkoutFinder.m in Sources */,
+				6161838226AC80A0001587B2 /* CocoaBridging.m in Sources */,
 				61808CB52610FEEF00BAF7AB /* LineScatterCandleRadarChartDataSetProtocol.swift in Sources */,
 				61808C9F2610FEEF00BAF7AB /* ChartDataEntry.swift in Sources */,
 				61808C522610FEEF00BAF7AB /* LineScatterCandleRadarRenderer.swift in Sources */,
@@ -1095,22 +1065,20 @@
 				61594D1826068105000D01A1 /* HealthApp.xcdatamodeld in Sources */,
 				61BC6F56266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m in Sources */,
 				6151A323260F012300D88F1B /* CalendarDateHelpers.c in Sources */,
-				61C7798826102DB5001326A1 /* AddWorkoutViewModel.m in Sources */,
 				61C7795026102C8C001326A1 /* HistoryViewController.m in Sources */,
 				61594D5726068C41000D01A1 /* AppCoordinator.m in Sources */,
-				61C7797826102D45001326A1 /* HomeViewModel.m in Sources */,
+				61C7797826102D45001326A1 /* HomeViewModel.c in Sources */,
 				616E2F9B2677195C00342CD8 /* AddWorkoutUpdateMaxesViewController.m in Sources */,
 				61C779AC26102E51001326A1 /* SettingsTabCoordinator.m in Sources */,
 				615A1C4C2608406100858C32 /* PersistenceService.m in Sources */,
-				61C7796426102CFF001326A1 /* ConfettiEmitterView.m in Sources */,
 				61C778DE26102235001326A1 /* Divider.m in Sources */,
 				61C7798426102D85001326A1 /* HomeViewController.m in Sources */,
 				61C779B426102E97001326A1 /* SettingsViewController.m in Sources */,
-				61C7796026102CC6001326A1 /* HistoryViewModel.m in Sources */,
-				61594D652606C7C6000D01A1 /* AppUserData.m in Sources */,
-				613946912610F16700552422 /* ChartHelpers.m in Sources */,
+				61C7796026102CC6001326A1 /* HistoryViewModel.c in Sources */,
+				61594D652606C7C6000D01A1 /* AppUserData.c in Sources */,
 				614DC13026082BBE00B9588E /* ViewControllerHelpers.m in Sources */,
 				61C7793626102C19001326A1 /* HistoryTabCoordinator.m in Sources */,
+				6197B5EF26AE314400F97B98 /* hash.c in Sources */,
 				61C7797C26102D5F001326A1 /* HomeTabCoordinator.m in Sources */,
 				61594D0C26068105000D01A1 /* AppDelegate.m in Sources */,
 				61C779A426102E20001326A1 /* AddWorkoutCoordinator.m in Sources */,

@@ -8,58 +8,58 @@
 #ifndef HistoryViewModel_h
 #define HistoryViewModel_h
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdocumentation"
-#import "HealthApp-Swift.h"
-#pragma clang diagnostic pop
 #include <CoreFoundation/CoreFoundation.h>
+#include "array.h"
 
-typedef struct HistoryViewModel HistoryViewModel;
-typedef struct HistoryTabCoordinator HistoryTabCoordinator;
-typedef struct Array_weekData Array_weekData;
-typedef struct Array_chartData Array_chartData;
-typedef struct HistoryGradientChartViewModel HistoryGradientChartViewModel;
-typedef struct HistoryAreaChartViewModel HistoryAreaChartViewModel;
-typedef struct HistoryLiftChartViewModel HistoryLiftChartViewModel;
+typedef struct {
+    double weekStart;
+    double weekEnd;
+    int totalWorkouts;
+    int durationByType[4];
+    int cumulativeDuration[4];
+    int weightArray[4];
+} HistoryWeekDataModel;
 
-struct HistoryGradientChartViewModel {
+gen_array_headers(weekData, HistoryWeekDataModel)
+gen_array_headers(chartData, void*)
+
+typedef struct {
+    long refTime;
+    CFDateFormatterRef formatter;
+    CFStringRef currString;
+} HistoryXAxisFormatter;
+
+typedef struct {
     Array_chartData *entries;
     CFStringRef legendLabelFormat;
     int totalWorkouts;
     int maxWorkouts;
     double avgWorkouts;
-};
+} HistoryGradientChartViewModel;
 
-struct HistoryAreaChartViewModel {
+typedef struct {
     Array_chartData *entries[5];
     CFStringRef legendLabelFormats[4];
     int maxActivityTime;
     int totalByType[4];
-};
+} HistoryAreaChartViewModel;
 
-struct HistoryLiftChartViewModel {
+typedef struct {
     Array_chartData *entries[4];
     CFStringRef legendLabelFormats[4];
     int maxWeight;
     int totalByExercise[4];
-};
+} HistoryLiftChartViewModel;
 
-struct HistoryViewModel {
-    HistoryTabCoordinator *delegate;
-    HistoryGradientChartViewModel *gradientChartViewModel;
-    HistoryAreaChartViewModel *areaChartViewModel;
-    HistoryLiftChartViewModel *liftChartViewModel;
+typedef struct {
+    HistoryGradientChartViewModel gradientChartViewModel;
+    HistoryAreaChartViewModel areaChartViewModel;
+    HistoryLiftChartViewModel liftChartViewModel;
     Array_weekData *data;
-};
+} HistoryViewModel;
 
-HistoryViewModel *historyViewModel_init(void);
+void historyViewModel_init(HistoryViewModel *model);
 void historyViewModel_free(HistoryViewModel *model);
-void historyViewModel_fetchData(HistoryViewModel *model);
-void historyViewModel_formatDataForTimeRange(HistoryViewModel *model, int index);
-
-bool historyViewModel_shouldShowCharts(HistoryViewModel *model);
-void historyViewModel_applyUpdatesForTotalWorkouts(HistoryGradientChartViewModel *model, LineChartView *view, LineChartData *data, LineChartDataSet *dataSet, ChartLimitLine *limitLine, NSArray<ChartLegendEntry*> *legendEntries);
-void historyViewModel_applyUpdatesForDurations(HistoryAreaChartViewModel *model, LineChartView *view, LineChartData *data, LineChartDataSet **dataSets, NSArray<ChartLegendEntry*> *legendEntries);
-void historyViewModel_applyUpdatesForLifts(HistoryLiftChartViewModel *model, LineChartView *view, LineChartData *data, LineChartDataSet **dataSets, NSArray<ChartLegendEntry*> *legendEntries);
+void historyViewModel_formatDataForTimeRange(HistoryViewModel *model, int index, HistoryXAxisFormatter *formatter);
 
 #endif /* HistoryViewModel_h */

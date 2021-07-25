@@ -8,28 +8,24 @@
 #ifndef AppUserData_h
 #define AppUserData_h
 
-typedef struct UserInfo UserInfo;
-struct UserInfo {
+typedef struct {
     double planStart;
     double weekStart;
     signed char currentPlan;
     unsigned char completedWorkouts;
-    unsigned short liftMaxes[4];
-    unsigned short squatMax, pullUpMax, benchMax, deadliftMax;
-};
+    short liftMaxes[4];
+} UserInfo;
 
 extern UserInfo *appUserDataShared;
 
 UserInfo *userInfo_initFromStorage(void);
 void userInfo_saveData(UserInfo *info);
-void appUserData_free(void);
 
 void appUserData_setWorkoutPlan(signed char plan);
 void appUserData_deleteSavedData(void);
 void appUserData_handleNewWeek(double weekStart);
 unsigned char appUserData_addCompletedWorkout(unsigned char day);
-unsigned int appUserData_getWeekInPlan(void);
-bool appUserData_hasWorkoutPlan(void);
-void appUserData_updateWeightMaxes(unsigned short *weights);
+int appUserData_getWeekInPlan(void);
+void appUserData_updateWeightMaxes(short *weights);
 
 #endif /* AppUserData_h */

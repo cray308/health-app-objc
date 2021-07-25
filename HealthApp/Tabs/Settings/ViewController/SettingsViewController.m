@@ -6,36 +6,30 @@
 //
 
 #import "SettingsViewController.h"
-#import "SettingsViewModel.h"
 #import "ViewControllerHelpers.h"
-#import "SettingsTabCoordinator.h"
-#import "AppCoordinator.h"
-#import "AppUserData.h"
+#include "AppUserData.h"
+#import "AppDelegate.h"
 #import "PersistenceService.h"
 
 #define _U_ __attribute__((__unused__))
 
 @interface SettingsViewController() {
-    SettingsViewModel *viewModel;
     UISegmentedControl *planPicker;
     UITextField *textFields[4];
     bool validInput[4];
-    unsigned short results[4];
+    short results[4];
     UIButton *saveButton;
 }
-
 @end
 
 @implementation SettingsViewController
-
-- (id) initWithViewModel: (SettingsViewModel *)model {
+- (id) init {
     if (!(self = [super initWithNibName:nil bundle:nil])) return nil;
-    viewModel = model;
     return self;
 }
 
 - (void) dealloc {
-    for (int i = 0; i < 4; ++i) { [textFields[i] release]; }
+    for (int i = 0; i < 4; ++i) [textFields[i] release];
     [planPicker release];
     [super dealloc];
 }
@@ -47,7 +41,11 @@
     [self setupSubviews];
     UITextField *fields[] = {textFields[0], textFields[1], textFields[2], textFields[3], nil};
     createToolbar(self, @selector(dismissKeyboard), fields);
-    appCoordinator_setTabToLoaded(viewModel->delegate->delegate, LoadedViewController_Settings);
+
+    AppDelegate *app = (AppDelegate *) UIApplication.sharedApplication.delegate;
+    if (app) {
+        app->coordinator.loadedViewControllers |= LoadedViewController_Settings;
+    }
 }
 
 - (void) setupSubviews {
@@ -87,7 +85,7 @@
         stacks[i].spacing = 5;
         stacks[i].distribution = UIStackViewDistributionFillEqually;
         [stacks[i] setLayoutMarginsRelativeArrangement:true];
-        stacks[i].layoutMargins = UIEdgeInsetsMake(4, 5, 4, 8);
+        stacks[i].layoutMargins = (UIEdgeInsets){.top = 4, .left = 5, .bottom = 4, .right = 8};
 
         [label release];
     }
@@ -117,7 +115,7 @@
     vStack.axis = UILayoutConstraintAxisVertical;
     vStack.spacing = 20;
     [vStack setLayoutMarginsRelativeArrangement:true];
-    vStack.layoutMargins = UIEdgeInsetsMake(20, 0, 0, 0);
+    vStack.layoutMargins = (UIEdgeInsets){.top = 20};
 
     UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:CGRectZero];
     scrollView.translatesAutoresizingMaskIntoConstraints = false;
@@ -164,18 +162,16 @@
     [scrollView release];
     [planContainer release];
     [planLabel release];
-    for (int i = 0; i < 4; ++i) { [stacks[i] release]; }
+    for (int i = 0; i < 4; ++i) [stacks[i] release];
 }
 
 - (void) updateWeightFields {
-    textFields[0].text = [NSString stringWithFormat:@"%u", appUserDataShared->squatMax];
-    textFields[1].text = [NSString stringWithFormat:@"%u", appUserDataShared->pullUpMax];
-    textFields[2].text = [NSString stringWithFormat:@"%u", appUserDataShared->benchMax];
-    textFields[3].text = [NSString stringWithFormat:@"%u", appUserDataShared->deadliftMax];
-    results[0] = appUserDataShared->squatMax;
-    results[1] = appUserDataShared->pullUpMax;
-    results[2] = appUserDataShared->benchMax;
-    results[3] = appUserDataShared->deadliftMax;
+    for (int i = 0; i < 4; ++i) {
+        results[i] = appUserDataShared->liftMaxes[i];
+        CFStringRef text = CFStringCreateWithFormat(NULL, NULL, CFSTR("%d"), results[i]);
+        textFields[i].text = (__bridge NSString*) text;
+        CFRelease(text);
+    }
     memset(validInput, true, 4 * sizeof(bool));
     [saveButton setEnabled:true];
 }
@@ -189,34 +185,36 @@
 - (void) saveButtonPressed {
     const int segment = (int) planPicker.selectedSegmentIndex;
     signed char plan = segment == 0 ? -1 : segment - 1;
-    AppCoordinator *delegate = viewModel->delegate->delegate;
 
-    AlertDetails *details = alertDetails_init(CFSTR("Are you sure?"), CFSTR("This will save the currently entered data."));
-    UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"Save" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action _U_) {
+    AlertDetails details = {CFSTR("Are you sure?"), CFSTR("This will save the currently entered data.")};
+    UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"Save" style:UIAlertActionStyleDefault
+                                                     handler:^(UIAlertAction * _Nonnull action _U_) {
         appUserData_updateWeightMaxes(results);
         appUserData_setWorkoutPlan(plan);
-        appCoordinator_updatedUserInfo(delegate);
+        AppDelegate *app = (AppDelegate *) UIApplication.sharedApplication.delegate;
+        if (app) appCoordinator_updatedUserInfo(&app->coordinator);
     }];
     UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil];
-    viewController_showAlert(self, details, okAction, cancelAction);
+    viewController_showAlert(self, &details, okAction, cancelAction);
 }
 
 - (void) deleteButtonPressed {
-    AppCoordinator *delegate = viewModel->delegate->delegate;
-
-    AlertDetails *details = alertDetails_init(CFSTR("Are you sure?"), CFSTR("This will delete all workout history. This action cannot be undone."));
-    UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"Delete" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action _U_) {
+    AlertDetails details = {CFSTR("Are you sure?"), CFSTR("This will delete all workout history.")};
+    UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"Delete" style:UIAlertActionStyleDestructive
+                                                     handler:^(UIAlertAction * _Nonnull action _U_) {
         persistenceService_deleteUserData();
         appUserData_deleteSavedData();
-        appCoordinator_deletedAppData(delegate);
+        AppDelegate *app = (AppDelegate *) UIApplication.sharedApplication.delegate;
+        if (app) appCoordinator_deletedAppData(&app->coordinator);
     }];
     UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil];
-    viewController_showAlert(self, details, okAction, cancelAction);
+    viewController_showAlert(self, &details, okAction, cancelAction);
 }
 
 #pragma mark - TextField Delegate
 
-- (BOOL) textField: (UITextField *)textField shouldChangeCharactersInRange: (NSRange)range replacementString: (NSString *)string {
+- (BOOL) textField: (UITextField *)textField shouldChangeCharactersInRange: (NSRange)range
+ replacementString: (NSString *)string {
     if (!viewController_validateNumericInput((__bridge CFStringRef) string)) return false;
 
     int i = 0;
@@ -243,7 +241,7 @@
     }
 
     validInput[i] = true;
-    results[i] = (unsigned short) newWeight;
+    results[i] = (short) newWeight;
 
     for (i = 0; i < 4; ++i) {
         if (!validInput[i]) {
@@ -260,5 +258,4 @@
     [textField resignFirstResponder];
     return true;
 }
-
 @end

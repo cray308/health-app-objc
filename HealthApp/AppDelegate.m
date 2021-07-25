@@ -6,13 +6,13 @@
 //
 
 #import "AppDelegate.h"
-#import "AppCoordinator.h"
-#import "AppUserData.h"
 #import "PersistenceService.h"
 #import "ViewControllerHelpers.h"
 #import "WorkoutViewController.h"
+#import <UserNotifications/UserNotifications.h>
+
+#include "AppUserData.h"
 #include "CalendarDateHelpers.h"
-#include <UserNotifications/UserNotifications.h>
 
 #if DEBUG
 #import "WeeklyData+CoreDataClass.h"
@@ -25,11 +25,12 @@ void setupData(void);
 @implementation AppDelegate
 
 - (void) dealloc {
-    appUserData_free();
-    persistenceService_free();
+    if (appUserDataShared) free(appUserDataShared);
+    appUserDataShared = NULL;
+    if (persistenceServiceShared) [persistenceServiceShared release];
+    persistenceServiceShared = NULL;
     viewControllerHelper_cleanupValidNumericChars();
-    appCoordinator_free(coordinator);
-    [window setRootViewController:nil];
+    appCoordinator_free(&coordinator);
     [window release];
     [super dealloc];
 }
@@ -37,18 +38,23 @@ void setupData(void);
 - (BOOL) application: (UIApplication *)application didFinishLaunchingWithOptions: (NSDictionary *)launchOptions {
     window = [[UIWindow alloc] initWithFrame:UIScreen.mainScreen.bounds];
 
-    coordinator = appCoordinator_init(window);
-    if (!coordinator) return true;
-
     bool hasLaunched = [NSUserDefaults.standardUserDefaults boolForKey:@"hasLaunched"];
-    persistenceService_setup();
+
+    persistenceServiceShared = [[NSPersistentContainer alloc] initWithName:@"HealthApp"];
+    [persistenceServiceShared
+     loadPersistentStoresWithCompletionHandler: ^(NSPersistentStoreDescription *description _U_, NSError *error _U_) {}];
+
     viewControllerHelper_setupValidNumericChars();
 
     if (!hasLaunched) setupData();
-    appCoordinator_start(coordinator);
+    appCoordinator_start(&coordinator);
+    [window setRootViewController:coordinator.tabVC];
+    [window makeKeyAndVisible];
+
     if (!hasLaunched) {
-        [UNUserNotificationCenter.currentNotificationCenter requestAuthorizationWithOptions:UNAuthorizationOptionAlert | UNAuthorizationOptionSound
-                                                                          completionHandler:^(BOOL granted _U_, NSError *_Nullable error _U_) {}];
+        [UNUserNotificationCenter.currentNotificationCenter
+         requestAuthorizationWithOptions:UNAuthorizationOptionAlert | UNAuthorizationOptionSound
+         completionHandler:^(BOOL granted _U_, NSError *_Nullable error _U_) {}];
     }
     return true;
 }
@@ -60,7 +66,7 @@ void setupData(void);
 }
 
 - (void) applicationDidBecomeActive: (UIApplication *)application {
-    appCoordinator_handleForegroundUpdate(coordinator);
+    appCoordinator_handleForegroundUpdate(&coordinator);
     if (workoutVC) [workoutVC restartTimers];
 }
 
@@ -72,44 +78,60 @@ void setupData(void);
 
 void setupData(void) {
     CFCalendarRef calendar = CFCalendarCopyCurrent();
-    #if DEBUG
+#if DEBUG
     int bench = 185, pullup = 20, squat = 300, deadlift = 235, i = 0;
     unsigned char plan = 0;
-    double start = date_calcStartOfWeek(CFAbsoluteTimeGetCurrent() - 126489600, calendar, DateSearchDirection_Previous, true);
-    double end = date_lastMonth(calendar);
+    long start = date_calcStartOfWeek(CFAbsoluteTimeGetCurrent() - 126489600, calendar, DateSearchDirectionPrev, true);
+    long end = date_calcStartOfWeek(CFAbsoluteTimeGetCurrent() - 2678400, calendar, DateSearchDirectionPrev, true);
 
-    while ( (int) start < (int) end) {
-        WeeklyData *data = [[WeeklyData alloc] initWithContext:persistenceService_sharedContainer.viewContext];
+    while (start < end) {
+        WeeklyData *data = [[WeeklyData alloc] initWithContext:persistenceServiceShared.viewContext];
         data.weekStart = start;
         data.weekEnd = start + (WeekSeconds - 1);
 
-        for (int j = 0; j < 6; ++j) {
-            switch (j) {
-                case 0:
-                    if (plan == 0) { data.timeSE += ((rand() % 20) + 10); } else { data.timeStrength += ((rand() % 20) + 20); }
-                    data.totalWorkouts += 1;
-                    break;
-                case 1:
-                    if (plan == 0) { data.timeEndurance += ((rand() % 30) + 30); } else { data.timeHIC += ((rand() % 20) + 15); }
-                    data.totalWorkouts += 1;
-                    break;
-                case 2:
-                    if (plan == 0) { data.timeEndurance += ((rand() % 30) + 30); } else { data.timeStrength += ((rand() % 20) + 20); }
-                    data.totalWorkouts += 1;
-                    break;
-                case 3:
-                    if (plan == 0) { data.timeSE += ((rand() % 20) + 10); } else { data.timeHIC += ((rand() % 20) + 15); }
-                    data.totalWorkouts += 1;
-                    break;
-                case 4:
-                    if (plan == 0) { if (rand() % 10 >= 5) { data.timeSE += (rand() % 20); data.totalWorkouts += 1; } } else { data.timeStrength += ((rand() % 20) + 20); data.totalWorkouts += 1; }
-                    break;
-                case 5:
-                    if (plan == 0) { data.timeEndurance += ((rand() % 30) + 30); } else { data.timeEndurance += ((rand() % 30) + 60); }
-                    data.totalWorkouts += 1;
-                    break;
-                default:
-                    break;
+        if (plan == 0) {
+            for (int j = 0; j < 6; ++j) {
+                int extra = 10;
+                bool didSE = true;
+                switch (j) {
+                    case 1:
+                    case 2:
+                    case 5:
+                        data.timeEndurance += ((rand() % 30) + 30);
+                        data.totalWorkouts += 1;
+                        break;
+                    case 4:
+                        if ((didSE = (rand() % 10 >= 5))) extra = 0;
+                    case 0:
+                    case 3:
+                        if (didSE) {
+                            data.timeSE += ((rand() % 20) + extra);
+                            data.totalWorkouts += 1;
+                        }
+                    default:
+                        break;
+                }
+            }
+        } else {
+            for (int j = 0; j < 6; ++j) {
+                switch (j) {
+                    case 0:
+                    case 2:
+                    case 4:
+                        data.timeStrength += ((rand() % 20) + 20);
+                        data.totalWorkouts += 1;
+                        break;
+                    case 1:
+                    case 3:
+                        data.timeHIC += ((rand() % 20) + 15);
+                        data.totalWorkouts += 1;
+                        break;
+                    case 5:
+                        data.timeEndurance += ((rand() % 30) + 60);
+                        data.totalWorkouts += 1;
+                    default:
+                        break;
+                }
             }
         }
 
@@ -128,16 +150,17 @@ void setupData(void) {
         [data release];
 
         if (++i == 52) {
-            i = 0; plan = 0;
+            i = 0;
+            plan = 0;
         }
         start += WeekSeconds;
     }
-    #endif
+#endif
 
     [NSUserDefaults.standardUserDefaults setBool:true forKey:@"hasLaunched"];
     UserInfo info = {
         .currentPlan = -1,
-        .weekStart = date_calcStartOfWeek(CFAbsoluteTimeGetCurrent(), calendar, DateSearchDirection_Previous, 1),
+        .weekStart = date_calcStartOfWeek(CFAbsoluteTimeGetCurrent(), calendar, DateSearchDirectionPrev, 1)
     };
     userInfo_saveData(&info);
     CFRelease(calendar);

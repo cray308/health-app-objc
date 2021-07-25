@@ -9,6 +9,7 @@
 #define Exercise_h
 
 #include <CoreFoundation/CoreFoundation.h>
+#include "array.h"
 
 typedef enum {
     LiftTypeSquat,
@@ -42,47 +43,37 @@ typedef enum {
     FitnessPlanContinuation
 } FitnessPlan;
 
-typedef struct ExerciseEntry ExerciseEntry;
-typedef struct Array_exEntry Array_exEntry;
-typedef struct ExerciseGroup ExerciseGroup;
-typedef struct Array_exGroup Array_exGroup;
-typedef struct Workout Workout;
-
-struct ExerciseEntry {
+typedef struct {
     unsigned char type;
-    unsigned int weight;
-    unsigned int reps;
-    unsigned int sets;
-    unsigned int rest;
-    unsigned int completedSets;
+    int weight;
+    int reps;
+    int sets;
+    int rest;
+    int completedSets;
     CFStringRef name;
-};
+} ExerciseEntry;
 
-struct ExerciseGroup {
+gen_array_headers(exEntry, ExerciseEntry)
+
+typedef struct {
     unsigned char type;
-    unsigned int reps;
-    unsigned int completedReps;
+    int reps;
+    int completedReps;
     Array_exEntry *exercises;
-};
+} ExerciseGroup;
 
-struct Workout {
+gen_array_headers(exGroup, ExerciseGroup)
+
+typedef struct {
     unsigned char type;
     signed char day;
     CFStringRef title;
     Array_exGroup *activities;
-};
+} Workout;
 
-void workout_buildFromDictionary(CFDictionaryRef dict, unsigned int index, unsigned char type, unsigned int sets, unsigned int reps, unsigned int weight, Workout *w);
-
-void workout_free(Workout *w);
-int workout_getNumberOfActivities(Workout *w);
-ExerciseGroup *workout_getExerciseGroup(Workout *w, int i);
-
-int exerciseGroup_getNumberOfExercises(ExerciseGroup *g);
-ExerciseEntry *exerciseGroup_getExercise(ExerciseGroup *g, int i);
-
-CFStringRef exercise_createTitleString(ExerciseEntry *e);
-CFStringRef exercise_createSetsString(ExerciseEntry *e);
-CFStringRef exerciseGroup_createHeaderText(ExerciseGroup *g);
+void exerciseManager_setWeeklyWorkoutNames(unsigned char plan, int week, CFStringRef *names);
+Workout *exerciseManager_getWeeklyWorkoutAtIndex(unsigned char plan, int week, int index);
+CFStringRef *exerciseManager_getWorkoutNamesForType(unsigned char type, int *size);
+Workout *exerciseManager_getWorkoutFromLibrary(unsigned char type, int index, int reps, int sets, int weight);
 
 #endif /* Exercise_h */

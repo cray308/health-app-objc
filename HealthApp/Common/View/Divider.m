@@ -7,17 +7,10 @@
 
 #import "Divider.h"
 
-@interface Divider()
-@end
-
-@implementation Divider
-
-- (id) init {
-    if (!(self = [super initWithFrame:CGRectZero])) return nil;
-    self.translatesAutoresizingMaskIntoConstraints = false;
-    self.backgroundColor = UIColor.separatorColor;
-    [self.heightAnchor constraintEqualToConstant:1].active = true;
-    return self;
+UIView *createDivider(void) {
+    UIView *view = [[UIView alloc] initWithFrame:CGRectZero];
+    view.translatesAutoresizingMaskIntoConstraints = false;
+    view.backgroundColor = UIColor.separatorColor;
+    [view.heightAnchor constraintEqualToConstant:1].active = true;
+    return view;
 }
-
-@end

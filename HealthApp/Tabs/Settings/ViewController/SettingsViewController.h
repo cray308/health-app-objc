@@ -8,15 +8,11 @@
 #ifndef SettingsViewController_h
 #define SettingsViewController_h
 
-#import <UIKit/UIKit.h>
-
-typedef struct SettingsViewModel SettingsViewModel;
+#include "SettingsTabCoordinator.h"
 
 @interface SettingsViewController: UIViewController<UITextFieldDelegate>
-
-- (id) initWithViewModel: (SettingsViewModel *)model;
+- (id) init;
 - (void) updateWeightFields;
-
 @end
 
 #endif /* SettingsViewController_h */

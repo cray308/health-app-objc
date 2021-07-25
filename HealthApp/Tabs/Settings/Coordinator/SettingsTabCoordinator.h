@@ -10,18 +10,10 @@
 
 #import <UIKit/UIKit.h>
 
-@class SettingsViewController;
-typedef struct AppCoordinator AppCoordinator;
-typedef struct SettingsTabCoordinator SettingsTabCoordinator;
-typedef struct SettingsViewModel SettingsViewModel;
-
-struct SettingsTabCoordinator {
+typedef struct {
     UINavigationController *navigationController;
-    AppCoordinator *delegate;
-    SettingsViewModel *viewModel;
-};
+} SettingsTabCoordinator;
 
-SettingsTabCoordinator *settingsCoordinator_init(UINavigationController *navVC, AppCoordinator *delegate);
 void settingsCoordinator_free(SettingsTabCoordinator *coordinator);
 void settingsCoordinator_start(SettingsTabCoordinator *coordinator);
 void settingsCoordinator_updateWeightText(SettingsTabCoordinator *coordinator);

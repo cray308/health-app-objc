@@ -6,30 +6,29 @@
 //
 
 #import "HomeSetupWorkoutModalViewController.h"
-#import "HomeViewModel.h"
 #import "ViewControllerHelpers.h"
+#include "Exercise.h"
 
 @interface HomeSetupWorkoutModalViewController() {
-    HomeViewModel *viewModel;
+    HomeTabCoordinator *delegate;
     CFStringRef *names;
-    unsigned int count;
-    unsigned int index;
+    int count;
+    int index;
     unsigned char type;
     UIButton *submitButton;
     UITextField *workoutTextField;
     UITextField *fields[3];
     bool validInput[3];
-    unsigned int inputs[3];
+    int inputs[3];
     int maxes[3];
 }
-
 @end
 
 @implementation HomeSetupWorkoutModalViewController
-
-- (id) initWithViewModel: (HomeViewModel *)model type: (unsigned char)_type names: (CFStringRef *)_names count: (unsigned int)_count {
+- (id) initWithDelegate: (HomeTabCoordinator *)_delegate type: (unsigned char)_type names: (CFStringRef *)_names
+                  count: (int)_count {
     if (!(self = [super initWithNibName:nil bundle:nil])) return nil;
-    viewModel = model;
+    delegate = _delegate;
     names = _names;
     count = _count;
     type = _type;
@@ -37,9 +36,7 @@
 }
 
 - (void) dealloc {
-    for (unsigned int i = 0; i < count; ++i) {
-        CFRelease(names[i]);
-    }
+    for (int i = 0; i < count; ++i) CFRelease(names[i]);
     free(names);
     [workoutTextField release];
     for (int i = 0; i < 3; ++i) { if (fields[i]) [fields[i] release]; }
@@ -116,7 +113,7 @@
 
         case WorkoutTypeHIC:
             memset(validInput, true, 3 * sizeof(bool));
-            memset(inputs, 1, 3 * sizeof(unsigned int));
+            memset(inputs, 1, 3 * sizeof(int));
             [submitButton setEnabled:true];
             break;
     }
@@ -149,7 +146,7 @@
         hStack.spacing = 5;
         hStack.distribution = UIStackViewDistributionFillEqually;
         [hStack setLayoutMarginsRelativeArrangement:true];
-        hStack.layoutMargins = UIEdgeInsetsMake(4, 8, 4, 8);
+        hStack.layoutMargins = (UIEdgeInsets){.top = 4, .left = 8, .bottom = 4, .right = 8};
         [textFieldStack addArrangedSubview:hStack];
         [label release];
         [hStack release];
@@ -160,7 +157,7 @@
     [cancelButton setTitle:@"Cancel" forState:UIControlStateNormal];
     [cancelButton setTitleColor:UIColor.systemBlueColor forState:UIControlStateNormal];
     [cancelButton setTitleColor:UIColor.systemGrayColor forState:UIControlStateDisabled];
-    cancelButton.frame = CGRectMake(0, 0, self.view.frame.size.width / 3, 30);
+    cancelButton.frame = (CGRect){.size = {.width = self.view.frame.size.width / 3, .height = 30}};
     [cancelButton addTarget:self action:@selector(pressedCancel) forControlEvents:UIControlEventTouchUpInside];
     UIBarButtonItem *leftItem = [[UIBarButtonItem alloc] initWithCustomView:cancelButton];
     self.navigationItem.leftBarButtonItem = leftItem;
@@ -202,18 +199,19 @@
 }
 
 - (void) didPressFinish {
-    homeViewModel_finishedSettingUpCustomWorkout(viewModel, self, type, index, inputs[0], inputs[1], inputs[2]);
+    homeCoordinator_finishedSettingUpCustomWorkout(delegate, self, type, index, inputs[0], inputs[1], inputs[2]);
 }
 
 - (void) pressedCancel {
-    homeViewModel_cancelCustomWorkout(self);
+    [delegate->navigationController.viewControllers[0] dismissViewControllerAnimated:true completion:nil];
 }
 
 - (void) dismissKeyboard {
     [self.view endEditing:true];
 }
 
-- (BOOL) textField: (UITextField *)textField shouldChangeCharactersInRange: (NSRange)range replacementString: (NSString *)string {
+- (BOOL) textField: (UITextField *)textField shouldChangeCharactersInRange: (NSRange)range
+ replacementString: (NSString *)string {
     if (!viewController_validateNumericInput((__bridge CFStringRef) string)) return false;
 
     int i = 0;
@@ -241,7 +239,7 @@
     }
 
     validInput[i] = true;
-    inputs[i] = (unsigned int) value;
+    inputs[i] = (int) value;
 
     for (i = 0; i < 3; ++i) {
         if (!validInput[i]) {
@@ -272,8 +270,7 @@
 }
 
 - (void) pickerView: (UIPickerView *)pickerView didSelectRow: (NSInteger)row inComponent: (NSInteger)component {
-    index = (unsigned int) row;
+    index = (int) row;
     workoutTextField.text = (__bridge NSString*) names[index];
 }
-
 @end

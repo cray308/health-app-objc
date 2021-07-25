@@ -9,25 +9,27 @@
 #define AddWorkoutCoordinator_h
 
 #import <UIKit/UIKit.h>
+#import "Exercise.h"
 
-@class AddWorkoutViewController;
-typedef struct AddWorkoutCoordinator AddWorkoutCoordinator;
-typedef struct HomeTabCoordinator HomeTabCoordinator;
-typedef struct AddWorkoutViewModel AddWorkoutViewModel;
-typedef struct Workout Workout;
+typedef struct {
+    Workout *workout;
+    double startTime, stopTime;
+} AddWorkoutViewModel;
 
-struct AddWorkoutCoordinator {
+typedef struct {
     UINavigationController *navigationController;
-    AddWorkoutViewModel *viewModel;
-    HomeTabCoordinator *parent;
-};
+    AddWorkoutViewModel viewModel;
+    void *parent;
+} AddWorkoutCoordinator;
 
-AddWorkoutCoordinator *addWorkoutCoordinator_init(UINavigationController *navigationController, HomeTabCoordinator *delegate, Workout *workout);
-void addWorkoutCoordinator_start(AddWorkoutCoordinator *coordinator);
-void addWorkoutCoordinator_free(AddWorkoutCoordinator *coordinator);
+void addWorkoutCoordinator_start(AddWorkoutCoordinator *this);
+void addWorkoutCoordinator_free(AddWorkoutCoordinator *this);
 
-void addWorkoutCoordinator_showUpdateWeightsModal(AddWorkoutCoordinator *coordinator);
-void addWorkoutCoordinator_didFinishAddingWorkout(AddWorkoutCoordinator *coordinator, UIViewController *presenter, int totalCompletedWorkouts);
-void addWorkoutCoordinator_stopWorkoutFromBackButtonPress(AddWorkoutCoordinator *coordinator);
+void addWorkoutCoordinator_stoppedWorkout(AddWorkoutCoordinator *this);
+void addWorkoutCoordinator_completedWorkout(AddWorkoutCoordinator *this, UIViewController *presenter,
+                                            bool showModalIfRequired);
+void addWorkoutCoordinator_finishedAddingNewWeights(AddWorkoutCoordinator *this, UIViewController *presenter,
+                                                    short *weights);
+void addWorkoutCoordinator_stopWorkoutFromBackButtonPress(AddWorkoutCoordinator *this);
 
 #endif /* AddWorkoutCoordinator_h */
