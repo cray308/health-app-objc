@@ -20,20 +20,17 @@ void freeChartDataEntry(void *entry) {
 }
 
 void historyDataManager_fetchData(HistoryViewModel *model) {
-    CFCalendarRef calendar = CFCalendarCopyCurrent();
-
     array_clear(weekData, model->data);
-    long count = 0;
-    NSFetchRequest *fetchRequest = WeeklyData.fetchRequest;
-    fetchRequest.predicate = [NSPredicate predicateWithFormat:@"weekStart > %f AND weekStart < %f",
-                              date_twoYears(calendar), appUserDataShared->weekStart - 2];
+    int count = 0;
+    CFCalendarRef calendar = CFCalendarCopyCurrent();
+    NSPredicate *pred = [NSPredicate predicateWithFormat:@"weekStart > %f AND weekStart < %f", date_twoYears(calendar),
+                         appUserDataShared->weekStart - 2];
     NSSortDescriptor *descriptor = [[NSSortDescriptor alloc] initWithKey:@"weekStart" ascending:true];
-    fetchRequest.sortDescriptors = @[descriptor];
-    [descriptor release];
+    NSArray<WeeklyData *> *data = persistenceService_executeFetchRequest(WeeklyData.fetchRequest, pred, descriptor,
+                                                                         &count);
     CFRelease(calendar);
-
-    NSArray<WeeklyData *> *data = [persistenceServiceShared.viewContext executeFetchRequest:fetchRequest error:nil];
-    if (!(data && (count = (data.count)) != 0)) return;
+    [descriptor release];
+    if (!data) return;
 
     for (int i = 0; i < count; ++i) {
         WeeklyData *d = data[i];

@@ -192,7 +192,7 @@
  * @param   index  Index before which the elements will be inserted. If this is specified as
  *                   `array_size`, the elements are appended.
  * @param   arr    Pointer to the first element to insert in a built-in array. The `Array` type in
- *                   this file can be used by passing \c array_at(id,a,index) .
+ *                   this file can be used by passing @c array_at(id,a,index) .
  * @param   n      Number of elements to insert from `arr`.
  *
  * @return         The index where the first element was inserted, or `ARRAY_ERROR` if there was an error.
@@ -213,15 +213,15 @@
 
 
 /**
- * Removes `nelem` elements from the array, starting at index \c first .
+ * Removes `nelem` elements from the array, starting at index @c first .
  *
  * @param  first  The first index to delete.
  * @param  nelem  The number of elements to delete. If this is -1, it means to erase all elements
  *                  from `first` to the end of the array.
  *
  * @return        The index after the last element to be deleted. If the last element to be deleted
- *                was the end of the array, returns \c array_size . If an error occurred, returns
- *                \c ARRAY_ERROR .
+ *                was the end of the array, returns @c array_size . If an error occurred, returns
+ *                @c ARRAY_ERROR .
  */
 #define array_erase(id, this, first, nelem) array_erase_##id(this, first, nelem)
 
@@ -251,7 +251,7 @@
 
 
 /**
- * Generates \c Array function declarations for a specified type and ID.
+ * Generates @c Array function declarations for a specified type and ID.
  *
  * @param  id           ID to be used for the array (must be unique).
  * @param  t            Type to be stored in the array.

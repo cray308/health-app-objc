@@ -10,10 +10,12 @@
 #include "AppUserData.h"
 #import "AppDelegate.h"
 #import "PersistenceService.h"
+#include "InputValidator.h"
 
 #define _U_ __attribute__((__unused__))
 
 @interface SettingsViewController() {
+    USet_char *validChars;
     UISegmentedControl *planPicker;
     UITextField *textFields[4];
     bool validInput[4];
@@ -29,6 +31,7 @@
 }
 
 - (void) dealloc {
+    if (validChars) uset_free(char, validChars);
     for (int i = 0; i < 4; ++i) [textFields[i] release];
     [planPicker release];
     [super dealloc];
@@ -38,6 +41,7 @@
     [super viewDidLoad];
     self.view.backgroundColor = UIColor.systemGroupedBackgroundColor;
     self.navigationItem.title = @"App Settings";
+    validChars = inputValidator_createNumberCharacterSet();
     [self setupSubviews];
     UITextField *fields[] = {textFields[0], textFields[1], textFields[2], textFields[3], nil};
     createToolbar(self, @selector(dismissKeyboard), fields);
@@ -215,7 +219,7 @@
 
 - (BOOL) textField: (UITextField *)textField shouldChangeCharactersInRange: (NSRange)range
  replacementString: (NSString *)string {
-    if (!viewController_validateNumericInput((__bridge CFStringRef) string)) return false;
+    if (!inputValidator_validateNumericInput(validChars, (__bridge CFStringRef) string)) return false;
 
     int i = 0;
     for (; i < 4; ++i) {

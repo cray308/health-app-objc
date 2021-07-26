@@ -7,10 +7,8 @@
 
 #import "AppDelegate.h"
 #import "PersistenceService.h"
-#import "ViewControllerHelpers.h"
 #import "WorkoutViewController.h"
 #import <UserNotifications/UserNotifications.h>
-
 #include "AppUserData.h"
 #include "CalendarDateHelpers.h"
 
@@ -29,7 +27,6 @@ void setupData(void);
     appUserDataShared = NULL;
     if (persistenceServiceShared) [persistenceServiceShared release];
     persistenceServiceShared = NULL;
-    viewControllerHelper_cleanupValidNumericChars();
     appCoordinator_free(&coordinator);
     [window release];
     [super dealloc];
@@ -43,8 +40,6 @@ void setupData(void);
     persistenceServiceShared = [[NSPersistentContainer alloc] initWithName:@"HealthApp"];
     [persistenceServiceShared
      loadPersistentStoresWithCompletionHandler: ^(NSPersistentStoreDescription *description _U_, NSError *error _U_) {}];
-
-    viewControllerHelper_setupValidNumericChars();
 
     if (!hasLaunched) setupData();
     appCoordinator_start(&coordinator);
@@ -73,7 +68,6 @@ void setupData(void);
 - (void) applicationWillResignActive: (UIApplication *)application {
     if (workoutVC) [workoutVC stopTimers];
 }
-
 @end
 
 void setupData(void) {

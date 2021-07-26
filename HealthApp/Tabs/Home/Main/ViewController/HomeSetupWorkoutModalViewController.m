@@ -8,8 +8,10 @@
 #import "HomeSetupWorkoutModalViewController.h"
 #import "ViewControllerHelpers.h"
 #include "Exercise.h"
+#include "InputValidator.h"
 
 @interface HomeSetupWorkoutModalViewController() {
+    USet_char *validChars;
     HomeTabCoordinator *delegate;
     CFStringRef *names;
     int count;
@@ -36,16 +38,20 @@
 }
 
 - (void) dealloc {
+    if (validChars) uset_free(char, validChars);
     for (int i = 0; i < count; ++i) CFRelease(names[i]);
     free(names);
     [workoutTextField release];
-    for (int i = 0; i < 3; ++i) { if (fields[i]) [fields[i] release]; }
+    for (int i = 0; i < 3; ++i) {
+        if (fields[i]) [fields[i] release];
+    }
     [super dealloc];
 }
 
 - (void) viewDidLoad {
     [super viewDidLoad];
     self.view.backgroundColor = UIColor.systemGroupedBackgroundColor;
+    validChars = inputValidator_createNumberCharacterSet();
     [self setupSubviews];
 }
 
@@ -212,7 +218,7 @@
 
 - (BOOL) textField: (UITextField *)textField shouldChangeCharactersInRange: (NSRange)range
  replacementString: (NSString *)string {
-    if (!viewController_validateNumericInput((__bridge CFStringRef) string)) return false;
+    if (!inputValidator_validateNumericInput(validChars, (__bridge CFStringRef) string)) return false;
 
     int i = 0;
     for (; i < 3; ++i) {

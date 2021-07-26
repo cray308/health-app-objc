@@ -6,19 +6,6 @@
 //
 
 #import "ViewControllerHelpers.h"
-#include "unordered_set.h"
-
-gen_uset(char, unsigned short, ds_cmp_num_eq, DSDefault_addrOfVal, DSDefault_sizeOfVal, DSDefault_shallowCopy, DSDefault_shallowDelete)
-
-static USet_char *validChars;
-
-void viewControllerHelper_setupValidNumericChars(void) {
-    validChars = uset_new_fromArray(char, ((unsigned short[]){'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'}), 10);
-}
-
-void viewControllerHelper_cleanupValidNumericChars(void) {
-    uset_free(char, validChars);
-}
 
 void createToolbar(id target, SEL doneSelector, UITextField **fields) {
     UIToolbar *toolbar = [[UIToolbar alloc] initWithFrame:
@@ -33,7 +20,7 @@ void createToolbar(id target, SEL doneSelector, UITextField **fields) {
     [toolbar setItems:@[flexSpace, doneButton] animated:false];
     [toolbar setUserInteractionEnabled:true];
 
-    for (size_t i = 0; fields[i]; ++i) {
+    for (int i = 0; fields[i]; ++i) {
         fields[i].inputAccessoryView = toolbar;
     }
 
@@ -51,16 +38,4 @@ void viewController_showAlert(UIViewController *presenter, AlertDetails const* d
     [ctrl addAction:defaultAction];
     if (secondaryAction) [ctrl addAction:secondaryAction];
     [presenter presentViewController:ctrl animated:true completion:nil];
-}
-
-bool viewController_validateNumericInput(CFStringRef str) {
-    long len = CFStringGetLength(str);
-    if (!len) return true;
-
-    CFStringInlineBuffer buf;
-    CFStringInitInlineBuffer(str, &buf, CFRangeMake(0, len));
-    for (long i = 0; i < len; ++i) {
-        if (!uset_contains(char, validChars, CFStringGetCharacterFromInlineBuffer(&buf, i))) return false;
-    }
-    return true;
 }

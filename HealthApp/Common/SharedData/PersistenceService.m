@@ -126,3 +126,15 @@ WeeklyData *persistenceService_getWeeklyDataForThisWeek(void) {
     CFRelease(calendar);
     return getCurrentWeeklyData(weekStart);
 }
+
+NSArray<id> *persistenceService_executeFetchRequest(NSFetchRequest *req, NSPredicate *pred,
+                                                    NSSortDescriptor *descriptor, int *count) {
+    if (pred) req.predicate = pred;
+    if (descriptor) req.sortDescriptors = @[descriptor];
+
+    int len = 0;
+    NSArray<id> *data = [persistenceServiceShared.viewContext executeFetchRequest:req error:nil];
+    if (!(data && (len = (int)(data.count)))) return nil;
+    *count = len;
+    return data;
+}

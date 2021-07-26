@@ -16,5 +16,7 @@ void persistenceService_saveContext(void);
 void persistenceService_performForegroundUpdate(void);
 void persistenceService_deleteUserData(void);
 WeeklyData *persistenceService_getWeeklyDataForThisWeek(void);
+NSArray<id> *persistenceService_executeFetchRequest(NSFetchRequest *req, NSPredicate *pred,
+                                                    NSSortDescriptor *descriptor, int *count);
 
 #endif /* PersistenceService_h */

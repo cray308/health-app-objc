@@ -10,18 +10,13 @@
 
 #import <UIKit/UIKit.h>
 
-void viewControllerHelper_setupValidNumericChars(void);
-void viewControllerHelper_cleanupValidNumericChars(void);
-
-void createToolbar(id target, SEL doneSelector, UITextField **fields);
-
 typedef struct {
     CFStringRef title;
     CFStringRef message;
 } AlertDetails;
 
+void createToolbar(id target, SEL doneSelector, UITextField **fields);
 void viewController_showAlert(UIViewController *presenter, AlertDetails const* details, UIAlertAction *defaultAction,
                               UIAlertAction *secondaryAction);
-bool viewController_validateNumericInput(CFStringRef str);
 
 #endif /* ViewControllerHelpers_h */
