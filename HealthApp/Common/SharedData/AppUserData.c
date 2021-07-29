@@ -5,7 +5,6 @@
 //  Created by Christopher Ray on 3/20/21.
 //
 
-#include <CoreFoundation/CoreFoundation.h>
 #include "AppUserData.h"
 #include "CocoaBridging.h"
 #include "Exercise.h"
@@ -13,7 +12,7 @@
 
 UserInfo *appUserDataShared = NULL;
 
-static CFStringRef const keys[] = {CFSTR("planStart"), CFSTR("weekStart"), CFSTR("currentPlan"),
+static CFStringRef const keys[] = {CFSTR("planStart"), CFSTR("weekStart"), CFSTR("tzOffset"), CFSTR("currentPlan"),
     CFSTR("completedWorkouts"), CFSTR("squatMax"), CFSTR("pullUpMax"), CFSTR("benchMax"), CFSTR("deadliftMax")};
 
 UserInfo *userInfo_initFromStorage(void) {
@@ -25,23 +24,26 @@ UserInfo *userInfo_initFromStorage(void) {
     if (!info) return NULL;
 
     value = CFDictionaryGetValue(savedInfo, keys[0]);
-    CFNumberGetValue(value, kCFNumberDoubleType, &info->planStart);
+    CFNumberGetValue(value, kCFNumberLongType, &info->planStart);
     value = CFDictionaryGetValue(savedInfo, keys[1]);
-    CFNumberGetValue(value, kCFNumberDoubleType, &info->weekStart);
+    CFNumberGetValue(value, kCFNumberLongType, &info->weekStart);
     value = CFDictionaryGetValue(savedInfo, keys[2]);
-    CFNumberGetValue(value, kCFNumberCharType, &info->currentPlan);
+    CFNumberGetValue(value, kCFNumberIntType, &info->tzOffset);
     value = CFDictionaryGetValue(savedInfo, keys[3]);
+    CFNumberGetValue(value, kCFNumberCharType, &info->currentPlan);
+    value = CFDictionaryGetValue(savedInfo, keys[4]);
     CFNumberGetValue(value, kCFNumberCharType, &info->completedWorkouts);
     for (int i = 0; i < 4; ++i) {
-        value = CFDictionaryGetValue(savedInfo, keys[4 + i]);
+        value = CFDictionaryGetValue(savedInfo, keys[5 + i]);
         CFNumberGetValue(value, kCFNumberShortType, &info->liftMaxes[i]);
     }
     return info;
 }
 
 void userInfo_saveData(UserInfo *info) {
-    CFNumberRef values[] = {CFNumberCreate(NULL, kCFNumberDoubleType, &info->planStart),
-        CFNumberCreate(NULL, kCFNumberDoubleType, &info->weekStart),
+    CFNumberRef values[] = {CFNumberCreate(NULL, kCFNumberLongType, &info->planStart),
+        CFNumberCreate(NULL, kCFNumberLongType, &info->weekStart),
+        CFNumberCreate(NULL, kCFNumberIntType, &info->tzOffset),
         CFNumberCreate(NULL, kCFNumberCharType, &info->currentPlan),
         CFNumberCreate(NULL, kCFNumberCharType, &info->completedWorkouts),
         CFNumberCreate(NULL, kCFNumberShortType, &info->liftMaxes[LiftTypeSquat]),
@@ -49,23 +51,31 @@ void userInfo_saveData(UserInfo *info) {
         CFNumberCreate(NULL, kCFNumberShortType, &info->liftMaxes[LiftTypeBench]),
         CFNumberCreate(NULL, kCFNumberShortType, &info->liftMaxes[LiftTypeDeadlift])};
 
-    CFDictionaryRef dict = CFDictionaryCreate(NULL, (const void **)keys, (const void **)values, 8,
+    CFDictionaryRef dict = CFDictionaryCreate(NULL, (const void **)keys, (const void **)values, 9,
                                               &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
 
     writeUserInfoDictionary(dict);
     CFRelease(dict);
-    for (int i = 0; i < 8; ++i) CFRelease(values[i]);
+    for (int i = 0; i < 9; ++i) CFRelease(values[i]);
 }
 
 void appUserData_setWorkoutPlan(signed char plan) {
     if (plan >= 0 && plan != appUserDataShared->currentPlan) {
-        CFCalendarRef calendar = CFCalendarCopyCurrent();
-        appUserDataShared->planStart = date_calcStartOfWeek(CFAbsoluteTimeGetCurrent(), calendar,
-                                                            DateSearchDirectionNext, 1);
-        CFRelease(calendar);
+        appUserDataShared->planStart = appUserDataShared->weekStart + WeekSeconds;
     }
     appUserDataShared->currentPlan = plan;
     userInfo_saveData(appUserDataShared);
+}
+
+int appUserData_checkTimezone(CFTimeZoneRef tz, long time) {
+    int newOffset = CFTimeZoneGetSecondsFromGMT(tz, time);
+    int diff = newOffset - appUserDataShared->tzOffset;
+    if (diff != 0) {
+        appUserDataShared->weekStart += diff;
+        appUserDataShared->tzOffset = newOffset;
+        userInfo_saveData(appUserDataShared);
+    }
+    return diff;
 }
 
 void appUserData_deleteSavedData(void) {
@@ -73,7 +83,7 @@ void appUserData_deleteSavedData(void) {
     userInfo_saveData(appUserDataShared);
 }
 
-void appUserData_handleNewWeek(double weekStart) {
+void appUserData_handleNewWeek(long weekStart) {
     appUserDataShared->completedWorkouts = 0;
     appUserDataShared->weekStart = weekStart;
 

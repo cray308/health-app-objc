@@ -12,8 +12,7 @@
 #include "array.h"
 
 typedef struct {
-    double weekStart;
-    double weekEnd;
+    long weekStart;
     int totalWorkouts;
     int durationByType[4];
     int cumulativeDuration[4];

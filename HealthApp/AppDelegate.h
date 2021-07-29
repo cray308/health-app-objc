@@ -7,14 +7,11 @@
 
 #include "AppCoordinator.h"
 
-@class WorkoutViewController;
-
 @interface AppDelegate: UIResponder <UIApplicationDelegate>
 @end
 
 @interface AppDelegate() {
     @public AppCoordinator coordinator;
     UIWindow *window;
-    @public WorkoutViewController *workoutVC;
 }
 @end

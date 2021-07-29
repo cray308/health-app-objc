@@ -7,7 +7,6 @@
 
 #import "AppDelegate.h"
 #import "PersistenceService.h"
-#import "WorkoutViewController.h"
 #import <UserNotifications/UserNotifications.h>
 #include "AppUserData.h"
 #include "CalendarDateHelpers.h"
@@ -18,7 +17,7 @@
 
 #define _U_ __attribute__((__unused__))
 
-void setupData(void);
+void setupData(CFTimeZoneRef tz, long now, long weekStart);
 
 @implementation AppDelegate
 
@@ -41,8 +40,13 @@ void setupData(void);
     [persistenceServiceShared
      loadPersistentStoresWithCompletionHandler: ^(NSPersistentStoreDescription *description _U_, NSError *error _U_) {}];
 
-    if (!hasLaunched) setupData();
-    appCoordinator_start(&coordinator);
+    CFCalendarRef calendar = CFCalendarCopyCurrent();
+    CFTimeZoneRef tz = CFCalendarCopyTimeZone(calendar);
+    long now = CFAbsoluteTimeGetCurrent();
+    long weekStart = date_calcStartOfWeek(now, calendar, DateSearchDirectionPrev, true);
+
+    if (!hasLaunched) setupData(tz, now, weekStart);
+    appCoordinator_start(&coordinator, tz, now, weekStart);
     [window setRootViewController:coordinator.tabVC];
     [window makeKeyAndVisible];
 
@@ -51,6 +55,8 @@ void setupData(void);
          requestAuthorizationWithOptions:UNAuthorizationOptionAlert | UNAuthorizationOptionSound
          completionHandler:^(BOOL granted _U_, NSError *_Nullable error _U_) {}];
     }
+    CFRelease(tz);
+    CFRelease(calendar);
     return true;
 }
 
@@ -60,19 +66,11 @@ void setupData(void);
     UIInterfaceOrientationMaskAllButUpsideDown : UIInterfaceOrientationMaskPortrait;
 }
 
-- (void) applicationDidBecomeActive: (UIApplication *)application {
-    appCoordinator_handleForegroundUpdate(&coordinator);
-    if (workoutVC) [workoutVC restartTimers];
-}
-
-- (void) applicationWillResignActive: (UIApplication *)application {
-    if (workoutVC) [workoutVC stopTimers];
-}
 @end
 
-void setupData(void) {
-    CFCalendarRef calendar = CFCalendarCopyCurrent();
+void setupData(CFTimeZoneRef tz, long now, long weekStart) {
 #if DEBUG
+    CFCalendarRef calendar = CFCalendarCopyCurrent();
     int bench = 185, pullup = 20, squat = 300, deadlift = 235, i = 0;
     unsigned char plan = 0;
     long start = date_calcStartOfWeek(CFAbsoluteTimeGetCurrent() - 126489600, calendar, DateSearchDirectionPrev, true);
@@ -81,7 +79,6 @@ void setupData(void) {
     while (start < end) {
         WeeklyData *data = [[WeeklyData alloc] initWithContext:persistenceServiceShared.viewContext];
         data.weekStart = start;
-        data.weekEnd = start + (WeekSeconds - 1);
 
         if (plan == 0) {
             for (int j = 0; j < 6; ++j) {
@@ -149,13 +146,10 @@ void setupData(void) {
         }
         start += WeekSeconds;
     }
+    CFRelease(calendar);
 #endif
 
     [NSUserDefaults.standardUserDefaults setBool:true forKey:@"hasLaunched"];
-    UserInfo info = {
-        .currentPlan = -1,
-        .weekStart = date_calcStartOfWeek(CFAbsoluteTimeGetCurrent(), calendar, DateSearchDirectionPrev, 1)
-    };
+    UserInfo info = {.currentPlan = -1, .weekStart = weekStart, .tzOffset = CFTimeZoneGetSecondsFromGMT(tz, now)};
     userInfo_saveData(&info);
-    CFRelease(calendar);
 }

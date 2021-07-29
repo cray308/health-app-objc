@@ -7,29 +7,23 @@
 
 #include "CalendarDateHelpers.h"
 
-static inline double getStartOfDay(CFCalendarRef calendar, double date) {
+static inline long getStartOfDay(CFCalendarRef calendar, long date) {
     double result = 0;
     CFCalendarGetTimeRangeOfUnit(calendar, kCFCalendarUnitDay, date, &result, NULL);
     return result;
 }
 
-static inline double date_calcEndOfWeek(double startOfWeek) {
-    return startOfWeek + (double) (WeekSeconds - 1);
+static inline int getDayOfWeek(long date, CFCalendarRef calendar) {
+    return (int) CFCalendarGetOrdinalityOfUnit(calendar, kCFCalendarUnitWeekday, kCFCalendarUnitWeekOfYear, date);
 }
 
-void date_calcWeekEndpoints(double date, CFCalendarRef calendar, DateSearchDirection direction, bool considerToday,
-                            double *start, double *end) {
-    *start = date_calcStartOfWeek(date, calendar, direction, considerToday);
-    *end = date_calcEndOfWeek(*start);
-}
-
-double date_calcStartOfWeek(double date, CFCalendarRef calendar, DateSearchDirection direction, bool considerToday) {
-    int weekday = date_getDayOfWeek(date, calendar);
+long date_calcStartOfWeek(long date, CFCalendarRef calendar, DateSearchDirection direction, bool considerToday) {
+    int weekday = getDayOfWeek(date, calendar);
 
     if (considerToday && weekday == 2) return getStartOfDay(calendar, date);
 
-    double result = direction == DateSearchDirectionNext ? date + WeekSeconds : date - WeekSeconds;
-    weekday = date_getDayOfWeek(result, calendar);
+    long result = direction == DateSearchDirectionNext ? date + WeekSeconds : date - WeekSeconds;
+    weekday = getDayOfWeek(result, calendar);
 
     switch (direction) {
         case DateSearchDirectionNext:

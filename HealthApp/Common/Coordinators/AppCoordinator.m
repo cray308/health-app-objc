@@ -25,23 +25,20 @@ void appCoordinator_free(AppCoordinator *coordinator) {
     free(coordinator);
 }
 
-void appCoordinator_start(AppCoordinator *coordinator) {
+void appCoordinator_start(AppCoordinator *coordinator, CFTimeZoneRef tz, long time, long weekStart) {
     coordinator->tabVC = [[UITabBarController alloc] init];
-    CFCalendarRef calendar = CFCalendarCopyCurrent();
-    double date = CFAbsoluteTimeGetCurrent();
-    coordinator->currentDay = date_getDayOfWeek(date, calendar);
 
     appUserDataShared = userInfo_initFromStorage();
-    if (!appUserDataShared) {
-        CFRelease(calendar);
-        return;
+    if (!appUserDataShared) return;
+
+    int tzOffset = appUserData_checkTimezone(tz, time);
+    if (tzOffset != 0) {
+        persistenceService_changeTimestamps(tzOffset);
     }
 
-    double weekStart = date_calcStartOfWeek(CFAbsoluteTimeGetCurrent(), calendar, DateSearchDirectionPrev, true);
-    if ((int) weekStart != (int) appUserDataShared->weekStart) {
+    if (weekStart != appUserDataShared->weekStart) {
         appUserData_handleNewWeek(weekStart);
     }
-    CFRelease(calendar);
 
     persistenceService_performForegroundUpdate();
     UINavigationController *controllers[3];
@@ -77,29 +74,6 @@ void appCoordinator_start(AppCoordinator *coordinator) {
         [controllers[i] release];
         [items[i] release];
     }
-}
-
-void appCoordinator_handleForegroundUpdate(AppCoordinator *coordinator) {
-    CFCalendarRef calendar = CFCalendarCopyCurrent();
-    double now = CFAbsoluteTimeGetCurrent();
-    int currentDay;
-    double weekStart = date_calcStartOfWeek(now, calendar, DateSearchDirectionPrev, true);
-    if ((int) weekStart != (int) appUserDataShared->weekStart) { // new week
-        coordinator->currentDay = date_getDayOfWeek(now, calendar);
-        persistenceService_performForegroundUpdate();
-        appUserData_handleNewWeek(weekStart);
-
-        if (coordinator->loadedViewControllers & LoadedViewController_Home) {
-            homeCoordinator_resetUI(coordinator->children[TabHome]);
-        }
-
-        if (coordinator->tabVC.selectedIndex == TabHistory) {
-            historyCoordinator_updateUI(coordinator->children[TabHistory]);
-        }
-    } else if ((currentDay = (date_getDayOfWeek(now, calendar))) != coordinator->currentDay) { // new day
-        coordinator->currentDay = currentDay;
-    }
-    CFRelease(calendar);
 }
 
 void appCoordinator_updatedUserInfo(AppCoordinator *coordinator) {

@@ -18,16 +18,13 @@ typedef enum {
 
 typedef struct {
     unsigned char loadedViewControllers;
-    int totalTokens;
-    int currentDay;
     UITabBarController *tabVC;
     void *children[3];
 } AppCoordinator;
 
 void appCoordinator_free(AppCoordinator *coordinator);
-void appCoordinator_start(AppCoordinator *coordinator);
+void appCoordinator_start(AppCoordinator *coordinator, CFTimeZoneRef tz, long time, long weekStart);
 
-void appCoordinator_handleForegroundUpdate(AppCoordinator *coordinator);
 void appCoordinator_updatedUserInfo(AppCoordinator *coordinator);
 void appCoordinator_deletedAppData(AppCoordinator *coordinator);
 void appCoordinator_updateMaxWeights(AppCoordinator *coordinator);

@@ -7,8 +7,8 @@
 
 #import "WorkoutViewController.h"
 #import "Divider.h"
-#import "AppDelegate.h"
 #include <UserNotifications/UserNotifications.h>
+#include <NotificationCenter/NotificationCenter.h>
 #include <pthread.h>
 
 #define _U_ __attribute__((__unused__))
@@ -502,6 +502,8 @@ CFStringRef createExerciseTitle(ExerciseEntry *e) {
     AddWorkoutViewModel *viewModel;
     UIStackView *groupsStack;
     int workoutType;
+    NSObject *startObserver;
+    NSObject *stopObserver;
     WorkoutTimer timers[2];
     struct savedInfo {
         int groupTag;
@@ -542,14 +544,10 @@ CFStringRef createExerciseTitle(ExerciseEntry *e) {
 
     pthread_create(&exerciseTimerThread, NULL, timer_loop, &timers[TimerTypeExercise]);
     pthread_create(&groupTimerThread, NULL, timer_loop, &timers[TimerTypeGroup]);
-    AppDelegate *delegate = (AppDelegate *) UIApplication.sharedApplication.delegate;
-    if (delegate) delegate->workoutVC = self;
     return self;
 }
 
 - (void) dealloc {
-    AppDelegate *delegate = (AppDelegate *) UIApplication.sharedApplication.delegate;
-    if (delegate) delegate->workoutVC = nil;
     if (timers[TimerTypeGroup].active == 1) pthread_kill(groupTimerThread, SIGUSR2);
     if (timers[TimerTypeExercise].active == 1) pthread_kill(exerciseTimerThread, SIGUSR1);
     startTimerForGroup(&timers[TimerTypeGroup], 0, 0);
@@ -566,6 +564,8 @@ CFStringRef createExerciseTitle(ExerciseEntry *e) {
     pthread_mutex_destroy(&sharedLock);
     [UNUserNotificationCenter.currentNotificationCenter removeAllPendingNotificationRequests];
     [UNUserNotificationCenter.currentNotificationCenter removeAllDeliveredNotifications];
+    [NSNotificationCenter.defaultCenter removeObserver:startObserver];
+    [NSNotificationCenter.defaultCenter removeObserver:stopObserver];
     [groupsStack release];
     [super dealloc];
 }
@@ -574,7 +574,18 @@ CFStringRef createExerciseTitle(ExerciseEntry *e) {
     [super viewDidLoad];
     self.view.backgroundColor = UIColor.systemGroupedBackgroundColor;
     self.navigationItem.title = (__bridge NSString*) viewModel->workout->title;
+
     [self setupSubviews];
+    startObserver = [NSNotificationCenter.defaultCenter addObserverForName:UIApplicationDidBecomeActiveNotification
+                                                                    object:nil queue:NSOperationQueue.mainQueue
+                                                                usingBlock:^(NSNotification *note _U_) {
+        [self restartTimers];
+    }];
+    stopObserver = [NSNotificationCenter.defaultCenter addObserverForName:UIApplicationWillResignActiveNotification
+                                                                   object:nil queue:NSOperationQueue.mainQueue
+                                                               usingBlock:^(NSNotification *note _U_) {
+        [self stopTimers];
+    }];
 }
 
 - (void) setupSubviews {
@@ -661,7 +672,7 @@ CFStringRef createExerciseTitle(ExerciseEntry *e) {
         pthread_mutex_lock(&sharedLock);
         if (viewModel) {
             m = viewModel;
-            m->stopTime = CFAbsoluteTimeGetCurrent();
+            m->stopTime = (long) CFAbsoluteTimeGetCurrent() + 1;
             viewModel = NULL;
         }
         pthread_mutex_unlock(&sharedLock);
@@ -683,7 +694,7 @@ CFStringRef createExerciseTitle(ExerciseEntry *e) {
             [next startCircuitAndTimer:1];
         } else {
             m = viewModel;
-            m->stopTime = CFAbsoluteTimeGetCurrent();
+            m->stopTime = (long) CFAbsoluteTimeGetCurrent() + 1;
             viewModel = NULL;
         }
     }

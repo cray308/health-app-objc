@@ -87,13 +87,13 @@ void historyViewModel_formatDataForTimeRange(HistoryViewModel *this, int index, 
     if (startIndex < 0) startIndex = 0;
 
     HistoryWeekDataModel *arr = this->data->arr;
-    double referenceTime = arr[startIndex].weekStart;
+    long referenceTime = arr[startIndex].weekStart;
     formatter->refTime = referenceTime;
     CFDateFormatterSetFormat(formatter->formatter, (size - startIndex) < 7 ? CFSTR("MMM dd") : CFSTR("M/d/yy"));
 
     for (int i = startIndex; i < size; ++i) {
         HistoryWeekDataModel *e = &arr[i];
-        double xValue = (e->weekStart - referenceTime) / DaySeconds;
+        long xValue = (e->weekStart - referenceTime) / DaySeconds;
 
         {
             HistoryGradientChartViewModel *vm = &this->gradientChartViewModel;

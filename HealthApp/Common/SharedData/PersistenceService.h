@@ -15,6 +15,7 @@ extern NSPersistentContainer *persistenceServiceShared;
 void persistenceService_saveContext(void);
 void persistenceService_performForegroundUpdate(void);
 void persistenceService_deleteUserData(void);
+void persistenceService_changeTimestamps(int difference);
 WeeklyData *persistenceService_getWeeklyDataForThisWeek(void);
 NSArray<id> *persistenceService_executeFetchRequest(NSFetchRequest *req, NSPredicate *pred,
                                                     NSSortDescriptor *descriptor, int *count);

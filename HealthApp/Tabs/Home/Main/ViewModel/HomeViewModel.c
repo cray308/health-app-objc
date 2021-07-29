@@ -34,7 +34,7 @@ void homeViewModel_free(HomeViewModel *model) {
 
 void homeViewModel_fetchData(HomeViewModel *model) {
     clearNames(model->workoutNames);
-    if (appUserDataShared->currentPlan >= 0 && (int) appUserDataShared->planStart <= (int) CFAbsoluteTimeGetCurrent()) {
+    if (appUserDataShared->currentPlan >= 0 && appUserDataShared->planStart <= (long) CFAbsoluteTimeGetCurrent()) {
         unsigned char plan = (unsigned char) appUserDataShared->currentPlan;
         exerciseManager_setWeeklyWorkoutNames(plan, appUserData_getWeekInPlan(), model->workoutNames);
     }

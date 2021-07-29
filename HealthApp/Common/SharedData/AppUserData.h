@@ -8,9 +8,12 @@
 #ifndef AppUserData_h
 #define AppUserData_h
 
+#include <CoreFoundation/CoreFoundation.h>
+
 typedef struct {
-    double planStart;
-    double weekStart;
+    long planStart;
+    long weekStart;
+    int tzOffset;
     signed char currentPlan;
     unsigned char completedWorkouts;
     short liftMaxes[4];
@@ -21,9 +24,10 @@ extern UserInfo *appUserDataShared;
 UserInfo *userInfo_initFromStorage(void);
 void userInfo_saveData(UserInfo *info);
 
+int appUserData_checkTimezone(CFTimeZoneRef tz, long time);
 void appUserData_setWorkoutPlan(signed char plan);
 void appUserData_deleteSavedData(void);
-void appUserData_handleNewWeek(double weekStart);
+void appUserData_handleNewWeek(long weekStart);
 unsigned char appUserData_addCompletedWorkout(unsigned char day);
 int appUserData_getWeekInPlan(void);
 void appUserData_updateWeightMaxes(short *weights);

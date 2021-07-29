@@ -18,14 +18,8 @@ typedef enum {
     DateSearchDirectionNext
 } DateSearchDirection;
 
-static inline int date_getDayOfWeek(double date, CFCalendarRef calendar) {
-    return (int) CFCalendarGetOrdinalityOfUnit(calendar, kCFCalendarUnitWeekday, kCFCalendarUnitWeekOfYear, date);
-}
+long date_calcStartOfWeek(long date, CFCalendarRef calendar, DateSearchDirection direction, bool considerToday);
 
-void date_calcWeekEndpoints(double date, CFCalendarRef calendar, DateSearchDirection direction, bool considerToday,
-                            double *start, double *end);
-double date_calcStartOfWeek(double date, CFCalendarRef calendar, DateSearchDirection direction, bool considerToday);
-
-#define date_twoYears(calendar) date_calcStartOfWeek(CFAbsoluteTimeGetCurrent() - 63244800, calendar, DateSearchDirectionPrev, true)
+#define date_twoYears (appUserDataShared->weekStart - 63244800)
 
 #endif /* CalendarDateHelpers_h */

@@ -6,19 +6,12 @@
 //
 
 #import "PersistenceService.h"
+#include "AppUserData.h"
 #include "CalendarDateHelpers.h"
 
 #define _U_ __attribute__((__unused__))
 
 NSPersistentContainer *persistenceServiceShared = nil;
-
-WeeklyData *getCurrentWeeklyData(double weekStart) {
-    NSFetchRequest *request = WeeklyData.fetchRequest;
-    request.predicate = [NSPredicate predicateWithFormat:@"weekStart > %f", weekStart - 2];
-    NSArray<WeeklyData *> *currentWeeks = [persistenceServiceShared.viewContext executeFetchRequest:request error:nil];
-    if (!(currentWeeks && currentWeeks.count)) return nil;
-    return currentWeeks[0];
-}
 
 void persistenceService_saveContext(void) {
     NSManagedObjectContext *context = persistenceServiceShared.viewContext;
@@ -26,38 +19,31 @@ void persistenceService_saveContext(void) {
 }
 
 void persistenceService_performForegroundUpdate(void) {
-    size_t count = 0;
-    CFCalendarRef calendar = CFCalendarCopyCurrent();
+    int count = 0;
 
     NSFetchRequest *request = WeeklyData.fetchRequest;
-    request.predicate = [NSPredicate predicateWithFormat:@"weekEnd < %f", date_twoYears(calendar)];
+    request.predicate = [NSPredicate predicateWithFormat:@"weekStart < %lld", date_twoYears];
 
     NSArray<WeeklyData *> *data = [persistenceServiceShared.viewContext executeFetchRequest:request error:nil];
-    if ((data && (count = (data.count)) != 0)) {
-        for (size_t i = 0; i < count; ++i) {
+    if (data && (count = (int) data.count)) {
+        for (int i = 0; i < count; ++i) {
             [persistenceServiceShared.viewContext deleteObject:data[i]];
         }
         persistenceService_saveContext();
     }
 
-    double weekStart = 0, weekEnd = 0;
-    date_calcWeekEndpoints(CFAbsoluteTimeGetCurrent(), calendar, DateSearchDirectionPrev, true,
-                           &weekStart, &weekEnd);
-
     NSSortDescriptor *descriptor = [[NSSortDescriptor alloc] initWithKey:@"weekStart" ascending:true];
-    request.predicate = [NSPredicate predicateWithFormat:@"weekStart < %f", weekStart - 2];
+    request.predicate = [NSPredicate predicateWithFormat:@"weekStart < %lld", appUserDataShared->weekStart];
     request.sortDescriptors = @[descriptor];
     data = [persistenceServiceShared.viewContext executeFetchRequest:request error:nil];
-    bool createEntryForCurrentWeek = getCurrentWeeklyData(weekStart) == nil;
+    bool createEntryForCurrentWeek = persistenceService_getWeeklyDataForThisWeek() == nil;
 
     [descriptor release];
-    CFRelease(calendar);
 
-    if (!(data && (count = (data.count)) != 0)) {
+    if (!(data && (count = (int) data.count))) {
         if (createEntryForCurrentWeek) {
             WeeklyData *curr = [[WeeklyData alloc] initWithContext:persistenceServiceShared.viewContext];
-            curr.weekStart = weekStart;
-            curr.weekEnd = weekEnd;
+            curr.weekStart = appUserDataShared->weekStart;
             [curr release];
         }
         persistenceService_saveContext();
@@ -66,12 +52,9 @@ void persistenceService_performForegroundUpdate(void) {
 
     WeeklyData *last = data[count - 1];
 
-    for (double currStart = last.weekEnd + 1, currEnd = last.weekEnd + WeekSeconds;
-         (int) currStart < (int) weekStart;
-         currStart = currEnd + 1, currEnd += WeekSeconds) {
+    for (long currStart = last.weekStart + WeekSeconds; currStart < appUserDataShared->weekStart; currStart += WeekSeconds) {
         WeeklyData *curr = [[WeeklyData alloc] initWithContext:persistenceServiceShared.viewContext];
         curr.weekStart = currStart;
-        curr.weekEnd = currEnd;
         curr.bestBench = last.bestBench;
         curr.bestPullup = last.bestPullup;
         curr.bestSquat = last.bestSquat;
@@ -81,8 +64,7 @@ void persistenceService_performForegroundUpdate(void) {
 
     if (createEntryForCurrentWeek) {
         WeeklyData *curr = [[WeeklyData alloc] initWithContext:persistenceServiceShared.viewContext];
-        curr.weekStart = weekStart;
-        curr.weekEnd = weekEnd;
+        curr.weekStart = appUserDataShared->weekStart;
         curr.bestBench = last.bestBench;
         curr.bestPullup = last.bestPullup;
         curr.bestSquat = last.bestSquat;
@@ -94,16 +76,13 @@ void persistenceService_performForegroundUpdate(void) {
 }
 
 void persistenceService_deleteUserData(void) {
-    size_t count = 0;
-    CFCalendarRef calendar = CFCalendarCopyCurrent();
-    double weekStart = date_calcStartOfWeek(CFAbsoluteTimeGetCurrent(), calendar, DateSearchDirectionPrev, true);
-    CFRelease(calendar);
+    int count = 0;
     NSFetchRequest *request = WeeklyData.fetchRequest;
-    request.predicate = [NSPredicate predicateWithFormat:@"weekStart < %f", weekStart - 2];
+    request.predicate = [NSPredicate predicateWithFormat:@"weekStart < %lld", appUserDataShared->weekStart];
 
     NSArray<WeeklyData *> *data = [persistenceServiceShared.viewContext executeFetchRequest:request error:nil];
-    if ((data && (count = (data.count)) != 0)) {
-        for (size_t i = 0; i < count; ++i) {
+    if (data && (count = (int) data.count)) {
+        for (int i = 0; i < count; ++i) {
             [persistenceServiceShared.viewContext deleteObject:data[i]];
         }
     }
@@ -120,11 +99,22 @@ void persistenceService_deleteUserData(void) {
     persistenceService_saveContext();
 }
 
+void persistenceService_changeTimestamps(int difference) {
+    int count = 0;
+    NSArray<WeeklyData *> *data = [persistenceServiceShared.viewContext executeFetchRequest:WeeklyData.fetchRequest error:nil];
+    if (!(data && (count = (int) data.count))) return;
+    for (int i = 0; i < count; ++i) {
+        data[i].weekStart += difference;
+    }
+    persistenceService_saveContext();
+}
+
 WeeklyData *persistenceService_getWeeklyDataForThisWeek(void) {
-    CFCalendarRef calendar = CFCalendarCopyCurrent();
-    double weekStart = date_calcStartOfWeek(CFAbsoluteTimeGetCurrent(), calendar, DateSearchDirectionPrev, true);
-    CFRelease(calendar);
-    return getCurrentWeeklyData(weekStart);
+    NSFetchRequest *request = WeeklyData.fetchRequest;
+    request.predicate = [NSPredicate predicateWithFormat:@"weekStart == %lld", appUserDataShared->weekStart];
+    NSArray<WeeklyData *> *currentWeeks = [persistenceServiceShared.viewContext executeFetchRequest:request error:nil];
+    if (!(currentWeeks && currentWeeks.count)) return nil;
+    return currentWeeks[0];
 }
 
 NSArray<id> *persistenceService_executeFetchRequest(NSFetchRequest *req, NSPredicate *pred,

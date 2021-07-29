@@ -27,7 +27,6 @@
 @dynamic timeSE;
 @dynamic timeStrength;
 @dynamic totalWorkouts;
-@dynamic weekEnd;
 @dynamic weekStart;
 
 @end

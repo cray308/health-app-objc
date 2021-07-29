@@ -28,8 +28,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) int16_t timeSE;
 @property (nonatomic) int16_t timeStrength;
 @property (nonatomic) int16_t totalWorkouts;
-@property (nonatomic) double weekEnd;
-@property (nonatomic) double weekStart;
+@property (nonatomic) int64_t weekStart;
 
 @end
 
