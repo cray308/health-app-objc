@@ -42,17 +42,7 @@
     self.view.backgroundColor = UIColor.systemGroupedBackgroundColor;
     self.navigationItem.title = @"App Settings";
     validChars = inputValidator_createNumberCharacterSet();
-    [self setupSubviews];
-    UITextField *fields[] = {textFields[0], textFields[1], textFields[2], textFields[3], nil};
-    createToolbar(self, @selector(dismissKeyboard), fields);
 
-    AppDelegate *app = (AppDelegate *) UIApplication.sharedApplication.delegate;
-    if (app) {
-        app->coordinator.loadedViewControllers |= LoadedViewController_Settings;
-    }
-}
-
-- (void) setupSubviews {
     UILabel *planLabel = [[UILabel alloc] initWithFrame:CGRectZero];
     planLabel.translatesAutoresizingMaskIntoConstraints = false;
     planLabel.text = @"Change workout plan";
@@ -167,6 +157,14 @@
     [planContainer release];
     [planLabel release];
     for (int i = 0; i < 4; ++i) [stacks[i] release];
+
+    createToolbar(self, @selector(dismissKeyboard),
+                  (UITextField *[]){textFields[0], textFields[1], textFields[2], textFields[3], nil});
+
+    AppDelegate *app = (AppDelegate *) UIApplication.sharedApplication.delegate;
+    if (app) {
+        app->coordinator.loadedViewControllers |= LoadedViewController_Settings;
+    }
 }
 
 - (void) updateWeightFields {

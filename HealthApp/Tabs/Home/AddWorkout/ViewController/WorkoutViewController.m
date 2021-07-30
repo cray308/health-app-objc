@@ -304,18 +304,7 @@ CFStringRef createExerciseTitle(ExerciseEntry *e) {
     group = exerciseGroup;
     size = (int) group->exercises->size;
     viewsArr = calloc(size, sizeof(ExerciseView *));
-    [self setupSubviews];
-    return self;
-}
 
-- (void) dealloc {
-    for (int i = 0; i < size; ++i) { [viewsArr[i] release]; }
-    free(viewsArr);
-    [headerLabel release];
-    [super dealloc];
-}
-
-- (void) setupSubviews {
     headerLabel = [[UILabel alloc] initWithFrame:CGRectZero];
     headerLabel.translatesAutoresizingMaskIntoConstraints = false;
     headerLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleTitle3];
@@ -357,6 +346,14 @@ CFStringRef createExerciseTitle(ExerciseEntry *e) {
         viewsArr[i] = v;
     }
     [exerciseStack release];
+    return self;
+}
+
+- (void) dealloc {
+    for (int i = 0; i < size; ++i) { [viewsArr[i] release]; }
+    free(viewsArr);
+    [headerLabel release];
+    [super dealloc];
 }
 
 - (void) startCircuitAndTimer: (bool)startTimer {
@@ -575,20 +572,6 @@ CFStringRef createExerciseTitle(ExerciseEntry *e) {
     self.view.backgroundColor = UIColor.systemGroupedBackgroundColor;
     self.navigationItem.title = (__bridge NSString*) viewModel->workout->title;
 
-    [self setupSubviews];
-    startObserver = [NSNotificationCenter.defaultCenter addObserverForName:UIApplicationDidBecomeActiveNotification
-                                                                    object:nil queue:NSOperationQueue.mainQueue
-                                                                usingBlock:^(NSNotification *note _U_) {
-        [self restartTimers];
-    }];
-    stopObserver = [NSNotificationCenter.defaultCenter addObserverForName:UIApplicationWillResignActiveNotification
-                                                                   object:nil queue:NSOperationQueue.mainQueue
-                                                               usingBlock:^(NSNotification *note _U_) {
-        [self stopTimers];
-    }];
-}
-
-- (void) setupSubviews {
     UIButton *startBtn = [UIButton buttonWithType:UIButtonTypeSystem];
     startBtn.translatesAutoresizingMaskIntoConstraints = false;
     [startBtn setTitle:@"Start" forState:UIControlStateNormal];
@@ -655,6 +638,16 @@ CFStringRef createExerciseTitle(ExerciseEntry *e) {
         [startBtn.heightAnchor constraintEqualToConstant: 30],
     ]];
 
+    startObserver = [NSNotificationCenter.defaultCenter addObserverForName:UIApplicationDidBecomeActiveNotification
+                                                                    object:nil queue:NSOperationQueue.mainQueue
+                                                                usingBlock:^(NSNotification *note _U_) {
+        [self restartTimers];
+    }];
+    stopObserver = [NSNotificationCenter.defaultCenter addObserverForName:UIApplicationWillResignActiveNotification
+                                                                   object:nil queue:NSOperationQueue.mainQueue
+                                                               usingBlock:^(NSNotification *note _U_) {
+        [self stopTimers];
+    }];
     [btnContainer release];
     [vStack release];
     [scrollView release];

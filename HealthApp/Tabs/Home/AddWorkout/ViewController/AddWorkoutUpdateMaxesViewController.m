@@ -23,11 +23,12 @@
 - (id) initWithDelegate: (AddWorkoutCoordinator *)_delegate {
     if (!(self = [super initWithNibName:nil bundle:nil])) return nil;
     delegate = _delegate;
+    validChars = inputValidator_createNumberCharacterSet();
     return self;
 }
 
 - (void) dealloc {
-    if (validChars) uset_free(char, validChars);
+    uset_free(char, validChars);
     for (int i = 0; i < 4; ++i) [textFields[i] release];
     [super dealloc];
 }
@@ -35,14 +36,7 @@
 - (void) viewDidLoad {
     [super viewDidLoad];
     self.view.backgroundColor = UIColor.secondarySystemBackgroundColor;
-    validChars = inputValidator_createNumberCharacterSet();
-    [self setupSubviews];
-    UITextField *fields[] = {textFields[0], textFields[1], textFields[2], textFields[3], nil};
-    createToolbar(self, @selector(dismissKeyboard), fields);
 
-}
-
-- (void) setupSubviews {
     NSString *titles[] = {@"Squat", @"Pull-up", @"Bench", @"Deadlift"};
     UIStackView *stacks[4];
 
@@ -99,6 +93,9 @@
 
     for (int i = 0; i < 4; ++i) [stacks[i] release];
     [rightItem release];
+
+    createToolbar(self, @selector(dismissKeyboard),
+                  (UITextField *[]){textFields[0], textFields[1], textFields[2], textFields[3], nil});
 }
 
 - (void) didPressFinish {

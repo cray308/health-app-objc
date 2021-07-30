@@ -222,16 +222,7 @@ UIView *createChartSeparator(CFStringRef title) {
     [super viewDidLoad];
     self.view.backgroundColor = UIColor.systemBackgroundColor;
     self.navigationItem.title = @"Workout History";
-    [self setupSubviews];
-    historyDataManager_fetchData(viewModel);
-    historyViewModel_formatDataForTimeRange(viewModel, 0, &formatter);
-    [self updateCharts];
 
-    AppDelegate *app = (AppDelegate *) UIApplication.sharedApplication.delegate;
-    if (app) app->coordinator.loadedViewControllers |= LoadedViewController_History;
-}
-
-- (void) setupSubviews {
     rangePicker = [[UISegmentedControl alloc] initWithItems:@[@"6 Months", @"1 Year", @"2 Years"]];
     rangePicker.layer.cornerRadius = 5;
     rangePicker.tintColor = UIColor.systemGray2Color;
@@ -283,6 +274,13 @@ UIView *createChartSeparator(CFStringRef title) {
     [areaChartSeparator release];
     [liftChartSeparator release];
     [scrollView release];
+
+    historyDataManager_fetchData(viewModel);
+    historyViewModel_formatDataForTimeRange(viewModel, 0, &formatter);
+    [self updateCharts];
+
+    AppDelegate *app = (AppDelegate *) UIApplication.sharedApplication.delegate;
+    if (app) app->coordinator.loadedViewControllers |= LoadedViewController_History;
 }
 
 - (void) updateSelectedSegment: (UISegmentedControl *)sender {

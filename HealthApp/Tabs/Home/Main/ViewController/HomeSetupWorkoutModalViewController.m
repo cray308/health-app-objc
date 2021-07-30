@@ -51,11 +51,7 @@
 - (void) viewDidLoad {
     [super viewDidLoad];
     self.view.backgroundColor = UIColor.systemGroupedBackgroundColor;
-    validChars = inputValidator_createNumberCharacterSet();
-    [self setupSubviews];
-}
 
-- (void) setupSubviews {
     workoutTextField = [[UITextField alloc] initWithFrame:CGRectZero];
     workoutTextField.translatesAutoresizingMaskIntoConstraints = false;
     workoutTextField.delegate = self;
@@ -130,8 +126,11 @@
     textFieldStack.spacing = 20;
     [self.view addSubview:textFieldStack];
 
+    bool createCharSet = false;
+
     for (int i = 0; i < 3; ++i) {
         if (!titles[i]) continue;
+        createCharSet = true;
         UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
         label.text = titles[i];
         label.font = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
@@ -157,6 +156,8 @@
         [label release];
         [hStack release];
     }
+
+    if (createCharSet) validChars = inputValidator_createNumberCharacterSet();
 
     UIButton *cancelButton = [UIButton buttonWithType:UIButtonTypeSystem];
     cancelButton.translatesAutoresizingMaskIntoConstraints = false;

@@ -22,7 +22,6 @@ void appCoordinator_free(AppCoordinator *coordinator) {
     historyCoordinator_free(coordinator->children[1]);
     settingsCoordinator_free(coordinator->children[2]);
     [coordinator->tabVC release];
-    free(coordinator);
 }
 
 void appCoordinator_start(AppCoordinator *coordinator, CFTimeZoneRef tz, long time, long weekStart) {

@@ -86,24 +86,7 @@ UIView *createConfettiView(CGRect frame) {
     [super viewDidLoad];
     self.view.backgroundColor = UIColor.systemGroupedBackgroundColor;
     self.navigationItem.title = @"Home";
-    [self setupSubviews];
-    [self updateGreeting];
-    homeViewModel_fetchData(viewModel);
-    [self createWorkoutsList];
 
-    AppDelegate *app = (AppDelegate *) UIApplication.sharedApplication.delegate;
-    if (app) app->coordinator.loadedViewControllers |= LoadedViewController_Home;
-}
-
-- (void) viewWillAppear: (BOOL)animated {
-    [super viewWillAppear:animated];
-    homeCoordinator_checkForChildCoordinator(delegate);
-    if (homeViewModel_updateTimeOfDay(viewModel)) {
-        [self updateGreeting];
-    }
-}
-
-- (void) setupSubviews {
     greetingLabel = [[UILabel alloc] initWithFrame:CGRectZero];
     greetingLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleTitle1];
     greetingLabel.textAlignment = NSTextAlignmentCenter;
@@ -121,35 +104,34 @@ UIView *createConfettiView(CGRect frame) {
     customWorkoutStack.spacing = 20;
     [customWorkoutStack setLayoutMarginsRelativeArrangement:true];
     customWorkoutStack.layoutMargins = (UIEdgeInsets){.top = 5, .left = 8, .bottom = 5, .right = 8};
-    {
-        UIView *divider = createDivider();
-        [customWorkoutStack addArrangedSubview:divider];
 
-        UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectZero];
-        headerLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleTitle2];
-        headerLabel.text = @"Add Custom Workout";
-        headerLabel.adjustsFontSizeToFitWidth = true;
-        headerLabel.textColor = UIColor.labelColor;
-        [customWorkoutStack addArrangedSubview:headerLabel];
+    UIView *divider = createDivider();
+    [customWorkoutStack addArrangedSubview:divider];
 
-        NSString *buttonTitles[] = {@"Test Max", @"Endurance", @"Strength", @"SE", @"HIC"};
-        for (int i = 0; i < 5; ++i) {
-            UIButton *btn = [UIButton buttonWithType:UIButtonTypeSystem];
-            [btn setTitle:buttonTitles[i] forState:UIControlStateNormal];
-            [btn setTitleColor:UIColor.labelColor forState: UIControlStateNormal];
-            [btn setTitleColor:UIColor.secondaryLabelColor forState:UIControlStateDisabled];
-            btn.titleLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleHeadline];
-            btn.backgroundColor = UIColor.secondarySystemGroupedBackgroundColor;
-            btn.layer.cornerRadius = 5;
-            [btn.heightAnchor constraintEqualToConstant:50].active = true;
-            btn.tag = i;
-            [btn addTarget:self
-                    action:@selector(customWorkoutButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
-            [customWorkoutStack addArrangedSubview:btn];
-        }
-        [headerLabel release];
-        [divider release];
+    UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+    headerLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleTitle2];
+    headerLabel.text = @"Add Custom Workout";
+    headerLabel.adjustsFontSizeToFitWidth = true;
+    headerLabel.textColor = UIColor.labelColor;
+    [customWorkoutStack addArrangedSubview:headerLabel];
+
+    NSString *buttonTitles[] = {@"Test Max", @"Endurance", @"Strength", @"SE", @"HIC"};
+    for (int i = 0; i < 5; ++i) {
+        UIButton *btn = [UIButton buttonWithType:UIButtonTypeSystem];
+        [btn setTitle:buttonTitles[i] forState:UIControlStateNormal];
+        [btn setTitleColor:UIColor.labelColor forState: UIControlStateNormal];
+        [btn setTitleColor:UIColor.secondaryLabelColor forState:UIControlStateDisabled];
+        btn.titleLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleHeadline];
+        btn.backgroundColor = UIColor.secondarySystemGroupedBackgroundColor;
+        btn.layer.cornerRadius = 5;
+        [btn.heightAnchor constraintEqualToConstant:50].active = true;
+        btn.tag = i;
+        [btn addTarget:self
+                action:@selector(customWorkoutButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
+        [customWorkoutStack addArrangedSubview:btn];
     }
+    [headerLabel release];
+    [divider release];
 
     UIStackView *vStack = [[UIStackView alloc] initWithArrangedSubviews:@[
         greetingLabel, weeklyWorkoutsStack, customWorkoutStack]];
@@ -186,6 +168,21 @@ UIView *createConfettiView(CGRect frame) {
     [weeklyWorkoutsStack setHidden:true];
     [vStack release];
     [scrollView release];
+
+    [self updateGreeting];
+    homeViewModel_fetchData(viewModel);
+    [self createWorkoutsList];
+
+    AppDelegate *app = (AppDelegate *) UIApplication.sharedApplication.delegate;
+    if (app) app->coordinator.loadedViewControllers |= LoadedViewController_Home;
+}
+
+- (void) viewWillAppear: (BOOL)animated {
+    [super viewWillAppear:animated];
+    homeCoordinator_checkForChildCoordinator(delegate);
+    if (homeViewModel_updateTimeOfDay(viewModel)) {
+        [self updateGreeting];
+    }
 }
 
 - (void) createWorkoutsList {
