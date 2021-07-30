@@ -101,22 +101,14 @@ open class BarLineScatterCandleBubbleRenderer: NSObject, DataRenderer
             self.max = entryTo == nil ? 0 : dataSet.entryIndex(entry: entryTo!)
             range = Int(Double(self.max - self.min) * phaseX)
         }
+
+        public func contains(_ element: Int) -> Bool {
+            return (min...min + range).contains(element)
+        }
     }
     
     public func createAccessibleHeader(usingChart chart: ChartViewBase, andData data: ChartData, withDefaultDescription defaultDescription: String) -> NSUIAccessibilityElement {
         return AccessibleHeader.create(usingChart: chart, andData: data, withDefaultDescription: defaultDescription)
-    }
-}
-
-extension BarLineScatterCandleBubbleRenderer.XBounds: RangeExpression {
-    public func relative<C>(to collection: C) -> Swift.Range<Int>
-        where C : Collection, Bound == C.Index
-    {
-        return Swift.Range<Int>(min...min + range)
-    }
-
-    public func contains(_ element: Int) -> Bool {
-        return (min...min + range).contains(element)
     }
 }
 

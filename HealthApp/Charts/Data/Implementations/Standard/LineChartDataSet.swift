@@ -101,12 +101,6 @@ open class LineChartDataSet: LineRadarChartDataSet, LineChartDataSetProtocol
         circleColors.append(color)
     }
     
-    open func setCircleColors(_ colors: NSUIColor...)
-    {
-        circleColors.removeAll(keepingCapacity: false)
-        circleColors.append(contentsOf: colors)
-    }
-    
     /// Resets the circle-colors array and creates a new one
     open func resetCircleColors(_ index: Int)
     {

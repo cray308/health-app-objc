@@ -85,11 +85,7 @@ types are aliased to either their UI* implementation (on iOS) or their NS* imple
         
         private weak var _target: AnyObject?
         private var _selector: Selector
-        
-        public var timestamp: CFTimeInterval
-        {
-            return _timestamp
-        }
+    
 
 		init(target: AnyObject, selector: Selector)
         {

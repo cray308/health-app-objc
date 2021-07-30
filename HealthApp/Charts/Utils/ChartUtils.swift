@@ -37,19 +37,6 @@ extension FloatingPoint
     {
         return self * .pi / 180
     }
-
-    var RAD2DEG: Self
-    {
-        return self * 180 / .pi
-    }
-
-    /// - Note: Value must be in degrees
-    /// - Returns: An angle between 0.0 < 360.0 (not less than zero, less than 360)
-    var normalizedAngle: Self
-    {
-        let angle = truncatingRemainder(dividingBy: 360)
-        return (sign == .minus) ? angle + 360 : angle
-    }
 }
 
 extension CGSize
@@ -103,16 +90,6 @@ extension Double
             else { return 0 }
 
         return Int(ceil(-log10(i))) + 2
-    }
-}
-
-extension CGPoint
-{
-    /// Calculates the position around a center point, depending on the distance from the center, and the angle of the position around the center.
-    func moving(distance: CGFloat, atAngle angle: CGFloat) -> CGPoint
-    {
-        return CGPoint(x: x + distance * cos(angle.DEG2RAD),
-                       y: y + distance * sin(angle.DEG2RAD))
     }
 }
 

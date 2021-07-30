@@ -291,19 +291,6 @@ open class ChartData: NSObject, ExpressibleByArrayLiteral
         return remove(at: index)
     }
 
-    /// Adds an Entry to the DataSet at the specified index. Entries are added to the end of the list.
-    @objc(addEntry:dataSetIndex:)
-    open func appendEntry(_ e: ChartDataEntry, toDataSet dataSetIndex: Index)
-    {
-        guard dataSets.indices.contains(dataSetIndex) else {
-            return print("ChartData.addEntry() - Cannot add Entry because dataSetIndex too high or too low.", terminator: "\n")
-        }
-
-        let set = self[dataSetIndex]
-        if !set.addEntry(e) { return }
-        calcMinMax(entry: e, axis: set.axisDependency)
-    }
-
     /// Removes the given Entry object from the DataSet at the specified index.
     @objc @discardableResult open func removeEntry(_ entry: ChartDataEntry, dataSetIndex: Index) -> Bool
     {
