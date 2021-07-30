@@ -40,8 +40,8 @@ void updateUI(HomeTabCoordinator *this, unsigned char updates) {
     }
 }
 
-void navigateToAddWorkout(HomeTabCoordinator *this, UIViewController *presenter, Workout *workout) {
-    if (presenter) [presenter dismissViewControllerAnimated:true completion:nil];
+void navigateToAddWorkout(HomeTabCoordinator *this, bool dismissVC, Workout *workout) {
+    if (dismissVC) [this->navigationController.viewControllers[0] dismissViewControllerAnimated:true completion:nil];
     AddWorkoutCoordinator *child = malloc(sizeof(AddWorkoutCoordinator));
     if (!child) return;
 
@@ -85,7 +85,7 @@ void homeCoordinator_didFinishAddingWorkout(HomeTabCoordinator *this, int totalC
 void homeCoordinator_addWorkoutFromPlan(HomeTabCoordinator *this, int index) {
     unsigned char plan = (unsigned char) appUserDataShared->currentPlan;
     Workout *w = exerciseManager_getWeeklyWorkoutAtIndex(plan, appUserData_getWeekInPlan(), index);
-    if (w) navigateToAddWorkout(this, nil, w);
+    if (w) navigateToAddWorkout(this, false, w);
 }
 
 void homeCoordinator_addWorkoutFromCustomButton(HomeTabCoordinator *this, int index) {
@@ -99,7 +99,7 @@ void homeCoordinator_addWorkoutFromCustomButton(HomeTabCoordinator *this, int in
             break;
         case CustomWorkoutIndexTestMax: ;
             Workout *w = exerciseManager_getWorkoutFromLibrary(WorkoutTypeStrength, 2, 1, 1, 100);
-            if (w) navigateToAddWorkout(this, nil, w);
+            if (w) navigateToAddWorkout(this, false, w);
             return;
         case CustomWorkoutIndexEndurance:
             type = WorkoutTypeEndurance;
@@ -123,10 +123,10 @@ void homeCoordinator_addWorkoutFromCustomButton(HomeTabCoordinator *this, int in
     [modal release];
 }
 
-void homeCoordinator_finishedSettingUpCustomWorkout(HomeTabCoordinator *this, UIViewController *presenter,
-                                                    unsigned char type, int index, int sets, int reps, int weight) {
+void homeCoordinator_finishedSettingUpCustomWorkout(HomeTabCoordinator *this, unsigned char type, int index, int sets,
+                                                    int reps, int weight) {
     Workout *w = exerciseManager_getWorkoutFromLibrary(type, index, reps, sets, weight);
-    if (w) navigateToAddWorkout(this, presenter, w);
+    if (w) navigateToAddWorkout(this, true, w);
 }
 
 void homeCoordinator_checkForChildCoordinator(HomeTabCoordinator *this) {

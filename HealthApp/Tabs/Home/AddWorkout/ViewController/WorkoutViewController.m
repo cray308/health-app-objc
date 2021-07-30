@@ -694,7 +694,7 @@ CFStringRef createExerciseTitle(ExerciseEntry *e) {
     pthread_mutex_unlock(&sharedLock);
 
     if (m) {
-        addWorkoutCoordinator_completedWorkout(delegate, nil, true);
+        addWorkoutCoordinator_completedWorkout(delegate, false, true);
     }
 }
 

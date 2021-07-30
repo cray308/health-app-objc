@@ -99,7 +99,7 @@
 }
 
 - (void) didPressFinish {
-    addWorkoutCoordinator_finishedAddingNewWeights(delegate, self, results);
+    addWorkoutCoordinator_finishedAddingNewWeights(delegate, results);
 }
 
 - (void) dismissKeyboard {

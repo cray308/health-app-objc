@@ -37,9 +37,9 @@ void updateStoredData(AddWorkoutViewModel *model) {
     persistenceService_saveContext();
 }
 
-void didFinishAddingWorkout(AddWorkoutCoordinator *this, UIViewController *presenter, int totalCompletedWorkouts) {
-    if (presenter) {
-        [presenter dismissViewControllerAnimated:true completion:nil];
+void didFinishAddingWorkout(AddWorkoutCoordinator *this, bool dismissVC, int totalCompletedWorkouts) {
+    if (dismissVC) {
+        [this->navigationController dismissViewControllerAnimated:true completion:nil];
         AppDelegate *delegate = (AppDelegate *) UIApplication.sharedApplication.delegate;
         if (delegate) appCoordinator_updateMaxWeights(&delegate->coordinator);
     }
@@ -61,11 +61,10 @@ void addWorkoutCoordinator_free(AddWorkoutCoordinator *this) {
 
 void addWorkoutCoordinator_stoppedWorkout(AddWorkoutCoordinator *this) {
     updateStoredData(&this->viewModel);
-    didFinishAddingWorkout(this, nil, 0);
+    didFinishAddingWorkout(this, false, 0);
 }
 
-void addWorkoutCoordinator_completedWorkout(AddWorkoutCoordinator *this, UIViewController *presenter,
-                                            bool showModalIfRequired) {
+void addWorkoutCoordinator_completedWorkout(AddWorkoutCoordinator *this, bool dismissVC, bool showModalIfRequired) {
     CFStringRef title = this->viewModel.workout->title;
     if (showModalIfRequired && CFStringCompareWithOptions(title, CFSTR("test day"),
                                                           CFRangeMake(0, CFStringGetLength(title)),
@@ -82,14 +81,13 @@ void addWorkoutCoordinator_completedWorkout(AddWorkoutCoordinator *this, UIViewC
     const signed char day = this->viewModel.workout->day;
     if (day >= 0) {
         unsigned char totalCompleted = appUserData_addCompletedWorkout((unsigned char) day);
-        didFinishAddingWorkout(this, presenter, totalCompleted);
+        didFinishAddingWorkout(this, dismissVC, totalCompleted);
         return;
     }
-    didFinishAddingWorkout(this, presenter, 0);
+    didFinishAddingWorkout(this, dismissVC, 0);
 }
 
-void addWorkoutCoordinator_finishedAddingNewWeights(AddWorkoutCoordinator *this, UIViewController *presenter,
-                                                    short *weights) {
+void addWorkoutCoordinator_finishedAddingNewWeights(AddWorkoutCoordinator *this, short *weights) {
     WeeklyData *data = persistenceService_getWeeklyDataForThisWeek();
     if (data) {
         data.bestSquat = weights[0];
@@ -99,7 +97,7 @@ void addWorkoutCoordinator_finishedAddingNewWeights(AddWorkoutCoordinator *this,
         persistenceService_saveContext();
     }
     appUserData_updateWeightMaxes(weights);
-    addWorkoutCoordinator_completedWorkout(this, presenter, 0);
+    addWorkoutCoordinator_completedWorkout(this, true, false);
 }
 
 void addWorkoutCoordinator_stopWorkoutFromBackButtonPress(AddWorkoutCoordinator *this) {

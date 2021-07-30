@@ -206,7 +206,7 @@
 }
 
 - (void) didPressFinish {
-    homeCoordinator_finishedSettingUpCustomWorkout(delegate, self, type, index, inputs[0], inputs[1], inputs[2]);
+    homeCoordinator_finishedSettingUpCustomWorkout(delegate, type, index, inputs[0], inputs[1], inputs[2]);
 }
 
 - (void) pressedCancel {
