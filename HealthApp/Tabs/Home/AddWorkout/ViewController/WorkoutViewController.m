@@ -25,8 +25,8 @@
 - (void) handleTap: (UIButton *)btn;
 - (void) stopExerciseAtIndex: (int)index moveToNext: (bool)moveToNext;
 - (void) finishGroupAtIndex: (int)index;
-- (void) restartExerciseAtIndex: (int)index moveToNext: (bool)moveToNext refTime: (int64_t)refTime;
-- (void) restartGroupAtIndex: (int)index refTime: (int64_t)refTime;
+- (void) restartExerciseAtIndex: (int)index moveToNext: (bool)moveToNext refTime: (time_t)refTime;
+- (void) restartGroupAtIndex: (int)index refTime: (time_t)refTime;
 @end
 
 @interface ExerciseView() {
@@ -62,13 +62,18 @@ typedef enum {
 
 typedef struct {
     WorkoutViewController *parent;
-    const unsigned char type;
-    unsigned char active;
-    bool stop;
+    struct info {
+        const unsigned char type : 2;
+        unsigned char active : 2;
+        unsigned char stop : 4;
+    } info;
+//    const unsigned char type;
+//    unsigned char active;
+//    bool stop;
     int container;
     int exercise;
     int duration;
-    int64_t refTime;
+    time_t refTime;
     pthread_mutex_t lock;
     pthread_cond_t cond;
 } WorkoutTimer;
@@ -87,22 +92,22 @@ void handle_group_timer_interrupt(int n __attribute__((__unused__))) {
 
 void startTimerForGroup(WorkoutTimer *t, int duration, int container) {
     pthread_mutex_lock(&t->lock);
-    t->refTime = CFAbsoluteTimeGetCurrent();
+    t->refTime = time(NULL);
     t->duration = duration;
     t->container = container;
-    t->stop = !duration;
-    t->active = 1;
+    t->info.stop = !duration;
+    t->info.active = 1;
     pthread_cond_signal(&t->cond);
     pthread_mutex_unlock(&t->lock);
 }
 
 void startTimerForExercise(WorkoutTimer *t, int duration, int exercise) {
     pthread_mutex_lock(&t->lock);
-    t->refTime = CFAbsoluteTimeGetCurrent();
+    t->refTime = time(NULL);
     t->duration = duration;
     t->exercise = exercise;
-    t->stop = !duration;
-    t->active = 1;
+    t->info.stop = !duration;
+    t->info.active = 1;
     pthread_cond_signal(&t->cond);
     pthread_mutex_unlock(&t->lock);
 }
@@ -110,9 +115,9 @@ void startTimerForExercise(WorkoutTimer *t, int duration, int exercise) {
 void *timer_loop(void *arg) {
     WorkoutTimer *t = (WorkoutTimer *) arg;
     int res = 0, duration = 0, container = -1, exercise = -1;
-    while (!t->stop) {
+    while (!t->info.stop) {
         pthread_mutex_lock(&t->lock);
-        while (t->active != 1) pthread_cond_wait(&t->cond, &t->lock);
+        while (t->info.active != 1) pthread_cond_wait(&t->cond, &t->lock);
         duration = t->duration;
         container = t->container;
         exercise = t->exercise;
@@ -120,13 +125,13 @@ void *timer_loop(void *arg) {
 
         if (!duration) continue;
         res = sleep(duration);
-        t->active = 2;
+        t->info.active = 2;
         if (!res) {
-            if (t->type == TimerTypeGroup && ePtr->active == 1) {
+            if (t->info.type == TimerTypeGroup && ePtr->info.active == 1) {
                 pthread_kill(exerciseTimerThread, SIGUSR1);
             }
             dispatch_async(dispatch_get_main_queue(), ^ (void) {
-                [t->parent finishedWorkoutTimerForType:t->type container:container exercise:exercise];
+                [t->parent finishedWorkoutTimerForType:t->info.type container:container exercise:exercise];
             });
         }
     }
@@ -302,7 +307,7 @@ CFStringRef createExerciseTitle(ExerciseEntry *e) {
 - (id) initWithGroup: (ExerciseGroup *)exerciseGroup {
     if (!(self = [super initWithFrame:CGRectZero])) return nil;
     group = exerciseGroup;
-    size = (int) group->exercises->size;
+    size = group->exercises->size;
     viewsArr = calloc(size, sizeof(ExerciseView *));
 
     headerLabel = [[UILabel alloc] initWithFrame:CGRectZero];
@@ -370,7 +375,7 @@ CFStringRef createExerciseTitle(ExerciseEntry *e) {
     [viewsArr[0] handleTap];
 }
 
-- (void) restartExerciseAtIndex: (int)index moveToNext: (bool)moveToNext refTime: (int64_t)refTime {
+- (void) restartExerciseAtIndex: (int)index moveToNext: (bool)moveToNext refTime: (time_t)refTime {
     ExerciseView *v = nil;
     bool endExercise = false;
     pthread_mutex_lock(&sharedLock);
@@ -394,7 +399,7 @@ CFStringRef createExerciseTitle(ExerciseEntry *e) {
     }
 }
 
-- (void) restartGroupAtIndex: (int)index refTime: (int64_t)refTime {
+- (void) restartGroupAtIndex: (int)index refTime: (time_t)refTime {
     WorkoutViewController *p = nil;
     bool endGroup = false;
     pthread_mutex_lock(&sharedLock);
@@ -527,8 +532,8 @@ CFStringRef createExerciseTitle(ExerciseEntry *e) {
     sa.sa_handler = handle_group_timer_interrupt;
     sigaction(SIGUSR2, &sa, NULL);
 
-    WorkoutTimer groupTimer = { .type = TimerTypeGroup, .parent = self };
-    WorkoutTimer exerciseTimer = { .type = TimerTypeExercise, .parent = self };
+    WorkoutTimer groupTimer = { .info = { .type = TimerTypeGroup }, .parent = self };
+    WorkoutTimer exerciseTimer = { .info = { .type = TimerTypeExercise }, .parent = self };
     memcpy(&timers[TimerTypeGroup], &groupTimer, sizeof(WorkoutTimer));
     memcpy(&timers[TimerTypeExercise], &exerciseTimer, sizeof(WorkoutTimer));
     for (int i = 0; i < 2; ++i) {
@@ -545,8 +550,8 @@ CFStringRef createExerciseTitle(ExerciseEntry *e) {
 }
 
 - (void) dealloc {
-    if (timers[TimerTypeGroup].active == 1) pthread_kill(groupTimerThread, SIGUSR2);
-    if (timers[TimerTypeExercise].active == 1) pthread_kill(exerciseTimerThread, SIGUSR1);
+    if (timers[TimerTypeGroup].info.active == 1) pthread_kill(groupTimerThread, SIGUSR2);
+    if (timers[TimerTypeExercise].info.active == 1) pthread_kill(exerciseTimerThread, SIGUSR1);
     startTimerForGroup(&timers[TimerTypeGroup], 0, 0);
     startTimerForExercise(&timers[TimerTypeExercise], 0, 0);
     pthread_join(exerciseTimerThread, NULL);
@@ -658,14 +663,14 @@ CFStringRef createExerciseTitle(ExerciseEntry *e) {
         [btn setTitle:@"End" forState:UIControlStateNormal];
         [btn setTitleColor:UIColor.systemRedColor forState:UIControlStateNormal];
         ExerciseContainer *v =  (ExerciseContainer *) groupsStack.arrangedSubviews[0];
-        viewModel->startTime = CFAbsoluteTimeGetCurrent();
+        viewModel->startTime = time(NULL);
         [v startCircuitAndTimer:1];
     } else {
         AddWorkoutViewModel *m = NULL;
         pthread_mutex_lock(&sharedLock);
         if (viewModel) {
             m = viewModel;
-            m->stopTime = (long) CFAbsoluteTimeGetCurrent() + 1;
+            m->stopTime = time(NULL) + 1;
             viewModel = NULL;
         }
         pthread_mutex_unlock(&sharedLock);
@@ -687,7 +692,7 @@ CFStringRef createExerciseTitle(ExerciseEntry *e) {
             [next startCircuitAndTimer:1];
         } else {
             m = viewModel;
-            m->stopTime = (long) CFAbsoluteTimeGetCurrent() + 1;
+            m->stopTime = time(NULL) + 1;
             viewModel = NULL;
         }
     }
@@ -721,14 +726,14 @@ CFStringRef createExerciseTitle(ExerciseEntry *e) {
 
 - (void) stopTimers {
     pthread_mutex_lock(&sharedLock);
-    if (timers[TimerTypeGroup].active == 1) {
+    if (timers[TimerTypeGroup].info.active == 1) {
         savedInfo.groupTag = timers[TimerTypeGroup].container;
         pthread_kill(groupTimerThread, SIGUSR2);
     } else {
         savedInfo.groupTag = -1;
     }
 
-    if (timers[TimerTypeExercise].active == 1) {
+    if (timers[TimerTypeExercise].info.active == 1) {
         savedInfo.exerciseInfo.group = timers[TimerTypeExercise].container;
         savedInfo.exerciseInfo.tag = timers[TimerTypeExercise].exercise;
         pthread_kill(exerciseTimerThread, SIGUSR1);
@@ -750,7 +755,7 @@ CFStringRef createExerciseTitle(ExerciseEntry *e) {
     pthread_mutex_unlock(&sharedLock);
 
     if (v) {
-        int64_t now = CFAbsoluteTimeGetCurrent();
+        time_t now = time(NULL);
         if (eTimerActive && v.tag == savedInfo.exerciseInfo.group) {
             [v restartExerciseAtIndex:savedInfo.exerciseInfo.tag moveToNext:workoutType != WorkoutTypeEndurance
                               refTime:now];

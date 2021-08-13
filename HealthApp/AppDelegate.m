@@ -17,7 +17,7 @@
 
 #define _U_ __attribute__((__unused__))
 
-void setupData(CFTimeZoneRef tz, long now, long weekStart);
+void setupData(time_t now, time_t weekStart);
 
 @implementation AppDelegate
 
@@ -40,13 +40,11 @@ void setupData(CFTimeZoneRef tz, long now, long weekStart);
     [persistenceServiceShared
      loadPersistentStoresWithCompletionHandler: ^(NSPersistentStoreDescription *description _U_, NSError *error _U_) {}];
 
-    CFCalendarRef calendar = CFCalendarCopyCurrent();
-    CFTimeZoneRef tz = CFCalendarCopyTimeZone(calendar);
-    long now = CFAbsoluteTimeGetCurrent();
-    long weekStart = date_calcStartOfWeek(now, calendar, DateSearchDirectionPrev, true);
+    time_t now = time(NULL);
+    time_t weekStart = date_calcStartOfWeek(now);
 
-    if (!hasLaunched) setupData(tz, now, weekStart);
-    appCoordinator_start(&coordinator, tz, now, weekStart);
+    if (!hasLaunched) setupData(now, weekStart);
+    appCoordinator_start(&coordinator, now, weekStart);
     [window setRootViewController:coordinator.tabVC];
     [window makeKeyAndVisible];
 
@@ -55,8 +53,6 @@ void setupData(CFTimeZoneRef tz, long now, long weekStart);
          requestAuthorizationWithOptions:UNAuthorizationOptionAlert | UNAuthorizationOptionSound
          completionHandler:^(BOOL granted _U_, NSError *_Nullable error _U_) {}];
     }
-    CFRelease(tz);
-    CFRelease(calendar);
     return true;
 }
 
@@ -68,13 +64,12 @@ void setupData(CFTimeZoneRef tz, long now, long weekStart);
 
 @end
 
-void setupData(CFTimeZoneRef tz, long now, long weekStart) {
+void setupData(time_t now, time_t weekStart) {
 #if DEBUG
-    CFCalendarRef calendar = CFCalendarCopyCurrent();
     int bench = 185, pullup = 20, squat = 300, deadlift = 235, i = 0;
     unsigned char plan = 0;
-    long start = date_calcStartOfWeek(CFAbsoluteTimeGetCurrent() - 126489600, calendar, DateSearchDirectionPrev, true);
-    long end = date_calcStartOfWeek(CFAbsoluteTimeGetCurrent() - 2678400, calendar, DateSearchDirectionPrev, true);
+    time_t start = date_calcStartOfWeek(time(NULL) - 126489600);
+    time_t end = date_calcStartOfWeek(time(NULL) - 2678400);
 
     while (start < end) {
         WeeklyData *data = [[WeeklyData alloc] initWithContext:persistenceServiceShared.viewContext];
@@ -146,10 +141,9 @@ void setupData(CFTimeZoneRef tz, long now, long weekStart) {
         }
         start += WeekSeconds;
     }
-    CFRelease(calendar);
 #endif
 
     [NSUserDefaults.standardUserDefaults setBool:true forKey:@"hasLaunched"];
-    UserInfo info = {.currentPlan = -1, .weekStart = weekStart, .tzOffset = CFTimeZoneGetSecondsFromGMT(tz, now)};
+    UserInfo info = {.currentPlan = -1, .weekStart = weekStart, .tzOffset = date_getOffsetFromGMT(now)};
     userInfo_saveData(&info);
 }

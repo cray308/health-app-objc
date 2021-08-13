@@ -67,10 +67,10 @@ void appUserData_setWorkoutPlan(signed char plan) {
     userInfo_saveData(appUserDataShared);
 }
 
-int appUserData_checkTimezone(CFTimeZoneRef tz, long time) {
-    int newOffset = CFTimeZoneGetSecondsFromGMT(tz, time);
+int appUserData_checkTimezone(time_t now) {
+    int newOffset = date_getOffsetFromGMT(now);
     int diff = newOffset - appUserDataShared->tzOffset;
-    if (diff != 0) {
+    if (diff) {
         appUserDataShared->weekStart += diff;
         appUserDataShared->tzOffset = newOffset;
         userInfo_saveData(appUserDataShared);
@@ -83,7 +83,7 @@ void appUserData_deleteSavedData(void) {
     userInfo_saveData(appUserDataShared);
 }
 
-void appUserData_handleNewWeek(long weekStart) {
+void appUserData_handleNewWeek(time_t weekStart) {
     appUserDataShared->completedWorkouts = 0;
     appUserDataShared->weekStart = weekStart;
 

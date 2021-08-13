@@ -24,14 +24,14 @@ void appCoordinator_free(AppCoordinator *coordinator) {
     [coordinator->tabVC release];
 }
 
-void appCoordinator_start(AppCoordinator *coordinator, CFTimeZoneRef tz, long time, long weekStart) {
+void appCoordinator_start(AppCoordinator *coordinator, time_t now, time_t weekStart) {
     coordinator->tabVC = [[UITabBarController alloc] init];
 
     appUserDataShared = userInfo_initFromStorage();
     if (!appUserDataShared) return;
 
-    int tzOffset = appUserData_checkTimezone(tz, time);
-    if (tzOffset != 0) {
+    int tzOffset = appUserData_checkTimezone(now);
+    if (tzOffset) {
         persistenceService_changeTimestamps(tzOffset);
     }
 

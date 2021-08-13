@@ -13,12 +13,8 @@
 #define DaySeconds 86400
 #define WeekSeconds 604800
 
-typedef enum {
-    DateSearchDirectionPrev,
-    DateSearchDirectionNext
-} DateSearchDirection;
-
-long date_calcStartOfWeek(long date, CFCalendarRef calendar, DateSearchDirection direction, bool considerToday);
+time_t date_calcStartOfWeek(time_t date);
+int date_getOffsetFromGMT(time_t date);
 
 #define date_twoYears (appUserDataShared->weekStart - 63244800)
 

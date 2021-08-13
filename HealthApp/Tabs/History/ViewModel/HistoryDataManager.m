@@ -20,6 +20,7 @@ void freeChartDataEntry(void *entry) {
 }
 
 void historyDataManager_fetchData(HistoryViewModel *model) {
+    struct tm localInfo;
     array_clear(weekData, model->data);
     int count = 0;
     NSPredicate *pred = [NSPredicate predicateWithFormat:@"weekStart > %lld AND weekStart < %lld", date_twoYears,
@@ -32,7 +33,13 @@ void historyDataManager_fetchData(HistoryViewModel *model) {
 
     for (int i = 0; i < count; ++i) {
         WeeklyData *d = data[i];
-        HistoryWeekDataModel m = {.weekStart = d.weekStart, .totalWorkouts = d.totalWorkouts,
+        time_t timestamp = d.weekStart;
+        localtime_r(&timestamp, &localInfo);
+        HistoryWeekDataModel m = {
+            .year = localInfo.tm_year % 100,
+            .month = localInfo.tm_mon,
+            .day = localInfo.tm_mday,
+            .totalWorkouts = d.totalWorkouts,
             .weightArray = {d.bestSquat, d.bestPullup, d.bestBench, d.bestDeadlift},
             .durationByType = {d.timeStrength, d.timeHIC, d.timeSE, d.timeEndurance},
             .cumulativeDuration = {[0] = d.timeStrength}
@@ -45,6 +52,6 @@ void historyDataManager_fetchData(HistoryViewModel *model) {
     }
 }
 
-void historyDataManager_createNewEntry(Array_chartData *arr, long x, int y) {
+void historyDataManager_createNewEntry(Array_chartData *arr, int x, int y) {
     array_push_back(chartData, arr, [[ChartDataEntry alloc] initWithX:x y:y]);
 }

@@ -161,6 +161,12 @@ UIView *createChartSeparator(CFStringRef title) {
 - (id) initWithFormatter: (NSObject<ChartAxisValueFormatter>*) xAxisFormatter;
 @end
 
+typedef struct {
+    char *months[2][12];
+    XAxisFormatType formatType;
+    CFStringRef currString;
+} HistoryXAxisFormatter;
+
 @interface TotalWorkoutsChartView() {
     @public ChartDefaultValueFormatter *valueFormatter;
     @public LineChartView *chartView;
@@ -202,14 +208,17 @@ UIView *createChartSeparator(CFStringRef title) {
 - (id) initWithDelegate: (HistoryTabCoordinator *)_delegate {
     if (!(self = [super initWithNibName:nil bundle:nil])) return nil;
     viewModel = &_delegate->viewModel;
-    CFLocaleRef locale = CFLocaleCopyCurrent();
-    formatter.formatter = CFDateFormatterCreate(NULL, locale, kCFDateFormatterNoStyle, kCFDateFormatterNoStyle);
-    CFRelease(locale);
+
+    memcpy(formatter.months[0],
+           (char*[]){"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"},
+           12 * sizeof(char *));
+    memcpy(formatter.months[1],
+           (char*[]){"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"},
+           12 * sizeof(char *));
     return self;
 }
 
 - (void) dealloc {
-    CFRelease(formatter.formatter);
     if (formatter.currString) CFRelease(formatter.currString);
     [rangePicker release];
     [gradientChart release];
@@ -276,7 +285,7 @@ UIView *createChartSeparator(CFStringRef title) {
     [scrollView release];
 
     historyDataManager_fetchData(viewModel);
-    historyViewModel_formatDataForTimeRange(viewModel, 0, &formatter);
+    formatter.formatType = historyViewModel_formatDataForTimeRange(viewModel, 0);
     [self updateCharts];
 
     AppDelegate *app = (AppDelegate *) UIApplication.sharedApplication.delegate;
@@ -284,13 +293,13 @@ UIView *createChartSeparator(CFStringRef title) {
 }
 
 - (void) updateSelectedSegment: (UISegmentedControl *)sender {
-    historyViewModel_formatDataForTimeRange(viewModel, (int) sender.selectedSegmentIndex, &formatter);
+    formatter.formatType = historyViewModel_formatDataForTimeRange(viewModel, (int) sender.selectedSegmentIndex);
     [self updateCharts];
 }
 
 - (void) performForegroundUpdate {
     rangePicker.selectedSegmentIndex = 0;
-    historyViewModel_formatDataForTimeRange(viewModel, 0, &formatter);
+    formatter.formatType = historyViewModel_formatDataForTimeRange(viewModel, 0);
     [self updateCharts];
 }
 
@@ -302,14 +311,14 @@ UIView *createChartSeparator(CFStringRef title) {
         return;
     }
 
-    const int count = (int) viewModel->gradientChartViewModel.entries->size;
+    const int count = viewModel->gradientChartViewModel.entries->size;
     const bool isSmall = count < SmallDataSetCutoff;
 
     {
         HistoryGradientChartViewModel *vm = &viewModel->gradientChartViewModel;
         gradientChart->limitLine.limit = vm->avgWorkouts;
         ChartDataEntry **entries = getChartEntriesFromArray(vm->entries);
-        CFStringRef label = CFStringCreateWithFormat(NULL, NULL, vm->legendLabelFormat, vm->avgWorkouts);
+        CFStringRef label = CFStringCreateWithFormat(NULL, NULL, CFSTR("Avg Workouts (%.2f)"), vm->avgWorkouts);
         updateDataSet(isSmall, count, gradientChart->dataSet, entries, gradientChart->legendEntries[0], label);
         updateChart(isSmall, count, gradientChart->chartView, gradientChart->chartData, max(1.1 * vm->maxWorkouts, 7));
         [gradientChart->chartData setValueFormatter:gradientChart->valueFormatter];
@@ -351,9 +360,14 @@ UIView *createChartSeparator(CFStringRef title) {
         CFRelease(formatter.currString);
         formatter.currString = NULL;
     }
-    CFDateRef date = CFDateCreate(NULL, (long) value * DaySeconds + formatter.refTime);
-    formatter.currString = CFDateFormatterCreateStringWithDate(NULL, formatter.formatter, date);
-    CFRelease(date);
+    const HistoryWeekDataModel *model = &viewModel->data->arr[(int) value];
+    if (formatter.formatType == FormatShort) {
+        formatter.currString = CFStringCreateWithFormat(NULL, NULL, CFSTR("%s %d"),
+                                                        formatter.months[0][model->month], model->day);
+    } else {
+        formatter.currString = CFStringCreateWithFormat(NULL, NULL, CFSTR("%s/%d/%d"),
+                                                        formatter.months[1][model->month], model->day, model->year);
+    }
     return (__bridge NSString*) formatter.currString;
 }
 @end

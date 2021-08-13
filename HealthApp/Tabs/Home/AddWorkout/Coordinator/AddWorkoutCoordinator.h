@@ -13,7 +13,8 @@
 
 typedef struct {
     Workout *workout;
-    long startTime, stopTime;
+    time_t startTime;
+    time_t stopTime;
 } AddWorkoutViewModel;
 
 typedef struct {

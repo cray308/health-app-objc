@@ -89,7 +89,7 @@ void buildWorkoutFromDict(CFDictionaryRef dict, int index, unsigned char type, i
     ExerciseEntry *e;
     switch (type) {
         case WorkoutTypeStrength: ;
-            int nExercises = (int) exercises->size;
+            int nExercises = exercises->size;
             double weightMultiplier = (double) weight / 100.0;
             array_iter(exercises, e) {
                 e->sets = sets;
@@ -198,15 +198,15 @@ CFStringRef *exerciseManager_getWorkoutNamesForType(unsigned char type, int *siz
     CFDictionaryRef root = workoutJsonDictionaryCreate();
     CFDictionaryRef lib = CFDictionaryGetValue(root, libraryKey);
 
-    long len = 0;
+    int len = 0;
     CFArrayRef libArr = getLibraryArrayForType(lib, type);
-    if (!(libArr && (len = CFArrayGetCount(libArr)))) goto cleanup;
+    if (!(libArr && (len = (int) CFArrayGetCount(libArr)))) goto cleanup;
 
     if (type == WorkoutTypeStrength) len = 2;
 
     results = calloc(len, sizeof(CFStringRef));
     *size = (int) len;
-    for (long i = 0; i < len; ++i) {
+    for (int i = 0; i < len; ++i) {
         CFDictionaryRef week = CFArrayGetValueAtIndex(libArr, i);
         CFStringRef title = CFDictionaryGetValue(week, titleKey);
         results[i] = CFStringCreateCopy(NULL, title);

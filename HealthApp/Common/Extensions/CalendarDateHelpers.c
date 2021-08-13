@@ -7,37 +7,30 @@
 
 #include "CalendarDateHelpers.h"
 
-static inline long getStartOfDay(CFCalendarRef calendar, long date) {
-    double result = 0;
-    CFCalendarGetTimeRangeOfUnit(calendar, kCFCalendarUnitDay, date, &result, NULL);
-    return result;
+static inline time_t getStartOfDay(time_t date, struct tm *info) {
+    const int seconds = (info->tm_hour * 3600) + (info->tm_min * 60) + info->tm_sec;
+    return date - seconds;
 }
 
-static inline int getDayOfWeek(long date, CFCalendarRef calendar) {
-    return (int) CFCalendarGetOrdinalityOfUnit(calendar, kCFCalendarUnitWeekday, kCFCalendarUnitWeekOfYear, date);
-}
+time_t date_calcStartOfWeek(time_t date) {
+    struct tm localInfo;
+    localtime_r(&date, &localInfo);
+    int weekday = localInfo.tm_wday;
 
-long date_calcStartOfWeek(long date, CFCalendarRef calendar, DateSearchDirection direction, bool considerToday) {
-    int weekday = getDayOfWeek(date, calendar);
+    if (weekday == 1) return getStartOfDay(date, &localInfo);
 
-    if (considerToday && weekday == 2) return getStartOfDay(calendar, date);
-
-    long result = direction == DateSearchDirectionNext ? date + WeekSeconds : date - WeekSeconds;
-    weekday = getDayOfWeek(result, calendar);
-
-    switch (direction) {
-        case DateSearchDirectionNext:
-            while (weekday != 2) {
-                result -= DaySeconds;
-                weekday = weekday == 1 ? 7 : weekday - 1;
-            }
-            break;
-        case DateSearchDirectionPrev:
-            while (weekday != 2) {
-                result += DaySeconds;
-                weekday = weekday == 7 ? 1 : weekday + 1;
-            }
-            break;
+    date -= WeekSeconds;
+    while (weekday != 1) {
+        date += DaySeconds;
+        weekday = weekday == 6 ? 0 : weekday + 1;
     }
-    return getStartOfDay(calendar, result);
+    localtime_r(&date, &localInfo);
+    return getStartOfDay(date, &localInfo);
+}
+
+int date_getOffsetFromGMT(time_t date) {
+    struct tm gmtInfo;
+    gmtime_r(&date, &gmtInfo);
+    gmtInfo.tm_isdst = -1;
+    return (int) (date - mktime(&gmtInfo));
 }

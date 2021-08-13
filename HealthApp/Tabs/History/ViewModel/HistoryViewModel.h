@@ -12,7 +12,9 @@
 #include "array.h"
 
 typedef struct {
-    long weekStart;
+    int year;
+    int month;
+    int day;
     int totalWorkouts;
     int durationByType[4];
     int cumulativeDuration[4];
@@ -22,15 +24,13 @@ typedef struct {
 gen_array_headers(weekData, HistoryWeekDataModel)
 gen_array_headers(chartData, void*)
 
-typedef struct {
-    long refTime;
-    CFDateFormatterRef formatter;
-    CFStringRef currString;
-} HistoryXAxisFormatter;
+typedef enum {
+    FormatShort,
+    FormatLong
+} XAxisFormatType;
 
 typedef struct {
     Array_chartData *entries;
-    CFStringRef legendLabelFormat;
     int totalWorkouts;
     int maxWorkouts;
     double avgWorkouts;
@@ -59,6 +59,6 @@ typedef struct {
 
 void historyViewModel_init(HistoryViewModel *model);
 void historyViewModel_free(HistoryViewModel *model);
-void historyViewModel_formatDataForTimeRange(HistoryViewModel *model, int index, HistoryXAxisFormatter *formatter);
+XAxisFormatType historyViewModel_formatDataForTimeRange(HistoryViewModel *this, int index);
 
 #endif /* HistoryViewModel_h */

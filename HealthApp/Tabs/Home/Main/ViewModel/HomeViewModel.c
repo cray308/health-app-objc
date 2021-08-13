@@ -34,25 +34,26 @@ void homeViewModel_free(HomeViewModel *model) {
 
 void homeViewModel_fetchData(HomeViewModel *model) {
     clearNames(model->workoutNames);
-    if (appUserDataShared->currentPlan >= 0 && appUserDataShared->planStart <= (long) CFAbsoluteTimeGetCurrent()) {
+    if (appUserDataShared->currentPlan >= 0 && appUserDataShared->planStart <= time(NULL)) {
         unsigned char plan = (unsigned char) appUserDataShared->currentPlan;
         exerciseManager_setWeeklyWorkoutNames(plan, appUserData_getWeekInPlan(), model->workoutNames);
     }
 }
 
 bool homeViewModel_updateTimeOfDay(HomeViewModel *model) {
-    CFCalendarRef calendar = CFCalendarCopyCurrent();
+    struct tm localInfo;
+    time_t now = time(NULL);
+    localtime_r(&now, &localInfo);
     int timeOfDay = model->timeOfDay;
-    int hour = (int) CFCalendarGetOrdinalityOfUnit(calendar, kCFCalendarUnitHour, kCFCalendarUnitDay,
-                                                   CFAbsoluteTimeGetCurrent());
-    CFRelease(calendar);
-    if (hour >= 6 && hour < 13 && timeOfDay != Morning) {
+    int hour = localInfo.tm_hour;
+
+    if (hour >= 5 && hour < 12 && timeOfDay != Morning) {
         model->timeOfDay = Morning;
         return true;
-    } else if (hour >= 13 && hour < 18 && timeOfDay != Afternoon) {
+    } else if (hour >= 12 && hour < 17 && timeOfDay != Afternoon) {
         model->timeOfDay = Afternoon;
         return true;
-    } else if ((hour < 6 || hour >= 18) && timeOfDay != Evening) {
+    } else if ((hour < 5 || hour >= 17) && timeOfDay != Evening) {
         model->timeOfDay = Evening;
         return true;
     }

@@ -52,7 +52,9 @@ void persistenceService_performForegroundUpdate(void) {
 
     WeeklyData *last = data[count - 1];
 
-    for (long currStart = last.weekStart + WeekSeconds; currStart < appUserDataShared->weekStart; currStart += WeekSeconds) {
+    for (time_t currStart = last.weekStart + WeekSeconds;
+         currStart < appUserDataShared->weekStart;
+         currStart += WeekSeconds) {
         WeeklyData *curr = [[WeeklyData alloc] initWithContext:persistenceServiceShared.viewContext];
         curr.weekStart = currStart;
         curr.bestBench = last.bestBench;

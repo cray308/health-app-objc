@@ -1,15 +1,6 @@
-//
-//  hash.h
-//  HealthApp
-//
-//  Created by Christopher Ray on 7/25/21.
-//
+#ifndef DS_MURMURHASH_H
+#define DS_MURMURHASH_H
 
-#ifndef hash_h
-#define hash_h
+unsigned murmurhash(const void *key, int len, unsigned seed);
 
-#include <stdint.h>
-
-size_t murmurhash(const void *key, int len, uint32_t seed);
-
-#endif /* hash_h */
+#endif /* DS_MURMURHASH_H */

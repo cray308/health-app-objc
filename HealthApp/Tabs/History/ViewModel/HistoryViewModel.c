@@ -34,7 +34,6 @@ void historyViewModel_init(HistoryViewModel *this) {
     }
     {
         HistoryGradientChartViewModel *vm = &this->gradientChartViewModel;
-        vm->legendLabelFormat = CFSTR("Avg Workouts (%.2f)");
         vm->entries = array_new(chartData);
     }
     this->data = array_new(weekData);
@@ -51,7 +50,7 @@ void historyViewModel_free(HistoryViewModel *this) {
     array_free(weekData, this->data);
 }
 
-void historyViewModel_formatDataForTimeRange(HistoryViewModel *this, int index, HistoryXAxisFormatter *formatter) {
+XAxisFormatType historyViewModel_formatDataForTimeRange(HistoryViewModel *this, int index) {
     {
         HistoryAreaChartViewModel *vm = &this->areaChartViewModel;
         vm->maxActivityTime = 0;
@@ -75,7 +74,7 @@ void historyViewModel_formatDataForTimeRange(HistoryViewModel *this, int index, 
     }
 
     int size = 0;
-    if (!(size = (array_size(this->data)))) return;
+    if (!(size = (this->data->size))) return FormatShort;
 
     int startIndex = 0;
     if (index == 0) {
@@ -87,13 +86,9 @@ void historyViewModel_formatDataForTimeRange(HistoryViewModel *this, int index, 
     if (startIndex < 0) startIndex = 0;
 
     HistoryWeekDataModel *arr = this->data->arr;
-    long referenceTime = arr[startIndex].weekStart;
-    formatter->refTime = referenceTime;
-    CFDateFormatterSetFormat(formatter->formatter, (size - startIndex) < 7 ? CFSTR("MMM dd") : CFSTR("M/d/yy"));
 
     for (int i = startIndex; i < size; ++i) {
         HistoryWeekDataModel *e = &arr[i];
-        long xValue = (e->weekStart - referenceTime) / DaySeconds;
 
         {
             HistoryGradientChartViewModel *vm = &this->gradientChartViewModel;
@@ -101,30 +96,30 @@ void historyViewModel_formatDataForTimeRange(HistoryViewModel *this, int index, 
             vm->totalWorkouts += workouts;
             if (workouts > vm->maxWorkouts) vm->maxWorkouts = workouts;
 
-            historyDataManager_createNewEntry(vm->entries, xValue, workouts);
+            historyDataManager_createNewEntry(vm->entries, i, workouts);
         }
         {
             HistoryAreaChartViewModel *vm = &this->areaChartViewModel;
-            for (int i = 0; i < 4; ++i) {
-                vm->totalByType[i] += e->durationByType[i];
+            for (int j = 0; j < 4; ++j) {
+                vm->totalByType[j] += e->durationByType[j];
             }
 
             if (e->cumulativeDuration[3] > vm->maxActivityTime) {
                 vm->maxActivityTime = e->cumulativeDuration[3];
             }
 
-            historyDataManager_createNewEntry(vm->entries[0], xValue, 0);
-            for (int i = 1; i < 5; ++i) {
-                historyDataManager_createNewEntry(vm->entries[i], xValue, e->cumulativeDuration[i - 1]);
+            historyDataManager_createNewEntry(vm->entries[0], i, 0);
+            for (int j = 1; j < 5; ++j) {
+                historyDataManager_createNewEntry(vm->entries[j], i, e->cumulativeDuration[j - 1]);
             }
         }
         {
             HistoryLiftChartViewModel *vm = &this->liftChartViewModel;
-            for (int i = 0; i < 4; ++i) {
-                int w = e->weightArray[i];
-                vm->totalByExercise[i] += w;
+            for (int j = 0; j < 4; ++j) {
+                int w = e->weightArray[j];
+                vm->totalByExercise[j] += w;
                 if (w > vm->maxWeight) vm->maxWeight = w;
-                historyDataManager_createNewEntry(vm->entries[i], xValue, w);
+                historyDataManager_createNewEntry(vm->entries[j], i, w);
             }
         }
     }
@@ -134,4 +129,5 @@ void historyViewModel_formatDataForTimeRange(HistoryViewModel *this, int index, 
         HistoryGradientChartViewModel *vm = &this->gradientChartViewModel;
         vm->avgWorkouts = (double) vm->totalWorkouts / (size - startIndex);
     }
+    return (size - startIndex) < 7 ? FormatShort : FormatLong;
 }

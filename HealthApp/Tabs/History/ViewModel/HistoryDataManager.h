@@ -12,6 +12,6 @@
 
 void freeChartDataEntry(void *entry);
 void historyDataManager_fetchData(HistoryViewModel *model);
-void historyDataManager_createNewEntry(Array_chartData *arr, long x, int y);
+void historyDataManager_createNewEntry(Array_chartData *arr, int x, int y);
 
 #endif /* HistoryDataManager_h */

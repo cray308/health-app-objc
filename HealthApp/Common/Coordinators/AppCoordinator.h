@@ -23,7 +23,7 @@ typedef struct {
 } AppCoordinator;
 
 void appCoordinator_free(AppCoordinator *coordinator);
-void appCoordinator_start(AppCoordinator *coordinator, CFTimeZoneRef tz, long time, long weekStart);
+void appCoordinator_start(AppCoordinator *coordinator, time_t now, time_t weekStart);
 
 void appCoordinator_updatedUserInfo(AppCoordinator *coordinator);
 void appCoordinator_deletedAppData(AppCoordinator *coordinator);

@@ -102,7 +102,7 @@ void addWorkoutCoordinator_finishedAddingNewWeights(AddWorkoutCoordinator *this,
 
 void addWorkoutCoordinator_stopWorkoutFromBackButtonPress(AddWorkoutCoordinator *this) {
     if (this->viewModel.startTime) {
-        this->viewModel.stopTime = CFAbsoluteTimeGetCurrent();
+        this->viewModel.stopTime = time(NULL) + 1;
         updateStoredData(&this->viewModel);
     }
     addWorkoutCoordinator_free(this);

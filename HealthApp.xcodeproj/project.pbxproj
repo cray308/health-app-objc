@@ -8,9 +8,16 @@
 
 /* Begin PBXBuildFile section */
 		6114EA752615544000B4A472 /* AreaChartRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6114EA742615544000B4A472 /* AreaChartRenderer.swift */; };
+		611B591326C5F6830082F6CA /* alg_helper.h in Headers */ = {isa = PBXBuildFile; fileRef = 611B590E26C5F6830082F6CA /* alg_helper.h */; };
+		611B591426C5F6830082F6CA /* unordered_set.h in Headers */ = {isa = PBXBuildFile; fileRef = 611B590F26C5F6830082F6CA /* unordered_set.h */; };
+		611B591526C5F6830082F6CA /* ds.h in Headers */ = {isa = PBXBuildFile; fileRef = 611B591026C5F6830082F6CA /* ds.h */; };
+		611B591626C5F6830082F6CA /* array.h in Headers */ = {isa = PBXBuildFile; fileRef = 611B591126C5F6830082F6CA /* array.h */; };
+		611B591726C5F6830082F6CA /* hash_table.h in Headers */ = {isa = PBXBuildFile; fileRef = 611B591226C5F6830082F6CA /* hash_table.h */; };
 		612FD048266DAF25002C9993 /* WorkoutData.plist in Resources */ = {isa = PBXBuildFile; fileRef = 612FD047266DAF25002C9993 /* WorkoutData.plist */; };
 		614DC13026082BBE00B9588E /* ViewControllerHelpers.m in Sources */ = {isa = PBXBuildFile; fileRef = 614DC12F26082BBE00B9588E /* ViewControllerHelpers.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		6151A323260F012300D88F1B /* CalendarDateHelpers.c in Sources */ = {isa = PBXBuildFile; fileRef = 6151A322260F012300D88F1B /* CalendarDateHelpers.c */; };
+		6151C91126C4B23200C95A93 /* hash.h in Headers */ = {isa = PBXBuildFile; fileRef = 6151C90226C4B23100C95A93 /* hash.h */; };
+		6151C92226C4B24200C95A93 /* hash.c in Sources */ = {isa = PBXBuildFile; fileRef = 6151C92026C4B24200C95A93 /* hash.c */; };
 		61594D0C26068105000D01A1 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 61594D0B26068105000D01A1 /* AppDelegate.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61594D1826068105000D01A1 /* HealthApp.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 61594D1626068105000D01A1 /* HealthApp.xcdatamodeld */; };
 		61594D1A26068106000D01A1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 61594D1926068106000D01A1 /* Assets.xcassets */; };
@@ -99,7 +106,6 @@
 		61808CBC2610FEEF00BAF7AB /* LineChartDataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61808C2F2610FEEF00BAF7AB /* LineChartDataProvider.swift */; };
 		61808CBD2610FEEF00BAF7AB /* BarLineScatterCandleBubbleChartDataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61808C302610FEEF00BAF7AB /* BarLineScatterCandleBubbleChartDataProvider.swift */; };
 		6197B5DB26ADFF0F00F97B98 /* HistoryDataManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 6197B5DA26ADFF0F00F97B98 /* HistoryDataManager.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		6197B5EF26AE314400F97B98 /* hash.c in Sources */ = {isa = PBXBuildFile; fileRef = 6197B5EE26AE314400F97B98 /* hash.c */; };
 		6197B60026AE3D5C00F97B98 /* InputValidator.h in Headers */ = {isa = PBXBuildFile; fileRef = 6197B5FE26AE3D5B00F97B98 /* InputValidator.h */; };
 		6197B60126AE3D5C00F97B98 /* InputValidator.c in Sources */ = {isa = PBXBuildFile; fileRef = 6197B5FF26AE3D5C00F97B98 /* InputValidator.c */; };
 		61BC6F55266EA9A80022D6F7 /* WeeklyData+CoreDataClass.h in Headers */ = {isa = PBXBuildFile; fileRef = 61BC6F51266EA9A80022D6F7 /* WeeklyData+CoreDataClass.h */; };
@@ -128,13 +134,18 @@
 
 /* Begin PBXFileReference section */
 		6114EA742615544000B4A472 /* AreaChartRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AreaChartRenderer.swift; sourceTree = "<group>"; };
-		6121523026690C94002BFA52 /* unordered_set.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = unordered_set.h; sourceTree = "<group>"; };
-		6121523126690CA6002BFA52 /* hash_table.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = hash_table.h; sourceTree = "<group>"; };
+		611B590E26C5F6830082F6CA /* alg_helper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alg_helper.h; sourceTree = "<group>"; };
+		611B590F26C5F6830082F6CA /* unordered_set.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = unordered_set.h; sourceTree = "<group>"; };
+		611B591026C5F6830082F6CA /* ds.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ds.h; sourceTree = "<group>"; };
+		611B591126C5F6830082F6CA /* array.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = array.h; sourceTree = "<group>"; };
+		611B591226C5F6830082F6CA /* hash_table.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hash_table.h; sourceTree = "<group>"; };
 		612FD047266DAF25002C9993 /* WorkoutData.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = WorkoutData.plist; sourceTree = "<group>"; };
 		614DC12826081E9E00B9588E /* ViewControllerHelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewControllerHelpers.h; sourceTree = "<group>"; };
 		614DC12F26082BBE00B9588E /* ViewControllerHelpers.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewControllerHelpers.m; sourceTree = "<group>"; };
 		6151A321260F010F00D88F1B /* CalendarDateHelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CalendarDateHelpers.h; sourceTree = "<group>"; };
 		6151A322260F012300D88F1B /* CalendarDateHelpers.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = CalendarDateHelpers.c; sourceTree = "<group>"; };
+		6151C90226C4B23100C95A93 /* hash.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hash.h; sourceTree = "<group>"; };
+		6151C92026C4B24200C95A93 /* hash.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = hash.c; sourceTree = "<group>"; };
 		61594D0726068105000D01A1 /* HealthApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HealthApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		61594D0A26068105000D01A1 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		61594D0B26068105000D01A1 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -235,14 +246,8 @@
 		61808C2C2610FEEF00BAF7AB /* ChartDataProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartDataProvider.swift; sourceTree = "<group>"; };
 		61808C2F2610FEEF00BAF7AB /* LineChartDataProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LineChartDataProvider.swift; sourceTree = "<group>"; };
 		61808C302610FEEF00BAF7AB /* BarLineScatterCandleBubbleChartDataProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BarLineScatterCandleBubbleChartDataProvider.swift; sourceTree = "<group>"; };
-		61808D402611274000BAF7AB /* ds.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ds.h; sourceTree = "<group>"; };
-		61808D412611275400BAF7AB /* array.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = array.h; sourceTree = "<group>"; };
-		61808D422611287100BAF7AB /* iterator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = iterator.h; sourceTree = "<group>"; };
-		61808D432611288300BAF7AB /* alg_helper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = alg_helper.h; sourceTree = "<group>"; };
 		6197B5DA26ADFF0F00F97B98 /* HistoryDataManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HistoryDataManager.m; sourceTree = "<group>"; };
 		6197B5DE26ADFF2000F97B98 /* HistoryDataManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HistoryDataManager.h; sourceTree = "<group>"; };
-		6197B5ED26AE312500F97B98 /* hash.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = hash.h; sourceTree = "<group>"; };
-		6197B5EE26AE314400F97B98 /* hash.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = hash.c; sourceTree = "<group>"; };
 		6197B5FE26AE3D5B00F97B98 /* InputValidator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = InputValidator.h; sourceTree = "<group>"; };
 		6197B5FF26AE3D5C00F97B98 /* InputValidator.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = InputValidator.c; sourceTree = "<group>"; };
 		61BC6F51266EA9A80022D6F7 /* WeeklyData+CoreDataClass.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "WeeklyData+CoreDataClass.h"; sourceTree = "<group>"; };
@@ -553,14 +558,13 @@
 		61808D3F261126CF00BAF7AB /* DataStructures */ = {
 			isa = PBXGroup;
 			children = (
-				61808D432611288300BAF7AB /* alg_helper.h */,
-				61808D412611275400BAF7AB /* array.h */,
-				61808D402611274000BAF7AB /* ds.h */,
-				6197B5ED26AE312500F97B98 /* hash.h */,
-				6197B5EE26AE314400F97B98 /* hash.c */,
-				6121523126690CA6002BFA52 /* hash_table.h */,
-				61808D422611287100BAF7AB /* iterator.h */,
-				6121523026690C94002BFA52 /* unordered_set.h */,
+				611B590E26C5F6830082F6CA /* alg_helper.h */,
+				611B591126C5F6830082F6CA /* array.h */,
+				611B591026C5F6830082F6CA /* ds.h */,
+				611B591226C5F6830082F6CA /* hash_table.h */,
+				6151C92026C4B24200C95A93 /* hash.c */,
+				6151C90226C4B23100C95A93 /* hash.h */,
+				611B590F26C5F6830082F6CA /* unordered_set.h */,
 			);
 			path = DataStructures;
 			sourceTree = "<group>";
@@ -784,8 +788,14 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6151C91126C4B23200C95A93 /* hash.h in Headers */,
+				611B591326C5F6830082F6CA /* alg_helper.h in Headers */,
 				6197B60026AE3D5C00F97B98 /* InputValidator.h in Headers */,
 				61BC6F55266EA9A80022D6F7 /* WeeklyData+CoreDataClass.h in Headers */,
+				611B591426C5F6830082F6CA /* unordered_set.h in Headers */,
+				611B591726C5F6830082F6CA /* hash_table.h in Headers */,
+				611B591526C5F6830082F6CA /* ds.h in Headers */,
+				611B591626C5F6830082F6CA /* array.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -899,6 +909,7 @@
 				61808C782610FEEF00BAF7AB /* Platform+Graphics.swift in Sources */,
 				61808C8B2610FEEF00BAF7AB /* ViewPortJob.swift in Sources */,
 				61808C852610FEEF00BAF7AB /* XAxis.swift in Sources */,
+				6151C92226C4B24200C95A93 /* hash.c in Sources */,
 				61808C822610FEEF00BAF7AB /* LegendEntry.swift in Sources */,
 				61808C6F2610FEEF00BAF7AB /* ValueFormatter.swift in Sources */,
 				61808C7A2610FEEF00BAF7AB /* Platform.swift in Sources */,
@@ -985,7 +996,6 @@
 				61594D652606C7C6000D01A1 /* AppUserData.c in Sources */,
 				614DC13026082BBE00B9588E /* ViewControllerHelpers.m in Sources */,
 				61C7793626102C19001326A1 /* HistoryTabCoordinator.m in Sources */,
-				6197B5EF26AE314400F97B98 /* hash.c in Sources */,
 				61C7797C26102D5F001326A1 /* HomeTabCoordinator.m in Sources */,
 				61594D0C26068105000D01A1 /* AppDelegate.m in Sources */,
 				61C779A426102E20001326A1 /* AddWorkoutCoordinator.m in Sources */,
@@ -1159,7 +1169,6 @@
 					"-Wall",
 					"-Wextra",
 					"-Wstrict-prototypes",
-					"-funsigned-char",
 					"-fconstant-cfstrings",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = cray2.HealthApp;
@@ -1196,7 +1205,6 @@
 					"-Wall",
 					"-Wextra",
 					"-Wstrict-prototypes",
-					"-funsigned-char",
 					"-finline-functions",
 				);
 				OTHER_CPLUSPLUSFLAGS = (
@@ -1204,7 +1212,6 @@
 					"-Wall",
 					"-Wextra",
 					"-Werror",
-					"-funsigned-char",
 					"-finline-functions",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = cray2.HealthApp;
