@@ -31,14 +31,15 @@ void setupData(time_t now, time_t weekStart);
     [super dealloc];
 }
 
-- (BOOL) application: (UIApplication *)application didFinishLaunchingWithOptions: (NSDictionary *)launchOptions {
+- (BOOL) application: (UIApplication *)application
+didFinishLaunchingWithOptions: (NSDictionary *)launchOptions {
     window = [[UIWindow alloc] initWithFrame:UIScreen.mainScreen.bounds];
 
     bool hasLaunched = [NSUserDefaults.standardUserDefaults boolForKey:@"hasLaunched"];
 
     persistenceServiceShared = [[NSPersistentContainer alloc] initWithName:@"HealthApp"];
-    [persistenceServiceShared
-     loadPersistentStoresWithCompletionHandler: ^(NSPersistentStoreDescription *description _U_, NSError *error _U_) {}];
+    [persistenceServiceShared loadPersistentStoresWithCompletionHandler:
+     ^(NSPersistentStoreDescription *description _U_, NSError *error _U_) {}];
 
     time_t now = time(NULL);
     time_t weekStart = date_calcStartOfWeek(now);
@@ -72,7 +73,8 @@ void setupData(time_t now, time_t weekStart) {
     time_t end = date_calcStartOfWeek(time(NULL) - 2678400);
 
     while (start < end) {
-        WeeklyData *data = [[WeeklyData alloc] initWithContext:persistenceServiceShared.viewContext];
+        WeeklyData *data = [[WeeklyData alloc]
+                            initWithContext:persistenceServiceShared.viewContext];
         data.weekStart = start;
 
         if (plan == 0) {
@@ -144,6 +146,8 @@ void setupData(time_t now, time_t weekStart) {
 #endif
 
     [NSUserDefaults.standardUserDefaults setBool:true forKey:@"hasLaunched"];
-    UserInfo info = {.currentPlan = -1, .weekStart = weekStart, .tzOffset = date_getOffsetFromGMT(now)};
+    UserInfo info = {
+        .currentPlan = -1, .weekStart = weekStart, .tzOffset = date_getOffsetFromGMT(now)
+    };
     userInfo_saveData(&info);
 }

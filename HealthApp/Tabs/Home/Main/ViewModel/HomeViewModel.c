@@ -18,14 +18,12 @@ void clearNames(CFStringRef *names) {
 }
 
 void homeViewModel_init(HomeViewModel *model) {
+    memcpy(model->weekdays, (CFStringRef []){
+        CFSTR("Monday"), CFSTR("Tuesday"), CFSTR("Wednesday"), CFSTR("Thursday"), CFSTR("Friday"),
+        CFSTR("Saturday"), CFSTR("Sunday")}, 7 * sizeof(CFStringRef));
+    memcpy(model->timeNames, (char [][10]){"morning", "afternoon", "evening"}, 30);
+
     homeViewModel_updateTimeOfDay(model);
-
-    CFStringRef weekdays[] = {CFSTR("Monday"), CFSTR("Tuesday"), CFSTR("Wednesday"), CFSTR("Thursday"), CFSTR("Friday"),
-        CFSTR("Saturday"), CFSTR("Sunday")};
-    CFStringRef greetings[] = {CFSTR("Good morning!"), CFSTR("Good afternoon!"), CFSTR("Good evening!")};
-
-    for (int i = 0; i < 7; ++i) model->weekdays[i] = weekdays[i];
-    for (int i = 0; i < 3; ++i) model->greetings[i] = greetings[i];
 }
 
 void homeViewModel_free(HomeViewModel *model) {
@@ -36,7 +34,8 @@ void homeViewModel_fetchData(HomeViewModel *model) {
     clearNames(model->workoutNames);
     if (appUserDataShared->currentPlan >= 0 && appUserDataShared->planStart <= time(NULL)) {
         unsigned char plan = (unsigned char) appUserDataShared->currentPlan;
-        exerciseManager_setWeeklyWorkoutNames(plan, appUserData_getWeekInPlan(), model->workoutNames);
+        exerciseManager_setWeeklyWorkoutNames(plan,
+                                              appUserData_getWeekInPlan(), model->workoutNames);
     }
 }
 

@@ -41,7 +41,8 @@ void updateUI(HomeTabCoordinator *this, unsigned char updates) {
 }
 
 void navigateToAddWorkout(HomeTabCoordinator *this, bool dismissVC, Workout *workout) {
-    if (dismissVC) [this->navigationController.viewControllers[0] dismissViewControllerAnimated:true completion:nil];
+    if (dismissVC) [this->navigationController.viewControllers[0]
+                    dismissViewControllerAnimated:true completion:nil];
     AddWorkoutCoordinator *child = malloc(sizeof(AddWorkoutCoordinator));
     if (!child) return;
 
@@ -69,14 +70,16 @@ void homeCoordinator_didFinishAddingWorkout(HomeTabCoordinator *this, int totalC
     HomeViewController *homeVC = getHomeViewController(this->navigationController);
     [homeVC updateWorkoutsList];
 
-    const bool showConfetti = homeViewModel_shouldShowConfetti(&this->viewModel, totalCompletedWorkouts);
+    const bool showConfetti = homeViewModel_shouldShowConfetti(&this->viewModel,
+                                                               totalCompletedWorkouts);
 
     addWorkoutCoordinator_free(this->childCoordinator);
     this->childCoordinator = NULL;
     [this->navigationController popViewControllerAnimated:true];
 
     if (showConfetti) {
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 0.75), dispatch_get_main_queue(), ^ (void) {
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 0.75),
+                       dispatch_get_main_queue(), ^ (void) {
             [homeVC showConfetti];
         });
     }
@@ -115,16 +118,18 @@ void homeCoordinator_addWorkoutFromCustomButton(HomeTabCoordinator *this, int in
         return;
     }
 
-    UIViewController *modal = [[HomeSetupWorkoutModalViewController alloc] initWithDelegate:this type:type names:names
-                                                                                      count:count];
-    UINavigationController *container = [[UINavigationController alloc] initWithRootViewController:modal];
-    [this->navigationController.viewControllers[0] presentViewController:container animated:true completion:nil];
+    UIViewController *modal = [[HomeSetupWorkoutModalViewController alloc]
+                               initWithDelegate:this type:type names:names count:count];
+    UINavigationController *container = [[UINavigationController alloc]
+                                         initWithRootViewController:modal];
+    [this->navigationController.viewControllers[0] presentViewController:container animated:true
+                                                              completion:nil];
     [container release];
     [modal release];
 }
 
-void homeCoordinator_finishedSettingUpCustomWorkout(HomeTabCoordinator *this, unsigned char type, int index, int sets,
-                                                    int reps, int weight) {
+void homeCoordinator_finishedSettingUpCustomWorkout(HomeTabCoordinator *this, unsigned char type,
+                                                    int index, int sets, int reps, int weight) {
     Workout *w = exerciseManager_getWorkoutFromLibrary(type, index, reps, sets, weight);
     if (w) navigateToAddWorkout(this, true, w);
 }

@@ -12,7 +12,10 @@
 #include "HistoryDataManager.h"
 
 #define SmallDataSetCutoff 7
-#define HistoryChartColors {[UIColor colorNamed:@"chartBlue"], [UIColor colorNamed:@"chartGreen"], [UIColor colorNamed:@"chartOrange"], [UIColor colorNamed:@"chartPink"]}
+#define HistoryChartColors { \
+    [UIColor colorNamed:@"chartBlue"], [UIColor colorNamed:@"chartGreen"], \
+    [UIColor colorNamed:@"chartOrange"], [UIColor colorNamed:@"chartPink"] \
+}
 
 ChartLegendEntry *createLegendEntry(UIColor *color) {
     ChartLegendEntry *entry = [[ChartLegendEntry alloc] initWithLabel:@""];
@@ -27,7 +30,8 @@ ChartDataEntry **getChartEntriesFromArray(Array_chartData *a) {
     return (ChartDataEntry **) a->arr;
 }
 
-void setupChartCommon(LineChartView *v, UIView *parent, NSObject<ChartAxisValueFormatter> *xAxisFormatter,
+void setupChartCommon(LineChartView *v, UIView *parent,
+                      NSObject<ChartAxisValueFormatter> *xAxisFormatter,
                       NSArray<ChartLegendEntry*> *legendEntries, int height) {
     v.translatesAutoresizingMaskIntoConstraints = false;
     v.noDataText = @"No data is available";
@@ -82,10 +86,7 @@ void updateLineChartLegendWidth(LineChartView *v, int width) {
 }
 
 NSString *getDurationStringForAreaChart(CFStringRef *str, int minutes) {
-    if (*str) {
-        CFRelease(*str);
-        *str = NULL;
-    }
+    CFRelease(*str);
     if (!minutes) {
         *str = CFStringCreateCopy(NULL, CFSTR(""));
     } else if (minutes < 60) {
@@ -104,7 +105,8 @@ void updateDataSet(bool isSmall, int count, LineChartDataSet *dataSet, ChartData
     CFRelease(labelString);
 }
 
-void updateChart(bool isSmall, int count, LineChartView *view, LineChartData *data, double axisMax) {
+void updateChart(bool isSmall, int count,
+                 LineChartView *view, LineChartData *data, double axisMax) {
     [data setDrawValues:isSmall];
 
     view.leftAxis.axisMaximum = axisMax;
@@ -161,12 +163,6 @@ UIView *createChartSeparator(CFStringRef title) {
 - (id) initWithFormatter: (NSObject<ChartAxisValueFormatter>*) xAxisFormatter;
 @end
 
-typedef struct {
-    char *months[2][12];
-    XAxisFormatType formatType;
-    CFStringRef currString;
-} HistoryXAxisFormatter;
-
 @interface TotalWorkoutsChartView() {
     @public ChartDefaultValueFormatter *valueFormatter;
     @public LineChartView *chartView;
@@ -196,7 +192,12 @@ typedef struct {
 
 @interface HistoryViewController() {
     HistoryViewModel *viewModel;
-    HistoryXAxisFormatter formatter;
+    struct formatter {
+        char wordMonths[12][4];
+        char numMonths[12][3];
+        XAxisFormatType formatType;
+        CFStringRef currString;
+    } formatter;
     UISegmentedControl *rangePicker;
     TotalWorkoutsChartView *gradientChart;
     DurationAreaChartView *areaChart;
@@ -209,17 +210,16 @@ typedef struct {
     if (!(self = [super initWithNibName:nil bundle:nil])) return nil;
     viewModel = &_delegate->viewModel;
 
-    memcpy(formatter.months[0],
-           (char*[]){"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"},
-           12 * sizeof(char *));
-    memcpy(formatter.months[1],
-           (char*[]){"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"},
-           12 * sizeof(char *));
+    memcpy(formatter.wordMonths, (char [][4]){
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}, 48);
+    memcpy(formatter.numMonths,
+           (char [][3]){"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"}, 36);
+    formatter.currString = CFStringCreateCopy(NULL, CFSTR(""));
     return self;
 }
 
 - (void) dealloc {
-    if (formatter.currString) CFRelease(formatter.currString);
+    CFRelease(formatter.currString);
     [rangePicker release];
     [gradientChart release];
     [areaChart release];
@@ -236,7 +236,8 @@ typedef struct {
     rangePicker.layer.cornerRadius = 5;
     rangePicker.tintColor = UIColor.systemGray2Color;
     rangePicker.selectedSegmentIndex = 0;
-    [rangePicker addTarget:self action:@selector(updateSelectedSegment:) forControlEvents:UIControlEventValueChanged];
+    [rangePicker addTarget:self action:@selector(updateSelectedSegment:)
+          forControlEvents:UIControlEventValueChanged];
 
     UIView *gradientChartSeparator = createChartSeparator(CFSTR("Workouts Each Week"));
     gradientChart = [[TotalWorkoutsChartView alloc] initWithFormatter:self];
@@ -246,7 +247,8 @@ typedef struct {
     liftChart = [[LiftChartView alloc] initWithFormatter:self];
 
     UIStackView *vStack = [[UIStackView alloc] initWithArrangedSubviews:@[
-        rangePicker, gradientChartSeparator, gradientChart, areaChartSeparator, areaChart, liftChartSeparator, liftChart
+        rangePicker, gradientChartSeparator, gradientChart, areaChartSeparator, areaChart,
+        liftChartSeparator, liftChart
     ]];
     vStack.translatesAutoresizingMaskIntoConstraints = false;
     vStack.axis = UILayoutConstraintAxisVertical;
@@ -263,11 +265,12 @@ typedef struct {
     [scrollView addSubview:vStack];
     [vStack setCustomSpacing:20 afterView:rangePicker];
 
+    UILayoutGuide *guide = self.view.safeAreaLayoutGuide;
     [NSLayoutConstraint activateConstraints:@[
-        [scrollView.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor],
-        [scrollView.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor],
-        [scrollView.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor],
-        [scrollView.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor],
+        [scrollView.leadingAnchor constraintEqualToAnchor:guide.leadingAnchor],
+        [scrollView.trailingAnchor constraintEqualToAnchor:guide.trailingAnchor],
+        [scrollView.topAnchor constraintEqualToAnchor:guide.topAnchor],
+        [scrollView.bottomAnchor constraintEqualToAnchor:guide.bottomAnchor],
 
         [vStack.leadingAnchor constraintEqualToAnchor:scrollView.leadingAnchor],
         [vStack.trailingAnchor constraintEqualToAnchor:scrollView.trailingAnchor],
@@ -293,7 +296,8 @@ typedef struct {
 }
 
 - (void) updateSelectedSegment: (UISegmentedControl *)sender {
-    formatter.formatType = historyViewModel_formatDataForTimeRange(viewModel, (int) sender.selectedSegmentIndex);
+    int index = (int) sender.selectedSegmentIndex;
+    formatter.formatType = historyViewModel_formatDataForTimeRange(viewModel, index);
     [self updateCharts];
 }
 
@@ -313,14 +317,18 @@ typedef struct {
 
     const int count = viewModel->gradientChartViewModel.entries->size;
     const bool isSmall = count < SmallDataSetCutoff;
+    char buf[10];
 
     {
         HistoryGradientChartViewModel *vm = &viewModel->gradientChartViewModel;
         gradientChart->limitLine.limit = vm->avgWorkouts;
         ChartDataEntry **entries = getChartEntriesFromArray(vm->entries);
-        CFStringRef label = CFStringCreateWithFormat(NULL, NULL, CFSTR("Avg Workouts (%.2f)"), vm->avgWorkouts);
-        updateDataSet(isSmall, count, gradientChart->dataSet, entries, gradientChart->legendEntries[0], label);
-        updateChart(isSmall, count, gradientChart->chartView, gradientChart->chartData, max(1.1 * vm->maxWorkouts, 7));
+        CFStringRef label = CFStringCreateWithFormat(NULL, NULL, CFSTR("Avg Workouts (%.2f)"),
+                                                     vm->avgWorkouts);
+        updateDataSet(isSmall, count, gradientChart->dataSet, entries,
+                      gradientChart->legendEntries[0], label);
+        updateChart(isSmall, count, gradientChart->chartView,
+                    gradientChart->chartData, max(1.1 * vm->maxWorkouts, 7));
         [gradientChart->chartData setValueFormatter:gradientChart->valueFormatter];
     }
     {
@@ -331,42 +339,45 @@ typedef struct {
         for (int i = 1; i < 5; ++i) {
             entries = getChartEntriesFromArray(vm->entries[i]);
             int average = vm->totalByType[i - 1] / count;
-            CFStringRef suffix;
             if (average > 59) {
-                suffix = CFStringCreateWithFormat(NULL, NULL, CFSTR("%d h %d m"), average / 60, average % 60);
+                sprintf(buf, "%d h %d m", average / 60, average % 60);
             } else {
-                suffix = CFStringCreateWithFormat(NULL, NULL, CFSTR("%d m"), average);
+                sprintf(buf, "%d m", average);
             }
-            CFStringRef label = CFStringCreateWithFormat(NULL, NULL, vm->legendLabelFormats[i - 1], suffix);
-            updateDataSet(isSmall, count, areaChart->dataSets[i], entries, areaChart->legendEntries[i - 1], label);
-            CFRelease(suffix);
+            CFStringRef label = CFStringCreateWithFormat(NULL, NULL, CFSTR("%s (Avg: %s)"),
+                                                         vm->names[i - 1], buf);
+            updateDataSet(isSmall, count, areaChart->dataSets[i], entries,
+                          areaChart->legendEntries[i - 1], label);
         }
-        updateChart(isSmall, count, areaChart->chartView, areaChart->chartData, 1.1 * vm->maxActivityTime);
+        updateChart(isSmall, count, areaChart->chartView,
+                    areaChart->chartData, 1.1 * vm->maxActivityTime);
     }
     {
         HistoryLiftChartViewModel *vm = &viewModel->liftChartViewModel;
         for (int i = 0; i < 4; ++i) {
             ChartDataEntry **entries = getChartEntriesFromArray(vm->entries[i]);
             double average = (double) vm->totalByExercise[i] / (double) count;
-            CFStringRef label = CFStringCreateWithFormat(NULL, NULL, vm->legendLabelFormats[i], average);
-            updateDataSet(isSmall, count, liftChart->dataSets[i], entries, liftChart->legendEntries[i], label);
+            CFStringRef label = CFStringCreateWithFormat(NULL, NULL, CFSTR("%s (Avg: %.1f)"),
+                                                         vm->names[i], average);
+            updateDataSet(isSmall, count, liftChart->dataSets[i], entries,
+                          liftChart->legendEntries[i], label);
         }
-        updateChart(isSmall, count, liftChart->chartView, liftChart->chartData, 1.1 * vm->maxWeight);
+        updateChart(isSmall, count, liftChart->chartView, liftChart->chartData,
+                    1.1 * vm->maxWeight);
     }
 }
 
 - (NSString *_Nonnull) stringForValue: (double)value axis: (ChartAxisBase *_Nullable)axis {
-    if (formatter.currString) {
-        CFRelease(formatter.currString);
-        formatter.currString = NULL;
-    }
+    CFRelease(formatter.currString);
     const HistoryWeekDataModel *model = &viewModel->data->arr[(int) value];
     if (formatter.formatType == FormatShort) {
         formatter.currString = CFStringCreateWithFormat(NULL, NULL, CFSTR("%s %d"),
-                                                        formatter.months[0][model->month], model->day);
+                                                        formatter.wordMonths[model->month],
+                                                        model->day);
     } else {
         formatter.currString = CFStringCreateWithFormat(NULL, NULL, CFSTR("%s/%d/%d"),
-                                                        formatter.months[1][model->month], model->day, model->year);
+                                                        formatter.numMonths[model->month],
+                                                        model->day, model->year);
     }
     return (__bridge NSString*) formatter.currString;
 }
@@ -375,15 +386,17 @@ typedef struct {
 #pragma mark - Total Workouts Chart
 
 @implementation TotalWorkoutsChartView
-- (id) initWithFormatter: (NSObject<ChartAxisValueFormatter>*) xAxisFormatter {
+- (id) initWithFormatter: (NSObject<ChartAxisValueFormatter>*)xAxisFormatter {
     if (!(self = [super initWithFrame:CGRectZero])) return nil;
 
+    CGColorRef colorVals[] = {UIColor.systemRedColor.CGColor, UIColor.clearColor.CGColor};
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-    CFArrayRef colorsArray = CFArrayCreate(
-        NULL, (const void **)(CGColorRef []){UIColor.systemRedColor.CGColor, UIColor.clearColor.CGColor}, 2,
-        &kCFTypeArrayCallBacks);
-    CGGradientRef chartGradient = CGGradientCreateWithColors(colorSpace, colorsArray, (CGFloat []){0.8, 0});
-    ChartLinearGradientFill *fill = [[ChartLinearGradientFill alloc] initWithGradient:chartGradient angle:90];
+    CFArrayRef colorsArray = CFArrayCreate(NULL, (const void **) colorVals, 2,
+                                           &kCFTypeArrayCallBacks);
+    CGGradientRef chartGradient = CGGradientCreateWithColors(colorSpace, colorsArray,
+                                                             (CGFloat[]){0.8, 0});
+    ChartLinearGradientFill *fill = [[ChartLinearGradientFill alloc] initWithGradient:chartGradient
+                                                                                angle:90];
 
     NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
     valueFormatter = [[ChartDefaultValueFormatter alloc] initWithFormatter:formatter];
@@ -436,8 +449,10 @@ typedef struct {
     if (!(self = [super initWithFrame:CGRectZero])) return nil;
 
     UIColor *colors[] = HistoryChartColors;
-    ChartLegendEntry *entries[4] = {createLegendEntry(colors[0]), createLegendEntry(colors[1]),
-        createLegendEntry(colors[2]), createLegendEntry(colors[3])};
+    ChartLegendEntry *entries[4] = {
+        createLegendEntry(colors[0]), createLegendEntry(colors[1]),
+        createLegendEntry(colors[2]), createLegendEntry(colors[3])
+    };
     legendEntries = @[entries[0], entries[1], entries[2], entries[3]];
 
     dataSets[0] = [[LineChartDataSet alloc] initWithEntries:@[]];
@@ -447,21 +462,25 @@ typedef struct {
         dataSets[i].fillColor = colors[i - 1];
         dataSets[i].drawFilledEnabled = true;
         dataSets[i].fillAlpha = 0.75;
-        AreaChartFormatter *fillFormatter = [[AreaChartFormatter alloc] initWithBoundaryDataSet:dataSets[i - 1]];
+        AreaChartFormatter *fillFormatter = [[AreaChartFormatter alloc]
+                                             initWithBoundaryDataSet:dataSets[i - 1]];
         dataSets[i].fillFormatter = fillFormatter;
         [fillFormatter release];
         [entries[i - 1] release];
     }
-    chartData = [[LineChartData alloc] initWithDataSets:@[dataSets[4], dataSets[3], dataSets[2], dataSets[1]]];
+    chartData = [[LineChartData alloc] initWithDataSets:@[
+        dataSets[4], dataSets[3], dataSets[2], dataSets[1]
+    ]];
     [chartData setValueFormatter:self];
 
     chartView = [[LineChartView alloc] initWithFrame:CGRectZero];
     setupChartCommon(chartView, self, xAxisFormatter, legendEntries, 425);
     chartView.leftAxis.valueFormatter = self;
 
-    LineChartRenderer *renderer = [[CustomLineChartRenderer alloc] initWithDataProvider:chartView
-                                                                               animator:chartView.chartAnimator
-                                                                        viewPortHandler:chartView.viewPortHandler];
+    LineChartRenderer *renderer = [[CustomLineChartRenderer alloc]
+                                   initWithDataProvider:chartView animator:chartView.chartAnimator
+                                   viewPortHandler:chartView.viewPortHandler];
+    currString = CFStringCreateCopy(NULL, CFSTR(""));
     chartView.renderer = renderer;
     [renderer release];
     return self;
@@ -469,7 +488,7 @@ typedef struct {
 
 - (void) dealloc {
     for (int i = 0; i < 5; ++i) [dataSets[i] release];
-    if (currString) CFRelease(currString);
+    CFRelease(currString);
     [chartData release];
     [chartView release];
     [super dealloc];
@@ -497,15 +516,19 @@ typedef struct {
     if (!(self = [super initWithFrame:CGRectZero])) return nil;
 
     UIColor *colors[] = HistoryChartColors;
-    legendEntries = @[createLegendEntry(colors[0]), createLegendEntry(colors[1]), createLegendEntry(colors[2]),
-                      createLegendEntry(colors[3])];
+    legendEntries = @[
+        createLegendEntry(colors[0]), createLegendEntry(colors[1]),
+        createLegendEntry(colors[2]), createLegendEntry(colors[3])
+    ];
 
     for (int i = 0; i < 4; ++i) {
         dataSets[i] = [[LineChartDataSet alloc] initWithEntries:@[]];
         setupDataSetCommon(dataSets[i], colors[i]);
         dataSets[i].lineWidth = 2;
     }
-    chartData = [[LineChartData alloc] initWithDataSets:@[dataSets[0], dataSets[1], dataSets[2], dataSets[3]]];
+    chartData = [[LineChartData alloc] initWithDataSets:@[
+        dataSets[0], dataSets[1], dataSets[2], dataSets[3]
+    ]];
 
     chartView = [[LineChartView alloc] initWithFrame:CGRectZero];
     setupChartCommon(chartView, self, xAxisFormatter, legendEntries, 550);

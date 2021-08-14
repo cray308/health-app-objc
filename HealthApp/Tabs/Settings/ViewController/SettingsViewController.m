@@ -48,9 +48,12 @@
     planLabel.text = @"Change workout plan";
     planLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleFootnote];
 
-    planPicker = [[UISegmentedControl alloc] initWithItems:@[@"None", @"Base-Building", @"Continuation"]];
+    planPicker = [[UISegmentedControl alloc] initWithItems:@[
+        @"None", @"Base-Building", @"Continuation"
+    ]];
     planPicker.translatesAutoresizingMaskIntoConstraints = false;
-    planPicker.selectedSegmentIndex = appUserDataShared->currentPlan >= 0 ? appUserDataShared->currentPlan + 1 : 0;
+    int plan = appUserDataShared->currentPlan;
+    planPicker.selectedSegmentIndex = plan >= 0 ? plan + 1 : 0;
     planPicker.layer.cornerRadius = 5;
     planPicker.tintColor = UIColor.systemGray2Color;
 
@@ -91,7 +94,8 @@
     saveButton.titleLabel.adjustsFontSizeToFitWidth = true;
     [saveButton setTitleColor:UIColor.systemBlueColor forState: UIControlStateNormal];
     [saveButton setTitleColor:UIColor.systemGrayColor forState: UIControlStateDisabled];
-    [saveButton addTarget:self action:@selector(saveButtonPressed) forControlEvents:UIControlEventTouchUpInside];
+    [saveButton addTarget:self action:@selector(saveButtonPressed)
+         forControlEvents:UIControlEventTouchUpInside];
     [self updateWeightFields];
 
     UIButton *deleteDataButton = [UIButton buttonWithType:UIButtonTypeSystem];
@@ -100,7 +104,8 @@
     deleteDataButton.titleLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
     deleteDataButton.titleLabel.adjustsFontSizeToFitWidth = true;
     [deleteDataButton setTitleColor:UIColor.systemRedColor forState:UIControlStateNormal];
-    [deleteDataButton addTarget:self action:@selector(deleteButtonPressed) forControlEvents:UIControlEventTouchUpInside];
+    [deleteDataButton addTarget:self action:@selector(deleteButtonPressed)
+               forControlEvents:UIControlEventTouchUpInside];
 
     UIStackView *vStack = [[UIStackView alloc] initWithArrangedSubviews:@[
         planContainer, stacks[0], stacks[1], stacks[2], stacks[3], saveButton, deleteDataButton
@@ -121,11 +126,12 @@
     [vStack setCustomSpacing:40 afterView:stacks[3]];
     [vStack setCustomSpacing:40 afterView:saveButton];
 
+    UILayoutGuide *guide = self.view.safeAreaLayoutGuide;
     [NSLayoutConstraint activateConstraints:@[
-        [scrollView.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor],
-        [scrollView.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor],
-        [scrollView.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor],
-        [scrollView.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor],
+        [scrollView.leadingAnchor constraintEqualToAnchor:guide.leadingAnchor],
+        [scrollView.trailingAnchor constraintEqualToAnchor:guide.trailingAnchor],
+        [scrollView.topAnchor constraintEqualToAnchor:guide.topAnchor],
+        [scrollView.bottomAnchor constraintEqualToAnchor:guide.bottomAnchor],
 
         [vStack.leadingAnchor constraintEqualToAnchor:scrollView.leadingAnchor],
         [vStack.trailingAnchor constraintEqualToAnchor:scrollView.trailingAnchor],
@@ -158,8 +164,9 @@
     [planLabel release];
     for (int i = 0; i < 4; ++i) [stacks[i] release];
 
-    createToolbar(self, @selector(dismissKeyboard),
-                  (UITextField *[]){textFields[0], textFields[1], textFields[2], textFields[3], nil});
+    createToolbar(self, @selector(dismissKeyboard), (UITextField *[]){
+        textFields[0], textFields[1], textFields[2], textFields[3], nil
+    });
 
     AppDelegate *app = (AppDelegate *) UIApplication.sharedApplication.delegate;
     if (app) {
@@ -188,7 +195,9 @@
     const int segment = (int) planPicker.selectedSegmentIndex;
     signed char plan = segment == 0 ? -1 : segment - 1;
 
-    AlertDetails details = {CFSTR("Are you sure?"), CFSTR("This will save the currently entered data.")};
+    AlertDetails details = {
+        CFSTR("Are you sure?"), CFSTR("This will save the currently entered data.")
+    };
     UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"Save" style:UIAlertActionStyleDefault
                                                      handler:^(UIAlertAction * _Nonnull action _U_) {
         appUserData_updateWeightMaxes(results);
@@ -196,28 +205,34 @@
         AppDelegate *app = (AppDelegate *) UIApplication.sharedApplication.delegate;
         if (app) appCoordinator_updatedUserInfo(&app->coordinator);
     }];
-    UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil];
+    UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"Cancel"
+                                                           style:UIAlertActionStyleCancel
+                                                         handler:nil];
     viewController_showAlert(self, &details, okAction, cancelAction);
 }
 
 - (void) deleteButtonPressed {
     AlertDetails details = {CFSTR("Are you sure?"), CFSTR("This will delete all workout history.")};
-    UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"Delete" style:UIAlertActionStyleDestructive
+    UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"Delete"
+                                                       style:UIAlertActionStyleDestructive
                                                      handler:^(UIAlertAction * _Nonnull action _U_) {
         persistenceService_deleteUserData();
         appUserData_deleteSavedData();
         AppDelegate *app = (AppDelegate *) UIApplication.sharedApplication.delegate;
         if (app) appCoordinator_deletedAppData(&app->coordinator);
     }];
-    UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil];
+    UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"Cancel"
+                                                           style:UIAlertActionStyleCancel
+                                                         handler:nil];
     viewController_showAlert(self, &details, okAction, cancelAction);
 }
 
 #pragma mark - TextField Delegate
 
-- (BOOL) textField: (UITextField *)textField shouldChangeCharactersInRange: (NSRange)range
- replacementString: (NSString *)string {
-    if (!inputValidator_validateNumericInput(validChars, (__bridge CFStringRef) string)) return false;
+- (BOOL) textField: (UITextField *)textField
+shouldChangeCharactersInRange: (NSRange)range replacementString: (NSString *)string {
+    if (!inputValidator_validateNumericInput(validChars, (__bridge CFStringRef) string))
+        return false;
 
     int i = 0;
     for (; i < 4; ++i) {
@@ -225,7 +240,8 @@
     }
 
     NSString *initialText = textField.text ? textField.text : @"";
-    CFStringRef newText = CFBridgingRetain([initialText stringByReplacingCharactersInRange:range withString:string]);
+    CFStringRef newText = CFBridgingRetain([initialText stringByReplacingCharactersInRange:range
+                                                                                withString:string]);
     if (!CFStringGetLength(newText)) {
         CFRelease(newText);
         [saveButton setEnabled:false];

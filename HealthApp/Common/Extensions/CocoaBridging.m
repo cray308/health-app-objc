@@ -9,7 +9,8 @@
 #import <Foundation/Foundation.h>
 
 CFDictionaryRef getUserInfoDictionary(void) {
-    return (__bridge CFDictionaryRef)[NSUserDefaults.standardUserDefaults dictionaryForKey:@"userinfo"];
+    return (__bridge CFDictionaryRef)[NSUserDefaults.standardUserDefaults
+                                      dictionaryForKey:@"userinfo"];
 }
 
 void writeUserInfoDictionary(CFDictionaryRef dict) {
@@ -18,7 +19,6 @@ void writeUserInfoDictionary(CFDictionaryRef dict) {
 }
 
 CFDictionaryRef workoutJsonDictionaryCreate(void) {
-    return (__bridge CFDictionaryRef) [[NSDictionary alloc]
-                                       initWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"WorkoutData"
-                                                                                              ofType:@"plist"]];
+    NSString *path = [[NSBundle mainBundle] pathForResource:@"WorkoutData" ofType:@"plist"];
+    return (__bridge CFDictionaryRef) [[NSDictionary alloc] initWithContentsOfFile:path];
 }

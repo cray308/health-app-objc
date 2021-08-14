@@ -23,11 +23,12 @@ void historyDataManager_fetchData(HistoryViewModel *model) {
     struct tm localInfo;
     array_clear(weekData, model->data);
     int count = 0;
-    NSPredicate *pred = [NSPredicate predicateWithFormat:@"weekStart > %lld AND weekStart < %lld", date_twoYears,
-                         appUserDataShared->weekStart];
-    NSSortDescriptor *descriptor = [[NSSortDescriptor alloc] initWithKey:@"weekStart" ascending:true];
-    NSArray<WeeklyData *> *data = persistenceService_executeFetchRequest(WeeklyData.fetchRequest, pred, descriptor,
-                                                                         &count);
+    NSPredicate *pred = [NSPredicate predicateWithFormat:@"weekStart > %lld AND weekStart < %lld",
+                         date_twoYears, appUserDataShared->weekStart];
+    NSSortDescriptor *descriptor = [[NSSortDescriptor alloc] initWithKey:@"weekStart"
+                                                               ascending:true];
+    NSArray<WeeklyData *> *data = persistenceService_executeFetchRequest(WeeklyData.fetchRequest,
+                                                                         pred, descriptor, &count);
     [descriptor release];
     if (!data) return;
 

@@ -8,7 +8,7 @@
 #ifndef AppUserData_h
 #define AppUserData_h
 
-#include <CoreFoundation/CoreFoundation.h>
+#include <time.h>
 
 typedef struct {
     time_t planStart;

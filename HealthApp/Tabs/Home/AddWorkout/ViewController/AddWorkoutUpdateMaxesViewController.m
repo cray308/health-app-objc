@@ -71,22 +71,24 @@
     [finishButton setTitleColor:UIColor.systemBlueColor forState:UIControlStateNormal];
     [finishButton setTitleColor:UIColor.systemGrayColor forState:UIControlStateDisabled];
     finishButton.frame = (CGRect){.size = {.width = self.view.frame.size.width / 3, .height = 30}};
-    [finishButton addTarget:self action:@selector(didPressFinish) forControlEvents:UIControlEventTouchUpInside];
+    [finishButton addTarget:self action:@selector(didPressFinish)
+           forControlEvents:UIControlEventTouchUpInside];
     UIBarButtonItem *rightItem = [[UIBarButtonItem alloc] initWithCustomView:finishButton];
     [finishButton setEnabled:false];
     self.navigationItem.rightBarButtonItem = rightItem;
 
+    UILayoutGuide *guide = self.view.safeAreaLayoutGuide;
     [NSLayoutConstraint activateConstraints:@[
-        [stacks[0].topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor constant:30],
-        [stacks[0].leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor],
-        [stacks[0].trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor],
+        [stacks[0].topAnchor constraintEqualToAnchor:guide.topAnchor constant:30],
+        [stacks[0].leadingAnchor constraintEqualToAnchor:guide.leadingAnchor],
+        [stacks[0].trailingAnchor constraintEqualToAnchor:guide.trailingAnchor],
         [stacks[0].heightAnchor constraintEqualToConstant:40]
     ]];
     for (int i = 1; i < 4; ++i) {
         [NSLayoutConstraint activateConstraints:@[
             [stacks[i].topAnchor constraintEqualToAnchor:stacks[i - 1].bottomAnchor constant:20],
-            [stacks[i].leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor],
-            [stacks[i].trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor],
+            [stacks[i].leadingAnchor constraintEqualToAnchor:guide.leadingAnchor],
+            [stacks[i].trailingAnchor constraintEqualToAnchor:guide.trailingAnchor],
             [stacks[i].heightAnchor constraintEqualToConstant:40]
         ]];
     }
@@ -94,8 +96,9 @@
     for (int i = 0; i < 4; ++i) [stacks[i] release];
     [rightItem release];
 
-    createToolbar(self, @selector(dismissKeyboard),
-                  (UITextField *[]){textFields[0], textFields[1], textFields[2], textFields[3], nil});
+    createToolbar(self, @selector(dismissKeyboard), (UITextField *[]){
+        textFields[0], textFields[1], textFields[2], textFields[3], nil
+    });
 }
 
 - (void) didPressFinish {
@@ -106,9 +109,10 @@
     [self.view endEditing:true];
 }
 
-- (BOOL) textField: (UITextField *)textField shouldChangeCharactersInRange: (NSRange)range
- replacementString: (NSString *)string {
-    if (!inputValidator_validateNumericInput(validChars, (__bridge CFStringRef) string)) return false;
+- (BOOL) textField: (UITextField *)textField
+shouldChangeCharactersInRange: (NSRange)range replacementString: (NSString *)string {
+    if (!inputValidator_validateNumericInput(validChars, (__bridge CFStringRef) string))
+        return false;
 
     int i = 0;
     for (; i < 4; ++i) {
@@ -116,7 +120,8 @@
     }
 
     NSString *initialText = textField.text ? textField.text : @"";
-    CFStringRef newText = CFBridgingRetain([initialText stringByReplacingCharactersInRange:range withString:string]);
+    CFStringRef newText = CFBridgingRetain([initialText stringByReplacingCharactersInRange:range
+                                                                                withString:string]);
     if (!CFStringGetLength(newText)) {
         CFRelease(newText);
         [finishButton setEnabled:false];

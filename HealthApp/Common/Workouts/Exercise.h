@@ -74,6 +74,7 @@ typedef struct {
 void exerciseManager_setWeeklyWorkoutNames(unsigned char plan, int week, CFStringRef *names);
 Workout *exerciseManager_getWeeklyWorkoutAtIndex(unsigned char plan, int week, int index);
 CFStringRef *exerciseManager_getWorkoutNamesForType(unsigned char type, int *size);
-Workout *exerciseManager_getWorkoutFromLibrary(unsigned char type, int index, int reps, int sets, int weight);
+Workout *exerciseManager_getWorkoutFromLibrary(unsigned char type,
+                                               int index, int reps, int sets, int weight);
 
 #endif /* Exercise_h */

@@ -67,9 +67,6 @@ typedef struct {
         unsigned char active : 2;
         unsigned char stop : 4;
     } info;
-//    const unsigned char type;
-//    unsigned char active;
-//    bool stop;
     int container;
     int exercise;
     int duration;
@@ -131,7 +128,8 @@ void *timer_loop(void *arg) {
                 pthread_kill(exerciseTimerThread, SIGUSR1);
             }
             dispatch_async(dispatch_get_main_queue(), ^ (void) {
-                [t->parent finishedWorkoutTimerForType:t->info.type container:container exercise:exercise];
+                [t->parent finishedWorkoutTimerForType:t->info.type
+                                             container:container exercise:exercise];
             });
         }
     }
@@ -148,24 +146,27 @@ void scheduleNotification(int secondsFromNow, CFStringRef message) {
     content.sound = UNNotificationSound.defaultSound;
 
     UNTimeIntervalNotificationTrigger *trigger = [UNTimeIntervalNotificationTrigger
-                                                  triggerWithTimeInterval:secondsFromNow repeats:false];
-    UNNotificationRequest *req = [UNNotificationRequest requestWithIdentifier:(__bridge NSString*)idString
-                                                                      content:content
-                                                                      trigger:trigger];
+                                                  triggerWithTimeInterval:secondsFromNow
+                                                  repeats:false];
+    UNNotificationRequest *req = [UNNotificationRequest
+                                  requestWithIdentifier:(__bridge NSString*)idString
+                                  content:content trigger:trigger];
 
-    [UNUserNotificationCenter.currentNotificationCenter addNotificationRequest:req
-                                                         withCompletionHandler:^(NSError *_Nullable error _U_) {}];
+    [UNUserNotificationCenter.currentNotificationCenter
+     addNotificationRequest:req withCompletionHandler:^(NSError *_Nullable error _U_) {}];
     CFRelease(idString);
     [content release];
 }
 
 static inline CFStringRef createSetsString(ExerciseEntry *e) {
-    return CFStringCreateWithFormat(NULL, NULL, CFSTR("Set %d of %d"), e->completedSets + 1, e->sets);
+    return CFStringCreateWithFormat(NULL, NULL, CFSTR("Set %d of %d"),
+                                    e->completedSets + 1, e->sets);
 }
 
 CFStringRef createExerciseGroupHeader(ExerciseGroup *g) {
     if (g->type == ExerciseContainerTypeRounds && g->reps > 1) {
-        return CFStringCreateWithFormat(NULL, NULL, CFSTR("Round %d of %d"), g->completedReps + 1, g->reps);
+        return CFStringCreateWithFormat(NULL, NULL, CFSTR("Round %d of %d"),
+                                        g->completedReps + 1, g->reps);
     } else if (g->type == ExerciseContainerTypeAMRAP) {
         return CFStringCreateWithFormat(NULL, NULL, CFSTR("AMRAP %d mins"), g->reps);
     }
@@ -176,20 +177,23 @@ CFStringRef createExerciseTitle(ExerciseEntry *e) {
     switch (e->type) {
         case ExerciseTypeReps:
             if (e->weight > 1) {
-                return CFStringCreateWithFormat(NULL, NULL, CFSTR("%@ x %d @ %d lbs"), e->name, e->reps, e->weight);
+                return CFStringCreateWithFormat(NULL, NULL, CFSTR("%@ x %d @ %d lbs"),
+                                                e->name, e->reps, e->weight);
             }
             return CFStringCreateWithFormat(NULL, NULL, CFSTR("%@ x %d"), e->name, e->reps);
 
         case ExerciseTypeDuration:
             if (e->reps > 120) {
                 double minutes = (double) e->reps / 60.0;
-                return CFStringCreateWithFormat(NULL, NULL, CFSTR("%@ for %.1f mins"), e->name, minutes);
+                return CFStringCreateWithFormat(NULL, NULL, CFSTR("%@ for %.1f mins"),
+                                                e->name, minutes);
             }
             return CFStringCreateWithFormat(NULL, NULL, CFSTR("%@ for %d sec"), e->name, e->reps);
 
         default: ;
             int rowingDist = (5 * e->reps) / 4;
-            return CFStringCreateWithFormat(NULL, NULL, CFSTR("Run/row %d/%d meters"), e->reps, rowingDist);
+            return CFStringCreateWithFormat(NULL, NULL, CFSTR("Run/row %d/%d meters"),
+                                            e->reps, rowingDist);
     }
 }
 
@@ -346,7 +350,8 @@ CFStringRef createExerciseTitle(ExerciseEntry *e) {
     for (int i = 0; i < size; ++i) {
         ExerciseView *v = [[ExerciseView alloc] initWithExercise:&group->exercises->arr[i]];
         v->button.tag = i;
-        [v->button addTarget:self action:@selector(handleTap:) forControlEvents:UIControlEventTouchUpInside];
+        [v->button addTarget:self action:@selector(handleTap:)
+            forControlEvents:UIControlEventTouchUpInside];
         [exerciseStack addArrangedSubview:v];
         viewsArr[i] = v;
     }
@@ -355,7 +360,7 @@ CFStringRef createExerciseTitle(ExerciseEntry *e) {
 }
 
 - (void) dealloc {
-    for (int i = 0; i < size; ++i) { [viewsArr[i] release]; }
+    for (int i = 0; i < size; ++i) [viewsArr[i] release];
     free(viewsArr);
     [headerLabel release];
     [super dealloc];
@@ -584,7 +589,8 @@ CFStringRef createExerciseTitle(ExerciseEntry *e) {
     startBtn.titleLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline];
     startBtn.backgroundColor = UIColor.secondarySystemGroupedBackgroundColor;
     startBtn.layer.cornerRadius = 5;
-    [startBtn addTarget:self action:@selector(startEndWorkout:) forControlEvents:UIControlEventTouchUpInside];
+    [startBtn addTarget:self action:@selector(startEndWorkout:)
+       forControlEvents:UIControlEventTouchUpInside];
 
     UIView *btnContainer = [[UIView alloc] initWithFrame:CGRectZero];
     [btnContainer addSubview:startBtn];
@@ -609,7 +615,9 @@ CFStringRef createExerciseTitle(ExerciseEntry *e) {
         [v release];
     }
 
-    UIStackView *vStack = [[UIStackView alloc] initWithArrangedSubviews:@[btnContainer, groupsStack]];
+    UIStackView *vStack = [[UIStackView alloc] initWithArrangedSubviews:@[
+        btnContainer, groupsStack
+    ]];
     vStack.translatesAutoresizingMaskIntoConstraints = false;
     vStack.axis = UILayoutConstraintAxisVertical;
     vStack.spacing = 20;
@@ -624,11 +632,12 @@ CFStringRef createExerciseTitle(ExerciseEntry *e) {
     [self.view addSubview:scrollView];
     [scrollView addSubview:vStack];
 
+    UILayoutGuide *guide = self.view.safeAreaLayoutGuide;
     [NSLayoutConstraint activateConstraints:@[
-        [scrollView.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor],
-        [scrollView.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor],
-        [scrollView.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor],
-        [scrollView.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor],
+        [scrollView.leadingAnchor constraintEqualToAnchor:guide.leadingAnchor],
+        [scrollView.trailingAnchor constraintEqualToAnchor:guide.trailingAnchor],
+        [scrollView.topAnchor constraintEqualToAnchor:guide.topAnchor],
+        [scrollView.bottomAnchor constraintEqualToAnchor:guide.bottomAnchor],
 
         [vStack.leadingAnchor constraintEqualToAnchor:scrollView.leadingAnchor],
         [vStack.trailingAnchor constraintEqualToAnchor:scrollView.trailingAnchor],
@@ -643,14 +652,14 @@ CFStringRef createExerciseTitle(ExerciseEntry *e) {
         [startBtn.heightAnchor constraintEqualToConstant: 30],
     ]];
 
-    startObserver = [NSNotificationCenter.defaultCenter addObserverForName:UIApplicationDidBecomeActiveNotification
-                                                                    object:nil queue:NSOperationQueue.mainQueue
-                                                                usingBlock:^(NSNotification *note _U_) {
+    startObserver = [NSNotificationCenter.defaultCenter
+                     addObserverForName:UIApplicationDidBecomeActiveNotification object:nil
+                     queue:NSOperationQueue.mainQueue usingBlock:^(NSNotification *note _U_) {
         [self restartTimers];
     }];
-    stopObserver = [NSNotificationCenter.defaultCenter addObserverForName:UIApplicationWillResignActiveNotification
-                                                                   object:nil queue:NSOperationQueue.mainQueue
-                                                               usingBlock:^(NSNotification *note _U_) {
+    stopObserver = [NSNotificationCenter.defaultCenter
+                    addObserverForName:UIApplicationWillResignActiveNotification object:nil
+                    queue:NSOperationQueue.mainQueue usingBlock:^(NSNotification *note _U_) {
         [self stopTimers];
     }];
     [btnContainer release];
@@ -703,7 +712,8 @@ CFStringRef createExerciseTitle(ExerciseEntry *e) {
     }
 }
 
-- (void) finishedWorkoutTimerForType: (unsigned char)type container: (int)container exercise: (int)exercise {
+- (void) finishedWorkoutTimerForType: (unsigned char)type
+                           container: (int)container exercise: (int)exercise {
     ExerciseContainer *v = nil;
     pthread_mutex_lock(&sharedLock);
     if (viewModel) {
@@ -757,8 +767,8 @@ CFStringRef createExerciseTitle(ExerciseEntry *e) {
     if (v) {
         time_t now = time(NULL);
         if (eTimerActive && v.tag == savedInfo.exerciseInfo.group) {
-            [v restartExerciseAtIndex:savedInfo.exerciseInfo.tag moveToNext:workoutType != WorkoutTypeEndurance
-                              refTime:now];
+            [v restartExerciseAtIndex:savedInfo.exerciseInfo.tag
+                           moveToNext:workoutType != WorkoutTypeEndurance refTime:now];
         }
         if (gTimerActive) {
             [v restartGroupAtIndex:savedInfo.groupTag refTime:now];

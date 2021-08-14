@@ -27,8 +27,8 @@
 @end
 
 @implementation HomeSetupWorkoutModalViewController
-- (id) initWithDelegate: (HomeTabCoordinator *)_delegate type: (unsigned char)_type names: (CFStringRef *)_names
-                  count: (int)_count {
+- (id) initWithDelegate: (HomeTabCoordinator *)_delegate
+                   type: (unsigned char)_type names: (CFStringRef *)_names count: (int)_count {
     if (!(self = [super initWithNibName:nil bundle:nil])) return nil;
     delegate = _delegate;
     names = _names;
@@ -81,7 +81,8 @@
     [submitButton setTitle:@"Go" forState:UIControlStateNormal];
     [submitButton setTitleColor:UIColor.systemBlueColor forState:UIControlStateNormal];
     [submitButton setTitleColor:UIColor.systemGrayColor forState:UIControlStateDisabled];
-    [submitButton addTarget:self action:@selector(didPressFinish) forControlEvents:UIControlEventTouchUpInside];
+    [submitButton addTarget:self action:@selector(didPressFinish)
+           forControlEvents:UIControlEventTouchUpInside];
     [submitButton setEnabled:false];
     [self.view addSubview:submitButton];
 
@@ -165,14 +166,16 @@
     [cancelButton setTitleColor:UIColor.systemBlueColor forState:UIControlStateNormal];
     [cancelButton setTitleColor:UIColor.systemGrayColor forState:UIControlStateDisabled];
     cancelButton.frame = (CGRect){.size = {.width = self.view.frame.size.width / 3, .height = 30}};
-    [cancelButton addTarget:self action:@selector(pressedCancel) forControlEvents:UIControlEventTouchUpInside];
+    [cancelButton addTarget:self action:@selector(pressedCancel)
+           forControlEvents:UIControlEventTouchUpInside];
     UIBarButtonItem *leftItem = [[UIBarButtonItem alloc] initWithCustomView:cancelButton];
     self.navigationItem.leftBarButtonItem = leftItem;
 
+    UILayoutGuide *guide = self.view.safeAreaLayoutGuide;
     [NSLayoutConstraint activateConstraints:@[
-        [workoutContainer.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor constant:30],
-        [workoutContainer.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor],
-        [workoutContainer.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor],
+        [workoutContainer.topAnchor constraintEqualToAnchor:guide.topAnchor constant:30],
+        [workoutContainer.leadingAnchor constraintEqualToAnchor:guide.leadingAnchor],
+        [workoutContainer.trailingAnchor constraintEqualToAnchor:guide.trailingAnchor],
 
         [workoutLabel.topAnchor constraintEqualToAnchor:workoutContainer.topAnchor],
         [workoutLabel.leadingAnchor constraintEqualToAnchor:workoutContainer.leadingAnchor],
@@ -185,12 +188,13 @@
         [workoutTextField.bottomAnchor constraintEqualToAnchor:workoutContainer.bottomAnchor],
         [workoutTextField.heightAnchor constraintEqualToConstant:40],
 
-        [textFieldStack.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor],
-        [textFieldStack.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor],
-        [textFieldStack.topAnchor constraintEqualToAnchor:workoutContainer.bottomAnchor constant:20],
+        [textFieldStack.leadingAnchor constraintEqualToAnchor:guide.leadingAnchor],
+        [textFieldStack.trailingAnchor constraintEqualToAnchor:guide.trailingAnchor],
+        [textFieldStack.topAnchor constraintEqualToAnchor:workoutContainer.bottomAnchor
+                                                 constant:20],
 
-        [submitButton.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor],
-        [submitButton.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor],
+        [submitButton.leadingAnchor constraintEqualToAnchor:guide.leadingAnchor],
+        [submitButton.trailingAnchor constraintEqualToAnchor:guide.trailingAnchor],
         [submitButton.topAnchor constraintEqualToAnchor:textFieldStack.bottomAnchor constant:20],
         [submitButton.heightAnchor constraintEqualToConstant:40]
     ]];
@@ -206,20 +210,23 @@
 }
 
 - (void) didPressFinish {
-    homeCoordinator_finishedSettingUpCustomWorkout(delegate, type, index, inputs[0], inputs[1], inputs[2]);
+    homeCoordinator_finishedSettingUpCustomWorkout(delegate, type, index,
+                                                   inputs[0], inputs[1], inputs[2]);
 }
 
 - (void) pressedCancel {
-    [delegate->navigationController.viewControllers[0] dismissViewControllerAnimated:true completion:nil];
+    [delegate->navigationController.viewControllers[0] dismissViewControllerAnimated:true
+                                                                          completion:nil];
 }
 
 - (void) dismissKeyboard {
     [self.view endEditing:true];
 }
 
-- (BOOL) textField: (UITextField *)textField shouldChangeCharactersInRange: (NSRange)range
- replacementString: (NSString *)string {
-    if (!inputValidator_validateNumericInput(validChars, (__bridge CFStringRef) string)) return false;
+- (BOOL) textField: (UITextField *)textField
+shouldChangeCharactersInRange: (NSRange)range replacementString: (NSString *)string {
+    if (!inputValidator_validateNumericInput(validChars, (__bridge CFStringRef) string))
+        return false;
 
     int i = 0;
     for (; i < 3; ++i) {
@@ -228,7 +235,8 @@
     if (i == 3) return true;
 
     NSString *initialText = textField.text ? textField.text : @"";
-    CFStringRef newText = CFBridgingRetain([initialText stringByReplacingCharactersInRange:range withString:string]);
+    CFStringRef newText = CFBridgingRetain([initialText stringByReplacingCharactersInRange:range
+                                                                                withString:string]);
     if (!CFStringGetLength(newText)) {
         CFRelease(newText);
         [submitButton setEnabled:false];
@@ -272,11 +280,13 @@
     return count;
 }
 
-- (NSString *) pickerView: (UIPickerView *)pickerView titleForRow: (NSInteger)row forComponent: (NSInteger)component {
+- (NSString *) pickerView: (UIPickerView *)pickerView
+              titleForRow: (NSInteger)row forComponent: (NSInteger)component {
     return (__bridge NSString*) names[row];
 }
 
-- (void) pickerView: (UIPickerView *)pickerView didSelectRow: (NSInteger)row inComponent: (NSInteger)component {
+- (void) pickerView: (UIPickerView *)pickerView
+       didSelectRow: (NSInteger)row inComponent: (NSInteger)component {
     index = (int) row;
     workoutTextField.text = (__bridge NSString*) names[index];
 }

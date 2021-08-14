@@ -5,15 +5,18 @@
 //  Created by Christopher Ray on 3/20/21.
 //
 
+#include <CoreFoundation/CoreFoundation.h>
 #include "AppUserData.h"
 #include "CocoaBridging.h"
-#include "Exercise.h"
 #include "CalendarDateHelpers.h"
 
 UserInfo *appUserDataShared = NULL;
 
-static CFStringRef const keys[] = {CFSTR("planStart"), CFSTR("weekStart"), CFSTR("tzOffset"), CFSTR("currentPlan"),
-    CFSTR("completedWorkouts"), CFSTR("squatMax"), CFSTR("pullUpMax"), CFSTR("benchMax"), CFSTR("deadliftMax")};
+static CFStringRef const keys[] = {
+    CFSTR("planStart"), CFSTR("weekStart"), CFSTR("tzOffset"), CFSTR("currentPlan"),
+    CFSTR("completedWorkouts"), CFSTR("squatMax"), CFSTR("pullUpMax"), CFSTR("benchMax"),
+    CFSTR("deadliftMax")
+};
 
 UserInfo *userInfo_initFromStorage(void) {
     CFDictionaryRef savedInfo = getUserInfoDictionary();
@@ -41,18 +44,21 @@ UserInfo *userInfo_initFromStorage(void) {
 }
 
 void userInfo_saveData(UserInfo *info) {
-    CFNumberRef values[] = {CFNumberCreate(NULL, kCFNumberLongType, &info->planStart),
+    CFNumberRef values[] = {
+        CFNumberCreate(NULL, kCFNumberLongType, &info->planStart),
         CFNumberCreate(NULL, kCFNumberLongType, &info->weekStart),
         CFNumberCreate(NULL, kCFNumberIntType, &info->tzOffset),
         CFNumberCreate(NULL, kCFNumberCharType, &info->currentPlan),
         CFNumberCreate(NULL, kCFNumberCharType, &info->completedWorkouts),
-        CFNumberCreate(NULL, kCFNumberShortType, &info->liftMaxes[LiftTypeSquat]),
-        CFNumberCreate(NULL, kCFNumberShortType, &info->liftMaxes[LiftTypePullup]),
-        CFNumberCreate(NULL, kCFNumberShortType, &info->liftMaxes[LiftTypeBench]),
-        CFNumberCreate(NULL, kCFNumberShortType, &info->liftMaxes[LiftTypeDeadlift])};
+        CFNumberCreate(NULL, kCFNumberShortType, &info->liftMaxes[0]),
+        CFNumberCreate(NULL, kCFNumberShortType, &info->liftMaxes[1]),
+        CFNumberCreate(NULL, kCFNumberShortType, &info->liftMaxes[2]),
+        CFNumberCreate(NULL, kCFNumberShortType, &info->liftMaxes[3])
+    };
 
     CFDictionaryRef dict = CFDictionaryCreate(NULL, (const void **)keys, (const void **)values, 9,
-                                              &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+                                              &kCFCopyStringDictionaryKeyCallBacks,
+                                              &kCFTypeDictionaryValueCallBacks);
 
     writeUserInfoDictionary(dict);
     CFRelease(dict);

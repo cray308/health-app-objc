@@ -34,8 +34,8 @@ CFArrayRef getCurrentWeekForPlan(CFDictionaryRef root, unsigned char plan, int w
     return CFArrayGetValueAtIndex(weeks, week);
 }
 
-void buildWorkoutFromDict(CFDictionaryRef dict, int index, unsigned char type, int sets, int reps, int weight,
-                          Workout *w) {
+void buildWorkoutFromDict(CFDictionaryRef dict, int index,
+                          unsigned char type, int sets, int reps, int weight, Workout *w) {
     CFArrayRef foundActivities = CFDictionaryGetValue(dict, CFSTR("activities"));
     CFNumberRef number;
     CFStringRef str;
@@ -99,11 +99,14 @@ void buildWorkoutFromDict(CFDictionaryRef dict, int index, unsigned char type, i
             entries[0].weight = (int) (weightMultiplier * (double) appUserDataShared->liftMaxes[0]);
 
             if (nExercises >= 3 && index <= 1) {
-                entries[1].weight = (int) (weightMultiplier * (double) appUserDataShared->liftMaxes[LiftTypeBench]);
+                entries[1].weight = (int)
+                (weightMultiplier * (double) appUserDataShared->liftMaxes[LiftTypeBench]);
                 if (index == 0) {
-                    entries[2].weight = (int) (weightMultiplier * (double) appUserDataShared->liftMaxes[LiftTypePullup]);
+                    entries[2].weight = (int)
+                    (weightMultiplier * (double) appUserDataShared->liftMaxes[LiftTypePullup]);
                 } else {
-                    entries[2].weight = (int) (weightMultiplier * (double) appUserDataShared->liftMaxes[LiftTypeDeadlift]);
+                    entries[2].weight = (int)
+                    (weightMultiplier * (double) appUserDataShared->liftMaxes[LiftTypeDeadlift]);
                 }
             } else if (nExercises >= 4 && index == 2) {
                 for (int i = 1; i < 4; ++i) {
@@ -216,7 +219,8 @@ cleanup:
     return results;
 }
 
-Workout *exerciseManager_getWorkoutFromLibrary(unsigned char type, int index, int reps, int sets, int weight) {
+Workout *exerciseManager_getWorkoutFromLibrary(unsigned char type,
+                                               int index, int reps, int sets, int weight) {
     Workout *w = NULL;
     CFDictionaryRef root = workoutJsonDictionaryCreate();
     CFDictionaryRef lib = CFDictionaryGetValue(root, libraryKey);

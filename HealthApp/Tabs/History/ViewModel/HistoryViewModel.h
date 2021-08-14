@@ -8,7 +8,6 @@
 #ifndef HistoryViewModel_h
 #define HistoryViewModel_h
 
-#include <CoreFoundation/CoreFoundation.h>
 #include "array.h"
 
 typedef struct {
@@ -38,14 +37,14 @@ typedef struct {
 
 typedef struct {
     Array_chartData *entries[5];
-    CFStringRef legendLabelFormats[4];
+    char names[4][10];
     int maxActivityTime;
     int totalByType[4];
 } HistoryAreaChartViewModel;
 
 typedef struct {
     Array_chartData *entries[4];
-    CFStringRef legendLabelFormats[4];
+    char names[4][9];
     int maxWeight;
     int totalByExercise[4];
 } HistoryLiftChartViewModel;

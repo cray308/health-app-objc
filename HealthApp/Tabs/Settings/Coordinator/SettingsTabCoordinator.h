@@ -14,8 +14,8 @@ typedef struct {
     UINavigationController *navigationController;
 } SettingsTabCoordinator;
 
-void settingsCoordinator_free(SettingsTabCoordinator *coordinator);
-void settingsCoordinator_start(SettingsTabCoordinator *coordinator);
-void settingsCoordinator_updateWeightText(SettingsTabCoordinator *coordinator);
+void settingsCoordinator_free(SettingsTabCoordinator *this);
+void settingsCoordinator_start(SettingsTabCoordinator *this);
+void settingsCoordinator_updateWeightText(SettingsTabCoordinator *this);
 
 #endif /* SettingsTabCoordinator_h */

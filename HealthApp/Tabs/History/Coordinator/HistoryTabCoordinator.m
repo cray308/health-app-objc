@@ -22,7 +22,7 @@ void historyCoordinator_start(HistoryTabCoordinator *this) {
 }
 
 void historyCoordinator_updateUI(HistoryTabCoordinator *this) {
-    HistoryViewController *vc = (HistoryViewController *) this->navigationController.viewControllers[0];
+    HistoryViewController *vc = this->navigationController.viewControllers[0];
     historyDataManager_fetchData(&this->viewModel);
     [vc performForegroundUpdate];
 }

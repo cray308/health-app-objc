@@ -24,7 +24,8 @@ void persistenceService_performForegroundUpdate(void) {
     NSFetchRequest *request = WeeklyData.fetchRequest;
     request.predicate = [NSPredicate predicateWithFormat:@"weekStart < %lld", date_twoYears];
 
-    NSArray<WeeklyData *> *data = [persistenceServiceShared.viewContext executeFetchRequest:request error:nil];
+    NSArray<WeeklyData *> *data = [persistenceServiceShared.viewContext executeFetchRequest:request
+                                                                                      error:nil];
     if (data && (count = (int) data.count)) {
         for (int i = 0; i < count; ++i) {
             [persistenceServiceShared.viewContext deleteObject:data[i]];
@@ -32,8 +33,10 @@ void persistenceService_performForegroundUpdate(void) {
         persistenceService_saveContext();
     }
 
-    NSSortDescriptor *descriptor = [[NSSortDescriptor alloc] initWithKey:@"weekStart" ascending:true];
-    request.predicate = [NSPredicate predicateWithFormat:@"weekStart < %lld", appUserDataShared->weekStart];
+    NSSortDescriptor *descriptor = [[NSSortDescriptor alloc] initWithKey:@"weekStart"
+                                                               ascending:true];
+    request.predicate = [NSPredicate predicateWithFormat:@"weekStart < %lld",
+                         appUserDataShared->weekStart];
     request.sortDescriptors = @[descriptor];
     data = [persistenceServiceShared.viewContext executeFetchRequest:request error:nil];
     bool createEntryForCurrentWeek = persistenceService_getWeeklyDataForThisWeek() == nil;
@@ -42,7 +45,8 @@ void persistenceService_performForegroundUpdate(void) {
 
     if (!(data && (count = (int) data.count))) {
         if (createEntryForCurrentWeek) {
-            WeeklyData *curr = [[WeeklyData alloc] initWithContext:persistenceServiceShared.viewContext];
+            WeeklyData *curr = [[WeeklyData alloc]
+                                initWithContext:persistenceServiceShared.viewContext];
             curr.weekStart = appUserDataShared->weekStart;
             [curr release];
         }
@@ -55,7 +59,8 @@ void persistenceService_performForegroundUpdate(void) {
     for (time_t currStart = last.weekStart + WeekSeconds;
          currStart < appUserDataShared->weekStart;
          currStart += WeekSeconds) {
-        WeeklyData *curr = [[WeeklyData alloc] initWithContext:persistenceServiceShared.viewContext];
+        WeeklyData *curr = [[WeeklyData alloc]
+                            initWithContext:persistenceServiceShared.viewContext];
         curr.weekStart = currStart;
         curr.bestBench = last.bestBench;
         curr.bestPullup = last.bestPullup;
@@ -65,7 +70,8 @@ void persistenceService_performForegroundUpdate(void) {
     }
 
     if (createEntryForCurrentWeek) {
-        WeeklyData *curr = [[WeeklyData alloc] initWithContext:persistenceServiceShared.viewContext];
+        WeeklyData *curr = [[WeeklyData alloc]
+                            initWithContext:persistenceServiceShared.viewContext];
         curr.weekStart = appUserDataShared->weekStart;
         curr.bestBench = last.bestBench;
         curr.bestPullup = last.bestPullup;
@@ -80,9 +86,11 @@ void persistenceService_performForegroundUpdate(void) {
 void persistenceService_deleteUserData(void) {
     int count = 0;
     NSFetchRequest *request = WeeklyData.fetchRequest;
-    request.predicate = [NSPredicate predicateWithFormat:@"weekStart < %lld", appUserDataShared->weekStart];
+    request.predicate = [NSPredicate predicateWithFormat:@"weekStart < %lld",
+                         appUserDataShared->weekStart];
 
-    NSArray<WeeklyData *> *data = [persistenceServiceShared.viewContext executeFetchRequest:request error:nil];
+    NSArray<WeeklyData *> *data = [persistenceServiceShared.viewContext executeFetchRequest:request
+                                                                                      error:nil];
     if (data && (count = (int) data.count)) {
         for (int i = 0; i < count; ++i) {
             [persistenceServiceShared.viewContext deleteObject:data[i]];
@@ -103,7 +111,8 @@ void persistenceService_deleteUserData(void) {
 
 void persistenceService_changeTimestamps(int difference) {
     int count = 0;
-    NSArray<WeeklyData *> *data = [persistenceServiceShared.viewContext executeFetchRequest:WeeklyData.fetchRequest error:nil];
+    NSArray<WeeklyData *> *data = [persistenceServiceShared.viewContext
+                                   executeFetchRequest:WeeklyData.fetchRequest error:nil];
     if (!(data && (count = (int) data.count))) return;
     for (int i = 0; i < count; ++i) {
         data[i].weekStart += difference;
@@ -113,8 +122,10 @@ void persistenceService_changeTimestamps(int difference) {
 
 WeeklyData *persistenceService_getWeeklyDataForThisWeek(void) {
     NSFetchRequest *request = WeeklyData.fetchRequest;
-    request.predicate = [NSPredicate predicateWithFormat:@"weekStart == %lld", appUserDataShared->weekStart];
-    NSArray<WeeklyData *> *currentWeeks = [persistenceServiceShared.viewContext executeFetchRequest:request error:nil];
+    request.predicate = [NSPredicate predicateWithFormat:@"weekStart == %lld",
+                         appUserDataShared->weekStart];
+    NSArray<WeeklyData *> *currentWeeks = [persistenceServiceShared.viewContext
+                                           executeFetchRequest:request error:nil];
     if (!(currentWeeks && currentWeeks.count)) return nil;
     return currentWeeks[0];
 }

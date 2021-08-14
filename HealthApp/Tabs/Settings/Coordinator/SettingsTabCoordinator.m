@@ -8,17 +8,17 @@
 #import "SettingsTabCoordinator.h"
 #import "SettingsViewController.h"
 
-void settingsCoordinator_free(SettingsTabCoordinator *coordinator) {
-    free(coordinator);
+void settingsCoordinator_free(SettingsTabCoordinator *this) {
+    free(this);
 }
 
-void settingsCoordinator_start(SettingsTabCoordinator *coordinator) {
+void settingsCoordinator_start(SettingsTabCoordinator *this) {
     UIViewController *vc = [[SettingsViewController alloc] init];
-    [coordinator->navigationController setViewControllers:@[vc]];
+    [this->navigationController setViewControllers:@[vc]];
     [vc release];
 }
 
-void settingsCoordinator_updateWeightText(SettingsTabCoordinator *coordinator) {
-    SettingsViewController *vc = (SettingsViewController *) coordinator->navigationController.viewControllers[0];
+void settingsCoordinator_updateWeightText(SettingsTabCoordinator *this) {
+    SettingsViewController *vc = this->navigationController.viewControllers[0];
     if (vc) [vc updateWeightFields];
 }

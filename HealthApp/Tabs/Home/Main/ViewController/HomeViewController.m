@@ -16,10 +16,14 @@ UIView *createConfettiView(CGRect frame) {
     UIView *this = [[UIView alloc] initWithFrame:frame];
     this.backgroundColor = [UIColor.systemGrayColor colorWithAlphaComponent:0.8];
 
-    UIColor const* colors[] = {UIColor.systemRedColor, UIColor.systemBlueColor, UIColor.systemGreenColor,
-        UIColor.systemYellowColor};
-    UIImage const* images[] = {[UIImage imageNamed:@"Box"], [UIImage imageNamed:@"Triangle"],
-        [UIImage imageNamed:@"Circle"], [UIImage imageNamed:@"Spiral"]};
+    UIColor const* colors[] = {
+        UIColor.systemRedColor, UIColor.systemBlueColor,
+        UIColor.systemGreenColor, UIColor.systemYellowColor
+    };
+    UIImage const* images[] = {
+        [UIImage imageNamed:@"Box"], [UIImage imageNamed:@"Triangle"],
+        [UIImage imageNamed:@"Circle"], [UIImage imageNamed:@"Spiral"]
+    };
     int const velocities[] = {100, 90, 150, 200};
 
     CAEmitterCell *cells[16];
@@ -97,7 +101,9 @@ UIView *createConfettiView(CGRect frame) {
     weeklyWorkoutsStack.axis = UILayoutConstraintAxisVertical;
     weeklyWorkoutsStack.spacing = 5;
     [weeklyWorkoutsStack setLayoutMarginsRelativeArrangement:true];
-    weeklyWorkoutsStack.layoutMargins = (UIEdgeInsets){.top = 5, .left = 8, .bottom = 5, .right = 8};
+    weeklyWorkoutsStack.layoutMargins = (UIEdgeInsets){
+        .top = 5, .left = 8, .bottom = 5, .right = 8
+    };
 
     UIStackView *customWorkoutStack = [[UIStackView alloc] initWithFrame:CGRectZero];
     customWorkoutStack.axis = UILayoutConstraintAxisVertical;
@@ -126,8 +132,8 @@ UIView *createConfettiView(CGRect frame) {
         btn.layer.cornerRadius = 5;
         [btn.heightAnchor constraintEqualToConstant:50].active = true;
         btn.tag = i;
-        [btn addTarget:self
-                action:@selector(customWorkoutButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
+        [btn addTarget:self action:@selector(customWorkoutButtonTapped:)
+      forControlEvents:UIControlEventTouchUpInside];
         [customWorkoutStack addArrangedSubview:btn];
     }
     [headerLabel release];
@@ -150,11 +156,12 @@ UIView *createConfettiView(CGRect frame) {
     [scrollView addSubview:vStack];
     [vStack setCustomSpacing:20 afterView:greetingLabel];
 
+    UILayoutGuide *guide = self.view.safeAreaLayoutGuide;
     [NSLayoutConstraint activateConstraints:@[
-        [scrollView.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor],
-        [scrollView.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor],
-        [scrollView.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor],
-        [scrollView.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor],
+        [scrollView.leadingAnchor constraintEqualToAnchor:guide.leadingAnchor],
+        [scrollView.trailingAnchor constraintEqualToAnchor:guide.trailingAnchor],
+        [scrollView.topAnchor constraintEqualToAnchor:guide.topAnchor],
+        [scrollView.bottomAnchor constraintEqualToAnchor:guide.bottomAnchor],
 
         [vStack.leadingAnchor constraintEqualToAnchor:scrollView.leadingAnchor],
         [vStack.trailingAnchor constraintEqualToAnchor:scrollView.trailingAnchor],
@@ -210,8 +217,9 @@ UIView *createConfettiView(CGRect frame) {
     CFStringRef *names = viewModel->workoutNames;
     for (int i = 0; i < 7; ++i) {
         if (!names[i]) continue;
-        DayWorkoutButton *dayBtn = [[DayWorkoutButton alloc] initWithTitle:(__bridge NSString*)names[i]
-                                                                       day:(__bridge NSString*)weekdays[i]];
+        DayWorkoutButton *dayBtn = [[DayWorkoutButton alloc]
+                                    initWithTitle:(__bridge NSString*)names[i]
+                                    day:(__bridge NSString*)weekdays[i]];
         dayBtn.tag = i;
         dayBtn->button.tag = i;
         [dayBtn->button addTarget:self action:@selector(workoutButtonTapped:)
@@ -220,7 +228,9 @@ UIView *createConfettiView(CGRect frame) {
         [dayBtn release];
     }
 
-    [NSLayoutConstraint activateConstraints:@[[headerLabel.heightAnchor constraintEqualToConstant:40]]];
+    [NSLayoutConstraint activateConstraints:@[
+        [headerLabel.heightAnchor constraintEqualToConstant:40]
+    ]];
     [headerLabel release];
     [divider release];
     [weeklyWorkoutsStack setHidden:false];
@@ -253,14 +263,19 @@ UIView *createConfettiView(CGRect frame) {
 }
 
 - (void) showConfetti {
-    AlertDetails details = {CFSTR("Nicely done!"), CFSTR("Great job meeting your workout goal this week.")};
-    UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil];
+    AlertDetails details = {
+        CFSTR("Nicely done!"), CFSTR("Great job meeting your workout goal this week.")
+    };
+    UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"OK"
+                                                       style:UIAlertActionStyleDefault handler:nil];
 
-    UIView *confettiView = createConfettiView(
-        (CGRect){.size = {.width = self.view.frame.size.width, .height = self.view.frame.size.height}});
+    UIView *confettiView = createConfettiView((CGRect){.size = {
+        .width = self.view.frame.size.width, .height = self.view.frame.size.height
+    }});
     [self.view addSubview:confettiView];
 
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 5), dispatch_get_main_queue(), ^ (void) {
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 5),
+                   dispatch_get_main_queue(), ^ (void) {
         [confettiView removeFromSuperview];
         [confettiView release];
         viewController_showAlert(self, &details, okAction, NULL);
@@ -268,7 +283,10 @@ UIView *createConfettiView(CGRect frame) {
 }
 
 - (void) updateGreeting {
-    greetingLabel.text = (__bridge NSString*) viewModel->greetings[viewModel->timeOfDay];
+    CFStringRef greeting = CFStringCreateWithFormat(NULL, NULL, CFSTR("Good %s!"),
+                                                    viewModel->timeNames[viewModel->timeOfDay]);
+    greetingLabel.text = (__bridge NSString*) greeting;
+    CFRelease(greeting);
 }
 @end
 

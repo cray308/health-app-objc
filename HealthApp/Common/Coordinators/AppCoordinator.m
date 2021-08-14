@@ -42,9 +42,13 @@ void appCoordinator_start(AppCoordinator *coordinator, time_t now, time_t weekSt
     persistenceService_performForegroundUpdate();
     UINavigationController *controllers[3];
     UITabBarItem *items[3] = {
-        [[UITabBarItem alloc] initWithTitle:@"Home" image:[UIImage systemImageNamed:@"house"] tag:0],
-        [[UITabBarItem alloc] initWithTitle:@"History" image:[UIImage systemImageNamed:@"chart.bar"] tag:1],
-        [[UITabBarItem alloc] initWithTitle:@"Settings" image:[UIImage systemImageNamed:@"gear"] tag:2]};
+        [[UITabBarItem alloc] initWithTitle:@"Home"
+                                      image:[UIImage systemImageNamed:@"house"] tag:0],
+        [[UITabBarItem alloc] initWithTitle:@"History"
+                                      image:[UIImage systemImageNamed:@"chart.bar"] tag:1],
+        [[UITabBarItem alloc] initWithTitle:@"Settings"
+                                      image:[UIImage systemImageNamed:@"gear"] tag:2]
+    };
     for (int i = 0; i < 3; ++i) {
         controllers[i] = [[UINavigationController alloc] initWithNibName:nil bundle:nil];
         [controllers[i].navigationBar setBarTintColor:UIColor.tertiarySystemGroupedBackgroundColor];
@@ -67,7 +71,8 @@ void appCoordinator_start(AppCoordinator *coordinator, time_t now, time_t weekSt
     coordinator->children[1] = histCoord;
     coordinator->children[2] = settingsCoord;
 
-    [coordinator->tabVC setViewControllers:@[controllers[0], controllers[1], controllers[2]] animated:false];
+    [coordinator->tabVC setViewControllers:@[controllers[0], controllers[1], controllers[2]]
+                                  animated:false];
 
     for (int i = 0; i < 3; ++i) {
         [controllers[i] release];

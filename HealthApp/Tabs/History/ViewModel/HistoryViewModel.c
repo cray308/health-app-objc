@@ -13,29 +13,17 @@ gen_array_source(weekData, HistoryWeekDataModel, DSDefault_shallowCopy, DSDefaul
 gen_array_source(chartData, void*, DSDefault_shallowCopy, freeChartDataEntry)
 
 void historyViewModel_init(HistoryViewModel *this) {
-    {
-        CFStringRef labels[] = {CFSTR("Strength (Avg: %@)"), CFSTR("HIC (Avg: %@)"), CFSTR("SE (Avg: %@)"),
-            CFSTR("Endurance (Avg: %@)")};
-        HistoryAreaChartViewModel *vm = &this->areaChartViewModel;
-        for (int i = 0; i < 4; ++i) {
-            vm->entries[i] = array_new(chartData);
-            vm->legendLabelFormats[i] = labels[i];
-        }
-        vm->entries[4] = array_new(chartData);
+    for (int i = 0; i < 4; ++i) {
+        this->areaChartViewModel.entries[i] = array_new(chartData);
+        this->liftChartViewModel.entries[i] = array_new(chartData);
     }
-    {
-        CFStringRef labels[] = {CFSTR("Squat (Avg: %.1f)"), CFSTR("Pull-up (Avg: %.1f)"), CFSTR("Bench (Avg: %.1f)"),
-            CFSTR("Deadlift (Avg: %.1f)")};
-        HistoryLiftChartViewModel *vm = &this->liftChartViewModel;
-        for (int i = 0; i < 4; ++i) {
-            vm->entries[i] = array_new(chartData);
-            vm->legendLabelFormats[i] = labels[i];
-        }
-    }
-    {
-        HistoryGradientChartViewModel *vm = &this->gradientChartViewModel;
-        vm->entries = array_new(chartData);
-    }
+    this->areaChartViewModel.entries[4] = array_new(chartData);
+    this->gradientChartViewModel.entries = array_new(chartData);
+
+    memcpy(this->areaChartViewModel.names, (char [][10]){"Strength", "HIC", "SE", "Endurance"}, 40);
+    memcpy(this->liftChartViewModel.names,
+           (char [][9]){"Squat", "Pull-up", "Bench", "Deadlift"}, 36);
+
     this->data = array_new(weekData);
     array_reserve(weekData, this->data, 128);
 }

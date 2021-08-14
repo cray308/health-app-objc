@@ -8,7 +8,7 @@
 #ifndef CalendarDateHelpers_h
 #define CalendarDateHelpers_h
 
-#include <CoreFoundation/CoreFoundation.h>
+#include <time.h>
 
 #define DaySeconds 86400
 #define WeekSeconds 604800

@@ -14,7 +14,8 @@
 @interface WorkoutViewController: UIViewController
 - (id) initWithDelegate: (AddWorkoutCoordinator *)_delegate;
 - (void) finishedExerciseGroup;
-- (void) finishedWorkoutTimerForType: (unsigned char)type container: (int)container exercise: (int)exercise;
+- (void) finishedWorkoutTimerForType: (unsigned char)type
+                           container: (int)container exercise: (int)exercise;
 @end
 
 #endif /* WorkoutViewController_h */

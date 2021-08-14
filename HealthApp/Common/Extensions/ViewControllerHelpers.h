@@ -16,7 +16,7 @@ typedef struct {
 } AlertDetails;
 
 void createToolbar(id target, SEL doneSelector, UITextField **fields);
-void viewController_showAlert(UIViewController *presenter, AlertDetails const* details, UIAlertAction *defaultAction,
-                              UIAlertAction *secondaryAction);
+void viewController_showAlert(UIViewController *presenter, AlertDetails const* details,
+                              UIAlertAction *defaultAction, UIAlertAction *secondaryAction);
 
 #endif /* ViewControllerHelpers_h */

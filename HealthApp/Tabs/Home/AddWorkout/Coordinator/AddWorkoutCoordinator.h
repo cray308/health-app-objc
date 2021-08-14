@@ -27,7 +27,8 @@ void addWorkoutCoordinator_start(AddWorkoutCoordinator *this);
 void addWorkoutCoordinator_free(AddWorkoutCoordinator *this);
 
 void addWorkoutCoordinator_stoppedWorkout(AddWorkoutCoordinator *this);
-void addWorkoutCoordinator_completedWorkout(AddWorkoutCoordinator *this, bool dismissVC, bool showModalIfRequired);
+void addWorkoutCoordinator_completedWorkout(AddWorkoutCoordinator *this,
+                                            bool dismissVC, bool showModalIfRequired);
 void addWorkoutCoordinator_finishedAddingNewWeights(AddWorkoutCoordinator *this, short *weights);
 void addWorkoutCoordinator_stopWorkoutFromBackButtonPress(AddWorkoutCoordinator *this);
 

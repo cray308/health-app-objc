@@ -7,10 +7,12 @@
 
 #include "InputValidator.h"
 
-gen_uset_source(char, unsigned short, ds_cmp_num_eq, DSDefault_addrOfVal, DSDefault_sizeOfVal, DSDefault_shallowCopy, DSDefault_shallowDelete)
+gen_uset_source(char, unsigned short, ds_cmp_num_eq, DSDefault_addrOfVal, DSDefault_sizeOfVal,
+                DSDefault_shallowCopy, DSDefault_shallowDelete)
 
 USet_char *inputValidator_createNumberCharacterSet(void) {
-    return uset_new_fromArray(char, ((unsigned short[]){'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'}), 10);
+    unsigned short nums[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
+    return uset_new_fromArray(char, nums, 10);
 }
 
 bool inputValidator_validateNumericInput(USet_char *set, CFStringRef str) {

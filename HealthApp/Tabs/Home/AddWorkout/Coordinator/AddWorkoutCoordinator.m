@@ -12,7 +12,6 @@
 #import "AppDelegate.h"
 #include "AppUserData.h"
 #import "PersistenceService.h"
-#import "WeeklyData+CoreDataClass.h"
 
 void updateStoredData(AddWorkoutViewModel *model) {
     int duration = (int) ((model->stopTime - model->startTime) / 60.0);
@@ -37,7 +36,8 @@ void updateStoredData(AddWorkoutViewModel *model) {
     persistenceService_saveContext();
 }
 
-void didFinishAddingWorkout(AddWorkoutCoordinator *this, bool dismissVC, int totalCompletedWorkouts) {
+void didFinishAddingWorkout(AddWorkoutCoordinator *this,
+                            bool dismissVC, int totalCompletedWorkouts) {
     if (dismissVC) {
         [this->navigationController dismissViewControllerAnimated:true completion:nil];
         AppDelegate *delegate = (AppDelegate *) UIApplication.sharedApplication.delegate;
@@ -64,13 +64,17 @@ void addWorkoutCoordinator_stoppedWorkout(AddWorkoutCoordinator *this) {
     didFinishAddingWorkout(this, false, 0);
 }
 
-void addWorkoutCoordinator_completedWorkout(AddWorkoutCoordinator *this, bool dismissVC, bool showModalIfRequired) {
+void addWorkoutCoordinator_completedWorkout(AddWorkoutCoordinator *this,
+                                            bool dismissVC, bool showModalIfRequired) {
     CFStringRef title = this->viewModel.workout->title;
-    if (showModalIfRequired && CFStringCompareWithOptions(title, CFSTR("test day"),
-                                                          CFRangeMake(0, CFStringGetLength(title)),
-                                                          kCFCompareCaseInsensitive) == kCFCompareEqualTo) {
-        UIViewController *modal = [[AddWorkoutUpdateMaxesViewController alloc] initWithDelegate:this];
-        UINavigationController *container = [[UINavigationController alloc] initWithRootViewController:modal];
+    if (showModalIfRequired &&
+        CFStringCompareWithOptions(title, CFSTR("test day"),
+                                   CFRangeMake(0, CFStringGetLength(title)),
+                                   kCFCompareCaseInsensitive) == kCFCompareEqualTo) {
+        UIViewController *modal = [[AddWorkoutUpdateMaxesViewController alloc]
+                                   initWithDelegate:this];
+        UINavigationController *container = [[UINavigationController alloc]
+                                             initWithRootViewController:modal];
         [this->navigationController presentViewController:container animated:true completion:nil];
         [container release];
         [modal release];
