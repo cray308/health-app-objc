@@ -8,17 +8,10 @@
 #import "CocoaBridging.h"
 #import <Foundation/Foundation.h>
 
-CFDictionaryRef getUserInfoDictionary(void) {
-    return (__bridge CFDictionaryRef)[NSUserDefaults.standardUserDefaults
-                                      dictionaryForKey:@"userinfo"];
+id objc_staticMethod(Class _self, SEL _cmd) {
+    return ((id (*)(Class, SEL)) objc_msgSend)(_self, _cmd);
 }
 
-void writeUserInfoDictionary(CFDictionaryRef dict) {
-    [NSUserDefaults.standardUserDefaults setObject:(__bridge NSDictionary*)dict forKey:@"userinfo"];
-    [NSUserDefaults.standardUserDefaults synchronize];
-}
-
-CFDictionaryRef workoutJsonDictionaryCreate(void) {
-    NSString *path = [[NSBundle mainBundle] pathForResource:@"WorkoutData" ofType:@"plist"];
-    return (__bridge CFDictionaryRef) [[NSDictionary alloc] initWithContentsOfFile:path];
+void objc_singleArg(id obj, SEL _cmd) {
+    ((void (*)(id, SEL)) objc_msgSend)(obj, _cmd);
 }

@@ -17,7 +17,6 @@ typedef struct {
     void *childCoordinator;
 } HomeTabCoordinator;
 
-void homeCoordinator_free(HomeTabCoordinator *this);
 void homeCoordinator_start(HomeTabCoordinator *this);
 
 void homeCoordinator_resetUI(HomeTabCoordinator *this);

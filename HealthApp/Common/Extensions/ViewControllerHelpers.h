@@ -8,15 +8,14 @@
 #ifndef ViewControllerHelpers_h
 #define ViewControllerHelpers_h
 
-#import <UIKit/UIKit.h>
+#include "CocoaBridging.h"
+#include "unordered_set.h"
 
-typedef struct {
-    CFStringRef title;
-    CFStringRef message;
-} AlertDetails;
+gen_uset_headers(char, unsigned short)
 
-void createToolbar(id target, SEL doneSelector, UITextField **fields);
-void viewController_showAlert(UIViewController *presenter, AlertDetails const* details,
-                              UIAlertAction *defaultAction, UIAlertAction *secondaryAction);
+void createToolbar(id target, SEL doneSelector, id *fields);
+id createDivider(void);
+USet_char *createNumberCharacterSet(void);
+bool validateNumericInput(USet_char *set, CFStringRef str, CFStringInlineBuffer *buf);
 
 #endif /* ViewControllerHelpers_h */

@@ -6,7 +6,7 @@
 //
 
 #import "WorkoutViewController.h"
-#import "Divider.h"
+#include "ViewControllerHelpers.h"
 #include <UserNotifications/UserNotifications.h>
 #include <NotificationCenter/NotificationCenter.h>
 #include <pthread.h>

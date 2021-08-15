@@ -6,16 +6,16 @@
 //
 
 #import "SettingsViewController.h"
-#import "ViewControllerHelpers.h"
+#include "ViewControllerHelpers.h"
 #include "AppUserData.h"
 #import "AppDelegate.h"
 #import "PersistenceService.h"
-#include "InputValidator.h"
 
 #define _U_ __attribute__((__unused__))
 
 @interface SettingsViewController() {
     USet_char *validChars;
+    CFStringInlineBuffer buf;
     UISegmentedControl *planPicker;
     UITextField *textFields[4];
     bool validInput[4];
@@ -41,7 +41,7 @@
     [super viewDidLoad];
     self.view.backgroundColor = UIColor.systemGroupedBackgroundColor;
     self.navigationItem.title = @"App Settings";
-    validChars = inputValidator_createNumberCharacterSet();
+    validChars = createNumberCharacterSet();
 
     UILabel *planLabel = [[UILabel alloc] initWithFrame:CGRectZero];
     planLabel.translatesAutoresizingMaskIntoConstraints = false;
@@ -195,44 +195,46 @@
     const int segment = (int) planPicker.selectedSegmentIndex;
     signed char plan = segment == 0 ? -1 : segment - 1;
 
-    AlertDetails details = {
-        CFSTR("Are you sure?"), CFSTR("This will save the currently entered data.")
-    };
-    UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"Save" style:UIAlertActionStyleDefault
-                                                     handler:^(UIAlertAction * _Nonnull action _U_) {
+    UIAlertController *ctrl = [UIAlertController
+                               alertControllerWithTitle:@"Are you sure?"
+                               message:@"This will save the currently entered data."
+                               preferredStyle:UIAlertControllerStyleAlert];
+
+    [ctrl addAction:[UIAlertAction actionWithTitle:@"Save" style:UIAlertActionStyleDefault
+                                           handler:^(UIAlertAction * _Nonnull action _U_) {
         appUserData_updateWeightMaxes(results);
         appUserData_setWorkoutPlan(plan);
         AppDelegate *app = (AppDelegate *) UIApplication.sharedApplication.delegate;
         if (app) appCoordinator_updatedUserInfo(&app->coordinator);
-    }];
-    UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"Cancel"
-                                                           style:UIAlertActionStyleCancel
-                                                         handler:nil];
-    viewController_showAlert(self, &details, okAction, cancelAction);
+    }]];
+    [ctrl addAction:[UIAlertAction actionWithTitle:@"Cancel"
+                                             style:UIAlertActionStyleCancel handler:nil]];
+    [self presentViewController:ctrl animated:true completion:nil];
 }
 
 - (void) deleteButtonPressed {
-    AlertDetails details = {CFSTR("Are you sure?"), CFSTR("This will delete all workout history.")};
-    UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"Delete"
-                                                       style:UIAlertActionStyleDestructive
-                                                     handler:^(UIAlertAction * _Nonnull action _U_) {
+    UIAlertController *ctrl = [UIAlertController
+                               alertControllerWithTitle:@"Are you sure?"
+                               message:@"This will delete all workout history."
+                               preferredStyle:UIAlertControllerStyleAlert];
+
+    [ctrl addAction:[UIAlertAction actionWithTitle:@"Delete" style:UIAlertActionStyleDestructive
+                                           handler:^(UIAlertAction * _Nonnull action _U_) {
         persistenceService_deleteUserData();
         appUserData_deleteSavedData();
         AppDelegate *app = (AppDelegate *) UIApplication.sharedApplication.delegate;
         if (app) appCoordinator_deletedAppData(&app->coordinator);
-    }];
-    UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"Cancel"
-                                                           style:UIAlertActionStyleCancel
-                                                         handler:nil];
-    viewController_showAlert(self, &details, okAction, cancelAction);
+    }]];
+    [ctrl addAction:[UIAlertAction actionWithTitle:@"Cancel"
+                                             style:UIAlertActionStyleCancel handler:nil]];
+    [self presentViewController:ctrl animated:true completion:nil];
 }
 
 #pragma mark - TextField Delegate
 
 - (BOOL) textField: (UITextField *)textField
 shouldChangeCharactersInRange: (NSRange)range replacementString: (NSString *)string {
-    if (!inputValidator_validateNumericInput(validChars, (__bridge CFStringRef) string))
-        return false;
+    if (!validateNumericInput(validChars, (__bridge CFStringRef) string, &buf)) return false;
 
     int i = 0;
     for (; i < 4; ++i) {

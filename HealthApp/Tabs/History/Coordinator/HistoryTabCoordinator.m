@@ -9,11 +9,6 @@
 #include "HistoryDataManager.h"
 #import "HistoryViewController.h"
 
-void historyCoordinator_free(HistoryTabCoordinator *this) {
-    historyViewModel_free(&this->viewModel);
-    free(this);
-}
-
 void historyCoordinator_start(HistoryTabCoordinator *this) {
     historyViewModel_init(&this->viewModel);
     UIViewController *vc = [[HistoryViewController alloc] initWithDelegate:this];

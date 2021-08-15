@@ -17,13 +17,6 @@ typedef enum {
     TabHome, TabHistory, TabSettings
 } AppTab;
 
-void appCoordinator_free(AppCoordinator *coordinator) {
-    homeCoordinator_free(coordinator->children[0]);
-    historyCoordinator_free(coordinator->children[1]);
-    settingsCoordinator_free(coordinator->children[2]);
-    [coordinator->tabVC release];
-}
-
 void appCoordinator_start(AppCoordinator *coordinator, time_t now, time_t weekStart) {
     coordinator->tabVC = [[UITabBarController alloc] init];
 

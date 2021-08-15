@@ -28,16 +28,6 @@ void historyViewModel_init(HistoryViewModel *this) {
     array_reserve(weekData, this->data, 128);
 }
 
-void historyViewModel_free(HistoryViewModel *this) {
-    for (int i = 0; i < 4; ++i) {
-        array_free(chartData, this->liftChartViewModel.entries[i]);
-        array_free(chartData, this->areaChartViewModel.entries[i]);
-    }
-    array_free(chartData, this->areaChartViewModel.entries[4]);
-    array_free(chartData, this->gradientChartViewModel.entries);
-    array_free(weekData, this->data);
-}
-
 XAxisFormatType historyViewModel_formatDataForTimeRange(HistoryViewModel *this, int index) {
     {
         HistoryAreaChartViewModel *vm = &this->areaChartViewModel;

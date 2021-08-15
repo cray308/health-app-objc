@@ -7,7 +7,7 @@
 
 #import "HistoryViewController.h"
 #import "AppDelegate.h"
-#import "Divider.h"
+#include "ViewControllerHelpers.h"
 #include "CalendarDateHelpers.h"
 #include "HistoryDataManager.h"
 

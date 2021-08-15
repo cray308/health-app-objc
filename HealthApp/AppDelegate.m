@@ -21,16 +21,6 @@ void setupData(time_t now, time_t weekStart);
 
 @implementation AppDelegate
 
-- (void) dealloc {
-    if (appUserDataShared) free(appUserDataShared);
-    appUserDataShared = NULL;
-    if (persistenceServiceShared) [persistenceServiceShared release];
-    persistenceServiceShared = NULL;
-    appCoordinator_free(&coordinator);
-    [window release];
-    [super dealloc];
-}
-
 - (BOOL) application: (UIApplication *)application
 didFinishLaunchingWithOptions: (NSDictionary *)launchOptions {
     window = [[UIWindow alloc] initWithFrame:UIScreen.mainScreen.bounds];

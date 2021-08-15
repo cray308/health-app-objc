@@ -6,12 +6,12 @@
 //
 
 #import "HomeSetupWorkoutModalViewController.h"
-#import "ViewControllerHelpers.h"
+#include "ViewControllerHelpers.h"
 #include "Exercise.h"
-#include "InputValidator.h"
 
 @interface HomeSetupWorkoutModalViewController() {
     USet_char *validChars;
+    CFStringInlineBuffer buf;
     HomeTabCoordinator *delegate;
     CFStringRef *names;
     int count;
@@ -158,7 +158,7 @@
         [hStack release];
     }
 
-    if (createCharSet) validChars = inputValidator_createNumberCharacterSet();
+    if (createCharSet) validChars = createNumberCharacterSet();
 
     UIButton *cancelButton = [UIButton buttonWithType:UIButtonTypeSystem];
     cancelButton.translatesAutoresizingMaskIntoConstraints = false;
@@ -225,8 +225,7 @@
 
 - (BOOL) textField: (UITextField *)textField
 shouldChangeCharactersInRange: (NSRange)range replacementString: (NSString *)string {
-    if (!inputValidator_validateNumericInput(validChars, (__bridge CFStringRef) string))
-        return false;
+    if (!validateNumericInput(validChars, (__bridge CFStringRef) string, &buf)) return false;
 
     int i = 0;
     for (; i < 3; ++i) {

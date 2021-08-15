@@ -5,12 +5,12 @@
 //  Created by Christopher Ray on 3/20/21.
 //
 
-#include <CoreFoundation/CoreFoundation.h>
 #include "AppUserData.h"
 #include "CocoaBridging.h"
 #include "CalendarDateHelpers.h"
 
 UserInfo *appUserDataShared = NULL;
+static CFStringRef const userInfoKey = CFSTR("userinfo");
 
 static CFStringRef const keys[] = {
     CFSTR("planStart"), CFSTR("weekStart"), CFSTR("tzOffset"), CFSTR("currentPlan"),
@@ -18,8 +18,13 @@ static CFStringRef const keys[] = {
     CFSTR("deadliftMax")
 };
 
+id getUserDefaults(void) {
+    return objc_staticMethod(objc_getClass("NSUserDefaults"), sel_getUid("standardUserDefaults"));
+}
+
 UserInfo *userInfo_initFromStorage(void) {
-    CFDictionaryRef savedInfo = getUserInfoDictionary();
+    CFDictionaryRef savedInfo = ((CFDictionaryRef (*)(id, SEL, CFStringRef)) objc_msgSend)
+        (getUserDefaults(), sel_getUid("dictionaryForKey:"), userInfoKey);
     if (!savedInfo) return NULL;
     CFNumberRef value;
 
@@ -60,7 +65,10 @@ void userInfo_saveData(UserInfo *info) {
                                               &kCFCopyStringDictionaryKeyCallBacks,
                                               &kCFTypeDictionaryValueCallBacks);
 
-    writeUserInfoDictionary(dict);
+    id defaults = getUserDefaults();
+    ((void (*)(id, SEL, CFDictionaryRef, CFStringRef)) objc_msgSend)
+        (defaults, sel_getUid("setObject:forKey:"), dict, userInfoKey);
+    ((bool (*)(id, SEL)) objc_msgSend)(defaults, sel_getUid("synchronize"));
     CFRelease(dict);
     for (int i = 0; i < 9; ++i) CFRelease(values[i]);
 }

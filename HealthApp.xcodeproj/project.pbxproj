@@ -14,7 +14,7 @@
 		611B591626C5F6830082F6CA /* array.h in Headers */ = {isa = PBXBuildFile; fileRef = 611B591126C5F6830082F6CA /* array.h */; };
 		611B591726C5F6830082F6CA /* hash_table.h in Headers */ = {isa = PBXBuildFile; fileRef = 611B591226C5F6830082F6CA /* hash_table.h */; };
 		612FD048266DAF25002C9993 /* WorkoutData.plist in Resources */ = {isa = PBXBuildFile; fileRef = 612FD047266DAF25002C9993 /* WorkoutData.plist */; };
-		614DC13026082BBE00B9588E /* ViewControllerHelpers.m in Sources */ = {isa = PBXBuildFile; fileRef = 614DC12F26082BBE00B9588E /* ViewControllerHelpers.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		614DC13026082BBE00B9588E /* ViewControllerHelpers.c in Sources */ = {isa = PBXBuildFile; fileRef = 614DC12F26082BBE00B9588E /* ViewControllerHelpers.c */; };
 		6151A323260F012300D88F1B /* CalendarDateHelpers.c in Sources */ = {isa = PBXBuildFile; fileRef = 6151A322260F012300D88F1B /* CalendarDateHelpers.c */; };
 		6151C91126C4B23200C95A93 /* hash.h in Headers */ = {isa = PBXBuildFile; fileRef = 6151C90226C4B23100C95A93 /* hash.h */; };
 		6151C92226C4B24200C95A93 /* hash.c in Sources */ = {isa = PBXBuildFile; fileRef = 6151C92026C4B24200C95A93 /* hash.c */; };
@@ -106,11 +106,8 @@
 		61808CBC2610FEEF00BAF7AB /* LineChartDataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61808C2F2610FEEF00BAF7AB /* LineChartDataProvider.swift */; };
 		61808CBD2610FEEF00BAF7AB /* BarLineScatterCandleBubbleChartDataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61808C302610FEEF00BAF7AB /* BarLineScatterCandleBubbleChartDataProvider.swift */; };
 		6197B5DB26ADFF0F00F97B98 /* HistoryDataManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 6197B5DA26ADFF0F00F97B98 /* HistoryDataManager.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		6197B60026AE3D5C00F97B98 /* InputValidator.h in Headers */ = {isa = PBXBuildFile; fileRef = 6197B5FE26AE3D5B00F97B98 /* InputValidator.h */; };
-		6197B60126AE3D5C00F97B98 /* InputValidator.c in Sources */ = {isa = PBXBuildFile; fileRef = 6197B5FF26AE3D5C00F97B98 /* InputValidator.c */; };
 		61BC6F55266EA9A80022D6F7 /* WeeklyData+CoreDataClass.h in Headers */ = {isa = PBXBuildFile; fileRef = 61BC6F51266EA9A80022D6F7 /* WeeklyData+CoreDataClass.h */; };
 		61BC6F56266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m in Sources */ = {isa = PBXBuildFile; fileRef = 61BC6F52266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		61C778DE26102235001326A1 /* Divider.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C778DD26102235001326A1 /* Divider.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61C7793626102C19001326A1 /* HistoryTabCoordinator.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C7793526102C19001326A1 /* HistoryTabCoordinator.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61C7795026102C8C001326A1 /* HistoryViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C7794F26102C8C001326A1 /* HistoryViewController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61C7796026102CC6001326A1 /* HistoryViewModel.c in Sources */ = {isa = PBXBuildFile; fileRef = 61C7795F26102CC6001326A1 /* HistoryViewModel.c */; };
@@ -141,7 +138,7 @@
 		611B591226C5F6830082F6CA /* hash_table.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hash_table.h; sourceTree = "<group>"; };
 		612FD047266DAF25002C9993 /* WorkoutData.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = WorkoutData.plist; sourceTree = "<group>"; };
 		614DC12826081E9E00B9588E /* ViewControllerHelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewControllerHelpers.h; sourceTree = "<group>"; };
-		614DC12F26082BBE00B9588E /* ViewControllerHelpers.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewControllerHelpers.m; sourceTree = "<group>"; };
+		614DC12F26082BBE00B9588E /* ViewControllerHelpers.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = ViewControllerHelpers.c; sourceTree = "<group>"; };
 		6151A321260F010F00D88F1B /* CalendarDateHelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CalendarDateHelpers.h; sourceTree = "<group>"; };
 		6151A322260F012300D88F1B /* CalendarDateHelpers.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = CalendarDateHelpers.c; sourceTree = "<group>"; };
 		6151C90226C4B23100C95A93 /* hash.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hash.h; sourceTree = "<group>"; };
@@ -248,12 +245,8 @@
 		61808C302610FEEF00BAF7AB /* BarLineScatterCandleBubbleChartDataProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BarLineScatterCandleBubbleChartDataProvider.swift; sourceTree = "<group>"; };
 		6197B5DA26ADFF0F00F97B98 /* HistoryDataManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HistoryDataManager.m; sourceTree = "<group>"; };
 		6197B5DE26ADFF2000F97B98 /* HistoryDataManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HistoryDataManager.h; sourceTree = "<group>"; };
-		6197B5FE26AE3D5B00F97B98 /* InputValidator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = InputValidator.h; sourceTree = "<group>"; };
-		6197B5FF26AE3D5C00F97B98 /* InputValidator.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = InputValidator.c; sourceTree = "<group>"; };
 		61BC6F51266EA9A80022D6F7 /* WeeklyData+CoreDataClass.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "WeeklyData+CoreDataClass.h"; sourceTree = "<group>"; };
 		61BC6F52266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "WeeklyData+CoreDataClass.m"; sourceTree = "<group>"; };
-		61C778D5261021F1001326A1 /* Divider.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Divider.h; sourceTree = "<group>"; };
-		61C778DD26102235001326A1 /* Divider.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Divider.m; sourceTree = "<group>"; };
 		61C77914261028BE001326A1 /* HomeTabCoordinator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HomeTabCoordinator.h; sourceTree = "<group>"; };
 		61C77916261028F3001326A1 /* HomeViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HomeViewController.h; sourceTree = "<group>"; };
 		61C7791A26102960001326A1 /* HomeViewModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HomeViewModel.h; sourceTree = "<group>"; };
@@ -739,7 +732,6 @@
 				61808D3F261126CF00BAF7AB /* DataStructures */,
 				61C7790426102663001326A1 /* Extensions */,
 				61C7790326102620001326A1 /* SharedData */,
-				61C7790526102727001326A1 /* View */,
 				6107C957266C159B00DDBCCF /* Workouts */,
 				612FD047266DAF25002C9993 /* WorkoutData.plist */,
 			);
@@ -764,21 +756,10 @@
 				6151A322260F012300D88F1B /* CalendarDateHelpers.c */,
 				6161838026AC8089001587B2 /* CocoaBridging.h */,
 				6161838126AC80A0001587B2 /* CocoaBridging.m */,
-				6197B5FE26AE3D5B00F97B98 /* InputValidator.h */,
-				6197B5FF26AE3D5C00F97B98 /* InputValidator.c */,
 				614DC12826081E9E00B9588E /* ViewControllerHelpers.h */,
-				614DC12F26082BBE00B9588E /* ViewControllerHelpers.m */,
+				614DC12F26082BBE00B9588E /* ViewControllerHelpers.c */,
 			);
 			path = Extensions;
-			sourceTree = "<group>";
-		};
-		61C7790526102727001326A1 /* View */ = {
-			isa = PBXGroup;
-			children = (
-				61C778D5261021F1001326A1 /* Divider.h */,
-				61C778DD26102235001326A1 /* Divider.m */,
-			);
-			path = View;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -790,7 +771,6 @@
 			files = (
 				6151C91126C4B23200C95A93 /* hash.h in Headers */,
 				611B591326C5F6830082F6CA /* alg_helper.h in Headers */,
-				6197B60026AE3D5C00F97B98 /* InputValidator.h in Headers */,
 				61BC6F55266EA9A80022D6F7 /* WeeklyData+CoreDataClass.h in Headers */,
 				611B591426C5F6830082F6CA /* unordered_set.h in Headers */,
 				611B591726C5F6830082F6CA /* hash_table.h in Headers */,
@@ -975,15 +955,13 @@
 				6114EA752615544000B4A472 /* AreaChartRenderer.swift in Sources */,
 				61594D1826068105000D01A1 /* HealthApp.xcdatamodeld in Sources */,
 				6151C92226C4B24200C95A93 /* hash.c in Sources */,
-				6197B60126AE3D5C00F97B98 /* InputValidator.c in Sources */,
 				6151A323260F012300D88F1B /* CalendarDateHelpers.c in Sources */,
 				6161838226AC80A0001587B2 /* CocoaBridging.m in Sources */,
 				616E2F842676A22700342CD8 /* Exercise.c in Sources */,
 				61594D652606C7C6000D01A1 /* AppUserData.c in Sources */,
 				61BC6F56266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m in Sources */,
 				615A1C4C2608406100858C32 /* PersistenceService.m in Sources */,
-				61C778DE26102235001326A1 /* Divider.m in Sources */,
-				614DC13026082BBE00B9588E /* ViewControllerHelpers.m in Sources */,
+				614DC13026082BBE00B9588E /* ViewControllerHelpers.c in Sources */,
 				6197B5DB26ADFF0F00F97B98 /* HistoryDataManager.m in Sources */,
 				61C7796026102CC6001326A1 /* HistoryViewModel.c in Sources */,
 				61C7795026102C8C001326A1 /* HistoryViewController.m in Sources */,
@@ -1155,6 +1133,7 @@
 				CLANG_WARN_OBJC_REPEATED_USE_OF_WEAK = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 77YYP4528L;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_CHAR_IS_UNSIGNED_CHAR = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -1190,6 +1169,7 @@
 				CLANG_WARN_OBJC_REPEATED_USE_OF_WEAK = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 77YYP4528L;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_CHAR_IS_UNSIGNED_CHAR = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;

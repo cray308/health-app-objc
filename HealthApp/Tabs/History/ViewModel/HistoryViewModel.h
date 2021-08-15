@@ -57,7 +57,6 @@ typedef struct {
 } HistoryViewModel;
 
 void historyViewModel_init(HistoryViewModel *model);
-void historyViewModel_free(HistoryViewModel *model);
 XAxisFormatType historyViewModel_formatDataForTimeRange(HistoryViewModel *this, int index);
 
 #endif /* HistoryViewModel_h */

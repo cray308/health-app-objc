@@ -9,9 +9,10 @@
 #define CocoaBridging_h
 
 #include <CoreFoundation/CoreFoundation.h>
+#include <objc/runtime.h>
+#include <objc/message.h>
 
-CFDictionaryRef getUserInfoDictionary(void);
-void writeUserInfoDictionary(CFDictionaryRef dict);
-CFDictionaryRef workoutJsonDictionaryCreate(void);
+id objc_staticMethod(Class _self, SEL _cmd);
+void objc_singleArg(id obj, SEL _cmd);
 
 #endif /* CocoaBridging_h */

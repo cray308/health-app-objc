@@ -53,12 +53,6 @@ void navigateToAddWorkout(HomeTabCoordinator *this, bool dismissVC, Workout *wor
     addWorkoutCoordinator_start(child);
 }
 
-void homeCoordinator_free(HomeTabCoordinator *this) {
-    if (this->childCoordinator) addWorkoutCoordinator_free(this->childCoordinator);
-    homeViewModel_free(&this->viewModel);
-    free(this);
-}
-
 void homeCoordinator_start(HomeTabCoordinator *this) {
     homeViewModel_init(&this->viewModel);
     HomeViewController *vc = [[HomeViewController alloc] initWithDelegate:this];

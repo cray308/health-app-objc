@@ -17,9 +17,19 @@ gen_array_source(exGroup, ExerciseGroup, DSDefault_shallowCopy, freeExerciseGrou
 
 static CFStringRef const repsKey = CFSTR("reps");
 static CFStringRef const typeKey = CFSTR("type");
-static CFStringRef const libraryKey = CFSTR("library");
 static CFStringRef const indexKey = CFSTR("index");
 static CFStringRef const titleKey = CFSTR("title");
+
+CFDictionaryRef createRootAndLibDict(CFDictionaryRef *lib) {
+    CFStringRef path = ((CFStringRef (*)(id, SEL, CFStringRef, CFStringRef)) objc_msgSend)
+        (objc_staticMethod(objc_getClass("NSBundle"), sel_getUid("mainBundle")),
+         sel_getUid("pathForResource:ofType:"), CFSTR("WorkoutData"), CFSTR("plist"));
+    CFDictionaryRef root = ((CFDictionaryRef (*)(id, SEL, CFStringRef)) objc_msgSend)
+        (objc_staticMethod(objc_getClass("NSDictionary"), sel_getUid("alloc")),
+         sel_getUid("initWithContentsOfFile:"), path);
+    *lib = CFDictionaryGetValue(root, CFSTR("library"));
+    return root;
+}
 
 CFArrayRef getLibraryArrayForType(CFDictionaryRef libDict, unsigned char type) {
     static CFStringRef const keys[] = {CFSTR("st"), CFSTR("se"), CFSTR("en"), CFSTR("hi")};
@@ -132,8 +142,8 @@ void buildWorkoutFromDict(CFDictionaryRef dict, int index,
 }
 
 void exerciseManager_setWeeklyWorkoutNames(unsigned char plan, int week, CFStringRef *names) {
-    CFDictionaryRef root = workoutJsonDictionaryCreate();
-    CFDictionaryRef lib = CFDictionaryGetValue(root, libraryKey);
+    CFDictionaryRef lib;
+    CFDictionaryRef root = createRootAndLibDict(&lib);
 
     CFArrayRef currWeek = getCurrentWeekForPlan(root, plan, week);
     if (!currWeek) goto cleanup;
@@ -161,8 +171,8 @@ cleanup:
 
 Workout *exerciseManager_getWeeklyWorkoutAtIndex(unsigned char plan, int week, int index) {
     Workout *w = NULL;
-    CFDictionaryRef root = workoutJsonDictionaryCreate();
-    CFDictionaryRef lib = CFDictionaryGetValue(root, libraryKey);
+    CFDictionaryRef lib;
+    CFDictionaryRef root = createRootAndLibDict(&lib);
 
     CFArrayRef currWeek = getCurrentWeekForPlan(root, plan, week);
     if (!currWeek) goto cleanup;
@@ -198,8 +208,8 @@ cleanup:
 
 CFStringRef *exerciseManager_getWorkoutNamesForType(unsigned char type, int *size) {
     CFStringRef *results = NULL;
-    CFDictionaryRef root = workoutJsonDictionaryCreate();
-    CFDictionaryRef lib = CFDictionaryGetValue(root, libraryKey);
+    CFDictionaryRef lib;
+    CFDictionaryRef root = createRootAndLibDict(&lib);
 
     int len = 0;
     CFArrayRef libArr = getLibraryArrayForType(lib, type);
@@ -222,8 +232,8 @@ cleanup:
 Workout *exerciseManager_getWorkoutFromLibrary(unsigned char type,
                                                int index, int reps, int sets, int weight) {
     Workout *w = NULL;
-    CFDictionaryRef root = workoutJsonDictionaryCreate();
-    CFDictionaryRef lib = CFDictionaryGetValue(root, libraryKey);
+    CFDictionaryRef lib;
+    CFDictionaryRef root = createRootAndLibDict(&lib);
     CFArrayRef libArr = getLibraryArrayForType(lib, type);
     if (!libArr) goto cleanup;
     w = calloc(1, sizeof(Workout));

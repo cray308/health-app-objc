@@ -6,7 +6,6 @@
 //
 
 #import "HomeViewController.h"
-#import "Divider.h"
 #import "ViewControllerHelpers.h"
 #import "AppDelegate.h"
 #include "AppUserData.h"
@@ -263,11 +262,13 @@ UIView *createConfettiView(CGRect frame) {
 }
 
 - (void) showConfetti {
-    AlertDetails details = {
-        CFSTR("Nicely done!"), CFSTR("Great job meeting your workout goal this week.")
-    };
-    UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"OK"
-                                                       style:UIAlertActionStyleDefault handler:nil];
+    UIAlertController *ctrl = [UIAlertController
+                               alertControllerWithTitle:@"Nicely done!"
+                               message:@"Great job meeting your workout goal this week."
+                               preferredStyle:UIAlertControllerStyleAlert];
+
+    [ctrl addAction:[UIAlertAction actionWithTitle:@"OK"
+                                             style:UIAlertActionStyleDefault handler:nil]];
 
     UIView *confettiView = createConfettiView((CGRect){.size = {
         .width = self.view.frame.size.width, .height = self.view.frame.size.height
@@ -278,7 +279,7 @@ UIView *createConfettiView(CGRect frame) {
                    dispatch_get_main_queue(), ^ (void) {
         [confettiView removeFromSuperview];
         [confettiView release];
-        viewController_showAlert(self, &details, okAction, NULL);
+        [self presentViewController:ctrl animated:true completion:nil];
     });
 }
 

@@ -10,13 +10,6 @@
 #include "CalendarDateHelpers.h"
 #include "Exercise.h"
 
-void clearNames(CFStringRef *names) {
-    for (int i = 0; i < 7; ++i) {
-        if (names[i]) CFRelease(names[i]);
-        names[i] = NULL;
-    }
-}
-
 void homeViewModel_init(HomeViewModel *model) {
     memcpy(model->weekdays, (CFStringRef []){
         CFSTR("Monday"), CFSTR("Tuesday"), CFSTR("Wednesday"), CFSTR("Thursday"), CFSTR("Friday"),
@@ -26,12 +19,11 @@ void homeViewModel_init(HomeViewModel *model) {
     homeViewModel_updateTimeOfDay(model);
 }
 
-void homeViewModel_free(HomeViewModel *model) {
-    clearNames(model->workoutNames);
-}
-
 void homeViewModel_fetchData(HomeViewModel *model) {
-    clearNames(model->workoutNames);
+    for (int i = 0; i < 7; ++i) {
+        if (model->workoutNames[i]) CFRelease(model->workoutNames[i]);
+        model->workoutNames[i] = NULL;
+    }
     if (appUserDataShared->currentPlan >= 0 && appUserDataShared->planStart <= time(NULL)) {
         unsigned char plan = (unsigned char) appUserDataShared->currentPlan;
         exerciseManager_setWeeklyWorkoutNames(plan,

@@ -8,10 +8,6 @@
 #import "SettingsTabCoordinator.h"
 #import "SettingsViewController.h"
 
-void settingsCoordinator_free(SettingsTabCoordinator *this) {
-    free(this);
-}
-
 void settingsCoordinator_start(SettingsTabCoordinator *this) {
     UIViewController *vc = [[SettingsViewController alloc] init];
     [this->navigationController setViewControllers:@[vc]];

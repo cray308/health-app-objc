@@ -22,7 +22,6 @@ typedef struct {
     void *children[3];
 } AppCoordinator;
 
-void appCoordinator_free(AppCoordinator *coordinator);
 void appCoordinator_start(AppCoordinator *coordinator, time_t now, time_t weekStart);
 
 void appCoordinator_updatedUserInfo(AppCoordinator *coordinator);

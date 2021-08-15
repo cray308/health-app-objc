@@ -7,10 +7,10 @@
 
 #import "AddWorkoutUpdateMaxesViewController.h"
 #import "ViewControllerHelpers.h"
-#include "InputValidator.h"
 
 @interface AddWorkoutUpdateMaxesViewController() {
     USet_char *validChars;
+    CFStringInlineBuffer buf;
     AddWorkoutCoordinator *delegate;
     UITextField *textFields[4];
     bool validInput[4];
@@ -23,7 +23,7 @@
 - (id) initWithDelegate: (AddWorkoutCoordinator *)_delegate {
     if (!(self = [super initWithNibName:nil bundle:nil])) return nil;
     delegate = _delegate;
-    validChars = inputValidator_createNumberCharacterSet();
+    validChars = createNumberCharacterSet();
     return self;
 }
 
@@ -111,8 +111,7 @@
 
 - (BOOL) textField: (UITextField *)textField
 shouldChangeCharactersInRange: (NSRange)range replacementString: (NSString *)string {
-    if (!inputValidator_validateNumericInput(validChars, (__bridge CFStringRef) string))
-        return false;
+    if (!validateNumericInput(validChars, (__bridge CFStringRef) string, &buf)) return false;
 
     int i = 0;
     for (; i < 4; ++i) {

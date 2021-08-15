@@ -18,7 +18,6 @@ typedef struct {
 } HomeViewModel;
 
 void homeViewModel_init(HomeViewModel *model);
-void homeViewModel_free(HomeViewModel *model);
 
 void homeViewModel_fetchData(HomeViewModel *model);
 bool homeViewModel_updateTimeOfDay(HomeViewModel *model);
