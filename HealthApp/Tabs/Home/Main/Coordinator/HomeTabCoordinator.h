@@ -8,11 +8,11 @@
 #ifndef HomeTabCoordinator_h
 #define HomeTabCoordinator_h
 
-#import <UIKit/UIKit.h>
+#include "CocoaBridging.h"
 #include "HomeViewModel.h"
 
 typedef struct {
-    UINavigationController *navigationController;
+    id navVC;
     HomeViewModel viewModel;
     void *childCoordinator;
 } HomeTabCoordinator;

@@ -7,7 +7,7 @@
 
 #import "HomeViewController.h"
 #import "ViewControllerHelpers.h"
-#import "AppDelegate.h"
+#include "AppCoordinator.h"
 #include "AppUserData.h"
 #include <math.h>
 
@@ -179,8 +179,7 @@ UIView *createConfettiView(CGRect frame) {
     homeViewModel_fetchData(viewModel);
     [self createWorkoutsList];
 
-    AppDelegate *app = (AppDelegate *) UIApplication.sharedApplication.delegate;
-    if (app) app->coordinator.loadedViewControllers |= LoadedViewController_Home;
+    appCoordinatorShared->loadedViewControllers |= LoadedViewController_Home;
 }
 
 - (void) viewWillAppear: (BOOL)animated {

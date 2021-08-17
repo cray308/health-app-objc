@@ -5,13 +5,7 @@
 //  Created by Christopher Ray on 3/20/21.
 //
 
-#include "AppCoordinator.h"
+#import <UIKit/UIKit.h>
 
 @interface AppDelegate: UIResponder <UIApplicationDelegate>
-@end
-
-@interface AppDelegate() {
-    @public AppCoordinator coordinator;
-    UIWindow *window;
-}
 @end

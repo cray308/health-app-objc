@@ -1,5 +1,5 @@
 //
-//  ViewControllerHelpers.m
+//  ViewControllerHelpers.c
 //  HealthApp
 //
 //  Created by Christopher Ray on 3/21/21.
@@ -29,13 +29,12 @@ void createToolbar(id target, SEL doneSelector, id *fields) {
         (objc_staticMethod(objc_getClass("UIBarButtonItem"), sel_getUid("alloc")),
          sel_getUid("initWithTitle:style:target:action:"), CFSTR("Done"), 0, target, doneSelector);
 
-    id items[] = {flexSpace, doneButton};
-    id array = ((id (*)(Class, SEL, id*, int)) objc_msgSend)
-        (objc_getClass("NSArray"), sel_getUid("arrayWithObjects:count:"), items, 2);
+    id array = ((id (*)(Class, SEL, id, ...)) objc_msgSend)
+        (objc_getClass("NSArray"), sel_getUid("arrayWithObjects:"), flexSpace, doneButton, nil);
     ((void (*)(id, SEL, id, bool)) objc_msgSend)
         (toolbar, sel_getUid("setItems:animated:"), array, false);
     ((void (*)(id, SEL, bool)) objc_msgSend)
-        (toolbar, sel_getUid("setUserInteractionEnabled:"), false);
+        (toolbar, sel_getUid("setUserInteractionEnabled:"), true);
 
     for (int i = 0; fields[i]; ++i) {
         ((void (*)(id, SEL, id)) objc_msgSend)

@@ -24,7 +24,7 @@
 		61594D1D26068106000D01A1 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 61594D1B26068106000D01A1 /* LaunchScreen.storyboard */; };
 		61594D2026068106000D01A1 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 61594D1F26068106000D01A1 /* main.m */; };
 		61594D2A26068106000D01A1 /* HealthAppTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 61594D2926068106000D01A1 /* HealthAppTests.m */; };
-		61594D5726068C41000D01A1 /* AppCoordinator.m in Sources */ = {isa = PBXBuildFile; fileRef = 61594D5626068C41000D01A1 /* AppCoordinator.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		61594D5726068C41000D01A1 /* AppCoordinator.c in Sources */ = {isa = PBXBuildFile; fileRef = 61594D5626068C41000D01A1 /* AppCoordinator.c */; };
 		61594D652606C7C6000D01A1 /* AppUserData.c in Sources */ = {isa = PBXBuildFile; fileRef = 61594D642606C7C6000D01A1 /* AppUserData.c */; };
 		615A1C4C2608406100858C32 /* PersistenceService.m in Sources */ = {isa = PBXBuildFile; fileRef = 615A1C4B2608406100858C32 /* PersistenceService.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		6161838226AC80A0001587B2 /* CocoaBridging.m in Sources */ = {isa = PBXBuildFile; fileRef = 6161838126AC80A0001587B2 /* CocoaBridging.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
@@ -105,17 +105,16 @@
 		61808CB92610FEEF00BAF7AB /* ChartDataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61808C2C2610FEEF00BAF7AB /* ChartDataProvider.swift */; };
 		61808CBC2610FEEF00BAF7AB /* LineChartDataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61808C2F2610FEEF00BAF7AB /* LineChartDataProvider.swift */; };
 		61808CBD2610FEEF00BAF7AB /* BarLineScatterCandleBubbleChartDataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61808C302610FEEF00BAF7AB /* BarLineScatterCandleBubbleChartDataProvider.swift */; };
-		6197B5DB26ADFF0F00F97B98 /* HistoryDataManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 6197B5DA26ADFF0F00F97B98 /* HistoryDataManager.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61BC6F55266EA9A80022D6F7 /* WeeklyData+CoreDataClass.h in Headers */ = {isa = PBXBuildFile; fileRef = 61BC6F51266EA9A80022D6F7 /* WeeklyData+CoreDataClass.h */; };
 		61BC6F56266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m in Sources */ = {isa = PBXBuildFile; fileRef = 61BC6F52266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		61C7793626102C19001326A1 /* HistoryTabCoordinator.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C7793526102C19001326A1 /* HistoryTabCoordinator.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		61C7793626102C19001326A1 /* HistoryTabCoordinator.c in Sources */ = {isa = PBXBuildFile; fileRef = 61C7793526102C19001326A1 /* HistoryTabCoordinator.c */; };
 		61C7795026102C8C001326A1 /* HistoryViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C7794F26102C8C001326A1 /* HistoryViewController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61C7796026102CC6001326A1 /* HistoryViewModel.c in Sources */ = {isa = PBXBuildFile; fileRef = 61C7795F26102CC6001326A1 /* HistoryViewModel.c */; };
 		61C7797826102D45001326A1 /* HomeViewModel.c in Sources */ = {isa = PBXBuildFile; fileRef = 61C7797726102D45001326A1 /* HomeViewModel.c */; };
-		61C7797C26102D5F001326A1 /* HomeTabCoordinator.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C7797B26102D5F001326A1 /* HomeTabCoordinator.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		61C7797C26102D5F001326A1 /* HomeTabCoordinator.c in Sources */ = {isa = PBXBuildFile; fileRef = 61C7797B26102D5F001326A1 /* HomeTabCoordinator.c */; };
 		61C7798426102D85001326A1 /* HomeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C7798326102D85001326A1 /* HomeViewController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		61C779A426102E20001326A1 /* AddWorkoutCoordinator.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C779A326102E20001326A1 /* AddWorkoutCoordinator.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		61C779AC26102E51001326A1 /* SettingsTabCoordinator.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C779AB26102E51001326A1 /* SettingsTabCoordinator.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		61C779A426102E20001326A1 /* AddWorkoutCoordinator.c in Sources */ = {isa = PBXBuildFile; fileRef = 61C779A326102E20001326A1 /* AddWorkoutCoordinator.c */; };
+		61C779AC26102E51001326A1 /* SettingsTabCoordinator.c in Sources */ = {isa = PBXBuildFile; fileRef = 61C779AB26102E51001326A1 /* SettingsTabCoordinator.c */; };
 		61C779B426102E97001326A1 /* SettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C779B326102E97001326A1 /* SettingsViewController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 /* End PBXBuildFile section */
 
@@ -155,7 +154,7 @@
 		61594D2926068106000D01A1 /* HealthAppTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HealthAppTests.m; sourceTree = "<group>"; };
 		61594D2B26068106000D01A1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		61594D5526068BFD000D01A1 /* AppCoordinator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppCoordinator.h; sourceTree = "<group>"; };
-		61594D5626068C41000D01A1 /* AppCoordinator.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppCoordinator.m; sourceTree = "<group>"; };
+		61594D5626068C41000D01A1 /* AppCoordinator.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = AppCoordinator.c; sourceTree = "<group>"; };
 		61594D632606C7AE000D01A1 /* AppUserData.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppUserData.h; sourceTree = "<group>"; };
 		61594D642606C7C6000D01A1 /* AppUserData.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = AppUserData.c; sourceTree = "<group>"; };
 		615A1C4A2608403900858C32 /* PersistenceService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PersistenceService.h; sourceTree = "<group>"; };
@@ -243,8 +242,6 @@
 		61808C2C2610FEEF00BAF7AB /* ChartDataProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartDataProvider.swift; sourceTree = "<group>"; };
 		61808C2F2610FEEF00BAF7AB /* LineChartDataProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LineChartDataProvider.swift; sourceTree = "<group>"; };
 		61808C302610FEEF00BAF7AB /* BarLineScatterCandleBubbleChartDataProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BarLineScatterCandleBubbleChartDataProvider.swift; sourceTree = "<group>"; };
-		6197B5DA26ADFF0F00F97B98 /* HistoryDataManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HistoryDataManager.m; sourceTree = "<group>"; };
-		6197B5DE26ADFF2000F97B98 /* HistoryDataManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HistoryDataManager.h; sourceTree = "<group>"; };
 		61BC6F51266EA9A80022D6F7 /* WeeklyData+CoreDataClass.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "WeeklyData+CoreDataClass.h"; sourceTree = "<group>"; };
 		61BC6F52266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "WeeklyData+CoreDataClass.m"; sourceTree = "<group>"; };
 		61C77914261028BE001326A1 /* HomeTabCoordinator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HomeTabCoordinator.h; sourceTree = "<group>"; };
@@ -256,14 +253,14 @@
 		61C7792D26102B28001326A1 /* HistoryViewModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HistoryViewModel.h; sourceTree = "<group>"; };
 		61C7793126102B8B001326A1 /* SettingsTabCoordinator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SettingsTabCoordinator.h; sourceTree = "<group>"; };
 		61C7793326102BAA001326A1 /* SettingsViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SettingsViewController.h; sourceTree = "<group>"; };
-		61C7793526102C19001326A1 /* HistoryTabCoordinator.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HistoryTabCoordinator.m; sourceTree = "<group>"; };
+		61C7793526102C19001326A1 /* HistoryTabCoordinator.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = HistoryTabCoordinator.c; sourceTree = "<group>"; };
 		61C7794F26102C8C001326A1 /* HistoryViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HistoryViewController.m; sourceTree = "<group>"; };
 		61C7795F26102CC6001326A1 /* HistoryViewModel.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = HistoryViewModel.c; sourceTree = "<group>"; };
 		61C7797726102D45001326A1 /* HomeViewModel.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = HomeViewModel.c; sourceTree = "<group>"; };
-		61C7797B26102D5F001326A1 /* HomeTabCoordinator.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HomeTabCoordinator.m; sourceTree = "<group>"; };
+		61C7797B26102D5F001326A1 /* HomeTabCoordinator.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = HomeTabCoordinator.c; sourceTree = "<group>"; };
 		61C7798326102D85001326A1 /* HomeViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HomeViewController.m; sourceTree = "<group>"; };
-		61C779A326102E20001326A1 /* AddWorkoutCoordinator.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AddWorkoutCoordinator.m; sourceTree = "<group>"; };
-		61C779AB26102E51001326A1 /* SettingsTabCoordinator.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SettingsTabCoordinator.m; sourceTree = "<group>"; };
+		61C779A326102E20001326A1 /* AddWorkoutCoordinator.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = AddWorkoutCoordinator.c; sourceTree = "<group>"; };
+		61C779AB26102E51001326A1 /* SettingsTabCoordinator.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = SettingsTabCoordinator.c; sourceTree = "<group>"; };
 		61C779B326102E97001326A1 /* SettingsViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SettingsViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -351,7 +348,7 @@
 			isa = PBXGroup;
 			children = (
 				61594D5526068BFD000D01A1 /* AppCoordinator.h */,
-				61594D5626068C41000D01A1 /* AppCoordinator.m */,
+				61594D5626068C41000D01A1 /* AppCoordinator.c */,
 			);
 			path = Coordinators;
 			sourceTree = "<group>";
@@ -624,7 +621,7 @@
 			isa = PBXGroup;
 			children = (
 				61C7791D261029C6001326A1 /* AddWorkoutCoordinator.h */,
-				61C779A326102E20001326A1 /* AddWorkoutCoordinator.m */,
+				61C779A326102E20001326A1 /* AddWorkoutCoordinator.c */,
 			);
 			path = Coordinator;
 			sourceTree = "<group>";
@@ -633,7 +630,7 @@
 			isa = PBXGroup;
 			children = (
 				61C77914261028BE001326A1 /* HomeTabCoordinator.h */,
-				61C7797B26102D5F001326A1 /* HomeTabCoordinator.m */,
+				61C7797B26102D5F001326A1 /* HomeTabCoordinator.c */,
 			);
 			path = Coordinator;
 			sourceTree = "<group>";
@@ -672,8 +669,6 @@
 		61C778F926102591001326A1 /* ViewModel */ = {
 			isa = PBXGroup;
 			children = (
-				6197B5DE26ADFF2000F97B98 /* HistoryDataManager.h */,
-				6197B5DA26ADFF0F00F97B98 /* HistoryDataManager.m */,
 				61C7792D26102B28001326A1 /* HistoryViewModel.h */,
 				61C7795F26102CC6001326A1 /* HistoryViewModel.c */,
 			);
@@ -701,7 +696,7 @@
 			isa = PBXGroup;
 			children = (
 				61C7792626102AAE001326A1 /* HistoryTabCoordinator.h */,
-				61C7793526102C19001326A1 /* HistoryTabCoordinator.m */,
+				61C7793526102C19001326A1 /* HistoryTabCoordinator.c */,
 			);
 			path = Coordinator;
 			sourceTree = "<group>";
@@ -719,7 +714,7 @@
 			isa = PBXGroup;
 			children = (
 				61C7793126102B8B001326A1 /* SettingsTabCoordinator.h */,
-				61C779AB26102E51001326A1 /* SettingsTabCoordinator.m */,
+				61C779AB26102E51001326A1 /* SettingsTabCoordinator.c */,
 			);
 			path = Coordinator;
 			sourceTree = "<group>";
@@ -962,20 +957,19 @@
 				61BC6F56266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m in Sources */,
 				615A1C4C2608406100858C32 /* PersistenceService.m in Sources */,
 				614DC13026082BBE00B9588E /* ViewControllerHelpers.c in Sources */,
-				6197B5DB26ADFF0F00F97B98 /* HistoryDataManager.m in Sources */,
 				61C7796026102CC6001326A1 /* HistoryViewModel.c in Sources */,
 				61C7795026102C8C001326A1 /* HistoryViewController.m in Sources */,
-				61C7793626102C19001326A1 /* HistoryTabCoordinator.m in Sources */,
+				61C7793626102C19001326A1 /* HistoryTabCoordinator.c in Sources */,
 				61C779B426102E97001326A1 /* SettingsViewController.m in Sources */,
-				61C779AC26102E51001326A1 /* SettingsTabCoordinator.m in Sources */,
+				61C779AC26102E51001326A1 /* SettingsTabCoordinator.c in Sources */,
 				61C7797826102D45001326A1 /* HomeViewModel.c in Sources */,
 				61C7798426102D85001326A1 /* HomeViewController.m in Sources */,
 				616E2F6826755D2B00342CD8 /* HomeSetupWorkoutModalViewController.m in Sources */,
 				616E2F9B2677195C00342CD8 /* AddWorkoutUpdateMaxesViewController.m in Sources */,
 				616DC23E267152BA00EFD3D4 /* WorkoutViewController.m in Sources */,
-				61C779A426102E20001326A1 /* AddWorkoutCoordinator.m in Sources */,
-				61C7797C26102D5F001326A1 /* HomeTabCoordinator.m in Sources */,
-				61594D5726068C41000D01A1 /* AppCoordinator.m in Sources */,
+				61C779A426102E20001326A1 /* AddWorkoutCoordinator.c in Sources */,
+				61C7797C26102D5F001326A1 /* HomeTabCoordinator.c in Sources */,
+				61594D5726068C41000D01A1 /* AppCoordinator.c in Sources */,
 				61594D0C26068105000D01A1 /* AppDelegate.m in Sources */,
 				61594D2026068106000D01A1 /* main.m in Sources */,
 			);

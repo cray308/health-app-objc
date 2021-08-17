@@ -6,10 +6,9 @@
 //
 
 #import "HistoryViewController.h"
-#import "AppDelegate.h"
+#include "AppCoordinator.h"
 #include "ViewControllerHelpers.h"
 #include "CalendarDateHelpers.h"
-#include "HistoryDataManager.h"
 
 #define SmallDataSetCutoff 7
 #define HistoryChartColors { \
@@ -287,12 +286,11 @@ UIView *createChartSeparator(CFStringRef title) {
     [liftChartSeparator release];
     [scrollView release];
 
-    historyDataManager_fetchData(viewModel);
+    historyViewModel_fetchData(viewModel);
     formatter.formatType = historyViewModel_formatDataForTimeRange(viewModel, 0);
     [self updateCharts];
 
-    AppDelegate *app = (AppDelegate *) UIApplication.sharedApplication.delegate;
-    if (app) app->coordinator.loadedViewControllers |= LoadedViewController_History;
+    appCoordinatorShared->loadedViewControllers |= LoadedViewController_History;
 }
 
 - (void) updateSelectedSegment: (UISegmentedControl *)sender {

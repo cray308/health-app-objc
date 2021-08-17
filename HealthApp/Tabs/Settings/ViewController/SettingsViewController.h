@@ -9,6 +9,7 @@
 #define SettingsViewController_h
 
 #include "SettingsTabCoordinator.h"
+#import <UIKit/UIKit.h>
 
 @interface SettingsViewController: UIViewController<UITextFieldDelegate>
 - (id) init;

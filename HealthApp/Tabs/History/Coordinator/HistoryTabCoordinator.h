@@ -8,11 +8,11 @@
 #ifndef HistoryTabCoordinator_h
 #define HistoryTabCoordinator_h
 
-#import <UIKit/UIKit.h>
+#include "CocoaBridging.h"
 #include "HistoryViewModel.h"
 
 typedef struct {
-    UINavigationController *navigationController;
+    id navVC;
     HistoryViewModel viewModel;
 } HistoryTabCoordinator;
 

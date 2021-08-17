@@ -6,6 +6,7 @@
 //
 
 #import "AppDelegate.h"
+#include "AppCoordinator.h"
 #import "PersistenceService.h"
 #import <UserNotifications/UserNotifications.h>
 #include "AppUserData.h"
@@ -19,6 +20,11 @@
 
 void setupData(time_t now, time_t weekStart);
 
+@interface AppDelegate() {
+    UIWindow *window;
+}
+@end
+
 @implementation AppDelegate
 
 - (BOOL) application: (UIApplication *)application
@@ -27,16 +33,33 @@ didFinishLaunchingWithOptions: (NSDictionary *)launchOptions {
 
     bool hasLaunched = [NSUserDefaults.standardUserDefaults boolForKey:@"hasLaunched"];
 
-    persistenceServiceShared = [[NSPersistentContainer alloc] initWithName:@"HealthApp"];
-    [persistenceServiceShared loadPersistentStoresWithCompletionHandler:
+    NSPersistentContainer *container = [[NSPersistentContainer alloc] initWithName:@"HealthApp"];
+    [container loadPersistentStoresWithCompletionHandler:
      ^(NSPersistentStoreDescription *description _U_, NSError *error _U_) {}];
+    persistenceServiceShared = container;
 
     time_t now = time(NULL);
     time_t weekStart = date_calcStartOfWeek(now);
 
     if (!hasLaunched) setupData(now, weekStart);
-    appCoordinator_start(&coordinator, now, weekStart);
-    [window setRootViewController:coordinator.tabVC];
+
+    appUserDataShared = userInfo_initFromStorage();
+
+    int tzOffset = appUserData_checkTimezone(now);
+    if (tzOffset) {
+        persistenceService_changeTimestamps(tzOffset);
+    }
+
+    if (weekStart != appUserDataShared->weekStart) {
+        appUserData_handleNewWeek(weekStart);
+    }
+
+    persistenceService_performForegroundUpdate();
+
+    UITabBarController *tabVC = [[UITabBarController alloc] init];
+    appCoordinatorShared = calloc(1, sizeof(AppCoordinator));
+    appCoordinator_start(appCoordinatorShared, tabVC);
+    [window setRootViewController:tabVC];
     [window makeKeyAndVisible];
 
     if (!hasLaunched) {
@@ -44,6 +67,7 @@ didFinishLaunchingWithOptions: (NSDictionary *)launchOptions {
          requestAuthorizationWithOptions:UNAuthorizationOptionAlert | UNAuthorizationOptionSound
          completionHandler:^(BOOL granted _U_, NSError *_Nullable error _U_) {}];
     }
+    [tabVC release];
     return true;
 }
 
@@ -63,8 +87,8 @@ void setupData(time_t now, time_t weekStart) {
     time_t end = date_calcStartOfWeek(time(NULL) - 2678400);
 
     while (start < end) {
-        WeeklyData *data = [[WeeklyData alloc]
-                            initWithContext:persistenceServiceShared.viewContext];
+        WeeklyData *data = [[WeeklyData alloc] initWithContext:
+                            ((NSPersistentContainer *) persistenceServiceShared).viewContext];
         data.weekStart = start;
 
         if (plan == 0) {

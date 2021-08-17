@@ -1,5 +1,5 @@
 //
-//  AppUserData.m
+//  AppUserData.c
 //  HealthApp
 //
 //  Created by Christopher Ray on 3/20/21.
@@ -18,7 +18,7 @@ static CFStringRef const keys[] = {
     CFSTR("deadliftMax")
 };
 
-id getUserDefaults(void) {
+static inline id getUserDefaults(void) {
     return objc_staticMethod(objc_getClass("NSUserDefaults"), sel_getUid("standardUserDefaults"));
 }
 

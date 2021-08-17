@@ -8,16 +8,15 @@
 #ifndef PersistenceService_h
 #define PersistenceService_h
 
-#import "WeeklyData+CoreDataClass.h"
+#import "CocoaBridging.h"
 
-extern NSPersistentContainer *persistenceServiceShared;
+extern id persistenceServiceShared;
 
 void persistenceService_saveContext(void);
 void persistenceService_performForegroundUpdate(void);
 void persistenceService_deleteUserData(void);
 void persistenceService_changeTimestamps(int difference);
-WeeklyData *persistenceService_getWeeklyDataForThisWeek(void);
-NSArray<id> *persistenceService_executeFetchRequest(NSFetchRequest *req, NSPredicate *pred,
-                                                    NSSortDescriptor *descriptor, int *count);
+id persistenceService_getWeeklyDataForThisWeek(void);
+id persistenceService_executeFetchRequest(id req, int *count);
 
 #endif /* PersistenceService_h */

@@ -9,6 +9,7 @@
 #define HistoryViewModel_h
 
 #include "array.h"
+#include "CocoaBridging.h"
 
 typedef struct {
     int year;
@@ -21,7 +22,7 @@ typedef struct {
 } HistoryWeekDataModel;
 
 gen_array_headers(weekData, HistoryWeekDataModel)
-gen_array_headers(chartData, void*)
+gen_array_headers(chartData, id)
 
 typedef enum {
     FormatShort,
@@ -57,6 +58,7 @@ typedef struct {
 } HistoryViewModel;
 
 void historyViewModel_init(HistoryViewModel *model);
+void historyViewModel_fetchData(HistoryViewModel *this);
 XAxisFormatType historyViewModel_formatDataForTimeRange(HistoryViewModel *this, int index);
 
 #endif /* HistoryViewModel_h */

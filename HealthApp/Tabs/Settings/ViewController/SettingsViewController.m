@@ -8,7 +8,7 @@
 #import "SettingsViewController.h"
 #include "ViewControllerHelpers.h"
 #include "AppUserData.h"
-#import "AppDelegate.h"
+#include "AppCoordinator.h"
 #import "PersistenceService.h"
 
 #define _U_ __attribute__((__unused__))
@@ -168,10 +168,7 @@
         textFields[0], textFields[1], textFields[2], textFields[3], nil
     });
 
-    AppDelegate *app = (AppDelegate *) UIApplication.sharedApplication.delegate;
-    if (app) {
-        app->coordinator.loadedViewControllers |= LoadedViewController_Settings;
-    }
+    appCoordinatorShared->loadedViewControllers |= LoadedViewController_Settings;
 }
 
 - (void) updateWeightFields {
@@ -204,8 +201,7 @@
                                            handler:^(UIAlertAction * _Nonnull action _U_) {
         appUserData_updateWeightMaxes(results);
         appUserData_setWorkoutPlan(plan);
-        AppDelegate *app = (AppDelegate *) UIApplication.sharedApplication.delegate;
-        if (app) appCoordinator_updatedUserInfo(&app->coordinator);
+        appCoordinator_updatedUserInfo(appCoordinatorShared);
     }]];
     [ctrl addAction:[UIAlertAction actionWithTitle:@"Cancel"
                                              style:UIAlertActionStyleCancel handler:nil]];
@@ -222,8 +218,7 @@
                                            handler:^(UIAlertAction * _Nonnull action _U_) {
         persistenceService_deleteUserData();
         appUserData_deleteSavedData();
-        AppDelegate *app = (AppDelegate *) UIApplication.sharedApplication.delegate;
-        if (app) appCoordinator_deletedAppData(&app->coordinator);
+        appCoordinator_deletedAppData(appCoordinatorShared);
     }]];
     [ctrl addAction:[UIAlertAction actionWithTitle:@"Cancel"
                                              style:UIAlertActionStyleCancel handler:nil]];

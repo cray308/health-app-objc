@@ -9,6 +9,7 @@
 #define HomeSetupWorkoutModalViewController_h
 
 #include "HomeTabCoordinator.h"
+#import <UIKit/UIKit.h>
 
 @interface HomeSetupWorkoutModalViewController:
 UIViewController<UIPickerViewDelegate, UIPickerViewDataSource, UITextFieldDelegate>

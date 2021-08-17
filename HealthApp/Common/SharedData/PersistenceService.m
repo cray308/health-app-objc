@@ -6,6 +6,7 @@
 //
 
 #import "PersistenceService.h"
+#import "WeeklyData+CoreDataClass.h"
 #include "AppUserData.h"
 #include "CalendarDateHelpers.h"
 
@@ -120,7 +121,7 @@ void persistenceService_changeTimestamps(int difference) {
     persistenceService_saveContext();
 }
 
-WeeklyData *persistenceService_getWeeklyDataForThisWeek(void) {
+id persistenceService_getWeeklyDataForThisWeek(void) {
     NSFetchRequest *request = WeeklyData.fetchRequest;
     request.predicate = [NSPredicate predicateWithFormat:@"weekStart == %lld",
                          appUserDataShared->weekStart];
@@ -130,11 +131,7 @@ WeeklyData *persistenceService_getWeeklyDataForThisWeek(void) {
     return currentWeeks[0];
 }
 
-NSArray<id> *persistenceService_executeFetchRequest(NSFetchRequest *req, NSPredicate *pred,
-                                                    NSSortDescriptor *descriptor, int *count) {
-    if (pred) req.predicate = pred;
-    if (descriptor) req.sortDescriptors = @[descriptor];
-
+id persistenceService_executeFetchRequest(id req, int *count) {
     int len = 0;
     NSArray<id> *data = [persistenceServiceShared.viewContext executeFetchRequest:req error:nil];
     if (!(data && (len = (int)(data.count)))) return nil;

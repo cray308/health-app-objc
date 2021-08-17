@@ -8,8 +8,8 @@
 #ifndef AddWorkoutCoordinator_h
 #define AddWorkoutCoordinator_h
 
-#import <UIKit/UIKit.h>
-#import "Exercise.h"
+#include "CocoaBridging.h"
+#include "Exercise.h"
 
 typedef struct {
     Workout *workout;
@@ -18,7 +18,7 @@ typedef struct {
 } AddWorkoutViewModel;
 
 typedef struct {
-    UINavigationController *navigationController;
+    id navVC;
     AddWorkoutViewModel viewModel;
     void *parent;
 } AddWorkoutCoordinator;

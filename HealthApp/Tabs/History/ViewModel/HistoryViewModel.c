@@ -1,16 +1,26 @@
 //
-//  HistoryViewModel.m
+//  HistoryViewModel.c
 //  HealthApp
 //
 //  Created by Christopher Ray on 3/27/21.
 //
 
 #include "HistoryViewModel.h"
-#include "HistoryDataManager.h"
+#include "AppUserData.h"
 #include "CalendarDateHelpers.h"
+#include "PersistenceService.h"
+
+void freeChartDataEntry(id x) {
+    objc_singleArg(x, sel_getUid("release"));
+}
+
+static inline void createNewEntry(Array_chartData *arr, int x, int y) {
+    id entry = createChartEntry(x, y);
+    array_push_back(chartData, arr, entry);
+}
 
 gen_array_source(weekData, HistoryWeekDataModel, DSDefault_shallowCopy, DSDefault_shallowDelete)
-gen_array_source(chartData, void*, DSDefault_shallowCopy, freeChartDataEntry)
+gen_array_source(chartData, id, DSDefault_shallowCopy, freeChartDataEntry)
 
 void historyViewModel_init(HistoryViewModel *this) {
     for (int i = 0; i < 4; ++i) {
@@ -26,6 +36,61 @@ void historyViewModel_init(HistoryViewModel *this) {
 
     this->data = array_new(weekData);
     array_reserve(weekData, this->data, 128);
+}
+
+void historyViewModel_fetchData(HistoryViewModel *this) {
+    struct tm localInfo;
+    array_clear(weekData, this->data);
+    int count = 0;
+
+    id request = objc_staticMethod(objc_getClass("WeeklyData"), sel_getUid("fetchRequest"));
+    id predicate = ((id (*)(Class, SEL, CFStringRef, ...)) objc_msgSend)
+        (objc_getClass("NSPredicate"), sel_getUid("predicateWithFormat:"),
+         CFSTR("weekStart > %lld AND weekStart < %lld"),
+         date_twoYears, appUserDataShared->weekStart);
+    id descriptor = ((id (*)(id, SEL, CFStringRef, bool)) objc_msgSend)
+        (objc_staticMethod(objc_getClass("NSSortDescriptor"), sel_getUid("alloc")),
+         sel_getUid("initWithKey:ascending:"), CFSTR("weekStart"), true);
+    id arr = ((id (*)(Class, SEL, id, ...)) objc_msgSend)
+        (objc_getClass("NSArray"), sel_getUid("arrayWithObjects:"), descriptor, nil);
+
+    ((void (*)(id, SEL, id)) objc_msgSend)(request, sel_getUid("setPredicate:"), predicate);
+    ((void (*)(id, SEL, id)) objc_msgSend)(request, sel_getUid("setSortDescriptors:"), arr);
+
+    id data = persistenceService_executeFetchRequest(request, &count);
+    objc_singleArg(descriptor, sel_getUid("release"));
+    if (!data) return;
+
+    for (int i = 0; i < count; ++i) {
+        id d = ((id (*)(id, SEL, int)) objc_msgSend)(data, sel_getUid("objectAtIndex:"), i);
+        int timeStrength = ((int16_t (*)(id, SEL)) objc_msgSend)(d, sel_getUid("timeStrength"));
+        time_t timestamp = ((int64_t (*)(id, SEL)) objc_msgSend)(d, sel_getUid("weekStart"));
+        localtime_r(&timestamp, &localInfo);
+        HistoryWeekDataModel m = {
+            .year = localInfo.tm_year % 100,
+            .month = localInfo.tm_mon,
+            .day = localInfo.tm_mday,
+            .totalWorkouts = ((int16_t (*)(id, SEL)) objc_msgSend)(d, sel_getUid("totalWorkouts")),
+            .weightArray = {
+                ((int16_t (*)(id, SEL)) objc_msgSend)(d, sel_getUid("bestSquat")),
+                ((int16_t (*)(id, SEL)) objc_msgSend)(d, sel_getUid("bestPullup")),
+                ((int16_t (*)(id, SEL)) objc_msgSend)(d, sel_getUid("bestBench")),
+                ((int16_t (*)(id, SEL)) objc_msgSend)(d, sel_getUid("bestDeadlift"))
+            },
+            .durationByType = {
+                timeStrength,
+                ((int16_t (*)(id, SEL)) objc_msgSend)(d, sel_getUid("timeHIC")),
+                ((int16_t (*)(id, SEL)) objc_msgSend)(d, sel_getUid("timeSE")),
+                ((int16_t (*)(id, SEL)) objc_msgSend)(d, sel_getUid("timeEndurance"))
+            },
+            .cumulativeDuration = {[0] = timeStrength}
+        };
+
+        for (int j = 1; j < 4; ++j) {
+            m.cumulativeDuration[j] = m.cumulativeDuration[j - 1] + m.durationByType[j];
+        }
+        array_push_back(weekData, this->data, m);
+    }
 }
 
 XAxisFormatType historyViewModel_formatDataForTimeRange(HistoryViewModel *this, int index) {
@@ -74,7 +139,7 @@ XAxisFormatType historyViewModel_formatDataForTimeRange(HistoryViewModel *this, 
             vm->totalWorkouts += workouts;
             if (workouts > vm->maxWorkouts) vm->maxWorkouts = workouts;
 
-            historyDataManager_createNewEntry(vm->entries, i, workouts);
+            createNewEntry(vm->entries, i, workouts);
         }
         {
             HistoryAreaChartViewModel *vm = &this->areaChartViewModel;
@@ -86,9 +151,9 @@ XAxisFormatType historyViewModel_formatDataForTimeRange(HistoryViewModel *this, 
                 vm->maxActivityTime = e->cumulativeDuration[3];
             }
 
-            historyDataManager_createNewEntry(vm->entries[0], i, 0);
+            createNewEntry(vm->entries[0], i, 0);
             for (int j = 1; j < 5; ++j) {
-                historyDataManager_createNewEntry(vm->entries[j], i, e->cumulativeDuration[j - 1]);
+                createNewEntry(vm->entries[j], i, e->cumulativeDuration[j - 1]);
             }
         }
         {
@@ -97,7 +162,7 @@ XAxisFormatType historyViewModel_formatDataForTimeRange(HistoryViewModel *this, 
                 int w = e->weightArray[j];
                 vm->totalByExercise[j] += w;
                 if (w > vm->maxWeight) vm->maxWeight = w;
-                historyDataManager_createNewEntry(vm->entries[j], i, w);
+                createNewEntry(vm->entries[j], i, w);
             }
         }
     }

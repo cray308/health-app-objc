@@ -215,8 +215,8 @@
 }
 
 - (void) pressedCancel {
-    [delegate->navigationController.viewControllers[0] dismissViewControllerAnimated:true
-                                                                          completion:nil];
+    UINavigationController *navVC = delegate->navVC;
+    [navVC.viewControllers[0] dismissViewControllerAnimated:true completion:nil];
 }
 
 - (void) dismissKeyboard {

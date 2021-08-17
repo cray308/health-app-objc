@@ -8,7 +8,7 @@
 #ifndef AppCoordinator_h
 #define AppCoordinator_h
 
-#import <UIKit/UIKit.h>
+#include "CocoaBridging.h"
 
 typedef enum {
     LoadedViewController_Home = 0x1,
@@ -18,12 +18,12 @@ typedef enum {
 
 typedef struct {
     unsigned char loadedViewControllers;
-    UITabBarController *tabVC;
     void *children[3];
 } AppCoordinator;
 
-void appCoordinator_start(AppCoordinator *coordinator, time_t now, time_t weekStart);
+extern AppCoordinator *appCoordinatorShared;
 
+void appCoordinator_start(AppCoordinator *coordinator, id tabVC);
 void appCoordinator_updatedUserInfo(AppCoordinator *coordinator);
 void appCoordinator_deletedAppData(AppCoordinator *coordinator);
 void appCoordinator_updateMaxWeights(AppCoordinator *coordinator);

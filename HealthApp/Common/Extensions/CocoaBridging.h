@@ -14,5 +14,6 @@
 
 id objc_staticMethod(Class _self, SEL _cmd);
 void objc_singleArg(id obj, SEL _cmd);
+id createChartEntry(int x, int y);
 
 #endif /* CocoaBridging_h */

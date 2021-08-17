@@ -8,10 +8,10 @@
 #ifndef SettingsTabCoordinator_h
 #define SettingsTabCoordinator_h
 
-#import <UIKit/UIKit.h>
+#include "CocoaBridging.h"
 
 typedef struct {
-    UINavigationController *navigationController;
+    id navVC;
 } SettingsTabCoordinator;
 
 void settingsCoordinator_start(SettingsTabCoordinator *this);
