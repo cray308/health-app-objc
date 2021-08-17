@@ -100,15 +100,13 @@ UIView *createConfettiView(CGRect frame) {
     weeklyWorkoutsStack.axis = UILayoutConstraintAxisVertical;
     weeklyWorkoutsStack.spacing = 5;
     [weeklyWorkoutsStack setLayoutMarginsRelativeArrangement:true];
-    weeklyWorkoutsStack.layoutMargins = (UIEdgeInsets){
-        .top = 5, .left = 8, .bottom = 5, .right = 8
-    };
+    weeklyWorkoutsStack.layoutMargins = (UIEdgeInsets){5, 8, 5, 8};
 
     UIStackView *customWorkoutStack = [[UIStackView alloc] initWithFrame:CGRectZero];
     customWorkoutStack.axis = UILayoutConstraintAxisVertical;
     customWorkoutStack.spacing = 20;
     [customWorkoutStack setLayoutMarginsRelativeArrangement:true];
-    customWorkoutStack.layoutMargins = (UIEdgeInsets){.top = 5, .left = 8, .bottom = 5, .right = 8};
+    customWorkoutStack.layoutMargins = (UIEdgeInsets){5, 8, 5, 8};
 
     UIView *divider = createDivider();
     [customWorkoutStack addArrangedSubview:divider];
@@ -144,7 +142,7 @@ UIView *createConfettiView(CGRect frame) {
     vStack.axis = UILayoutConstraintAxisVertical;
     vStack.spacing = 5;
     [vStack setLayoutMarginsRelativeArrangement:true];
-    vStack.layoutMargins = (UIEdgeInsets){.top = 10, .bottom = 16};
+    vStack.layoutMargins = (UIEdgeInsets){10, 0, 16, 0};
 
     UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:CGRectZero];
     scrollView.translatesAutoresizingMaskIntoConstraints = false;
@@ -269,9 +267,8 @@ UIView *createConfettiView(CGRect frame) {
     [ctrl addAction:[UIAlertAction actionWithTitle:@"OK"
                                              style:UIAlertActionStyleDefault handler:nil]];
 
-    UIView *confettiView = createConfettiView((CGRect){.size = {
-        .width = self.view.frame.size.width, .height = self.view.frame.size.height
-    }});
+    CGSize size = self.view.frame.size;
+    UIView *confettiView = createConfettiView((CGRect){{0}, size});
     [self.view addSubview:confettiView];
 
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 5),

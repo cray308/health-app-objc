@@ -144,15 +144,14 @@
         fields[i].borderStyle = UITextBorderStyleRoundedRect;
         fields[i].keyboardType = UIKeyboardTypeNumberPad;
 
-        UITextField *toolbarFields[] = {fields[i], nil};
-        createToolbar(self, @selector(dismissKeyboard), toolbarFields);
+        createToolbar(self, @selector(dismissKeyboard), (id []){fields[i], nil});
 
         UIStackView *hStack = [[UIStackView alloc] initWithArrangedSubviews:@[label, fields[i]]];
         hStack.backgroundColor = UIColor.secondarySystemBackgroundColor;
         hStack.spacing = 5;
         hStack.distribution = UIStackViewDistributionFillEqually;
         [hStack setLayoutMarginsRelativeArrangement:true];
-        hStack.layoutMargins = (UIEdgeInsets){.top = 4, .left = 8, .bottom = 4, .right = 8};
+        hStack.layoutMargins = (UIEdgeInsets){4, 8, 4, 8};
         [textFieldStack addArrangedSubview:hStack];
         [label release];
         [hStack release];
@@ -165,7 +164,7 @@
     [cancelButton setTitle:@"Cancel" forState:UIControlStateNormal];
     [cancelButton setTitleColor:UIColor.systemBlueColor forState:UIControlStateNormal];
     [cancelButton setTitleColor:UIColor.systemGrayColor forState:UIControlStateDisabled];
-    cancelButton.frame = (CGRect){.size = {.width = self.view.frame.size.width / 3, .height = 30}};
+    cancelButton.frame = (CGRect){{0}, {self.view.frame.size.width / 3, 30}};
     [cancelButton addTarget:self action:@selector(pressedCancel)
            forControlEvents:UIControlEventTouchUpInside];
     UIBarButtonItem *leftItem = [[UIBarButtonItem alloc] initWithCustomView:cancelButton];
@@ -199,8 +198,7 @@
         [submitButton.heightAnchor constraintEqualToConstant:40]
     ]];
 
-    UITextField *toolbarFields[] = {workoutTextField, nil};
-    createToolbar(self, @selector(dismissKeyboard), toolbarFields);
+    createToolbar(self, @selector(dismissKeyboard), (id []){workoutTextField, nil});
 
     [workoutLabel release];
     [workoutContainer release];

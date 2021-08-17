@@ -8,13 +8,10 @@
 #import "AppDelegate.h"
 #include "AppCoordinator.h"
 #import "PersistenceService.h"
+#import "WeeklyData+CoreDataClass.h"
 #import <UserNotifications/UserNotifications.h>
 #include "AppUserData.h"
 #include "CalendarDateHelpers.h"
-
-#if DEBUG
-#import "WeeklyData+CoreDataClass.h"
-#endif
 
 #define _U_ __attribute__((__unused__))
 

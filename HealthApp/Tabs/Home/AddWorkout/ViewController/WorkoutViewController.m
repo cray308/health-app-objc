@@ -332,7 +332,7 @@ CFStringRef createExerciseTitle(ExerciseEntry *e) {
     exerciseStack.axis = UILayoutConstraintAxisVertical;
     exerciseStack.spacing = 5;
     [exerciseStack setLayoutMarginsRelativeArrangement:true];
-    exerciseStack.layoutMargins = (UIEdgeInsets){.top = 5, .left = 4, .bottom = 4};
+    exerciseStack.layoutMargins = (UIEdgeInsets){5, 4, 4, 0};
     [self addSubview:exerciseStack];
 
     [NSLayoutConstraint activateConstraints:@[
@@ -599,7 +599,7 @@ CFStringRef createExerciseTitle(ExerciseEntry *e) {
     groupsStack.axis = UILayoutConstraintAxisVertical;
     groupsStack.spacing = 20;
     [groupsStack setLayoutMarginsRelativeArrangement:true];
-    groupsStack.layoutMargins = (UIEdgeInsets){.left = 4, .bottom = 4};
+    groupsStack.layoutMargins = (UIEdgeInsets){0, 4, 4, 0};
 
     Workout *w = viewModel->workout;
     for (int i = 0; i < (int) w->activities->size; ++i) {
@@ -622,7 +622,7 @@ CFStringRef createExerciseTitle(ExerciseEntry *e) {
     vStack.axis = UILayoutConstraintAxisVertical;
     vStack.spacing = 20;
     [vStack setLayoutMarginsRelativeArrangement:true];
-    vStack.layoutMargins = (UIEdgeInsets){.top = 10};
+    vStack.layoutMargins = (UIEdgeInsets){10, 0, 0, 0};
 
     UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:CGRectZero];
     scrollView.translatesAutoresizingMaskIntoConstraints = false;

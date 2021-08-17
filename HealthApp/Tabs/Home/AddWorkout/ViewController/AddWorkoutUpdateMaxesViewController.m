@@ -12,7 +12,7 @@
     USet_char *validChars;
     CFStringInlineBuffer buf;
     AddWorkoutCoordinator *delegate;
-    UITextField *textFields[4];
+    UITextField *textFields[5];
     bool validInput[4];
     short results[4];
     UIButton *finishButton;
@@ -59,7 +59,7 @@
         stacks[i].spacing = 5;
         stacks[i].distribution = UIStackViewDistributionFillEqually;
         [stacks[i] setLayoutMarginsRelativeArrangement:true];
-        stacks[i].layoutMargins = (UIEdgeInsets){.top = 4, .left = 8, .bottom = 4, .right = 8};
+        stacks[i].layoutMargins = (UIEdgeInsets){4, 8, 4, 8};
         [self.view addSubview:stacks[i]];
 
         [label release];
@@ -70,7 +70,7 @@
     [finishButton setTitle:@"Finish" forState:UIControlStateNormal];
     [finishButton setTitleColor:UIColor.systemBlueColor forState:UIControlStateNormal];
     [finishButton setTitleColor:UIColor.systemGrayColor forState:UIControlStateDisabled];
-    finishButton.frame = (CGRect){.size = {.width = self.view.frame.size.width / 3, .height = 30}};
+    finishButton.frame = (CGRect){{0}, {self.view.frame.size.width / 3, 30}};
     [finishButton addTarget:self action:@selector(didPressFinish)
            forControlEvents:UIControlEventTouchUpInside];
     UIBarButtonItem *rightItem = [[UIBarButtonItem alloc] initWithCustomView:finishButton];
@@ -96,9 +96,7 @@
     for (int i = 0; i < 4; ++i) [stacks[i] release];
     [rightItem release];
 
-    createToolbar(self, @selector(dismissKeyboard), (UITextField *[]){
-        textFields[0], textFields[1], textFields[2], textFields[3], nil
-    });
+    createToolbar(self, @selector(dismissKeyboard), textFields);
 }
 
 - (void) didPressFinish {

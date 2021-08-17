@@ -12,33 +12,35 @@ gen_uset_source(char, unsigned short, ds_cmp_num_eq, DSDefault_addrOfVal, DSDefa
                 DSDefault_shallowCopy, DSDefault_shallowDelete)
 
 void createToolbar(id target, SEL doneSelector, id *fields) {
-    CGFloat width = ((CGRect(*)(id, SEL))objc_msgSend_stret)
-        (objc_staticMethod(objc_getClass("UIScreen"), sel_getUid("mainScreen")),
-         sel_getUid("bounds")).size.width;
+    CGRect bounds;
+    ((void (*)(CGRect*, id, SEL)) objc_msgSend_stret)
+    (&bounds,
+     objc_staticMethod(objc_getClass("UIScreen"), sel_getUid("mainScreen")), sel_getUid("bounds"));
+    CGFloat width = bounds.size.width;
 
     id toolbar = ((id (*)(id, SEL, CGRect)) objc_msgSend)
-        (objc_staticMethod(objc_getClass("UIToolbar"), sel_getUid("alloc")),
-         sel_getUid("initWithFrame:"), (CGRect){{0}, {width, 50}});
+    (objc_staticMethod(objc_getClass("UIToolbar"), sel_getUid("alloc")),
+     sel_getUid("initWithFrame:"), (CGRect){{0}, {width, 50}});
     objc_singleArg(toolbar, sel_getUid("sizeToFit"));
 
     id flexSpace = ((id (*)(id, SEL, int, id, SEL)) objc_msgSend)
-        (objc_staticMethod(objc_getClass("UIBarButtonItem"), sel_getUid("alloc")),
-         sel_getUid("initWithBarButtonSystemItem:target:action:"), 5, nil, nil);
+    (objc_staticMethod(objc_getClass("UIBarButtonItem"), sel_getUid("alloc")),
+     sel_getUid("initWithBarButtonSystemItem:target:action:"), 5, nil, nil);
 
     id doneButton = ((id (*)(id, SEL, CFStringRef, int, id, SEL)) objc_msgSend)
-        (objc_staticMethod(objc_getClass("UIBarButtonItem"), sel_getUid("alloc")),
-         sel_getUid("initWithTitle:style:target:action:"), CFSTR("Done"), 0, target, doneSelector);
+    (objc_staticMethod(objc_getClass("UIBarButtonItem"), sel_getUid("alloc")),
+     sel_getUid("initWithTitle:style:target:action:"), CFSTR("Done"), 0, target, doneSelector);
 
     id array = ((id (*)(Class, SEL, id, ...)) objc_msgSend)
-        (objc_getClass("NSArray"), sel_getUid("arrayWithObjects:"), flexSpace, doneButton, nil);
-    ((void (*)(id, SEL, id, bool)) objc_msgSend)
-        (toolbar, sel_getUid("setItems:animated:"), array, false);
-    ((void (*)(id, SEL, bool)) objc_msgSend)
-        (toolbar, sel_getUid("setUserInteractionEnabled:"), true);
+    (objc_getClass("NSArray"), sel_getUid("arrayWithObjects:"), flexSpace, doneButton, nil);
+    ((void (*)(id, SEL, id, bool)) objc_msgSend)(toolbar,
+                                                 sel_getUid("setItems:animated:"), array, false);
+    ((void (*)(id, SEL, bool)) objc_msgSend)(toolbar,
+                                             sel_getUid("setUserInteractionEnabled:"), true);
 
     for (int i = 0; fields[i]; ++i) {
-        ((void (*)(id, SEL, id)) objc_msgSend)
-            (fields[i], sel_getUid("setInputAccessoryView:"), toolbar);
+        ((void (*)(id, SEL, id)) objc_msgSend)(fields[i],
+                                               sel_getUid("setInputAccessoryView:"), toolbar);
     }
 
     objc_singleArg(toolbar, sel_getUid("release"));
@@ -48,17 +50,17 @@ void createToolbar(id target, SEL doneSelector, id *fields) {
 
 id createDivider(void) {
     id view = ((id (*)(id, SEL, CGRect)) objc_msgSend)
-        (objc_staticMethod(objc_getClass("UIView"), sel_getUid("alloc")),
-         sel_getUid("initWithFrame:"), CGRectZero);
+    (objc_staticMethod(objc_getClass("UIView"), sel_getUid("alloc")),
+     sel_getUid("initWithFrame:"), CGRectZero);
     ((void (*)(id, SEL, bool)) objc_msgSend)
-        (view, sel_getUid("setTranslatesAutoresizingMaskIntoConstraints:"), false);
+    (view, sel_getUid("setTranslatesAutoresizingMaskIntoConstraints:"), false);
     ((void (*)(id, SEL, id)) objc_msgSend)
-        (view, sel_getUid("setBackgroundColor:"),
-         objc_staticMethod(objc_getClass("UIColor"), sel_getUid("separatorColor")));
+    (view, sel_getUid("setBackgroundColor:"),
+     objc_staticMethod(objc_getClass("UIColor"), sel_getUid("separatorColor")));
 
     id heightAnchor = ((id (*)(id, SEL)) objc_msgSend)(view, sel_getUid("heightAnchor"));
     id constraint = ((id (*)(id, SEL, CGFloat)) objc_msgSend)
-        (heightAnchor, sel_getUid("constraintEqualToConstant:"), 1);
+    (heightAnchor, sel_getUid("constraintEqualToConstant:"), 1);
     ((void (*)(id, SEL, bool)) objc_msgSend)(constraint, sel_getUid("setActive:"), true);
     return view;
 }

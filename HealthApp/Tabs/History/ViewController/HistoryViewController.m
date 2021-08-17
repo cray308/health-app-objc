@@ -253,7 +253,7 @@ UIView *createChartSeparator(CFStringRef title) {
     vStack.axis = UILayoutConstraintAxisVertical;
     vStack.spacing = 5;
     [vStack setLayoutMarginsRelativeArrangement:true];
-    vStack.layoutMargins = (UIEdgeInsets){.top = 10, .left = 8, .bottom = 10, .right = 8};
+    vStack.layoutMargins = (UIEdgeInsets){10, 8, 10, 8};
 
     UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:CGRectZero];
     scrollView.translatesAutoresizingMaskIntoConstraints = false;

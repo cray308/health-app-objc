@@ -17,7 +17,7 @@
     USet_char *validChars;
     CFStringInlineBuffer buf;
     UISegmentedControl *planPicker;
-    UITextField *textFields[4];
+    UITextField *textFields[5];
     bool validInput[4];
     short results[4];
     UIButton *saveButton;
@@ -82,7 +82,7 @@
         stacks[i].spacing = 5;
         stacks[i].distribution = UIStackViewDistributionFillEqually;
         [stacks[i] setLayoutMarginsRelativeArrangement:true];
-        stacks[i].layoutMargins = (UIEdgeInsets){.top = 4, .left = 5, .bottom = 4, .right = 8};
+        stacks[i].layoutMargins = (UIEdgeInsets){4, 5, 4, 8};
 
         [label release];
     }
@@ -114,7 +114,7 @@
     vStack.axis = UILayoutConstraintAxisVertical;
     vStack.spacing = 20;
     [vStack setLayoutMarginsRelativeArrangement:true];
-    vStack.layoutMargins = (UIEdgeInsets){.top = 20};
+    vStack.layoutMargins = (UIEdgeInsets){20, 0, 0, 0};
 
     UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:CGRectZero];
     scrollView.translatesAutoresizingMaskIntoConstraints = false;
@@ -164,9 +164,7 @@
     [planLabel release];
     for (int i = 0; i < 4; ++i) [stacks[i] release];
 
-    createToolbar(self, @selector(dismissKeyboard), (UITextField *[]){
-        textFields[0], textFields[1], textFields[2], textFields[3], nil
-    });
+    createToolbar(self, @selector(dismissKeyboard), textFields);
 
     appCoordinatorShared->loadedViewControllers |= LoadedViewController_Settings;
 }
