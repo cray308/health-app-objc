@@ -21,12 +21,11 @@ static CFStringRef const indexKey = CFSTR("index");
 static CFStringRef const titleKey = CFSTR("title");
 
 CFDictionaryRef createRootAndLibDict(CFDictionaryRef *lib) {
-    CFStringRef path = ((CFStringRef (*)(id, SEL, CFStringRef, CFStringRef)) objc_msgSend)
-        (objc_staticMethod(objc_getClass("NSBundle"), sel_getUid("mainBundle")),
-         sel_getUid("pathForResource:ofType:"), CFSTR("WorkoutData"), CFSTR("plist"));
-    CFDictionaryRef root = ((CFDictionaryRef (*)(id, SEL, CFStringRef)) objc_msgSend)
-        (objc_staticMethod(objc_getClass("NSDictionary"), sel_getUid("alloc")),
-         sel_getUid("initWithContentsOfFile:"), path);
+    CFStringRef path = ((CFStringRef(*)(id,SEL,CFStringRef,CFStringRef))objc_msgSend)
+    (objc_staticMethod(objc_getClass("NSBundle"), sel_getUid("mainBundle")),
+     sel_getUid("pathForResource:ofType:"), CFSTR("WorkoutData"), CFSTR("plist"));
+    CFDictionaryRef root = ((CFDictionaryRef(*)(id,SEL,CFStringRef))objc_msgSend)
+    (allocClass("NSDictionary"), sel_getUid("initWithContentsOfFile:"), path);
     *lib = CFDictionaryGetValue(root, CFSTR("library"));
     return root;
 }

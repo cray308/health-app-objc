@@ -38,11 +38,6 @@ typedef enum {
     WorkoutTypeRest
 } WorkoutType;
 
-typedef enum {
-    FitnessPlanBaseBuilding,
-    FitnessPlanContinuation
-} FitnessPlan;
-
 typedef struct {
     unsigned char type;
     int weight;

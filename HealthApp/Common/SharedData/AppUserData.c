@@ -18,18 +18,16 @@ static CFStringRef const keys[] = {
     CFSTR("deadliftMax")
 };
 
-static inline id getUserDefaults(void) {
+id getUserDefaults(void) {
     return objc_staticMethod(objc_getClass("NSUserDefaults"), sel_getUid("standardUserDefaults"));
 }
 
 UserInfo *userInfo_initFromStorage(void) {
-    CFDictionaryRef savedInfo = ((CFDictionaryRef (*)(id, SEL, CFStringRef)) objc_msgSend)
-        (getUserDefaults(), sel_getUid("dictionaryForKey:"), userInfoKey);
-    if (!savedInfo) return NULL;
+    CFDictionaryRef savedInfo = ((CFDictionaryRef(*)(id,SEL,CFStringRef))objc_msgSend)
+    (getUserDefaults(), sel_getUid("dictionaryForKey:"), userInfoKey);
     CFNumberRef value;
 
     UserInfo *info = malloc(sizeof(UserInfo));
-    if (!info) return NULL;
 
     value = CFDictionaryGetValue(savedInfo, keys[0]);
     CFNumberGetValue(value, kCFNumberLongType, &info->planStart);
@@ -66,9 +64,9 @@ void userInfo_saveData(UserInfo *info) {
                                               &kCFTypeDictionaryValueCallBacks);
 
     id defaults = getUserDefaults();
-    ((void (*)(id, SEL, CFDictionaryRef, CFStringRef)) objc_msgSend)
-        (defaults, sel_getUid("setObject:forKey:"), dict, userInfoKey);
-    ((bool (*)(id, SEL)) objc_msgSend)(defaults, sel_getUid("synchronize"));
+    ((void(*)(id,SEL,CFDictionaryRef,CFStringRef))objc_msgSend)
+    (defaults, sel_getUid("setObject:forKey:"), dict, userInfoKey);
+    ((bool(*)(id,SEL))objc_msgSend)(defaults, sel_getUid("synchronize"));
     CFRelease(dict);
     for (int i = 0; i < 9; ++i) CFRelease(values[i]);
 }

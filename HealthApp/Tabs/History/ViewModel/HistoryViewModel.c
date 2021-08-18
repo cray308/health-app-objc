@@ -8,11 +8,8 @@
 #include "HistoryViewModel.h"
 #include "AppUserData.h"
 #include "CalendarDateHelpers.h"
+#include "Exercise.h"
 #include "PersistenceService.h"
-
-void freeChartDataEntry(id x) {
-    objc_singleArg(x, sel_getUid("release"));
-}
 
 static inline void createNewEntry(Array_chartData *arr, int x, int y) {
     id entry = createChartEntry(x, y);
@@ -20,7 +17,7 @@ static inline void createNewEntry(Array_chartData *arr, int x, int y) {
 }
 
 gen_array_source(weekData, HistoryWeekDataModel, DSDefault_shallowCopy, DSDefault_shallowDelete)
-gen_array_source(chartData, id, DSDefault_shallowCopy, freeChartDataEntry)
+gen_array_source(chartData, id, DSDefault_shallowCopy, releaseObj)
 
 void historyViewModel_init(HistoryViewModel *this) {
     for (int i = 0; i < 4; ++i) {
@@ -44,44 +41,42 @@ void historyViewModel_fetchData(HistoryViewModel *this) {
     int count = 0;
 
     id request = objc_staticMethod(objc_getClass("WeeklyData"), sel_getUid("fetchRequest"));
-    id predicate = ((id (*)(Class, SEL, CFStringRef, ...)) objc_msgSend)
-        (objc_getClass("NSPredicate"), sel_getUid("predicateWithFormat:"),
-         CFSTR("weekStart > %lld AND weekStart < %lld"),
-         date_twoYears, appUserDataShared->weekStart);
-    id descriptor = ((id (*)(id, SEL, CFStringRef, bool)) objc_msgSend)
-        (objc_staticMethod(objc_getClass("NSSortDescriptor"), sel_getUid("alloc")),
-         sel_getUid("initWithKey:ascending:"), CFSTR("weekStart"), true);
-    id arr = ((id (*)(Class, SEL, id, ...)) objc_msgSend)
-        (objc_getClass("NSArray"), sel_getUid("arrayWithObjects:"), descriptor, nil);
+    id predicate = ((id(*)(Class,SEL,CFStringRef,...))objc_msgSend)
+    (objc_getClass("NSPredicate"), sel_getUid("predicateWithFormat:"),
+     CFSTR("weekStart > %lld AND weekStart < %lld"), date_twoYears, appUserDataShared->weekStart);
+    id descriptor = ((id(*)(id,SEL,CFStringRef,bool))objc_msgSend)
+    (allocClass("NSSortDescriptor"),
+     sel_getUid("initWithKey:ascending:"), CFSTR("weekStart"), true);
 
-    ((void (*)(id, SEL, id)) objc_msgSend)(request, sel_getUid("setPredicate:"), predicate);
-    ((void (*)(id, SEL, id)) objc_msgSend)(request, sel_getUid("setSortDescriptors:"), arr);
+    ((void(*)(id,SEL,id))objc_msgSend)(request, sel_getUid("setPredicate:"), predicate);
+    ((void(*)(id,SEL,id))objc_msgSend)(request, sel_getUid("setSortDescriptors:"),
+                                       createArray((id []){descriptor}, 1));
 
     id data = persistenceService_executeFetchRequest(request, &count);
-    objc_singleArg(descriptor, sel_getUid("release"));
+    releaseObj(descriptor);
     if (!data) return;
 
     for (int i = 0; i < count; ++i) {
-        id d = ((id (*)(id, SEL, int)) objc_msgSend)(data, sel_getUid("objectAtIndex:"), i);
-        int timeStrength = ((int16_t (*)(id, SEL)) objc_msgSend)(d, sel_getUid("timeStrength"));
-        time_t timestamp = ((int64_t (*)(id, SEL)) objc_msgSend)(d, sel_getUid("weekStart"));
+        id d = getObjectAtIndex(data, i);
+        int timeStrength = getWorkoutTimeForType(d, WorkoutTypeStrength);
+        time_t timestamp = ((int64_t(*)(id,SEL))objc_msgSend)(d, sel_getUid("weekStart"));
         localtime_r(&timestamp, &localInfo);
         HistoryWeekDataModel m = {
             .year = localInfo.tm_year % 100,
             .month = localInfo.tm_mon,
             .day = localInfo.tm_mday,
-            .totalWorkouts = ((int16_t (*)(id, SEL)) objc_msgSend)(d, sel_getUid("totalWorkouts")),
+            .totalWorkouts = getTotalWorkouts(d),
             .weightArray = {
-                ((int16_t (*)(id, SEL)) objc_msgSend)(d, sel_getUid("bestSquat")),
-                ((int16_t (*)(id, SEL)) objc_msgSend)(d, sel_getUid("bestPullup")),
-                ((int16_t (*)(id, SEL)) objc_msgSend)(d, sel_getUid("bestBench")),
-                ((int16_t (*)(id, SEL)) objc_msgSend)(d, sel_getUid("bestDeadlift"))
+                getLiftingLimitForType(d, LiftTypeSquat),
+                getLiftingLimitForType(d, LiftTypePullup),
+                getLiftingLimitForType(d, LiftTypeBench),
+                getLiftingLimitForType(d, LiftTypeDeadlift)
             },
             .durationByType = {
                 timeStrength,
-                ((int16_t (*)(id, SEL)) objc_msgSend)(d, sel_getUid("timeHIC")),
-                ((int16_t (*)(id, SEL)) objc_msgSend)(d, sel_getUid("timeSE")),
-                ((int16_t (*)(id, SEL)) objc_msgSend)(d, sel_getUid("timeEndurance"))
+                getWorkoutTimeForType(d, WorkoutTypeHIC),
+                getWorkoutTimeForType(d, WorkoutTypeSE),
+                getWorkoutTimeForType(d, WorkoutTypeEndurance)
             },
             .cumulativeDuration = {[0] = timeStrength}
         };

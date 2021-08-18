@@ -23,25 +23,20 @@ void appCoordinator_start(AppCoordinator *this, id tabVC) {
     CFStringRef imgNames[] = {CFSTR("house"), CFSTR("chart.bar"), CFSTR("gear")};
 
     for (int i = 0; i < 3; ++i) {
-        id image = ((id (*)(Class, SEL, CFStringRef)) objc_msgSend)
-            (objc_getClass("UIImage"), sel_getUid("systemImageNamed:"), imgNames[i]);
+        id image = ((id(*)(Class,SEL,CFStringRef))objc_msgSend)
+        (objc_getClass("UIImage"), sel_getUid("systemImageNamed:"), imgNames[i]);
 
-        items[i] = ((id (*)(id, SEL, CFStringRef, id, int)) objc_msgSend)
-            (objc_staticMethod(objc_getClass("UITabBarItem"), sel_getUid("alloc")),
-             sel_getUid("initWithTitle:image:tag:"), titles[i], image, i);
+        items[i] = ((id(*)(id,SEL,CFStringRef,id,int))objc_msgSend)
+        (allocClass("UITabBarItem"), sel_getUid("initWithTitle:image:tag:"), titles[i], image, i);
 
-        controllers[i] = ((id (*)(id, SEL, CFStringRef, id)) objc_msgSend)
-            (objc_staticMethod(objc_getClass("UINavigationController"), sel_getUid("alloc")),
-             sel_getUid("initWithNibName:bundle:"), NULL, nil);
+        controllers[i] = ((id(*)(id,SEL,CFStringRef,id))objc_msgSend)
+        (allocNavVC(), sel_getUid("initWithNibName:bundle:"), NULL, nil);
 
-        id navBar = ((id (*)(id, SEL)) objc_msgSend)(controllers[i], sel_getUid("navigationBar"));
+        id navBar = ((id(*)(id,SEL))objc_msgSend)(controllers[i], sel_getUid("navigationBar"));
 
-        ((void (*)(id, SEL, id)) objc_msgSend)
-            (navBar, sel_getUid("setBarTintColor:"),
-             objc_staticMethod(objc_getClass("UIColor"),
-                               sel_getUid("tertiarySystemGroupedBackgroundColor")));
-        ((void (*)(id, SEL, id)) objc_msgSend)
-            (controllers[i], sel_getUid("setTabBarItem:"), items[i]);
+        ((void(*)(id,SEL,id))objc_msgSend)(navBar, sel_getUid("setBarTintColor:"),
+                                           createColor("tertiarySystemGroupedBackgroundColor"));
+        ((void(*)(id,SEL,id))objc_msgSend)(controllers[i], sel_getUid("setTabBarItem:"), items[i]);
     }
 
     HomeTabCoordinator *homeCoord = calloc(1, sizeof(HomeTabCoordinator));
@@ -58,14 +53,12 @@ void appCoordinator_start(AppCoordinator *this, id tabVC) {
 
     memcpy(this->children, (void *[]){homeCoord, histCoord, settingsCoord}, 3 * sizeof(void *));
 
-    id vcArr = ((id (*)(Class, SEL, id*, int)) objc_msgSend)
-        (objc_getClass("NSArray"), sel_getUid("arrayWithObjects:count:"), controllers, 3);
-    ((void (*)(id, SEL, id, bool)) objc_msgSend)
-        (tabVC, sel_getUid("setViewControllers:animated:"), vcArr, false);
+    ((void(*)(id,SEL,id,bool))objc_msgSend)(tabVC, sel_getUid("setViewControllers:animated:"),
+                                            createArray(controllers, 3), false);
 
     for (int i = 0; i < 3; ++i) {
-        objc_singleArg(controllers[i], sel_getUid("release"));
-        objc_singleArg(items[i], sel_getUid("release"));
+        releaseObj(controllers[i]);
+        releaseObj(items[i]);
     }
 }
 
