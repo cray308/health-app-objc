@@ -11,10 +11,8 @@
 #include <NotificationCenter/NotificationCenter.h>
 #include <pthread.h>
 
-#define _U_ __attribute__((__unused__))
-
 @interface ExerciseView: UIView
-- (id) initWithExercise: (ExerciseEntry *)exercise;
+- (id) initWithExercise: (ExerciseEntry *)exercise tag: (int)tag;
 - (bool) handleTap;
 - (void) reset;
 @end
@@ -198,43 +196,31 @@ CFStringRef createExerciseTitle(ExerciseEntry *e) {
 }
 
 @implementation ExerciseView
-- (id) initWithExercise: (ExerciseEntry *)exerciseEntry {
+- (id) initWithExercise: (ExerciseEntry *)exerciseEntry tag: (int)tag {
     if (!(self = [super initWithFrame:CGRectZero])) return nil;
     exercise = exerciseEntry;
     if (exerciseEntry->rest) {
         restStr = CFStringCreateWithFormat(NULL, NULL, CFSTR("Rest: %d s"), exerciseEntry->rest);
     }
 
-    button = [UIButton buttonWithType:UIButtonTypeSystem];
-    button.translatesAutoresizingMaskIntoConstraints = false;
-    [button setTitle:@"" forState:UIControlStateNormal];
-    [button setTitleColor:UIColor.labelColor forState: UIControlStateNormal];
-    [button setTitleColor:UIColor.secondaryLabelColor forState:UIControlStateDisabled];
-    button.titleLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleHeadline];
-    button.titleLabel.adjustsFontSizeToFitWidth = true;
-    button.backgroundColor = UIColor.secondarySystemGroupedBackgroundColor;
-    button.layer.cornerRadius = 5;
+    button = createButton(CFSTR(""), UIColor.labelColor, UIColor.secondaryLabelColor,
+                          UIFontTextStyleHeadline, UIColor.secondarySystemGroupedBackgroundColor,
+                          true, true, true, tag);
 
-    setsLabel = [[UILabel alloc] initWithFrame:CGRectZero];
-    setsLabel.translatesAutoresizingMaskIntoConstraints = false;
-    setsLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline];
-    setsLabel.adjustsFontSizeToFitWidth = true;
+    setsLabel = createLabel(NULL, UIFontTextStyleSubheadline, true, NSTextAlignmentNatural);
     if (exercise->sets > 1) {
         CFStringRef setsStr = createSetsString(exercise);
         setsLabel.text = (__bridge NSString*) setsStr;
         CFRelease(setsStr);
     }
-    setsLabel.textColor = UIColor.labelColor;
 
-    checkbox = [[UIView alloc] initWithFrame:CGRectZero];
-    checkbox.translatesAutoresizingMaskIntoConstraints = false;
-    checkbox.layer.cornerRadius = 5;
+    checkbox = createView(nil, true);
 
     [self addSubview:setsLabel];
     [self addSubview:button];
     [self addSubview:checkbox];
 
-    [NSLayoutConstraint activateConstraints:@[
+    activateConstraints((id []){
         [setsLabel.topAnchor constraintEqualToAnchor:self.topAnchor],
         [setsLabel.heightAnchor constraintEqualToConstant:20],
         [setsLabel.leadingAnchor constraintEqualToAnchor:self.leadingAnchor constant:8],
@@ -250,7 +236,7 @@ CFStringRef createExerciseTitle(ExerciseEntry *e) {
         [checkbox.centerYAnchor constraintEqualToAnchor:button.centerYAnchor],
         [checkbox.widthAnchor constraintEqualToConstant:20],
         [checkbox.heightAnchor constraintEqualToAnchor:checkbox.widthAnchor]
-    ]];
+    }, 13);
     [self reset];
     return self;
 }
@@ -314,28 +300,18 @@ CFStringRef createExerciseTitle(ExerciseEntry *e) {
     size = group->exercises->size;
     viewsArr = calloc(size, sizeof(ExerciseView *));
 
-    headerLabel = [[UILabel alloc] initWithFrame:CGRectZero];
-    headerLabel.translatesAutoresizingMaskIntoConstraints = false;
-    headerLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleTitle3];
-    headerLabel.adjustsFontSizeToFitWidth = true;
-
+    headerLabel = createLabel(NULL, UIFontTextStyleTitle3, true, NSTextAlignmentNatural);
     CFStringRef headerStr = createExerciseGroupHeader(group);
     if (headerStr) {
         headerLabel.text = (__bridge NSString*) headerStr;
         CFRelease(headerStr);
     }
-    headerLabel.textColor = UIColor.labelColor;
     [self addSubview:headerLabel];
 
-    UIStackView *exerciseStack = [[UIStackView alloc] initWithFrame:CGRectZero];
-    exerciseStack.translatesAutoresizingMaskIntoConstraints = false;
-    exerciseStack.axis = UILayoutConstraintAxisVertical;
-    exerciseStack.spacing = 5;
-    [exerciseStack setLayoutMarginsRelativeArrangement:true];
-    exerciseStack.layoutMargins = (UIEdgeInsets){5, 4, 4, 0};
+    UIStackView *exerciseStack = createStackView(NULL, 0, 1, 5, 0, (HAEdgeInsets){5, 4, 4, 0});
     [self addSubview:exerciseStack];
 
-    [NSLayoutConstraint activateConstraints:@[
+    activateConstraints((id []){
         [headerLabel.topAnchor constraintEqualToAnchor:self.topAnchor],
         [headerLabel.leadingAnchor constraintEqualToAnchor:self.leadingAnchor constant:8],
         [headerLabel.trailingAnchor constraintEqualToAnchor:self.trailingAnchor constant:-8],
@@ -344,12 +320,11 @@ CFStringRef createExerciseTitle(ExerciseEntry *e) {
         [exerciseStack.topAnchor constraintEqualToAnchor:headerLabel.bottomAnchor],
         [exerciseStack.leadingAnchor constraintEqualToAnchor:self.leadingAnchor],
         [exerciseStack.trailingAnchor constraintEqualToAnchor:self.trailingAnchor],
-        [exerciseStack.bottomAnchor constraintEqualToAnchor:self.bottomAnchor],
-    ]];
+        [exerciseStack.bottomAnchor constraintEqualToAnchor:self.bottomAnchor]
+    }, 8);
 
     for (int i = 0; i < size; ++i) {
-        ExerciseView *v = [[ExerciseView alloc] initWithExercise:&group->exercises->arr[i]];
-        v->button.tag = i;
+        ExerciseView *v = [[ExerciseView alloc] initWithExercise:&group->exercises->arr[i] tag:i];
         [v->button addTarget:self action:@selector(handleTap:)
             forControlEvents:UIControlEventTouchUpInside];
         [exerciseStack addArrangedSubview:v];
@@ -582,24 +557,17 @@ CFStringRef createExerciseTitle(ExerciseEntry *e) {
     self.view.backgroundColor = UIColor.systemGroupedBackgroundColor;
     self.navigationItem.title = (__bridge NSString*) viewModel->workout->title;
 
-    UIButton *startBtn = [UIButton buttonWithType:UIButtonTypeSystem];
-    startBtn.translatesAutoresizingMaskIntoConstraints = false;
-    [startBtn setTitle:@"Start" forState:UIControlStateNormal];
-    [startBtn setTitleColor:UIColor.systemGreenColor forState: UIControlStateNormal];
-    startBtn.titleLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline];
-    startBtn.backgroundColor = UIColor.secondarySystemGroupedBackgroundColor;
-    startBtn.layer.cornerRadius = 5;
+    UIButton *startBtn = createButton(CFSTR("Start"), UIColor.systemGreenColor, nil,
+                                      UIFontTextStyleSubheadline,
+                                      UIColor.secondarySystemGroupedBackgroundColor,
+                                      true, false, true, 0);
     [startBtn addTarget:self action:@selector(startEndWorkout:)
        forControlEvents:UIControlEventTouchUpInside];
 
-    UIView *btnContainer = [[UIView alloc] initWithFrame:CGRectZero];
+    UIView *btnContainer = createView(nil, false);
     [btnContainer addSubview:startBtn];
 
-    groupsStack = [[UIStackView alloc] initWithFrame:CGRectZero];
-    groupsStack.axis = UILayoutConstraintAxisVertical;
-    groupsStack.spacing = 20;
-    [groupsStack setLayoutMarginsRelativeArrangement:true];
-    groupsStack.layoutMargins = (UIEdgeInsets){0, 4, 4, 0};
+    groupsStack = createStackView(NULL, 0, 1, 20, 0, (HAEdgeInsets){0, 4, 4, 0});
 
     Workout *w = viewModel->workout;
     for (int i = 0; i < (int) w->activities->size; ++i) {
@@ -615,25 +583,15 @@ CFStringRef createExerciseTitle(ExerciseEntry *e) {
         [v release];
     }
 
-    UIStackView *vStack = [[UIStackView alloc] initWithArrangedSubviews:@[
-        btnContainer, groupsStack
-    ]];
-    vStack.translatesAutoresizingMaskIntoConstraints = false;
-    vStack.axis = UILayoutConstraintAxisVertical;
-    vStack.spacing = 20;
-    [vStack setLayoutMarginsRelativeArrangement:true];
-    vStack.layoutMargins = (UIEdgeInsets){10, 0, 0, 0};
+    UIStackView *vStack = createStackView((id[]){btnContainer, groupsStack}, 2, 1, 20, 0,
+                                          (HAEdgeInsets){10, 0, 0, 0});
 
-    UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:CGRectZero];
-    scrollView.translatesAutoresizingMaskIntoConstraints = false;
-    scrollView.autoresizingMask = UIViewAutoresizingFlexibleHeight;
-    scrollView.bounces = true;
-    scrollView.showsVerticalScrollIndicator = true;
+    UIScrollView *scrollView = createScrollView();
     [self.view addSubview:scrollView];
     [scrollView addSubview:vStack];
 
     UILayoutGuide *guide = self.view.safeAreaLayoutGuide;
-    [NSLayoutConstraint activateConstraints:@[
+    activateConstraints((id []){
         [scrollView.leadingAnchor constraintEqualToAnchor:guide.leadingAnchor],
         [scrollView.trailingAnchor constraintEqualToAnchor:guide.trailingAnchor],
         [scrollView.topAnchor constraintEqualToAnchor:guide.topAnchor],
@@ -649,8 +607,8 @@ CFStringRef createExerciseTitle(ExerciseEntry *e) {
         [startBtn.bottomAnchor constraintEqualToAnchor:btnContainer.bottomAnchor],
         [startBtn.leadingAnchor constraintEqualToAnchor:btnContainer.leadingAnchor],
         [startBtn.widthAnchor constraintEqualToAnchor:btnContainer.widthAnchor multiplier:0.4],
-        [startBtn.heightAnchor constraintEqualToConstant: 30],
-    ]];
+        [startBtn.heightAnchor constraintEqualToConstant: 30]
+    }, 14);
 
     startObserver = [NSNotificationCenter.defaultCenter
                      addObserverForName:UIApplicationDidBecomeActiveNotification object:nil
@@ -693,11 +651,13 @@ CFStringRef createExerciseTitle(ExerciseEntry *e) {
     AddWorkoutViewModel *m = NULL;
     pthread_mutex_lock(&sharedLock);
     if (viewModel) {
-        NSArray<UIView *> *views = groupsStack.arrangedSubviews;
-        if (views.count >= 3) {
-            ExerciseContainer *next = (ExerciseContainer *) views[2];
-            [views[0] removeFromSuperview];
-            [views[1] removeFromSuperview];
+        CFArrayRef views = (__bridge CFArrayRef) groupsStack.arrangedSubviews;
+        if (CFArrayGetCount(views) >= 3) {
+            UIView *first = CFArrayGetValueAtIndex(views, 0);
+            UIView *second = CFArrayGetValueAtIndex(views, 1);
+            ExerciseContainer *next = CFArrayGetValueAtIndex(views, 2);
+            [first removeFromSuperview];
+            [second removeFromSuperview];
             [next startCircuitAndTimer:1];
         } else {
             m = viewModel;
@@ -717,8 +677,8 @@ CFStringRef createExerciseTitle(ExerciseEntry *e) {
     ExerciseContainer *v = nil;
     pthread_mutex_lock(&sharedLock);
     if (viewModel) {
-        NSArray<UIView *> *views = groupsStack.arrangedSubviews;
-        v = (ExerciseContainer *) views[0];
+        CFArrayRef views = (__bridge CFArrayRef) groupsStack.arrangedSubviews;
+        v = CFArrayGetValueAtIndex(views, 0);
     }
     pthread_mutex_unlock(&sharedLock);
 

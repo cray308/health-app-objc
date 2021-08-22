@@ -5,10 +5,10 @@
 //  Created by Christopher Ray on 3/20/21.
 //
 
-#import "AppCoordinator.h"
-#import "HomeTabCoordinator.h"
-#import "HistoryTabCoordinator.h"
-#import "SettingsTabCoordinator.h"
+#include "AppCoordinator.h"
+#include "HomeTabCoordinator.h"
+#include "HistoryTabCoordinator.h"
+#include "SettingsTabCoordinator.h"
 
 typedef enum {
     TabHome, TabHistory, TabSettings
@@ -53,13 +53,15 @@ void appCoordinator_start(AppCoordinator *this, id tabVC) {
 
     memcpy(this->children, (void *[]){homeCoord, histCoord, settingsCoord}, 3 * sizeof(void *));
 
-    ((void(*)(id,SEL,id,bool))objc_msgSend)(tabVC, sel_getUid("setViewControllers:animated:"),
-                                            createArray(controllers, 3), false);
+    CFArrayRef array = CFArrayCreate(NULL, (const void **)controllers, 3, kCocoaArrCallbacks);
+    ((void(*)(id,SEL,CFArrayRef,bool))objc_msgSend)
+    (tabVC, sel_getUid("setViewControllers:animated:"), array, false);
 
     for (int i = 0; i < 3; ++i) {
         releaseObj(controllers[i]);
         releaseObj(items[i]);
     }
+    CFRelease(array);
 }
 
 void appCoordinator_updatedUserInfo(AppCoordinator *this) {

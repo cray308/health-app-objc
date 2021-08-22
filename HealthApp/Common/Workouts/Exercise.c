@@ -11,9 +11,12 @@
 
 #define freeExerciseEntry(x) CFRelease((x).name)
 #define freeExerciseGroup(x) array_free(exEntry, (x).exercises)
+#define copyStringRef(x, y) x = CFStringCreateCopy(NULL, y)
+#define deleteStringRef(x) CFRelease(x)
 
 gen_array_source(exEntry, ExerciseEntry, DSDefault_shallowCopy, freeExerciseEntry)
 gen_array_source(exGroup, ExerciseGroup, DSDefault_shallowCopy, freeExerciseGroup)
+gen_array_source(str, CFStringRef, copyStringRef, deleteStringRef)
 
 static CFStringRef const repsKey = CFSTR("reps");
 static CFStringRef const typeKey = CFSTR("type");
@@ -205,8 +208,8 @@ cleanup:
     return w;
 }
 
-CFStringRef *exerciseManager_getWorkoutNamesForType(unsigned char type, int *size) {
-    CFStringRef *results = NULL;
+Array_str *exerciseManager_getWorkoutNamesForType(unsigned char type) {
+    Array_str *results = NULL;
     CFDictionaryRef lib;
     CFDictionaryRef root = createRootAndLibDict(&lib);
 
@@ -216,12 +219,12 @@ CFStringRef *exerciseManager_getWorkoutNamesForType(unsigned char type, int *siz
 
     if (type == WorkoutTypeStrength) len = 2;
 
-    results = calloc(len, sizeof(CFStringRef));
-    *size = (int) len;
+    results = array_new(str);
+    array_reserve(str, results, len);
     for (int i = 0; i < len; ++i) {
         CFDictionaryRef week = CFArrayGetValueAtIndex(libArr, i);
         CFStringRef title = CFDictionaryGetValue(week, titleKey);
-        results[i] = CFStringCreateCopy(NULL, title);
+        array_push_back(str, results, title);
     }
 cleanup:
     CFRelease(root);
@@ -229,7 +232,7 @@ cleanup:
 }
 
 Workout *exerciseManager_getWorkoutFromLibrary(unsigned char type,
-                                               int index, int reps, int sets, int weight) {
+                                               int index, int sets, int reps, int weight) {
     Workout *w = NULL;
     CFDictionaryRef lib;
     CFDictionaryRef root = createRootAndLibDict(&lib);

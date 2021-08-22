@@ -18,10 +18,6 @@ static CFStringRef const keys[] = {
     CFSTR("deadliftMax")
 };
 
-id getUserDefaults(void) {
-    return objc_staticMethod(objc_getClass("NSUserDefaults"), sel_getUid("standardUserDefaults"));
-}
-
 UserInfo *userInfo_initFromStorage(void) {
     CFDictionaryRef savedInfo = ((CFDictionaryRef(*)(id,SEL,CFStringRef))objc_msgSend)
     (getUserDefaults(), sel_getUid("dictionaryForKey:"), userInfoKey);
@@ -66,7 +62,6 @@ void userInfo_saveData(UserInfo *info) {
     id defaults = getUserDefaults();
     ((void(*)(id,SEL,CFDictionaryRef,CFStringRef))objc_msgSend)
     (defaults, sel_getUid("setObject:forKey:"), dict, userInfoKey);
-    ((bool(*)(id,SEL))objc_msgSend)(defaults, sel_getUid("synchronize"));
     CFRelease(dict);
     for (int i = 0; i < 9; ++i) CFRelease(values[i]);
 }

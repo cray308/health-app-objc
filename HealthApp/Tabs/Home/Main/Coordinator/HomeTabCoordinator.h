@@ -24,7 +24,7 @@ void homeCoordinator_updateUI(HomeTabCoordinator *this);
 void homeCoordinator_addWorkoutFromPlan(HomeTabCoordinator *this, int index);
 void homeCoordinator_addWorkoutFromCustomButton(HomeTabCoordinator *this, int index);
 void homeCoordinator_finishedSettingUpCustomWorkout(HomeTabCoordinator *this, unsigned char type,
-                                                    int index, int sets, int reps, int weight);
+                                                    int index, short *params);
 void homeCoordinator_didFinishAddingWorkout(HomeTabCoordinator *this, int totalCompletedWorkouts);
 void homeCoordinator_checkForChildCoordinator(HomeTabCoordinator *this);
 

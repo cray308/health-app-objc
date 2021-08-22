@@ -11,6 +11,42 @@
 #import "HealthApp-Swift.h"
 #pragma clang diagnostic pop
 
+CFArrayCallBacks *kCocoaArrCallbacks;
+
+static void disableAutoresizing(id view) {
+    ((void(*)(id,SEL,bool))objc_msgSend)
+    (view, sel_getUid("setTranslatesAutoresizingMaskIntoConstraints:"), false);
+}
+
+static void setAlignment(id view, int alignment) {
+    ((void(*)(id,SEL,int))objc_msgSend)(view, sel_getUid("setTextAlignment:"), alignment);
+}
+
+static void setDynamicFont(id view, bool enable) {
+    ((void(*)(id,SEL,bool))objc_msgSend)(view, sel_getUid("setAdjustsFontSizeToFitWidth:"), enable);
+}
+
+static void setTag(id view, int tag) {
+    ((void(*)(id,SEL,int))objc_msgSend)(view, sel_getUid("setTag:"), tag);
+}
+
+static void setBackground(id view, id color) {
+    ((void(*)(id,SEL,id))objc_msgSend)(view, sel_getUid("setBackgroundColor:"), color);
+}
+
+static void setCornerRadius(id view) {
+    id layer = ((id(*)(id,SEL))objc_msgSend)(view, sel_getUid("layer"));
+    ((void(*)(id,SEL,CGFloat))objc_msgSend)(layer, sel_getUid("setCornerRadius:"), 5);
+}
+
+static void setFont(id view, id style) {
+    if (style) {
+        id font = ((id(*)(Class,SEL,CFStringRef))objc_msgSend)
+        (objc_getClass("UIFont"), sel_getUid("preferredFontForTextStyle:"), (CFStringRef)style);
+        ((void(*)(id,SEL,id))objc_msgSend)(view, sel_getUid("setFont:"), font);
+    }
+}
+
 id objc_staticMethod(Class _self, SEL _cmd) {
     return ((id(*)(Class,SEL))objc_msgSend)(_self, _cmd);
 }
@@ -23,8 +59,23 @@ id createChartEntry(int x, int y) {
     return [[ChartDataEntry alloc] initWithX:x y:y];
 }
 
+void getScreenBounds(CGRect *result) {
+    ((void(*)(CGRect*,id,SEL))objc_msgSend_stret)
+    (result,
+     objc_staticMethod(objc_getClass("UIScreen"), sel_getUid("mainScreen")), sel_getUid("bounds"));
+}
+
+id getUserDefaults(void) {
+    return objc_staticMethod(objc_getClass("NSUserDefaults"), sel_getUid("standardUserDefaults"));
+}
+
 id createColor(const char *name) {
     return objc_staticMethod(objc_getClass("UIColor"), sel_getUid(name));
+}
+
+id createObjectWithFrame(const char *name, CGRect rect) {
+    return ((id(*)(id,SEL,CGRect))objc_msgSend)(allocClass(name),
+                                                sel_getUid("initWithFrame:"), rect);
 }
 
 id allocClass(const char *name) {
@@ -35,29 +86,22 @@ void releaseObj(id obj) {
     objc_singleArg(obj, sel_getUid("release"));
 }
 
-id createArray(id *arr, int count) {
-    return ((id(*)(Class,SEL,id*,int))objc_msgSend)
-    (objc_getClass("NSArray"), sel_getUid("arrayWithObjects:count:"), arr, count);
-}
-
-id getObjectAtIndex(id arr, int i) {
-    return ((id(*)(id,SEL,int))objc_msgSend)(arr, sel_getUid("objectAtIndex:"), i);
-}
-
 id createVCWithDelegate(const char *name, void *delegate) {
     return ((id(*)(id,SEL,void*))objc_msgSend)(allocClass(name),
                                                sel_getUid("initWithDelegate:"), delegate);
 }
 
 void setupNavVC(id navVC, id firstVC) {
-    id array = createArray((id []){firstVC}, 1);
-    ((void(*)(id,SEL,id))objc_msgSend)(navVC, sel_getUid("setViewControllers:"), array);
+    id ctrls[] = {firstVC};
+    CFArrayRef array = CFArrayCreate(NULL, (const void **)ctrls, 1, kCocoaArrCallbacks);
+    ((void(*)(id,SEL,CFArrayRef))objc_msgSend)(navVC, sel_getUid("setViewControllers:"), array);
     releaseObj(firstVC);
+    CFRelease(array);
 }
 
 id getFirstVC(id navVC) {
-    id ctrls = ((id(*)(id,SEL))objc_msgSend)(navVC, sel_getUid("viewControllers"));
-    return getObjectAtIndex(ctrls, 0);
+    CFArrayRef ctrls = ((CFArrayRef(*)(id,SEL))objc_msgSend)(navVC, sel_getUid("viewControllers"));
+    return CFArrayGetValueAtIndex(ctrls, 0);
 }
 
 id allocNavVC(void) {
@@ -78,40 +122,116 @@ void dismissPresentedVC(id presenter) {
     (presenter, sel_getUid("dismissViewControllerAnimated:completion:"), true, nil);
 }
 
-void setWeekData(id weekData, const char *setter, int16_t value) {
-    ((void(*)(id,SEL,int16_t))objc_msgSend)(weekData, sel_getUid(setter), value);
+id createView(id color, bool rounded) {
+    id view = createObjectWithFrame("UIView", CGRectZero);
+    disableAutoresizing(view);
+    setBackground(view, color);
+    if (rounded)
+        setCornerRadius(view);
+    return view;
 }
 
-int16_t getWeekData(id weekData, const char *getter) {
-    return ((int16_t(*)(id,SEL))objc_msgSend)(weekData, sel_getUid(getter));
-}
-
-int16_t getLiftingLimitForType(id weekData, unsigned char type) {
-    static char const *getterStrs[] = {"bestSquat", "bestPullup", "bestBench", "bestDeadlift"};
-    return getWeekData(weekData, getterStrs[type]);
-}
-
-int16_t getWorkoutTimeForType(id weekData, unsigned char type) {
-    static char const *getterStrs[] = {"timeStrength", "timeSE", "timeEndurance", "timeHIC"};
-    return getWeekData(weekData, getterStrs[type]);
-}
-
-int16_t getTotalWorkouts(id weekData) {
-    return getWeekData(weekData, "totalWorkouts");
-}
-
-void addToWorkoutType(id weekData, unsigned char type, int16_t duration) {
-    static char const *setterStrs[] = {
-        "setTimeStrength:", "setTimeSE:", "setTimeEndurance:", "setTimeHIC:"
-    };
-    setWeekData(weekData, setterStrs[type], duration + getWorkoutTimeForType(weekData, type));
-}
-
-void setLiftingMaxes(id weekData, short *weights) {
-    static char const *setterStrs[] = {
-        "setBestSquat:", "setBestPullup:", "setBestBench:", "setBestDeadlift:"
-    };
-    for (int i = 0; i < 4; ++i) {
-        setWeekData(weekData, setterStrs[i], weights[i]);
+id createStackView(id *subviews, int count, int axis, CGFloat spacing,
+                   int distribution, HAEdgeInsets margins) {
+    id view;
+    const char *name = "UIStackView";
+    if (count) {
+        CFArrayRef array = CFArrayCreate(NULL, (const void **)subviews, count, kCocoaArrCallbacks);
+        view = ((id(*)(id,SEL,CFArrayRef))objc_msgSend)
+        (allocClass(name), sel_getUid("initWithArrangedSubviews:"), array);
+        CFRelease(array);
+    } else {
+        view = createObjectWithFrame(name, CGRectZero);
     }
+    disableAutoresizing(view);
+    ((void(*)(id,SEL,int))objc_msgSend)(view, sel_getUid("setAxis:"), axis);
+    ((void(*)(id,SEL,CGFloat))objc_msgSend)(view, sel_getUid("setSpacing:"), spacing);
+    ((void(*)(id,SEL,int))objc_msgSend)(view, sel_getUid("setDistribution:"), distribution);
+    ((void(*)(id,SEL,bool))objc_msgSend)(view, sel_getUid("setLayoutMarginsRelativeArrangement:"),
+                                         true);
+    UIEdgeInsets insets = {margins.top, margins.left, margins.bottom, margins.right};
+    ((void(*)(id,SEL,UIEdgeInsets))objc_msgSend)(view, sel_getUid("setLayoutMargins:"), insets);
+    return view;
+}
+
+id createScrollView(void) {
+    id view = createObjectWithFrame("UIScrollView", CGRectZero);
+    disableAutoresizing(view);
+    ((void(*)(id,SEL,int))objc_msgSend)(view, sel_getUid("setAutoresizingMask:"), 16);
+    ((void(*)(id,SEL,bool))objc_msgSend)(view, sel_getUid("setBounces:"), true);
+    ((void(*)(id,SEL,bool))objc_msgSend)(view, sel_getUid("setShowsVerticalScrollIndicator:"),
+                                         true);
+    return view;
+}
+
+id createLabel(CFStringRef text, id style, bool dynamicSize, int alignment) {
+    id view = createObjectWithFrame("UILabel", CGRectZero);
+    disableAutoresizing(view);
+    ((void(*)(id,SEL,CFStringRef))objc_msgSend)(view, sel_getUid("setText:"), text);
+    setFont(view, style);
+    setDynamicFont(view, dynamicSize);
+    ((void(*)(id,SEL,id))objc_msgSend)(view,
+                                       sel_getUid("setTextColor:"), createColor("labelColor"));
+    setAlignment(view, alignment);
+    return view;
+}
+
+id createButton(CFStringRef title, id color, id disabledColor, id style,
+                id background, bool rounded, bool dynamicSize, bool enabled, int tag) {
+    id view = ((id(*)(Class,SEL,int))objc_msgSend)(objc_getClass("UIButton"),
+                                                   sel_getUid("buttonWithType:"), 1);
+    disableAutoresizing(view);
+    ((void(*)(id,SEL,CFStringRef,int))objc_msgSend)(view, sel_getUid("setTitle:forState:"),
+                                                    title, UIControlStateNormal);
+    ((void(*)(id,SEL,id,int))objc_msgSend)(view, sel_getUid("setTitleColor:forState:"),
+                                           color, UIControlStateNormal);
+    if (disabledColor) {
+        ((void(*)(id,SEL,id,int))objc_msgSend)(view, sel_getUid("setTitleColor:forState:"),
+                                               disabledColor, UIControlStateDisabled);
+    }
+    id label = ((id(*)(id,SEL))objc_msgSend)(view, sel_getUid("titleLabel"));
+    setFont(label, style);
+    setDynamicFont(label, dynamicSize);
+    setBackground(view, background);
+    if (rounded)
+        setCornerRadius(view);
+    setTag(view, tag);
+    enableButton(view, enabled);
+    return view;
+}
+
+id createSegmentedControl(CFStringRef *items, int count, int startIndex) {
+    CFArrayRef array = CFArrayCreate(NULL, (const void **)items, count, kCocoaArrCallbacks);
+    id view = ((id(*)(id,SEL,CFArrayRef))objc_msgSend)(allocClass("UISegmentedControl"),
+                                                       sel_getUid("initWithItems:"), array);
+    disableAutoresizing(view);
+    ((void(*)(id,SEL,int))objc_msgSend)(view, sel_getUid("setSelectedSegmentIndex:"), startIndex);
+    setCornerRadius(view);
+    ((void(*)(id,SEL,id))objc_msgSend)(view, sel_getUid("setTintColor:"),
+                                       createColor("systemGray2Color"));
+    CFRelease(array);
+    return view;
+}
+
+id createTextfield(id delegate, CFStringRef placeholder, int alignment, int keyboard) {
+    id view = createObjectWithFrame("UITextField", CGRectZero);
+    disableAutoresizing(view);
+    ((void(*)(id,SEL,id))objc_msgSend)(view, sel_getUid("setDelegate:"), delegate);
+    setBackground(view, createColor("tertiarySystemBackgroundColor"));
+    ((void(*)(id,SEL,CFStringRef))objc_msgSend)(view, sel_getUid("setPlaceholder:"), placeholder);
+    setAlignment(view, alignment);
+    ((void(*)(id,SEL,int))objc_msgSend)(view, sel_getUid("setBorderStyle:"), 3);
+    ((void(*)(id,SEL,int))objc_msgSend)(view, sel_getUid("setKeyboardType:"), keyboard);
+    return view;
+}
+
+void enableButton(id view, bool enabled) {
+    ((void(*)(id,SEL,bool))objc_msgSend)(view, sel_getUid("setEnabled:"), enabled);
+}
+
+void activateConstraints(id *constraints, int count) {
+    CFArrayRef array = CFArrayCreate(NULL, (const void **)constraints, count, kCocoaArrCallbacks);
+    ((void(*)(Class,SEL,CFArrayRef))objc_msgSend)(objc_getClass("NSLayoutConstraint"),
+                                                  sel_getUid("activateConstraints:"), array);
+    CFRelease(array);
 }

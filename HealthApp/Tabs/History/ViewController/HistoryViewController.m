@@ -31,7 +31,7 @@ ChartDataEntry **getChartEntriesFromArray(Array_chartData *a) {
 
 void setupChartCommon(LineChartView *v, UIView *parent,
                       NSObject<ChartAxisValueFormatter> *xAxisFormatter,
-                      NSArray<ChartLegendEntry*> *legendEntries, int height) {
+                      CFArrayRef legendEntries, int height) {
     v.translatesAutoresizingMaskIntoConstraints = false;
     v.noDataText = @"No data is available";
     v.leftAxis.axisMinimum = 0;
@@ -41,7 +41,7 @@ void setupChartCommon(LineChartView *v, UIView *parent,
     v.legend.orientation = ChartLegendOrientationVertical;
     v.legend.yEntrySpace = 10;
     v.legend.font = [UIFont systemFontOfSize:16];
-    [v.legend setCustomWithEntries:legendEntries];
+    [v.legend setCustomWithEntries:(__bridge NSArray*)legendEntries];
     v.legend.enabled = false;
 
     v.xAxis.labelPosition = XAxisLabelPositionBottom;
@@ -53,23 +53,25 @@ void setupChartCommon(LineChartView *v, UIView *parent,
     v.xAxis.valueFormatter = xAxisFormatter;
 
     [parent addSubview:v];
-    [NSLayoutConstraint activateConstraints:@[
+    activateConstraints((id []){
         [v.topAnchor constraintEqualToAnchor:parent.topAnchor],
         [v.bottomAnchor constraintEqualToAnchor:parent.bottomAnchor],
         [v.leadingAnchor constraintEqualToAnchor:parent.leadingAnchor constant:8],
         [v.trailingAnchor constraintEqualToAnchor:parent.trailingAnchor constant:-8],
         [v.heightAnchor constraintEqualToConstant:height]
-    ]];
+    }, 5);
 }
 
 void setupDataSetCommon(LineChartDataSet *dataSet, UIColor *color) {
-    dataSet.colors = @[color];
+    CFArrayRef arr = CFArrayCreate(NULL, (const void **)((id[]){color}), 1, kCocoaArrCallbacks);
+    dataSet.colors = (__bridge NSArray*)arr;
     dataSet.axisDependency = AxisDependencyLeft;
     dataSet.valueFont = [UIFont boldSystemFontOfSize:11];
     dataSet.valueTextColor = UIColor.labelColor;
     [dataSet setCircleColor:color];
     dataSet.circleHoleColor = color;
     dataSet.circleRadius = 2;
+    CFRelease(arr);
 }
 
 void disableLineChartView(LineChartView *v) {
@@ -99,9 +101,11 @@ NSString *getDurationStringForAreaChart(CFStringRef *str, int minutes) {
 void updateDataSet(bool isSmall, int count, LineChartDataSet *dataSet, ChartDataEntry **entries,
                    ChartLegendEntry *legendEntry, CFStringRef labelString) {
     dataSet.drawCirclesEnabled = isSmall;
-    [dataSet replaceEntries:[NSArray arrayWithObjects:entries count:count]];
+    CFArrayRef array = CFArrayCreate(NULL, (const void **)entries, count, kCocoaArrCallbacks);
+    [dataSet replaceEntries:(__bridge NSArray*)array];
     legendEntry.label = (__bridge NSString*) labelString;
     CFRelease(labelString);
+    CFRelease(array);
 }
 
 void updateChart(bool isSmall, int count,
@@ -120,21 +124,16 @@ void updateChart(bool isSmall, int count,
 }
 
 UIView *createChartSeparator(CFStringRef title) {
-    UIView *view = [[UIView alloc] initWithFrame:CGRectZero];
+    UIView *view = createView(nil, false);
 
     UIView *topDivider = createDivider();
     [view addSubview:topDivider];
 
-    UILabel *chartTitleLabel = [[UILabel alloc] initWithFrame:CGRectZero];
-    chartTitleLabel.translatesAutoresizingMaskIntoConstraints = false;
-    chartTitleLabel.text = (__bridge NSString*) title;
+    UILabel *chartTitleLabel = createLabel(title, nil, true, NSTextAlignmentCenter);
     chartTitleLabel.font = [UIFont systemFontOfSize:20];
-    chartTitleLabel.adjustsFontSizeToFitWidth = true;
-    chartTitleLabel.textColor = UIColor.labelColor;
-    chartTitleLabel.textAlignment = NSTextAlignmentCenter;
     [view addSubview:chartTitleLabel];
 
-    [NSLayoutConstraint activateConstraints:@[
+    activateConstraints((id []){
         [topDivider.leadingAnchor constraintEqualToAnchor:view.leadingAnchor],
         [topDivider.trailingAnchor constraintEqualToAnchor:view.trailingAnchor],
         [topDivider.topAnchor constraintEqualToAnchor:view.topAnchor],
@@ -144,7 +143,7 @@ UIView *createChartSeparator(CFStringRef title) {
         [chartTitleLabel.topAnchor constraintEqualToAnchor:topDivider.bottomAnchor constant:5],
         [chartTitleLabel.heightAnchor constraintEqualToConstant:40],
         [chartTitleLabel.bottomAnchor constraintEqualToAnchor:view.bottomAnchor]
-    ]];
+    }, 8);
     [topDivider release];
     [chartTitleLabel release];
     return view;
@@ -168,7 +167,7 @@ UIView *createChartSeparator(CFStringRef title) {
     @public LineChartData *chartData;
     @public LineChartDataSet *dataSet;
     @public ChartLimitLine *limitLine;
-    @public NSArray<ChartLegendEntry*> *legendEntries;
+    @public ChartLegendEntry *legendEntries[1];
 }
 @end
 
@@ -177,7 +176,7 @@ UIView *createChartSeparator(CFStringRef title) {
     @public LineChartView *chartView;
     @public LineChartData *chartData;
     @public LineChartDataSet *dataSets[5];
-    @public NSArray<ChartLegendEntry*> *legendEntries;
+    @public ChartLegendEntry *legendEntries[4];
 }
 @end
 
@@ -185,7 +184,7 @@ UIView *createChartSeparator(CFStringRef title) {
     @public LineChartView *chartView;
     @public LineChartData *chartData;
     @public LineChartDataSet *dataSets[4];
-    @public NSArray<ChartLegendEntry *> *legendEntries;
+    @public ChartLegendEntry *legendEntries[4];
 }
 @end
 
@@ -231,10 +230,8 @@ UIView *createChartSeparator(CFStringRef title) {
     self.view.backgroundColor = UIColor.systemBackgroundColor;
     self.navigationItem.title = @"Workout History";
 
-    rangePicker = [[UISegmentedControl alloc] initWithItems:@[@"6 Months", @"1 Year", @"2 Years"]];
-    rangePicker.layer.cornerRadius = 5;
-    rangePicker.tintColor = UIColor.systemGray2Color;
-    rangePicker.selectedSegmentIndex = 0;
+    CFStringRef segments[] = {CFSTR("6 Months"), CFSTR("1 Year"), CFSTR("2 Years")};
+    rangePicker = createSegmentedControl(segments, 3, 0);
     [rangePicker addTarget:self action:@selector(updateSelectedSegment:)
           forControlEvents:UIControlEventValueChanged];
 
@@ -245,27 +242,19 @@ UIView *createChartSeparator(CFStringRef title) {
     UIView *liftChartSeparator = createChartSeparator(CFSTR("Lift Progress"));
     liftChart = [[LiftChartView alloc] initWithFormatter:self];
 
-    UIStackView *vStack = [[UIStackView alloc] initWithArrangedSubviews:@[
+    id subviews[] = {
         rangePicker, gradientChartSeparator, gradientChart, areaChartSeparator, areaChart,
         liftChartSeparator, liftChart
-    ]];
-    vStack.translatesAutoresizingMaskIntoConstraints = false;
-    vStack.axis = UILayoutConstraintAxisVertical;
-    vStack.spacing = 5;
-    [vStack setLayoutMarginsRelativeArrangement:true];
-    vStack.layoutMargins = (UIEdgeInsets){10, 8, 10, 8};
+    };
+    UIStackView *vStack = createStackView(subviews, 7, 1, 5, 0, (HAEdgeInsets){10, 8, 10, 8});
 
-    UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:CGRectZero];
-    scrollView.translatesAutoresizingMaskIntoConstraints = false;
-    scrollView.autoresizingMask = UIViewAutoresizingFlexibleHeight;
-    scrollView.bounces = true;
-    scrollView.showsVerticalScrollIndicator = true;
+    UIScrollView *scrollView = createScrollView();
     [self.view addSubview:scrollView];
     [scrollView addSubview:vStack];
     [vStack setCustomSpacing:20 afterView:rangePicker];
 
     UILayoutGuide *guide = self.view.safeAreaLayoutGuide;
-    [NSLayoutConstraint activateConstraints:@[
+    activateConstraints((id []){
         [scrollView.leadingAnchor constraintEqualToAnchor:guide.leadingAnchor],
         [scrollView.trailingAnchor constraintEqualToAnchor:guide.trailingAnchor],
         [scrollView.topAnchor constraintEqualToAnchor:guide.topAnchor],
@@ -278,7 +267,7 @@ UIView *createChartSeparator(CFStringRef title) {
         [vStack.widthAnchor constraintEqualToAnchor:scrollView.widthAnchor],
 
         [rangePicker.heightAnchor constraintEqualToConstant:30]
-    ]];
+    }, 10);
 
     [vStack release];
     [gradientChartSeparator release];
@@ -332,7 +321,8 @@ UIView *createChartSeparator(CFStringRef title) {
     {
         HistoryAreaChartViewModel *vm = &viewModel->areaChartViewModel;
         ChartDataEntry **entries = getChartEntriesFromArray(vm->entries[0]);
-        [areaChart->dataSets[0] replaceEntries:[NSArray arrayWithObjects:entries count:count]];
+        CFArrayRef array = CFArrayCreate(NULL, (const void **)entries, count, kCocoaArrCallbacks);
+        [areaChart->dataSets[0] replaceEntries:(__bridge NSArray*)array];
 
         for (int i = 1; i < 5; ++i) {
             entries = getChartEntriesFromArray(vm->entries[i]);
@@ -349,6 +339,7 @@ UIView *createChartSeparator(CFStringRef title) {
         }
         updateChart(isSmall, count, areaChart->chartView,
                     areaChart->chartData, 1.1 * vm->maxActivityTime);
+        CFRelease(array);
     }
     {
         HistoryLiftChartViewModel *vm = &viewModel->liftChartViewModel;
@@ -399,13 +390,22 @@ UIView *createChartSeparator(CFStringRef title) {
     NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
     valueFormatter = [[ChartDefaultValueFormatter alloc] initWithFormatter:formatter];
 
-    ChartLegendEntry *entry = createLegendEntry(UIColor.systemTealColor);
-    legendEntries = @[entry];
+    memcpy(legendEntries, (id []){createLegendEntry(UIColor.systemTealColor)},
+           sizeof(ChartLegendEntry*));
+    CFArrayRef legendArr = CFArrayCreate(NULL, (const void **)legendEntries, 1, kCocoaArrCallbacks);
     limitLine = [[ChartLimitLine alloc] initWithLimit:0];
-    limitLine.lineDashLengths = @[@5, @5];
+    double first = 5, second = 5;
+    CFNumberRef lineDashLengths[] = {
+        CFNumberCreate(NULL, kCFNumberDoubleType, &first),
+        CFNumberCreate(NULL, kCFNumberDoubleType, &second)
+    };
+    CFArrayRef lineArr = CFArrayCreate(NULL, (const void **)lineDashLengths,
+                                       2, &kCFTypeArrayCallBacks);
+    limitLine.lineDashLengths = (__bridge NSArray*)lineArr;
     limitLine.lineColor = UIColor.systemTealColor;
 
-    dataSet = [[LineChartDataSet alloc] initWithEntries:@[]];
+    CFArrayRef entryArr = CFArrayCreate(NULL, (const void **)((id []){}), 0, kCocoaArrCallbacks);
+    dataSet = [[LineChartDataSet alloc] initWithEntries:(__bridge NSArray*)entryArr];
     setupDataSetCommon(dataSet, UIColor.systemRedColor);
     dataSet.fill = fill;
     dataSet.drawFilledEnabled = true;
@@ -414,14 +414,18 @@ UIView *createChartSeparator(CFStringRef title) {
     chartData = [[LineChartData alloc] initWithDataSet:dataSet];
 
     chartView = [[LineChartView alloc] initWithFrame:CGRectZero];
-    setupChartCommon(chartView, self, xAxisFormatter, legendEntries, 390);
+    setupChartCommon(chartView, self, xAxisFormatter, legendArr, 390);
     [chartView.leftAxis addLimitLine:limitLine];
 
     CFRelease(colorSpace);
     CFRelease(chartGradient);
     CFRelease(colorsArray);
+    CFRelease(lineArr);
+    CFRelease(entryArr);
+    CFRelease(lineDashLengths[0]);
+    CFRelease(lineDashLengths[1]);
+    CFRelease(legendArr);
     [fill release];
-    [entry release];
     [formatter release];
     return self;
 }
@@ -431,6 +435,7 @@ UIView *createChartSeparator(CFStringRef title) {
     [chartData release];
     [dataSet release];
     [limitLine release];
+    [legendEntries[0] release];
     [valueFormatter release];
     [super dealloc];
 }
@@ -447,15 +452,18 @@ UIView *createChartSeparator(CFStringRef title) {
     if (!(self = [super initWithFrame:CGRectZero])) return nil;
 
     UIColor *colors[] = HistoryChartColors;
-    ChartLegendEntry *entries[4] = {
+    memcpy(legendEntries, (id []){
         createLegendEntry(colors[0]), createLegendEntry(colors[1]),
         createLegendEntry(colors[2]), createLegendEntry(colors[3])
-    };
-    legendEntries = @[entries[0], entries[1], entries[2], entries[3]];
+    }, 4 * sizeof(ChartLegendEntry*));
+    CFArrayRef legendArr = CFArrayCreate(NULL, (const void **)legendEntries, 4, kCocoaArrCallbacks);
 
-    dataSets[0] = [[LineChartDataSet alloc] initWithEntries:@[]];
+    CFArrayRef entryArr = CFArrayCreate(NULL, (const void **)((id []){}), 0, kCocoaArrCallbacks);
+    dataSets[0] = [[LineChartDataSet alloc] initWithEntries:(__bridge NSArray*)entryArr];
+    CFRelease(entryArr);
     for (int i = 1; i < 5; ++i) {
-        dataSets[i] = [[LineChartDataSet alloc] initWithEntries:@[]];
+        entryArr = CFArrayCreate(NULL, (const void **)((id []){}), 0, kCocoaArrCallbacks);
+        dataSets[i] = [[LineChartDataSet alloc] initWithEntries:(__bridge NSArray*)entryArr];
         setupDataSetCommon(dataSets[i], colors[i - 1]);
         dataSets[i].fillColor = colors[i - 1];
         dataSets[i].drawFilledEnabled = true;
@@ -464,15 +472,15 @@ UIView *createChartSeparator(CFStringRef title) {
                                              initWithBoundaryDataSet:dataSets[i - 1]];
         dataSets[i].fillFormatter = fillFormatter;
         [fillFormatter release];
-        [entries[i - 1] release];
+        CFRelease(entryArr);
     }
-    chartData = [[LineChartData alloc] initWithDataSets:@[
-        dataSets[4], dataSets[3], dataSets[2], dataSets[1]
-    ]];
+    id _ds[] = {dataSets[4], dataSets[3], dataSets[2], dataSets[1]};
+    CFArrayRef datasetArr = CFArrayCreate(NULL, (const void **) _ds, 4, kCocoaArrCallbacks);
+    chartData = [[LineChartData alloc] initWithDataSets:(__bridge NSArray*)datasetArr];
     [chartData setValueFormatter:self];
 
     chartView = [[LineChartView alloc] initWithFrame:CGRectZero];
-    setupChartCommon(chartView, self, xAxisFormatter, legendEntries, 425);
+    setupChartCommon(chartView, self, xAxisFormatter, legendArr, 425);
     chartView.leftAxis.valueFormatter = self;
 
     LineChartRenderer *renderer = [[CustomLineChartRenderer alloc]
@@ -481,11 +489,17 @@ UIView *createChartSeparator(CFStringRef title) {
     currString = CFStringCreateCopy(NULL, CFSTR(""));
     chartView.renderer = renderer;
     [renderer release];
+    CFRelease(datasetArr);
+    CFRelease(legendArr);
     return self;
 }
 
 - (void) dealloc {
-    for (int i = 0; i < 5; ++i) [dataSets[i] release];
+    for (int i = 0; i < 4; ++i) {
+        [dataSets[i] release];
+        [legendEntries[i] release];
+    }
+    [dataSets[4] release];
     CFRelease(currString);
     [chartData release];
     [chartView release];
@@ -514,27 +528,35 @@ UIView *createChartSeparator(CFStringRef title) {
     if (!(self = [super initWithFrame:CGRectZero])) return nil;
 
     UIColor *colors[] = HistoryChartColors;
-    legendEntries = @[
+    memcpy(legendEntries, (id []){
         createLegendEntry(colors[0]), createLegendEntry(colors[1]),
         createLegendEntry(colors[2]), createLegendEntry(colors[3])
-    ];
+    }, 4 * sizeof(ChartLegendEntry*));
+    CFArrayRef legendArr = CFArrayCreate(NULL, (const void **)legendEntries, 4, kCocoaArrCallbacks);
 
     for (int i = 0; i < 4; ++i) {
-        dataSets[i] = [[LineChartDataSet alloc] initWithEntries:@[]];
+        CFArrayRef entryArr = CFArrayCreate(NULL, (const void **)((id []){}),
+                                            0, kCocoaArrCallbacks);
+        dataSets[i] = [[LineChartDataSet alloc] initWithEntries:(__bridge NSArray*)entryArr];
         setupDataSetCommon(dataSets[i], colors[i]);
         dataSets[i].lineWidth = 2;
+        CFRelease(entryArr);
     }
-    chartData = [[LineChartData alloc] initWithDataSets:@[
-        dataSets[0], dataSets[1], dataSets[2], dataSets[3]
-    ]];
+    CFArrayRef datasetArr = CFArrayCreate(NULL, (const void **)dataSets, 4, kCocoaArrCallbacks);
+    chartData = [[LineChartData alloc] initWithDataSets:(__bridge NSArray*)datasetArr];
 
     chartView = [[LineChartView alloc] initWithFrame:CGRectZero];
-    setupChartCommon(chartView, self, xAxisFormatter, legendEntries, 550);
+    setupChartCommon(chartView, self, xAxisFormatter, legendArr, 550);
+    CFRelease(datasetArr);
+    CFRelease(legendArr);
     return self;
 }
 
 - (void) dealloc {
-    for (int i = 0; i < 4; ++i) [dataSets[i] release];
+    for (int i = 0; i < 4; ++i) {
+        [dataSets[i] release];
+        [legendEntries[i] release];
+    }
     [chartData release];
     [chartView release];
     [super dealloc];

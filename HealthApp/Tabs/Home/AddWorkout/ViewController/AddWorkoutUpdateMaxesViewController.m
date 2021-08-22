@@ -10,11 +10,11 @@
 
 @interface AddWorkoutUpdateMaxesViewController() {
     USet_char *validChars;
-    CFStringInlineBuffer buf;
     AddWorkoutCoordinator *delegate;
     UITextField *textFields[5];
     bool validInput[4];
     short results[4];
+    short maxes[4];
     UIButton *finishButton;
 }
 @end
@@ -22,8 +22,9 @@
 @implementation AddWorkoutUpdateMaxesViewController
 - (id) initWithDelegate: (AddWorkoutCoordinator *)_delegate {
     if (!(self = [super initWithNibName:nil bundle:nil])) return nil;
-    delegate = _delegate;
-    validChars = createNumberCharacterSet();
+    self->delegate = _delegate;
+    self->validChars = createNumberCharacterSet();
+    memcpy(maxes, (short []){999, 999, 999, 999}, 4 * sizeof(short));
     return self;
 }
 
@@ -37,65 +38,41 @@
     [super viewDidLoad];
     self.view.backgroundColor = UIColor.secondarySystemBackgroundColor;
 
-    NSString *titles[] = {@"Squat", @"Pull-up", @"Bench", @"Deadlift"};
+    CFStringRef titles[] = {CFSTR("Squat"), CFSTR("Pull-up"), CFSTR("Bench"), CFSTR("Deadlift")};
     UIStackView *stacks[4];
 
     for (int i = 0; i < 4; ++i) {
-        UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
-        label.text = titles[i];
-        label.font = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
-
-        textFields[i] = [[UITextField alloc] initWithFrame:CGRectZero];
-        textFields[i].delegate = self;
-        textFields[i].backgroundColor = UIColor.tertiarySystemBackgroundColor;
-        textFields[i].placeholder = @"Weight";
-        textFields[i].textAlignment = NSTextAlignmentLeft;
-        textFields[i].borderStyle = UITextBorderStyleRoundedRect;
-        textFields[i].keyboardType = UIKeyboardTypeNumberPad;
-
-        stacks[i] = [[UIStackView alloc] initWithArrangedSubviews:@[label, textFields[i]]];
-        stacks[i].translatesAutoresizingMaskIntoConstraints = false;
-        stacks[i].backgroundColor = UIColor.secondarySystemBackgroundColor;
-        stacks[i].spacing = 5;
-        stacks[i].distribution = UIStackViewDistributionFillEqually;
-        [stacks[i] setLayoutMarginsRelativeArrangement:true];
-        stacks[i].layoutMargins = (UIEdgeInsets){4, 8, 4, 8};
+        UILabel *label = createLabel(titles[i], UIFontTextStyleBody, false, NSTextAlignmentNatural);
+        textFields[i] = createTextfield(self, CFSTR("Weight"), NSTextAlignmentLeft, 4);
+        stacks[i] = createStackView((id []){label, textFields[i]}, 2, 0, 5, 1,
+                                    (HAEdgeInsets){4, 8, 4, 8});
         [self.view addSubview:stacks[i]];
-
         [label release];
     }
 
-    finishButton = [UIButton buttonWithType:UIButtonTypeSystem];
-    finishButton.translatesAutoresizingMaskIntoConstraints = false;
-    [finishButton setTitle:@"Finish" forState:UIControlStateNormal];
-    [finishButton setTitleColor:UIColor.systemBlueColor forState:UIControlStateNormal];
-    [finishButton setTitleColor:UIColor.systemGrayColor forState:UIControlStateDisabled];
-    finishButton.frame = (CGRect){{0}, {self.view.frame.size.width / 3, 30}};
+    finishButton = createButton(CFSTR("Finish"), UIColor.systemBlueColor, UIColor.systemGrayColor,
+                                NULL, nil, false, false, false, 0);
     [finishButton addTarget:self action:@selector(didPressFinish)
            forControlEvents:UIControlEventTouchUpInside];
-    UIBarButtonItem *rightItem = [[UIBarButtonItem alloc] initWithCustomView:finishButton];
-    [finishButton setEnabled:false];
-    self.navigationItem.rightBarButtonItem = rightItem;
+    setNavButton(self.navigationItem, false, finishButton, self.view.frame.size.width);
 
     UILayoutGuide *guide = self.view.safeAreaLayoutGuide;
-    [NSLayoutConstraint activateConstraints:@[
+    activateConstraints((id []){
         [stacks[0].topAnchor constraintEqualToAnchor:guide.topAnchor constant:30],
         [stacks[0].leadingAnchor constraintEqualToAnchor:guide.leadingAnchor],
         [stacks[0].trailingAnchor constraintEqualToAnchor:guide.trailingAnchor],
         [stacks[0].heightAnchor constraintEqualToConstant:40]
-    ]];
+    }, 4);
     for (int i = 1; i < 4; ++i) {
-        [NSLayoutConstraint activateConstraints:@[
+        activateConstraints((id []){
             [stacks[i].topAnchor constraintEqualToAnchor:stacks[i - 1].bottomAnchor constant:20],
             [stacks[i].leadingAnchor constraintEqualToAnchor:guide.leadingAnchor],
             [stacks[i].trailingAnchor constraintEqualToAnchor:guide.trailingAnchor],
             [stacks[i].heightAnchor constraintEqualToConstant:40]
-        ]];
+        }, 4);
     }
 
     for (int i = 0; i < 4; ++i) [stacks[i] release];
-    [rightItem release];
-
     createToolbar(self, @selector(dismissKeyboard), textFields);
 }
 
@@ -109,44 +86,9 @@
 
 - (BOOL) textField: (UITextField *)textField
 shouldChangeCharactersInRange: (NSRange)range replacementString: (NSString *)string {
-    if (!validateNumericInput(validChars, (__bridge CFStringRef) string, &buf)) return false;
-
-    int i = 0;
-    for (; i < 4; ++i) {
-        if (textField == textFields[i]) break;
-    }
-
-    NSString *initialText = textField.text ? textField.text : @"";
-    CFStringRef newText = CFBridgingRetain([initialText stringByReplacingCharactersInRange:range
-                                                                                withString:string]);
-    if (!CFStringGetLength(newText)) {
-        CFRelease(newText);
-        [finishButton setEnabled:false];
-        validInput[i] = false;
-        return true;
-    }
-
-    int newWeight = CFStringGetIntValue(newText);
-    CFRelease(newText);
-
-    if (newWeight < 0 || newWeight > 999) {
-        [finishButton setEnabled:false];
-        validInput[i] = false;
-        return true;
-    }
-
-    validInput[i] = true;
-    results[i] = (short) newWeight;
-
-    for (i = 0; i < 4; ++i) {
-        if (!validInput[i]) {
-            [finishButton setEnabled:false];
-            return true;
-        }
-    }
-
-    [finishButton setEnabled:true];
-    return true;
+    return checkTextfield(textField, (CFRange){range.location, range.length},
+                          (__bridge CFStringRef) string, validChars, finishButton, textFields, 4,
+                          maxes, results, validInput);
 }
 
 - (BOOL) textFieldShouldReturn: (UITextField *)textField {

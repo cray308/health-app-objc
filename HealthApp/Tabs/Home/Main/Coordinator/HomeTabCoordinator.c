@@ -81,23 +81,23 @@ void homeCoordinator_addWorkoutFromCustomButton(HomeTabCoordinator *this, int in
             break;
     }
 
-    int count = 0;
-    CFStringRef *names = exerciseManager_getWorkoutNamesForType(type, &count);
+    Array_str *names = exerciseManager_getWorkoutNamesForType(type);
     if (!names) return;
-    else if (!count) {
+    else if (!names->size) {
         free(names);
         return;
     }
 
-    id modal = ((id(*)(id,SEL,HomeTabCoordinator*,unsigned char,CFStringRef*,int))objc_msgSend)
+    id modal = ((id(*)(id,SEL,HomeTabCoordinator*,unsigned char,Array_str*))objc_msgSend)
     (allocClass("HomeSetupWorkoutModalViewController"),
-     sel_getUid("initWithDelegate:type:names:count:"), this, type, names, count);
+     sel_getUid("initWithDelegate:type:names:"), this, type, names);
     presentVC(getFirstVC(this->navVC), modal);
 }
 
 void homeCoordinator_finishedSettingUpCustomWorkout(HomeTabCoordinator *this, unsigned char type,
-                                                    int index, int sets, int reps, int weight) {
-    Workout *w = exerciseManager_getWorkoutFromLibrary(type, index, reps, sets, weight);
+                                                    int index, short *params) {
+    Workout *w = exerciseManager_getWorkoutFromLibrary(type, index,
+                                                       params[0], params[1], params[2]);
     if (w) navigateToAddWorkout(this, true, w);
 }
 

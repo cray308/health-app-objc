@@ -5,7 +5,14 @@
 //  Created by Christopher Ray on 3/20/21.
 //
 
-#import <UIKit/UIKit.h>
+#include "CocoaBridging.h"
 
-@interface AppDelegate: UIResponder <UIApplicationDelegate>
-@end
+extern Class AppDelegateClass;
+
+typedef struct {
+    Class isa;
+    id window;
+} AppDelegate;
+
+bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd, id application, id options);
+int appDelegate_supportedOrientations(AppDelegate *self, SEL _cmd, id application, id window);

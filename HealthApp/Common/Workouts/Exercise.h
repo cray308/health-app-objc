@@ -38,6 +38,8 @@ typedef enum {
     WorkoutTypeRest
 } WorkoutType;
 
+gen_array_headers(str, CFStringRef)
+
 typedef struct {
     unsigned char type;
     int weight;
@@ -68,8 +70,8 @@ typedef struct {
 
 void exerciseManager_setWeeklyWorkoutNames(unsigned char plan, int week, CFStringRef *names);
 Workout *exerciseManager_getWeeklyWorkoutAtIndex(unsigned char plan, int week, int index);
-CFStringRef *exerciseManager_getWorkoutNamesForType(unsigned char type, int *size);
+Array_str *exerciseManager_getWorkoutNamesForType(unsigned char type);
 Workout *exerciseManager_getWorkoutFromLibrary(unsigned char type,
-                                               int index, int reps, int sets, int weight);
+                                               int index, int sets, int reps, int weight);
 
 #endif /* Exercise_h */

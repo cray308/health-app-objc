@@ -11,36 +11,32 @@
 
 @interface HomeSetupWorkoutModalViewController() {
     USet_char *validChars;
-    CFStringInlineBuffer buf;
     HomeTabCoordinator *delegate;
-    CFStringRef *names;
-    int count;
+    Array_str *names;
     int index;
     unsigned char type;
     UIButton *submitButton;
     UITextField *workoutTextField;
     UITextField *fields[3];
     bool validInput[3];
-    int inputs[3];
-    int maxes[3];
+    short inputs[3];
+    short maxes[3];
 }
 @end
 
 @implementation HomeSetupWorkoutModalViewController
-- (id) initWithDelegate: (HomeTabCoordinator *)_delegate
-                   type: (unsigned char)_type names: (CFStringRef *)_names count: (int)_count {
+- (id) initWithDelegate: (HomeTabCoordinator *)delegate
+                   type: (unsigned char)type names: (Array_str *)names {
     if (!(self = [super initWithNibName:nil bundle:nil])) return nil;
-    delegate = _delegate;
-    names = _names;
-    count = _count;
-    type = _type;
+    self->delegate = delegate;
+    self->names = names;
+    self->type = type;
     return self;
 }
 
 - (void) dealloc {
     if (validChars) uset_free(char, validChars);
-    for (int i = 0; i < count; ++i) CFRelease(names[i]);
-    free(names);
+    array_free(str, names);
     [workoutTextField release];
     for (int i = 0; i < 3; ++i) {
         if (fields[i]) [fields[i] release];
@@ -52,55 +48,43 @@
     [super viewDidLoad];
     self.view.backgroundColor = UIColor.systemGroupedBackgroundColor;
 
-    workoutTextField = [[UITextField alloc] initWithFrame:CGRectZero];
-    workoutTextField.translatesAutoresizingMaskIntoConstraints = false;
-    workoutTextField.delegate = self;
-    workoutTextField.backgroundColor = UIColor.tertiarySystemBackgroundColor;
-    workoutTextField.text = (__bridge NSString*) names[0];
-    workoutTextField.textAlignment = NSTextAlignmentCenter;
-    workoutTextField.borderStyle = UITextBorderStyleRoundedRect;
+    workoutTextField = createTextfield(self, NULL, NSTextAlignmentCenter, 0);
+    workoutTextField.text = (__bridge NSString*) names->arr[0];
 
-    UILabel *workoutLabel = [[UILabel alloc] initWithFrame:CGRectZero];
-    workoutLabel.translatesAutoresizingMaskIntoConstraints = false;
-    workoutLabel.text = @"Choose workout";
-    workoutLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleFootnote];
+    UILabel *workoutLabel = createLabel(CFSTR("Choose workout"), UIFontTextStyleFootnote,
+                                        false, NSTextAlignmentNatural);
 
     UIPickerView *workoutPicker = [[UIPickerView alloc] init];
     workoutPicker.delegate = self;
     workoutTextField.inputView = workoutPicker;
 
-    UIView *workoutContainer = [[UIView alloc] initWithFrame:CGRectZero];
-    workoutContainer.translatesAutoresizingMaskIntoConstraints = false;
+    UIView *workoutContainer = createView(nil, false);
     [workoutContainer addSubview:workoutLabel];
     [workoutContainer addSubview:workoutTextField];
     [self.view addSubview:workoutContainer];
 
-    submitButton = [UIButton buttonWithType:UIButtonTypeSystem];
-    submitButton.translatesAutoresizingMaskIntoConstraints = false;
-    submitButton.backgroundColor = UIColor.secondarySystemBackgroundColor;
-    [submitButton setTitle:@"Go" forState:UIControlStateNormal];
-    [submitButton setTitleColor:UIColor.systemBlueColor forState:UIControlStateNormal];
-    [submitButton setTitleColor:UIColor.systemGrayColor forState:UIControlStateDisabled];
+    submitButton = createButton(CFSTR("Go"), UIColor.systemBlueColor, UIColor.systemGrayColor,
+                                NULL, UIColor.secondarySystemBackgroundColor,
+                                false, false, false, 0);
     [submitButton addTarget:self action:@selector(didPressFinish)
            forControlEvents:UIControlEventTouchUpInside];
-    [submitButton setEnabled:false];
     [self.view addSubview:submitButton];
 
-    NSString *titles[3] = {0};
+    CFStringRef titles[3] = {0};
 
     switch (type) {
         case WorkoutTypeStrength:
-            titles[0] = @"Sets";
-            titles[1] = @"Reps";
-            titles[2] = @"Max Weight Percentage";
+            titles[0] = CFSTR("Sets");
+            titles[1] = CFSTR("Reps");
+            titles[2] = CFSTR("Max Weight Percentage");
             maxes[0] = 5;
             maxes[1] = 5;
             maxes[2] = 100;
             break;
 
         case WorkoutTypeSE:
-            titles[0] = @"Sets";
-            titles[1] = @"Reps";
+            titles[0] = CFSTR("Sets");
+            titles[1] = CFSTR("Reps");
             validInput[2] = true;
             inputs[2] = 1;
             maxes[0] = 3;
@@ -108,7 +92,7 @@
             break;
 
         case WorkoutTypeEndurance:
-            titles[1] = @"Duration (mins)";
+            titles[1] = CFSTR("Duration (mins)");
             validInput[0] = validInput[2] = true;
             inputs[0] = inputs[2] = 1;
             maxes[1] = 180;
@@ -116,15 +100,12 @@
 
         case WorkoutTypeHIC:
             memset(validInput, true, 3 * sizeof(bool));
-            memset(inputs, 1, 3 * sizeof(int));
+            memset(inputs, 1, 3 * sizeof(short));
             [submitButton setEnabled:true];
             break;
     }
 
-    UIStackView *textFieldStack = [[UIStackView alloc] initWithFrame:CGRectZero];
-    textFieldStack.translatesAutoresizingMaskIntoConstraints = false;
-    textFieldStack.axis = UILayoutConstraintAxisVertical;
-    textFieldStack.spacing = 20;
+    UIStackView *textFieldStack = createStackView(NULL, 0, 1, 20, 0, (HAEdgeInsets){0});
     [self.view addSubview:textFieldStack];
 
     bool createCharSet = false;
@@ -132,26 +113,11 @@
     for (int i = 0; i < 3; ++i) {
         if (!titles[i]) continue;
         createCharSet = true;
-        UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
-        label.text = titles[i];
-        label.font = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
-        label.adjustsFontSizeToFitWidth = true;
-
-        fields[i] = [[UITextField alloc] initWithFrame:CGRectZero];
-        fields[i].delegate = self;
-        fields[i].backgroundColor = UIColor.tertiarySystemBackgroundColor;
-        fields[i].textAlignment = NSTextAlignmentLeft;
-        fields[i].borderStyle = UITextBorderStyleRoundedRect;
-        fields[i].keyboardType = UIKeyboardTypeNumberPad;
-
+        UILabel *label = createLabel(titles[i], UIFontTextStyleBody, true, NSTextAlignmentNatural);
+        fields[i] = createTextfield(self, NULL, NSTextAlignmentLeft, 4);
         createToolbar(self, @selector(dismissKeyboard), (id []){fields[i], nil});
-
-        UIStackView *hStack = [[UIStackView alloc] initWithArrangedSubviews:@[label, fields[i]]];
-        hStack.backgroundColor = UIColor.secondarySystemBackgroundColor;
-        hStack.spacing = 5;
-        hStack.distribution = UIStackViewDistributionFillEqually;
-        [hStack setLayoutMarginsRelativeArrangement:true];
-        hStack.layoutMargins = (UIEdgeInsets){4, 8, 4, 8};
+        UIStackView *hStack = createStackView((id []){label, fields[i]}, 2, 0, 5, 1,
+                                              (HAEdgeInsets){4, 8, 4, 8});
         [textFieldStack addArrangedSubview:hStack];
         [label release];
         [hStack release];
@@ -159,22 +125,18 @@
 
     if (createCharSet) validChars = createNumberCharacterSet();
 
-    UIButton *cancelButton = [UIButton buttonWithType:UIButtonTypeSystem];
-    cancelButton.translatesAutoresizingMaskIntoConstraints = false;
-    [cancelButton setTitle:@"Cancel" forState:UIControlStateNormal];
-    [cancelButton setTitleColor:UIColor.systemBlueColor forState:UIControlStateNormal];
-    [cancelButton setTitleColor:UIColor.systemGrayColor forState:UIControlStateDisabled];
-    cancelButton.frame = (CGRect){{0}, {self.view.frame.size.width / 3, 30}};
+    UIButton *cancelButton = createButton(CFSTR("Cancel"), UIColor.systemBlueColor,
+                                          UIColor.systemGrayColor, NULL, nil,
+                                          false, false, true, 0);
     [cancelButton addTarget:self action:@selector(pressedCancel)
            forControlEvents:UIControlEventTouchUpInside];
-    UIBarButtonItem *leftItem = [[UIBarButtonItem alloc] initWithCustomView:cancelButton];
-    self.navigationItem.leftBarButtonItem = leftItem;
+    setNavButton(self.navigationItem, true, cancelButton, self.view.frame.size.width);
 
     UILayoutGuide *guide = self.view.safeAreaLayoutGuide;
-    [NSLayoutConstraint activateConstraints:@[
+    activateConstraints((id []){
         [workoutContainer.topAnchor constraintEqualToAnchor:guide.topAnchor constant:30],
-        [workoutContainer.leadingAnchor constraintEqualToAnchor:guide.leadingAnchor],
-        [workoutContainer.trailingAnchor constraintEqualToAnchor:guide.trailingAnchor],
+        [workoutContainer.leadingAnchor constraintEqualToAnchor:guide.leadingAnchor constant:8],
+        [workoutContainer.trailingAnchor constraintEqualToAnchor:guide.trailingAnchor constant:-8],
 
         [workoutLabel.topAnchor constraintEqualToAnchor:workoutContainer.topAnchor],
         [workoutLabel.leadingAnchor constraintEqualToAnchor:workoutContainer.leadingAnchor],
@@ -196,7 +158,7 @@
         [submitButton.trailingAnchor constraintEqualToAnchor:guide.trailingAnchor],
         [submitButton.topAnchor constraintEqualToAnchor:textFieldStack.bottomAnchor constant:20],
         [submitButton.heightAnchor constraintEqualToConstant:40]
-    ]];
+    }, 19);
 
     createToolbar(self, @selector(dismissKeyboard), (id []){workoutTextField, nil});
 
@@ -204,12 +166,10 @@
     [workoutContainer release];
     [textFieldStack release];
     [workoutPicker release];
-    [leftItem release];
 }
 
 - (void) didPressFinish {
-    homeCoordinator_finishedSettingUpCustomWorkout(delegate, type, index,
-                                                   inputs[0], inputs[1], inputs[2]);
+    homeCoordinator_finishedSettingUpCustomWorkout(delegate, type, index, inputs);
 }
 
 - (void) pressedCancel {
@@ -223,45 +183,9 @@
 
 - (BOOL) textField: (UITextField *)textField
 shouldChangeCharactersInRange: (NSRange)range replacementString: (NSString *)string {
-    if (!validateNumericInput(validChars, (__bridge CFStringRef) string, &buf)) return false;
-
-    int i = 0;
-    for (; i < 3; ++i) {
-        if (fields[i] && textField == fields[i]) break;
-    }
-    if (i == 3) return true;
-
-    NSString *initialText = textField.text ? textField.text : @"";
-    CFStringRef newText = CFBridgingRetain([initialText stringByReplacingCharactersInRange:range
-                                                                                withString:string]);
-    if (!CFStringGetLength(newText)) {
-        CFRelease(newText);
-        [submitButton setEnabled:false];
-        validInput[i] = false;
-        return true;
-    }
-
-    int value = CFStringGetIntValue(newText);
-    CFRelease(newText);
-
-    if (value < 0 || value > maxes[i]) {
-        [submitButton setEnabled:false];
-        validInput[i] = false;
-        return true;
-    }
-
-    validInput[i] = true;
-    inputs[i] = (int) value;
-
-    for (i = 0; i < 3; ++i) {
-        if (!validInput[i]) {
-            [submitButton setEnabled:false];
-            return true;
-        }
-    }
-
-    [submitButton setEnabled:true];
-    return true;
+    return checkTextfield(textField, (CFRange){range.location, range.length},
+                          (__bridge CFStringRef) string, validChars, submitButton, fields, 3,
+                          maxes, inputs, validInput);
 }
 
 - (BOOL) textFieldShouldReturn: (UITextField *)textField {
@@ -274,17 +198,17 @@ shouldChangeCharactersInRange: (NSRange)range replacementString: (NSString *)str
 }
 
 - (NSInteger) pickerView: (UIPickerView *)pickerView numberOfRowsInComponent: (NSInteger)component {
-    return count;
+    return names->size;
 }
 
 - (NSString *) pickerView: (UIPickerView *)pickerView
               titleForRow: (NSInteger)row forComponent: (NSInteger)component {
-    return (__bridge NSString*) names[row];
+    return (__bridge NSString*) names->arr[row];
 }
 
 - (void) pickerView: (UIPickerView *)pickerView
        didSelectRow: (NSInteger)row inComponent: (NSInteger)component {
     index = (int) row;
-    workoutTextField.text = (__bridge NSString*) names[index];
+    workoutTextField.text = (__bridge NSString*) names->arr[index];
 }
 @end

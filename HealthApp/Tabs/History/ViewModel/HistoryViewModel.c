@@ -40,43 +40,41 @@ void historyViewModel_fetchData(HistoryViewModel *this) {
     array_clear(weekData, this->data);
     int count = 0;
 
-    id request = objc_staticMethod(objc_getClass("WeeklyData"), sel_getUid("fetchRequest"));
-    id predicate = ((id(*)(Class,SEL,CFStringRef,...))objc_msgSend)
-    (objc_getClass("NSPredicate"), sel_getUid("predicateWithFormat:"),
-     CFSTR("weekStart > %lld AND weekStart < %lld"), date_twoYears, appUserDataShared->weekStart);
-    id descriptor = ((id(*)(id,SEL,CFStringRef,bool))objc_msgSend)
-    (allocClass("NSSortDescriptor"),
-     sel_getUid("initWithKey:ascending:"), CFSTR("weekStart"), true);
+    id request = fetchRequest();
+    id predicate = createPredicate(CFSTR("weekStart > %lld AND weekStart < %lld"),
+                                   date_twoYears, appUserDataShared->weekStart);
+    id descriptors[] = {createSortDescriptor()};
+    CFArrayRef array = CFArrayCreate(NULL, (const void **)descriptors, 1, kCocoaArrCallbacks);
 
-    ((void(*)(id,SEL,id))objc_msgSend)(request, sel_getUid("setPredicate:"), predicate);
-    ((void(*)(id,SEL,id))objc_msgSend)(request, sel_getUid("setSortDescriptors:"),
-                                       createArray((id []){descriptor}, 1));
+    setPredicate(request, predicate);
+    setDescriptors(request, array);
 
-    id data = persistenceService_executeFetchRequest(request, &count);
-    releaseObj(descriptor);
+    CFArrayRef data = persistenceService_executeFetchRequest(request, &count);
+    releaseObj(descriptors[0]);
+    CFRelease(array);
     if (!data) return;
 
     for (int i = 0; i < count; ++i) {
-        id d = getObjectAtIndex(data, i);
-        int timeStrength = getWorkoutTimeForType(d, WorkoutTypeStrength);
-        time_t timestamp = ((int64_t(*)(id,SEL))objc_msgSend)(d, sel_getUid("weekStart"));
+        const id d = (const id) CFArrayGetValueAtIndex(data, i);
+        int timeStrength = weekData_getWorkoutTimeForType(d, WorkoutTypeStrength);
+        time_t timestamp = weekData_getWeekStart(d);
         localtime_r(&timestamp, &localInfo);
         HistoryWeekDataModel m = {
             .year = localInfo.tm_year % 100,
             .month = localInfo.tm_mon,
             .day = localInfo.tm_mday,
-            .totalWorkouts = getTotalWorkouts(d),
+            .totalWorkouts = weekData_getTotalWorkouts(d),
             .weightArray = {
-                getLiftingLimitForType(d, LiftTypeSquat),
-                getLiftingLimitForType(d, LiftTypePullup),
-                getLiftingLimitForType(d, LiftTypeBench),
-                getLiftingLimitForType(d, LiftTypeDeadlift)
+                weekData_getLiftingLimitForType(d, LiftTypeSquat),
+                weekData_getLiftingLimitForType(d, LiftTypePullup),
+                weekData_getLiftingLimitForType(d, LiftTypeBench),
+                weekData_getLiftingLimitForType(d, LiftTypeDeadlift)
             },
             .durationByType = {
                 timeStrength,
-                getWorkoutTimeForType(d, WorkoutTypeHIC),
-                getWorkoutTimeForType(d, WorkoutTypeSE),
-                getWorkoutTimeForType(d, WorkoutTypeEndurance)
+                weekData_getWorkoutTimeForType(d, WorkoutTypeHIC),
+                weekData_getWorkoutTimeForType(d, WorkoutTypeSE),
+                weekData_getWorkoutTimeForType(d, WorkoutTypeEndurance)
             },
             .cumulativeDuration = {[0] = timeStrength}
         };

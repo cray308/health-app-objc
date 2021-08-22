@@ -9,12 +9,13 @@
 #define HomeSetupWorkoutModalViewController_h
 
 #include "HomeTabCoordinator.h"
+#include "Exercise.h"
 #import <UIKit/UIKit.h>
 
 @interface HomeSetupWorkoutModalViewController:
 UIViewController<UIPickerViewDelegate, UIPickerViewDataSource, UITextFieldDelegate>
-- (id) initWithDelegate: (HomeTabCoordinator *)_delegate
-                   type: (unsigned char)_type names: (CFStringRef *)_names count: (int)_count;
+- (id) initWithDelegate: (HomeTabCoordinator *)delegate
+                   type: (unsigned char)type names: (Array_str *)names;
 @end
 
 #endif /* HomeSetupWorkoutModalViewController_h */

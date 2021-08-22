@@ -11,15 +11,13 @@
 #include "AppCoordinator.h"
 #import "PersistenceService.h"
 
-#define _U_ __attribute__((__unused__))
-
 @interface SettingsViewController() {
     USet_char *validChars;
-    CFStringInlineBuffer buf;
     UISegmentedControl *planPicker;
     UITextField *textFields[5];
     bool validInput[4];
     short results[4];
+    short maxes[4];
     UIButton *saveButton;
 }
 @end
@@ -27,6 +25,7 @@
 @implementation SettingsViewController
 - (id) init {
     if (!(self = [super initWithNibName:nil bundle:nil])) return nil;
+    memcpy(maxes, (short []){999, 999, 999, 999}, 4 * sizeof(short));
     return self;
 }
 
@@ -43,10 +42,7 @@
     self.navigationItem.title = @"App Settings";
     validChars = createNumberCharacterSet();
 
-    UILabel *planLabel = [[UILabel alloc] initWithFrame:CGRectZero];
-    planLabel.translatesAutoresizingMaskIntoConstraints = false;
-    planLabel.text = @"Change workout plan";
-    planLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleFootnote];
+    UILabel *planLabel = createLabel(CFSTR("Change workout plan"), UIFontTextStyleFootnote, false, NSTextAlignmentNatural);
 
     planPicker = [[UISegmentedControl alloc] initWithItems:@[
         @"None", @"Base-Building", @"Continuation"
@@ -57,77 +53,50 @@
     planPicker.layer.cornerRadius = 5;
     planPicker.tintColor = UIColor.systemGray2Color;
 
-    UIView *planContainer = [[UIView alloc] initWithFrame:CGRectZero];
+    UIView *planContainer = createView(nil, false);
     [planContainer addSubview:planLabel];
     [planContainer addSubview:planPicker];
 
     UIStackView *stacks[4];
-    NSString *titles[] = {@"Max Squat", @"Max Pull-up", @"Max Bench", @"Max Deadlift"};
+    CFStringRef titles[] = {
+        CFSTR("Max Squat"), CFSTR("Max Pull-up"), CFSTR("Max Bench"), CFSTR("Max Deadlift")
+    };
 
     for (int i = 0; i < 4; ++i) {
-        UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
-        label.text = titles[i];
-        label.font = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
-
-        textFields[i] = [[UITextField alloc] initWithFrame:CGRectZero];
-        textFields[i].delegate = self;
-        textFields[i].backgroundColor = UIColor.tertiarySystemBackgroundColor;
-        textFields[i].placeholder = @"Weight";
-        textFields[i].textAlignment = NSTextAlignmentLeft;
-        textFields[i].borderStyle = UITextBorderStyleRoundedRect;
-        textFields[i].keyboardType = UIKeyboardTypeNumberPad;
-
-        stacks[i] = [[UIStackView alloc] initWithArrangedSubviews:@[label, textFields[i]]];
-        stacks[i].backgroundColor = UIColor.secondarySystemGroupedBackgroundColor;
-        stacks[i].spacing = 5;
-        stacks[i].distribution = UIStackViewDistributionFillEqually;
-        [stacks[i] setLayoutMarginsRelativeArrangement:true];
-        stacks[i].layoutMargins = (UIEdgeInsets){4, 5, 4, 8};
-
+        UILabel *label = createLabel(titles[i], UIFontTextStyleBody, false, NSTextAlignmentNatural);
+        textFields[i] = createTextfield(self, CFSTR("Weight"), NSTextAlignmentLeft, 4);
+        stacks[i] = createStackView((id []){label, textFields[i]}, 2, 0, 5, 1,
+                                    (HAEdgeInsets){4, 5, 4, 8});
         [label release];
     }
 
-    saveButton = [UIButton buttonWithType:UIButtonTypeSystem];
-    saveButton.backgroundColor = UIColor.secondarySystemGroupedBackgroundColor;
-    [saveButton setTitle:@"Save Settings" forState:UIControlStateNormal];
-    saveButton.titleLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
-    saveButton.titleLabel.adjustsFontSizeToFitWidth = true;
-    [saveButton setTitleColor:UIColor.systemBlueColor forState: UIControlStateNormal];
-    [saveButton setTitleColor:UIColor.systemGrayColor forState: UIControlStateDisabled];
+    saveButton = createButton(CFSTR("Save Settings"), UIColor.systemBlueColor,
+                              UIColor.systemGrayColor, UIFontTextStyleBody,
+                              UIColor.secondarySystemGroupedBackgroundColor, false, true, true, 0);
     [saveButton addTarget:self action:@selector(saveButtonPressed)
          forControlEvents:UIControlEventTouchUpInside];
     [self updateWeightFields];
 
-    UIButton *deleteDataButton = [UIButton buttonWithType:UIButtonTypeSystem];
-    deleteDataButton.backgroundColor = UIColor.secondarySystemGroupedBackgroundColor;
-    [deleteDataButton setTitle:@"Delete Data" forState: UIControlStateNormal];
-    deleteDataButton.titleLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
-    deleteDataButton.titleLabel.adjustsFontSizeToFitWidth = true;
-    [deleteDataButton setTitleColor:UIColor.systemRedColor forState:UIControlStateNormal];
+    UIButton *deleteDataButton = createButton(CFSTR("Delete Data"), UIColor.systemRedColor, nil,
+                                              UIFontTextStyleBody,
+                                              UIColor.secondarySystemGroupedBackgroundColor,
+                                              false, true, true, 0);
     [deleteDataButton addTarget:self action:@selector(deleteButtonPressed)
                forControlEvents:UIControlEventTouchUpInside];
 
-    UIStackView *vStack = [[UIStackView alloc] initWithArrangedSubviews:@[
+    id subviews[] = {
         planContainer, stacks[0], stacks[1], stacks[2], stacks[3], saveButton, deleteDataButton
-    ]];
-    vStack.translatesAutoresizingMaskIntoConstraints = false;
-    vStack.axis = UILayoutConstraintAxisVertical;
-    vStack.spacing = 20;
-    [vStack setLayoutMarginsRelativeArrangement:true];
-    vStack.layoutMargins = (UIEdgeInsets){20, 0, 0, 0};
+    };
+    UIStackView *vStack = createStackView(subviews, 7, 1, 20, 0, (HAEdgeInsets){20, 0, 0, 0});
 
-    UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:CGRectZero];
-    scrollView.translatesAutoresizingMaskIntoConstraints = false;
-    scrollView.autoresizingMask = UIViewAutoresizingFlexibleHeight;
-    scrollView.bounces = true;
-    scrollView.showsVerticalScrollIndicator = true;
+    UIScrollView *scrollView = createScrollView();
     [self.view addSubview:scrollView];
     [scrollView addSubview:vStack];
     [vStack setCustomSpacing:40 afterView:stacks[3]];
     [vStack setCustomSpacing:40 afterView:saveButton];
 
     UILayoutGuide *guide = self.view.safeAreaLayoutGuide;
-    [NSLayoutConstraint activateConstraints:@[
+    activateConstraints((id []){
         [scrollView.leadingAnchor constraintEqualToAnchor:guide.leadingAnchor],
         [scrollView.trailingAnchor constraintEqualToAnchor:guide.trailingAnchor],
         [scrollView.topAnchor constraintEqualToAnchor:guide.topAnchor],
@@ -140,13 +109,14 @@
         [vStack.widthAnchor constraintEqualToAnchor:scrollView.widthAnchor],
 
         [planLabel.topAnchor constraintEqualToAnchor:planContainer.topAnchor],
-        [planLabel.leadingAnchor constraintEqualToAnchor:planContainer.leadingAnchor],
-        [planLabel.trailingAnchor constraintEqualToAnchor:planContainer.trailingAnchor],
+        [planLabel.leadingAnchor constraintEqualToAnchor:planContainer.leadingAnchor constant:8],
+        [planLabel.trailingAnchor constraintEqualToAnchor:planContainer.trailingAnchor constant:-8],
         [planLabel.heightAnchor constraintEqualToConstant:20],
 
         [planPicker.topAnchor constraintEqualToAnchor:planLabel.bottomAnchor constant:2],
-        [planPicker.leadingAnchor constraintEqualToAnchor:planContainer.leadingAnchor],
-        [planPicker.trailingAnchor constraintEqualToAnchor:planContainer.trailingAnchor],
+        [planPicker.leadingAnchor constraintEqualToAnchor:planContainer.leadingAnchor constant:8],
+        [planPicker.trailingAnchor constraintEqualToAnchor:planContainer.trailingAnchor
+                                                  constant:-8],
         [planPicker.bottomAnchor constraintEqualToAnchor:planContainer.bottomAnchor],
         [planPicker.heightAnchor constraintEqualToConstant:40],
 
@@ -156,7 +126,7 @@
         [stacks[3].heightAnchor constraintEqualToConstant:40],
         [saveButton.heightAnchor constraintEqualToConstant:40],
         [deleteDataButton.heightAnchor constraintEqualToConstant:40]
-    ]];
+    }, 24);
 
     [vStack release];
     [scrollView release];
@@ -227,48 +197,12 @@
 
 - (BOOL) textField: (UITextField *)textField
 shouldChangeCharactersInRange: (NSRange)range replacementString: (NSString *)string {
-    if (!validateNumericInput(validChars, (__bridge CFStringRef) string, &buf)) return false;
-
-    int i = 0;
-    for (; i < 4; ++i) {
-        if (textField == textFields[i]) break;
-    }
-
-    NSString *initialText = textField.text ? textField.text : @"";
-    CFStringRef newText = CFBridgingRetain([initialText stringByReplacingCharactersInRange:range
-                                                                                withString:string]);
-    if (!CFStringGetLength(newText)) {
-        CFRelease(newText);
-        [saveButton setEnabled:false];
-        validInput[i] = false;
-        return true;
-    }
-
-    int newWeight = CFStringGetIntValue(newText);
-    CFRelease(newText);
-
-    if (newWeight < 0 || newWeight > 999) {
-        [saveButton setEnabled:false];
-        validInput[i] = false;
-        return true;
-    }
-
-    validInput[i] = true;
-    results[i] = (short) newWeight;
-
-    for (i = 0; i < 4; ++i) {
-        if (!validInput[i]) {
-            [saveButton setEnabled:false];
-            return true;
-        }
-    }
-
-    [saveButton setEnabled:true];
-    return true;
+    return checkTextfield(textField, (CFRange){range.location, range.length},
+                          (__bridge CFStringRef) string, validChars, saveButton, textFields, 4,
+                          maxes, results, validInput);
 }
 
 -(BOOL) textFieldShouldReturn: (UITextField *)textField {
-    [textField resignFirstResponder];
-    return true;
+    return [textField resignFirstResponder];
 }
 @end

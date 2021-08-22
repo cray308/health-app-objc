@@ -5,19 +5,20 @@
 //  Created by Christopher Ray on 3/27/21.
 //
 
-#import "AddWorkoutCoordinator.h"
-#import "HomeTabCoordinator.h"
+#include "AddWorkoutCoordinator.h"
+#include "HomeTabCoordinator.h"
 #include "AppCoordinator.h"
 #include "AppUserData.h"
-#import "PersistenceService.h"
+#include "PersistenceService.h"
 
 void updateStoredData(AddWorkoutViewModel *model) {
     int16_t duration = (int16_t) ((model->stopTime - model->startTime) / 60.0);
     id data = persistenceService_getWeeklyDataForThisWeek();
     if (!(duration >= 15 && data)) return;
 
-    addToWorkoutType(data, model->workout->type, duration);
-    setWeekData(data, "setTotalWorkouts:", getTotalWorkouts(data) + 1);
+    duration += weekData_getWorkoutTimeForType(data, model->workout->type);
+    weekData_setWorkoutTimeForType(data, model->workout->type, duration);
+    weekData_setTotalWorkouts(data, weekData_getTotalWorkouts(data) + 1);
     persistenceService_saveContext();
 }
 
@@ -74,7 +75,9 @@ void addWorkoutCoordinator_completedWorkout(AddWorkoutCoordinator *this,
 void addWorkoutCoordinator_finishedAddingNewWeights(AddWorkoutCoordinator *this, short *weights) {
     id data = persistenceService_getWeeklyDataForThisWeek();
     if (data) {
-        setLiftingMaxes(data, weights);
+        for (int i = 0; i < 4; ++i) {
+            weekData_setLiftingMaxForType(data, i, weights[i]);
+        }
         persistenceService_saveContext();
     }
     appUserData_updateWeightMaxes(weights);

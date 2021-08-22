@@ -41,20 +41,22 @@ UIView *createConfettiView(CGRect frame) {
         cells[i] = cell;
     }
 
+    CFArrayRef array = CFArrayCreate(NULL, (const void **)cells, 16, kCocoaArrCallbacks);
     CAEmitterLayer *particleLayer = [[CAEmitterLayer alloc] init];
     [this.layer addSublayer:particleLayer];
     particleLayer.emitterPosition = CGPointMake(frame.size.width / 2, 0);
     particleLayer.emitterShape = kCAEmitterLayerLine;
     particleLayer.emitterSize = CGSizeMake(frame.size.width - 16, 1);
-    particleLayer.emitterCells = [NSArray arrayWithObjects:cells count:16];
+    particleLayer.emitterCells = (__bridge NSArray*)array;
 
     [particleLayer release];
     for (int i = 0; i < 16; ++i) [cells[i] release];
+    CFRelease(array);
     return this;
 }
 
 @interface DayWorkoutButton: UIView
-- (id) initWithTitle: (NSString *)title day: (NSString *)day;
+- (id) initWithTitle: (CFStringRef)title day: (CFStringRef)day tag: (int)tag;
 @end
 
 @interface DayWorkoutButton() {
@@ -90,45 +92,30 @@ UIView *createConfettiView(CGRect frame) {
     self.view.backgroundColor = UIColor.systemGroupedBackgroundColor;
     self.navigationItem.title = @"Home";
 
-    greetingLabel = [[UILabel alloc] initWithFrame:CGRectZero];
-    greetingLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleTitle1];
-    greetingLabel.textAlignment = NSTextAlignmentCenter;
-    greetingLabel.adjustsFontSizeToFitWidth = true;
-    greetingLabel.textColor = UIColor.labelColor;
+    greetingLabel = createLabel(NULL, UIFontTextStyleTitle1, true, NSTextAlignmentCenter);
 
-    weeklyWorkoutsStack = [[UIStackView alloc] initWithFrame:CGRectZero];
-    weeklyWorkoutsStack.axis = UILayoutConstraintAxisVertical;
-    weeklyWorkoutsStack.spacing = 5;
-    [weeklyWorkoutsStack setLayoutMarginsRelativeArrangement:true];
-    weeklyWorkoutsStack.layoutMargins = (UIEdgeInsets){5, 8, 5, 8};
+    weeklyWorkoutsStack = createStackView(NULL, 0, 1, 5, 0, (HAEdgeInsets){5, 8, 5, 8});
 
-    UIStackView *customWorkoutStack = [[UIStackView alloc] initWithFrame:CGRectZero];
-    customWorkoutStack.axis = UILayoutConstraintAxisVertical;
-    customWorkoutStack.spacing = 20;
-    [customWorkoutStack setLayoutMarginsRelativeArrangement:true];
-    customWorkoutStack.layoutMargins = (UIEdgeInsets){5, 8, 5, 8};
+    UIStackView *customWorkoutStack = createStackView(NULL, 0, 1, 20, 0,
+                                                      (HAEdgeInsets){5, 8, 5, 8});
 
     UIView *divider = createDivider();
     [customWorkoutStack addArrangedSubview:divider];
 
-    UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectZero];
-    headerLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleTitle2];
-    headerLabel.text = @"Add Custom Workout";
-    headerLabel.adjustsFontSizeToFitWidth = true;
-    headerLabel.textColor = UIColor.labelColor;
+
+    UILabel *headerLabel = createLabel(CFSTR("Add Custom Workout"), UIFontTextStyleTitle2,
+                                       true, NSTextAlignmentNatural);
     [customWorkoutStack addArrangedSubview:headerLabel];
 
-    NSString *buttonTitles[] = {@"Test Max", @"Endurance", @"Strength", @"SE", @"HIC"};
+    CFStringRef buttonTitles[] = {
+        CFSTR("Test Max"), CFSTR("Endurance"), CFSTR("Strength"), CFSTR("SE"), CFSTR("HIC")
+    };
     for (int i = 0; i < 5; ++i) {
-        UIButton *btn = [UIButton buttonWithType:UIButtonTypeSystem];
-        [btn setTitle:buttonTitles[i] forState:UIControlStateNormal];
-        [btn setTitleColor:UIColor.labelColor forState: UIControlStateNormal];
-        [btn setTitleColor:UIColor.secondaryLabelColor forState:UIControlStateDisabled];
-        btn.titleLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleHeadline];
-        btn.backgroundColor = UIColor.secondarySystemGroupedBackgroundColor;
-        btn.layer.cornerRadius = 5;
+        UIButton *btn = createButton(buttonTitles[i], UIColor.labelColor,
+                                     UIColor.secondaryLabelColor, UIFontTextStyleHeadline,
+                                     UIColor.secondarySystemGroupedBackgroundColor,
+                                     true, false, true, i);
         [btn.heightAnchor constraintEqualToConstant:50].active = true;
-        btn.tag = i;
         [btn addTarget:self action:@selector(customWorkoutButtonTapped:)
       forControlEvents:UIControlEventTouchUpInside];
         [customWorkoutStack addArrangedSubview:btn];
@@ -136,25 +123,16 @@ UIView *createConfettiView(CGRect frame) {
     [headerLabel release];
     [divider release];
 
-    UIStackView *vStack = [[UIStackView alloc] initWithArrangedSubviews:@[
-        greetingLabel, weeklyWorkoutsStack, customWorkoutStack]];
-    vStack.translatesAutoresizingMaskIntoConstraints = false;
-    vStack.axis = UILayoutConstraintAxisVertical;
-    vStack.spacing = 5;
-    [vStack setLayoutMarginsRelativeArrangement:true];
-    vStack.layoutMargins = (UIEdgeInsets){10, 0, 16, 0};
+    id subviews[] = {greetingLabel, weeklyWorkoutsStack, customWorkoutStack};
+    UIStackView *vStack = createStackView(subviews, 3, 1, 5, 0, (HAEdgeInsets){10, 0, 16, 0});
 
-    UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:CGRectZero];
-    scrollView.translatesAutoresizingMaskIntoConstraints = false;
-    scrollView.autoresizingMask = UIViewAutoresizingFlexibleHeight;
-    scrollView.bounces = true;
-    scrollView.showsVerticalScrollIndicator = true;
+    UIScrollView *scrollView = createScrollView();
     [self.view addSubview:scrollView];
     [scrollView addSubview:vStack];
     [vStack setCustomSpacing:20 afterView:greetingLabel];
 
     UILayoutGuide *guide = self.view.safeAreaLayoutGuide;
-    [NSLayoutConstraint activateConstraints:@[
+    activateConstraints((id []){
         [scrollView.leadingAnchor constraintEqualToAnchor:guide.leadingAnchor],
         [scrollView.trailingAnchor constraintEqualToAnchor:guide.trailingAnchor],
         [scrollView.topAnchor constraintEqualToAnchor:guide.topAnchor],
@@ -167,7 +145,7 @@ UIView *createConfettiView(CGRect frame) {
         [vStack.widthAnchor constraintEqualToAnchor:scrollView.widthAnchor],
 
         [greetingLabel.heightAnchor constraintEqualToConstant:50]
-    ]];
+    }, 10);
 
     [weeklyWorkoutsStack setHidden:true];
     [vStack release];
@@ -189,9 +167,10 @@ UIView *createConfettiView(CGRect frame) {
 }
 
 - (void) createWorkoutsList {
-    NSArray<UIView *> *subviews = weeklyWorkoutsStack.arrangedSubviews;
-    for (size_t i = 0; i < subviews.count; ++i) {
-        [subviews[i] removeFromSuperview];
+    CFArrayRef subviews = (__bridge CFArrayRef) weeklyWorkoutsStack.arrangedSubviews;
+    for (int i = 0; i < (int) CFArrayGetCount(subviews); ++i) {
+        UIView *v = CFArrayGetValueAtIndex(subviews, i);
+        [v removeFromSuperview];
     }
 
     if (!homeViewModel_hasWorkoutsForThisWeek(viewModel)) {
@@ -199,11 +178,8 @@ UIView *createConfettiView(CGRect frame) {
         return;
     }
 
-    UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectZero];
-    headerLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleTitle2];
-    headerLabel.text = @"Workouts this week";
-    headerLabel.adjustsFontSizeToFitWidth = true;
-    headerLabel.textColor = UIColor.labelColor;
+    UILabel *headerLabel = createLabel(CFSTR("Workouts this week"), UIFontTextStyleTitle2,
+                                       true, NSTextAlignmentNatural);
     [weeklyWorkoutsStack addArrangedSubview:headerLabel];
 
     UIView *divider = createDivider();
@@ -213,20 +189,15 @@ UIView *createConfettiView(CGRect frame) {
     CFStringRef *names = viewModel->workoutNames;
     for (int i = 0; i < 7; ++i) {
         if (!names[i]) continue;
-        DayWorkoutButton *dayBtn = [[DayWorkoutButton alloc]
-                                    initWithTitle:(__bridge NSString*)names[i]
-                                    day:(__bridge NSString*)weekdays[i]];
-        dayBtn.tag = i;
-        dayBtn->button.tag = i;
+        DayWorkoutButton *dayBtn = [[DayWorkoutButton alloc] initWithTitle:names[i]
+                                                                       day:weekdays[i] tag:i];
         [dayBtn->button addTarget:self action:@selector(workoutButtonTapped:)
                  forControlEvents:UIControlEventTouchUpInside];
         [weeklyWorkoutsStack addArrangedSubview:dayBtn];
         [dayBtn release];
     }
 
-    [NSLayoutConstraint activateConstraints:@[
-        [headerLabel.heightAnchor constraintEqualToConstant:40]
-    ]];
+    activateConstraints((id []){[headerLabel.heightAnchor constraintEqualToConstant:40]}, 1);
     [headerLabel release];
     [divider release];
     [weeklyWorkoutsStack setHidden:false];
@@ -234,15 +205,14 @@ UIView *createConfettiView(CGRect frame) {
 }
 
 - (void) updateWorkoutsList {
-    NSArray<UIView *> *subviews = weeklyWorkoutsStack.arrangedSubviews;
-    if (!(homeViewModel_hasWorkoutsForThisWeek(viewModel) && subviews.count > 2)) return;
+    CFArrayRef subviews = (__bridge CFArrayRef) weeklyWorkoutsStack.arrangedSubviews;
+    int count = (int) CFArrayGetCount(subviews);
+    if (!(homeViewModel_hasWorkoutsForThisWeek(viewModel) && count > 2)) return;
 
-    const int len = (int) subviews.count;
     const unsigned char completed = appUserDataShared->completedWorkouts;
 
-    for (int i = 2; i < len; ++i) {
-        DayWorkoutButton *v = (DayWorkoutButton *) subviews[i];
-        if (!v) continue;
+    for (int i = 2; i < count; ++i) {
+        DayWorkoutButton *v = (DayWorkoutButton *) CFArrayGetValueAtIndex(subviews, i);
         int day = (int) v.tag;
         bool enabled = !(completed & (1 << day));
         [v->button setEnabled:enabled];
@@ -290,34 +260,22 @@ UIView *createConfettiView(CGRect frame) {
 #pragma mark - Day Workout Button
 
 @implementation DayWorkoutButton
-- (id) initWithTitle: (NSString *)title day: (NSString *)day {
+- (id) initWithTitle: (CFStringRef)title day: (CFStringRef)day tag: (int)tag {
     if (!(self = [super initWithFrame:CGRectZero])) return nil;
-    button = [UIButton buttonWithType:UIButtonTypeSystem];
-    button.translatesAutoresizingMaskIntoConstraints = false;
-    [button setTitle:title forState:UIControlStateNormal];
-    [button setTitleColor:UIColor.labelColor forState: UIControlStateNormal];
-    [button setTitleColor:UIColor.secondaryLabelColor forState:UIControlStateDisabled];
-    button.titleLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleHeadline];
-    button.backgroundColor = UIColor.secondarySystemGroupedBackgroundColor;
-    button.layer.cornerRadius = 5;
+    self.tag = tag;
+    button = createButton(title, UIColor.labelColor, UIColor.secondaryLabelColor,
+                          UIFontTextStyleHeadline, UIColor.secondarySystemGroupedBackgroundColor,
+                          true, false, true, tag);
 
-    UILabel *topLabel = [[UILabel alloc] initWithFrame:CGRectZero];
-    topLabel.translatesAutoresizingMaskIntoConstraints = false;
-    topLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline];
-    topLabel.adjustsFontSizeToFitWidth = true;
-    topLabel.text = day;
-    topLabel.textColor = UIColor.labelColor;
 
-    checkbox = [[UIView alloc] initWithFrame:CGRectZero];
-    checkbox.translatesAutoresizingMaskIntoConstraints = false;
-    checkbox.backgroundColor = UIColor.systemGrayColor;
-    checkbox.layer.cornerRadius = 5;
+    UILabel *topLabel = createLabel(day, UIFontTextStyleSubheadline, true, NSTextAlignmentNatural);
+    checkbox = createView(UIColor.systemGrayColor, true);
 
     [self addSubview:topLabel];
     [self addSubview:button];
     [self addSubview:checkbox];
 
-    [NSLayoutConstraint activateConstraints:@[
+    activateConstraints((id []){
         [topLabel.topAnchor constraintEqualToAnchor:self.topAnchor],
         [topLabel.heightAnchor constraintEqualToConstant:20],
         [topLabel.leadingAnchor constraintEqualToAnchor:self.leadingAnchor],
@@ -333,7 +291,7 @@ UIView *createConfettiView(CGRect frame) {
         [checkbox.centerYAnchor constraintEqualToAnchor:button.centerYAnchor],
         [checkbox.widthAnchor constraintEqualToConstant:20],
         [checkbox.heightAnchor constraintEqualToAnchor:checkbox.widthAnchor]
-    ]];
+    }, 13);
     [topLabel release];
     return self;
 }
