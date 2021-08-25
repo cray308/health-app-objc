@@ -68,10 +68,18 @@ typedef struct {
     Array_exGroup *activities;
 } Workout;
 
+static inline CFStringRef exerciseEntry_createSetsTitle(ExerciseEntry *e) {
+    return CFStringCreateWithFormat(NULL, NULL, CFSTR("Set %d of %d"),
+                                    e->completedSets + 1, e->sets);
+}
+
 void exerciseManager_setWeeklyWorkoutNames(unsigned char plan, int week, CFStringRef *names);
 Workout *exerciseManager_getWeeklyWorkoutAtIndex(unsigned char plan, int week, int index);
 Array_str *exerciseManager_getWorkoutNamesForType(unsigned char type);
 Workout *exerciseManager_getWorkoutFromLibrary(unsigned char type,
                                                int index, int sets, int reps, int weight);
+
+CFStringRef exerciseGroup_createHeader(ExerciseGroup *g);
+CFStringRef exerciseEntry_createTitle(ExerciseEntry *e);
 
 #endif /* Exercise_h */

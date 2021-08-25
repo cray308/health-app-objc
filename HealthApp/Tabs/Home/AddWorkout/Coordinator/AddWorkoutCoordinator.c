@@ -10,6 +10,7 @@
 #include "AppCoordinator.h"
 #include "AppUserData.h"
 #include "PersistenceService.h"
+#include "ViewControllerHelpers.h"
 
 void updateStoredData(AddWorkoutViewModel *model) {
     int16_t duration = (int16_t) ((model->stopTime - model->startTime) / 60.0);
@@ -58,7 +59,7 @@ void addWorkoutCoordinator_completedWorkout(AddWorkoutCoordinator *this,
                                    CFRangeMake(0, CFStringGetLength(title)),
                                    kCFCompareCaseInsensitive) == kCFCompareEqualTo) {
         id modal = createVCWithDelegate("AddWorkoutUpdateMaxesViewController", this);
-        presentVC(this->navVC, modal);
+        presentModalVC(this->navVC, modal);
         return;
     }
 

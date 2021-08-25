@@ -9,6 +9,7 @@
 #include "HomeTabCoordinator.h"
 #include "HistoryTabCoordinator.h"
 #include "SettingsTabCoordinator.h"
+#include "ViewControllerHelpers.h"
 
 typedef enum {
     TabHome, TabHistory, TabSettings
@@ -23,9 +24,7 @@ void appCoordinator_start(AppCoordinator *this, id tabVC) {
     CFStringRef imgNames[] = {CFSTR("house"), CFSTR("chart.bar"), CFSTR("gear")};
 
     for (int i = 0; i < 3; ++i) {
-        id image = ((id(*)(Class,SEL,CFStringRef))objc_msgSend)
-        (objc_getClass("UIImage"), sel_getUid("systemImageNamed:"), imgNames[i]);
-
+        id image = createImage(imgNames[i]);
         items[i] = ((id(*)(id,SEL,CFStringRef,id,int))objc_msgSend)
         (allocClass("UITabBarItem"), sel_getUid("initWithTitle:image:tag:"), titles[i], image, i);
 
@@ -53,7 +52,7 @@ void appCoordinator_start(AppCoordinator *this, id tabVC) {
 
     memcpy(this->children, (void *[]){homeCoord, histCoord, settingsCoord}, 3 * sizeof(void *));
 
-    CFArrayRef array = CFArrayCreate(NULL, (const void **)controllers, 3, kCocoaArrCallbacks);
+    CFArrayRef array = CFArrayCreate(NULL, (const void **)controllers, 3, &kCocoaArrCallbacks);
     ((void(*)(id,SEL,CFArrayRef,bool))objc_msgSend)
     (tabVC, sel_getUid("setViewControllers:animated:"), array, false);
 

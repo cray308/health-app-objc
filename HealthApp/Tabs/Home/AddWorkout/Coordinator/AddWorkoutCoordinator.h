@@ -8,7 +8,7 @@
 #ifndef AddWorkoutCoordinator_h
 #define AddWorkoutCoordinator_h
 
-#include "CocoaBridging.h"
+#include "CocoaHelpers.h"
 #include "Exercise.h"
 
 typedef struct {

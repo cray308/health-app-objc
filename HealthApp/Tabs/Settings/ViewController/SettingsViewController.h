@@ -12,7 +12,7 @@
 #import <UIKit/UIKit.h>
 
 @interface SettingsViewController: UIViewController<UITextFieldDelegate>
-- (id) init;
+- (id) initWithDelegate: (SettingsTabCoordinator *)delegate;
 - (void) updateWeightFields;
 @end
 

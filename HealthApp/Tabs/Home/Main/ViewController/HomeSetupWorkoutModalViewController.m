@@ -46,13 +46,11 @@
 
 - (void) viewDidLoad {
     [super viewDidLoad];
-    self.view.backgroundColor = UIColor.systemGroupedBackgroundColor;
+    setBackground(self.view, UIColor.systemGroupedBackgroundColor);
 
-    workoutTextField = createTextfield(self, NULL, NSTextAlignmentCenter, 0);
-    workoutTextField.text = (__bridge NSString*) names->arr[0];
-
+    workoutTextField = createTextfield(self, names->arr[0], NULL, NSTextAlignmentCenter, 0);
     UILabel *workoutLabel = createLabel(CFSTR("Choose workout"), UIFontTextStyleFootnote,
-                                        false, NSTextAlignmentNatural);
+                                        NSTextAlignmentNatural);
 
     UIPickerView *workoutPicker = [[UIPickerView alloc] init];
     workoutPicker.delegate = self;
@@ -64,10 +62,8 @@
     [self.view addSubview:workoutContainer];
 
     submitButton = createButton(CFSTR("Go"), UIColor.systemBlueColor, UIColor.systemGrayColor,
-                                NULL, UIColor.secondarySystemBackgroundColor,
-                                false, false, false, 0);
-    [submitButton addTarget:self action:@selector(didPressFinish)
-           forControlEvents:UIControlEventTouchUpInside];
+                                nil, UIColor.secondarySystemBackgroundColor, false, false, 0,
+                                self, @selector(didPressFinish));
     [self.view addSubview:submitButton];
 
     CFStringRef titles[3] = {0};
@@ -101,7 +97,7 @@
         case WorkoutTypeHIC:
             memset(validInput, true, 3 * sizeof(bool));
             memset(inputs, 1, 3 * sizeof(short));
-            [submitButton setEnabled:true];
+            enableButton(submitButton, true);
             break;
     }
 
@@ -113,8 +109,8 @@
     for (int i = 0; i < 3; ++i) {
         if (!titles[i]) continue;
         createCharSet = true;
-        UILabel *label = createLabel(titles[i], UIFontTextStyleBody, true, NSTextAlignmentNatural);
-        fields[i] = createTextfield(self, NULL, NSTextAlignmentLeft, 4);
+        UILabel *label = createLabel(titles[i], UIFontTextStyleBody, NSTextAlignmentNatural);
+        fields[i] = createTextfield(self, NULL, NULL, NSTextAlignmentLeft, 4);
         createToolbar(self, @selector(dismissKeyboard), (id []){fields[i], nil});
         UIStackView *hStack = createStackView((id []){label, fields[i]}, 2, 0, 5, 1,
                                               (HAEdgeInsets){4, 8, 4, 8});
@@ -126,10 +122,8 @@
     if (createCharSet) validChars = createNumberCharacterSet();
 
     UIButton *cancelButton = createButton(CFSTR("Cancel"), UIColor.systemBlueColor,
-                                          UIColor.systemGrayColor, NULL, nil,
-                                          false, false, true, 0);
-    [cancelButton addTarget:self action:@selector(pressedCancel)
-           forControlEvents:UIControlEventTouchUpInside];
+                                          UIColor.systemGrayColor, nil, nil, false, true, 0,
+                                          self, @selector(pressedCancel));
     setNavButton(self.navigationItem, true, cancelButton, self.view.frame.size.width);
 
     UILayoutGuide *guide = self.view.safeAreaLayoutGuide;
@@ -209,6 +203,6 @@ shouldChangeCharactersInRange: (NSRange)range replacementString: (NSString *)str
 - (void) pickerView: (UIPickerView *)pickerView
        didSelectRow: (NSInteger)row inComponent: (NSInteger)component {
     index = (int) row;
-    workoutTextField.text = (__bridge NSString*) names->arr[index];
+    setLabelText(workoutTextField, names->arr[index]);
 }
 @end

@@ -8,7 +8,7 @@
 #ifndef HistoryTabCoordinator_h
 #define HistoryTabCoordinator_h
 
-#include "CocoaBridging.h"
+#include "CocoaHelpers.h"
 #include "HistoryViewModel.h"
 
 typedef struct {

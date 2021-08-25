@@ -8,7 +8,7 @@
 #ifndef AppCoordinator_h
 #define AppCoordinator_h
 
-#include "CocoaBridging.h"
+#include "CocoaHelpers.h"
 
 typedef enum {
     LoadedViewController_Home = 0x1,

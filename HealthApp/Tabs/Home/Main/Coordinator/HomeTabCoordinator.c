@@ -9,6 +9,8 @@
 #include "AddWorkoutCoordinator.h"
 #include "AppUserData.h"
 #include "CalendarDateHelpers.h"
+#include "ViewControllerHelpers.h"
+#include "ConfettiView.h"
 
 typedef enum {
     CustomWorkoutIndexTestMax,
@@ -18,7 +20,7 @@ typedef enum {
     CustomWorkoutIndexHIC
 } CustomWorkoutIndex;
 
-void navigateToAddWorkout(HomeTabCoordinator *this, bool dismissVC, Workout *workout) {
+static void navigateToAddWorkout(HomeTabCoordinator *this, bool dismissVC, Workout *workout) {
     if (dismissVC) {
         dismissPresentedVC(getFirstVC(this->navVC));
     }
@@ -31,6 +33,25 @@ void navigateToAddWorkout(HomeTabCoordinator *this, bool dismissVC, Workout *wor
     addWorkoutCoordinator_start(child);
 }
 
+static void showConfetti(id vc) {
+    id ctrl = createAlertController(CFSTR("Nicely done!"),
+                                    CFSTR("Great job meeting your workout goal this week."));
+    addAlertAction(ctrl, createAlertAction(CFSTR("OK"), 0, NULL));
+
+    id view = getRootView(vc);
+    CGRect frame;
+    getViewFrame(view, &frame);
+    id confettiView = createConfettiView((CGRect){{0}, frame.size});
+    addSubview(view, confettiView);
+
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 5),
+                   dispatch_get_main_queue(), ^(void) {
+        objc_singleArg(confettiView, sel_getUid("removeFromSuperview"));
+        releaseObj(confettiView);
+        presentVC(vc, ctrl);
+    });
+}
+
 void homeCoordinator_start(HomeTabCoordinator *this) {
     homeViewModel_init(&this->viewModel);
     id vc = createVCWithDelegate("HomeViewController", this);
@@ -41,17 +62,17 @@ void homeCoordinator_didFinishAddingWorkout(HomeTabCoordinator *this, int totalC
     id homeVC = getFirstVC(this->navVC);
     objc_singleArg(homeVC, sel_getUid("updateWorkoutsList"));
 
-    const bool showConfetti = homeViewModel_shouldShowConfetti(&this->viewModel,
-                                                               totalCompletedWorkouts);
+    const bool confetti = homeViewModel_shouldShowConfetti(&this->viewModel,
+                                                           totalCompletedWorkouts);
 
     addWorkoutCoordinator_free(this->childCoordinator);
     this->childCoordinator = NULL;
     ((id(*)(id,SEL,bool))objc_msgSend)(this->navVC, sel_getUid("popViewControllerAnimated:"), true);
 
-    if (showConfetti) {
+    if (confetti) {
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 0.75),
-                       dispatch_get_main_queue(), ^ (void) {
-            objc_singleArg(homeVC, sel_getUid("showConfetti"));
+                       dispatch_get_main_queue(), ^(void) {
+            showConfetti(homeVC);
         });
     }
 }
@@ -91,7 +112,7 @@ void homeCoordinator_addWorkoutFromCustomButton(HomeTabCoordinator *this, int in
     id modal = ((id(*)(id,SEL,HomeTabCoordinator*,unsigned char,Array_str*))objc_msgSend)
     (allocClass("HomeSetupWorkoutModalViewController"),
      sel_getUid("initWithDelegate:type:names:"), this, type, names);
-    presentVC(getFirstVC(this->navVC), modal);
+    presentModalVC(getFirstVC(this->navVC), modal);
 }
 
 void homeCoordinator_finishedSettingUpCustomWorkout(HomeTabCoordinator *this, unsigned char type,

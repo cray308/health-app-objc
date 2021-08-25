@@ -9,7 +9,7 @@
 #define HistoryViewModel_h
 
 #include "array.h"
-#include "CocoaBridging.h"
+#include "CocoaHelpers.h"
 
 typedef struct {
     int year;
@@ -24,41 +24,59 @@ typedef struct {
 gen_array_headers(weekData, HistoryWeekDataModel)
 gen_array_headers(chartData, id)
 
-typedef enum {
-    FormatShort,
-    FormatLong
-} XAxisFormatType;
+typedef struct {
+    char wordMonths[12][4];
+    char numMonths[12][3];
+    enum {
+        FormatShort,
+        FormatLong
+    } formatType;
+    CFStringRef currString;
+} HistoryXAxisFormatter;
 
 typedef struct {
     Array_chartData *entries;
-    int totalWorkouts;
-    int maxWorkouts;
+    id legendEntries[1];
+    id dataSet;
+    id chartData;
     double avgWorkouts;
-} HistoryGradientChartViewModel;
+    double yMax;
+} HistoryTotalWorkoutsChartViewModel;
 
 typedef struct {
     Array_chartData *entries[5];
-    char names[4][10];
-    int maxActivityTime;
+    id legendEntries[4];
+    id dataSets[5];
+    id chartData;
     int totalByType[4];
-} HistoryAreaChartViewModel;
+    double yMax;
+    CFStringRef durationStr;
+    char names[4][10];
+} HistoryWorkoutTypeChartViewModel;
 
 typedef struct {
     Array_chartData *entries[4];
-    char names[4][9];
-    int maxWeight;
+    id legendEntries[4];
+    id dataSets[4];
+    id chartData;
     int totalByExercise[4];
+    double yMax;
+    char names[4][9];
 } HistoryLiftChartViewModel;
 
 typedef struct {
-    HistoryGradientChartViewModel gradientChartViewModel;
-    HistoryAreaChartViewModel areaChartViewModel;
-    HistoryLiftChartViewModel liftChartViewModel;
+    HistoryTotalWorkoutsChartViewModel totalWorkoutsViewModel;
+    HistoryWorkoutTypeChartViewModel workoutTypeViewModel;
+    HistoryLiftChartViewModel liftViewModel;
+    HistoryXAxisFormatter formatter;
     Array_weekData *data;
 } HistoryViewModel;
 
 void historyViewModel_init(HistoryViewModel *model);
 void historyViewModel_fetchData(HistoryViewModel *this);
-XAxisFormatType historyViewModel_formatDataForTimeRange(HistoryViewModel *this, int index);
+void historyViewModel_formatDataForTimeRange(HistoryViewModel *this, int index);
+
+CFStringRef historyViewModel_getXAxisLabel(HistoryViewModel *this, int index);
+CFStringRef workoutTypeViewModel_getDuration(HistoryWorkoutTypeChartViewModel *this, int minutes);
 
 #endif /* HistoryViewModel_h */

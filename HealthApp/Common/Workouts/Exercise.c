@@ -7,7 +7,7 @@
 
 #include "Exercise.h"
 #include "AppUserData.h"
-#include "CocoaBridging.h"
+#include "CocoaHelpers.h"
 
 #define freeExerciseEntry(x) CFRelease((x).name)
 #define freeExerciseGroup(x) array_free(exEntry, (x).exercises)
@@ -245,4 +245,38 @@ Workout *exerciseManager_getWorkoutFromLibrary(unsigned char type,
 cleanup:
     CFRelease(root);
     return w;
+}
+
+CFStringRef exerciseGroup_createHeader(ExerciseGroup *g) {
+    if (g->type == ExerciseContainerTypeRounds && g->reps > 1) {
+        return CFStringCreateWithFormat(NULL, NULL, CFSTR("Round %d of %d"),
+                                        g->completedReps + 1, g->reps);
+    } else if (g->type == ExerciseContainerTypeAMRAP) {
+        return CFStringCreateWithFormat(NULL, NULL, CFSTR("AMRAP %d mins"), g->reps);
+    }
+    return NULL;
+}
+
+CFStringRef exerciseEntry_createTitle(ExerciseEntry *e) {
+    switch (e->type) {
+        case ExerciseTypeReps:
+            if (e->weight > 1) {
+                return CFStringCreateWithFormat(NULL, NULL, CFSTR("%@ x %d @ %d lbs"),
+                                                e->name, e->reps, e->weight);
+            }
+            return CFStringCreateWithFormat(NULL, NULL, CFSTR("%@ x %d"), e->name, e->reps);
+
+        case ExerciseTypeDuration:
+            if (e->reps > 120) {
+                double minutes = (double) e->reps / 60.0;
+                return CFStringCreateWithFormat(NULL, NULL, CFSTR("%@ for %.1f mins"),
+                                                e->name, minutes);
+            }
+            return CFStringCreateWithFormat(NULL, NULL, CFSTR("%@ for %d sec"), e->name, e->reps);
+
+        default: ;
+            int rowingDist = (5 * e->reps) / 4;
+            return CFStringCreateWithFormat(NULL, NULL, CFSTR("Run/row %d/%d meters"),
+                                            e->reps, rowingDist);
+    }
 }

@@ -36,14 +36,14 @@
 
 - (void) viewDidLoad {
     [super viewDidLoad];
-    self.view.backgroundColor = UIColor.secondarySystemBackgroundColor;
+    setBackground(self.view, UIColor.secondarySystemBackgroundColor);
 
     CFStringRef titles[] = {CFSTR("Squat"), CFSTR("Pull-up"), CFSTR("Bench"), CFSTR("Deadlift")};
     UIStackView *stacks[4];
 
     for (int i = 0; i < 4; ++i) {
-        UILabel *label = createLabel(titles[i], UIFontTextStyleBody, false, NSTextAlignmentNatural);
-        textFields[i] = createTextfield(self, CFSTR("Weight"), NSTextAlignmentLeft, 4);
+        UILabel *label = createLabel(titles[i], UIFontTextStyleBody, NSTextAlignmentNatural);
+        textFields[i] = createTextfield(self, NULL, CFSTR("Weight"), NSTextAlignmentLeft, 4);
         stacks[i] = createStackView((id []){label, textFields[i]}, 2, 0, 5, 1,
                                     (HAEdgeInsets){4, 8, 4, 8});
         [self.view addSubview:stacks[i]];
@@ -51,9 +51,7 @@
     }
 
     finishButton = createButton(CFSTR("Finish"), UIColor.systemBlueColor, UIColor.systemGrayColor,
-                                NULL, nil, false, false, false, 0);
-    [finishButton addTarget:self action:@selector(didPressFinish)
-           forControlEvents:UIControlEventTouchUpInside];
+                                nil, nil, false, false, 0, self, @selector(didPressFinish));
     setNavButton(self.navigationItem, false, finishButton, self.view.frame.size.width);
 
     UILayoutGuide *guide = self.view.safeAreaLayoutGuide;

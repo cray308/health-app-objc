@@ -6,7 +6,7 @@
 //
 
 #include "AppUserData.h"
-#include "CocoaBridging.h"
+#include "CocoaHelpers.h"
 #include "CalendarDateHelpers.h"
 
 UserInfo *appUserDataShared = NULL;

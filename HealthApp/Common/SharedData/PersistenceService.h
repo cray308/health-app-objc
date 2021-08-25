@@ -8,7 +8,7 @@
 #ifndef PersistenceService_h
 #define PersistenceService_h
 
-#include "CocoaBridging.h"
+#include "CocoaHelpers.h"
 
 extern id persistenceServiceShared;
 

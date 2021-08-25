@@ -8,7 +8,7 @@
 #ifndef HomeTabCoordinator_h
 #define HomeTabCoordinator_h
 
-#include "CocoaBridging.h"
+#include "CocoaHelpers.h"
 #include "HomeViewModel.h"
 
 typedef struct {

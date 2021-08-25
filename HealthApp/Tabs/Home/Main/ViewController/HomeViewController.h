@@ -13,7 +13,6 @@
 
 @interface HomeViewController: UIViewController
 - (id) initWithDelegate: (HomeTabCoordinator *)_delegate;
-- (void) showConfetti;
 - (void) updateGreeting;
 - (void) createWorkoutsList;
 - (void) updateWorkoutsList;

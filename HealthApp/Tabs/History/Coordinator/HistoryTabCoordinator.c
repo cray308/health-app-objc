@@ -6,6 +6,7 @@
 //
 
 #include "HistoryTabCoordinator.h"
+#include "ViewControllerHelpers.h"
 
 void historyCoordinator_start(HistoryTabCoordinator *this) {
     historyViewModel_init(&this->viewModel);

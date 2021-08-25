@@ -10,6 +10,7 @@
 #include "PersistenceService.h"
 #include "AppUserData.h"
 #include "CalendarDateHelpers.h"
+#include "ViewControllerHelpers.h"
 
 static CFStringRef const hasLaunchedKey = CFSTR("hasLaunched");
 
@@ -31,8 +32,6 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
     ((void(*)(id,SEL,void(^)(id,id)))objc_msgSend)
     (persistenceServiceShared, sel_getUid("loadPersistentStoresWithCompletionHandler:"),
      ^(id description _U_, id error _U_) {});
-
-    kCocoaArrCallbacks = calloc(1, sizeof(CFArrayCallBacks));
 
     time_t now = time(NULL);
     time_t weekStart = date_calcStartOfWeek(now);
@@ -59,10 +58,8 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
     objc_singleArg(self->window, sel_getUid("makeKeyAndVisible"));
 
     if (!hasLaunched) {
-        id center = objc_staticMethod(objc_getClass("UNUserNotificationCenter"),
-                                      sel_getUid("currentNotificationCenter"));
         ((void(*)(id,SEL,int,void(^)(BOOL,id)))objc_msgSend)
-        (center, sel_getUid("requestAuthorizationWithOptions:completionHandler:"),
+        (getNotificationCenter(), sel_getUid("requestAuthorizationWithOptions:completionHandler:"),
          6, ^(BOOL granted _U_, id error _U_) {});
     }
     releaseObj(tabVC);

@@ -9,10 +9,10 @@
 #include "ViewControllerHelpers.h"
 #include "AppUserData.h"
 #include "AppCoordinator.h"
-#import "PersistenceService.h"
 
 @interface SettingsViewController() {
     USet_char *validChars;
+    SettingsTabCoordinator *delegate;
     UISegmentedControl *planPicker;
     UITextField *textFields[5];
     bool validInput[4];
@@ -23,35 +23,25 @@
 @end
 
 @implementation SettingsViewController
-- (id) init {
+- (id) initWithDelegate: (SettingsTabCoordinator *)delegate {
     if (!(self = [super initWithNibName:nil bundle:nil])) return nil;
+    self->delegate = delegate;
     memcpy(maxes, (short []){999, 999, 999, 999}, 4 * sizeof(short));
     return self;
 }
 
-- (void) dealloc {
-    if (validChars) uset_free(char, validChars);
-    for (int i = 0; i < 4; ++i) [textFields[i] release];
-    [planPicker release];
-    [super dealloc];
-}
-
 - (void) viewDidLoad {
     [super viewDidLoad];
-    self.view.backgroundColor = UIColor.systemGroupedBackgroundColor;
+    setBackground(self.view, UIColor.systemGroupedBackgroundColor);
     self.navigationItem.title = @"App Settings";
     validChars = createNumberCharacterSet();
 
-    UILabel *planLabel = createLabel(CFSTR("Change workout plan"), UIFontTextStyleFootnote, false, NSTextAlignmentNatural);
+    UILabel *planLabel = createLabel(CFSTR("Change workout plan"), UIFontTextStyleFootnote,
+                                     NSTextAlignmentNatural);
 
-    planPicker = [[UISegmentedControl alloc] initWithItems:@[
-        @"None", @"Base-Building", @"Continuation"
-    ]];
-    planPicker.translatesAutoresizingMaskIntoConstraints = false;
     int plan = appUserDataShared->currentPlan;
-    planPicker.selectedSegmentIndex = plan >= 0 ? plan + 1 : 0;
-    planPicker.layer.cornerRadius = 5;
-    planPicker.tintColor = UIColor.systemGray2Color;
+    CFStringRef segments[] = {CFSTR("None"), CFSTR("Base-Building"), CFSTR("Continuation")};
+    planPicker = createSegmentedControl(segments, 3, plan >= 0 ? plan + 1 : 0, nil, nil);
 
     UIView *planContainer = createView(nil, false);
     [planContainer addSubview:planLabel];
@@ -63,8 +53,8 @@
     };
 
     for (int i = 0; i < 4; ++i) {
-        UILabel *label = createLabel(titles[i], UIFontTextStyleBody, false, NSTextAlignmentNatural);
-        textFields[i] = createTextfield(self, CFSTR("Weight"), NSTextAlignmentLeft, 4);
+        UILabel *label = createLabel(titles[i], UIFontTextStyleBody, NSTextAlignmentNatural);
+        textFields[i] = createTextfield(self, NULL, CFSTR("Weight"), NSTextAlignmentLeft, 4);
         stacks[i] = createStackView((id []){label, textFields[i]}, 2, 0, 5, 1,
                                     (HAEdgeInsets){4, 5, 4, 8});
         [label release];
@@ -72,17 +62,14 @@
 
     saveButton = createButton(CFSTR("Save Settings"), UIColor.systemBlueColor,
                               UIColor.systemGrayColor, UIFontTextStyleBody,
-                              UIColor.secondarySystemGroupedBackgroundColor, false, true, true, 0);
-    [saveButton addTarget:self action:@selector(saveButtonPressed)
-         forControlEvents:UIControlEventTouchUpInside];
+                              UIColor.secondarySystemGroupedBackgroundColor, false, true, 0,
+                              self, @selector(saveButtonPressed));
     [self updateWeightFields];
 
     UIButton *deleteDataButton = createButton(CFSTR("Delete Data"), UIColor.systemRedColor, nil,
                                               UIFontTextStyleBody,
                                               UIColor.secondarySystemGroupedBackgroundColor,
-                                              false, true, true, 0);
-    [deleteDataButton addTarget:self action:@selector(deleteButtonPressed)
-               forControlEvents:UIControlEventTouchUpInside];
+                                              false, true, 0, self, @selector(deleteButtonPressed));
 
     id subviews[] = {
         planContainer, stacks[0], stacks[1], stacks[2], stacks[3], saveButton, deleteDataButton
@@ -143,11 +130,11 @@
     for (int i = 0; i < 4; ++i) {
         results[i] = appUserDataShared->liftMaxes[i];
         CFStringRef text = CFStringCreateWithFormat(NULL, NULL, CFSTR("%d"), results[i]);
-        textFields[i].text = (__bridge NSString*) text;
+        setLabelText(textFields[i], text);
         CFRelease(text);
     }
     memset(validInput, true, 4 * sizeof(bool));
-    [saveButton setEnabled:true];
+    enableButton(saveButton, true);
 }
 
 #pragma mark - Selectors
@@ -158,39 +145,11 @@
 
 - (void) saveButtonPressed {
     const int segment = (int) planPicker.selectedSegmentIndex;
-    signed char plan = segment == 0 ? -1 : segment - 1;
-
-    UIAlertController *ctrl = [UIAlertController
-                               alertControllerWithTitle:@"Are you sure?"
-                               message:@"This will save the currently entered data."
-                               preferredStyle:UIAlertControllerStyleAlert];
-
-    [ctrl addAction:[UIAlertAction actionWithTitle:@"Save" style:UIAlertActionStyleDefault
-                                           handler:^(UIAlertAction * _Nonnull action _U_) {
-        appUserData_updateWeightMaxes(results);
-        appUserData_setWorkoutPlan(plan);
-        appCoordinator_updatedUserInfo(appCoordinatorShared);
-    }]];
-    [ctrl addAction:[UIAlertAction actionWithTitle:@"Cancel"
-                                             style:UIAlertActionStyleCancel handler:nil]];
-    [self presentViewController:ctrl animated:true completion:nil];
+    settingsCoordinator_handleSaveTap(delegate, results, !segment ? -1 : segment - 1);
 }
 
 - (void) deleteButtonPressed {
-    UIAlertController *ctrl = [UIAlertController
-                               alertControllerWithTitle:@"Are you sure?"
-                               message:@"This will delete all workout history."
-                               preferredStyle:UIAlertControllerStyleAlert];
-
-    [ctrl addAction:[UIAlertAction actionWithTitle:@"Delete" style:UIAlertActionStyleDestructive
-                                           handler:^(UIAlertAction * _Nonnull action _U_) {
-        persistenceService_deleteUserData();
-        appUserData_deleteSavedData();
-        appCoordinator_deletedAppData(appCoordinatorShared);
-    }]];
-    [ctrl addAction:[UIAlertAction actionWithTitle:@"Cancel"
-                                             style:UIAlertActionStyleCancel handler:nil]];
-    [self presentViewController:ctrl animated:true completion:nil];
+    settingsCoordinator_handleDeleteTap(delegate);
 }
 
 #pragma mark - TextField Delegate
