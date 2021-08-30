@@ -10,13 +10,13 @@
 
 @implementation WorkoutTypeChart
 - (id) initWithViewModel: (HistoryWorkoutTypeChartViewModel *)viewModel
-               formatter: (id<ChartAxisValueFormatter>)xAxisFormatter {
+               formatter: (id<AxisValueFormatter>)xAxisFormatter {
     if (!(self = [super initWithFrame:CGRectZero])) return nil;
     self->viewModel = viewModel;
 
     for (int i = 1; i < 5; ++i) {
         LineChartDataSet *dataSet = viewModel->dataSets[i];
-        dataSet.fillColor = ((ChartLegendEntry*) viewModel->legendEntries[i - 1]).formColor;
+        dataSet.fillColor = ((LegendEntry*) viewModel->legendEntries[i - 1]).formColor;
         dataSet.drawFilledEnabled = true;
         dataSet.fillAlpha = 0.75;
         AreaChartFormatter *fillFormatter = [[AreaChartFormatter alloc]
@@ -29,9 +29,7 @@
     chartView = createChartView(self, xAxisFormatter, viewModel->legendEntries, 4, 425);
     chartView.leftAxis.valueFormatter = self;
 
-    LineChartRenderer *renderer = [[CustomLineChartRenderer alloc]
-                                   initWithDataProvider:chartView animator:chartView.chartAnimator
-                                   viewPortHandler:chartView.viewPortHandler];
+    LineChartRenderer *renderer = [[AreaChartRenderer alloc] initWithView:chartView];
     chartView.renderer = renderer;
     [renderer release];
     return self;
@@ -48,13 +46,13 @@
     CFRelease(array);
 }
 
-- (NSString * _Nonnull) stringForValue: (double)value axis: (ChartAxisBase * _Nullable)axis {
+- (NSString * _Nonnull) stringForValue: (double)value axis: (AxisBase *_Nullable)axis {
     return (__bridge NSString*) workoutTypeViewModel_getDuration(viewModel, value);
 }
 
-- (NSString * _Nonnull) stringForValue: (double)value entry: (ChartDataEntry * _Nonnull)entry
+- (NSString * _Nonnull) stringForValue: (double)value entry: (ChartDataEntry *_Nonnull)entry
                           dataSetIndex: (NSInteger)dataSetIndex
-                       viewPortHandler: (ChartViewPortHandler * _Nullable)viewPortHandler {
+                       viewPortHandler: (ViewPortHandler *_Nullable)viewPortHandler {
     return (__bridge NSString*) workoutTypeViewModel_getDuration(viewModel, value);
 }
 @end

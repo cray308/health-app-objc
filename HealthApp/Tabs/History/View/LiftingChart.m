@@ -10,7 +10,7 @@
 
 @implementation LiftingChart
 - (id) initWithViewModel: (HistoryLiftChartViewModel *)viewModel
-               formatter: (id<ChartAxisValueFormatter>) xAxisFormatter {
+               formatter: (id<AxisValueFormatter>)xAxisFormatter {
     if (!(self = [super initWithFrame:CGRectZero])) return nil;
     self->viewModel = viewModel;
     for (int i = 0; i < 4; ++i)

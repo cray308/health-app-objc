@@ -15,18 +15,17 @@ void homeViewModel_init(HomeViewModel *model) {
         CFSTR("Monday"), CFSTR("Tuesday"), CFSTR("Wednesday"), CFSTR("Thursday"), CFSTR("Friday"),
         CFSTR("Saturday"), CFSTR("Sunday")}, 7 * sizeof(CFStringRef));
     memcpy(model->timeNames, (char [][10]){"morning", "afternoon", "evening"}, 30);
-
     homeViewModel_updateTimeOfDay(model);
 }
 
 void homeViewModel_fetchData(HomeViewModel *model) {
     for (int i = 0; i < 7; ++i) {
-        if (model->workoutNames[i]) CFRelease(model->workoutNames[i]);
+        if (model->workoutNames[i])
+            CFRelease(model->workoutNames[i]);
         model->workoutNames[i] = NULL;
     }
     if (appUserDataShared->currentPlan >= 0 && appUserDataShared->planStart <= time(NULL)) {
-        unsigned char plan = (unsigned char) appUserDataShared->currentPlan;
-        exerciseManager_setWeeklyWorkoutNames(plan,
+        exerciseManager_setWeeklyWorkoutNames((unsigned char) appUserDataShared->currentPlan,
                                               appUserData_getWeekInPlan(), model->workoutNames);
     }
 }
@@ -65,7 +64,8 @@ bool homeViewModel_shouldShowConfetti(HomeViewModel *model, int totalCompletedWo
     int nWorkouts = 0;
     CFStringRef *names = model->workoutNames;
     for (int i = 0; i < 7; ++i) {
-        if (names[i]) ++nWorkouts;
+        if (names[i])
+            ++nWorkouts;
     }
     return nWorkouts == totalCompletedWorkouts;
 }

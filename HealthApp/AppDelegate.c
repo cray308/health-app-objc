@@ -16,7 +16,28 @@ static CFStringRef const hasLaunchedKey = CFSTR("hasLaunched");
 
 Class AppDelegateClass;
 
-void setupData(time_t now, time_t weekStart);
+static inline time_t getStartOfDay(time_t date, struct tm *info) {
+    const int seconds = (info->tm_hour * 3600) + (info->tm_min * 60) + info->tm_sec;
+    return date - seconds;
+}
+
+static time_t calcStartOfWeek(time_t date) {
+    struct tm localInfo;
+    localtime_r(&date, &localInfo);
+    int weekday = localInfo.tm_wday;
+
+    if (weekday == 1) return getStartOfDay(date, &localInfo);
+
+    date -= WeekSeconds;
+    while (weekday != 1) {
+        date += DaySeconds;
+        weekday = weekday == 6 ? 0 : weekday + 1;
+    }
+    localtime_r(&date, &localInfo);
+    return getStartOfDay(date, &localInfo);
+}
+
+static void setupData(time_t now, time_t weekStart);
 
 bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
                                     id application _U_, id options _U_) {
@@ -34,20 +55,19 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
      ^(id description _U_, id error _U_) {});
 
     time_t now = time(NULL);
-    time_t weekStart = date_calcStartOfWeek(now);
+    time_t weekStart = calcStartOfWeek(now);
 
-    if (!hasLaunched) setupData(now, weekStart);
+    if (!hasLaunched)
+        setupData(now, weekStart);
 
     appUserDataShared = userInfo_initFromStorage();
 
     int tzOffset = appUserData_checkTimezone(now);
-    if (tzOffset) {
+    if (tzOffset)
         persistenceService_changeTimestamps(tzOffset);
-    }
 
-    if (weekStart != appUserDataShared->weekStart) {
+    if (weekStart != appUserDataShared->weekStart)
         appUserData_handleNewWeek(weekStart);
-    }
 
     persistenceService_performForegroundUpdate();
 
@@ -78,8 +98,8 @@ void setupData(time_t now, time_t weekStart) {
     int16_t lifts[] = {300, 20, 185, 235};
     int i = 0;
     unsigned char plan = 0;
-    time_t start = date_calcStartOfWeek(time(NULL) - 126489600);
-    time_t end = date_calcStartOfWeek(time(NULL) - 2678400);
+    time_t start = calcStartOfWeek(time(NULL) - 126489600);
+    time_t end = calcStartOfWeek(time(NULL) - 2678400);
     id context = ((id(*)(id,SEL))objc_msgSend)(persistenceServiceShared, sel_getUid("viewContext"));
 
     while (start < end) {

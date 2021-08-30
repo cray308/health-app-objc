@@ -117,9 +117,8 @@ void historyViewModel_fetchData(HistoryViewModel *this) {
             .cumulativeDuration = {[0] = timeStrength}
         };
 
-        for (int j = 1; j < 4; ++j) {
+        for (int j = 1; j < 4; ++j)
             m.cumulativeDuration[j] = m.cumulativeDuration[j - 1] + m.durationByType[j];
-        }
         array_push_back(weekData, this->data, m);
     }
 }
@@ -179,9 +178,8 @@ void historyViewModel_formatDataForTimeRange(HistoryViewModel *this, int index) 
         if (e->cumulativeDuration[3] > maxActivityTime)
             maxActivityTime = e->cumulativeDuration[3];
         createNewEntry(this->workoutTypeViewModel.entries[0], i, 0);
-        for (int j = 1; j < 5; ++j) {
+        for (int j = 1; j < 5; ++j)
             createNewEntry(this->workoutTypeViewModel.entries[j], i, e->cumulativeDuration[j - 1]);
-        }
     }
 
     this->totalWorkoutsViewModel.avgWorkouts = (double) totalWorkouts / (size - startIndex);

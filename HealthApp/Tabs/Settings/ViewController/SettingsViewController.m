@@ -36,12 +36,11 @@
     self.navigationItem.title = @"App Settings";
     validChars = createNumberCharacterSet();
 
-    UILabel *planLabel = createLabel(CFSTR("Change workout plan"), UIFontTextStyleFootnote,
-                                     NSTextAlignmentNatural);
+    UILabel *planLabel = createLabel(CFSTR("Change workout plan"), UIFontTextStyleFootnote, 4);
 
-    int plan = appUserDataShared->currentPlan;
-    CFStringRef segments[] = {CFSTR("None"), CFSTR("Base-Building"), CFSTR("Continuation")};
-    planPicker = createSegmentedControl(segments, 3, plan >= 0 ? plan + 1 : 0, nil, nil);
+    planPicker = createSegmentedControl((CFStringRef []){
+        CFSTR("None"), CFSTR("Base-Building"), CFSTR("Continuation")
+    }, 3, appUserDataShared->currentPlan >= 0 ? appUserDataShared->currentPlan + 1 : 0, nil, nil);
 
     UIView *planContainer = createView(nil, false);
     [planContainer addSubview:planLabel];
@@ -53,28 +52,28 @@
     };
 
     for (int i = 0; i < 4; ++i) {
-        UILabel *label = createLabel(titles[i], UIFontTextStyleBody, NSTextAlignmentNatural);
-        textFields[i] = createTextfield(self, NULL, CFSTR("Weight"), NSTextAlignmentLeft, 4);
+        UILabel *label = createLabel(titles[i], UIFontTextStyleBody, 4);
+        textFields[i] = createTextfield(self, NULL, CFSTR("Weight"), 0, 4);
         stacks[i] = createStackView((id []){label, textFields[i]}, 2, 0, 5, 1,
                                     (HAEdgeInsets){4, 5, 4, 8});
+        [stacks[i].heightAnchor constraintEqualToConstant:40].active = true;
         [label release];
     }
 
     saveButton = createButton(CFSTR("Save Settings"), UIColor.systemBlueColor,
                               UIColor.systemGrayColor, UIFontTextStyleBody,
                               UIColor.secondarySystemGroupedBackgroundColor, false, true, 0,
-                              self, @selector(saveButtonPressed));
-    [self updateWeightFields];
+                              self, @selector(buttonTapped:));
 
-    UIButton *deleteDataButton = createButton(CFSTR("Delete Data"), UIColor.systemRedColor, nil,
+    UIButton *deleteButton = createButton(CFSTR("Delete Data"), UIColor.systemRedColor, nil,
                                               UIFontTextStyleBody,
                                               UIColor.secondarySystemGroupedBackgroundColor,
-                                              false, true, 0, self, @selector(deleteButtonPressed));
+                                          false, true, 1, self, @selector(buttonTapped:));
 
     id subviews[] = {
-        planContainer, stacks[0], stacks[1], stacks[2], stacks[3], saveButton, deleteDataButton
+        planContainer, stacks[0], stacks[1], stacks[2], stacks[3], saveButton, deleteButton
     };
-    UIStackView *vStack = createStackView(subviews, 7, 1, 20, 0, (HAEdgeInsets){20, 0, 0, 0});
+    UIStackView *vStack = createStackView(subviews, 7, 1, 20, 0, (HAEdgeInsets){.top = 20});
 
     UIScrollView *scrollView = createScrollView();
     [self.view addSubview:scrollView];
@@ -107,22 +106,19 @@
         [planPicker.bottomAnchor constraintEqualToAnchor:planContainer.bottomAnchor],
         [planPicker.heightAnchor constraintEqualToConstant:40],
 
-        [stacks[0].heightAnchor constraintEqualToConstant:40],
-        [stacks[1].heightAnchor constraintEqualToConstant:40],
-        [stacks[2].heightAnchor constraintEqualToConstant:40],
-        [stacks[3].heightAnchor constraintEqualToConstant:40],
         [saveButton.heightAnchor constraintEqualToConstant:40],
-        [deleteDataButton.heightAnchor constraintEqualToConstant:40]
-    }, 24);
+        [deleteButton.heightAnchor constraintEqualToConstant:40]
+    }, 20);
 
     [vStack release];
     [scrollView release];
     [planContainer release];
     [planLabel release];
-    for (int i = 0; i < 4; ++i) [stacks[i] release];
+    for (int i = 0; i < 4; ++i)
+        [stacks[i] release];
 
+    [self updateWeightFields];
     createToolbar(self, @selector(dismissKeyboard), textFields);
-
     appCoordinatorShared->loadedViewControllers |= LoadedViewController_Settings;
 }
 
@@ -137,22 +133,18 @@
     enableButton(saveButton, true);
 }
 
-#pragma mark - Selectors
-
 - (void) dismissKeyboard {
     [self.view endEditing:true];
 }
 
-- (void) saveButtonPressed {
-    const int segment = (int) planPicker.selectedSegmentIndex;
-    settingsCoordinator_handleSaveTap(delegate, results, !segment ? -1 : segment - 1);
+- (void) buttonTapped: (UIButton *)sender {
+    if (!sender.tag) {
+        const int segment = (int) planPicker.selectedSegmentIndex;
+        settingsCoordinator_handleSaveTap(delegate, results, !segment ? -1 : segment - 1);
+    } else {
+        settingsCoordinator_handleDeleteTap(delegate);
+    }
 }
-
-- (void) deleteButtonPressed {
-    settingsCoordinator_handleDeleteTap(delegate);
-}
-
-#pragma mark - TextField Delegate
 
 - (BOOL) textField: (UITextField *)textField
 shouldChangeCharactersInRange: (NSRange)range replacementString: (NSString *)string {
@@ -161,7 +153,7 @@ shouldChangeCharactersInRange: (NSRange)range replacementString: (NSString *)str
                           maxes, results, validInput);
 }
 
--(BOOL) textFieldShouldReturn: (UITextField *)textField {
+- (BOOL) textFieldShouldReturn: (UITextField *)textField {
     return [textField resignFirstResponder];
 }
 @end

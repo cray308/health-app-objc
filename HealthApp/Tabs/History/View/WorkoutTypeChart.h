@@ -11,12 +11,13 @@
 #include "HistoryViewModel.h"
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
-#import "HealthApp-Swift.h"
+#import "UIKit/UIKit.h"
+@import Charts;
 #pragma clang diagnostic pop
 
-@interface WorkoutTypeChart: UIView<ChartAxisValueFormatter, ChartValueFormatter>
+@interface WorkoutTypeChart: UIView<AxisValueFormatter, ValueFormatter>
 - (id) initWithViewModel: (HistoryWorkoutTypeChartViewModel *)viewModel
-               formatter: (id<ChartAxisValueFormatter>)xAxisFormatter;
+               formatter: (id<AxisValueFormatter>)xAxisFormatter;
 - (void) updateWithCount: (int)count isSmall: (bool)isSmall;
 @end
 

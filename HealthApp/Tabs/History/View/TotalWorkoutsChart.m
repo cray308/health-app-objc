@@ -10,7 +10,7 @@
 
 @implementation TotalWorkoutsChart
 - (id) initWithViewModel: (HistoryTotalWorkoutsChartViewModel *)viewModel
-               formatter: (id<ChartAxisValueFormatter>) xAxisFormatter {
+               formatter: (id<AxisValueFormatter>)xAxisFormatter {
     if (!(self = [super initWithFrame:CGRectZero])) return nil;
     self->viewModel = viewModel;
 
@@ -20,21 +20,10 @@
                                            &kCFTypeArrayCallBacks);
     CGGradientRef chartGradient = CGGradientCreateWithColors(colorSpace, colorsArray,
                                                              (CGFloat[]){0.8, 0});
-    ChartLinearGradientFill *fill = [[ChartLinearGradientFill alloc] initWithGradient:chartGradient
-                                                                                angle:90];
-
-    NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
-    valueFormatter = [[ChartDefaultValueFormatter alloc] initWithFormatter:formatter];
+    NSObject<Fill> *fill = [[LinearGradientFill alloc] initWithGradient:chartGradient angle:90];
 
     limitLine = [[ChartLimitLine alloc] initWithLimit:0];
-    CFNumberRef lineDashLengths[] = {
-        CFNumberCreate(NULL, kCFNumberDoubleType, &(double){5}),
-        CFNumberCreate(NULL, kCFNumberDoubleType, &(double){5})
-    };
-    CFArrayRef lineArr = CFArrayCreate(NULL, (const void **)lineDashLengths,
-                                       2, &kCFTypeArrayCallBacks);
-    limitLine.lineDashLengths = (__bridge NSArray*)lineArr;
-    limitLine.lineColor = ((ChartLegendEntry*) viewModel->legendEntries[0]).formColor;
+    limitLine.lineColor = ((LegendEntry*) viewModel->legendEntries[0]).formColor;
 
     LineChartDataSet *dataSet = viewModel->dataSet;
     dataSet.fill = fill;
@@ -47,11 +36,7 @@
     CFRelease(colorSpace);
     CFRelease(chartGradient);
     CFRelease(colorsArray);
-    CFRelease(lineArr);
-    CFRelease(lineDashLengths[0]);
-    CFRelease(lineDashLengths[1]);
     [fill release];
-    [formatter release];
     return self;
 }
 
@@ -59,6 +44,11 @@
     limitLine.limit = viewModel->avgWorkouts;
     updateDataSet(isSmall, count, viewModel->dataSet, viewModel->entries->arr);
     updateChart(isSmall, count, chartView, viewModel->chartData, viewModel->yMax);
+    NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
+    DefaultValueFormatter *valueFormatter = [[DefaultValueFormatter alloc]
+                                             initWithFormatter:formatter];
     [((LineChartData *) viewModel->chartData) setValueFormatter:valueFormatter];
+    [valueFormatter release];
+    [formatter release];
 }
 @end

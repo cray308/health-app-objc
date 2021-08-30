@@ -11,10 +11,11 @@
 #include "HistoryTabCoordinator.h"
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
-#import "HealthApp-Swift.h"
+#import "UIKit/UIKit.h"
+@import Charts;
 #pragma clang diagnostic pop
 
-@interface HistoryViewController: UIViewController<ChartAxisValueFormatter>
+@interface HistoryViewController: UIViewController<AxisValueFormatter>
 - (id) initWithDelegate: (HistoryTabCoordinator *)_delegate;
 - (void) performForegroundUpdate;
 - (void) updateCharts;

@@ -35,8 +35,6 @@
     setBackground(self.view, UIColor.systemBackgroundColor);
     self.navigationItem.title = @"Workout History";
 
-    UILayoutGuide *guide = self.view.safeAreaLayoutGuide;
-    UIScrollView *scrollView = createScrollView();
     UIView *separators[] = {
         createChartSeparator(CFSTR("Workouts Each Week")),
         createChartSeparator(CFSTR("Activity Time Each Week (By Type)")),
@@ -57,11 +55,13 @@
         separators[2], liftChart
     };
     UIStackView *vStack = createStackView(subviews, 7, 1, 5, 0, (HAEdgeInsets){10, 8, 10, 8});
+    UIScrollView *scrollView = createScrollView();
 
     [self.view addSubview:scrollView];
     [scrollView addSubview:vStack];
     [vStack setCustomSpacing:20 afterView:rangePicker];
 
+    UILayoutGuide *guide = self.view.safeAreaLayoutGuide;
     activateConstraints((id []){
         [scrollView.leadingAnchor constraintEqualToAnchor:guide.leadingAnchor],
         [scrollView.trailingAnchor constraintEqualToAnchor:guide.trailingAnchor],
@@ -81,16 +81,15 @@
     [scrollView release];
     for (int i = 0; i < 3; ++i)
         [separators[i] release];
+
     historyViewModel_fetchData(viewModel);
     historyViewModel_formatDataForTimeRange(viewModel, 0);
     [self updateCharts];
-
     appCoordinatorShared->loadedViewControllers |= LoadedViewController_History;
 }
 
 - (void) updateSelectedSegment: (UISegmentedControl *)sender {
-    int index = (int) sender.selectedSegmentIndex;
-    historyViewModel_formatDataForTimeRange(viewModel, index);
+    historyViewModel_formatDataForTimeRange(viewModel, (int) sender.selectedSegmentIndex);
     [self updateCharts];
 }
 
@@ -114,7 +113,7 @@
     [liftChart updateWithCount:count isSmall:isSmall];
 }
 
-- (NSString *_Nonnull) stringForValue: (double)value axis: (ChartAxisBase *_Nullable)axis {
+- (NSString *_Nonnull) stringForValue: (double)value axis: (AxisBase *_Nullable)axis {
     return (__bridge NSString*) historyViewModel_getXAxisLabel(viewModel, (int) value);
 }
 @end

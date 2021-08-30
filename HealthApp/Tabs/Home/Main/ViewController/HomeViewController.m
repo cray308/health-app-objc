@@ -34,10 +34,10 @@
 
     greetingLabel = createLabel(NULL, UIFontTextStyleTitle1, NSTextAlignmentCenter);
     weeklyWorkoutsStack = createStackView(NULL, 0, 1, 5, 0, (HAEdgeInsets){5, 8, 5, 8});
-    UIScrollView *scrollView = createScrollView();
+    [weeklyWorkoutsStack setHidden:true];
+
     UIView *divider = createDivider();
-    UILabel *headerLabel = createLabel(CFSTR("Add Custom Workout"), UIFontTextStyleTitle2,
-                                       NSTextAlignmentNatural);
+    UILabel *headerLabel = createLabel(CFSTR("Add Custom Workout"), UIFontTextStyleTitle2, 4);
     UIStackView *customWorkoutStack = createStackView((id []){divider, headerLabel}, 2, 1, 20, 0,
                                                       (HAEdgeInsets){5, 8, 5, 8});
 
@@ -55,6 +55,7 @@
 
     id subviews[] = {greetingLabel, weeklyWorkoutsStack, customWorkoutStack};
     UIStackView *vStack = createStackView(subviews, 3, 1, 5, 0, (HAEdgeInsets){10, 0, 16, 0});
+    UIScrollView *scrollView = createScrollView();
 
     [self.view addSubview:scrollView];
     [scrollView addSubview:vStack];
@@ -76,7 +77,7 @@
         [greetingLabel.heightAnchor constraintEqualToConstant:50]
     }, 10);
 
-    [weeklyWorkoutsStack setHidden:true];
+    [customWorkoutStack release];
     [headerLabel release];
     [divider release];
     [vStack release];
@@ -85,16 +86,14 @@
     [self updateGreeting];
     homeViewModel_fetchData(viewModel);
     [self createWorkoutsList];
-
     appCoordinatorShared->loadedViewControllers |= LoadedViewController_Home;
 }
 
 - (void) viewWillAppear: (BOOL)animated {
     [super viewWillAppear:animated];
     homeCoordinator_checkForChildCoordinator(delegate);
-    if (homeViewModel_updateTimeOfDay(viewModel)) {
+    if (homeViewModel_updateTimeOfDay(viewModel))
         [self updateGreeting];
-    }
 }
 
 - (void) createWorkoutsList {
@@ -110,18 +109,15 @@
     }
 
     UIView *divider = createDivider();
-    UILabel *headerLabel = createLabel(CFSTR("Workouts this week"), UIFontTextStyleTitle2,
-                                       NSTextAlignmentNatural);
+    UILabel *headerLabel = createLabel(CFSTR("Workouts this week"), UIFontTextStyleTitle2, 4);
     [weeklyWorkoutsStack addArrangedSubview:headerLabel];
     [weeklyWorkoutsStack addArrangedSubview:divider];
 
-    CFStringRef *weekdays = viewModel->weekdays;
-    CFStringRef *names = viewModel->workoutNames;
     for (int i = 0; i < 7; ++i) {
-        if (!names[i]) continue;
-        DayWorkoutButton *dayBtn = [[DayWorkoutButton alloc]
-                                    initWithTitle:names[i] day:weekdays[i] tag:i
-                                    target:self action:@selector(workoutButtonTapped:)];
+        if (!viewModel->workoutNames[i]) continue;
+        UIView *dayBtn = [[DayWorkoutButton alloc]
+                          initWithTitle:viewModel->workoutNames[i] day:viewModel->weekdays[i] tag:i
+                          target:self action:@selector(workoutButtonTapped:)];
         [weeklyWorkoutsStack addArrangedSubview:dayBtn];
         [dayBtn release];
     }
@@ -142,8 +138,7 @@
 
     for (int i = 2; i < count; ++i) {
         DayWorkoutButton *v = (DayWorkoutButton *) CFArrayGetValueAtIndex(subviews, i);
-        int day = (int) v.tag;
-        bool enabled = !(completed & (1 << day));
+        bool enabled = !(completed & (1 << (int) v.tag));
         enableButton(v->button, enabled);
         setBackground(v->checkbox, enabled ? UIColor.systemGrayColor : UIColor.systemGreenColor);
     }

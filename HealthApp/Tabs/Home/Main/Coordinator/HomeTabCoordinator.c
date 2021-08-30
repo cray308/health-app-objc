@@ -21,11 +21,9 @@ typedef enum {
 } CustomWorkoutIndex;
 
 static void navigateToAddWorkout(HomeTabCoordinator *this, bool dismissVC, Workout *workout) {
-    if (dismissVC) {
+    if (dismissVC)
         dismissPresentedVC(getFirstVC(this->navVC));
-    }
     AddWorkoutCoordinator *child = malloc(sizeof(AddWorkoutCoordinator));
-
     child->navVC = this->navVC;
     child->parent = this;
     child->viewModel.workout = workout;
@@ -62,14 +60,11 @@ void homeCoordinator_didFinishAddingWorkout(HomeTabCoordinator *this, int totalC
     id homeVC = getFirstVC(this->navVC);
     objc_singleArg(homeVC, sel_getUid("updateWorkoutsList"));
 
-    const bool confetti = homeViewModel_shouldShowConfetti(&this->viewModel,
-                                                           totalCompletedWorkouts);
-
     addWorkoutCoordinator_free(this->childCoordinator);
     this->childCoordinator = NULL;
     ((id(*)(id,SEL,bool))objc_msgSend)(this->navVC, sel_getUid("popViewControllerAnimated:"), true);
 
-    if (confetti) {
+    if (homeViewModel_shouldShowConfetti(&this->viewModel, totalCompletedWorkouts)) {
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 0.75),
                        dispatch_get_main_queue(), ^(void) {
             showConfetti(homeVC);
@@ -80,7 +75,8 @@ void homeCoordinator_didFinishAddingWorkout(HomeTabCoordinator *this, int totalC
 void homeCoordinator_addWorkoutFromPlan(HomeTabCoordinator *this, int index) {
     unsigned char plan = (unsigned char) appUserDataShared->currentPlan;
     Workout *w = exerciseManager_getWeeklyWorkoutAtIndex(plan, appUserData_getWeekInPlan(), index);
-    if (w) navigateToAddWorkout(this, false, w);
+    if (w)
+        navigateToAddWorkout(this, false, w);
 }
 
 void homeCoordinator_addWorkoutFromCustomButton(HomeTabCoordinator *this, int index) {
@@ -94,7 +90,8 @@ void homeCoordinator_addWorkoutFromCustomButton(HomeTabCoordinator *this, int in
             break;
         case CustomWorkoutIndexTestMax: ;
             Workout *w = exerciseManager_getWorkoutFromLibrary(WorkoutTypeStrength, 2, 1, 1, 100);
-            if (w) navigateToAddWorkout(this, false, w);
+            if (w)
+                navigateToAddWorkout(this, false, w);
             return;
         case CustomWorkoutIndexEndurance:
             type = WorkoutTypeEndurance;
@@ -119,7 +116,8 @@ void homeCoordinator_finishedSettingUpCustomWorkout(HomeTabCoordinator *this, un
                                                     int index, short *params) {
     Workout *w = exerciseManager_getWorkoutFromLibrary(type, index,
                                                        params[0], params[1], params[2]);
-    if (w) navigateToAddWorkout(this, true, w);
+    if (w)
+        navigateToAddWorkout(this, true, w);
 }
 
 void homeCoordinator_checkForChildCoordinator(HomeTabCoordinator *this) {
