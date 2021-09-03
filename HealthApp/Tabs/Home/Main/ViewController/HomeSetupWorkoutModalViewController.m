@@ -7,14 +7,13 @@
 
 #import "HomeSetupWorkoutModalViewController.h"
 #include "ViewControllerHelpers.h"
-#include "Exercise.h"
 
 @interface HomeSetupWorkoutModalViewController() {
     USet_char *validChars;
     HomeTabCoordinator *delegate;
     Array_str *names;
     int index;
-    unsigned char type;
+    uchar type;
     UIButton *submitButton;
     UITextField *workoutTextField;
     UITextField *fields[3];
@@ -25,8 +24,7 @@
 @end
 
 @implementation HomeSetupWorkoutModalViewController
-- (id) initWithDelegate: (HomeTabCoordinator *)delegate
-                   type: (unsigned char)type names: (Array_str *)names {
+- (id) initWithDelegate: (HomeTabCoordinator *)delegate type: (uchar)type names: (Array_str *)names {
     if (!(self = [super initWithNibName:nil bundle:nil])) return nil;
     self->delegate = delegate;
     self->names = names;
@@ -35,11 +33,13 @@
 }
 
 - (void) dealloc {
-    if (validChars) uset_free(char, validChars);
+    if (validChars)
+        uset_free(char, validChars);
     array_free(str, names);
     [workoutTextField release];
     for (int i = 0; i < 3; ++i) {
-        if (fields[i]) [fields[i] release];
+        if (fields[i])
+            [fields[i] release];
     }
     [super dealloc];
 }
@@ -49,8 +49,7 @@
     setBackground(self.view, UIColor.systemGroupedBackgroundColor);
 
     workoutTextField = createTextfield(self, names->arr[0], NULL, NSTextAlignmentCenter, 0);
-    UILabel *workoutLabel = createLabel(CFSTR("Choose workout"), UIFontTextStyleFootnote,
-                                        NSTextAlignmentNatural);
+    UILabel *workoutLabel = createLabel(CFSTR("Choose workout"), UIFontTextStyleFootnote, 4);
 
     UIPickerView *workoutPicker = [[UIPickerView alloc] init];
     workoutPicker.delegate = self;
@@ -109,8 +108,8 @@
     for (int i = 0; i < 3; ++i) {
         if (!titles[i]) continue;
         createCharSet = true;
-        UILabel *label = createLabel(titles[i], UIFontTextStyleBody, NSTextAlignmentNatural);
-        fields[i] = createTextfield(self, NULL, NULL, NSTextAlignmentLeft, 4);
+        UILabel *label = createLabel(titles[i], UIFontTextStyleBody, 4);
+        fields[i] = createTextfield(self, NULL, NULL, 0, 4);
         createToolbar(self, @selector(dismissKeyboard), (id []){fields[i], nil});
         UIStackView *hStack = createStackView((id []){label, fields[i]}, 2, 0, 5, 1,
                                               (HAEdgeInsets){4, 8, 4, 8});
@@ -119,7 +118,8 @@
         [hStack release];
     }
 
-    if (createCharSet) validChars = createNumberCharacterSet();
+    if (createCharSet)
+        validChars = createNumberCharacterSet();
 
     UIButton *cancelButton = createButton(CFSTR("Cancel"), UIColor.systemBlueColor,
                                           UIColor.systemGrayColor, nil, nil, false, true, 0,
@@ -183,8 +183,7 @@ shouldChangeCharactersInRange: (NSRange)range replacementString: (NSString *)str
 }
 
 - (BOOL) textFieldShouldReturn: (UITextField *)textField {
-    [textField resignFirstResponder];
-    return true;
+    return [textField resignFirstResponder];
 }
 
 - (NSInteger) numberOfComponentsInPickerView: (UIPickerView *)pickerView {

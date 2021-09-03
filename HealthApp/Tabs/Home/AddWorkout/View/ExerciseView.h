@@ -8,26 +8,18 @@
 #ifndef ExerciseView_h
 #define ExerciseView_h
 
-#include "WorkoutScreenHelpers.h"
 #include "Exercise.h"
 #import <UIKit/UIKit.h>
 
 @interface ExerciseView: UIView
-- (id) initWithExercise: (ExerciseEntry *)exercise tag: (int)tag
-                 target: (id)target action: (SEL)action timer: (WorkoutTimer *)timer;
-- (bool) handleTap;
-- (void) reset;
+- (id) initWithEntry: (ExerciseEntry *)e tag: (uint)tag target: (id)target action: (SEL)action;
+- (void) configureWithEntry: (ExerciseEntry *)e;
 @end
 
 @interface ExerciseView() {
-    @public ExerciseEntry *exercise;
-    WorkoutTimer *timer;
-    int completedSets;
-    bool resting;
-    CFStringRef restStr;
-    UILabel *setsLabel;
-    UIView *checkbox;
-    UIButton *button;
+    @public UILabel *setsLabel;
+    @public UIView *checkbox;
+    @public UIButton *button;
 }
 @end
 

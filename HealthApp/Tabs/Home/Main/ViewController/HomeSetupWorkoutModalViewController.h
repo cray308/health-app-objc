@@ -14,8 +14,7 @@
 
 @interface HomeSetupWorkoutModalViewController:
 UIViewController<UIPickerViewDelegate, UIPickerViewDataSource, UITextFieldDelegate>
-- (id) initWithDelegate: (HomeTabCoordinator *)delegate
-                   type: (unsigned char)type names: (Array_str *)names;
+- (id) initWithDelegate: (HomeTabCoordinator *)delegate type: (uchar)type names: (Array_str *)names;
 @end
 
 #endif /* HomeSetupWorkoutModalViewController_h */

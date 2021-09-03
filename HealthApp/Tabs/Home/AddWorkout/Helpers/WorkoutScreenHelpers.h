@@ -9,7 +9,14 @@
 #define WorkoutScreenHelpers_h
 
 #include "CocoaHelpers.h"
-#include <pthread.h>
+#include "Exercise.h"
+
+typedef void (^ObserverCallback)(id);
+
+typedef enum {
+    TimerSignalGroup = SIGUSR2,
+    TimerSignalExercise = SIGUSR1
+} TimerSignal;
 
 typedef enum {
     TimerTypeGroup,
@@ -17,28 +24,29 @@ typedef enum {
 } TimerType;
 
 typedef enum {
-    WorkoutNotificationExerciseCompleted,
-    WorkoutNotificationAMRAPCompleted
-} WorkoutNotification;
+    TransitionCompletedWorkout,
+    TransitionFinishedCircuitDeleteFirst,
+    TransitionFinishedCircuit,
+    TransitionFinishedExercise,
+    TransitionNoChange
+} WorkoutTransition;
 
-typedef struct {
-    id parent;
-    struct info {
-        const unsigned char type : 2;
-        unsigned char active : 2;
-        unsigned char stop : 4;
-    } info;
-    int container;
-    int exercise;
-    int duration;
-    time_t refTime;
-    pthread_mutex_t lock;
-    pthread_cond_t cond;
-} WorkoutTimer;
+typedef enum {
+    EventOptionNone,
+    EventOptionStartGroup,
+    EventOptionFinishGroup,
+} WorkoutEventOption;
 
 extern pthread_mutex_t timerLock;
 
-void scheduleNotification(int secondsFromNow, CFStringRef message);
-void startWorkoutTimer(WorkoutTimer *t, int duration, int container, int exercise);
+void setupTimers(Workout *w, id parent);
+id createDeviceEventNotification(id name, ObserverCallback block);
+void cleanupWorkoutNotifications(id *observers);
+void startWorkoutTimer(WorkoutTimer *t, int duration, unsigned container, unsigned exercise);
+
+WorkoutTransition workout_findTransitionForEvent(Workout *w, id view, id btn, uint option);
+void workout_stopTimers(Workout *w);
+bool workout_restartExerciseTimer(Workout *w, time_t refTime);
+bool workout_restartGroupTimer(Workout *w, time_t refTime);
 
 #endif /* WorkoutScreenHelpers_h */

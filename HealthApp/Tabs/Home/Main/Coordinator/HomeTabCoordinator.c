@@ -26,7 +26,7 @@ static void navigateToAddWorkout(HomeTabCoordinator *this, bool dismissVC, Worko
     AddWorkoutCoordinator *child = malloc(sizeof(AddWorkoutCoordinator));
     child->navVC = this->navVC;
     child->parent = this;
-    child->viewModel.workout = workout;
+    child->workout = workout;
     this->childCoordinator = child;
     addWorkoutCoordinator_start(child);
 }
@@ -60,9 +60,9 @@ void homeCoordinator_didFinishAddingWorkout(HomeTabCoordinator *this, int totalC
     id homeVC = getFirstVC(this->navVC);
     objc_singleArg(homeVC, sel_getUid("updateWorkoutsList"));
 
+    ((id(*)(id,SEL,bool))objc_msgSend)(this->navVC, sel_getUid("popViewControllerAnimated:"), true);
     addWorkoutCoordinator_free(this->childCoordinator);
     this->childCoordinator = NULL;
-    ((id(*)(id,SEL,bool))objc_msgSend)(this->navVC, sel_getUid("popViewControllerAnimated:"), true);
 
     if (homeViewModel_shouldShowConfetti(&this->viewModel, totalCompletedWorkouts)) {
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 0.75),

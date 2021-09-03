@@ -12,14 +12,8 @@
 #include "Exercise.h"
 
 typedef struct {
-    Workout *workout;
-    time_t startTime;
-    time_t stopTime;
-} AddWorkoutViewModel;
-
-typedef struct {
     id navVC;
-    AddWorkoutViewModel viewModel;
+    Workout *workout;
     void *parent;
 } AddWorkoutCoordinator;
 

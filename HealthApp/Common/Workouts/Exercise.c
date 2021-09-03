@@ -95,8 +95,6 @@ void buildWorkoutFromDict(CFDictionaryRef dict, int index,
         array_push_back(exGroup, w->activities, activities);
     }
 
-
-
     Array_exEntry *exercises = w->activities->arr[0].exercises;
     ExerciseEntry *e;
     switch (type) {
@@ -137,9 +135,15 @@ void buildWorkoutFromDict(CFDictionaryRef dict, int index,
             array_iter(exercises, e) {
                 e->reps = duration;
             }
-            break;
         default:
             break;
+    }
+    w->group = &w->activities->arr[0];
+    w->entry = &w->group->exercises->arr[0];
+    for (int i = 0; i < 2; ++i) {
+        memcpy(&w->timers[i], &(WorkoutTimer){.info = {.type = i}}, sizeof(WorkoutTimer));
+        pthread_mutex_init(&w->timers[i].lock, NULL);
+        pthread_cond_init(&w->timers[i].cond, NULL);
     }
 }
 
@@ -249,15 +253,24 @@ cleanup:
 
 CFStringRef exerciseGroup_createHeader(ExerciseGroup *g) {
     if (g->type == ExerciseContainerTypeRounds && g->reps > 1) {
-        return CFStringCreateWithFormat(NULL, NULL, CFSTR("Round %d of %d"),
-                                        g->completedReps + 1, g->reps);
+        int completed = g->completedReps == g->reps ? g->reps : g->completedReps + 1;
+        return CFStringCreateWithFormat(NULL, NULL, CFSTR("Round %d of %d"), completed, g->reps);
     } else if (g->type == ExerciseContainerTypeAMRAP) {
         return CFStringCreateWithFormat(NULL, NULL, CFSTR("AMRAP %d mins"), g->reps);
     }
     return NULL;
 }
 
+CFStringRef exerciseEntry_createSetsTitle(ExerciseEntry *e) {
+    if (e->sets == 1)
+        return NULL;
+    int completed = e->completedSets == e->sets ? e->sets : e->completedSets + 1;
+    return CFStringCreateWithFormat(NULL, NULL, CFSTR("Set %d of %d"), completed, e->sets);
+}
+
 CFStringRef exerciseEntry_createTitle(ExerciseEntry *e) {
+    if (e->state == ExerciseStateResting)
+        return CFStringCreateWithFormat(NULL, NULL, CFSTR("Rest: %d s"), e->rest);
     switch (e->type) {
         case ExerciseTypeReps:
             if (e->weight > 1) {

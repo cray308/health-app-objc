@@ -16,6 +16,9 @@
 #include <objc/message.h>
 
 extern CFArrayCallBacks kCocoaArrCallbacks;
+typedef unsigned char uchar;
+typedef signed char schar;
+typedef unsigned int uint;
 
 id objc_staticMethod(Class _self, SEL _cmd);
 void objc_singleArg(id obj, SEL _cmd);
