@@ -7,10 +7,7 @@
 
 #import "SwiftBridging.h"
 #import "UIKit/UIKit.h"
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdocumentation"
 @import Charts;
-#pragma clang diagnostic pop
 
 id createChartEntry(int x, int y) {
     return [[ChartDataEntry alloc] initWithX:x y:y];

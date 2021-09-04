@@ -41,6 +41,8 @@
 		616E2F6826755D2B00342CD8 /* HomeSetupWorkoutModalViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 616E2F6726755D2B00342CD8 /* HomeSetupWorkoutModalViewController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		616E2F842676A22700342CD8 /* Exercise.c in Sources */ = {isa = PBXBuildFile; fileRef = 616E2F832676A22700342CD8 /* Exercise.c */; };
 		616E2F9B2677195C00342CD8 /* AddWorkoutUpdateMaxesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 616E2F9A2677195C00342CD8 /* AddWorkoutUpdateMaxesViewController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		6185D9BD26E4267000DB2BF2 /* Charts.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6185D9BA26E4264D00DB2BF2 /* Charts.xcframework */; };
+		6185D9BE26E4267000DB2BF2 /* Charts.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 6185D9BA26E4264D00DB2BF2 /* Charts.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		61BC6F55266EA9A80022D6F7 /* WeeklyData+CoreDataClass.h in Headers */ = {isa = PBXBuildFile; fileRef = 61BC6F51266EA9A80022D6F7 /* WeeklyData+CoreDataClass.h */; };
 		61BC6F56266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m in Sources */ = {isa = PBXBuildFile; fileRef = 61BC6F52266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61C7793626102C19001326A1 /* HistoryTabCoordinator.c in Sources */ = {isa = PBXBuildFile; fileRef = 61C7793526102C19001326A1 /* HistoryTabCoordinator.c */; };
@@ -52,8 +54,6 @@
 		61C779A426102E20001326A1 /* AddWorkoutCoordinator.c in Sources */ = {isa = PBXBuildFile; fileRef = 61C779A326102E20001326A1 /* AddWorkoutCoordinator.c */; };
 		61C779AC26102E51001326A1 /* SettingsTabCoordinator.c in Sources */ = {isa = PBXBuildFile; fileRef = 61C779AB26102E51001326A1 /* SettingsTabCoordinator.c */; };
 		61C779B426102E97001326A1 /* SettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C779B326102E97001326A1 /* SettingsViewController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		61D5651226DC74B8009CF765 /* Charts.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61D5650E26DC74AD009CF765 /* Charts.xcframework */; };
-		61D5651326DC74B8009CF765 /* Charts.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 61D5650E26DC74AD009CF765 /* Charts.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		61FD868B26D482290057E5DC /* DayWorkoutButton.h in Headers */ = {isa = PBXBuildFile; fileRef = 61FD868926D482290057E5DC /* DayWorkoutButton.h */; };
 		61FD868C26D482290057E5DC /* DayWorkoutButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 61FD868A26D482290057E5DC /* DayWorkoutButton.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61FD869C26D487710057E5DC /* HistoryChartHelpers.h in Headers */ = {isa = PBXBuildFile; fileRef = 61FD869A26D487710057E5DC /* HistoryChartHelpers.h */; };
@@ -77,7 +77,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				61D5651326DC74B8009CF765 /* Charts.xcframework in Embed Frameworks */,
+				6185D9BE26E4267000DB2BF2 /* Charts.xcframework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -140,6 +140,7 @@
 		616E2F992677194D00342CD8 /* AddWorkoutUpdateMaxesViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AddWorkoutUpdateMaxesViewController.h; sourceTree = "<group>"; };
 		616E2F9A2677195C00342CD8 /* AddWorkoutUpdateMaxesViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AddWorkoutUpdateMaxesViewController.m; sourceTree = "<group>"; };
 		6176277D266D44C60079A17E /* Exercise.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Exercise.h; sourceTree = "<group>"; };
+		6185D9BA26E4264D00DB2BF2 /* Charts.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = Charts.xcframework; sourceTree = "<group>"; };
 		61BC6F51266EA9A80022D6F7 /* WeeklyData+CoreDataClass.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "WeeklyData+CoreDataClass.h"; sourceTree = "<group>"; };
 		61BC6F52266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "WeeklyData+CoreDataClass.m"; sourceTree = "<group>"; };
 		61C77914261028BE001326A1 /* HomeTabCoordinator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HomeTabCoordinator.h; sourceTree = "<group>"; };
@@ -160,7 +161,6 @@
 		61C779A326102E20001326A1 /* AddWorkoutCoordinator.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = AddWorkoutCoordinator.c; sourceTree = "<group>"; };
 		61C779AB26102E51001326A1 /* SettingsTabCoordinator.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = SettingsTabCoordinator.c; sourceTree = "<group>"; };
 		61C779B326102E97001326A1 /* SettingsViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SettingsViewController.m; sourceTree = "<group>"; };
-		61D5650E26DC74AD009CF765 /* Charts.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = Charts.xcframework; path = ../../Charts.xcframework; sourceTree = "<group>"; };
 		61FD868926D482290057E5DC /* DayWorkoutButton.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DayWorkoutButton.h; sourceTree = "<group>"; };
 		61FD868A26D482290057E5DC /* DayWorkoutButton.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DayWorkoutButton.m; sourceTree = "<group>"; };
 		61FD869A26D487710057E5DC /* HistoryChartHelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HistoryChartHelpers.h; sourceTree = "<group>"; };
@@ -172,7 +172,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				61D5651226DC74B8009CF765 /* Charts.xcframework in Frameworks */,
+				6185D9BD26E4267000DB2BF2 /* Charts.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -231,8 +231,8 @@
 			children = (
 				61594D0926068105000D01A1 /* HealthApp */,
 				61594D2826068106000D01A1 /* HealthAppTests */,
+				6185D9B926E4263700DB2BF2 /* Frameworks */,
 				61594D0826068105000D01A1 /* Products */,
-				61BCC6B626D9E9D700A925F6 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -302,12 +302,12 @@
 			path = DataStructures;
 			sourceTree = "<group>";
 		};
-		61BCC6B626D9E9D700A925F6 /* Frameworks */ = {
+		6185D9B926E4263700DB2BF2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				61D5650E26DC74AD009CF765 /* Charts.xcframework */,
+				6185D9BA26E4264D00DB2BF2 /* Charts.xcframework */,
 			);
-			name = Frameworks;
+			path = Frameworks;
 			sourceTree = "<group>";
 		};
 		61C778E926102446001326A1 /* Tabs */ = {

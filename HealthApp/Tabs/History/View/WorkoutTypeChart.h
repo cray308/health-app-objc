@@ -9,11 +9,8 @@
 #define WorkoutTypeChart_h
 
 #include "HistoryViewModel.h"
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdocumentation"
 #import "UIKit/UIKit.h"
 @import Charts;
-#pragma clang diagnostic pop
 
 @interface WorkoutTypeChart: UIView<AxisValueFormatter, ValueFormatter>
 - (id) initWithViewModel: (HistoryWorkoutTypeChartViewModel *)viewModel

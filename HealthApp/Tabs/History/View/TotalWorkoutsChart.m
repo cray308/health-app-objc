@@ -14,28 +14,17 @@
     if (!(self = [super initWithFrame:CGRectZero])) return nil;
     self->viewModel = viewModel;
 
-    CGColorRef colorVals[] = {UIColor.systemRedColor.CGColor, UIColor.clearColor.CGColor};
-    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-    CFArrayRef colorsArray = CFArrayCreate(NULL, (const void **) colorVals, 2,
-                                           &kCFTypeArrayCallBacks);
-    CGGradientRef chartGradient = CGGradientCreateWithColors(colorSpace, colorsArray,
-                                                             (CGFloat[]){0.8, 0});
-    NSObject<Fill> *fill = [[LinearGradientFill alloc] initWithGradient:chartGradient angle:90];
-
     limitLine = [[ChartLimitLine alloc] initWithLimit:0];
     limitLine.lineColor = ((LegendEntry*) viewModel->legendEntries[0]).formColor;
 
     LineChartDataSet *dataSet = viewModel->dataSet;
+    NSObject<Fill> *fill = [[LinearGradientFill alloc] initWithEndColor:UIColor.systemRedColor];
     dataSet.fill = fill;
     dataSet.drawFilledEnabled = true;
     dataSet.fillAlpha = 0.75;
 
     chartView = createChartView(self, xAxisFormatter, viewModel->legendEntries, 1, 390);
     [chartView.leftAxis addLimitLine:limitLine];
-
-    CFRelease(colorSpace);
-    CFRelease(chartGradient);
-    CFRelease(colorsArray);
     [fill release];
     return self;
 }

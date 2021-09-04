@@ -9,11 +9,8 @@
 #define LiftingChart_h
 
 #include "HistoryViewModel.h"
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdocumentation"
 #import "UIKit/UIKit.h"
 @import Charts;
-#pragma clang diagnostic pop
 
 @interface LiftingChart: UIView
 - (id) initWithViewModel: (HistoryLiftChartViewModel *)viewModel

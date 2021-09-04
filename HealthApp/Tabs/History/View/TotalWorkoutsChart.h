@@ -9,12 +9,8 @@
 #define TotalWorkoutsChart_h
 
 #include "HistoryViewModel.h"
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdocumentation"
 #import "UIKit/UIKit.h"
 @import Charts;
-//#import "HealthApp-Swift.h"
-#pragma clang diagnostic pop
 
 @interface TotalWorkoutsChart: UIView
 - (id) initWithViewModel: (HistoryTotalWorkoutsChartViewModel *)viewModel

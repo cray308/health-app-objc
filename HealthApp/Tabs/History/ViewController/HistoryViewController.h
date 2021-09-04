@@ -9,11 +9,8 @@
 #define HistoryViewController_h
 
 #include "HistoryTabCoordinator.h"
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdocumentation"
 #import "UIKit/UIKit.h"
 @import Charts;
-#pragma clang diagnostic pop
 
 @interface HistoryViewController: UIViewController<AxisValueFormatter>
 - (id) initWithDelegate: (HistoryTabCoordinator *)_delegate;
