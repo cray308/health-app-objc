@@ -221,12 +221,8 @@ SWIFT_CLASS("_TtC6Charts8Animator")
 @class LineChartDataSet;
 @class LineChartView;
 
-/// Protocol for providing a custom logic to where the filling line of a LineDataSet should end. This of course only works if setFillEnabled(…) is set to true.
 SWIFT_PROTOCOL("_TtP6Charts13FillFormatter_")
 @protocol FillFormatter
-///
-/// returns:
-/// The vertical (y-axis) position where the filled-line of the LineDataSet should end.
 - (CGFloat)getFillLinePositionWithDataSet:(LineChartDataSet * _Nonnull)dataSet dataProvider:(LineChartView * _Nonnull)dataProvider SWIFT_WARN_UNUSED_RESULT;
 @end
 
@@ -239,99 +235,22 @@ SWIFT_CLASS("_TtC6Charts18AreaChartFormatter")
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
 
-@class ViewPortHandler;
 
-SWIFT_PROTOCOL("_TtP6Charts8Renderer_")
-@protocol Renderer
-/// the component that handles the drawing area of the chart and it’s offsets
-@property (nonatomic, readonly, strong) ViewPortHandler * _Nonnull viewPortHandler;
-@end
-
-@class UIAccessibilityElement;
-@class Highlight;
-@class ChartViewBase;
-@class ChartData;
-
-SWIFT_PROTOCOL("_TtP6Charts12DataRenderer_")
-@protocol DataRenderer <Renderer>
-/// An array of accessibility elements that are presented to the ChartViewBase accessibility methods.
-/// Note that the order of elements in this array determines the order in which they are presented and navigated by
-/// Accessibility clients such as VoiceOver.
-/// Renderers should ensure that the order of elements makes sense to a client presenting an audio-only interface to a user.
-/// Subclasses should populate this array in drawData() or drawDataSet() to make the chart accessible.
-@property (nonatomic, readonly, copy) NSArray<UIAccessibilityElement *> * _Nonnull accessibleChartElements;
-@property (nonatomic, readonly, strong) Animator * _Nonnull animator;
-- (void)drawDataWithContext:(CGContextRef _Nonnull)context;
-- (void)drawValuesWithContext:(CGContextRef _Nonnull)context;
-- (void)drawExtrasWithContext:(CGContextRef _Nonnull)context;
-/// Draws all highlight indicators for the values that are currently highlighted.
-/// \param indices the highlighted values
-///
-- (void)drawHighlightedWithContext:(CGContextRef _Nonnull)context indices:(NSArray<Highlight *> * _Nonnull)indices;
-/// An opportunity for initializing internal buffers used for rendering with a new size.
-/// Since this might do memory allocations, it should only be called if necessary.
-- (void)initBuffers SWIFT_METHOD_FAMILY(none);
-- (BOOL)isDrawingValuesAllowedWithDataProvider:(ChartViewBase * _Nullable)dataProvider SWIFT_WARN_UNUSED_RESULT;
-/// Creates an <code>UIAccessibilityElement</code> that acts as the first and primary header describing a chart view.
-/// \param chart The chartView object being described
-///
-/// \param data A non optional data source about the chart
-///
-/// \param defaultDescription A simple string describing the type/design of Chart.
-///
-///
-/// returns:
-/// A header <code>UIAccessibilityElement</code> that can be added to accessibleChartElements.
-- (UIAccessibilityElement * _Nonnull)createAccessibleHeaderUsingChart:(ChartViewBase * _Nonnull)chart andData:(ChartData * _Nonnull)data withDefaultDescription:(NSString * _Nonnull)defaultDescription SWIFT_WARN_UNUSED_RESULT;
-@end
-
-
-SWIFT_CLASS("_TtC6Charts34BarLineScatterCandleBubbleRenderer")
-@interface BarLineScatterCandleBubbleRenderer : NSObject <DataRenderer>
-@property (nonatomic, readonly, strong) ViewPortHandler * _Nonnull viewPortHandler;
-@property (nonatomic, copy) NSArray<UIAccessibilityElement *> * _Nonnull accessibleChartElements;
-@property (nonatomic, readonly, strong) Animator * _Nonnull animator;
-- (void)drawDataWithContext:(CGContextRef _Nonnull)context;
-- (void)drawValuesWithContext:(CGContextRef _Nonnull)context;
-- (void)drawExtrasWithContext:(CGContextRef _Nonnull)context;
-- (void)drawHighlightedWithContext:(CGContextRef _Nonnull)context indices:(NSArray<Highlight *> * _Nonnull)indices;
-- (void)initBuffers SWIFT_METHOD_FAMILY(none);
-- (BOOL)isDrawingValuesAllowedWithDataProvider:(ChartViewBase * _Nullable)dataProvider SWIFT_WARN_UNUSED_RESULT;
-- (UIAccessibilityElement * _Nonnull)createAccessibleHeaderUsingChart:(ChartViewBase * _Nonnull)chart andData:(ChartData * _Nonnull)data withDefaultDescription:(NSString * _Nonnull)defaultDescription SWIFT_WARN_UNUSED_RESULT;
+SWIFT_CLASS("_TtC6Charts13ChartRenderer")
+@interface ChartRenderer : NSObject
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
 
 
-SWIFT_CLASS("_TtC6Charts30LineScatterCandleRadarRenderer")
-@interface LineScatterCandleRadarRenderer : BarLineScatterCandleBubbleRenderer
-@end
-
-
-SWIFT_CLASS("_TtC6Charts17LineRadarRenderer")
-@interface LineRadarRenderer : LineScatterCandleRadarRenderer
-@end
-
-
-SWIFT_CLASS("_TtC6Charts17LineChartRenderer")
-@interface LineChartRenderer : LineRadarRenderer
-- (void)drawDataWithContext:(CGContextRef _Nonnull)context;
-- (void)drawValuesWithContext:(CGContextRef _Nonnull)context;
-- (void)drawExtrasWithContext:(CGContextRef _Nonnull)context;
-- (void)drawHighlightedWithContext:(CGContextRef _Nonnull)context indices:(NSArray<Highlight *> * _Nonnull)indices;
-@end
-
-
 SWIFT_CLASS("_TtC6Charts17AreaChartRenderer")
-@interface AreaChartRenderer : LineChartRenderer
+@interface AreaChartRenderer : ChartRenderer
 - (nonnull instancetype)initWithView:(LineChartView * _Nonnull)view OBJC_DESIGNATED_INITIALIZER;
 @end
 
 
-/// This class encapsulates everything both Axis, Legend and LimitLines have in common
 SWIFT_CLASS("_TtC6Charts13ComponentBase")
 @interface ComponentBase : NSObject
-/// flag that indicates if this component is enabled or not
 @property (nonatomic) BOOL enabled;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
@@ -340,66 +259,35 @@ SWIFT_CLASS("_TtC6Charts13ComponentBase")
 @protocol AxisValueFormatter;
 @class ChartLimitLine;
 
-/// Base class for all axes
 SWIFT_CLASS("_TtC6Charts8AxisBase")
 @interface AxisBase : ComponentBase
-/// Sets the formatter to be used for formatting the axis labels.
-/// If no formatter is set, the chart will automatically determine a reasonable formatting (concerning decimals) for all the values that are drawn inside the chart.
 @property (nonatomic, strong) id <AxisValueFormatter> _Nonnull valueFormatter;
-/// the number of label entries the axis should have
-/// max = 25,
-/// min = 2,
-/// default = 6,
-/// be aware that this number is not fixed and can only be approximated
 @property (nonatomic) NSInteger labelCount;
-/// Adds a new ChartLimitLine to this axis.
 - (void)addLimitLine:(ChartLimitLine * _Nonnull)line;
-/// The maximum value for this axis.
-/// If set, this value will not be calculated automatically depending on the provided data.
-/// Use <code>resetCustomAxisMax()</code> to undo this.
 @property (nonatomic) double axisMaximum;
 @end
 
 
-/// An interface for providing custom axis Strings.
 SWIFT_PROTOCOL("_TtP6Charts18AxisValueFormatter_")
 @protocol AxisValueFormatter
-/// Called when a value from an axis is formatted before being drawn.
-/// For performance reasons, avoid excessive calculations and memory allocations inside this method.
-/// \param value the value that is currently being drawn
-///
-/// \param axis the axis that the value belongs to
-///
-///
-/// returns:
-/// The customized label that is drawn on the x-axis.
 - (NSString * _Nonnull)stringForValue:(double)value axis:(AxisBase * _Nullable)axis SWIFT_WARN_UNUSED_RESULT;
 @end
 
+@class ChartData;
 @class XAxis;
 @class Legend;
 @class NSCoder;
 
 SWIFT_CLASS("_TtC6Charts13ChartViewBase")
 @interface ChartViewBase : UIView
-/// Object that holds all data that was originally set for the chart, before it was modified or any filtering algorithms had been applied.
 @property (nonatomic, strong) ChartData * _Nullable data;
-/// The object representing the labels on the x-axis
 @property (nonatomic, readonly, strong) XAxis * _Nonnull xAxis;
-/// The legend object containing all data associated with the legend
 @property (nonatomic, readonly, strong) Legend * _Nonnull legend;
-/// object responsible for rendering the data
-@property (nonatomic, strong) id <DataRenderer> _Nullable renderer;
+@property (nonatomic, strong) ChartRenderer * _Nullable renderer;
 - (nonnull instancetype)initWithFrame:(CGRect)frame OBJC_DESIGNATED_INITIALIZER;
 - (nullable instancetype)initWithCoder:(NSCoder * _Nonnull)aDecoder OBJC_DESIGNATED_INITIALIZER;
-/// Lets the chart know its underlying data has changed and should perform all necessary recalculations.
-/// It is crucial that this method is called everytime data is changed dynamically. Not calling this method can lead to crashes or unexpected behaviour.
 - (void)notifyDataSetChanged;
 - (void)drawRect:(CGRect)rect;
-/// Animates the drawing / rendering of the chart the x-axis with the specified animation time.
-/// If <code>animate(...)</code> is called, no further calling of <code>invalidate()</code> is necessary to refresh the chart.
-/// \param xAxisDuration duration for animating the x axis
-///
 - (void)animateWithXAxisDuration:(NSTimeInterval)xAxisDuration;
 - (void)observeValueForKeyPath:(NSString * _Nullable)keyPath ofObject:(id _Nullable)object change:(NSDictionary<NSKeyValueChangeKey, id> * _Nullable)change context:(void * _Nullable)context;
 @end
@@ -407,11 +295,8 @@ SWIFT_CLASS("_TtC6Charts13ChartViewBase")
 @class YAxis;
 @class UIGestureRecognizer;
 
-/// Base-class of LineChart, BarChart, ScatterChart and CandleStickChart.
 SWIFT_CLASS("_TtC6Charts20BarLineChartViewBase")
 @interface BarLineChartViewBase : ChartViewBase <UIGestureRecognizerDelegate>
-/// The left y-axis object. In the horizontal bar-chart, this is the
-/// top axis.
 @property (nonatomic, readonly, strong) YAxis * _Nonnull leftAxis;
 - (nonnull instancetype)initWithFrame:(CGRect)frame OBJC_DESIGNATED_INITIALIZER;
 - (nullable instancetype)initWithCoder:(NSCoder * _Nonnull)aDecoder OBJC_DESIGNATED_INITIALIZER;
@@ -425,20 +310,11 @@ SWIFT_CLASS("_TtC6Charts20BarLineChartViewBase")
 @class ChartDataEntry;
 @class UIColor;
 
-/// The DataSet class represents one group or type of entries (Entry) in the Chart that belong together.
-/// It is designed to logically separate different groups of values inside the Chart (e.g. the values for a specific line in the LineChart, or the values of a specific group of bars in the BarChart).
 SWIFT_CLASS("_TtC6Charts12ChartDataSet")
 @interface ChartDataSet : NSObject <NSCopying>
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 - (nonnull instancetype)initWithEntries:(NSArray<ChartDataEntry *> * _Nonnull)entries OBJC_DESIGNATED_INITIALIZER;
-/// Used to replace all entries of a data set while retaining styling properties.
-/// This is a separate method from a setter on <code>entries</code> to encourage usage
-/// of <code>Collection</code> conformances.
-/// \param entries new entries to replace existing entries in the dataset
-///
 - (void)replaceEntries:(NSArray<ChartDataEntry *> * _Nonnull)entries;
-/// All the colors that are used for this DataSet.
-/// Colors are reused as soon as the number of Entries the DataSet represents is higher than the size of the colors array.
 @property (nonatomic, copy) NSArray<UIColor *> * _Nonnull colors;
 - (id _Nonnull)copyWithZone:(struct _NSZone * _Nullable)zone SWIFT_WARN_UNUSED_RESULT;
 @end
@@ -451,19 +327,14 @@ SWIFT_CLASS("_TtC6Charts38BarLineScatterCandleBubbleChartDataSet")
 - (nonnull instancetype)initWithEntries:(NSArray<ChartDataEntry *> * _Nonnull)entries OBJC_DESIGNATED_INITIALIZER;
 @end
 
-
 @protocol ValueFormatter;
 
 SWIFT_CLASS("_TtC6Charts9ChartData")
 @interface ChartData : NSObject
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 - (nonnull instancetype)initWithDataSets:(NSArray<ChartDataSet *> * _Nonnull)dataSets OBJC_DESIGNATED_INITIALIZER;
-/// Call this method to let the ChartData know that the underlying data has changed.
-/// Calling this performs all necessary recalculations needed when the contained data has changed.
 - (void)notifyDataChanged;
-/// Sets a custom ValueFormatter for all DataSets this data object contains.
 - (void)setValueFormatter:(id <ValueFormatter> _Nonnull)formatter;
-/// Enables / disables drawing values (value-text) for all DataSets this data object contains.
 - (void)setDrawValues:(BOOL)enabled;
 @end
 
@@ -472,23 +343,10 @@ SWIFT_CLASS("_TtC6Charts9ChartData")
 
 
 
-SWIFT_CLASS("_TtC6Charts18ChartDataEntryBase")
-@interface ChartDataEntryBase : NSObject
-- (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
-@property (nonatomic, readonly, copy) NSString * _Nonnull description;
-@end
-
-
 SWIFT_CLASS("_TtC6Charts14ChartDataEntry")
-@interface ChartDataEntry : ChartDataEntryBase <NSCopying>
+@interface ChartDataEntry : NSObject <NSCopying>
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
-/// An Entry represents one single entry in the chart.
-/// \param x the x value
-///
-/// \param y the y value (the actual value of the entry)
-///
 - (nonnull instancetype)initWithX:(double)x y:(double)y OBJC_DESIGNATED_INITIALIZER;
-@property (nonatomic, readonly, copy) NSString * _Nonnull description;
 - (id _Nonnull)copyWithZone:(struct _NSZone * _Nullable)zone SWIFT_WARN_UNUSED_RESULT;
 @end
 
@@ -499,34 +357,11 @@ SWIFT_CLASS("_TtC6Charts14ChartDataEntry")
 
 
 
-@interface ChartDataEntryBase (SWIFT_EXTENSION(Charts))
-- (BOOL)isEqual:(id _Nullable)object SWIFT_WARN_UNUSED_RESULT;
-@end
 
 
 
-
-
-/// Determines how to round DataSet index values for <code>ChartDataSet.entryIndex(x, rounding)</code> when an exact x-value is not found.
-typedef SWIFT_ENUM(NSInteger, ChartDataSetRounding, open) {
-  ChartDataSetRoundingUp = 0,
-  ChartDataSetRoundingDown = 1,
-  ChartDataSetRoundingClosest = 2,
-};
-
-
-SWIFT_CLASS("_TtC6Charts16ChartHighlighter")
-@interface ChartHighlighter : NSObject
-- (nonnull instancetype)init SWIFT_UNAVAILABLE;
-+ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
-@end
-
-
-/// The limit line is an additional feature for all Line, Bar and ScatterCharts.
-/// It allows the displaying of an additional line in the chart that marks a certain maximum / limit on the specified axis (x- or y-axis).
 SWIFT_CLASS("_TtC6Charts14ChartLimitLine")
 @interface ChartLimitLine : ComponentBase
-/// limit / maximum (the y-value or xIndex)
 @property (nonatomic) double limit;
 @property (nonatomic, strong) UIColor * _Nonnull lineColor;
 - (nonnull instancetype)initWithLimit:(double)limit OBJC_DESIGNATED_INITIALIZER;
@@ -535,29 +370,15 @@ SWIFT_CLASS("_TtC6Charts14ChartLimitLine")
 
 
 
+@class ViewPortHandler;
 
-/// Interface that allows custom formatting of all values inside the chart before they are drawn to the screen.
-/// Simply create your own formatting class and let it implement ValueFormatter. Then override the stringForValue()
-/// method and return whatever you want.
 SWIFT_PROTOCOL("_TtP6Charts14ValueFormatter_")
 @protocol ValueFormatter
-/// Called when a value (from labels inside the chart) is formatted before being drawn.
-/// For performance reasons, avoid excessive calculations and memory allocations inside this method.
-/// \param value The value to be formatted
-///
-/// \param dataSetIndex The index of the DataSet the entry in focus belongs to
-///
-/// \param viewPortHandler provides information about the current chart state (scale, translation, …)
-///
-///
-/// returns:
-/// The formatted label ready to be drawn
 - (NSString * _Nonnull)stringForValue:(double)value entry:(ChartDataEntry * _Nonnull)entry dataSetIndex:(NSInteger)dataSetIndex viewPortHandler:(ViewPortHandler * _Nullable)viewPortHandler SWIFT_WARN_UNUSED_RESULT;
 @end
 
 @class NSNumberFormatter;
 
-/// The default value formatter used for all chart components that needs a default
 SWIFT_CLASS("_TtC6Charts21DefaultValueFormatter")
 @interface DefaultValueFormatter : NSObject <ValueFormatter>
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
@@ -569,23 +390,9 @@ SWIFT_CLASS("_TtC6Charts21DefaultValueFormatter")
 
 SWIFT_PROTOCOL("_TtP6Charts4Fill_")
 @protocol Fill
-/// Draws the provided path in filled mode with the provided area
 - (void)fillPathWithContext:(CGContextRef _Nonnull)context rect:(CGRect)rect;
 @end
 
-
-
-SWIFT_CLASS("_TtC6Charts9Highlight")
-@interface Highlight : NSObject
-- (nonnull instancetype)init SWIFT_UNAVAILABLE;
-+ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
-@property (nonatomic, readonly, copy) NSString * _Nonnull description;
-@end
-
-
-@interface Highlight (SWIFT_EXTENSION(Charts))
-- (BOOL)isEqual:(id _Nullable)object SWIFT_WARN_UNUSED_RESULT;
-@end
 
 
 SWIFT_CLASS("_TtC6Charts6Legend")
@@ -595,14 +402,8 @@ SWIFT_CLASS("_TtC6Charts6Legend")
 
 SWIFT_CLASS("_TtC6Charts11LegendEntry")
 @interface LegendEntry : NSObject
-/// \param label The legend entry text.
-/// A <code>nil</code> label will start a group.
-///
 - (nonnull instancetype)initWithLabel:(NSString * _Nullable)label color:(UIColor * _Nullable)color OBJC_DESIGNATED_INITIALIZER;
-/// The legend entry text.
-/// A <code>nil</code> label will start a group.
 @property (nonatomic, copy) NSString * _Nullable label;
-/// The color for drawing the form
 @property (nonatomic, strong) UIColor * _Nullable formColor;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
@@ -610,14 +411,12 @@ SWIFT_CLASS("_TtC6Charts11LegendEntry")
 
 
 SWIFT_CLASS("_TtC6Charts14LegendRenderer")
-@interface LegendRenderer : NSObject <Renderer>
-@property (nonatomic, readonly, strong) ViewPortHandler * _Nonnull viewPortHandler;
+@interface LegendRenderer : NSObject
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
 
 
-/// Data object that encapsulates all data associated with a LineChart.
 SWIFT_CLASS("_TtC6Charts13LineChartData")
 @interface LineChartData : ChartData
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
@@ -635,17 +434,10 @@ SWIFT_CLASS("_TtC6Charts34LineScatterCandleRadarChartDataSet")
 
 SWIFT_CLASS("_TtC6Charts21LineRadarChartDataSet")
 @interface LineRadarChartDataSet : LineScatterCandleRadarChartDataSet
-/// The color that is used for filling the line surface area.
 @property (nonatomic, strong) UIColor * _Nonnull fillColor;
-/// The object that is used for filling the area below the line. <em>Default</em>: <code>nil</code>.
 @property (nonatomic, strong) id <Fill> _Nullable fill;
-/// The alpha value that is used for filling the line surface. <em>Default</em>: 0.33.
 @property (nonatomic) CGFloat fillAlpha;
-/// Line width of the chart (min = 0.0, max = 10). <em>Default</em>: 1.
 @property (nonatomic) CGFloat lineWidth;
-/// Set to <code>true</code> if the DataSet should be drawn filled (surface), and not just as a line.
-/// Disabling this will give great performance boost.
-/// Please note that this method uses the path clipping for drawing the filled area (with images, gradients and layers).
 @property (nonatomic) BOOL drawFilledEnabled;
 - (id _Nonnull)copyWithZone:(struct _NSZone * _Nullable)zone SWIFT_WARN_UNUSED_RESULT;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
@@ -657,28 +449,19 @@ SWIFT_CLASS("_TtC6Charts16LineChartDataSet")
 @interface LineChartDataSet : LineRadarChartDataSet
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 - (nonnull instancetype)initWithEntries:(NSArray<ChartDataEntry *> * _Nonnull)entries OBJC_DESIGNATED_INITIALIZER;
-/// Sets the one and ONLY color that should be used for this DataSet.
-/// Internally, this recreates the colors array and adds the specified color.
 - (void)setCircleColor:(UIColor * _Nonnull)color;
-/// If true, drawing circles is enabled
 @property (nonatomic) BOOL drawCirclesEnabled;
-/// Sets a custom FillFormatterProtocol to the chart that handles the position of the filled-line for each DataSet.
-/// Set this to null to use the default logic.
 @property (nonatomic, strong) id <FillFormatter> _Nullable fillFormatter;
 - (id _Nonnull)copyWithZone:(struct _NSZone * _Nullable)zone SWIFT_WARN_UNUSED_RESULT;
 @end
 
 
-
-/// Chart that draws lines, surfaces, circles, …
 SWIFT_CLASS("_TtC6Charts13LineChartView")
 @interface LineChartView : BarLineChartViewBase
 - (nonnull instancetype)initWithLegendEntries:(NSArray<LegendEntry *> * _Nonnull)legendEntries OBJC_DESIGNATED_INITIALIZER;
 - (nullable instancetype)initWithCoder:(NSCoder * _Nonnull)aDecoder OBJC_DESIGNATED_INITIALIZER;
 - (nonnull instancetype)initWithFrame:(CGRect)frame SWIFT_UNAVAILABLE;
 @end
-
-
 
 
 
@@ -693,16 +476,6 @@ SWIFT_CLASS("_TtC6Charts18LinearGradientFill")
 
 
 
-/// Transformer class that contains all matrices and is responsible for transforming values into pixels on the screen and backwards.
-SWIFT_CLASS("_TtC6Charts11Transformer")
-@interface Transformer : NSObject
-- (nonnull instancetype)init SWIFT_UNAVAILABLE;
-+ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
-@end
-
-
-
-/// Class that contains information about the charts current viewport settings, including offsets, scale & translation levels, …
 SWIFT_CLASS("_TtC6Charts15ViewPortHandler")
 @interface ViewPortHandler : NSObject
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
@@ -715,18 +488,9 @@ SWIFT_CLASS("_TtC6Charts5XAxis")
 @end
 
 
-/// Class representing the y-axis labels settings and its entries.
-/// Be aware that not all features the YLabels class provides are suitable for the RadarChart.
-/// Customizations that affect the value range of the axis need to be applied before setting data for the chart.
 SWIFT_CLASS("_TtC6Charts5YAxis")
 @interface YAxis : AxisBase
 @end
-
-/// Enum that specifies the axis a DataSet should be plotted against, either Left or Right.
-typedef SWIFT_ENUM(NSInteger, AxisDependency, open) {
-  AxisDependencyLeft = 0,
-  AxisDependencyRight = 1,
-};
 
 #if __has_attribute(external_source_symbol)
 # pragma clang attribute pop
@@ -956,12 +720,8 @@ SWIFT_CLASS("_TtC6Charts8Animator")
 @class LineChartDataSet;
 @class LineChartView;
 
-/// Protocol for providing a custom logic to where the filling line of a LineDataSet should end. This of course only works if setFillEnabled(…) is set to true.
 SWIFT_PROTOCOL("_TtP6Charts13FillFormatter_")
 @protocol FillFormatter
-///
-/// returns:
-/// The vertical (y-axis) position where the filled-line of the LineDataSet should end.
 - (CGFloat)getFillLinePositionWithDataSet:(LineChartDataSet * _Nonnull)dataSet dataProvider:(LineChartView * _Nonnull)dataProvider SWIFT_WARN_UNUSED_RESULT;
 @end
 
@@ -974,99 +734,22 @@ SWIFT_CLASS("_TtC6Charts18AreaChartFormatter")
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
 
-@class ViewPortHandler;
 
-SWIFT_PROTOCOL("_TtP6Charts8Renderer_")
-@protocol Renderer
-/// the component that handles the drawing area of the chart and it’s offsets
-@property (nonatomic, readonly, strong) ViewPortHandler * _Nonnull viewPortHandler;
-@end
-
-@class UIAccessibilityElement;
-@class Highlight;
-@class ChartViewBase;
-@class ChartData;
-
-SWIFT_PROTOCOL("_TtP6Charts12DataRenderer_")
-@protocol DataRenderer <Renderer>
-/// An array of accessibility elements that are presented to the ChartViewBase accessibility methods.
-/// Note that the order of elements in this array determines the order in which they are presented and navigated by
-/// Accessibility clients such as VoiceOver.
-/// Renderers should ensure that the order of elements makes sense to a client presenting an audio-only interface to a user.
-/// Subclasses should populate this array in drawData() or drawDataSet() to make the chart accessible.
-@property (nonatomic, readonly, copy) NSArray<UIAccessibilityElement *> * _Nonnull accessibleChartElements;
-@property (nonatomic, readonly, strong) Animator * _Nonnull animator;
-- (void)drawDataWithContext:(CGContextRef _Nonnull)context;
-- (void)drawValuesWithContext:(CGContextRef _Nonnull)context;
-- (void)drawExtrasWithContext:(CGContextRef _Nonnull)context;
-/// Draws all highlight indicators for the values that are currently highlighted.
-/// \param indices the highlighted values
-///
-- (void)drawHighlightedWithContext:(CGContextRef _Nonnull)context indices:(NSArray<Highlight *> * _Nonnull)indices;
-/// An opportunity for initializing internal buffers used for rendering with a new size.
-/// Since this might do memory allocations, it should only be called if necessary.
-- (void)initBuffers SWIFT_METHOD_FAMILY(none);
-- (BOOL)isDrawingValuesAllowedWithDataProvider:(ChartViewBase * _Nullable)dataProvider SWIFT_WARN_UNUSED_RESULT;
-/// Creates an <code>UIAccessibilityElement</code> that acts as the first and primary header describing a chart view.
-/// \param chart The chartView object being described
-///
-/// \param data A non optional data source about the chart
-///
-/// \param defaultDescription A simple string describing the type/design of Chart.
-///
-///
-/// returns:
-/// A header <code>UIAccessibilityElement</code> that can be added to accessibleChartElements.
-- (UIAccessibilityElement * _Nonnull)createAccessibleHeaderUsingChart:(ChartViewBase * _Nonnull)chart andData:(ChartData * _Nonnull)data withDefaultDescription:(NSString * _Nonnull)defaultDescription SWIFT_WARN_UNUSED_RESULT;
-@end
-
-
-SWIFT_CLASS("_TtC6Charts34BarLineScatterCandleBubbleRenderer")
-@interface BarLineScatterCandleBubbleRenderer : NSObject <DataRenderer>
-@property (nonatomic, readonly, strong) ViewPortHandler * _Nonnull viewPortHandler;
-@property (nonatomic, copy) NSArray<UIAccessibilityElement *> * _Nonnull accessibleChartElements;
-@property (nonatomic, readonly, strong) Animator * _Nonnull animator;
-- (void)drawDataWithContext:(CGContextRef _Nonnull)context;
-- (void)drawValuesWithContext:(CGContextRef _Nonnull)context;
-- (void)drawExtrasWithContext:(CGContextRef _Nonnull)context;
-- (void)drawHighlightedWithContext:(CGContextRef _Nonnull)context indices:(NSArray<Highlight *> * _Nonnull)indices;
-- (void)initBuffers SWIFT_METHOD_FAMILY(none);
-- (BOOL)isDrawingValuesAllowedWithDataProvider:(ChartViewBase * _Nullable)dataProvider SWIFT_WARN_UNUSED_RESULT;
-- (UIAccessibilityElement * _Nonnull)createAccessibleHeaderUsingChart:(ChartViewBase * _Nonnull)chart andData:(ChartData * _Nonnull)data withDefaultDescription:(NSString * _Nonnull)defaultDescription SWIFT_WARN_UNUSED_RESULT;
+SWIFT_CLASS("_TtC6Charts13ChartRenderer")
+@interface ChartRenderer : NSObject
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
 
 
-SWIFT_CLASS("_TtC6Charts30LineScatterCandleRadarRenderer")
-@interface LineScatterCandleRadarRenderer : BarLineScatterCandleBubbleRenderer
-@end
-
-
-SWIFT_CLASS("_TtC6Charts17LineRadarRenderer")
-@interface LineRadarRenderer : LineScatterCandleRadarRenderer
-@end
-
-
-SWIFT_CLASS("_TtC6Charts17LineChartRenderer")
-@interface LineChartRenderer : LineRadarRenderer
-- (void)drawDataWithContext:(CGContextRef _Nonnull)context;
-- (void)drawValuesWithContext:(CGContextRef _Nonnull)context;
-- (void)drawExtrasWithContext:(CGContextRef _Nonnull)context;
-- (void)drawHighlightedWithContext:(CGContextRef _Nonnull)context indices:(NSArray<Highlight *> * _Nonnull)indices;
-@end
-
-
 SWIFT_CLASS("_TtC6Charts17AreaChartRenderer")
-@interface AreaChartRenderer : LineChartRenderer
+@interface AreaChartRenderer : ChartRenderer
 - (nonnull instancetype)initWithView:(LineChartView * _Nonnull)view OBJC_DESIGNATED_INITIALIZER;
 @end
 
 
-/// This class encapsulates everything both Axis, Legend and LimitLines have in common
 SWIFT_CLASS("_TtC6Charts13ComponentBase")
 @interface ComponentBase : NSObject
-/// flag that indicates if this component is enabled or not
 @property (nonatomic) BOOL enabled;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
@@ -1075,66 +758,35 @@ SWIFT_CLASS("_TtC6Charts13ComponentBase")
 @protocol AxisValueFormatter;
 @class ChartLimitLine;
 
-/// Base class for all axes
 SWIFT_CLASS("_TtC6Charts8AxisBase")
 @interface AxisBase : ComponentBase
-/// Sets the formatter to be used for formatting the axis labels.
-/// If no formatter is set, the chart will automatically determine a reasonable formatting (concerning decimals) for all the values that are drawn inside the chart.
 @property (nonatomic, strong) id <AxisValueFormatter> _Nonnull valueFormatter;
-/// the number of label entries the axis should have
-/// max = 25,
-/// min = 2,
-/// default = 6,
-/// be aware that this number is not fixed and can only be approximated
 @property (nonatomic) NSInteger labelCount;
-/// Adds a new ChartLimitLine to this axis.
 - (void)addLimitLine:(ChartLimitLine * _Nonnull)line;
-/// The maximum value for this axis.
-/// If set, this value will not be calculated automatically depending on the provided data.
-/// Use <code>resetCustomAxisMax()</code> to undo this.
 @property (nonatomic) double axisMaximum;
 @end
 
 
-/// An interface for providing custom axis Strings.
 SWIFT_PROTOCOL("_TtP6Charts18AxisValueFormatter_")
 @protocol AxisValueFormatter
-/// Called when a value from an axis is formatted before being drawn.
-/// For performance reasons, avoid excessive calculations and memory allocations inside this method.
-/// \param value the value that is currently being drawn
-///
-/// \param axis the axis that the value belongs to
-///
-///
-/// returns:
-/// The customized label that is drawn on the x-axis.
 - (NSString * _Nonnull)stringForValue:(double)value axis:(AxisBase * _Nullable)axis SWIFT_WARN_UNUSED_RESULT;
 @end
 
+@class ChartData;
 @class XAxis;
 @class Legend;
 @class NSCoder;
 
 SWIFT_CLASS("_TtC6Charts13ChartViewBase")
 @interface ChartViewBase : UIView
-/// Object that holds all data that was originally set for the chart, before it was modified or any filtering algorithms had been applied.
 @property (nonatomic, strong) ChartData * _Nullable data;
-/// The object representing the labels on the x-axis
 @property (nonatomic, readonly, strong) XAxis * _Nonnull xAxis;
-/// The legend object containing all data associated with the legend
 @property (nonatomic, readonly, strong) Legend * _Nonnull legend;
-/// object responsible for rendering the data
-@property (nonatomic, strong) id <DataRenderer> _Nullable renderer;
+@property (nonatomic, strong) ChartRenderer * _Nullable renderer;
 - (nonnull instancetype)initWithFrame:(CGRect)frame OBJC_DESIGNATED_INITIALIZER;
 - (nullable instancetype)initWithCoder:(NSCoder * _Nonnull)aDecoder OBJC_DESIGNATED_INITIALIZER;
-/// Lets the chart know its underlying data has changed and should perform all necessary recalculations.
-/// It is crucial that this method is called everytime data is changed dynamically. Not calling this method can lead to crashes or unexpected behaviour.
 - (void)notifyDataSetChanged;
 - (void)drawRect:(CGRect)rect;
-/// Animates the drawing / rendering of the chart the x-axis with the specified animation time.
-/// If <code>animate(...)</code> is called, no further calling of <code>invalidate()</code> is necessary to refresh the chart.
-/// \param xAxisDuration duration for animating the x axis
-///
 - (void)animateWithXAxisDuration:(NSTimeInterval)xAxisDuration;
 - (void)observeValueForKeyPath:(NSString * _Nullable)keyPath ofObject:(id _Nullable)object change:(NSDictionary<NSKeyValueChangeKey, id> * _Nullable)change context:(void * _Nullable)context;
 @end
@@ -1142,11 +794,8 @@ SWIFT_CLASS("_TtC6Charts13ChartViewBase")
 @class YAxis;
 @class UIGestureRecognizer;
 
-/// Base-class of LineChart, BarChart, ScatterChart and CandleStickChart.
 SWIFT_CLASS("_TtC6Charts20BarLineChartViewBase")
 @interface BarLineChartViewBase : ChartViewBase <UIGestureRecognizerDelegate>
-/// The left y-axis object. In the horizontal bar-chart, this is the
-/// top axis.
 @property (nonatomic, readonly, strong) YAxis * _Nonnull leftAxis;
 - (nonnull instancetype)initWithFrame:(CGRect)frame OBJC_DESIGNATED_INITIALIZER;
 - (nullable instancetype)initWithCoder:(NSCoder * _Nonnull)aDecoder OBJC_DESIGNATED_INITIALIZER;
@@ -1160,20 +809,11 @@ SWIFT_CLASS("_TtC6Charts20BarLineChartViewBase")
 @class ChartDataEntry;
 @class UIColor;
 
-/// The DataSet class represents one group or type of entries (Entry) in the Chart that belong together.
-/// It is designed to logically separate different groups of values inside the Chart (e.g. the values for a specific line in the LineChart, or the values of a specific group of bars in the BarChart).
 SWIFT_CLASS("_TtC6Charts12ChartDataSet")
 @interface ChartDataSet : NSObject <NSCopying>
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 - (nonnull instancetype)initWithEntries:(NSArray<ChartDataEntry *> * _Nonnull)entries OBJC_DESIGNATED_INITIALIZER;
-/// Used to replace all entries of a data set while retaining styling properties.
-/// This is a separate method from a setter on <code>entries</code> to encourage usage
-/// of <code>Collection</code> conformances.
-/// \param entries new entries to replace existing entries in the dataset
-///
 - (void)replaceEntries:(NSArray<ChartDataEntry *> * _Nonnull)entries;
-/// All the colors that are used for this DataSet.
-/// Colors are reused as soon as the number of Entries the DataSet represents is higher than the size of the colors array.
 @property (nonatomic, copy) NSArray<UIColor *> * _Nonnull colors;
 - (id _Nonnull)copyWithZone:(struct _NSZone * _Nullable)zone SWIFT_WARN_UNUSED_RESULT;
 @end
@@ -1186,19 +826,14 @@ SWIFT_CLASS("_TtC6Charts38BarLineScatterCandleBubbleChartDataSet")
 - (nonnull instancetype)initWithEntries:(NSArray<ChartDataEntry *> * _Nonnull)entries OBJC_DESIGNATED_INITIALIZER;
 @end
 
-
 @protocol ValueFormatter;
 
 SWIFT_CLASS("_TtC6Charts9ChartData")
 @interface ChartData : NSObject
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 - (nonnull instancetype)initWithDataSets:(NSArray<ChartDataSet *> * _Nonnull)dataSets OBJC_DESIGNATED_INITIALIZER;
-/// Call this method to let the ChartData know that the underlying data has changed.
-/// Calling this performs all necessary recalculations needed when the contained data has changed.
 - (void)notifyDataChanged;
-/// Sets a custom ValueFormatter for all DataSets this data object contains.
 - (void)setValueFormatter:(id <ValueFormatter> _Nonnull)formatter;
-/// Enables / disables drawing values (value-text) for all DataSets this data object contains.
 - (void)setDrawValues:(BOOL)enabled;
 @end
 
@@ -1207,23 +842,10 @@ SWIFT_CLASS("_TtC6Charts9ChartData")
 
 
 
-SWIFT_CLASS("_TtC6Charts18ChartDataEntryBase")
-@interface ChartDataEntryBase : NSObject
-- (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
-@property (nonatomic, readonly, copy) NSString * _Nonnull description;
-@end
-
-
 SWIFT_CLASS("_TtC6Charts14ChartDataEntry")
-@interface ChartDataEntry : ChartDataEntryBase <NSCopying>
+@interface ChartDataEntry : NSObject <NSCopying>
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
-/// An Entry represents one single entry in the chart.
-/// \param x the x value
-///
-/// \param y the y value (the actual value of the entry)
-///
 - (nonnull instancetype)initWithX:(double)x y:(double)y OBJC_DESIGNATED_INITIALIZER;
-@property (nonatomic, readonly, copy) NSString * _Nonnull description;
 - (id _Nonnull)copyWithZone:(struct _NSZone * _Nullable)zone SWIFT_WARN_UNUSED_RESULT;
 @end
 
@@ -1234,34 +856,11 @@ SWIFT_CLASS("_TtC6Charts14ChartDataEntry")
 
 
 
-@interface ChartDataEntryBase (SWIFT_EXTENSION(Charts))
-- (BOOL)isEqual:(id _Nullable)object SWIFT_WARN_UNUSED_RESULT;
-@end
 
 
 
-
-
-/// Determines how to round DataSet index values for <code>ChartDataSet.entryIndex(x, rounding)</code> when an exact x-value is not found.
-typedef SWIFT_ENUM(NSInteger, ChartDataSetRounding, open) {
-  ChartDataSetRoundingUp = 0,
-  ChartDataSetRoundingDown = 1,
-  ChartDataSetRoundingClosest = 2,
-};
-
-
-SWIFT_CLASS("_TtC6Charts16ChartHighlighter")
-@interface ChartHighlighter : NSObject
-- (nonnull instancetype)init SWIFT_UNAVAILABLE;
-+ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
-@end
-
-
-/// The limit line is an additional feature for all Line, Bar and ScatterCharts.
-/// It allows the displaying of an additional line in the chart that marks a certain maximum / limit on the specified axis (x- or y-axis).
 SWIFT_CLASS("_TtC6Charts14ChartLimitLine")
 @interface ChartLimitLine : ComponentBase
-/// limit / maximum (the y-value or xIndex)
 @property (nonatomic) double limit;
 @property (nonatomic, strong) UIColor * _Nonnull lineColor;
 - (nonnull instancetype)initWithLimit:(double)limit OBJC_DESIGNATED_INITIALIZER;
@@ -1270,29 +869,15 @@ SWIFT_CLASS("_TtC6Charts14ChartLimitLine")
 
 
 
+@class ViewPortHandler;
 
-/// Interface that allows custom formatting of all values inside the chart before they are drawn to the screen.
-/// Simply create your own formatting class and let it implement ValueFormatter. Then override the stringForValue()
-/// method and return whatever you want.
 SWIFT_PROTOCOL("_TtP6Charts14ValueFormatter_")
 @protocol ValueFormatter
-/// Called when a value (from labels inside the chart) is formatted before being drawn.
-/// For performance reasons, avoid excessive calculations and memory allocations inside this method.
-/// \param value The value to be formatted
-///
-/// \param dataSetIndex The index of the DataSet the entry in focus belongs to
-///
-/// \param viewPortHandler provides information about the current chart state (scale, translation, …)
-///
-///
-/// returns:
-/// The formatted label ready to be drawn
 - (NSString * _Nonnull)stringForValue:(double)value entry:(ChartDataEntry * _Nonnull)entry dataSetIndex:(NSInteger)dataSetIndex viewPortHandler:(ViewPortHandler * _Nullable)viewPortHandler SWIFT_WARN_UNUSED_RESULT;
 @end
 
 @class NSNumberFormatter;
 
-/// The default value formatter used for all chart components that needs a default
 SWIFT_CLASS("_TtC6Charts21DefaultValueFormatter")
 @interface DefaultValueFormatter : NSObject <ValueFormatter>
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
@@ -1304,23 +889,9 @@ SWIFT_CLASS("_TtC6Charts21DefaultValueFormatter")
 
 SWIFT_PROTOCOL("_TtP6Charts4Fill_")
 @protocol Fill
-/// Draws the provided path in filled mode with the provided area
 - (void)fillPathWithContext:(CGContextRef _Nonnull)context rect:(CGRect)rect;
 @end
 
-
-
-SWIFT_CLASS("_TtC6Charts9Highlight")
-@interface Highlight : NSObject
-- (nonnull instancetype)init SWIFT_UNAVAILABLE;
-+ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
-@property (nonatomic, readonly, copy) NSString * _Nonnull description;
-@end
-
-
-@interface Highlight (SWIFT_EXTENSION(Charts))
-- (BOOL)isEqual:(id _Nullable)object SWIFT_WARN_UNUSED_RESULT;
-@end
 
 
 SWIFT_CLASS("_TtC6Charts6Legend")
@@ -1330,14 +901,8 @@ SWIFT_CLASS("_TtC6Charts6Legend")
 
 SWIFT_CLASS("_TtC6Charts11LegendEntry")
 @interface LegendEntry : NSObject
-/// \param label The legend entry text.
-/// A <code>nil</code> label will start a group.
-///
 - (nonnull instancetype)initWithLabel:(NSString * _Nullable)label color:(UIColor * _Nullable)color OBJC_DESIGNATED_INITIALIZER;
-/// The legend entry text.
-/// A <code>nil</code> label will start a group.
 @property (nonatomic, copy) NSString * _Nullable label;
-/// The color for drawing the form
 @property (nonatomic, strong) UIColor * _Nullable formColor;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
@@ -1345,14 +910,12 @@ SWIFT_CLASS("_TtC6Charts11LegendEntry")
 
 
 SWIFT_CLASS("_TtC6Charts14LegendRenderer")
-@interface LegendRenderer : NSObject <Renderer>
-@property (nonatomic, readonly, strong) ViewPortHandler * _Nonnull viewPortHandler;
+@interface LegendRenderer : NSObject
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
 
 
-/// Data object that encapsulates all data associated with a LineChart.
 SWIFT_CLASS("_TtC6Charts13LineChartData")
 @interface LineChartData : ChartData
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
@@ -1370,17 +933,10 @@ SWIFT_CLASS("_TtC6Charts34LineScatterCandleRadarChartDataSet")
 
 SWIFT_CLASS("_TtC6Charts21LineRadarChartDataSet")
 @interface LineRadarChartDataSet : LineScatterCandleRadarChartDataSet
-/// The color that is used for filling the line surface area.
 @property (nonatomic, strong) UIColor * _Nonnull fillColor;
-/// The object that is used for filling the area below the line. <em>Default</em>: <code>nil</code>.
 @property (nonatomic, strong) id <Fill> _Nullable fill;
-/// The alpha value that is used for filling the line surface. <em>Default</em>: 0.33.
 @property (nonatomic) CGFloat fillAlpha;
-/// Line width of the chart (min = 0.0, max = 10). <em>Default</em>: 1.
 @property (nonatomic) CGFloat lineWidth;
-/// Set to <code>true</code> if the DataSet should be drawn filled (surface), and not just as a line.
-/// Disabling this will give great performance boost.
-/// Please note that this method uses the path clipping for drawing the filled area (with images, gradients and layers).
 @property (nonatomic) BOOL drawFilledEnabled;
 - (id _Nonnull)copyWithZone:(struct _NSZone * _Nullable)zone SWIFT_WARN_UNUSED_RESULT;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
@@ -1392,28 +948,19 @@ SWIFT_CLASS("_TtC6Charts16LineChartDataSet")
 @interface LineChartDataSet : LineRadarChartDataSet
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 - (nonnull instancetype)initWithEntries:(NSArray<ChartDataEntry *> * _Nonnull)entries OBJC_DESIGNATED_INITIALIZER;
-/// Sets the one and ONLY color that should be used for this DataSet.
-/// Internally, this recreates the colors array and adds the specified color.
 - (void)setCircleColor:(UIColor * _Nonnull)color;
-/// If true, drawing circles is enabled
 @property (nonatomic) BOOL drawCirclesEnabled;
-/// Sets a custom FillFormatterProtocol to the chart that handles the position of the filled-line for each DataSet.
-/// Set this to null to use the default logic.
 @property (nonatomic, strong) id <FillFormatter> _Nullable fillFormatter;
 - (id _Nonnull)copyWithZone:(struct _NSZone * _Nullable)zone SWIFT_WARN_UNUSED_RESULT;
 @end
 
 
-
-/// Chart that draws lines, surfaces, circles, …
 SWIFT_CLASS("_TtC6Charts13LineChartView")
 @interface LineChartView : BarLineChartViewBase
 - (nonnull instancetype)initWithLegendEntries:(NSArray<LegendEntry *> * _Nonnull)legendEntries OBJC_DESIGNATED_INITIALIZER;
 - (nullable instancetype)initWithCoder:(NSCoder * _Nonnull)aDecoder OBJC_DESIGNATED_INITIALIZER;
 - (nonnull instancetype)initWithFrame:(CGRect)frame SWIFT_UNAVAILABLE;
 @end
-
-
 
 
 
@@ -1428,16 +975,6 @@ SWIFT_CLASS("_TtC6Charts18LinearGradientFill")
 
 
 
-/// Transformer class that contains all matrices and is responsible for transforming values into pixels on the screen and backwards.
-SWIFT_CLASS("_TtC6Charts11Transformer")
-@interface Transformer : NSObject
-- (nonnull instancetype)init SWIFT_UNAVAILABLE;
-+ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
-@end
-
-
-
-/// Class that contains information about the charts current viewport settings, including offsets, scale & translation levels, …
 SWIFT_CLASS("_TtC6Charts15ViewPortHandler")
 @interface ViewPortHandler : NSObject
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
@@ -1450,18 +987,9 @@ SWIFT_CLASS("_TtC6Charts5XAxis")
 @end
 
 
-/// Class representing the y-axis labels settings and its entries.
-/// Be aware that not all features the YLabels class provides are suitable for the RadarChart.
-/// Customizations that affect the value range of the axis need to be applied before setting data for the chart.
 SWIFT_CLASS("_TtC6Charts5YAxis")
 @interface YAxis : AxisBase
 @end
-
-/// Enum that specifies the axis a DataSet should be plotted against, either Left or Right.
-typedef SWIFT_ENUM(NSInteger, AxisDependency, open) {
-  AxisDependencyLeft = 0,
-  AxisDependencyRight = 1,
-};
 
 #if __has_attribute(external_source_symbol)
 # pragma clang attribute pop

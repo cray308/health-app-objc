@@ -29,7 +29,7 @@
     chartView = createChartView(self, xAxisFormatter, viewModel->legendEntries, 4, 425);
     chartView.leftAxis.valueFormatter = self;
 
-    LineChartRenderer *renderer = [[AreaChartRenderer alloc] initWithView:chartView];
+    ChartRenderer *renderer = [[AreaChartRenderer alloc] initWithView:chartView];
     chartView.renderer = renderer;
     [renderer release];
     return self;

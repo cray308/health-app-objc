@@ -31,26 +31,7 @@ import UIKit
   @objc deinit
   @objc override dynamic public init()
 }
-@objc @_hasMissingDesignatedInitializers public class BarLineScatterCandleBubbleRenderer : ObjectiveC.NSObject, Charts.DataRenderer {
-  @objc final public let viewPortHandler: Charts.ViewPortHandler
-  @objc final public var accessibleChartElements: [UIKit.UIAccessibilityElement]
-  @objc final public let animator: Charts.Animator
-  @objc public func drawData(context: CoreGraphics.CGContext)
-  @objc public func drawValues(context: CoreGraphics.CGContext)
-  @objc public func drawExtras(context: CoreGraphics.CGContext)
-  @objc public func drawHighlighted(context: CoreGraphics.CGContext, indices: [Charts.Highlight])
-  @objc public func initBuffers()
-  @objc public func isDrawingValuesAllowed(dataProvider: Charts.ChartViewBase?) -> Swift.Bool
-  @objc public func createAccessibleHeader(usingChart chart: Charts.ChartViewBase, andData data: Charts.ChartData, withDefaultDescription defaultDescription: Swift.String) -> UIKit.UIAccessibilityElement
-  @objc override dynamic public init()
-  @objc deinit
-}
-@objc @_hasMissingDesignatedInitializers public class Transformer : ObjectiveC.NSObject {
-  @objc deinit
-  @objc override dynamic public init()
-}
-@objc @_hasMissingDesignatedInitializers public class LegendRenderer : ObjectiveC.NSObject, Charts.Renderer {
-  @objc final public let viewPortHandler: Charts.ViewPortHandler
+@objc @_hasMissingDesignatedInitializers public class LegendRenderer : ObjectiveC.NSObject {
   @objc deinit
   @objc override dynamic public init()
 }
@@ -74,16 +55,6 @@ import UIKit
   @objc required dynamic public init()
   @objc override public init(entries: [Charts.ChartDataEntry])
 }
-@objc public class ChartHighlighter : ObjectiveC.NSObject {
-  weak public var chart: Charts.ChartViewBase?
-  public init(chart: Charts.ChartViewBase)
-  public func getHighlight(x: CoreGraphics.CGFloat, y: CoreGraphics.CGFloat) -> Charts.Highlight?
-  public func getValsForTouch(x: CoreGraphics.CGFloat, y: CoreGraphics.CGFloat) -> CoreGraphics.CGPoint
-  public func getHighlight(xValue xVal: Swift.Double, x: CoreGraphics.CGFloat, y: CoreGraphics.CGFloat) -> Charts.Highlight?
-  public func getHighlights(xValue: Swift.Double, x: CoreGraphics.CGFloat, y: CoreGraphics.CGFloat) -> [Charts.Highlight]
-  @objc deinit
-  @objc override dynamic public init()
-}
 extension CGContext {
   public func drawText(_ text: Swift.String, at point: CoreGraphics.CGPoint, align: UIKit.NSTextAlignment, anchor: CoreGraphics.CGPoint = CGPoint(x: 0.5, y: 0.5), angleRadians: CoreGraphics.CGFloat = 0.0, attributes: [Foundation.NSAttributedString.Key : Any]?)
   public func drawText(_ text: Swift.String, at point: CoreGraphics.CGPoint, anchor: CoreGraphics.CGPoint = CGPoint(x: 0.5, y: 0.5), angleRadians: CoreGraphics.CGFloat, attributes: [Foundation.NSAttributedString.Key : Any]?)
@@ -106,18 +77,6 @@ extension CGContext {
   @objc required dynamic public init()
   @objc override public init(entries: [Charts.ChartDataEntry])
   @objc deinit
-}
-@objc @_inheritsConvenienceInitializers public class ChartDataEntryBase : ObjectiveC.NSObject {
-  public var y: Swift.Double
-  @objc override required dynamic public init()
-  public init(y: Swift.Double)
-  @objc override dynamic public var description: Swift.String {
-    @objc get
-  }
-  @objc deinit
-}
-extension ChartDataEntryBase {
-  @objc override dynamic public func isEqual(_ object: Any?) -> Swift.Bool
 }
 @objc public protocol FillFormatter {
   @objc func getFillLinePosition(dataSet: Charts.LineChartDataSet, dataProvider: Charts.LineChartView) -> CoreGraphics.CGFloat
@@ -143,29 +102,16 @@ extension ChartDataEntryBase {
   @objc override public func copy(with zone: ObjectiveC.NSZone? = nil) -> Any
   @objc deinit
 }
-@objc public class ChartDataEntry : Charts.ChartDataEntryBase, Foundation.NSCopying {
-  @objc required dynamic public init()
+@objc @_inheritsConvenienceInitializers public class ChartDataEntry : ObjectiveC.NSObject, Foundation.NSCopying {
+  @objc override required dynamic public init()
   @objc public init(x: Swift.Double, y: Swift.Double)
-  @objc override dynamic public var description: Swift.String {
-    @objc get
-  }
   @objc public func copy(with zone: ObjectiveC.NSZone? = nil) -> Any
   @objc deinit
-  override public init(y: Swift.Double)
 }
 extension ChartDataEntry {
   @objc override dynamic public func isEqual(_ object: Any?) -> Swift.Bool
 }
 @_hasMissingDesignatedInitializers @objc public class YAxis : Charts.AxisBase {
-  @objc public enum AxisDependency : Swift.Int {
-    case left
-    case right
-    public typealias RawValue = Swift.Int
-    public init?(rawValue: Swift.Int)
-    public var rawValue: Swift.Int {
-      get
-    }
-  }
   @objc deinit
 }
 @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc public class DefaultValueFormatter : ObjectiveC.NSObject, Charts.ValueFormatter {
@@ -173,21 +119,8 @@ extension ChartDataEntry {
   @objc public func stringForValue(_ value: Swift.Double, entry: Charts.ChartDataEntry, dataSetIndex: Swift.Int, viewPortHandler: Charts.ViewPortHandler?) -> Swift.String
   @objc deinit
 }
-@objc @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers public class LineRadarRenderer : Charts.LineScatterCandleRadarRenderer {
-  @objc deinit
-}
 @objc public protocol ValueFormatter : AnyObject {
   @objc func stringForValue(_ value: Swift.Double, entry: Charts.ChartDataEntry, dataSetIndex: Swift.Int, viewPortHandler: Charts.ViewPortHandler?) -> Swift.String
-}
-@objc public enum ChartDataSetRounding : Swift.Int {
-  case up = 0
-  case down = 1
-  case closest = 2
-  public typealias RawValue = Swift.Int
-  public init?(rawValue: Swift.Int)
-  public var rawValue: Swift.Int {
-    get
-  }
 }
 @objc @_inheritsConvenienceInitializers public class ChartDataSet : ObjectiveC.NSObject, Foundation.NSCopying {
   @objc required override dynamic public init()
@@ -197,36 +130,9 @@ extension ChartDataEntry {
   public func calcMinMax()
   public func calcMinMaxX(entry e: Charts.ChartDataEntry)
   public func calcMinMaxY(entry e: Charts.ChartDataEntry)
-  public var yMin: Swift.Double {
-    get
-  }
-  public var yMax: Swift.Double {
-    get
-  }
-  public var xMin: Swift.Double {
-    get
-  }
-  public var xMax: Swift.Double {
-    get
-  }
-  @available(*, deprecated, message: "Use `count` instead")
-  public var entryCount: Swift.Int {
-    get
-  }
-  @available(*, deprecated, message: "Use `subscript(index:)` instead.")
-  public func entryForIndex(_ i: Swift.Int) -> Charts.ChartDataEntry?
-  public func entryForXValue(_ xValue: Swift.Double, closestToY yValue: Swift.Double, rounding: Charts.ChartDataSetRounding) -> Charts.ChartDataEntry?
   public func entryForXValue(_ xValue: Swift.Double, closestToY yValue: Swift.Double) -> Charts.ChartDataEntry?
   public func entriesForXValue(_ xValue: Swift.Double) -> [Charts.ChartDataEntry]
-  public func entryIndex(x xValue: Swift.Double, closestToY yValue: Swift.Double, rounding: Charts.ChartDataSetRounding) -> Swift.Int
-  @available(*, deprecated, message: "Use `firstIndex(of:)` or `lastIndex(of:)`")
-  public func entryIndex(entry e: Charts.ChartDataEntry) -> Swift.Int
   @objc public var colors: [UIKit.UIColor]
-  public var valueFormatter: Charts.ValueFormatter {
-    get
-    set
-  }
-  public var drawValuesEnabled: Swift.Bool
   @objc public func copy(with zone: ObjectiveC.NSZone? = nil) -> Any
   @objc deinit
 }
@@ -272,53 +178,15 @@ extension ChartDataSet : Swift.RangeReplaceableCollection {
   @objc public var legend: Charts.Legend {
     @objc get
   }
-  public var legendRenderer: Charts.LegendRenderer {
-    get
-    set
-  }
-  @objc public var renderer: Charts.DataRenderer?
+  @objc public var renderer: Charts.ChartRenderer?
   @objc override dynamic public init(frame: CoreGraphics.CGRect)
   @objc required dynamic public init?(coder aDecoder: Foundation.NSCoder)
   @objc deinit
   @objc public func notifyDataSetChanged()
   @objc override dynamic public func draw(_ rect: CoreGraphics.CGRect)
   public func valuesToHighlight() -> Swift.Bool
-  public func highlightValue(_ highlight: Charts.Highlight?)
-  public var lastHighlighted: Charts.Highlight?
   @objc public func animate(xAxisDuration: Foundation.TimeInterval)
-  public var chartYMax: Swift.Double {
-    get
-  }
-  public var chartYMin: Swift.Double {
-    get
-  }
-  public var chartXMax: Swift.Double {
-    get
-  }
   @objc override dynamic public func observeValue(forKeyPath keyPath: Swift.String?, of object: Any?, change: [Foundation.NSKeyValueChangeKey : Any]?, context: Swift.UnsafeMutableRawPointer?)
-}
-@objc public protocol DataRenderer : Charts.Renderer {
-  @objc var accessibleChartElements: [UIKit.UIAccessibilityElement] { get }
-  @objc var animator: Charts.Animator { get }
-  @objc func drawData(context: CoreGraphics.CGContext)
-  @objc func drawValues(context: CoreGraphics.CGContext)
-  @objc func drawExtras(context: CoreGraphics.CGContext)
-  @objc func drawHighlighted(context: CoreGraphics.CGContext, indices: [Charts.Highlight])
-  @objc func initBuffers()
-  @objc func isDrawingValuesAllowed(dataProvider: Charts.ChartViewBase?) -> Swift.Bool
-  @objc func createAccessibleHeader(usingChart chart: Charts.ChartViewBase, andData data: Charts.ChartData, withDefaultDescription defaultDescription: Swift.String) -> UIKit.UIAccessibilityElement
-}
-@objc @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers public class Highlight : ObjectiveC.NSObject {
-  @objc override dynamic public var description: Swift.String {
-    @objc get
-  }
-  @objc deinit
-}
-extension Highlight {
-  @objc override dynamic public func isEqual(_ object: Any?) -> Swift.Bool
-}
-@objc public protocol Renderer {
-  @objc var viewPortHandler: Charts.ViewPortHandler { get }
 }
 @objc public class AreaChartFormatter : ObjectiveC.NSObject, Charts.FillFormatter {
   @objc public init(boundaryDataSet: Charts.LineChartDataSet)
@@ -326,7 +194,7 @@ extension Highlight {
   @objc deinit
   @objc override dynamic public init()
 }
-@_hasMissingDesignatedInitializers @objc public class AreaChartRenderer : Charts.LineChartRenderer {
+@_hasMissingDesignatedInitializers @objc public class AreaChartRenderer : Charts.ChartRenderer {
   @objc public init(view: Charts.LineChartView)
   @objc deinit
 }
@@ -350,27 +218,6 @@ extension Highlight {
   public func stopDeceleration()
   @objc override dynamic public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIKit.UIGestureRecognizer) -> Swift.Bool
   @objc public func gestureRecognizer(_ gestureRecognizer: UIKit.UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIKit.UIGestureRecognizer) -> Swift.Bool
-  public func zoom(scaleX: CoreGraphics.CGFloat, scaleY: CoreGraphics.CGFloat, x: CoreGraphics.CGFloat, y: CoreGraphics.CGFloat)
-  public func getDataSetByTouchPoint(point pt: CoreGraphics.CGPoint) -> Charts.BarLineScatterCandleBubbleChartDataSet?
-  public var isFullyZoomedOut: Swift.Bool {
-    get
-  }
-  public var hasNoDragOffset: Swift.Bool {
-    get
-  }
-  override public var chartYMax: Swift.Double {
-    get
-  }
-  override public var chartYMin: Swift.Double {
-    get
-  }
-  public func getTransformer(forAxis axis: Charts.YAxis.AxisDependency) -> Charts.Transformer
-  public var lowestVisibleX: Swift.Double {
-    get
-  }
-  public var highestVisibleX: Swift.Double {
-    get
-  }
 }
 @objc @_inheritsConvenienceInitializers public class LineScatterCandleRadarChartDataSet : Charts.BarLineScatterCandleBubbleChartDataSet {
   @objc override public func copy(with zone: ObjectiveC.NSZone? = nil) -> Any
@@ -397,11 +244,8 @@ extension Highlight {
 @objc public protocol AxisValueFormatter : AnyObject {
   @objc func stringForValue(_ value: Swift.Double, axis: Charts.AxisBase?) -> Swift.String
 }
-@objc @_hasMissingDesignatedInitializers public class LineChartRenderer : Charts.LineRadarRenderer {
-  @objc override public func drawData(context: CoreGraphics.CGContext)
-  @objc override public func drawValues(context: CoreGraphics.CGContext)
-  @objc override public func drawExtras(context: CoreGraphics.CGContext)
-  @objc override public func drawHighlighted(context: CoreGraphics.CGContext, indices: [Charts.Highlight])
+@_hasMissingDesignatedInitializers @objc public class ChartRenderer : ObjectiveC.NSObject {
+  @objc override dynamic public init()
   @objc deinit
 }
 @objc @_inheritsConvenienceInitializers public class ChartData : ObjectiveC.NSObject, Swift.ExpressibleByArrayLiteral {
@@ -451,12 +295,3 @@ extension ChartData {
     get
   }
 }
-@objc @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers public class LineScatterCandleRadarRenderer : Charts.BarLineScatterCandleBubbleRenderer {
-  @objc deinit
-}
-extension Charts.YAxis.AxisDependency : Swift.Equatable {}
-extension Charts.YAxis.AxisDependency : Swift.Hashable {}
-extension Charts.YAxis.AxisDependency : Swift.RawRepresentable {}
-extension Charts.ChartDataSetRounding : Swift.Equatable {}
-extension Charts.ChartDataSetRounding : Swift.Hashable {}
-extension Charts.ChartDataSetRounding : Swift.RawRepresentable {}
