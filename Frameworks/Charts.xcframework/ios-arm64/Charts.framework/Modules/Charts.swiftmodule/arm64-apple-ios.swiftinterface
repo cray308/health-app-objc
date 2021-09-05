@@ -6,10 +6,7 @@ import CoreGraphics
 import QuartzCore
 import Swift
 import UIKit
-@objc @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers public class Animator : ObjectiveC.NSObject {
-  @objc deinit
-}
-@_hasMissingDesignatedInitializers @objc public class ViewPortHandler : ObjectiveC.NSObject {
+@objc @_hasMissingDesignatedInitializers public class ViewPortHandler : ObjectiveC.NSObject {
   @objc deinit
   @objc override dynamic public init()
 }
@@ -59,7 +56,7 @@ extension CGContext {
   public func drawText(_ text: Swift.String, at point: CoreGraphics.CGPoint, align: UIKit.NSTextAlignment, anchor: CoreGraphics.CGPoint = CGPoint(x: 0.5, y: 0.5), angleRadians: CoreGraphics.CGFloat = 0.0, attributes: [Foundation.NSAttributedString.Key : Any]?)
   public func drawText(_ text: Swift.String, at point: CoreGraphics.CGPoint, anchor: CoreGraphics.CGPoint = CGPoint(x: 0.5, y: 0.5), angleRadians: CoreGraphics.CGFloat, attributes: [Foundation.NSAttributedString.Key : Any]?)
 }
-@_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc public class ComponentBase : ObjectiveC.NSObject {
+@objc @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers public class ComponentBase : ObjectiveC.NSObject {
   @objc public var enabled: Swift.Bool
   @objc deinit
 }
@@ -69,7 +66,7 @@ extension CGContext {
   @objc public init(limit: Swift.Double)
   @objc deinit
 }
-@_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc public class Legend : Charts.ComponentBase {
+@objc @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers public class Legend : Charts.ComponentBase {
   @objc deinit
 }
 @objc @_inheritsConvenienceInitializers public class BarLineScatterCandleBubbleChartDataSet : Charts.ChartDataSet {
@@ -87,7 +84,7 @@ extension CGContext {
   required public init(arrayLiteral elements: Charts.ChartDataSet...)
   @objc deinit
 }
-@_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc public class XAxis : Charts.AxisBase {
+@objc @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers public class XAxis : Charts.AxisBase {
   @objc deinit
 }
 @objc @_inheritsConvenienceInitializers public class LineChartDataSet : Charts.LineRadarChartDataSet {
@@ -111,10 +108,10 @@ extension CGContext {
 extension ChartDataEntry {
   @objc override dynamic public func isEqual(_ object: Any?) -> Swift.Bool
 }
-@_hasMissingDesignatedInitializers @objc public class YAxis : Charts.AxisBase {
+@objc @_hasMissingDesignatedInitializers public class YAxis : Charts.AxisBase {
   @objc deinit
 }
-@_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc public class DefaultValueFormatter : ObjectiveC.NSObject, Charts.ValueFormatter {
+@objc @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers public class DefaultValueFormatter : ObjectiveC.NSObject, Charts.ValueFormatter {
   @objc public init(formatter: Foundation.NumberFormatter)
   @objc public func stringForValue(_ value: Swift.Double, entry: Charts.ChartDataEntry, dataSetIndex: Swift.Int, viewPortHandler: Charts.ViewPortHandler?) -> Swift.String
   @objc deinit
@@ -194,7 +191,7 @@ extension ChartDataSet : Swift.RangeReplaceableCollection {
   @objc deinit
   @objc override dynamic public init()
 }
-@_hasMissingDesignatedInitializers @objc public class AreaChartRenderer : Charts.ChartRenderer {
+@objc @_hasMissingDesignatedInitializers public class AreaChartRenderer : Charts.ChartRenderer {
   @objc public init(view: Charts.LineChartView)
   @objc deinit
 }
@@ -225,7 +222,7 @@ extension ChartDataSet : Swift.RangeReplaceableCollection {
   @objc override public init(entries: [Charts.ChartDataEntry])
   @objc deinit
 }
-@_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc public class AxisBase : Charts.ComponentBase {
+@objc @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers public class AxisBase : Charts.ComponentBase {
   @objc public var valueFormatter: Charts.AxisValueFormatter {
     @objc get
     @objc set
@@ -244,7 +241,7 @@ extension ChartDataSet : Swift.RangeReplaceableCollection {
 @objc public protocol AxisValueFormatter : AnyObject {
   @objc func stringForValue(_ value: Swift.Double, axis: Charts.AxisBase?) -> Swift.String
 }
-@_hasMissingDesignatedInitializers @objc public class ChartRenderer : ObjectiveC.NSObject {
+@objc @_hasMissingDesignatedInitializers public class ChartRenderer : ObjectiveC.NSObject {
   @objc override dynamic public init()
   @objc deinit
 }
