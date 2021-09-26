@@ -88,7 +88,9 @@ typedef struct {
     unsigned char type;
     signed char day;
     unsigned index;
-    time_t startTime, stopTime;
+    time_t startTime;
+    int16_t duration;
+    short *newLifts;
     CFStringRef title;
     ExerciseGroup *group;
     ExerciseEntry *entry;
@@ -104,14 +106,26 @@ typedef struct {
     } savedInfo;
 } Workout;
 
+typedef struct {
+    const schar day;
+    uchar type;
+    int index;
+    int sets;
+    int reps;
+    int weight;
+} WorkoutParams;
+
 void exerciseManager_setWeeklyWorkoutNames(unsigned char plan, int week, CFStringRef *names);
 Workout *exerciseManager_getWeeklyWorkoutAtIndex(unsigned char plan, int week, int index);
 Array_str *exerciseManager_getWorkoutNamesForType(unsigned char type);
-Workout *exerciseManager_getWorkoutFromLibrary(unsigned char type,
-                                               int index, int sets, int reps, int weight);
+Workout *exerciseManager_getWorkoutFromLibrary(WorkoutParams *params);
 
 CFStringRef exerciseGroup_createHeader(ExerciseGroup *g);
 CFStringRef exerciseEntry_createSetsTitle(ExerciseEntry *e);
 CFStringRef exerciseEntry_createTitle(ExerciseEntry *e);
+
+void workoutParams_init(WorkoutParams *this, schar day);
+void workout_setDuration(Workout *w);
+void initWorkoutStrings(void);
 
 #endif /* Exercise_h */

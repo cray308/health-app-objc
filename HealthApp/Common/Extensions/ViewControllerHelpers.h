@@ -13,6 +13,19 @@
 
 gen_uset_headers(char, unsigned short)
 
+typedef struct {
+    USet_char *set;
+    id button;
+    int count;
+    struct ChildValidator {
+        id inputView;
+        short minVal;
+        short maxVal;
+        short result;
+        bool valid;
+    } children[4];
+} TextValidator;
+
 struct AnchorNames {
     const char *top;
     const char *bottom;
@@ -26,16 +39,20 @@ typedef struct {
     CGFloat top, left, bottom, right;
 } HAEdgeInsets;
 
-typedef void (^AlertCallback)(void);
+typedef enum {
+    StatusViewStateDisabled = 0,
+    StatusViewStateActive = 1,
+    StatusViewStateFinished = 3
+} StatusViewState;
 
 extern struct AnchorNames anchors;
 
-void createToolbar(id target, SEL doneSelector, id *fields);
+id createToolbar(id target, SEL doneSelector);
 void setNavButton(id navItem, bool left, id button, CGFloat totalWidth);
 id createDivider(void);
 USet_char *createNumberCharacterSet(void);
-bool checkTextfield(id field, CFRange range, CFStringRef replacement, USet_char *set, id button,
-                    id *fields, int count, short *maxes, short *results, bool *valid);
+void resetInputChild(struct ChildValidator *child, short value);
+bool checkInput(id field, CFRange range, CFStringRef replacement, TextValidator *validator);
 
 id createVCWithDelegate(const char *name, void *delegate);
 id getFirstVC(id navVC);
@@ -48,7 +65,7 @@ void dismissPresentedVC(id presenter);
 id getRootView(id vc);
 void addSubview(id view, id subview);
 id createAlertController(CFStringRef title, CFStringRef message);
-id createAlertAction(CFStringRef title, int style, AlertCallback handler);
+id createAlertAction(CFStringRef title, int style, CallbackBlock handler);
 void addAlertAction(id ctrl, id action);
 
 id getAnchor(id view, const char *name);
@@ -59,16 +76,16 @@ id createStackView(id *subviews, int count, int axis, CGFloat spacing,
                    int distribution, HAEdgeInsets margins);
 id createScrollView(void);
 id createLabel(CFStringRef text, id style, int alignment);
-id createTextfield(id delegate, CFStringRef text, CFStringRef placeholder,
-                   int alignment, int keyboard);
-id createButton(CFStringRef title, id color, id disabledColor, id style,
-                id background, bool rounded, bool enabled, int tag, id target, SEL action);
+id createTextfield(id delegate, CFStringRef text, int alignment, int keyboard);
+id createButton(CFStringRef title, id color, id style, id background,
+                bool rounded, bool enabled, int tag, id target, SEL action);
 id createSegmentedControl(CFStringRef *items, int count, int startIndex, id target, SEL action);
 
 void enableButton(id view, bool enabled);
 void activateConstraints(id *constraints, int count);
 void setTag(id view, int tag);
 void setBackground(id view, id color);
+void setTintColor(id view, id color);
 void setLabelText(id view, CFStringRef text);
 void setLabelFontWithStyle(id view, id style);
 void setLabelFontWithSize(id view, CGFloat size);

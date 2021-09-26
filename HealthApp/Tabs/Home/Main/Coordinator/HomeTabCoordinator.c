@@ -32,9 +32,9 @@ static void navigateToAddWorkout(HomeTabCoordinator *this, bool dismissVC, Worko
 }
 
 static void showConfetti(id vc) {
-    id ctrl = createAlertController(CFSTR("Nicely done!"),
-                                    CFSTR("Great job meeting your workout goal this week."));
-    addAlertAction(ctrl, createAlertAction(CFSTR("OK"), 0, NULL));
+    id ctrl = createAlertController(localize(CFSTR("homeAlertTitle")),
+                                    localize(CFSTR("homeAlertMessage")));
+    addAlertAction(ctrl, createAlertAction(localize(CFSTR("ok")), 0, NULL));
 
     id view = getRootView(vc);
     CGRect frame;
@@ -61,7 +61,6 @@ void homeCoordinator_didFinishAddingWorkout(HomeTabCoordinator *this, int totalC
     objc_singleArg(homeVC, sel_getUid("updateWorkoutsList"));
 
     ((id(*)(id,SEL,bool))objc_msgSend)(this->navVC, sel_getUid("popViewControllerAnimated:"), true);
-    addWorkoutCoordinator_free(this->childCoordinator);
     this->childCoordinator = NULL;
 
     if (homeViewModel_shouldShowConfetti(&this->viewModel, totalCompletedWorkouts)) {
@@ -89,7 +88,8 @@ void homeCoordinator_addWorkoutFromCustomButton(HomeTabCoordinator *this, int in
             type = WorkoutTypeHIC;
             break;
         case CustomWorkoutIndexTestMax: ;
-            Workout *w = exerciseManager_getWorkoutFromLibrary(WorkoutTypeStrength, 2, 1, 1, 100);
+            WorkoutParams params = {-1, WorkoutTypeStrength, 2, 1, 1, 100};
+            Workout *w = exerciseManager_getWorkoutFromLibrary(&params);
             if (w)
                 navigateToAddWorkout(this, false, w);
             return;
@@ -112,10 +112,8 @@ void homeCoordinator_addWorkoutFromCustomButton(HomeTabCoordinator *this, int in
     presentModalVC(getFirstVC(this->navVC), modal);
 }
 
-void homeCoordinator_finishedSettingUpCustomWorkout(HomeTabCoordinator *this, unsigned char type,
-                                                    int index, short *params) {
-    Workout *w = exerciseManager_getWorkoutFromLibrary(type, index,
-                                                       params[0], params[1], params[2]);
+void homeCoordinator_finishedSettingUpCustomWorkout(HomeTabCoordinator *this, void *params) {
+    Workout *w = exerciseManager_getWorkoutFromLibrary(params);
     if (w)
         navigateToAddWorkout(this, true, w);
 }
@@ -124,7 +122,6 @@ void homeCoordinator_checkForChildCoordinator(HomeTabCoordinator *this) {
     AddWorkoutCoordinator *child = this->childCoordinator;
     if (child) {
         addWorkoutCoordinator_stopWorkoutFromBackButtonPress(child);
-        addWorkoutCoordinator_free(this->childCoordinator);
         this->childCoordinator = NULL;
     }
 }

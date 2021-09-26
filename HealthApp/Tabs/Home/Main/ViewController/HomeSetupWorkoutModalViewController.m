@@ -6,41 +6,37 @@
 //
 
 #import "HomeSetupWorkoutModalViewController.h"
+#include "HomeTabCoordinator.h"
 #include "ViewControllerHelpers.h"
+#include "InputView.h"
 
 @interface HomeSetupWorkoutModalViewController() {
-    USet_char *validChars;
     HomeTabCoordinator *delegate;
     Array_str *names;
-    int index;
-    uchar type;
-    UIButton *submitButton;
     UITextField *workoutTextField;
-    UITextField *fields[3];
-    bool validInput[3];
-    short inputs[3];
-    short maxes[3];
+    TextValidator validator;
+    WorkoutParams output;
 }
 @end
 
 @implementation HomeSetupWorkoutModalViewController
-- (id) initWithDelegate: (HomeTabCoordinator *)delegate type: (uchar)type names: (Array_str *)names {
+- (id) initWithDelegate: (void *)delegate type: (uchar)type names: (Array_str *)names {
     if (!(self = [super initWithNibName:nil bundle:nil])) return nil;
     self->delegate = delegate;
     self->names = names;
-    self->type = type;
+    memcpy(&validator, &(TextValidator){
+        .children = {[0 ... 3] = {.minVal = 1}}
+    }, sizeof(TextValidator));
+    workoutParams_init(&output, -1);
+    output.type = type;
     return self;
 }
 
 - (void) dealloc {
-    if (validChars)
-        uset_free(char, validChars);
+    if (validator.set)
+        uset_free(char, validator.set);
     array_free(str, names);
     [workoutTextField release];
-    for (int i = 0; i < 3; ++i) {
-        if (fields[i])
-            [fields[i] release];
-    }
     [super dealloc];
 }
 
@@ -48,8 +44,9 @@
     [super viewDidLoad];
     setBackground(self.view, UIColor.systemGroupedBackgroundColor);
 
-    workoutTextField = createTextfield(self, names->arr[0], NULL, NSTextAlignmentCenter, 0);
-    UILabel *workoutLabel = createLabel(CFSTR("Choose workout"), UIFontTextStyleFootnote, 4);
+    workoutTextField = createTextfield(nil, names->arr[0], NSTextAlignmentCenter, 0);
+    UILabel *workoutLabel = createLabel(localize(CFSTR("setupWorkoutPickerTitle")),
+                                        UIFontTextStyleFootnote, 4);
 
     UIPickerView *workoutPicker = [[UIPickerView alloc] init];
     workoutPicker.delegate = self;
@@ -60,71 +57,53 @@
     [workoutContainer addSubview:workoutTextField];
     [self.view addSubview:workoutContainer];
 
-    submitButton = createButton(CFSTR("Go"), UIColor.systemBlueColor, UIColor.systemGrayColor,
-                                nil, UIColor.secondarySystemBackgroundColor, false, false, 0,
-                                self, @selector(didPressFinish));
-    [self.view addSubview:submitButton];
+    UIButton *cancelButton = createButton(localize(CFSTR("cancel")), UIColor.systemBlueColor,
+                                          nil, nil, false, true, 0, self, @selector(pressedCancel));
+    UIButton *submitButton = createButton(localize(CFSTR("go")), UIColor.systemBlueColor, nil, nil,
+                                          false, false, 0, self, @selector(didPressFinish));
+    setNavButton(self.navigationItem, true, cancelButton, self.view.frame.size.width);
+    setNavButton(self.navigationItem, false, submitButton, self.view.frame.size.width);
+    enableButton(submitButton, false);
+    validator.button = submitButton;
 
-    CFStringRef titles[3] = {0};
+    short maxes[] = {5, 5, 100};
+    CFStringRef titles[] = {CFSTR("setupWorkoutSets"), CFSTR("setupWorkoutReps"), NULL};
 
-    switch (type) {
+    switch (output.type) {
         case WorkoutTypeStrength:
-            titles[0] = CFSTR("Sets");
-            titles[1] = CFSTR("Reps");
-            titles[2] = CFSTR("Max Weight Percentage");
-            maxes[0] = 5;
-            maxes[1] = 5;
-            maxes[2] = 100;
+            titles[2] = CFSTR("setupWorkoutMaxWeight");
             break;
-
         case WorkoutTypeSE:
-            titles[0] = CFSTR("Sets");
-            titles[1] = CFSTR("Reps");
-            validInput[2] = true;
-            inputs[2] = 1;
             maxes[0] = 3;
             maxes[1] = 50;
             break;
-
         case WorkoutTypeEndurance:
-            titles[1] = CFSTR("Duration (mins)");
-            validInput[0] = validInput[2] = true;
-            inputs[0] = inputs[2] = 1;
+            titles[0] = NULL;
+            titles[1] = CFSTR("setupWorkoutDuration");
             maxes[1] = 180;
             break;
-
-        case WorkoutTypeHIC:
-            memset(validInput, true, 3 * sizeof(bool));
-            memset(inputs, 1, 3 * sizeof(short));
+        default:
+            titles[0] = titles[1] = NULL;
             enableButton(submitButton, true);
-            break;
     }
 
-    UIStackView *textFieldStack = createStackView(NULL, 0, 1, 20, 0, (HAEdgeInsets){0});
+    UIToolbar *toolbar = createToolbar(self, @selector(dismissKeyboard));
+    UIStackView *textFieldStack = createStackView(NULL, 0, 1, 0, 0, (HAEdgeInsets){0});
     [self.view addSubview:textFieldStack];
-
-    bool createCharSet = false;
 
     for (int i = 0; i < 3; ++i) {
         if (!titles[i]) continue;
-        createCharSet = true;
-        UILabel *label = createLabel(titles[i], UIFontTextStyleBody, 4);
-        fields[i] = createTextfield(self, NULL, NULL, 0, 4);
-        createToolbar(self, @selector(dismissKeyboard), (id []){fields[i], nil});
-        UIStackView *hStack = createStackView((id []){label, fields[i]}, 2, 0, 5, 1,
-                                              (HAEdgeInsets){4, 8, 4, 8});
-        [textFieldStack addArrangedSubview:hStack];
-        [label release];
-        [hStack release];
+        InputView *v = [[InputView alloc] initWithDelegate:self fieldHint:localize(titles[i])
+                                                       tag:validator.count min:1 max:maxes[i]];
+        validator.children[validator.count].inputView = v;
+        validator.children[validator.count++].maxVal = maxes[i];
+        v->field.inputAccessoryView = toolbar;
+        [textFieldStack addArrangedSubview:v];
+        [v release];
     }
 
-    if (createCharSet)
-        validChars = createNumberCharacterSet();
-
-    UIButton *cancelButton = createButton(CFSTR("Cancel"), UIColor.systemBlueColor,
-                                          UIColor.systemGrayColor, nil, nil, false, true, 0,
-                                          self, @selector(pressedCancel));
-    setNavButton(self.navigationItem, true, cancelButton, self.view.frame.size.width);
+    if (validator.count)
+        validator.set = createNumberCharacterSet();
 
     UILayoutGuide *guide = self.view.safeAreaLayoutGuide;
     activateConstraints((id []){
@@ -146,24 +125,32 @@
         [textFieldStack.leadingAnchor constraintEqualToAnchor:guide.leadingAnchor],
         [textFieldStack.trailingAnchor constraintEqualToAnchor:guide.trailingAnchor],
         [textFieldStack.topAnchor constraintEqualToAnchor:workoutContainer.bottomAnchor
-                                                 constant:20],
+                                                 constant:20]
+    }, 15);
 
-        [submitButton.leadingAnchor constraintEqualToAnchor:guide.leadingAnchor],
-        [submitButton.trailingAnchor constraintEqualToAnchor:guide.trailingAnchor],
-        [submitButton.topAnchor constraintEqualToAnchor:textFieldStack.bottomAnchor constant:20],
-        [submitButton.heightAnchor constraintEqualToConstant:40]
-    }, 19);
-
-    createToolbar(self, @selector(dismissKeyboard), (id []){workoutTextField, nil});
+    workoutTextField.inputAccessoryView = toolbar;
 
     [workoutLabel release];
     [workoutContainer release];
     [textFieldStack release];
     [workoutPicker release];
+    [toolbar release];
 }
 
 - (void) didPressFinish {
-    homeCoordinator_finishedSettingUpCustomWorkout(delegate, type, index, inputs);
+    switch (output.type) {
+        case WorkoutTypeStrength:
+            output.weight = validator.children[2].result;
+        case WorkoutTypeSE:
+            output.sets = validator.children[0].result;
+            output.reps = validator.children[1].result;
+            break;
+
+        case WorkoutTypeEndurance:
+            output.reps = validator.children[0].result;
+        default: ;
+    }
+    homeCoordinator_finishedSettingUpCustomWorkout(delegate, &output);
 }
 
 - (void) pressedCancel {
@@ -171,24 +158,19 @@
     [navVC.viewControllers[0] dismissViewControllerAnimated:true completion:nil];
 }
 
-- (void) dismissKeyboard {
-    [self.view endEditing:true];
-}
+- (void) dismissKeyboard { [self.view endEditing:true]; }
 
 - (BOOL) textField: (UITextField *)textField
 shouldChangeCharactersInRange: (NSRange)range replacementString: (NSString *)string {
-    return checkTextfield(textField, (CFRange){range.location, range.length},
-                          (__bridge CFStringRef) string, validChars, submitButton, fields, 3,
-                          maxes, inputs, validInput);
+    return checkInput(textField, (CFRange){range.location, range.length},
+                      (__bridge CFStringRef) string, &validator);
 }
 
 - (BOOL) textFieldShouldReturn: (UITextField *)textField {
     return [textField resignFirstResponder];
 }
 
-- (NSInteger) numberOfComponentsInPickerView: (UIPickerView *)pickerView {
-    return 1;
-}
+- (NSInteger) numberOfComponentsInPickerView: (UIPickerView *)pickerView { return 1; }
 
 - (NSInteger) pickerView: (UIPickerView *)pickerView numberOfRowsInComponent: (NSInteger)component {
     return names->size;
@@ -201,7 +183,7 @@ shouldChangeCharactersInRange: (NSRange)range replacementString: (NSString *)str
 
 - (void) pickerView: (UIPickerView *)pickerView
        didSelectRow: (NSInteger)row inComponent: (NSInteger)component {
-    index = (int) row;
-    setLabelText(workoutTextField, names->arr[index]);
+    output.index = (int) row;
+    setLabelText(workoutTextField, names->arr[output.index]);
 }
 @end

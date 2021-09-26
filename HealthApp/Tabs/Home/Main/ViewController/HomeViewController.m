@@ -9,7 +9,7 @@
 #include "ViewControllerHelpers.h"
 #include "AppCoordinator.h"
 #include "AppUserData.h"
-#import "DayWorkoutButton.h"
+#import "StatusButton.h"
 
 @interface HomeViewController() {
     HomeViewModel *viewModel;
@@ -30,27 +30,26 @@
 - (void) viewDidLoad {
     [super viewDidLoad];
     setBackground(self.view, UIColor.systemGroupedBackgroundColor);
-    self.navigationItem.title = @"Home";
+    self.navigationItem.title = (__bridge NSString*) localize(CFSTR("titles0"));
 
     greetingLabel = createLabel(NULL, UIFontTextStyleTitle1, NSTextAlignmentCenter);
-    weeklyWorkoutsStack = createStackView(NULL, 0, 1, 5, 0, (HAEdgeInsets){5, 8, 5, 8});
+    weeklyWorkoutsStack = createStackView(NULL, 0, 1, 0, 0, (HAEdgeInsets){5, 8, 5, 8});
     [weeklyWorkoutsStack setHidden:true];
 
     UIView *divider = createDivider();
-    UILabel *headerLabel = createLabel(CFSTR("Add Custom Workout"), UIFontTextStyleTitle2, 4);
-    UIStackView *customWorkoutStack = createStackView((id []){divider, headerLabel}, 2, 1, 20, 0,
+    UILabel *headerLabel = createLabel(localize(CFSTR("customWorkoutsHeader")),
+                                       UIFontTextStyleTitle2, 4);
+    UIStackView *customWorkoutStack = createStackView((id []){divider, headerLabel}, 2, 1, 4, 0,
                                                       (HAEdgeInsets){5, 8, 5, 8});
 
-    CFStringRef buttonTitles[] = {
-        CFSTR("Test Max"), CFSTR("Endurance"), CFSTR("Strength"), CFSTR("SE"), CFSTR("HIC")
-    };
     for (int i = 0; i < 5; ++i) {
-        UIButton *btn = createButton(buttonTitles[i], UIColor.labelColor,
-                                     UIColor.secondaryLabelColor, UIFontTextStyleHeadline,
-                                     UIColor.secondarySystemGroupedBackgroundColor, true, true, i,
-                                     self, @selector(customWorkoutButtonTapped:));
-        [btn.heightAnchor constraintEqualToConstant:50].active = true;
+        CFStringRef key = CFStringCreateWithFormat(NULL, NULL, CFSTR("homeWorkoutType%d"), i);
+        UIView *btn = [[StatusButton alloc]
+                       initWithButtonText:localize(key) hideHeader:true hideBox:true tag:i
+                       target:self action:@selector(customWorkoutButtonTapped:)];
         [customWorkoutStack addArrangedSubview:btn];
+        CFRelease(key);
+        [btn release];
     }
 
     id subviews[] = {greetingLabel, weeklyWorkoutsStack, customWorkoutStack};
@@ -109,17 +108,22 @@
     }
 
     UIView *divider = createDivider();
-    UILabel *headerLabel = createLabel(CFSTR("Workouts this week"), UIFontTextStyleTitle2, 4);
+    UILabel *headerLabel = createLabel(localize(CFSTR("weeklyWorkoutsHeader")),
+                                       UIFontTextStyleTitle2, 4);
     [weeklyWorkoutsStack addArrangedSubview:headerLabel];
     [weeklyWorkoutsStack addArrangedSubview:divider];
 
     for (int i = 0; i < 7; ++i) {
         if (!viewModel->workoutNames[i]) continue;
-        UIView *dayBtn = [[DayWorkoutButton alloc]
-                          initWithTitle:viewModel->workoutNames[i] day:viewModel->weekdays[i] tag:i
-                          target:self action:@selector(workoutButtonTapped:)];
-        [weeklyWorkoutsStack addArrangedSubview:dayBtn];
-        [dayBtn release];
+        CFStringRef key = CFStringCreateWithFormat(NULL, NULL, CFSTR("dayNames%d"), i);
+        StatusButton *btn = [[StatusButton alloc]
+                             initWithButtonText:NULL hideHeader:false hideBox:false tag:i
+                             target:self action:@selector(workoutButtonTapped:)];
+        [btn updateWithLabelText:localize(key) buttonText:viewModel->workoutNames[i]
+                           state:StatusViewStateDisabled enable:true];
+        [weeklyWorkoutsStack addArrangedSubview:btn];
+        [btn release];
+        CFRelease(key);
     }
 
     activateConstraints((id []){[headerLabel.heightAnchor constraintEqualToConstant:40]}, 1);
@@ -137,10 +141,9 @@
     const unsigned char completed = appUserDataShared->completedWorkouts;
 
     for (int i = 2; i < count; ++i) {
-        DayWorkoutButton *v = (DayWorkoutButton *) CFArrayGetValueAtIndex(subviews, i);
-        bool enabled = !(completed & (1 << (int) v.tag));
-        enableButton(v->button, enabled);
-        setBackground(v->checkbox, enabled ? UIColor.systemGrayColor : UIColor.systemGreenColor);
+        StatusButton *v = (StatusButton *) CFArrayGetValueAtIndex(subviews, i);
+        bool enable = !(completed & (1 << (int) v.tag));
+        [v updateState:enable ? StatusViewStateDisabled : StatusViewStateFinished enable:enable];
     }
 }
 
@@ -153,9 +156,6 @@
 }
 
 - (void) updateGreeting {
-    CFStringRef greeting = CFStringCreateWithFormat(NULL, NULL, CFSTR("Good %s!"),
-                                                    viewModel->timeNames[viewModel->timeOfDay]);
-    setLabelText(greetingLabel, greeting);
-    CFRelease(greeting);
+    setLabelText(greetingLabel, viewModel->timeNames[viewModel->timeOfDay]);
 }
 @end

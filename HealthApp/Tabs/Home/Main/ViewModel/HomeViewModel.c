@@ -11,10 +11,11 @@
 #include "Exercise.h"
 
 void homeViewModel_init(HomeViewModel *model) {
-    memcpy(model->weekdays, (CFStringRef []){
-        CFSTR("Monday"), CFSTR("Tuesday"), CFSTR("Wednesday"), CFSTR("Thursday"), CFSTR("Friday"),
-        CFSTR("Saturday"), CFSTR("Sunday")}, 7 * sizeof(CFStringRef));
-    memcpy(model->timeNames, (char [][10]){"morning", "afternoon", "evening"}, 30);
+    for (int i = 0; i < 3; ++i) {
+        CFStringRef key = CFStringCreateWithFormat(NULL, NULL, CFSTR("timesOfDay%d"), i);
+        model->timeNames[i] = localize(key);
+        CFRelease(key);
+    }
     homeViewModel_updateTimeOfDay(model);
 }
 

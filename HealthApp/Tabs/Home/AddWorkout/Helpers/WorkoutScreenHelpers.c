@@ -10,6 +10,10 @@
 pthread_mutex_t timerLock;
 static pthread_t *exerciseTimerThread;
 
+static CFStringRef notifTitle = NULL;
+static CFStringRef exerciseNotifMessage = NULL;
+static CFStringRef circuitNotifMessage = NULL;
+
 static void handle_exercise_timer_interrupt(int n _U_) {}
 static void handle_group_timer_interrupt(int n _U_) {}
 
@@ -49,8 +53,7 @@ static void scheduleNotification(int secondsFromNow, CFStringRef message) {
 
     id content = ((id(*)(id,SEL))objc_msgSend)(allocClass("UNMutableNotificationContent"),
                                                sel_getUid("init"));
-    ((void(*)(id,SEL,CFStringRef))objc_msgSend)(content, sel_getUid("setTitle:"),
-                                                CFSTR("Workout Update"));
+    ((void(*)(id,SEL,CFStringRef))objc_msgSend)(content, sel_getUid("setTitle:"), notifTitle);
     ((void(*)(id,SEL,CFStringRef))objc_msgSend)(content, sel_getUid("setSubtitle:"), message);
     id sound = objc_staticMethod(objc_getClass("UNNotificationSound"), sel_getUid("defaultSound"));
     ((void(*)(id,SEL,id))objc_msgSend)(content, sel_getUid("setSound:"), sound);
@@ -87,7 +90,7 @@ static bool cycleCurrentEntry(Workout *w) {
             if (e->type == ExerciseTypeDuration) {
                 startWorkoutTimer(&w->timers[TimerTypeExercise],
                                   e->reps, w->index, w->group->index);
-                scheduleNotification(e->reps, CFSTR("Finished exercise!"));
+                scheduleNotification(e->reps, exerciseNotifMessage);
             }
             break;
 
@@ -137,6 +140,12 @@ static bool finishedExerciseGroup(ExerciseGroup *g) {
 }
 
 void setupTimers(Workout *w, id parent) {
+    if (!notifTitle) {
+        notifTitle = localize(CFSTR("workoutNotificationTitle"));
+        exerciseNotifMessage = localize(CFSTR("notifications0"));
+        circuitNotifMessage = localize(CFSTR("notifications1"));
+    }
+
     struct sigaction sa = {.sa_flags = 0, .sa_handler = handle_exercise_timer_interrupt};
     sigemptyset(&sa.sa_mask);
     sigaction(TimerSignalExercise, &sa, NULL);
@@ -190,7 +199,7 @@ static void startGroup(Workout *w, bool startTimer) {
     if (w->group->type == ExerciseContainerTypeAMRAP && startTimer) {
         int duration = 60 * w->group->reps;
         startWorkoutTimer(&w->timers[TimerTypeGroup], duration, w->index, 255);
-        scheduleNotification(duration, CFSTR("Finished AMRAP circuit!"));
+        scheduleNotification(duration, circuitNotifMessage);
     }
 }
 

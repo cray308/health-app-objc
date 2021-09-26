@@ -9,11 +9,9 @@
 #define AddWorkoutUpdateMaxesViewController_h
 
 #import <UIKit/UIKit.h>
-#include "AddWorkoutCoordinator.h"
-#include "CocoaHelpers.h"
 
 @interface AddWorkoutUpdateMaxesViewController: UIViewController<UITextFieldDelegate>
-- (id) initWithDelegate: (AddWorkoutCoordinator *)_delegate;
+- (id) initWithDelegate: (void *)delegate;
 @end
 
 #endif /* AddWorkoutUpdateMaxesViewController_h */

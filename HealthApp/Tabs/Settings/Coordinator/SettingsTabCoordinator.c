@@ -12,7 +12,7 @@
 #include "ViewControllerHelpers.h"
 
 static id cancelAction(void) {
-    return createAlertAction(CFSTR("Cancel"), 1, NULL);
+    return createAlertAction(localize(CFSTR("cancel")), 1, NULL);
 }
 
 void settingsCoordinator_start(SettingsTabCoordinator *this) {
@@ -25,9 +25,9 @@ void settingsCoordinator_updateWeightText(SettingsTabCoordinator *this) {
 
 void settingsCoordinator_handleSaveTap(SettingsTabCoordinator *this,
                                        short *weights, signed char plan) {
-    id ctrl = createAlertController(CFSTR("Are you sure?"),
-                                    CFSTR("This will save the currently entered data."));
-    addAlertAction(ctrl, createAlertAction(CFSTR("Save"), 0, ^{
+    id ctrl = createAlertController(localize(CFSTR("settingsAlertTitle")),
+                                    localize(CFSTR("settingsAlertMessageSave")));
+    addAlertAction(ctrl, createAlertAction(localize(CFSTR("save")), 0, ^{
         appUserData_updateWeightMaxes(weights);
         appUserData_setWorkoutPlan(plan);
         appCoordinator_updatedUserInfo(appCoordinatorShared);
@@ -37,12 +37,12 @@ void settingsCoordinator_handleSaveTap(SettingsTabCoordinator *this,
 }
 
 void settingsCoordinator_handleDeleteTap(SettingsTabCoordinator *this) {
-    id ctrl = createAlertController(CFSTR("Are you sure?"),
-                                    CFSTR("This will delete all workout history."));
-    addAlertAction(ctrl, createAlertAction(CFSTR("Delete"), 2, ^{
-        persistenceService_deleteUserData();
+    id ctrl = createAlertController(localize(CFSTR("settingsAlertTitle")),
+                                    localize(CFSTR("settingsAlertMessageDelete")));
+    addAlertAction(ctrl, createAlertAction(localize(CFSTR("delete")), 2, ^{
         appUserData_deleteSavedData();
         appCoordinator_deletedAppData(appCoordinatorShared);
+        persistenceService_deleteUserData();
     }));
     addAlertAction(ctrl, cancelAction());
     presentVC(getFirstVC(this->navVC), ctrl);

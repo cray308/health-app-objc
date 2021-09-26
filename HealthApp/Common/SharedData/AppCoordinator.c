@@ -20,13 +20,14 @@ AppCoordinator *appCoordinatorShared = NULL;
 void appCoordinator_start(AppCoordinator *this, id tabVC) {
     id controllers[3];
     id items[3];
-    CFStringRef titles[] = {CFSTR("Home"), CFSTR("History"), CFSTR("Settings")};
     CFStringRef imgNames[] = {CFSTR("house"), CFSTR("chart.bar"), CFSTR("gear")};
 
     for (int i = 0; i < 3; ++i) {
         id image = createImage(imgNames[i]);
+        CFStringRef title = CFStringCreateWithFormat(NULL, NULL, CFSTR("tabs%d"), i);
         items[i] = ((id(*)(id,SEL,CFStringRef,id,int))objc_msgSend)
-        (allocClass("UITabBarItem"), sel_getUid("initWithTitle:image:tag:"), titles[i], image, i);
+        (allocClass("UITabBarItem"),
+         sel_getUid("initWithTitle:image:tag:"), localize(title), image, i);
 
         controllers[i] = ((id(*)(id,SEL,CFStringRef,id))objc_msgSend)
         (allocNavVC(), sel_getUid("initWithNibName:bundle:"), NULL, nil);
@@ -36,6 +37,7 @@ void appCoordinator_start(AppCoordinator *this, id tabVC) {
         ((void(*)(id,SEL,id))objc_msgSend)(navBar, sel_getUid("setBarTintColor:"),
                                            createColor("tertiarySystemGroupedBackgroundColor"));
         ((void(*)(id,SEL,id))objc_msgSend)(controllers[i], sel_getUid("setTabBarItem:"), items[i]);
+        CFRelease(title);
     }
 
     HomeTabCoordinator *homeCoord = calloc(1, sizeof(HomeTabCoordinator));
@@ -65,6 +67,10 @@ void appCoordinator_start(AppCoordinator *this, id tabVC) {
 
 void appCoordinator_updatedUserInfo(AppCoordinator *this) {
     homeCoordinator_resetUI(this->children[TabHome]);
+}
+
+void appCoordinator_fetchHistory(AppCoordinator *this) {
+    historyCoordinator_fetchData(this->children[TabHistory]);
 }
 
 void appCoordinator_deletedAppData(AppCoordinator *this) {

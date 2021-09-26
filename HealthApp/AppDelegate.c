@@ -10,7 +10,7 @@
 #include "PersistenceService.h"
 #include "AppUserData.h"
 #include "CalendarDateHelpers.h"
-#include "ViewControllerHelpers.h"
+#include "SwiftBridging.h"
 
 static CFStringRef const hasLaunchedKey = CFSTR("hasLaunched");
 
@@ -48,30 +48,34 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
     bool hasLaunched = ((bool(*)(id,SEL,CFStringRef))objc_msgSend)
     (getUserDefaults(), sel_getUid("boolForKey:"), hasLaunchedKey);
 
-    persistenceServiceShared = ((id(*)(id,SEL, CFStringRef))objc_msgSend)
-    (allocClass("NSPersistentContainer"), sel_getUid("initWithName:"), CFSTR("HealthApp"));
-    ((void(*)(id,SEL,void(^)(id,id)))objc_msgSend)
-    (persistenceServiceShared, sel_getUid("loadPersistentStoresWithCompletionHandler:"),
-     ^(id description _U_, id error _U_) {});
+    persistenceService_init();
 
     time_t now = time(NULL);
     time_t weekStart = calcStartOfWeek(now);
 
-    if (!hasLaunched)
+    if (!hasLaunched) {
         setupData(now, weekStart);
-
-    appUserDataShared = userInfo_initFromStorage();
+    } else {
+        userInfo_initFromStorage();
+    }
 
     int tzOffset = appUserData_checkTimezone(now);
-    if (tzOffset)
-        persistenceService_changeTimestamps(tzOffset);
-
     if (weekStart != appUserDataShared->weekStart)
         appUserData_handleNewWeek(weekStart);
 
-    persistenceService_performForegroundUpdate();
+    id appearance = ((id(*)(id,SEL))objc_msgSend)(allocClass("UITabBarAppearance"),
+                                                  sel_getUid("init"));
+    setBackground(appearance, createColor("systemBackgroundColor"));
+    setTabBarItemColors(((id(*)(id,SEL))objc_msgSend)(appearance,
+                                                      sel_getUid("stackedLayoutAppearance")));
+    setTabBarItemColors(((id(*)(id,SEL))objc_msgSend)(appearance,
+                                                      sel_getUid("inlineLayoutAppearance")));
+    setTabBarItemColors(((id(*)(id,SEL))objc_msgSend)(appearance,
+                                                      sel_getUid("compactInlineLayoutAppearance")));
 
     id tabVC = ((id(*)(id,SEL))objc_msgSend)(allocClass("UITabBarController"), sel_getUid("init"));
+    id bar = ((id(*)(id,SEL))objc_msgSend)(tabVC, sel_getUid("tabBar"));
+    ((void(*)(id,SEL,id))objc_msgSend)(bar, sel_getUid("setStandardAppearance:"), appearance);
     appCoordinatorShared = calloc(1, sizeof(AppCoordinator));
     appCoordinator_start(appCoordinatorShared, tabVC);
     ((void(*)(id,SEL,id))objc_msgSend)(self->window, sel_getUid("setRootViewController:"), tabVC);
@@ -82,7 +86,13 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
         (getNotificationCenter(), sel_getUid("requestAuthorizationWithOptions:completionHandler:"),
          6, ^(BOOL granted _U_, id error _U_) {});
     }
+    releaseObj(appearance);
     releaseObj(tabVC);
+
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        persistenceService_start(tzOffset);
+        appCoordinator_fetchHistory(appCoordinatorShared);
+    });
     return true;
 }
 
@@ -176,12 +186,10 @@ void setupData(time_t now, time_t weekStart) {
         }
         start += WeekSeconds;
     }
+    ((bool(*)(id,SEL,id))objc_msgSend)(context, sel_getUid("save:"), nil);
 #endif
 
     ((void(*)(id,SEL,bool,CFStringRef))objc_msgSend)
     (getUserDefaults(),sel_getUid("setBool:forKey:"), true, hasLaunchedKey);
-    UserInfo info = {
-        .currentPlan = -1, .weekStart = weekStart, .tzOffset = date_getOffsetFromGMT(now)
-    };
-    userInfo_saveData(&info);
+    userInfo_create(now, weekStart);
 }

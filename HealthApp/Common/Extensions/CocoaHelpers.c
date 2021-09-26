@@ -37,6 +37,10 @@ void getScreenBounds(CGRect *result) {
     getViewBounds(objc_staticMethod(objc_getClass("UIScreen"), sel_getUid("mainScreen")), result);
 }
 
+id getBundle(void) {
+    return objc_staticMethod(objc_getClass("NSBundle"), sel_getUid("mainBundle"));
+}
+
 id getUserDefaults(void) {
     return objc_staticMethod(objc_getClass("NSUserDefaults"), sel_getUid("standardUserDefaults"));
 }
@@ -53,4 +57,9 @@ id createColor(const char *name) {
 id createImage(CFStringRef name) {
     return ((id(*)(Class,SEL,CFStringRef))objc_msgSend)(objc_getClass("UIImage"),
                                                         sel_getUid("systemImageNamed:"), name);
+}
+
+CFStringRef localize(CFStringRef key) {
+    return ((CFStringRef(*)(id,SEL,CFStringRef,CFStringRef,CFStringRef))objc_msgSend)
+    (getBundle(), sel_getUid("localizedStringForKey:value:table:"), key, NULL, NULL);
 }

@@ -25,12 +25,7 @@ gen_array_headers(weekData, HistoryWeekDataModel)
 gen_array_headers(chartData, id)
 
 typedef struct {
-    char wordMonths[12][4];
-    char numMonths[12][3];
-    enum {
-        FormatShort,
-        FormatLong
-    } formatType;
+    CFStringRef months[12];
     CFStringRef currString;
 } HistoryXAxisFormatter;
 
@@ -51,7 +46,7 @@ typedef struct {
     int totalByType[4];
     double yMax;
     CFStringRef durationStr;
-    char names[4][10];
+    CFStringRef names[4];
 } HistoryWorkoutTypeChartViewModel;
 
 typedef struct {
@@ -61,7 +56,7 @@ typedef struct {
     id chartData;
     int totalByExercise[4];
     double yMax;
-    char names[4][9];
+    CFStringRef names[4];
 } HistoryLiftChartViewModel;
 
 typedef struct {
@@ -70,6 +65,7 @@ typedef struct {
     HistoryLiftChartViewModel liftViewModel;
     HistoryXAxisFormatter formatter;
     Array_weekData *data;
+    bool isSmall;
 } HistoryViewModel;
 
 void historyViewModel_init(HistoryViewModel *model);

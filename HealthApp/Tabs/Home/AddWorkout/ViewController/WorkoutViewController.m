@@ -38,14 +38,13 @@
     [super viewDidLoad];
     setBackground(self.view, UIColor.systemGroupedBackgroundColor);
     self.navigationItem.title = (__bridge NSString*) workout->title;
+    setTintColor(self.navigationController.navigationBar, UIColor.systemBlueColor);
 
-    groupsStack = createStackView(NULL, 0, 1, 20, 0, (HAEdgeInsets){0, 4, 4, 0});
-    UIButton *startBtn = createButton(CFSTR("Start"), UIColor.systemGreenColor, nil,
-                                      UIFontTextStyleSubheadline,
-                                      UIColor.secondarySystemGroupedBackgroundColor, true, true, 0,
-                                      self, @selector(startEndWorkout:));
-    UIView *btnContainer = createView(nil, false);
-    [btnContainer addSubview:startBtn];
+    groupsStack = createStackView(NULL, 0, 1, 20, 0, (HAEdgeInsets){20, 4, 20, 4});
+    UIButton *startBtn = createButton(localize(CFSTR("start")),
+                                      UIColor.systemGreenColor, UIFontTextStyleSubheadline,
+                                      nil, true, true, 0, self, @selector(startEndWorkout:));
+    setNavButton(self.navigationItem, false, startBtn, self.view.frame.size.width);
 
     for (unsigned i = 0; i < workout->activities->size; ++i) {
         ExerciseContainer *v = [[ExerciseContainer alloc]
@@ -55,11 +54,9 @@
         [v release];
     }
 
-    UIStackView *vStack = createStackView((id[]){btnContainer, groupsStack}, 2, 1, 20, 0,
-                                          (HAEdgeInsets){10, 0, 0, 0});
     UIScrollView *scrollView = createScrollView();
     [self.view addSubview:scrollView];
-    [scrollView addSubview:vStack];
+    [scrollView addSubview:groupsStack];
 
     UILayoutGuide *guide = self.view.safeAreaLayoutGuide;
     activateConstraints((id []){
@@ -68,21 +65,13 @@
         [scrollView.topAnchor constraintEqualToAnchor:guide.topAnchor],
         [scrollView.bottomAnchor constraintEqualToAnchor:guide.bottomAnchor],
 
-        [vStack.leadingAnchor constraintEqualToAnchor:scrollView.leadingAnchor],
-        [vStack.trailingAnchor constraintEqualToAnchor:scrollView.trailingAnchor],
-        [vStack.topAnchor constraintEqualToAnchor:scrollView.topAnchor],
-        [vStack.bottomAnchor constraintEqualToAnchor:scrollView.bottomAnchor],
-        [vStack.widthAnchor constraintEqualToAnchor:scrollView.widthAnchor],
+        [groupsStack.leadingAnchor constraintEqualToAnchor:scrollView.leadingAnchor],
+        [groupsStack.trailingAnchor constraintEqualToAnchor:scrollView.trailingAnchor],
+        [groupsStack.topAnchor constraintEqualToAnchor:scrollView.topAnchor],
+        [groupsStack.bottomAnchor constraintEqualToAnchor:scrollView.bottomAnchor],
+        [groupsStack.widthAnchor constraintEqualToAnchor:scrollView.widthAnchor]
+    }, 9);
 
-        [startBtn.topAnchor constraintEqualToAnchor:btnContainer.topAnchor],
-        [startBtn.bottomAnchor constraintEqualToAnchor:btnContainer.bottomAnchor],
-        [startBtn.leadingAnchor constraintEqualToAnchor:btnContainer.leadingAnchor constant:8],
-        [startBtn.widthAnchor constraintEqualToAnchor:btnContainer.widthAnchor multiplier:0.4],
-        [startBtn.heightAnchor constraintEqualToConstant: 30]
-    }, 14);
-
-    [btnContainer release];
-    [vStack release];
     [scrollView release];
 
     firstContainer = groupsStack.arrangedSubviews[0];
@@ -96,7 +85,7 @@
 
 - (void) startEndWorkout: (UIButton *)btn {
     if (!btn.tag) { // tapped start
-        setButtonTitle(btn, CFSTR("End"), 0);
+        setButtonTitle(btn, localize(CFSTR("end")), 0);
         setButtonColor(btn, UIColor.systemRedColor, 0);
         setTag(btn, 1);
         workout->startTime = time(NULL);
@@ -105,7 +94,7 @@
         Workout *w = NULL;
         pthread_mutex_lock(&timerLock);
         if (workout) {
-            workout->stopTime = time(NULL) + 1;
+            workout_setDuration(workout);
             w = workout;
             workout = NULL;
         }
@@ -134,7 +123,7 @@
     switch (workout_findTransitionForEvent(workout, v, v->button, option)) {
         case TransitionCompletedWorkout:
             finishedWorkout = true;
-            workout->stopTime = time(NULL) + 1;
+            workout_setDuration(workout);
             workout = NULL;
             break;
         case TransitionFinishedCircuitDeleteFirst:

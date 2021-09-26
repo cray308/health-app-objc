@@ -13,7 +13,11 @@ void historyCoordinator_start(HistoryTabCoordinator *this) {
     setupNavVC(this->navVC, createVCWithDelegate("HistoryViewController", this));
 }
 
-void historyCoordinator_updateUI(HistoryTabCoordinator *this) {
+void historyCoordinator_fetchData(HistoryTabCoordinator *this) {
     historyViewModel_fetchData(&this->viewModel);
+}
+
+void historyCoordinator_updateUI(HistoryTabCoordinator *this) {
+    array_clear(weekData, this->viewModel.data);
     objc_singleArg(getFirstVC(this->navVC), sel_getUid("performForegroundUpdate"));
 }

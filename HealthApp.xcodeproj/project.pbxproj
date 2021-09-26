@@ -41,6 +41,10 @@
 		616E2F6826755D2B00342CD8 /* HomeSetupWorkoutModalViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 616E2F6726755D2B00342CD8 /* HomeSetupWorkoutModalViewController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		616E2F842676A22700342CD8 /* Exercise.c in Sources */ = {isa = PBXBuildFile; fileRef = 616E2F832676A22700342CD8 /* Exercise.c */; };
 		616E2F9B2677195C00342CD8 /* AddWorkoutUpdateMaxesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 616E2F9A2677195C00342CD8 /* AddWorkoutUpdateMaxesViewController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		617BDE1B26FE48FD00BDDB73 /* StatusButton.h in Headers */ = {isa = PBXBuildFile; fileRef = 617BDE1A26FE48FD00BDDB73 /* StatusButton.h */; };
+		617BDE1F26FE491000BDDB73 /* StatusButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 617BDE1E26FE491000BDDB73 /* StatusButton.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		617BDE2426FE9DD700BDDB73 /* InputView.h in Headers */ = {isa = PBXBuildFile; fileRef = 617BDE2326FE9DD700BDDB73 /* InputView.h */; };
+		617BDE2726FE9DF000BDDB73 /* InputView.m in Sources */ = {isa = PBXBuildFile; fileRef = 617BDE2626FE9DF000BDDB73 /* InputView.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61A5EFC026E465D60086625A /* Charts.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61A5EFBD26E465D10086625A /* Charts.xcframework */; };
 		61A5EFC126E465D60086625A /* Charts.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 61A5EFBD26E465D10086625A /* Charts.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		61BC6F55266EA9A80022D6F7 /* WeeklyData+CoreDataClass.h in Headers */ = {isa = PBXBuildFile; fileRef = 61BC6F51266EA9A80022D6F7 /* WeeklyData+CoreDataClass.h */; };
@@ -54,8 +58,8 @@
 		61C779A426102E20001326A1 /* AddWorkoutCoordinator.c in Sources */ = {isa = PBXBuildFile; fileRef = 61C779A326102E20001326A1 /* AddWorkoutCoordinator.c */; };
 		61C779AC26102E51001326A1 /* SettingsTabCoordinator.c in Sources */ = {isa = PBXBuildFile; fileRef = 61C779AB26102E51001326A1 /* SettingsTabCoordinator.c */; };
 		61C779B426102E97001326A1 /* SettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 61C779B326102E97001326A1 /* SettingsViewController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		61FD868B26D482290057E5DC /* DayWorkoutButton.h in Headers */ = {isa = PBXBuildFile; fileRef = 61FD868926D482290057E5DC /* DayWorkoutButton.h */; };
-		61FD868C26D482290057E5DC /* DayWorkoutButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 61FD868A26D482290057E5DC /* DayWorkoutButton.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		61E8ED6726FD60B400942368 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 61E8ED6926FD60B400942368 /* Localizable.strings */; };
+		61E8ED6C26FD87AB00942368 /* WorkoutData_d.plist in Resources */ = {isa = PBXBuildFile; fileRef = 61E8ED6B26FD87AB00942368 /* WorkoutData_d.plist */; };
 		61FD869C26D487710057E5DC /* HistoryChartHelpers.h in Headers */ = {isa = PBXBuildFile; fileRef = 61FD869A26D487710057E5DC /* HistoryChartHelpers.h */; };
 		61FD869D26D487710057E5DC /* HistoryChartHelpers.c in Sources */ = {isa = PBXBuildFile; fileRef = 61FD869B26D487710057E5DC /* HistoryChartHelpers.c */; };
 /* End PBXBuildFile section */
@@ -140,6 +144,10 @@
 		616E2F992677194D00342CD8 /* AddWorkoutUpdateMaxesViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AddWorkoutUpdateMaxesViewController.h; sourceTree = "<group>"; };
 		616E2F9A2677195C00342CD8 /* AddWorkoutUpdateMaxesViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AddWorkoutUpdateMaxesViewController.m; sourceTree = "<group>"; };
 		6176277D266D44C60079A17E /* Exercise.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Exercise.h; sourceTree = "<group>"; };
+		617BDE1A26FE48FD00BDDB73 /* StatusButton.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StatusButton.h; sourceTree = "<group>"; };
+		617BDE1E26FE491000BDDB73 /* StatusButton.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StatusButton.m; sourceTree = "<group>"; };
+		617BDE2326FE9DD700BDDB73 /* InputView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = InputView.h; sourceTree = "<group>"; };
+		617BDE2626FE9DF000BDDB73 /* InputView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = InputView.m; sourceTree = "<group>"; };
 		61A5EFBD26E465D10086625A /* Charts.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = Charts.xcframework; sourceTree = "<group>"; };
 		61BC6F51266EA9A80022D6F7 /* WeeklyData+CoreDataClass.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "WeeklyData+CoreDataClass.h"; sourceTree = "<group>"; };
 		61BC6F52266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "WeeklyData+CoreDataClass.m"; sourceTree = "<group>"; };
@@ -161,8 +169,8 @@
 		61C779A326102E20001326A1 /* AddWorkoutCoordinator.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = AddWorkoutCoordinator.c; sourceTree = "<group>"; };
 		61C779AB26102E51001326A1 /* SettingsTabCoordinator.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = SettingsTabCoordinator.c; sourceTree = "<group>"; };
 		61C779B326102E97001326A1 /* SettingsViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SettingsViewController.m; sourceTree = "<group>"; };
-		61FD868926D482290057E5DC /* DayWorkoutButton.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DayWorkoutButton.h; sourceTree = "<group>"; };
-		61FD868A26D482290057E5DC /* DayWorkoutButton.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DayWorkoutButton.m; sourceTree = "<group>"; };
+		61E8ED6826FD60B400942368 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		61E8ED6B26FD87AB00942368 /* WorkoutData_d.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = WorkoutData_d.plist; sourceTree = "<group>"; };
 		61FD869A26D487710057E5DC /* HistoryChartHelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HistoryChartHelpers.h; sourceTree = "<group>"; };
 		61FD869B26D487710057E5DC /* HistoryChartHelpers.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = HistoryChartHelpers.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -220,8 +228,6 @@
 			children = (
 				6150872526D34EFD00521269 /* ConfettiView.c */,
 				6150872426D34EFD00521269 /* ConfettiView.h */,
-				61FD868926D482290057E5DC /* DayWorkoutButton.h */,
-				61FD868A26D482290057E5DC /* DayWorkoutButton.m */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -256,6 +262,7 @@
 				61594D1E26068106000D01A1 /* Info.plist */,
 				61594D1B26068106000D01A1 /* LaunchScreen.storyboard */,
 				61594D1F26068106000D01A1 /* main.c */,
+				61E8ED6926FD60B400942368 /* Localizable.strings */,
 			);
 			path = HealthApp;
 			sourceTree = "<group>";
@@ -279,13 +286,15 @@
 			path = CoreData;
 			sourceTree = "<group>";
 		};
-		61594D5426068B93000D01A1 /* Coordinators */ = {
+		617BDE1926FE48CB00BDDB73 /* View */ = {
 			isa = PBXGroup;
 			children = (
-				61594D5526068BFD000D01A1 /* AppCoordinator.h */,
-				61594D5626068C41000D01A1 /* AppCoordinator.c */,
+				617BDE1A26FE48FD00BDDB73 /* StatusButton.h */,
+				617BDE1E26FE491000BDDB73 /* StatusButton.m */,
+				617BDE2326FE9DD700BDDB73 /* InputView.h */,
+				617BDE2626FE9DF000BDDB73 /* InputView.m */,
 			);
-			path = Coordinators;
+			path = View;
 			sourceTree = "<group>";
 		};
 		61808D3F261126CF00BAF7AB /* DataStructures */ = {
@@ -482,13 +491,14 @@
 		61C779022610260B001326A1 /* Common */ = {
 			isa = PBXGroup;
 			children = (
-				61594D5426068B93000D01A1 /* Coordinators */,
 				61594D5326068A05000D01A1 /* CoreData */,
 				61808D3F261126CF00BAF7AB /* DataStructures */,
 				61C7790426102663001326A1 /* Extensions */,
 				61C7790326102620001326A1 /* SharedData */,
+				617BDE1926FE48CB00BDDB73 /* View */,
 				6107C957266C159B00DDBCCF /* Workouts */,
 				612FD047266DAF25002C9993 /* WorkoutData.plist */,
+				61E8ED6B26FD87AB00942368 /* WorkoutData_d.plist */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -496,6 +506,8 @@
 		61C7790326102620001326A1 /* SharedData */ = {
 			isa = PBXGroup;
 			children = (
+				61594D5526068BFD000D01A1 /* AppCoordinator.h */,
+				61594D5626068C41000D01A1 /* AppCoordinator.c */,
 				61594D632606C7AE000D01A1 /* AppUserData.h */,
 				61594D642606C7C6000D01A1 /* AppUserData.c */,
 				615A1C4A2608403900858C32 /* PersistenceService.h */,
@@ -535,11 +547,12 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				617BDE1B26FE48FD00BDDB73 /* StatusButton.h in Headers */,
 				6151C91126C4B23200C95A93 /* hash.h in Headers */,
 				611B591326C5F6830082F6CA /* alg_helper.h in Headers */,
 				6150870426D3370400521269 /* WorkoutScreenHelpers.h in Headers */,
-				61FD868B26D482290057E5DC /* DayWorkoutButton.h in Headers */,
 				61BC6F55266EA9A80022D6F7 /* WeeklyData+CoreDataClass.h in Headers */,
+				617BDE2426FE9DD700BDDB73 /* InputView.h in Headers */,
 				611B591426C5F6830082F6CA /* unordered_set.h in Headers */,
 				61FD869C26D487710057E5DC /* HistoryChartHelpers.h in Headers */,
 				611B591726C5F6830082F6CA /* hash_table.h in Headers */,
@@ -631,6 +644,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				61594D1D26068106000D01A1 /* LaunchScreen.storyboard in Resources */,
+				61E8ED6726FD60B400942368 /* Localizable.strings in Resources */,
+				61E8ED6C26FD87AB00942368 /* WorkoutData_d.plist in Resources */,
 				61594D1A26068106000D01A1 /* Assets.xcassets in Resources */,
 				612FD048266DAF25002C9993 /* WorkoutData.plist in Resources */,
 			);
@@ -657,12 +672,12 @@
 				6161838226AC80A0001587B2 /* CocoaHelpers.c in Sources */,
 				616E2F842676A22700342CD8 /* Exercise.c in Sources */,
 				61594D652606C7C6000D01A1 /* AppUserData.c in Sources */,
+				617BDE1F26FE491000BDDB73 /* StatusButton.m in Sources */,
 				61BC6F56266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m in Sources */,
 				615A1C4C2608406100858C32 /* PersistenceService.c in Sources */,
 				614DC13026082BBE00B9588E /* ViewControllerHelpers.c in Sources */,
 				6150870526D3370400521269 /* WorkoutScreenHelpers.c in Sources */,
 				6150872726D34EFD00521269 /* ConfettiView.c in Sources */,
-				61FD868C26D482290057E5DC /* DayWorkoutButton.m in Sources */,
 				61FD869D26D487710057E5DC /* HistoryChartHelpers.c in Sources */,
 				61C7796026102CC6001326A1 /* HistoryViewModel.c in Sources */,
 				615174E826D5E04700BE5741 /* TotalWorkoutsChart.m in Sources */,
@@ -670,6 +685,7 @@
 				615174F026D5E07B00BE5741 /* LiftingChart.m in Sources */,
 				61C7795026102C8C001326A1 /* HistoryViewController.m in Sources */,
 				61C7793626102C19001326A1 /* HistoryTabCoordinator.c in Sources */,
+				617BDE2726FE9DF000BDDB73 /* InputView.m in Sources */,
 				61C779B426102E97001326A1 /* SettingsViewController.m in Sources */,
 				61C779AC26102E51001326A1 /* SettingsTabCoordinator.c in Sources */,
 				61C7797826102D45001326A1 /* HomeViewModel.c in Sources */,
@@ -712,6 +728,14 @@
 				61594D1C26068106000D01A1 /* Base */,
 			);
 			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+		61E8ED6926FD60B400942368 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				61E8ED6826FD60B400942368 /* en */,
+			);
+			name = Localizable.strings;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -840,6 +864,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 77YYP4528L;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				EXCLUDED_SOURCE_FILE_NAMES = WorkoutData.plist;
 				GCC_CHAR_IS_UNSIGNED_CHAR = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -876,6 +901,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 77YYP4528L;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				EXCLUDED_SOURCE_FILE_NAMES = WorkoutData_d.plist;
 				GCC_CHAR_IS_UNSIGNED_CHAR = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;

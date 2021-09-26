@@ -17,6 +17,7 @@ typedef struct {
 } HistoryTabCoordinator;
 
 void historyCoordinator_start(HistoryTabCoordinator *this);
+void historyCoordinator_fetchData(HistoryTabCoordinator *this);
 void historyCoordinator_updateUI(HistoryTabCoordinator *this);
 
 #endif /* HistoryTabCoordinator_h */

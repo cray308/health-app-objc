@@ -18,7 +18,16 @@ static CFStringRef const keys[] = {
     CFSTR("deadliftMax")
 };
 
-UserInfo *userInfo_initFromStorage(void) {
+void userInfo_create(time_t now, time_t weekStart) {
+    UserInfo info = {
+        .currentPlan = -1, .weekStart = weekStart, .tzOffset = date_getOffsetFromGMT(now)
+    };
+    appUserDataShared = malloc(sizeof(UserInfo));
+    memcpy(appUserDataShared, &info, sizeof(UserInfo));
+    userInfo_saveData(appUserDataShared);
+}
+
+void userInfo_initFromStorage(void) {
     CFDictionaryRef savedInfo = ((CFDictionaryRef(*)(id,SEL,CFStringRef))objc_msgSend)
     (getUserDefaults(), sel_getUid("dictionaryForKey:"), userInfoKey);
     CFNumberRef value;
@@ -39,7 +48,7 @@ UserInfo *userInfo_initFromStorage(void) {
         value = CFDictionaryGetValue(savedInfo, keys[5 + i]);
         CFNumberGetValue(value, kCFNumberShortType, &info->liftMaxes[i]);
     }
-    return info;
+    appUserDataShared = info;
 }
 
 void userInfo_saveData(UserInfo *info) {
@@ -68,7 +77,11 @@ void userInfo_saveData(UserInfo *info) {
 
 void appUserData_setWorkoutPlan(signed char plan) {
     if (plan >= 0 && plan != appUserDataShared->currentPlan) {
+#if DEBUG
+        appUserDataShared->planStart = appUserDataShared->weekStart;
+#else
         appUserDataShared->planStart = appUserDataShared->weekStart + WeekSeconds;
+#endif
     }
     appUserDataShared->currentPlan = plan;
     userInfo_saveData(appUserDataShared);
@@ -96,12 +109,10 @@ void appUserData_handleNewWeek(time_t weekStart) {
 
     signed char plan = appUserDataShared->currentPlan;
     if (plan >= 0) {
-        int difference = (int) (weekStart - appUserDataShared->planStart);
         const int nWeeks = plan == 0 ? 8 : 13;
-        if ((difference / WeekSeconds) >= nWeeks) {
-            if (plan == 0) {
+        if ((appUserData_getWeekInPlan() / WeekSeconds) >= nWeeks) {
+            if (plan == 0)
                 appUserDataShared->currentPlan = 1;
-            }
             appUserDataShared->planStart = weekStart;
         }
     }
@@ -114,7 +125,8 @@ unsigned char appUserData_addCompletedWorkout(unsigned char day) {
     userInfo_saveData(appUserDataShared);
     const unsigned char completedMask = appUserDataShared->completedWorkouts;
     for (unsigned char i = 0; i < 7; ++i) {
-        if ((1 << i) & completedMask) ++total;
+        if ((1 << i) & completedMask)
+            ++total;
     }
     return total;
 }
@@ -125,9 +137,8 @@ int appUserData_getWeekInPlan(void) {
 
 void appUserData_updateWeightMaxes(short *weights) {
     for (int i = 0; i < 4; ++i) {
-        if (weights[i] > appUserDataShared->liftMaxes[i]) {
+        if (weights[i] > appUserDataShared->liftMaxes[i])
             appUserDataShared->liftMaxes[i] = weights[i];
-        }
     }
     userInfo_saveData(appUserDataShared);
 }

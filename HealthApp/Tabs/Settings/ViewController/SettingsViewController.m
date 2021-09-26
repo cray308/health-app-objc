@@ -6,19 +6,16 @@
 //
 
 #import "SettingsViewController.h"
+#import "InputView.h"
 #include "ViewControllerHelpers.h"
 #include "AppUserData.h"
 #include "AppCoordinator.h"
 
 @interface SettingsViewController() {
-    USet_char *validChars;
     SettingsTabCoordinator *delegate;
     UISegmentedControl *planPicker;
-    UITextField *textFields[5];
-    bool validInput[4];
+    TextValidator validator;
     short results[4];
-    short maxes[4];
-    UIButton *saveButton;
 }
 @end
 
@@ -26,59 +23,67 @@
 - (id) initWithDelegate: (SettingsTabCoordinator *)delegate {
     if (!(self = [super initWithNibName:nil bundle:nil])) return nil;
     self->delegate = delegate;
-    memcpy(maxes, (short []){999, 999, 999, 999}, 4 * sizeof(short));
+    memcpy(&validator, &(TextValidator){
+        .count = 4, .children = {[0 ... 3] = {.maxVal = 999}}
+    }, sizeof(TextValidator));
     return self;
 }
 
 - (void) viewDidLoad {
     [super viewDidLoad];
     setBackground(self.view, UIColor.systemGroupedBackgroundColor);
-    self.navigationItem.title = @"App Settings";
-    validChars = createNumberCharacterSet();
+    self.navigationItem.title = (__bridge NSString*) localize(CFSTR("titles2"));
+    validator.set = createNumberCharacterSet();
 
-    UILabel *planLabel = createLabel(CFSTR("Change workout plan"), UIFontTextStyleFootnote, 4);
-
-    planPicker = createSegmentedControl((CFStringRef []){
-        CFSTR("None"), CFSTR("Base-Building"), CFSTR("Continuation")
-    }, 3, appUserDataShared->currentPlan >= 0 ? appUserDataShared->currentPlan + 1 : 0, nil, nil);
+    UILabel *planLabel = createLabel(localize(CFSTR("planPickerTitle")),
+                                     UIFontTextStyleFootnote, 4);
+    
+    CFStringRef segments[3];
+    for (int i = 0; i < 3; ++i) {
+        CFStringRef key = CFStringCreateWithFormat(NULL, NULL, CFSTR("settingsSegment%d"), i);
+        segments[i] = localize(key);
+        CFRelease(key);
+    }
+    int startIndex = appUserDataShared->currentPlan >= 0 ? appUserDataShared->currentPlan + 1 : 0;
+    planPicker = createSegmentedControl(segments, 3, startIndex, nil, nil);
 
     UIView *planContainer = createView(nil, false);
     [planContainer addSubview:planLabel];
     [planContainer addSubview:planPicker];
 
-    UIStackView *stacks[4];
-    CFStringRef titles[] = {
-        CFSTR("Max Squat"), CFSTR("Max Pull-up"), CFSTR("Max Bench"), CFSTR("Max Deadlift")
-    };
+    InputView *views[4];
+    UIToolbar *toolbar = createToolbar(self, @selector(dismissKeyboard));
 
     for (int i = 0; i < 4; ++i) {
-        UILabel *label = createLabel(titles[i], UIFontTextStyleBody, 4);
-        textFields[i] = createTextfield(self, NULL, CFSTR("Weight"), 0, 4);
-        stacks[i] = createStackView((id []){label, textFields[i]}, 2, 0, 5, 1,
-                                    (HAEdgeInsets){4, 5, 4, 8});
-        [stacks[i].heightAnchor constraintEqualToConstant:40].active = true;
-        [label release];
+        CFStringRef key = CFStringCreateWithFormat(NULL, NULL, CFSTR("maxWeight%d"), i);
+        views[i] = [[InputView alloc] initWithDelegate:self fieldHint:localize(key)
+                                                          tag:i min:0 max:999];
+        validator.children[i].inputView = views[i];
+        views[i]->field.inputAccessoryView = toolbar;
+        CFRelease(key);
     }
 
-    saveButton = createButton(CFSTR("Save Settings"), UIColor.systemBlueColor,
-                              UIColor.systemGrayColor, UIFontTextStyleBody,
-                              UIColor.secondarySystemGroupedBackgroundColor, false, true, 0,
-                              self, @selector(buttonTapped:));
+    UIButton *saveButton = createButton(localize(CFSTR("settingsSaveButtonTitle")),
+                                        UIColor.systemBlueColor, UIFontTextStyleBody,
+                                        UIColor.secondarySystemGroupedBackgroundColor, false, true,
+                                        0, self, @selector(buttonTapped:));
+    validator.button = saveButton;
 
-    UIButton *deleteButton = createButton(CFSTR("Delete Data"), UIColor.systemRedColor, nil,
-                                              UIFontTextStyleBody,
-                                              UIColor.secondarySystemGroupedBackgroundColor,
+    UIButton *deleteButton = createButton(localize(CFSTR("settingsDeleteButtonTitle")),
+                                          UIColor.systemRedColor, UIFontTextStyleBody,
+                                          UIColor.secondarySystemGroupedBackgroundColor,
                                           false, true, 1, self, @selector(buttonTapped:));
 
     id subviews[] = {
-        planContainer, stacks[0], stacks[1], stacks[2], stacks[3], saveButton, deleteButton
+        planContainer, views[0], views[1], views[2], views[3], saveButton, deleteButton
     };
-    UIStackView *vStack = createStackView(subviews, 7, 1, 20, 0, (HAEdgeInsets){.top = 20});
+    UIStackView *vStack = createStackView(subviews, 7, 1, 0, 0, (HAEdgeInsets){20, 0, 20, 0});
 
     UIScrollView *scrollView = createScrollView();
     [self.view addSubview:scrollView];
     [scrollView addSubview:vStack];
-    [vStack setCustomSpacing:40 afterView:stacks[3]];
+    [vStack setCustomSpacing:20 afterView:planContainer];
+    [vStack setCustomSpacing:20 afterView:views[3]];
     [vStack setCustomSpacing:40 afterView:saveButton];
 
     UILayoutGuide *guide = self.view.safeAreaLayoutGuide;
@@ -115,31 +120,31 @@
     [planContainer release];
     [planLabel release];
     for (int i = 0; i < 4; ++i)
-        [stacks[i] release];
+        [views[i] release];
+    [toolbar release];
 
     [self updateWeightFields];
-    createToolbar(self, @selector(dismissKeyboard), textFields);
     appCoordinatorShared->loadedViewControllers |= LoadedViewController_Settings;
 }
 
 - (void) updateWeightFields {
     for (int i = 0; i < 4; ++i) {
-        results[i] = appUserDataShared->liftMaxes[i];
-        CFStringRef text = CFStringCreateWithFormat(NULL, NULL, CFSTR("%d"), results[i]);
-        setLabelText(textFields[i], text);
+        short value = appUserDataShared->liftMaxes[i];
+        CFStringRef text = CFStringCreateWithFormat(NULL, NULL, CFSTR("%d"), value);
+        setLabelText(((InputView *) validator.children[i].inputView)->field, text);
+        resetInputChild(&validator.children[i], value);
         CFRelease(text);
     }
-    memset(validInput, true, 4 * sizeof(bool));
-    enableButton(saveButton, true);
+    enableButton(validator.button, true);
 }
 
-- (void) dismissKeyboard {
-    [self.view endEditing:true];
-}
+- (void) dismissKeyboard { [self.view endEditing:true]; }
 
 - (void) buttonTapped: (UIButton *)sender {
     if (!sender.tag) {
         const int segment = (int) planPicker.selectedSegmentIndex;
+        for (int i = 0; i < 4; ++i)
+            results[i] = validator.children[i].result;
         settingsCoordinator_handleSaveTap(delegate, results, !segment ? -1 : segment - 1);
     } else {
         settingsCoordinator_handleDeleteTap(delegate);
@@ -148,9 +153,8 @@
 
 - (BOOL) textField: (UITextField *)textField
 shouldChangeCharactersInRange: (NSRange)range replacementString: (NSString *)string {
-    return checkTextfield(textField, (CFRange){range.location, range.length},
-                          (__bridge CFStringRef) string, validChars, saveButton, textFields, 4,
-                          maxes, results, validInput);
+    return checkInput(textField, (CFRange){range.location, range.length},
+                      (__bridge CFStringRef) string, &validator);
 }
 
 - (BOOL) textFieldShouldReturn: (UITextField *)textField {

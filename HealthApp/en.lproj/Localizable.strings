@@ -1,0 +1,116 @@
+/* 
+  Localizable.strings
+  HealthApp
+
+  Created by Christopher Ray on 9/23/21.
+  
+*/
+
+"titles0" = "Home";
+"titles1" = "Workout History";
+"titles2" = "App Settings";
+
+"tabs0" = "Home";
+"tabs1" = "History";
+"tabs2" = "Settings";
+
+"notifications0" = "Finished exercise!";
+"notifications1" = "Finished AMRAP circuit!";
+
+"timesOfDay0" = "Good morning!";
+"timesOfDay1" = "Good afternoon!";
+"timesOfDay2" = "Good evening!";
+
+"dayNames0" = "Monday";
+"dayNames1" = "Tuesday";
+"dayNames2" = "Wednesday";
+"dayNames3" = "Thursday";
+"dayNames4" = "Friday";
+"dayNames5" = "Saturday";
+"dayNames6" = "Sunday";
+
+"months00" = "1";
+"months01" = "2";
+"months02" = "3";
+"months03" = "4";
+"months04" = "5";
+"months05" = "6";
+"months06" = "7";
+"months07" = "8";
+"months08" = "9";
+"months09" = "10";
+"months10" = "11";
+"months11" = "12";
+
+"workoutTypes0" = "Strength";
+"workoutTypes1" = "HIC";
+"workoutTypes2" = "SE";
+"workoutTypes3" = "Endurance";
+
+"liftTypes0" = "Squat";
+"liftTypes1" = "Pull-up";
+"liftTypes2" = "Bench";
+"liftTypes3" = "Deadlift";
+
+"workoutNotificationTitle" = "Workout Update";
+
+"cancel" = "Cancel";
+"go" = "Go";
+"ok" = "OK";
+"save" = "Save";
+"delete" = "Delete";
+
+"weeklyWorkoutsHeader" = "Workouts this week";
+"customWorkoutsHeader" = "Add Custom Workout";
+"homeWorkoutType0" = "Test Max";
+"homeWorkoutType1" = "Endurance";
+"homeWorkoutType2" = "Strength";
+"homeWorkoutType3" = "SE";
+"homeWorkoutType4" = "HIC";
+"homeAlertTitle" = "Nicely done!";
+"homeAlertMessage" = "Great job meeting your workout goal this week.";
+
+"historySegment0" = "6 Months";
+"historySegment1" = "1 Year";
+"historySegment2" = "2 Years";
+"chartHeaderWorkoutType" = "Activity Time Each Week (By Type)";
+"chartHeaderLifts" = "Lift Progress";
+"chartHeaderTotalWorkouts" = "Workouts Each Week";
+"totalWorkoutsLegend" = "Avg Workouts (%.2f)";
+"workoutTypeLegend" = "%@ (Avg: %s)";
+"liftLegend" = "%@ (Avg: %.1f)";
+
+"planPickerTitle" = "Change workout plan";
+"settingsSegment0" = "None";
+"settingsSegment1" = "Base-Building";
+"settingsSegment2" = "Continuation";
+"maxWeight0" = "Max Squat Weight";
+"maxWeight1" = "Max Pull-up Weight";
+"maxWeight2" = "Max Bench Weight";
+"maxWeight3" = "Max Deadlift Weight";
+"settingsSaveButtonTitle" = "Save Settings";
+"settingsDeleteButtonTitle" = "Delete Data";
+"settingsAlertTitle" = "Are you sure?";
+"inputFieldError" = "Input must be between %d and %d.";
+"settingsAlertMessageSave" = "This will save the currently entered data.";
+"settingsAlertMessageDelete" = "This will delete all workout history.";
+
+"setupWorkoutPickerTitle" = "Choose workout";
+"setupWorkoutSets" = "Sets";
+"setupWorkoutReps" = "Reps";
+"setupWorkoutMaxWeight" = "Max Weight Percentage";
+"setupWorkoutDuration" = "Duration (minutes)";
+
+"start" = "Start";
+"end" = "End";
+"updatesMaxesFinishText" = "Finish";
+"workoutTitleTestDay" = "test day";
+"exerciseHeader" = "Set %d of %d";
+"exerciseTitleRest" = "Rest: %d s";
+"exerciseTitleReps" = "%@ x %d";
+"exerciseTitleRepsWithWeight" = "%@ x %d @ %d lbs";
+"exerciseTitleDurationMinutes" = "%@ for %.1f min";
+"exerciseTitleDurationSeconds" = "%@ for %d s";
+"exerciseTitleDistance" = "Run/row %d/%d m";
+"circuitHeaderRounds" = "Round %d of %d";
+"circuitHeaderAMRAP" = "AMRAP %d min";

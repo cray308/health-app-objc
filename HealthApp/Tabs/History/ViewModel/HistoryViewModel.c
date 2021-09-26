@@ -45,6 +45,14 @@ void historyViewModel_init(HistoryViewModel *this) {
 
         this->workoutTypeViewModel.dataSets[i + 1] = createDataSet(colors[i]);
         this->liftViewModel.dataSets[i] = createDataSet(colors[i]);
+
+        CFStringRef key = CFStringCreateWithFormat(NULL, NULL, CFSTR("workoutTypes%d"), i);
+        this->workoutTypeViewModel.names[i] = localize(key);
+        CFRelease(key);
+
+        key = CFStringCreateWithFormat(NULL, NULL, CFSTR("liftTypes%d"), i);
+        this->liftViewModel.names[i] = localize(key);
+        CFRelease(key);
     }
 
     this->workoutTypeViewModel.entries[4] = array_new(chartData);
@@ -57,16 +65,13 @@ void historyViewModel_init(HistoryViewModel *this) {
     }, 4);
     this->liftViewModel.chartData = createChartData(this->liftViewModel.dataSets, 4);
 
-    memcpy(this->workoutTypeViewModel.names,
-           (char [][10]){"Strength", "HIC", "SE", "Endurance"}, 40);
-    memcpy(this->liftViewModel.names,
-           (char [][9]){"Squat", "Pull-up", "Bench", "Deadlift"}, 36);
     this->workoutTypeViewModel.durationStr = CFStringCreateCopy(NULL, CFSTR(""));
 
-    memcpy(this->formatter.wordMonths, (char [][4]){
-        "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}, 48);
-    memcpy(this->formatter.numMonths,
-           (char [][3]){"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"}, 36);
+    for (int i = 0; i < 12; ++i) {
+        CFStringRef key = CFStringCreateWithFormat(NULL, NULL, CFSTR("months%02d"), i);
+        this->formatter.months[i] = localize(key);
+        CFRelease(key);
+    }
     this->formatter.currString = CFStringCreateCopy(NULL, CFSTR(""));
 
     this->data = array_new(weekData);
@@ -74,57 +79,59 @@ void historyViewModel_init(HistoryViewModel *this) {
 }
 
 void historyViewModel_fetchData(HistoryViewModel *this) {
-    struct tm localInfo;
-    array_clear(weekData, this->data);
-    int count = 0;
+    ((void(*)(id,SEL,void(^)(void)))objc_msgSend)(backgroundContext, sel_getUid("performBlock:"), ^{
+        array_clear(weekData, this->data);
+        struct tm localInfo;
+        int count = 0;
 
-    id request = fetchRequest();
-    id predicate = createPredicate(CFSTR("weekStart > %lld AND weekStart < %lld"),
-                                   date_twoYears, appUserDataShared->weekStart);
-    id descriptors[] = {createSortDescriptor()};
-    CFArrayRef array = CFArrayCreate(NULL, (const void **)descriptors, 1, &kCocoaArrCallbacks);
+        id request = fetchRequest();
+        id predicate = createPredicate(CFSTR("weekStart > %lld AND weekStart < %lld"),
+                                       date_twoYears, appUserDataShared->weekStart);
+        id descriptors[] = {createSortDescriptor()};
+        CFArrayRef array = CFArrayCreate(NULL, (const void **)descriptors, 1, &kCocoaArrCallbacks);
 
-    setPredicate(request, predicate);
-    setDescriptors(request, array);
+        setPredicate(request, predicate);
+        setDescriptors(request, array);
 
-    CFArrayRef data = persistenceService_executeFetchRequest(request, &count);
-    releaseObj(descriptors[0]);
-    CFRelease(array);
-    if (!data) return;
+        CFArrayRef data = persistenceService_executeFetchRequest(request, &count);
+        releaseObj(descriptors[0]);
+        CFRelease(array);
+        if (!data) return;
 
-    for (int i = 0; i < count; ++i) {
-        const id d = (const id) CFArrayGetValueAtIndex(data, i);
-        int timeStrength = weekData_getWorkoutTimeForType(d, WorkoutTypeStrength);
-        time_t timestamp = weekData_getWeekStart(d);
-        localtime_r(&timestamp, &localInfo);
-        HistoryWeekDataModel m = {
-            .year = localInfo.tm_year % 100,
-            .month = localInfo.tm_mon,
-            .day = localInfo.tm_mday,
-            .totalWorkouts = weekData_getTotalWorkouts(d),
-            .weightArray = {
-                weekData_getLiftingLimitForType(d, LiftTypeSquat),
-                weekData_getLiftingLimitForType(d, LiftTypePullup),
-                weekData_getLiftingLimitForType(d, LiftTypeBench),
-                weekData_getLiftingLimitForType(d, LiftTypeDeadlift)
-            },
-            .durationByType = {
-                timeStrength,
-                weekData_getWorkoutTimeForType(d, WorkoutTypeHIC),
-                weekData_getWorkoutTimeForType(d, WorkoutTypeSE),
-                weekData_getWorkoutTimeForType(d, WorkoutTypeEndurance)
-            },
-            .cumulativeDuration = {[0] = timeStrength}
-        };
+        for (int i = 0; i < count; ++i) {
+            const id d = (const id) CFArrayGetValueAtIndex(data, i);
+            int timeStrength = weekData_getWorkoutTimeForType(d, WorkoutTypeStrength);
+            time_t timestamp = weekData_getWeekStart(d);
+            localtime_r(&timestamp, &localInfo);
+            HistoryWeekDataModel m = {
+                .year = localInfo.tm_year % 100,
+                .month = localInfo.tm_mon,
+                .day = localInfo.tm_mday,
+                .totalWorkouts = weekData_getTotalWorkouts(d),
+                .weightArray = {
+                    weekData_getLiftingLimitForType(d, LiftTypeSquat),
+                    weekData_getLiftingLimitForType(d, LiftTypePullup),
+                    weekData_getLiftingLimitForType(d, LiftTypeBench),
+                    weekData_getLiftingLimitForType(d, LiftTypeDeadlift)
+                },
+                .durationByType = {
+                    timeStrength,
+                    weekData_getWorkoutTimeForType(d, WorkoutTypeHIC),
+                    weekData_getWorkoutTimeForType(d, WorkoutTypeSE),
+                    weekData_getWorkoutTimeForType(d, WorkoutTypeEndurance)
+                },
+                .cumulativeDuration = {[0] = timeStrength}
+            };
 
-        for (int j = 1; j < 4; ++j)
-            m.cumulativeDuration[j] = m.cumulativeDuration[j - 1] + m.durationByType[j];
-        array_push_back(weekData, this->data, m);
-    }
+            for (int j = 1; j < 4; ++j)
+                m.cumulativeDuration[j] = m.cumulativeDuration[j - 1] + m.durationByType[j];
+            array_push_back(weekData, this->data, m);
+        }
+    });
 }
 
 void historyViewModel_formatDataForTimeRange(HistoryViewModel *this, int index) {
-    this->formatter.formatType = 0;
+    this->isSmall = true;
     this->totalWorkoutsViewModel.avgWorkouts = 0;
     this->totalWorkoutsViewModel.yMax = 0;
     this->workoutTypeViewModel.yMax = 0;
@@ -150,8 +157,9 @@ void historyViewModel_formatDataForTimeRange(HistoryViewModel *this, int index) 
 
     if (startIndex < 0)
         startIndex = 0;
-    if (size - startIndex >= 7)
-        this->formatter.formatType = 1;
+    int nEntries = size - startIndex;
+    if (nEntries >= 7)
+        this->isSmall = false;
 
     HistoryWeekDataModel *arr = this->data->arr;
     int totalWorkouts = 0, maxWorkouts = 0, maxActivityTime = 0, maxWeight = 0;
@@ -182,31 +190,35 @@ void historyViewModel_formatDataForTimeRange(HistoryViewModel *this, int index) 
             createNewEntry(this->workoutTypeViewModel.entries[j], i, e->cumulativeDuration[j - 1]);
     }
 
-    this->totalWorkoutsViewModel.avgWorkouts = (double) totalWorkouts / (size - startIndex);
+    this->totalWorkoutsViewModel.avgWorkouts = (double) totalWorkouts / nEntries;
     this->totalWorkoutsViewModel.yMax = maxWorkouts < 7 ? 7 : 1.1 * maxWorkouts;
     this->workoutTypeViewModel.yMax = 1.1 * maxActivityTime;
     this->liftViewModel.yMax = 1.1 * maxWeight;
 
+    CFStringRef totalWorkoutLegend = localize(CFSTR("totalWorkoutsLegend"));
+    CFStringRef liftLegend = localize(CFSTR("liftLegend"));
+    CFStringRef typeLegend = localize(CFSTR("workoutTypeLegend"));
     char buf[10];
-    CFStringRef label = CFStringCreateWithFormat(NULL, NULL, CFSTR("Avg Workouts (%.2f)"),
+
+    CFStringRef label = CFStringCreateWithFormat(NULL, NULL, totalWorkoutLegend,
                                                  this->totalWorkoutsViewModel.avgWorkouts);
     setLegendLabel(this->totalWorkoutsViewModel.legendEntries[0], label);
     CFRelease(label);
 
     for (int i = 0; i < 4; ++i) {
-        double liftAverage = (double) this->liftViewModel.totalByExercise[i] / size;
-        int typeAverage = this->workoutTypeViewModel.totalByType[i] / size;
+        double liftAverage = (double) this->liftViewModel.totalByExercise[i] / nEntries;
+        int typeAverage = this->workoutTypeViewModel.totalByType[i] / nEntries;
         if (typeAverage > 59) {
             sprintf(buf, "%d h %d m", typeAverage / 60, typeAverage % 60);
         } else {
             sprintf(buf, "%d m", typeAverage);
         }
-        label = CFStringCreateWithFormat(NULL, NULL, CFSTR("%s (Avg: %s)"),
+        label = CFStringCreateWithFormat(NULL, NULL, typeLegend,
                                          this->workoutTypeViewModel.names[i], buf);
         setLegendLabel(this->workoutTypeViewModel.legendEntries[i], label);
         CFRelease(label);
 
-        label = CFStringCreateWithFormat(NULL, NULL, CFSTR("%s (Avg: %.1f)"),
+        label = CFStringCreateWithFormat(NULL, NULL, liftLegend,
                                          this->liftViewModel.names[i], liftAverage);
         setLegendLabel(this->liftViewModel.legendEntries[i], label);
         CFRelease(label);
@@ -216,15 +228,9 @@ void historyViewModel_formatDataForTimeRange(HistoryViewModel *this, int index) 
 CFStringRef historyViewModel_getXAxisLabel(HistoryViewModel *this, int index) {
     CFRelease(this->formatter.currString);
     const HistoryWeekDataModel *model = &this->data->arr[index];
-    if (!this->formatter.formatType) {
-        this->formatter.currString = CFStringCreateWithFormat(NULL, NULL, CFSTR("%s %d"),
-                                                              this->formatter.wordMonths[model->month],
-                                                              model->day);
-    } else {
-        this->formatter.currString = CFStringCreateWithFormat(NULL, NULL, CFSTR("%s/%d/%d"),
-                                                              this->formatter.numMonths[model->month],
-                                                              model->day, model->year);
-    }
+    this->formatter.currString = CFStringCreateWithFormat(NULL, NULL, CFSTR("%@/%d/%d"),
+                                                          this->formatter.months[model->month],
+                                                          model->day, model->year);
     return this->formatter.currString;
 }
 

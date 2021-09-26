@@ -20,6 +20,8 @@ typedef unsigned char uchar;
 typedef signed char schar;
 typedef unsigned int uint;
 
+typedef void (^CallbackBlock)(void);
+
 id objc_staticMethod(Class _self, SEL _cmd);
 void objc_singleArg(id obj, SEL _cmd);
 id allocClass(const char *name);
@@ -28,9 +30,11 @@ void releaseObj(id obj);
 void getViewBounds(id view, CGRect *bounds);
 void getViewFrame(id view, CGRect *frame);
 void getScreenBounds(CGRect *result);
+id getBundle(void);
 id getUserDefaults(void);
 id getNotificationCenter(void);
 id createColor(const char *name);
 id createImage(CFStringRef name);
+CFStringRef localize(CFStringRef key);
 
 #endif /* CocoaBridging_h */

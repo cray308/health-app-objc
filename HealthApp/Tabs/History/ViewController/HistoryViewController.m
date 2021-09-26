@@ -33,14 +33,19 @@
 - (void) viewDidLoad {
     [super viewDidLoad];
     setBackground(self.view, UIColor.systemBackgroundColor);
-    self.navigationItem.title = @"Workout History";
+    self.navigationItem.title = (__bridge NSString*) localize(CFSTR("titles1"));
 
     UIView *separators[] = {
-        createChartSeparator(CFSTR("Workouts Each Week")),
-        createChartSeparator(CFSTR("Activity Time Each Week (By Type)")),
-        createChartSeparator(CFSTR("Lift Progress"))
+        createChartSeparator(localize(CFSTR("chartHeaderTotalWorkouts"))),
+        createChartSeparator(localize(CFSTR("chartHeaderWorkoutType"))),
+        createChartSeparator(localize(CFSTR("chartHeaderLifts")))
     };
-    CFStringRef segments[] = {CFSTR("6 Months"), CFSTR("1 Year"), CFSTR("2 Years")};
+    CFStringRef segments[3];
+    for (int i = 0; i < 3; ++i) {
+        CFStringRef key = CFStringCreateWithFormat(NULL, NULL, CFSTR("historySegment%d"), i);
+        segments[i] = localize(key);
+        CFRelease(key);
+    }
 
     rangePicker = createSegmentedControl(segments, 3, 0, self, @selector(updateSelectedSegment:));
     totalWorkoutsChart = [[TotalWorkoutsChart alloc]
@@ -82,9 +87,7 @@
     for (int i = 0; i < 3; ++i)
         [separators[i] release];
 
-    historyViewModel_fetchData(viewModel);
-    historyViewModel_formatDataForTimeRange(viewModel, 0);
-    [self updateCharts];
+    [self updateSelectedSegment:rangePicker];
     appCoordinatorShared->loadedViewControllers |= LoadedViewController_History;
 }
 
@@ -107,10 +110,9 @@
     }
 
     const int count = viewModel->totalWorkoutsViewModel.entries->size;
-    const bool isSmall = !viewModel->formatter.formatType;
-    [totalWorkoutsChart updateWithCount:count isSmall:isSmall];
-    [workoutTypeChart updateWithCount:count isSmall:isSmall];
-    [liftChart updateWithCount:count isSmall:isSmall];
+    [totalWorkoutsChart updateWithCount:count isSmall:viewModel->isSmall];
+    [workoutTypeChart updateWithCount:count isSmall:viewModel->isSmall];
+    [liftChart updateWithCount:count isSmall:viewModel->isSmall];
 }
 
 - (NSString *_Nonnull) stringForValue: (double)value axis: (AxisBase *_Nullable)axis {

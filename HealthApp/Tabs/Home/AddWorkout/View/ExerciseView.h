@@ -9,18 +9,11 @@
 #define ExerciseView_h
 
 #include "Exercise.h"
-#import <UIKit/UIKit.h>
+#import "StatusButton.h"
 
-@interface ExerciseView: UIView
+@interface ExerciseView: StatusButton
 - (id) initWithEntry: (ExerciseEntry *)e tag: (uint)tag target: (id)target action: (SEL)action;
 - (void) configureWithEntry: (ExerciseEntry *)e;
-@end
-
-@interface ExerciseView() {
-    @public UILabel *setsLabel;
-    @public UIView *checkbox;
-    @public UIButton *button;
-}
 @end
 
 #endif /* ExerciseView_h */

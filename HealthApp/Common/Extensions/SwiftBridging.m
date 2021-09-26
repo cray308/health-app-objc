@@ -100,3 +100,11 @@ void updateChart(bool isSmall, int count, id v, id data, double axisMax) {
     [view notifyDataSetChanged];
     [view animateWithXAxisDuration:isSmall ? 1.5 : 2.5];
 }
+
+void setTabBarItemColors(id appearance) {
+    UITabBarItemAppearance *item = appearance;
+    item.normal.iconColor = UIColor.systemGrayColor;
+    item.normal.titleTextAttributes = @{NSForegroundColorAttributeName: UIColor.systemGrayColor};
+    item.selected.iconColor = UIColor.systemRedColor;
+    item.selected.titleTextAttributes = @{NSForegroundColorAttributeName: UIColor.systemRedColor};
+}

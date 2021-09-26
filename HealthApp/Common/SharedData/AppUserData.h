@@ -21,7 +21,8 @@ typedef struct {
 
 extern UserInfo *appUserDataShared;
 
-UserInfo *userInfo_initFromStorage(void);
+void userInfo_create(time_t now, time_t weekStart);
+void userInfo_initFromStorage(void);
 void userInfo_saveData(UserInfo *info);
 
 int appUserData_checkTimezone(time_t now);

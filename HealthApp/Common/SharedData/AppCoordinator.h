@@ -25,6 +25,7 @@ extern AppCoordinator *appCoordinatorShared;
 
 void appCoordinator_start(AppCoordinator *coordinator, id tabVC);
 void appCoordinator_updatedUserInfo(AppCoordinator *coordinator);
+void appCoordinator_fetchHistory(AppCoordinator *this);
 void appCoordinator_deletedAppData(AppCoordinator *coordinator);
 void appCoordinator_updateMaxWeights(AppCoordinator *coordinator);
 

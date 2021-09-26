@@ -11,6 +11,7 @@
 #include "CocoaHelpers.h"
 
 extern id persistenceServiceShared;
+extern id backgroundContext;
 
 id createSortDescriptor(void);
 id fetchRequest(void);
@@ -31,9 +32,9 @@ void weekData_setTotalWorkouts(id weekData, int16_t value);
  (objc_getClass("NSPredicate"), sel_getUid("predicateWithFormat:"), format, ##__VA_ARGS__)  \
 
 void persistenceService_saveContext(void);
-void persistenceService_performForegroundUpdate(void);
+void persistenceService_init(void);
+void persistenceService_start(int tzOffset);
 void persistenceService_deleteUserData(void);
-void persistenceService_changeTimestamps(int difference);
 id persistenceService_getWeeklyDataForThisWeek(void);
 CFArrayRef persistenceService_executeFetchRequest(id req, int *count);
 

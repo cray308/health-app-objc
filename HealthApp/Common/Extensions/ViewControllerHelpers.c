@@ -49,7 +49,7 @@ static void addTarget(id view, id target, SEL action, int event) {
     (view, sel_getUid("addTarget:action:forControlEvents:"), target, action, event);
 }
 
-void createToolbar(id target, SEL doneSelector, id *fields) {
+id createToolbar(id target, SEL doneSelector) {
     CGRect bounds;
     getScreenBounds(&bounds);
     CGFloat width = bounds.size.width;
@@ -70,15 +70,10 @@ void createToolbar(id target, SEL doneSelector, id *fields) {
                                             sel_getUid("setItems:animated:"), array, false);
     ((void(*)(id,SEL,bool))objc_msgSend)(toolbar, sel_getUid("setUserInteractionEnabled:"), true);
 
-    for (int i = 0; fields[i]; ++i) {
-        ((void(*)(id,SEL,id))objc_msgSend)(fields[i],
-                                           sel_getUid("setInputAccessoryView:"), toolbar);
-    }
-
     CFRelease(array);
-    releaseObj(toolbar);
     releaseObj(flexSpace);
     releaseObj(doneButton);
+    return toolbar;
 }
 
 void setNavButton(id navItem, bool left, id button, CGFloat totalWidth) {
@@ -105,23 +100,32 @@ USet_char *createNumberCharacterSet(void) {
     return uset_new_fromArray(char, nums, 10);
 }
 
-bool checkTextfield(id field, CFRange range, CFStringRef replacement, USet_char *set, id button,
-                    id *fields, int count, short *maxes, short *results, bool *valid) {
+static void showInputError(TextValidator *validator, struct ChildValidator *child) {
+    enableButton(validator->button, false);
+    child->valid = false;
+    ((void(*)(id,SEL,bool))objc_msgSend)(child->inputView, sel_getUid("toggleError:"), true);
+}
+
+void resetInputChild(struct ChildValidator *child, short value) {
+    child->valid = true;
+    child->result = value;
+    ((void(*)(id,SEL,bool))objc_msgSend)(child->inputView, sel_getUid("toggleError:"), false);
+}
+
+bool checkInput(id field, CFRange range, CFStringRef replacement, TextValidator *validator) {
     int len = (int) CFStringGetLength(replacement);
     if (len) {
         CFStringInlineBuffer buf;
         CFStringInitInlineBuffer(replacement, &buf, CFRangeMake(0, len));
         for (int i = 0; i < len; ++i) {
-            if (!uset_contains(char, set, CFStringGetCharacterFromInlineBuffer(&buf, i)))
+            if (!uset_contains(char, validator->set, CFStringGetCharacterFromInlineBuffer(&buf, i)))
                 return false;
         }
     }
 
-    int i = 0;
-    for (; i < count; ++i) {
-        if (fields[i] && field == fields[i]) break;
-    }
-    if (i == count) return true;
+    int i = ((int(*)(id,SEL))objc_msgSend)(field, sel_getUid("tag"));
+    if (i == validator->count) return true;
+    struct ChildValidator *child = &validator->children[i];
 
     CFStringRef text = ((CFStringRef(*)(id,SEL))objc_msgSend)(field, sel_getUid("text"));
     CFMutableStringRef newText = CFStringCreateMutableCopy(NULL, 0, text ? text : CFSTR(""));
@@ -129,31 +133,25 @@ bool checkTextfield(id field, CFRange range, CFStringRef replacement, USet_char 
 
     if (!CFStringGetLength(newText)) {
         CFRelease(newText);
-        enableButton(button, false);
-        valid[i] = false;
+        showInputError(validator, child);
         return true;
     }
 
     short newVal = CFStringGetIntValue(newText);
     CFRelease(newText);
 
-    if (newVal < 0 || newVal > maxes[i]) {
-        enableButton(button, false);
-        valid[i] = false;
+    if (newVal < child->minVal || newVal > child->maxVal) {
+        showInputError(validator, child);
         return true;
     }
 
-    valid[i] = true;
-    results[i] = newVal;
+    resetInputChild(child, newVal);
 
-    for (i = 0; i < count; ++i) {
-        if (!valid[i]) {
-            enableButton(button, false);
-            return true;
-        }
+    for (i = 0; i < validator->count; ++i) {
+        if (!validator->children[i].valid) return true;
     }
-    
-    enableButton(button, true);
+
+    enableButton(validator->button, true);
     return true;
 }
 
@@ -213,7 +211,7 @@ id createAlertController(CFStringRef title, CFStringRef message) {
      sel_getUid("alertControllerWithTitle:message:preferredStyle:"), title, message, 1);
 }
 
-id createAlertAction(CFStringRef title, int style, AlertCallback handler) {
+id createAlertAction(CFStringRef title, int style, CallbackBlock handler) {
     return ((id(*)(Class,SEL,CFStringRef,int,void(^)(id)))objc_msgSend)
     (objc_getClass("UIAlertAction"), sel_getUid("actionWithTitle:style:handler:"), title, style,
      ^(id action _U_) {
@@ -302,15 +300,14 @@ id createLabel(CFStringRef text, id style, int alignment) {
     return view;
 }
 
-id createButton(CFStringRef title, id color, id disabledColor, id style,
-                id background, bool rounded, bool enabled, int tag, id target, SEL action) {
+id createButton(CFStringRef title, id color, id style, id background,
+                bool rounded, bool enabled, int tag, id target, SEL action) {
     id view = ((id(*)(Class,SEL,int))objc_msgSend)(objc_getClass("UIButton"),
                                                    sel_getUid("buttonWithType:"), 1);
     disableAutoresizing(view);
     setButtonTitle(view, title, 0);
     setButtonColor(view, color, 0);
-    if (disabledColor)
-        setButtonColor(view, disabledColor, 2);
+    setButtonColor(view, createColor("secondaryLabelColor"), 2);
     id label = ((id(*)(id,SEL))objc_msgSend)(view, sel_getUid("titleLabel"));
     setLabelFontWithStyle(label, style);
     setDynamicFont(label);
@@ -330,20 +327,17 @@ id createSegmentedControl(CFStringRef *items, int count, int startIndex, id targ
     disableAutoresizing(view);
     ((void(*)(id,SEL,int))objc_msgSend)(view, sel_getUid("setSelectedSegmentIndex:"), startIndex);
     setCornerRadius(view);
-    ((void(*)(id,SEL,id))objc_msgSend)(view, sel_getUid("setTintColor:"),
-                                       createColor("systemGray2Color"));
+    setTintColor(view, createColor("systemGray2Color"));
     if (action)
         addTarget(view, target, action, 4096);
     CFRelease(array);
     return view;
 }
 
-id createTextfield(id delegate, CFStringRef text, CFStringRef placeholder,
-                   int alignment, int keyboard) {
+id createTextfield(id delegate, CFStringRef text, int alignment, int keyboard) {
     id view = createObjectWithFrame("UITextField", CGRectZero);
     disableAutoresizing(view);
     setBackground(view, createColor("tertiarySystemBackgroundColor"));
-    ((void(*)(id,SEL,CFStringRef))objc_msgSend)(view, sel_getUid("setPlaceholder:"), placeholder);
     setLabelText(view, text);
     setAlignment(view, alignment);
     ((void(*)(id,SEL,int))objc_msgSend)(view, sel_getUid("setBorderStyle:"), 3);
@@ -369,6 +363,10 @@ void setTag(id view, int tag) {
 
 void setBackground(id view, id color) {
     ((void(*)(id,SEL,id))objc_msgSend)(view, sel_getUid("setBackgroundColor:"), color);
+}
+
+void setTintColor(id view, id color) {
+    ((void(*)(id,SEL,id))objc_msgSend)(view, sel_getUid("setTintColor:"), color);
 }
 
 void setLabelText(id view, CFStringRef text) {
