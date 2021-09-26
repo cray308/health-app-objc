@@ -86,7 +86,7 @@ void historyViewModel_fetchData(HistoryViewModel *this) {
 
         id request = fetchRequest();
         id predicate = createPredicate(CFSTR("weekStart > %lld AND weekStart < %lld"),
-                                       date_twoYears, appUserDataShared->weekStart);
+                                       date_twoYears, userData->weekStart);
         id descriptors[] = {createSortDescriptor()};
         CFArrayRef array = CFArrayCreate(NULL, (const void **)descriptors, 1, &kCocoaArrCallbacks);
 
@@ -96,36 +96,36 @@ void historyViewModel_fetchData(HistoryViewModel *this) {
         CFArrayRef data = persistenceService_executeFetchRequest(request, &count);
         releaseObj(descriptors[0]);
         CFRelease(array);
-        if (!data) return;
+        if (data) {
+            for (int i = 0; i < count; ++i) {
+                const id d = (const id) CFArrayGetValueAtIndex(data, i);
+                int timeStrength = weekData_getWorkoutTimeForType(d, WorkoutTypeStrength);
+                time_t timestamp = weekData_getWeekStart(d);
+                localtime_r(&timestamp, &localInfo);
+                HistoryWeekDataModel m = {
+                    .year = localInfo.tm_year % 100,
+                    .month = localInfo.tm_mon,
+                    .day = localInfo.tm_mday,
+                    .totalWorkouts = weekData_getTotalWorkouts(d),
+                    .weightArray = {
+                        weekData_getLiftingLimitForType(d, LiftTypeSquat),
+                        weekData_getLiftingLimitForType(d, LiftTypePullup),
+                        weekData_getLiftingLimitForType(d, LiftTypeBench),
+                        weekData_getLiftingLimitForType(d, LiftTypeDeadlift)
+                    },
+                    .durationByType = {
+                        timeStrength,
+                        weekData_getWorkoutTimeForType(d, WorkoutTypeHIC),
+                        weekData_getWorkoutTimeForType(d, WorkoutTypeSE),
+                        weekData_getWorkoutTimeForType(d, WorkoutTypeEndurance)
+                    },
+                    .cumulativeDuration = {[0] = timeStrength}
+                };
 
-        for (int i = 0; i < count; ++i) {
-            const id d = (const id) CFArrayGetValueAtIndex(data, i);
-            int timeStrength = weekData_getWorkoutTimeForType(d, WorkoutTypeStrength);
-            time_t timestamp = weekData_getWeekStart(d);
-            localtime_r(&timestamp, &localInfo);
-            HistoryWeekDataModel m = {
-                .year = localInfo.tm_year % 100,
-                .month = localInfo.tm_mon,
-                .day = localInfo.tm_mday,
-                .totalWorkouts = weekData_getTotalWorkouts(d),
-                .weightArray = {
-                    weekData_getLiftingLimitForType(d, LiftTypeSquat),
-                    weekData_getLiftingLimitForType(d, LiftTypePullup),
-                    weekData_getLiftingLimitForType(d, LiftTypeBench),
-                    weekData_getLiftingLimitForType(d, LiftTypeDeadlift)
-                },
-                .durationByType = {
-                    timeStrength,
-                    weekData_getWorkoutTimeForType(d, WorkoutTypeHIC),
-                    weekData_getWorkoutTimeForType(d, WorkoutTypeSE),
-                    weekData_getWorkoutTimeForType(d, WorkoutTypeEndurance)
-                },
-                .cumulativeDuration = {[0] = timeStrength}
-            };
-
-            for (int j = 1; j < 4; ++j)
+                for (int j = 1; j < 4; ++j)
                 m.cumulativeDuration[j] = m.cumulativeDuration[j - 1] + m.durationByType[j];
-            array_push_back(weekData, this->data, m);
+                array_push_back(weekData, this->data, m);
+            }
         }
     });
 }

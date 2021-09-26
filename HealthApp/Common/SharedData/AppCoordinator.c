@@ -15,9 +15,10 @@ typedef enum {
     TabHome, TabHistory, TabSettings
 } AppTab;
 
-AppCoordinator *appCoordinatorShared = NULL;
+AppCoordinator *appCoordinator = NULL;
 
-void appCoordinator_start(AppCoordinator *this, id tabVC) {
+void appCoordinator_start(id tabVC) {
+    appCoordinator = calloc(1, sizeof(AppCoordinator));
     id controllers[3];
     id items[3];
     CFStringRef imgNames[] = {CFSTR("house"), CFSTR("chart.bar"), CFSTR("gear")};
@@ -52,7 +53,8 @@ void appCoordinator_start(AppCoordinator *this, id tabVC) {
     settingsCoord->navVC = controllers[2];
     settingsCoordinator_start(settingsCoord);
 
-    memcpy(this->children, (void *[]){homeCoord, histCoord, settingsCoord}, 3 * sizeof(void *));
+    memcpy(appCoordinator->children,
+           (void *[]){homeCoord, histCoord, settingsCoord}, 3 * sizeof(void *));
 
     CFArrayRef array = CFArrayCreate(NULL, (const void **)controllers, 3, &kCocoaArrCallbacks);
     ((void(*)(id,SEL,CFArrayRef,bool))objc_msgSend)
@@ -65,23 +67,22 @@ void appCoordinator_start(AppCoordinator *this, id tabVC) {
     CFRelease(array);
 }
 
-void appCoordinator_updatedUserInfo(AppCoordinator *this) {
-    homeCoordinator_resetUI(this->children[TabHome]);
+void appCoordinator_updatedUserInfo(void) {
+    homeCoordinator_resetUI(appCoordinator->children[TabHome]);
 }
 
-void appCoordinator_fetchHistory(AppCoordinator *this) {
-    historyCoordinator_fetchData(this->children[TabHistory]);
+void appCoordinator_fetchHistory(void) {
+    historyCoordinator_fetchData(appCoordinator->children[TabHistory]);
 }
 
-void appCoordinator_deletedAppData(AppCoordinator *this) {
-    homeCoordinator_updateUI(this->children[TabHome]);
-    if (this->loadedViewControllers & LoadedViewController_History) {
-        historyCoordinator_updateUI(this->children[TabHistory]);
-    }
+void appCoordinator_deletedAppData(void) {
+    homeCoordinator_updateUI(appCoordinator->children[TabHome]);
+    bool updateVC = appCoordinator->loadedViewControllers & LoadedViewController_History;
+    historyCoordinator_updateUI(appCoordinator->children[TabHistory], updateVC);
 }
 
-void appCoordinator_updateMaxWeights(AppCoordinator *this) {
-    if (this->loadedViewControllers & LoadedViewController_Settings) {
-        settingsCoordinator_updateWeightText(this->children[TabSettings]);
+void appCoordinator_updateMaxWeights(void) {
+    if (appCoordinator->loadedViewControllers & LoadedViewController_Settings) {
+        settingsCoordinator_updateWeightText(appCoordinator->children[TabSettings]);
     }
 }

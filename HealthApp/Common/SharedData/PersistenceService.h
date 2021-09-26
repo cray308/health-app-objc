@@ -10,7 +10,6 @@
 
 #include "CocoaHelpers.h"
 
-extern id persistenceServiceShared;
 extern id backgroundContext;
 
 id createSortDescriptor(void);

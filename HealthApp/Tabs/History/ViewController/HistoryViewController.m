@@ -88,7 +88,7 @@
         [separators[i] release];
 
     [self updateSelectedSegment:rangePicker];
-    appCoordinatorShared->loadedViewControllers |= LoadedViewController_History;
+    appCoordinator->loadedViewControllers |= LoadedViewController_History;
 }
 
 - (void) updateSelectedSegment: (UISegmentedControl *)sender {

@@ -85,7 +85,7 @@
     [self updateGreeting];
     homeViewModel_fetchData(viewModel);
     [self createWorkoutsList];
-    appCoordinatorShared->loadedViewControllers |= LoadedViewController_Home;
+    appCoordinator->loadedViewControllers |= LoadedViewController_Home;
 }
 
 - (void) viewWillAppear: (BOOL)animated {
@@ -138,7 +138,7 @@
     int count = (int) CFArrayGetCount(subviews);
     if (!(homeViewModel_hasWorkoutsForThisWeek(viewModel) && count > 2)) return;
 
-    const unsigned char completed = appUserDataShared->completedWorkouts;
+    const unsigned char completed = userData->completedWorkouts;
 
     for (int i = 2; i < count; ++i) {
         StatusButton *v = (StatusButton *) CFArrayGetValueAtIndex(subviews, i);

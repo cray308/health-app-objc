@@ -72,7 +72,7 @@ void homeCoordinator_didFinishAddingWorkout(HomeTabCoordinator *this, int totalC
 }
 
 void homeCoordinator_addWorkoutFromPlan(HomeTabCoordinator *this, int index) {
-    unsigned char plan = (unsigned char) appUserDataShared->currentPlan;
+    unsigned char plan = (unsigned char) userData->currentPlan;
     Workout *w = exerciseManager_getWeeklyWorkoutAtIndex(plan, appUserData_getWeekInPlan(), index);
     if (w)
         navigateToAddWorkout(this, false, w);

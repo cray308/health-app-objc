@@ -19,16 +19,13 @@ typedef struct {
     short liftMaxes[4];
 } UserInfo;
 
-extern UserInfo *appUserDataShared;
+extern UserInfo *userData;
 
-void userInfo_create(time_t now, time_t weekStart);
-void userInfo_initFromStorage(void);
-void userInfo_saveData(UserInfo *info);
+void userInfo_create(void);
+int userInfo_initFromStorage(void);
 
-int appUserData_checkTimezone(time_t now);
 void appUserData_setWorkoutPlan(signed char plan);
 void appUserData_deleteSavedData(void);
-void appUserData_handleNewWeek(time_t weekStart);
 unsigned char appUserData_addCompletedWorkout(unsigned char day);
 int appUserData_getWeekInPlan(void);
 void appUserData_updateWeightMaxes(short *weights);

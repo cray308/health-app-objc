@@ -30,7 +30,7 @@ void settingsCoordinator_handleSaveTap(SettingsTabCoordinator *this,
     addAlertAction(ctrl, createAlertAction(localize(CFSTR("save")), 0, ^{
         appUserData_updateWeightMaxes(weights);
         appUserData_setWorkoutPlan(plan);
-        appCoordinator_updatedUserInfo(appCoordinatorShared);
+        appCoordinator_updatedUserInfo();
     }));
     addAlertAction(ctrl, cancelAction());
     presentVC(getFirstVC(this->navVC), ctrl);
@@ -41,7 +41,7 @@ void settingsCoordinator_handleDeleteTap(SettingsTabCoordinator *this) {
                                     localize(CFSTR("settingsAlertMessageDelete")));
     addAlertAction(ctrl, createAlertAction(localize(CFSTR("delete")), 2, ^{
         appUserData_deleteSavedData();
-        appCoordinator_deletedAppData(appCoordinatorShared);
+        appCoordinator_deletedAppData();
         persistenceService_deleteUserData();
     }));
     addAlertAction(ctrl, cancelAction());

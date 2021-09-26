@@ -44,7 +44,7 @@
         segments[i] = localize(key);
         CFRelease(key);
     }
-    int startIndex = appUserDataShared->currentPlan >= 0 ? appUserDataShared->currentPlan + 1 : 0;
+    int startIndex = userData->currentPlan >= 0 ? userData->currentPlan + 1 : 0;
     planPicker = createSegmentedControl(segments, 3, startIndex, nil, nil);
 
     UIView *planContainer = createView(nil, false);
@@ -124,16 +124,15 @@
     [toolbar release];
 
     [self updateWeightFields];
-    appCoordinatorShared->loadedViewControllers |= LoadedViewController_Settings;
+    appCoordinator->loadedViewControllers |= LoadedViewController_Settings;
 }
 
 - (void) updateWeightFields {
     for (int i = 0; i < 4; ++i) {
-        short value = appUserDataShared->liftMaxes[i];
-        CFStringRef text = CFStringCreateWithFormat(NULL, NULL, CFSTR("%d"), value);
-        setLabelText(((InputView *) validator.children[i].inputView)->field, text);
-        resetInputChild(&validator.children[i], value);
-        CFRelease(text);
+        CFStringRef str = CFStringCreateWithFormat(NULL, NULL, CFSTR("%d"), userData->liftMaxes[i]);
+        setLabelText(((InputView *) validator.children[i].inputView)->field, str);
+        resetInputChild(&validator.children[i], userData->liftMaxes[i]);
+        CFRelease(str);
     }
     enableButton(validator.button, true);
 }

@@ -9,16 +9,16 @@
 #include "AppUserData.h"
 #include "CalendarDateHelpers.h"
 
-id persistenceServiceShared = nil;
+static id persistenceService = nil;
 id backgroundContext = nil;
 
-static id createWeekData(id context) {
+static id createWeekData(void) {
     return ((id(*)(id,SEL,id))objc_msgSend)(allocClass("WeeklyData"),
-                                            sel_getUid("initWithContext:"), context);
+                                            sel_getUid("initWithContext:"), backgroundContext);
 }
 
-static void deleteWeekData(id context, id data) {
-    ((void(*)(id,SEL,id))objc_msgSend)(context, sel_getUid("deleteObject:"), data);
+static void deleteWeekData(id data) {
+    ((void(*)(id,SEL,id))objc_msgSend)(backgroundContext, sel_getUid("deleteObject:"), data);
 }
 
 static void setWeekData(id data, const char *setter, int16_t value) {
@@ -95,12 +95,12 @@ void setDescriptors(id request, CFArrayRef descriptors) {
 }
 
 void persistenceService_init(void) {
-    persistenceServiceShared = ((id(*)(id,SEL,CFStringRef))objc_msgSend)
+    persistenceService = ((id(*)(id,SEL,CFStringRef))objc_msgSend)
     (allocClass("NSPersistentContainer"), sel_getUid("initWithName:"), CFSTR("HealthApp"));
     ((void(*)(id,SEL,void(^)(id,id)))objc_msgSend)
-    (persistenceServiceShared, sel_getUid("loadPersistentStoresWithCompletionHandler:"),
+    (persistenceService, sel_getUid("loadPersistentStoresWithCompletionHandler:"),
      ^(id description _U_, id error _U_) {});
-    backgroundContext = ((id(*)(id,SEL))objc_msgSend)(persistenceServiceShared,
+    backgroundContext = ((id(*)(id,SEL))objc_msgSend)(persistenceService,
                                                       sel_getUid("newBackgroundContext"));
     ((void(*)(id,SEL,bool))objc_msgSend)
     (backgroundContext, sel_getUid("setAutomaticallyMergesChangesFromParent:"), true);
@@ -126,7 +126,7 @@ void persistenceService_start(int tzOffset) {
         if (data && count) {
             for (int i = 0; i < count; ++i) {
                 id d = (id) CFArrayGetValueAtIndex(data, i);
-                deleteWeekData(backgroundContext, d);
+                deleteWeekData(d);
             }
             persistenceService_saveContext();
         }
@@ -134,8 +134,7 @@ void persistenceService_start(int tzOffset) {
         id descriptor = createSortDescriptor();
         id _descriptors[] = {descriptor};
         CFArrayRef array = CFArrayCreate(NULL, (const void **)_descriptors, 1, &kCocoaArrCallbacks);
-        setPredicate(request,
-                     createPredicate(CFSTR("weekStart < %lld"), appUserDataShared->weekStart));
+        setPredicate(request, createPredicate(CFSTR("weekStart < %lld"), userData->weekStart));
         setDescriptors(request, array);
         data = persistenceService_executeFetchRequest(request, &count);
         bool createEntryForCurrentWeek = persistenceService_getWeeklyDataForThisWeek() == nil;
@@ -145,40 +144,37 @@ void persistenceService_start(int tzOffset) {
 
         if (!(data && count)) {
             if (createEntryForCurrentWeek) {
-                id curr = createWeekData(backgroundContext);
-                weekData_setWeekStart(curr, appUserDataShared->weekStart);
+                id curr = createWeekData();
+                weekData_setWeekStart(curr, userData->weekStart);
                 releaseObj(curr);
             }
-            persistenceService_saveContext();
-            return;
+            goto cleanup;
         }
 
         id last = (id) CFArrayGetValueAtIndex(data, count - 1);
         int16_t lastLifts[4];
-        for (int i = 0; i < 4; ++i) {
+        for (int i = 0; i < 4; ++i)
             lastLifts[i] = weekData_getLiftingLimitForType(last, i);
-        }
 
         for (time_t currStart = weekData_getWeekStart(last) + WeekSeconds;
-             currStart < appUserDataShared->weekStart;
+             currStart < userData->weekStart;
              currStart += WeekSeconds) {
-            id curr = createWeekData(backgroundContext);
+            id curr = createWeekData();
             weekData_setWeekStart(curr, currStart);
-            for (int i = 0; i < 4; ++i) {
+            for (int i = 0; i < 4; ++i)
                 weekData_setLiftingMaxForType(curr, i, lastLifts[i]);
-            }
             releaseObj(curr);
         }
 
         if (createEntryForCurrentWeek) {
-            id curr = createWeekData(backgroundContext);
-            weekData_setWeekStart(curr, appUserDataShared->weekStart);
-            for (int i = 0; i < 4; ++i) {
+            id curr = createWeekData();
+            weekData_setWeekStart(curr, userData->weekStart);
+            for (int i = 0; i < 4; ++i)
                 weekData_setLiftingMaxForType(curr, i, lastLifts[i]);
-            }
             releaseObj(curr);
         }
 
+    cleanup:
         persistenceService_saveContext();
     });
 }
@@ -187,23 +183,22 @@ void persistenceService_deleteUserData(void) {
     ((void(*)(id,SEL,void(^)(void)))objc_msgSend)(backgroundContext, sel_getUid("performBlock:"), ^{
         int count = 0;
         id request = fetchRequest();
-        id predicate = createPredicate(CFSTR("weekStart < %lld"), appUserDataShared->weekStart);
+        id predicate = createPredicate(CFSTR("weekStart < %lld"), userData->weekStart);
         setPredicate(request, predicate);
         CFArrayRef data = persistenceService_executeFetchRequest(fetchRequest(), &count);
 
         if (data && count) {
             for (int i = 0; i < count; ++i) {
                 id d = (id) CFArrayGetValueAtIndex(data, i);
-                deleteWeekData(backgroundContext, d);
+                deleteWeekData(d);
             }
         }
 
         id currWeek = persistenceService_getWeeklyDataForThisWeek();
         if (currWeek) {
             weekData_setTotalWorkouts(currWeek, 0);
-            for (int i = 0; i < 4; ++i) {
+            for (int i = 0; i < 4; ++i)
                 weekData_setWorkoutTimeForType(currWeek, i, 0);
-            }
         }
         persistenceService_saveContext();
     });
@@ -212,7 +207,7 @@ void persistenceService_deleteUserData(void) {
 id persistenceService_getWeeklyDataForThisWeek(void) {
     int count = 0;
     id request = fetchRequest();
-    id predicate = createPredicate(CFSTR("weekStart == %lld"), appUserDataShared->weekStart);
+    id predicate = createPredicate(CFSTR("weekStart == %lld"), userData->weekStart);
     setPredicate(request, predicate);
     CFArrayRef currentWeeks = persistenceService_executeFetchRequest(request, &count);
     if (!(currentWeeks && count)) return nil;

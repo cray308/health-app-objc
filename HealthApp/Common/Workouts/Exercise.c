@@ -119,7 +119,7 @@ static void buildWorkoutFromDict(CFDictionaryRef dict, WorkoutParams *params, Wo
     ExerciseEntry *e;
     switch (params->type) {
         case WorkoutTypeStrength: ;
-            short *lifts = appUserDataShared->liftMaxes;
+            short *lifts = userData->liftMaxes;
             int nExercises = exercises->size;
             float multiplier = params->weight / 100.f;
             array_iter(exercises, e) {

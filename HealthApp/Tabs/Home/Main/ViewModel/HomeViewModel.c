@@ -25,8 +25,8 @@ void homeViewModel_fetchData(HomeViewModel *model) {
             CFRelease(model->workoutNames[i]);
         model->workoutNames[i] = NULL;
     }
-    if (appUserDataShared->currentPlan >= 0 && appUserDataShared->planStart <= time(NULL)) {
-        exerciseManager_setWeeklyWorkoutNames((unsigned char) appUserDataShared->currentPlan,
+    if (userData->currentPlan >= 0 && userData->planStart <= time(NULL)) {
+        exerciseManager_setWeeklyWorkoutNames((unsigned char) userData->currentPlan,
                                               appUserData_getWeekInPlan(), model->workoutNames);
     }
 }

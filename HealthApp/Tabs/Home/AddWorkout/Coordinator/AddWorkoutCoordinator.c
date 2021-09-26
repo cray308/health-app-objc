@@ -45,11 +45,11 @@ static void updateStoredData(AddWorkoutCoordinator *this) {
                     weekData_setLiftingMaxForType(data, i, w->newLifts[i]);
             }
             persistenceService_saveContext();
-            if (w->newLifts)
-                free(w->newLifts);
-            free(w);
-            free(this);
         }
+        if (w->newLifts)
+            free(w->newLifts);
+        free(w);
+        free(this);
     });
 }
 
@@ -63,8 +63,9 @@ void addWorkoutCoordinator_start(AddWorkoutCoordinator *this) {
 }
 
 void addWorkoutCoordinator_stoppedWorkout(AddWorkoutCoordinator *this) {
+    void *parent = this->parent;
     updateStoredData(this);
-    homeCoordinator_didFinishAddingWorkout(this->parent, 0);
+    homeCoordinator_didFinishAddingWorkout(parent, 0);
 }
 
 void addWorkoutCoordinator_completedWorkout(AddWorkoutCoordinator *this,
@@ -91,10 +92,11 @@ void addWorkoutCoordinator_completedWorkout(AddWorkoutCoordinator *this,
 
     if (dismissVC) {
         dismissPresentedVC(this->navVC);
-        appCoordinator_updateMaxWeights(appCoordinatorShared);
+        appCoordinator_updateMaxWeights();
     }
+    void *parent = this->parent;
     updateStoredData(this);
-    homeCoordinator_didFinishAddingWorkout(this->parent, totalCompleted);
+    homeCoordinator_didFinishAddingWorkout(parent, totalCompleted);
 }
 
 void addWorkoutCoordinator_stopWorkoutFromBackButtonPress(AddWorkoutCoordinator *this) {

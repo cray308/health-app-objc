@@ -17,7 +17,8 @@ void historyCoordinator_fetchData(HistoryTabCoordinator *this) {
     historyViewModel_fetchData(&this->viewModel);
 }
 
-void historyCoordinator_updateUI(HistoryTabCoordinator *this) {
+void historyCoordinator_updateUI(HistoryTabCoordinator *this, bool callVC) {
     array_clear(weekData, this->viewModel.data);
-    objc_singleArg(getFirstVC(this->navVC), sel_getUid("performForegroundUpdate"));
+    if (callVC)
+        objc_singleArg(getFirstVC(this->navVC), sel_getUid("performForegroundUpdate"));
 }

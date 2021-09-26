@@ -21,12 +21,12 @@ typedef struct {
     void *children[3];
 } AppCoordinator;
 
-extern AppCoordinator *appCoordinatorShared;
+extern AppCoordinator *appCoordinator;
 
-void appCoordinator_start(AppCoordinator *coordinator, id tabVC);
-void appCoordinator_updatedUserInfo(AppCoordinator *coordinator);
-void appCoordinator_fetchHistory(AppCoordinator *this);
-void appCoordinator_deletedAppData(AppCoordinator *coordinator);
-void appCoordinator_updateMaxWeights(AppCoordinator *coordinator);
+void appCoordinator_start(id tabVC);
+void appCoordinator_updatedUserInfo(void);
+void appCoordinator_fetchHistory(void);
+void appCoordinator_deletedAppData(void);
+void appCoordinator_updateMaxWeights(void);
 
 #endif /* AppCoordinator_h */
