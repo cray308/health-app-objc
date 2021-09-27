@@ -44,8 +44,7 @@
         segments[i] = localize(key);
         CFRelease(key);
     }
-    int startIndex = userData->currentPlan >= 0 ? userData->currentPlan + 1 : 0;
-    planPicker = createSegmentedControl(segments, 3, startIndex, nil, nil);
+    planPicker = createSegmentedControl(segments, 3, userData->currentPlan + 1, nil, nil);
 
     UIView *planContainer = createView(nil, false);
     [planContainer addSubview:planLabel];
@@ -141,10 +140,10 @@
 
 - (void) buttonTapped: (UIButton *)sender {
     if (!sender.tag) {
-        const int segment = (int) planPicker.selectedSegmentIndex;
+        schar plan = ((schar) planPicker.selectedSegmentIndex - 1);
         for (int i = 0; i < 4; ++i)
             results[i] = validator.children[i].result;
-        settingsCoordinator_handleSaveTap(delegate, results, !segment ? -1 : segment - 1);
+        settingsCoordinator_handleSaveTap(delegate, results, plan);
     } else {
         settingsCoordinator_handleDeleteTap(delegate);
     }

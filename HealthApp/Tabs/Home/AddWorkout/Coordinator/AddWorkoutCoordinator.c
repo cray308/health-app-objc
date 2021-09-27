@@ -35,7 +35,7 @@ static void updateStoredData(AddWorkoutCoordinator *this) {
     ((void(*)(id,SEL,void(^)(void)))objc_msgSend)(backgroundContext, sel_getUid("performBlock:"), ^{
         Workout *w = this->workout;
         if (w->duration >= 15) {
-            id data = persistenceService_getWeeklyDataForThisWeek();
+            id data = persistenceService_getCurrentWeek();
 
             int16_t duration = w->duration + weekData_getWorkoutTimeForType(data, w->type);
             weekData_setWorkoutTimeForType(data, w->type, duration);

@@ -61,8 +61,9 @@ static CFArrayRef getLibraryArrayForType(struct DictWrapper *data, unsigned char
 }
 
 static CFArrayRef getCurrentWeekForPlan(struct DictWrapper *data, uchar plan, int week) {
+    static CFStringRef const planKeys[] = {CFSTR("bb"), CFSTR("cc")};
     CFDictionaryRef plans = CFDictionaryGetValue(data->root, CFSTR("plans"));
-    CFArrayRef weeks = CFDictionaryGetValue(plans, plan == 0 ? CFSTR("bb") : CFSTR("cc"));
+    CFArrayRef weeks = CFDictionaryGetValue(plans, planKeys[plan]);
     if (week >= CFArrayGetCount(weeks)) return NULL;
     return CFArrayGetValueAtIndex(weeks, week);
 }

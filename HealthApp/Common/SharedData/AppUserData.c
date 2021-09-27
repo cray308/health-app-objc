@@ -9,6 +9,12 @@
 #include "CocoaHelpers.h"
 #include "CalendarDateHelpers.h"
 
+typedef enum {
+    WorkoutPlanNone = -1,
+    WorkoutPlanBaseBuilding = 0,
+    WorkoutPlanContinuation = 1
+} WorkoutPlan;
+
 UserInfo *userData = NULL;
 static CFStringRef const userInfoKey = CFSTR("userinfo");
 
@@ -46,7 +52,9 @@ void userInfo_create(void) {
     time_t now = time(NULL);
     time_t weekStart = date_calcStartOfWeek(now);
     UserInfo info = {
-        .currentPlan = -1, .weekStart = weekStart, .tzOffset = date_getOffsetFromGMT(now)
+        .currentPlan = WorkoutPlanNone,
+        .weekStart = weekStart,
+        .tzOffset = date_getOffsetFromGMT(now)
     };
     userData = malloc(sizeof(UserInfo));
     memcpy(userData, &info, sizeof(UserInfo));
@@ -54,6 +62,7 @@ void userInfo_create(void) {
 }
 
 int userInfo_initFromStorage(void) {
+    static int const planLengths[] = {8, 13};
     time_t now = time(NULL);
     time_t weekStart = date_calcStartOfWeek(now);
     CFDictionaryRef savedInfo = ((CFDictionaryRef(*)(id,SEL,CFStringRef))objc_msgSend)
@@ -90,12 +99,11 @@ int userInfo_initFromStorage(void) {
         userData->completedWorkouts = 0;
         userData->weekStart = weekStart;
 
-        signed char plan = userData->currentPlan;
-        if (plan >= 0) {
-            const int nWeeks = plan == 0 ? 8 : 13;
+        if (userData->currentPlan != WorkoutPlanNone) {
+            const int nWeeks = planLengths[userData->currentPlan];
             if ((appUserData_getWeekInPlan() / WeekSeconds) >= nWeeks) {
-                if (plan == 0)
-                    userData->currentPlan = 1;
+                if (userData->currentPlan == WorkoutPlanBaseBuilding)
+                    userData->currentPlan = WorkoutPlanContinuation;
                 userData->planStart = weekStart;
             }
         }
@@ -105,7 +113,7 @@ int userInfo_initFromStorage(void) {
 }
 
 void appUserData_setWorkoutPlan(signed char plan) {
-    if (plan >= 0 && plan != userData->currentPlan) {
+    if (plan != WorkoutPlanNone && plan != userData->currentPlan) {
 #if DEBUG
         userData->planStart = userData->weekStart;
 #else

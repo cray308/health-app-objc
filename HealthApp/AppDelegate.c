@@ -16,94 +16,6 @@ static CFStringRef const hasLaunchedKey = CFSTR("hasLaunched");
 
 Class AppDelegateClass;
 
-#if DEBUG
-static void setupData(void) {
-    ((void(*)(id,SEL,void(^)(void)))objc_msgSend)(backgroundContext, sel_getUid("performBlock:"), ^{
-        int16_t lifts[] = {300, 20, 185, 235};
-        int i = 0;
-        unsigned char plan = 0;
-        time_t start = date_calcStartOfWeek(time(NULL) - 126489600);
-        time_t end = date_calcStartOfWeek(time(NULL) - 2678400);
-
-        while (start < end) {
-            int16_t totalWorkouts = 0;
-            int16_t times[4] = {0};
-            id data = ((id(*)(id,SEL,id))objc_msgSend)
-            (allocClass("WeeklyData"), sel_getUid("initWithContext:"), backgroundContext);
-            ((void(*)(id,SEL,int64_t))objc_msgSend)(data, sel_getUid("setWeekStart:"), start);
-
-            if (plan == 0) {
-                for (int j = 0; j < 6; ++j) {
-                    int extra = 10;
-                    bool didSE = true;
-                    switch (j) {
-                        case 1:
-                        case 2:
-                        case 5:
-                            times[2] += ((rand() % 30) + 30);
-                            totalWorkouts += 1;
-                            break;
-                        case 4:
-                            if ((didSE = (rand() % 10 >= 5))) extra = 0;
-                        case 0:
-                        case 3:
-                            if (didSE) {
-                                times[1] += ((rand() % 20) + extra);
-                                totalWorkouts += 1;
-                            }
-                        default:
-                            break;
-                    }
-                }
-            } else {
-                for (int j = 0; j < 6; ++j) {
-                    switch (j) {
-                        case 0:
-                        case 2:
-                        case 4:
-                            times[0] += ((rand() % 20) + 20);
-                            totalWorkouts += 1;
-                            break;
-                        case 1:
-                        case 3:
-                            times[3] += ((rand() % 20) + 15);
-                            totalWorkouts += 1;
-                            break;
-                        case 5:
-                            times[2] += ((rand() % 30) + 60);
-                            totalWorkouts += 1;
-                        default:
-                            break;
-                    }
-                }
-            }
-
-            if (i == 7) {
-                plan = 1;
-            } else if (i == 20 || i == 32 || i == 44) {
-                lifts[2] = 185 + (rand() % 50);
-                lifts[1] = 20 + (rand() % 20);
-                lifts[0] = 300 + (rand() % 80);
-                lifts[3] = 235 + (rand() % 50);
-            }
-            weekData_setTotalWorkouts(data, totalWorkouts);
-            for (int l = 0; l < 4; ++l) {
-                weekData_setWorkoutTimeForType(data, l, times[l]);
-                weekData_setLiftingMaxForType(data, l, lifts[l]);
-            }
-            releaseObj(data);
-
-            if (++i == 52) {
-                i = 0;
-                plan = 0;
-            }
-            start += WeekSeconds;
-        }
-        ((bool(*)(id,SEL,id))objc_msgSend)(backgroundContext, sel_getUid("save:"), nil);
-    });
-}
-#endif
-
 bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
                                     id application _U_, id options _U_) {
     CGRect bounds;
@@ -120,9 +32,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
         ((void(*)(id,SEL,bool,CFStringRef))objc_msgSend)
         (getUserDefaults(), sel_getUid("setBool:forKey:"), true, hasLaunchedKey);
         userInfo_create();
-#if DEBUG
-        setupData();
-#endif
+        persistenceService_create();
     } else {
         tzOffset = userInfo_initFromStorage();
     }

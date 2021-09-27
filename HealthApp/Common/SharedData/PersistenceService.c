@@ -94,6 +94,95 @@ void setDescriptors(id request, CFArrayRef descriptors) {
                                                sel_getUid("setSortDescriptors:"), descriptors);
 }
 
+void persistenceService_create(void) {
+#if DEBUG
+    ((void(*)(id,SEL,void(^)(void)))objc_msgSend)(backgroundContext, sel_getUid("performBlock:"), ^{
+        int16_t lifts[] = {300, 20, 185, 235};
+        int i = 0;
+        unsigned char plan = 0;
+        time_t start = date_calcStartOfWeek(time(NULL) - 126489600);
+        time_t end = date_calcStartOfWeek(time(NULL) - 2678400);
+
+        while (start < end) {
+            int16_t totalWorkouts = 0;
+            int16_t times[4] = {0};
+            id data = createWeekData();
+            weekData_setWeekStart(data, start);
+
+            if (plan == 0) {
+                for (int j = 0; j < 6; ++j) {
+                    int extra = 10;
+                    bool didSE = true;
+                    switch (j) {
+                        case 1:
+                        case 2:
+                        case 5:
+                            times[2] += ((rand() % 30) + 30);
+                            totalWorkouts += 1;
+                            break;
+                        case 4:
+                            if ((didSE = (rand() % 10 >= 5))) extra = 0;
+                        case 0:
+                        case 3:
+                            if (didSE) {
+                                times[1] += ((rand() % 20) + extra);
+                                totalWorkouts += 1;
+                            }
+                        default:
+                            break;
+                    }
+                }
+            } else {
+                for (int j = 0; j < 6; ++j) {
+                    switch (j) {
+                        case 0:
+                        case 2:
+                        case 4:
+                            times[0] += ((rand() % 20) + 20);
+                            totalWorkouts += 1;
+                            break;
+                        case 1:
+                        case 3:
+                            times[3] += ((rand() % 20) + 15);
+                            totalWorkouts += 1;
+                            break;
+                        case 5:
+                            times[2] += ((rand() % 30) + 60);
+                            totalWorkouts += 1;
+                        default:
+                            break;
+                    }
+                }
+            }
+
+            if (i == 7) {
+                plan = 1;
+            } else if (i == 20 || i == 32 || i == 44) {
+                lifts[2] = 185 + (rand() % 50);
+                lifts[1] = 20 + (rand() % 20);
+                lifts[0] = 300 + (rand() % 80);
+                lifts[3] = 235 + (rand() % 50);
+            }
+            weekData_setTotalWorkouts(data, totalWorkouts);
+            for (int l = 0; l < 4; ++l) {
+                weekData_setWorkoutTimeForType(data, l, times[l]);
+                weekData_setLiftingMaxForType(data, l, lifts[l]);
+            }
+            releaseObj(data);
+
+            if (++i == 52) {
+                i = 0;
+                plan = 0;
+            }
+            start += WeekSeconds;
+        }
+        persistenceService_saveContext();
+    });
+#else
+
+#endif
+}
+
 void persistenceService_init(void) {
     persistenceService = ((id(*)(id,SEL,CFStringRef))objc_msgSend)
     (allocClass("NSPersistentContainer"), sel_getUid("initWithName:"), CFSTR("HealthApp"));
@@ -137,17 +226,20 @@ void persistenceService_start(int tzOffset) {
         setPredicate(request, createPredicate(CFSTR("weekStart < %lld"), userData->weekStart));
         setDescriptors(request, array);
         data = persistenceService_executeFetchRequest(request, &count);
-        bool createEntryForCurrentWeek = persistenceService_getWeeklyDataForThisWeek() == nil;
+        id currWeek = persistenceService_getCurrentWeek();
+        bool newEntryForCurrentWeek = false;
+        if (!currWeek) {
+            newEntryForCurrentWeek = true;
+            currWeek = createWeekData();
+            weekData_setWeekStart(currWeek, userData->weekStart);
+        }
 
         releaseObj(descriptor);
         CFRelease(array);
 
         if (!(data && count)) {
-            if (createEntryForCurrentWeek) {
-                id curr = createWeekData();
-                weekData_setWeekStart(curr, userData->weekStart);
-                releaseObj(curr);
-            }
+            if (newEntryForCurrentWeek)
+                releaseObj(currWeek);
             goto cleanup;
         }
 
@@ -166,12 +258,10 @@ void persistenceService_start(int tzOffset) {
             releaseObj(curr);
         }
 
-        if (createEntryForCurrentWeek) {
-            id curr = createWeekData();
-            weekData_setWeekStart(curr, userData->weekStart);
+        if (newEntryForCurrentWeek) {
             for (int i = 0; i < 4; ++i)
-                weekData_setLiftingMaxForType(curr, i, lastLifts[i]);
-            releaseObj(curr);
+                weekData_setLiftingMaxForType(currWeek, i, lastLifts[i]);
+            releaseObj(currWeek);
         }
 
     cleanup:
@@ -194,7 +284,7 @@ void persistenceService_deleteUserData(void) {
             }
         }
 
-        id currWeek = persistenceService_getWeeklyDataForThisWeek();
+        id currWeek = persistenceService_getCurrentWeek();
         if (currWeek) {
             weekData_setTotalWorkouts(currWeek, 0);
             for (int i = 0; i < 4; ++i)
@@ -204,7 +294,7 @@ void persistenceService_deleteUserData(void) {
     });
 }
 
-id persistenceService_getWeeklyDataForThisWeek(void) {
+id persistenceService_getCurrentWeek(void) {
     int count = 0;
     id request = fetchRequest();
     id predicate = createPredicate(CFSTR("weekStart == %lld"), userData->weekStart);

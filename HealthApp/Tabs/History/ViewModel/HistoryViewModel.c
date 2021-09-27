@@ -12,6 +12,11 @@
 #include "PersistenceService.h"
 #include "SwiftBridging.h"
 
+typedef enum {
+    HistoryTimeRange6Months,
+    HistoryTimeRange1Year
+} HistoryTimeRange;
+
 static id getCustomColor(CFStringRef name) {
     return ((id(*)(Class,SEL,CFStringRef))objc_msgSend)(objc_getClass("UIColor"),
                                                         sel_getUid("colorNamed:"), name);
@@ -149,9 +154,9 @@ void historyViewModel_formatDataForTimeRange(HistoryViewModel *this, int index) 
     if (!(size = (this->data->size))) return;
 
     int startIndex = 0;
-    if (index == 0) {
+    if (index == HistoryTimeRange6Months) {
         startIndex = size - 26;
-    } else if (index == 1) {
+    } else if (index == HistoryTimeRange1Year) {
         startIndex = size - 52;
     }
 
