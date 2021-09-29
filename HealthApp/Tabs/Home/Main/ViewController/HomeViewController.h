@@ -9,13 +9,7 @@
 #define HomeViewController_h
 
 #import <UIKit/UIKit.h>
-#include "HomeTabCoordinator.h"
 
-@interface HomeViewController: UIViewController
-- (id) initWithDelegate: (HomeTabCoordinator *)_delegate;
-- (void) updateGreeting;
-- (void) createWorkoutsList;
-- (void) updateWorkoutsList;
-@end
+@interface HomeViewController: UIViewController @end
 
 #endif /* HomeViewController_h */

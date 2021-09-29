@@ -9,15 +9,11 @@
 #import "UIKit/UIKit.h"
 @import Charts;
 
-id createChartEntry(int x, int y) {
-    return [[ChartDataEntry alloc] initWithX:x y:y];
-}
+id createChartEntry(int x, int y) { return [[ChartDataEntry alloc] initWithX:x y:y]; }
 
-void setLegendLabel(id entry, CFStringRef text) {
-    ((LegendEntry *)entry).label = (__bridge NSString*) text;
-}
+void setLegendLabel(id entry, CFStringRef text) { ((LegendEntry *)entry).label = _nsstr(text); }
 
-void setLayoutMargins(id view, HAEdgeInsets *margins) {
+void setLayoutMargins(id view, Padding *margins) {
     UIEdgeInsets insets = {margins->top, margins->left, margins->bottom, margins->right};
     ((void(*)(id,SEL,UIEdgeInsets))objc_msgSend)(view, sel_getUid("setLayoutMargins:"), insets);
 }
@@ -25,7 +21,7 @@ void setLayoutMargins(id view, HAEdgeInsets *margins) {
 id createChartView(id parent, id xAxisFormatter, id *legendEntries, int count, int height) {
     CFArrayRef legendArr = CFArrayCreate(NULL, (const void **)legendEntries,
                                          count, &kCocoaArrCallbacks);
-    LineChartView *view = [[LineChartView alloc] initWithLegendEntries:(__bridge NSArray*)legendArr];
+    LineChartView *view = [[LineChartView alloc] initWithLegendEntries:_nsarr(legendArr)];
     view.translatesAutoresizingMaskIntoConstraints = false;
     view.xAxis.valueFormatter = (id<AxisValueFormatter>)xAxisFormatter;
     [((UIView *)parent) addSubview:view];
@@ -42,8 +38,7 @@ id createChartView(id parent, id xAxisFormatter, id *legendEntries, int count, i
 
 id createEmptyDataSet(void) {
     CFArrayRef entries = CFArrayCreate(NULL, (const void **)((id []){}), 0, &kCocoaArrCallbacks);
-    LineChartDataSet *dataSet = [[LineChartDataSet alloc]
-                                 initWithEntries:(__bridge NSArray*)entries];
+    LineChartDataSet *dataSet = [[LineChartDataSet alloc] initWithEntries:_nsarr(entries)];
     CFRelease(entries);
     return dataSet;
 }
@@ -51,7 +46,7 @@ id createEmptyDataSet(void) {
 id createDataSet(id color) {
     CFArrayRef colors = CFArrayCreate(NULL, (const void **)((id[]){color}), 1, &kCocoaArrCallbacks);
     LineChartDataSet *dataSet = createEmptyDataSet();
-    dataSet.colors = (__bridge NSArray*)colors;
+    dataSet.colors = _nsarr(colors);
     [dataSet setCircleColor:color];
     CFRelease(colors);
     return dataSet;
@@ -60,7 +55,7 @@ id createDataSet(id color) {
 id createChartData(id *dataSets, int count) {
     LineChartData *data;
     CFArrayRef arr = CFArrayCreate(NULL, (const void **) dataSets, count, &kCocoaArrCallbacks);
-    data = [[LineChartData alloc] initWithDataSets:(__bridge NSArray*)arr];
+    data = [[LineChartData alloc] initWithDataSets:_nsarr(arr)];
     CFRelease(arr);
     return data;
 }
@@ -84,11 +79,11 @@ void updateDataSet(bool isSmall, int count, id dataSet, id *entries) {
     LineChartDataSet *set = dataSet;
     set.drawCirclesEnabled = isSmall;
     CFArrayRef array = CFArrayCreate(NULL, (const void **)entries, count, &kCocoaArrCallbacks);
-    [set replaceEntries:(__bridge NSArray*)array];
+    [set replaceEntries:_nsarr(array)];
     CFRelease(array);
 }
 
-void updateChart(bool isSmall, int count, id v, id data, double axisMax) {
+void updateChart(bool isSmall, int count, id v, id data, float axisMax) {
     LineChartView *view = v;
     LineChartData *chartData = data;
     view.leftAxis.axisMaximum = axisMax;

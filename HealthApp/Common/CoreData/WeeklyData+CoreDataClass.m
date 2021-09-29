@@ -8,12 +8,8 @@
 
 #import "WeeklyData+CoreDataClass.h"
 
-@implementation WeeklyData
-
-@end
-
+@implementation WeeklyData @end
 @implementation WeeklyData (CoreDataProperties)
-
 + (NSFetchRequest<WeeklyData *> *) fetchRequest {
     return [NSFetchRequest fetchRequestWithEntityName:@"WeeklyData"];
 }
@@ -28,5 +24,4 @@
 @dynamic timeStrength;
 @dynamic totalWorkouts;
 @dynamic weekStart;
-
 @end

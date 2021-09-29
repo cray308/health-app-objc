@@ -8,14 +8,9 @@
 #ifndef HistoryViewController_h
 #define HistoryViewController_h
 
-#include "HistoryTabCoordinator.h"
 #import "UIKit/UIKit.h"
 @import Charts;
 
-@interface HistoryViewController: UIViewController<AxisValueFormatter>
-- (id) initWithDelegate: (HistoryTabCoordinator *)_delegate;
-- (void) performForegroundUpdate;
-- (void) updateCharts;
-@end
+@interface HistoryViewController: UIViewController<AxisValueFormatter> @end
 
 #endif /* HistoryViewController_h */

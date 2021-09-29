@@ -11,9 +11,7 @@
 #include "Exercise.h"
 #import <UIKit/UIKit.h>
 
-@interface HomeSetupWorkoutModalViewController:
-UIViewController<UIPickerViewDelegate, UIPickerViewDataSource, UITextFieldDelegate>
-- (id) initWithDelegate: (void *)delegate type: (uchar)type names: (Array_str *)names;
-@end
+@interface SetupWorkoutSheet:
+UIViewController<UIPickerViewDelegate, UIPickerViewDataSource, UITextFieldDelegate> @end
 
 #endif /* HomeSetupWorkoutModalViewController_h */

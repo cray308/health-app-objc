@@ -6,46 +6,39 @@
 //
 
 #import "AddWorkoutUpdateMaxesViewController.h"
-#import "InputView.h"
 #include "AddWorkoutCoordinator.h"
 #include "ViewControllerHelpers.h"
 
-@interface AddWorkoutUpdateMaxesViewController() {
-    AddWorkoutCoordinator *delegate;
-    TextValidator validator;
+@interface UpdateMaxesSheet() {
+    @public AddWorkoutCoordinator *delegate;
+    @public Validator validator;
 }
 @end
 
-@implementation AddWorkoutUpdateMaxesViewController
-- (id) initWithDelegate: (void *)delegate {
-    if (!(self = [super initWithNibName:nil bundle:nil])) return nil;
-    self->delegate = delegate;
-    memcpy(&validator, &(TextValidator){
-        .count = 4, .children = {[0 ... 3] = {.minVal = 1, .maxVal = 999}}
-    }, sizeof(TextValidator));
-    validator.set = createNumberCharacterSet();
-    return self;
+id updateMaxesVC_init(void *delegate) {
+    UpdateMaxesSheet *this = [[UpdateMaxesSheet alloc] initWithNibName:nil bundle:nil];
+    this->delegate = delegate;
+    return this;
 }
 
+@implementation UpdateMaxesSheet
 - (void) dealloc {
-    uset_free(char, validator.set);
+    textValidator_free(&validator);
     [super dealloc];
 }
 
 - (void) viewDidLoad {
     [super viewDidLoad];
     setBackground(self.view, UIColor.secondarySystemBackgroundColor);
+    textValidator_setup(&validator);
 
     UIToolbar *toolbar = createToolbar(self, @selector(dismissKeyboard));
-    InputView *views[4];
+    UIView *views[4];
     UILayoutGuide *guide = self.view.safeAreaLayoutGuide;
 
     for (int i = 0; i < 4; ++i) {
         CFStringRef key = CFStringCreateWithFormat(NULL, NULL, CFSTR("maxWeight%d"), i);
-        views[i] = [[InputView alloc] initWithDelegate:self fieldHint:localize(key)
-                                                   tag:i min:1 max:999];
-        validator.children[i].inputView = views[i];
-        views[i]->field.inputAccessoryView = toolbar;
+        views[i] = validator_addChild(&validator, self, localize(key), 1, 999, toolbar);
         [self.view addSubview:views[i]];
         activateConstraints((id []){
             [views[i].leadingAnchor constraintEqualToAnchor:guide.leadingAnchor],
@@ -54,9 +47,8 @@
         CFRelease(key);
     }
 
-    UIButton *finishButton = createButton(localize(CFSTR("updatesMaxesFinishText")),
-                                          UIColor.systemBlueColor, nil, nil, false, false, 0,
-                                          self, @selector(didPressFinish));
+    UIButton *finishButton = createButton(localize(CFSTR("finish")), UIColor.systemBlueColor, 0,
+                                          0, self, @selector(didPressFinish));
     setNavButton(self.navigationItem, false, finishButton, self.view.frame.size.width);
     enableButton(finishButton, false);
     validator.button = finishButton;
@@ -70,8 +62,6 @@
         }, 1);
     }
 
-    for (int i = 0; i < 4; ++i)
-        [views[i] release];
     [toolbar release];
 }
 
@@ -86,8 +76,7 @@
 
 - (BOOL) textField: (UITextField *)textField
 shouldChangeCharactersInRange: (NSRange)range replacementString: (NSString *)string {
-    return checkInput(textField, (CFRange){range.location, range.length},
-                      (__bridge CFStringRef) string, &validator);
+    return checkInput(&validator, textField, (CFRange){range.location,range.length},_cfstr(string));
 }
 
 - (BOOL) textFieldShouldReturn: (UITextField *)textField {

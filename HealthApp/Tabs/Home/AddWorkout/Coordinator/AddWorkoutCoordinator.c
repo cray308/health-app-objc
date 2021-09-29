@@ -13,13 +13,16 @@
 #include "ViewControllerHelpers.h"
 #include "WorkoutScreenHelpers.h"
 
+extern id workoutVC_init(void *delegate);
+extern id updateMaxesVC_init(void *delegate);
+
 static void updateStoredData(AddWorkoutCoordinator *this) {
     if (this->workout->timers[TimerTypeGroup].info.active == 1)
         pthread_kill(this->workout->threads[TimerTypeGroup], TimerSignalGroup);
     if (this->workout->timers[TimerTypeExercise].info.active == 1)
         pthread_kill(this->workout->threads[TimerTypeExercise], TimerSignalExercise);
-    startWorkoutTimer(&this->workout->timers[TimerTypeGroup], 0, 0, 255);
-    startWorkoutTimer(&this->workout->timers[TimerTypeExercise], 0, 255, 0);
+    startWorkoutTimer(&this->workout->timers[TimerTypeGroup], 0, 0, ExerciseTagNA);
+    startWorkoutTimer(&this->workout->timers[TimerTypeExercise], 0, ExerciseTagNA, 0);
     pthread_join(this->workout->threads[1], NULL);
     pthread_join(this->workout->threads[0], NULL);
     signal(SIGUSR1, SIG_DFL);
@@ -56,7 +59,7 @@ static void updateStoredData(AddWorkoutCoordinator *this) {
 void addWorkoutCoordinator_start(AddWorkoutCoordinator *this) {
     initWorkoutStrings();
     pthread_mutex_init(&timerLock, NULL);
-    id vc = createVCWithDelegate("WorkoutViewController", this);
+    id vc = workoutVC_init(this);
     ((void(*)(id,SEL,id,bool))objc_msgSend)(this->navVC,
                                             sel_getUid("pushViewController:animated:"), vc, true);
     releaseObj(vc);
@@ -75,8 +78,7 @@ void addWorkoutCoordinator_completedWorkout(AddWorkoutCoordinator *this,
         CFStringCompareWithOptions(title, localize(CFSTR("workoutTitleTestDay")),
                                    CFRangeMake(0, CFStringGetLength(title)),
                                    kCFCompareCaseInsensitive) == kCFCompareEqualTo) {
-        id modal = createVCWithDelegate("AddWorkoutUpdateMaxesViewController", this);
-        presentModalVC(this->navVC, modal);
+        presentModalVC(this->navVC, updateMaxesVC_init(this));
         return;
     }
 

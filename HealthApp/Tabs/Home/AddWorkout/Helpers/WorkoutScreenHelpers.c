@@ -7,12 +7,15 @@
 
 #include "WorkoutScreenHelpers.h"
 
+extern void exerciseView_configure(id v, ExerciseEntry *e);
+extern void workoutVC_finishedTimer(id vc, uchar type, uint group, uint entry);
+
 pthread_mutex_t timerLock;
+const uint ExerciseTagNA = 255;
 static pthread_t *exerciseTimerThread;
 
 static CFStringRef notifTitle = NULL;
-static CFStringRef exerciseNotifMessage = NULL;
-static CFStringRef circuitNotifMessage = NULL;
+static CFStringRef notificationMessages[2] = {0};
 
 static void handle_exercise_timer_interrupt(int n _U_) {}
 static void handle_group_timer_interrupt(int n _U_) {}
@@ -20,7 +23,7 @@ static void handle_group_timer_interrupt(int n _U_) {}
 static void *timer_loop(void *arg) {
     WorkoutTimer *t = arg;
     int res = 0, duration = 0;
-    unsigned container = 255, exercise = 255;
+    unsigned container = ExerciseTagNA, exercise = ExerciseTagNA;
     while (!t->info.stop) {
         pthread_mutex_lock(&t->lock);
         while (t->info.active != 1)
@@ -38,23 +41,22 @@ static void *timer_loop(void *arg) {
             if (t->info.type == 0 && t[1].info.active == 1)
                 pthread_kill(*exerciseTimerThread, TimerSignalExercise);
             dispatch_async(dispatch_get_main_queue(), ^(void) {
-                ((void(*)(id,SEL,unsigned char,unsigned,unsigned))objc_msgSend)
-                (parent, sel_getUid("finishedWorkoutTimerForType:group:entry:"),
-                 t->info.type, container, exercise);
+                workoutVC_finishedTimer(parent, t->info.type, container, exercise);
             });
         }
     }
     return NULL;
 }
 
-static void scheduleNotification(int secondsFromNow, CFStringRef message) {
+static void scheduleNotification(int secondsFromNow, int type) {
     static int identifier = 0;
     CFStringRef idString = CFStringCreateWithFormat(NULL, NULL, CFSTR("%d"), identifier++);
 
     id content = ((id(*)(id,SEL))objc_msgSend)(allocClass("UNMutableNotificationContent"),
                                                sel_getUid("init"));
     ((void(*)(id,SEL,CFStringRef))objc_msgSend)(content, sel_getUid("setTitle:"), notifTitle);
-    ((void(*)(id,SEL,CFStringRef))objc_msgSend)(content, sel_getUid("setSubtitle:"), message);
+    ((void(*)(id,SEL,CFStringRef))objc_msgSend)(content, sel_getUid("setSubtitle:"),
+                                                notificationMessages[type]);
     id sound = objc_staticMethod(objc_getClass("UNNotificationSound"), sel_getUid("defaultSound"));
     ((void(*)(id,SEL,id))objc_msgSend)(content, sel_getUid("setSound:"), sound);
 
@@ -90,7 +92,7 @@ static bool cycleCurrentEntry(Workout *w) {
             if (e->type == ExerciseTypeDuration) {
                 startWorkoutTimer(&w->timers[TimerTypeExercise],
                                   e->reps, w->index, w->group->index);
-                scheduleNotification(e->reps, exerciseNotifMessage);
+                scheduleNotification(e->reps, TimerTypeExercise);
             }
             break;
 
@@ -142,8 +144,8 @@ static bool finishedExerciseGroup(ExerciseGroup *g) {
 void setupTimers(Workout *w, id parent) {
     if (!notifTitle) {
         notifTitle = localize(CFSTR("workoutNotificationTitle"));
-        exerciseNotifMessage = localize(CFSTR("notifications0"));
-        circuitNotifMessage = localize(CFSTR("notifications1"));
+        notificationMessages[0] = localize(CFSTR("notifications0"));
+        notificationMessages[1] = localize(CFSTR("notifications1"));
     }
 
     struct sigaction sa = {.sa_flags = 0, .sa_handler = handle_exercise_timer_interrupt};
@@ -198,8 +200,8 @@ static void startGroup(Workout *w, bool startTimer) {
 
     if (w->group->type == ExerciseContainerTypeAMRAP && startTimer) {
         int duration = 60 * w->group->reps;
-        startWorkoutTimer(&w->timers[TimerTypeGroup], duration, w->index, 255);
-        scheduleNotification(duration, circuitNotifMessage);
+        startWorkoutTimer(&w->timers[TimerTypeGroup], duration, w->index, ExerciseTagNA);
+        scheduleNotification(duration, TimerTypeGroup);
     }
 }
 
@@ -226,8 +228,7 @@ WorkoutTransition workout_findTransitionForEvent(Workout *w, id view, id btn, ui
     }
 
     bool exerciseDone = cycleCurrentEntry(w);
-    ((void(*)(id,SEL,ExerciseEntry*))objc_msgSend)(view,
-                                                   sel_getUid("configureWithEntry:"), w->entry);
+    exerciseView_configure(view, w->entry);
 
     if (exerciseDone) {
         t = TransitionFinishedExercise;
@@ -260,7 +261,7 @@ void workout_stopTimers(Workout *w) {
         w->savedInfo.groupTag = w->timers[TimerTypeGroup].container;
         pthread_kill(w->threads[TimerTypeGroup], TimerSignalGroup);
     } else {
-        w->savedInfo.groupTag = 255;
+        w->savedInfo.groupTag = ExerciseTagNA;
     }
 
     if (w->timers[TimerTypeExercise].info.active == 1) {
@@ -268,13 +269,13 @@ void workout_stopTimers(Workout *w) {
         w->savedInfo.exerciseInfo.tag = w->timers[TimerTypeExercise].exercise;
         pthread_kill(w->threads[TimerTypeExercise], TimerSignalExercise);
     } else {
-        w->savedInfo.exerciseInfo.group = w->savedInfo.exerciseInfo.tag = 255;
+        w->savedInfo.exerciseInfo.group = w->savedInfo.exerciseInfo.tag = ExerciseTagNA;
     }
 }
 
 bool workout_restartExerciseTimer(Workout *w, time_t refTime) {
     unsigned group = w->savedInfo.exerciseInfo.group;
-    bool endExercise = false, timerActive = group != 255;
+    bool endExercise = false, timerActive = group != ExerciseTagNA;
     unsigned index = w->savedInfo.exerciseInfo.tag;
 
     if (timerActive && w->index == group && w->group->index == index) {
@@ -294,7 +295,7 @@ bool workout_restartExerciseTimer(Workout *w, time_t refTime) {
 
 bool workout_restartGroupTimer(Workout *w, time_t refTime) {
     unsigned group = w->savedInfo.groupTag;
-    bool endGroup = false, timerActive = group != 255;
+    bool endGroup = false, timerActive = group != ExerciseTagNA;
     
     if (timerActive && w->index == group && w->group->type == ExerciseContainerTypeAMRAP) {
         int diff = (int) (refTime - w->timers[TimerTypeGroup].refTime);
@@ -302,7 +303,7 @@ bool workout_restartGroupTimer(Workout *w, time_t refTime) {
             endGroup = true;
         } else {
             startWorkoutTimer(&w->timers[TimerTypeGroup],
-                              w->timers[TimerTypeGroup].duration - diff, group, 255);
+                              w->timers[TimerTypeGroup].duration - diff, group, ExerciseTagNA);
         }
     }
     return endGroup;

@@ -9,18 +9,18 @@
 #define ExerciseContainer_h
 
 #include "Exercise.h"
-#import "ExerciseView.h"
+#import "StatusButton.h"
 
-@interface ExerciseContainer: UIView
-- (id) initWithGroup: (ExerciseGroup *)g tag: (uint)idx target: (id)target action: (SEL)action;
-@end
-
+@interface ExerciseContainer: UIView @end
 @interface ExerciseContainer() {
     @public UIView *divider;
     @public UILabel *headerLabel;
-    @public ExerciseView **viewsArr;
-    unsigned size;
+    @public StatusButton **viewsArr;
+    @public unsigned size;
 }
 @end
+
+id exerciseContainer_init(ExerciseGroup *g, int idx, id target, SEL action);
+void exerciseView_configure(id v, ExerciseEntry *e);
 
 #endif /* ExerciseContainer_h */

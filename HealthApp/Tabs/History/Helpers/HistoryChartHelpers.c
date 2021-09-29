@@ -11,7 +11,7 @@
 id createChartSeparator(CFStringRef title) {
     id view = createView(nil, false);
     id topDivider = createDivider();
-    id titleLabel = createLabel(title, nil, 1);
+    id titleLabel = createLabel(title, 0, 1);
     setLabelFontWithSize(titleLabel, 20);
     addSubview(view, topDivider);
     addSubview(view, titleLabel);

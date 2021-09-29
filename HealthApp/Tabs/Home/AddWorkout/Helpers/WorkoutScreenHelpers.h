@@ -38,6 +38,7 @@ typedef enum {
 } WorkoutEventOption;
 
 extern pthread_mutex_t timerLock;
+extern const uint ExerciseTagNA;
 
 void setupTimers(Workout *w, id parent);
 id createDeviceEventNotification(id name, ObserverCallback block);

@@ -8,12 +8,8 @@
 #ifndef SettingsViewController_h
 #define SettingsViewController_h
 
-#include "SettingsTabCoordinator.h"
 #import <UIKit/UIKit.h>
 
-@interface SettingsViewController: UIViewController<UITextFieldDelegate>
-- (id) initWithDelegate: (SettingsTabCoordinator *)delegate;
-- (void) updateWeightFields;
-@end
+@interface SettingsViewController: UIViewController<UITextFieldDelegate> @end
 
 #endif /* SettingsViewController_h */

@@ -14,8 +14,8 @@
 "tabs1" = "History";
 "tabs2" = "Settings";
 
-"notifications0" = "Finished exercise!";
-"notifications1" = "Finished AMRAP circuit!";
+"notifications0" = "Finished AMRAP circuit!";
+"notifications1" = "Finished exercise!";
 
 "timesOfDay0" = "Good morning!";
 "timesOfDay1" = "Good afternoon!";
@@ -59,6 +59,7 @@
 "ok" = "OK";
 "save" = "Save";
 "delete" = "Delete";
+"finish" = "Finish";
 
 "weeklyWorkoutsHeader" = "Workouts this week";
 "customWorkoutsHeader" = "Add Custom Workout";
@@ -88,8 +89,8 @@
 "maxWeight1" = "Max Pull-up Weight";
 "maxWeight2" = "Max Bench Weight";
 "maxWeight3" = "Max Deadlift Weight";
-"settingsSaveButtonTitle" = "Save Settings";
-"settingsDeleteButtonTitle" = "Delete Data";
+"settingsSave" = "Save Settings";
+"settingsDelete" = "Delete Data";
 "settingsAlertTitle" = "Are you sure?";
 "inputFieldError" = "Input must be between %d and %d.";
 "settingsAlertMessageSave" = "This will save the currently entered data.";
@@ -103,7 +104,6 @@
 
 "start" = "Start";
 "end" = "End";
-"updatesMaxesFinishText" = "Finish";
 "workoutTitleTestDay" = "test day";
 "exerciseHeader" = "Set %d of %d";
 "exerciseTitleRest" = "Rest: %d s";

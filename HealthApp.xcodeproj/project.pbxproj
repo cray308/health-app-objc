@@ -17,7 +17,6 @@
 		615086ED26D3222500521269 /* SwiftBridging.m in Sources */ = {isa = PBXBuildFile; fileRef = 615086EC26D3222500521269 /* SwiftBridging.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		6150870426D3370400521269 /* WorkoutScreenHelpers.h in Headers */ = {isa = PBXBuildFile; fileRef = 6150870226D3370400521269 /* WorkoutScreenHelpers.h */; };
 		6150870526D3370400521269 /* WorkoutScreenHelpers.c in Sources */ = {isa = PBXBuildFile; fileRef = 6150870326D3370400521269 /* WorkoutScreenHelpers.c */; };
-		6150871226D341CC00521269 /* ExerciseView.m in Sources */ = {isa = PBXBuildFile; fileRef = 6150871126D341CC00521269 /* ExerciseView.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		6150871626D341DB00521269 /* ExerciseContainer.m in Sources */ = {isa = PBXBuildFile; fileRef = 6150871526D341DB00521269 /* ExerciseContainer.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		6150872626D34EFD00521269 /* ConfettiView.h in Headers */ = {isa = PBXBuildFile; fileRef = 6150872426D34EFD00521269 /* ConfettiView.h */; };
 		6150872726D34EFD00521269 /* ConfettiView.c in Sources */ = {isa = PBXBuildFile; fileRef = 6150872526D34EFD00521269 /* ConfettiView.c */; };
@@ -43,8 +42,6 @@
 		616E2F9B2677195C00342CD8 /* AddWorkoutUpdateMaxesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 616E2F9A2677195C00342CD8 /* AddWorkoutUpdateMaxesViewController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		617BDE1B26FE48FD00BDDB73 /* StatusButton.h in Headers */ = {isa = PBXBuildFile; fileRef = 617BDE1A26FE48FD00BDDB73 /* StatusButton.h */; };
 		617BDE1F26FE491000BDDB73 /* StatusButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 617BDE1E26FE491000BDDB73 /* StatusButton.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		617BDE2426FE9DD700BDDB73 /* InputView.h in Headers */ = {isa = PBXBuildFile; fileRef = 617BDE2326FE9DD700BDDB73 /* InputView.h */; };
-		617BDE2726FE9DF000BDDB73 /* InputView.m in Sources */ = {isa = PBXBuildFile; fileRef = 617BDE2626FE9DF000BDDB73 /* InputView.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61A5EFC026E465D60086625A /* Charts.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61A5EFBD26E465D10086625A /* Charts.xcframework */; };
 		61A5EFC126E465D60086625A /* Charts.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 61A5EFBD26E465D10086625A /* Charts.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		61BC6F55266EA9A80022D6F7 /* WeeklyData+CoreDataClass.h in Headers */ = {isa = PBXBuildFile; fileRef = 61BC6F51266EA9A80022D6F7 /* WeeklyData+CoreDataClass.h */; };
@@ -101,10 +98,8 @@
 		615086F026D3223400521269 /* SwiftBridging.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SwiftBridging.h; sourceTree = "<group>"; };
 		6150870226D3370400521269 /* WorkoutScreenHelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WorkoutScreenHelpers.h; sourceTree = "<group>"; };
 		6150870326D3370400521269 /* WorkoutScreenHelpers.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = WorkoutScreenHelpers.c; sourceTree = "<group>"; };
-		6150871126D341CC00521269 /* ExerciseView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ExerciseView.m; sourceTree = "<group>"; };
 		6150871526D341DB00521269 /* ExerciseContainer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ExerciseContainer.m; sourceTree = "<group>"; };
 		6150871926D341EA00521269 /* ExerciseContainer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ExerciseContainer.h; sourceTree = "<group>"; };
-		6150871A26D341F800521269 /* ExerciseView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ExerciseView.h; sourceTree = "<group>"; };
 		6150872426D34EFD00521269 /* ConfettiView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ConfettiView.h; sourceTree = "<group>"; };
 		6150872526D34EFD00521269 /* ConfettiView.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = ConfettiView.c; sourceTree = "<group>"; };
 		615174E726D5E04700BE5741 /* TotalWorkoutsChart.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TotalWorkoutsChart.m; sourceTree = "<group>"; };
@@ -146,8 +141,6 @@
 		6176277D266D44C60079A17E /* Exercise.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Exercise.h; sourceTree = "<group>"; };
 		617BDE1A26FE48FD00BDDB73 /* StatusButton.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StatusButton.h; sourceTree = "<group>"; };
 		617BDE1E26FE491000BDDB73 /* StatusButton.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StatusButton.m; sourceTree = "<group>"; };
-		617BDE2326FE9DD700BDDB73 /* InputView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = InputView.h; sourceTree = "<group>"; };
-		617BDE2626FE9DF000BDDB73 /* InputView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = InputView.m; sourceTree = "<group>"; };
 		61A5EFBD26E465D10086625A /* Charts.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = Charts.xcframework; sourceTree = "<group>"; };
 		61BC6F51266EA9A80022D6F7 /* WeeklyData+CoreDataClass.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "WeeklyData+CoreDataClass.h"; sourceTree = "<group>"; };
 		61BC6F52266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "WeeklyData+CoreDataClass.m"; sourceTree = "<group>"; };
@@ -217,8 +210,6 @@
 			children = (
 				6150871926D341EA00521269 /* ExerciseContainer.h */,
 				6150871526D341DB00521269 /* ExerciseContainer.m */,
-				6150871A26D341F800521269 /* ExerciseView.h */,
-				6150871126D341CC00521269 /* ExerciseView.m */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -291,8 +282,6 @@
 			children = (
 				617BDE1A26FE48FD00BDDB73 /* StatusButton.h */,
 				617BDE1E26FE491000BDDB73 /* StatusButton.m */,
-				617BDE2326FE9DD700BDDB73 /* InputView.h */,
-				617BDE2626FE9DF000BDDB73 /* InputView.m */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -552,7 +541,6 @@
 				611B591326C5F6830082F6CA /* alg_helper.h in Headers */,
 				6150870426D3370400521269 /* WorkoutScreenHelpers.h in Headers */,
 				61BC6F55266EA9A80022D6F7 /* WeeklyData+CoreDataClass.h in Headers */,
-				617BDE2426FE9DD700BDDB73 /* InputView.h in Headers */,
 				611B591426C5F6830082F6CA /* unordered_set.h in Headers */,
 				61FD869C26D487710057E5DC /* HistoryChartHelpers.h in Headers */,
 				611B591726C5F6830082F6CA /* hash_table.h in Headers */,
@@ -685,14 +673,12 @@
 				615174F026D5E07B00BE5741 /* LiftingChart.m in Sources */,
 				61C7795026102C8C001326A1 /* HistoryViewController.m in Sources */,
 				61C7793626102C19001326A1 /* HistoryTabCoordinator.c in Sources */,
-				617BDE2726FE9DF000BDDB73 /* InputView.m in Sources */,
 				61C779B426102E97001326A1 /* SettingsViewController.m in Sources */,
 				61C779AC26102E51001326A1 /* SettingsTabCoordinator.c in Sources */,
 				61C7797826102D45001326A1 /* HomeViewModel.c in Sources */,
 				61C7798426102D85001326A1 /* HomeViewController.m in Sources */,
 				616E2F6826755D2B00342CD8 /* HomeSetupWorkoutModalViewController.m in Sources */,
 				616E2F9B2677195C00342CD8 /* AddWorkoutUpdateMaxesViewController.m in Sources */,
-				6150871226D341CC00521269 /* ExerciseView.m in Sources */,
 				6150871626D341DB00521269 /* ExerciseContainer.m in Sources */,
 				616DC23E267152BA00EFD3D4 /* WorkoutViewController.m in Sources */,
 				61C779A426102E20001326A1 /* AddWorkoutCoordinator.c in Sources */,

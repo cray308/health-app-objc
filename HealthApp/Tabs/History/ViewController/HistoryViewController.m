@@ -11,12 +11,13 @@
 #import "WorkoutTypeChart.h"
 #import "LiftingChart.h"
 #include "AppCoordinator.h"
+#include "HistoryTabCoordinator.h"
 #include "HistoryChartHelpers.h"
 #include "ViewControllerHelpers.h"
 
 @interface HistoryViewController() {
-    HistoryViewModel *viewModel;
-    UISegmentedControl *rangePicker;
+    @public HistoryViewModel *model;
+    @public UISegmentedControl *rangePicker;
     TotalWorkoutsChart *totalWorkoutsChart;
     WorkoutTypeChart *workoutTypeChart;
     LiftingChart *liftChart;
@@ -24,16 +25,10 @@
 @end
 
 @implementation HistoryViewController
-- (id) initWithDelegate: (HistoryTabCoordinator *)_delegate {
-    if (!(self = [super initWithNibName:nil bundle:nil])) return nil;
-    viewModel = &_delegate->viewModel;
-    return self;
-}
-
 - (void) viewDidLoad {
     [super viewDidLoad];
     setBackground(self.view, UIColor.systemBackgroundColor);
-    self.navigationItem.title = (__bridge NSString*) localize(CFSTR("titles1"));
+    self.navigationItem.title = _nsstr(localize(CFSTR("titles1")));
 
     UIView *separators[] = {
         createChartSeparator(localize(CFSTR("chartHeaderTotalWorkouts"))),
@@ -48,18 +43,15 @@
     }
 
     rangePicker = createSegmentedControl(segments, 3, 0, self, @selector(updateSelectedSegment:));
-    totalWorkoutsChart = [[TotalWorkoutsChart alloc]
-                     initWithViewModel:&viewModel->totalWorkoutsViewModel formatter:self];
-    workoutTypeChart = [[WorkoutTypeChart alloc]
-                 initWithViewModel:&viewModel->workoutTypeViewModel formatter:self];
-    liftChart = [[LiftingChart alloc]
-                 initWithViewModel:&viewModel->liftViewModel formatter:self];
+    totalWorkoutsChart = totalWorkoutsChart_init(&model->totalWorkoutsModel, self);
+    workoutTypeChart = workoutTypeChart_init(&model->workoutTypeModel, self);
+    liftChart = liftingChart_init(&model->liftModel, self);
 
     id subviews[] = {
         rangePicker, separators[0], totalWorkoutsChart, separators[1], workoutTypeChart,
         separators[2], liftChart
     };
-    UIStackView *vStack = createStackView(subviews, 7, 1, 5, 0, (HAEdgeInsets){10, 8, 10, 8});
+    UIStackView *vStack = createStackView(subviews, 7, 1, 5, (Padding){10, 8, 10, 8});
     UIScrollView *scrollView = createScrollView();
 
     [self.view addSubview:scrollView];
@@ -92,30 +84,36 @@
 }
 
 - (void) updateSelectedSegment: (UISegmentedControl *)sender {
-    historyViewModel_formatDataForTimeRange(viewModel, (int) sender.selectedSegmentIndex);
+    historyViewModel_formatDataForTimeRange(model, (int) sender.selectedSegmentIndex);
     [self updateCharts];
 }
 
-- (void) performForegroundUpdate {
-    rangePicker.selectedSegmentIndex = 0;
-    [self updateSelectedSegment:rangePicker];
-}
-
 - (void) updateCharts {
-    if (!viewModel->data->size) {
+    if (!model->data->size) {
         disableLineChartView(totalWorkoutsChart->chartView);
         disableLineChartView(workoutTypeChart->chartView);
         disableLineChartView(liftChart->chartView);
         return;
     }
 
-    const int count = viewModel->totalWorkoutsViewModel.entries->size;
-    [totalWorkoutsChart updateWithCount:count isSmall:viewModel->isSmall];
-    [workoutTypeChart updateWithCount:count isSmall:viewModel->isSmall];
-    [liftChart updateWithCount:count isSmall:viewModel->isSmall];
+    const int count = model->totalWorkoutsModel.entries->size;
+    totalWorkoutsChart_update(totalWorkoutsChart, count, model->isSmall);
+    workoutTypeChart_update(workoutTypeChart, count, model->isSmall);
+    liftingChart_update(liftChart, count, model->isSmall);
 }
 
-- (NSString *_Nonnull) stringForValue: (double)value axis: (AxisBase *_Nullable)axis {
-    return (__bridge NSString*) historyViewModel_getXAxisLabel(viewModel, (int) value);
+- (NSString *) stringForValue: (double)value axis: (AxisBase *)axis {
+    return _nsstr(historyViewModel_getXAxisLabel(model, (int) value));
 }
 @end
+
+id historyVC_init(void *delegate) {
+    HistoryViewController *this = [[HistoryViewController alloc] initWithNibName:nil bundle:nil];
+    this->model = &((HistoryTabCoordinator *) delegate)->model;
+    return this;
+}
+
+void historyVC_refresh(HistoryViewController *vc) {
+    vc->rangePicker.selectedSegmentIndex = 0;
+    [vc updateSelectedSegment:vc->rangePicker];
+}

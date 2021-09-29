@@ -8,42 +8,69 @@
 #import "ExerciseContainer.h"
 #include "ViewControllerHelpers.h"
 
-@implementation ExerciseContainer
-- (id) initWithGroup: (ExerciseGroup *)g tag: (uint)idx target: (id)target action: (SEL)action {
-    if (!(self = [super initWithFrame:CGRectZero])) return nil;
-    size = g->exercises->size;
-    viewsArr = calloc(size, sizeof(ExerciseView *));
+void exerciseView_configure(StatusButton *v, ExerciseEntry *e) {
+    CFStringRef setsStr = exerciseEntry_createSetsTitle(e);
+    CFStringRef title = exerciseEntry_createTitle(e);
+    setButtonTitle(v->button, title, 0);
+    setLabelText(v->headerLabel, setsStr);
 
-    divider = createDivider();
+    switch (e->state) {
+        case ExerciseStateDisabled:
+            setBackground(v->box, UIColor.systemGrayColor);
+            enableButton(v->button, false);
+            break;
+        case ExerciseStateActive:
+            if (e->type == ExerciseTypeDuration)
+                v->button.userInteractionEnabled = false;
+        case ExerciseStateResting:
+            enableButton(v->button, true);
+            setBackground(v->box, UIColor.systemOrangeColor);
+            break;
+        case ExerciseStateCompleted:
+            enableButton(v->button, false);
+            setBackground(v->box, UIColor.systemGreenColor);
+    }
+
+    CFRelease(title);
+    if (setsStr)
+        CFRelease(setsStr);
+}
+
+id exerciseContainer_init(ExerciseGroup *g, int idx, id target, SEL action) {
+    ExerciseContainer *this = [[ExerciseContainer alloc] initWithFrame:CGRectZero];
+    this->size = g->exercises->size;
+    this->viewsArr = calloc(this->size, sizeof(StatusButton *));
+
+    this->divider = createDivider();
     CFStringRef headerStr = exerciseGroup_createHeader(g);
-    headerLabel = createLabel(headerStr, UIFontTextStyleTitle3, NSTextAlignmentNatural);
-    UIStackView *exerciseStack = createStackView(NULL, 0, 1, 5, 0, (HAEdgeInsets){.top = 5});
-    UIStackView *vStack = createStackView((id []){divider, headerLabel, exerciseStack},
-                                          3, 1, 0, 0, (HAEdgeInsets){0, 8, 0, 8});
-    [self addSubview:vStack];
-    [vStack setCustomSpacing:20 afterView:divider];
+    this->headerLabel = createLabel(headerStr, TextTitle3, 4);
+    UIStackView *exerciseStack = createStackView(NULL, 0, 1, 5, (Padding){.top = 5});
+    UIStackView *vStack = createStackView((id []){this->divider, this->headerLabel, exerciseStack},
+                                          3, 1, 0, (Padding){0, 8, 0, 8});
+    [this addSubview:vStack];
+    [vStack setCustomSpacing:20 afterView:this->divider];
     activateConstraints((id []){
-        [vStack.topAnchor constraintEqualToAnchor:self.topAnchor],
-        [vStack.leadingAnchor constraintEqualToAnchor:self.leadingAnchor],
-        [vStack.trailingAnchor constraintEqualToAnchor:self.trailingAnchor],
-        [vStack.bottomAnchor constraintEqualToAnchor:self.bottomAnchor],
-        [headerLabel.heightAnchor constraintEqualToConstant:20]
+        [vStack.topAnchor constraintEqualToAnchor:this.topAnchor],
+        [vStack.leadingAnchor constraintEqualToAnchor:this.leadingAnchor],
+        [vStack.trailingAnchor constraintEqualToAnchor:this.trailingAnchor],
+        [vStack.bottomAnchor constraintEqualToAnchor:this.bottomAnchor],
+        [this->headerLabel.heightAnchor constraintEqualToConstant:20]
     }, 5);
 
-    for (unsigned i = 0; i < size; ++i) {
-        unsigned tag = (idx << 8) | i;
-        ExerciseView *v = [[ExerciseView alloc] initWithEntry:&g->exercises->arr[i]
-                                                          tag:tag target:target action:action];
-        [exerciseStack addArrangedSubview:v];
-        viewsArr[i] = v;
+
+    for (unsigned i = 0; i < this->size; ++i) {
+        this->viewsArr[i] = statusButton_init(NULL, false, (idx << 8) | i, target, action);
+        exerciseView_configure(this->viewsArr[i], &g->exercises->arr[i]);
+        [exerciseStack addArrangedSubview:this->viewsArr[i]];
     }
     if (headerStr)
         CFRelease(headerStr);
     [vStack release];
     [exerciseStack release];
-    return self;
+    return this;
 }
 
+@implementation ExerciseContainer
 - (void) dealloc {
     for (unsigned i = 0; i < size; ++i)
         [viewsArr[i] release];

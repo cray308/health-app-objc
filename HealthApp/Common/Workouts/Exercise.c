@@ -280,8 +280,7 @@ CFStringRef exerciseGroup_createHeader(ExerciseGroup *g) {
 }
 
 CFStringRef exerciseEntry_createSetsTitle(ExerciseEntry *e) {
-    if (e->sets == 1)
-        return NULL;
+    if (e->sets == 1) return NULL;
     int completed = e->completedSets == e->sets ? e->sets : e->completedSets + 1;
     return CFStringCreateWithFormat(NULL, NULL, exerciseHeader, completed, e->sets);
 }
@@ -299,17 +298,15 @@ CFStringRef exerciseEntry_createTitle(ExerciseEntry *e) {
 
         case ExerciseTypeDuration:
             if (e->reps > 120) {
-                double minutes = (double) e->reps / 60.0;
                 return CFStringCreateWithFormat(NULL, NULL, exerciseTitleDurationMinutes,
-                                                e->name, minutes);
+                                                e->name, e->reps / 60.f);
             }
             return CFStringCreateWithFormat(NULL, NULL,
                                             exerciseTitleDurationSeconds, e->name, e->reps);
 
-        default: ;
-            int rowingDist = (5 * e->reps) / 4;
+        default:
             return CFStringCreateWithFormat(NULL, NULL, exerciseTitleDistance,
-                                            e->reps, rowingDist);
+                                            e->reps, (5 * e->reps) / 4);
     }
 }
 

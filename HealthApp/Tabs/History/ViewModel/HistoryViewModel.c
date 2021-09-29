@@ -34,43 +34,43 @@ void historyViewModel_init(HistoryViewModel *this) {
         getCustomColor(CFSTR("chartBlue")), getCustomColor(CFSTR("chartGreen")),
         getCustomColor(CFSTR("chartOrange")), getCustomColor(CFSTR("chartPink"))
     };
-    id *areaDataSets = this->workoutTypeViewModel.dataSets;
-    setupLegendEntries(this->totalWorkoutsViewModel.legendEntries,
+    id *areaDataSets = this->workoutTypeModel.dataSets;
+    setupLegendEntries(this->totalWorkoutsModel.legendEntries,
                        (id []){createColor("systemTealColor")}, 1);
-    setupLegendEntries(this->workoutTypeViewModel.legendEntries, colors, 4);
-    setupLegendEntries(this->liftViewModel.legendEntries, colors, 4);
+    setupLegendEntries(this->workoutTypeModel.legendEntries, colors, 4);
+    setupLegendEntries(this->liftModel.legendEntries, colors, 4);
 
-    this->totalWorkoutsViewModel.entries = array_new(chartData);
-    this->totalWorkoutsViewModel.dataSet = createDataSet(createColor("systemRedColor"));
-    this->workoutTypeViewModel.dataSets[0] = createEmptyDataSet();
+    this->totalWorkoutsModel.entries = array_new(chartData);
+    this->totalWorkoutsModel.dataSet = createDataSet(createColor("systemRedColor"));
+    this->workoutTypeModel.dataSets[0] = createEmptyDataSet();
 
     for (int i = 0; i < 4; ++i) {
-        this->workoutTypeViewModel.entries[i] = array_new(chartData);
-        this->liftViewModel.entries[i] = array_new(chartData);
+        this->workoutTypeModel.entries[i] = array_new(chartData);
+        this->liftModel.entries[i] = array_new(chartData);
 
-        this->workoutTypeViewModel.dataSets[i + 1] = createDataSet(colors[i]);
-        this->liftViewModel.dataSets[i] = createDataSet(colors[i]);
+        this->workoutTypeModel.dataSets[i + 1] = createDataSet(colors[i]);
+        this->liftModel.dataSets[i] = createDataSet(colors[i]);
 
         CFStringRef key = CFStringCreateWithFormat(NULL, NULL, CFSTR("workoutTypes%d"), i);
-        this->workoutTypeViewModel.names[i] = localize(key);
+        this->workoutTypeModel.names[i] = localize(key);
         CFRelease(key);
 
         key = CFStringCreateWithFormat(NULL, NULL, CFSTR("liftTypes%d"), i);
-        this->liftViewModel.names[i] = localize(key);
+        this->liftModel.names[i] = localize(key);
         CFRelease(key);
     }
 
-    this->workoutTypeViewModel.entries[4] = array_new(chartData);
+    this->workoutTypeModel.entries[4] = array_new(chartData);
 
-    this->totalWorkoutsViewModel.chartData = createChartData((id []){
-        this->totalWorkoutsViewModel.dataSet
+    this->totalWorkoutsModel.chartData = createChartData((id []){
+        this->totalWorkoutsModel.dataSet
     }, 1);
-    this->workoutTypeViewModel.chartData = createChartData((id []){
+    this->workoutTypeModel.chartData = createChartData((id []){
         areaDataSets[4], areaDataSets[3], areaDataSets[2], areaDataSets[1]
     }, 4);
-    this->liftViewModel.chartData = createChartData(this->liftViewModel.dataSets, 4);
+    this->liftModel.chartData = createChartData(this->liftModel.dataSets, 4);
 
-    this->workoutTypeViewModel.durationStr = CFStringCreateCopy(NULL, CFSTR(""));
+    this->workoutTypeModel.durationStr = CFStringCreateCopy(NULL, CFSTR(""));
 
     for (int i = 0; i < 12; ++i) {
         CFStringRef key = CFStringCreateWithFormat(NULL, NULL, CFSTR("months%02d"), i);
@@ -137,18 +137,18 @@ void historyViewModel_fetchData(HistoryViewModel *this) {
 
 void historyViewModel_formatDataForTimeRange(HistoryViewModel *this, int index) {
     this->isSmall = true;
-    this->totalWorkoutsViewModel.avgWorkouts = 0;
-    this->totalWorkoutsViewModel.yMax = 0;
-    this->workoutTypeViewModel.yMax = 0;
-    this->liftViewModel.yMax = 0;
-    memset(this->liftViewModel.totalByExercise, 0, 4 * sizeof(int));
-    memset(this->workoutTypeViewModel.totalByType, 0, 4 * sizeof(int));
-    array_clear(chartData, this->totalWorkoutsViewModel.entries);
+    this->totalWorkoutsModel.avgWorkouts = 0;
+    this->totalWorkoutsModel.yMax = 0;
+    this->workoutTypeModel.yMax = 0;
+    this->liftModel.yMax = 0;
+    memset(this->liftModel.totalByExercise, 0, 4 * sizeof(int));
+    memset(this->workoutTypeModel.totalByType, 0, 4 * sizeof(int));
+    array_clear(chartData, this->totalWorkoutsModel.entries);
     for (int i = 0; i < 4; ++i) {
-        array_clear(chartData, this->workoutTypeViewModel.entries[i]);
-        array_clear(chartData, this->liftViewModel.entries[i]);
+        array_clear(chartData, this->workoutTypeModel.entries[i]);
+        array_clear(chartData, this->liftModel.entries[i]);
     }
-    array_clear(chartData, this->workoutTypeViewModel.entries[4]);
+    array_clear(chartData, this->workoutTypeModel.entries[4]);
 
     int size = 0;
     if (!(size = (this->data->size))) return;
@@ -176,29 +176,29 @@ void historyViewModel_formatDataForTimeRange(HistoryViewModel *this, int index) 
         totalWorkouts += workouts;
         if (workouts > maxWorkouts)
             maxWorkouts = workouts;
-        createNewEntry(this->totalWorkoutsViewModel.entries, i, workouts);
+        createNewEntry(this->totalWorkoutsModel.entries, i, workouts);
 
         for (int j = 0; j < 4; ++j) {
-            this->workoutTypeViewModel.totalByType[j] += e->durationByType[j];
+            this->workoutTypeModel.totalByType[j] += e->durationByType[j];
 
             int weight = e->weightArray[j];
-            this->liftViewModel.totalByExercise[j] += weight;
+            this->liftModel.totalByExercise[j] += weight;
             if (weight > maxWeight)
                 maxWeight = weight;
-            createNewEntry(this->liftViewModel.entries[j], i, weight);
+            createNewEntry(this->liftModel.entries[j], i, weight);
         }
 
         if (e->cumulativeDuration[3] > maxActivityTime)
             maxActivityTime = e->cumulativeDuration[3];
-        createNewEntry(this->workoutTypeViewModel.entries[0], i, 0);
+        createNewEntry(this->workoutTypeModel.entries[0], i, 0);
         for (int j = 1; j < 5; ++j)
-            createNewEntry(this->workoutTypeViewModel.entries[j], i, e->cumulativeDuration[j - 1]);
+            createNewEntry(this->workoutTypeModel.entries[j], i, e->cumulativeDuration[j - 1]);
     }
 
-    this->totalWorkoutsViewModel.avgWorkouts = (double) totalWorkouts / nEntries;
-    this->totalWorkoutsViewModel.yMax = maxWorkouts < 7 ? 7 : 1.1 * maxWorkouts;
-    this->workoutTypeViewModel.yMax = 1.1 * maxActivityTime;
-    this->liftViewModel.yMax = 1.1 * maxWeight;
+    this->totalWorkoutsModel.avgWorkouts = (float) totalWorkouts / nEntries;
+    this->totalWorkoutsModel.yMax = maxWorkouts < 7 ? 7 : 1.1 * maxWorkouts;
+    this->workoutTypeModel.yMax = 1.1 * maxActivityTime;
+    this->liftModel.yMax = 1.1 * maxWeight;
 
     CFStringRef totalWorkoutLegend = localize(CFSTR("totalWorkoutsLegend"));
     CFStringRef liftLegend = localize(CFSTR("liftLegend"));
@@ -206,26 +206,26 @@ void historyViewModel_formatDataForTimeRange(HistoryViewModel *this, int index) 
     char buf[10];
 
     CFStringRef label = CFStringCreateWithFormat(NULL, NULL, totalWorkoutLegend,
-                                                 this->totalWorkoutsViewModel.avgWorkouts);
-    setLegendLabel(this->totalWorkoutsViewModel.legendEntries[0], label);
+                                                 this->totalWorkoutsModel.avgWorkouts);
+    setLegendLabel(this->totalWorkoutsModel.legendEntries[0], label);
     CFRelease(label);
 
     for (int i = 0; i < 4; ++i) {
-        double liftAverage = (double) this->liftViewModel.totalByExercise[i] / nEntries;
-        int typeAverage = this->workoutTypeViewModel.totalByType[i] / nEntries;
+        float liftAverage = (float) this->liftModel.totalByExercise[i] / nEntries;
+        int typeAverage = this->workoutTypeModel.totalByType[i] / nEntries;
         if (typeAverage > 59) {
             sprintf(buf, "%d h %d m", typeAverage / 60, typeAverage % 60);
         } else {
             sprintf(buf, "%d m", typeAverage);
         }
         label = CFStringCreateWithFormat(NULL, NULL, typeLegend,
-                                         this->workoutTypeViewModel.names[i], buf);
-        setLegendLabel(this->workoutTypeViewModel.legendEntries[i], label);
+                                         this->workoutTypeModel.names[i], buf);
+        setLegendLabel(this->workoutTypeModel.legendEntries[i], label);
         CFRelease(label);
 
         label = CFStringCreateWithFormat(NULL, NULL, liftLegend,
-                                         this->liftViewModel.names[i], liftAverage);
-        setLegendLabel(this->liftViewModel.legendEntries[i], label);
+                                         this->liftModel.names[i], liftAverage);
+        setLegendLabel(this->liftModel.legendEntries[i], label);
         CFRelease(label);
     }
 }
@@ -239,7 +239,7 @@ CFStringRef historyViewModel_getXAxisLabel(HistoryViewModel *this, int index) {
     return this->formatter.currString;
 }
 
-CFStringRef workoutTypeViewModel_getDuration(HistoryWorkoutTypeChartViewModel *this, int minutes) {
+CFStringRef workoutTypeViewModel_getDuration(WorkoutTypeChartViewModel *this, int minutes) {
     CFRelease(this->durationStr);
     if (!minutes) {
         this->durationStr = CFStringCreateCopy(NULL, CFSTR(""));

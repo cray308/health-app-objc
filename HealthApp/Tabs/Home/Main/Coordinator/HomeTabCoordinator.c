@@ -12,6 +12,11 @@
 #include "ViewControllerHelpers.h"
 #include "ConfettiView.h"
 
+extern id homeVC_init(void *delegate);
+extern void homeVC_createWorkoutsList(id vc);
+extern void homeVC_updateWorkoutsList(id vc);
+extern id setupWorkoutVC_init(void *delegate, uchar type, Array_str *names);
+
 typedef enum {
     CustomWorkoutIndexTestMax,
     CustomWorkoutIndexEndurance,
@@ -51,19 +56,18 @@ static void showConfetti(id vc) {
 }
 
 void homeCoordinator_start(HomeTabCoordinator *this) {
-    homeViewModel_init(&this->viewModel);
-    id vc = createVCWithDelegate("HomeViewController", this);
-    setupNavVC(this->navVC, vc);
+    homeViewModel_init(&this->model);
+    setupNavVC(this->navVC, homeVC_init(this));
 }
 
 void homeCoordinator_didFinishAddingWorkout(HomeTabCoordinator *this, int totalCompletedWorkouts) {
     id homeVC = getFirstVC(this->navVC);
-    objc_singleArg(homeVC, sel_getUid("updateWorkoutsList"));
+    homeVC_updateWorkoutsList(homeVC);
 
     ((id(*)(id,SEL,bool))objc_msgSend)(this->navVC, sel_getUid("popViewControllerAnimated:"), true);
     this->childCoordinator = NULL;
 
-    if (homeViewModel_shouldShowConfetti(&this->viewModel, totalCompletedWorkouts)) {
+    if (homeViewModel_shouldShowConfetti(&this->model, totalCompletedWorkouts)) {
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 0.75),
                        dispatch_get_main_queue(), ^(void) {
             showConfetti(homeVC);
@@ -106,10 +110,7 @@ void homeCoordinator_addWorkoutFromCustomButton(HomeTabCoordinator *this, int in
         return;
     }
 
-    id modal = ((id(*)(id,SEL,HomeTabCoordinator*,unsigned char,Array_str*))objc_msgSend)
-    (allocClass("HomeSetupWorkoutModalViewController"),
-     sel_getUid("initWithDelegate:type:names:"), this, type, names);
-    presentModalVC(getFirstVC(this->navVC), modal);
+    presentModalVC(getFirstVC(this->navVC), setupWorkoutVC_init(this, type, names));
 }
 
 void homeCoordinator_finishedSettingUpCustomWorkout(HomeTabCoordinator *this, void *params) {
@@ -127,10 +128,10 @@ void homeCoordinator_checkForChildCoordinator(HomeTabCoordinator *this) {
 }
 
 void homeCoordinator_resetUI(HomeTabCoordinator *this) {
-    homeViewModel_fetchData(&this->viewModel);
-    objc_singleArg(getFirstVC(this->navVC), sel_getUid("createWorkoutsList"));
+    homeViewModel_fetchData(&this->model);
+    homeVC_createWorkoutsList(getFirstVC(this->navVC));
 }
 
 void homeCoordinator_updateUI(HomeTabCoordinator *this) {
-    objc_singleArg(getFirstVC(this->navVC), sel_getUid("updateWorkoutsList"));
+    homeVC_updateWorkoutsList(getFirstVC(this->navVC));
 }

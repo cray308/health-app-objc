@@ -6,37 +6,43 @@
 //
 
 #import "SettingsViewController.h"
-#import "InputView.h"
+#include "SettingsTabCoordinator.h"
 #include "ViewControllerHelpers.h"
 #include "AppUserData.h"
 #include "AppCoordinator.h"
 
 @interface SettingsViewController() {
-    SettingsTabCoordinator *delegate;
-    UISegmentedControl *planPicker;
-    TextValidator validator;
+    @public SettingsTabCoordinator *delegate;
+    UISegmentedControl *picker;
+    @public Validator validator;
     short results[4];
 }
 @end
 
-@implementation SettingsViewController
-- (id) initWithDelegate: (SettingsTabCoordinator *)delegate {
-    if (!(self = [super initWithNibName:nil bundle:nil])) return nil;
-    self->delegate = delegate;
-    memcpy(&validator, &(TextValidator){
-        .count = 4, .children = {[0 ... 3] = {.maxVal = 999}}
-    }, sizeof(TextValidator));
-    return self;
+id settingsVC_init(void *delegate) {
+    SettingsViewController *this = [[SettingsViewController alloc] initWithNibName:nil bundle:nil];
+    this->delegate = delegate;
+    return this;
 }
 
+void settingsVC_updateWeightFields(SettingsViewController *vc) {
+    for (int i = 0; i < 4; ++i) {
+        CFStringRef str = CFStringCreateWithFormat(NULL, NULL, CFSTR("%d"), userData->liftMaxes[i]);
+        setLabelText(vc->validator.children[i].field, str);
+        inputView_reset(&vc->validator.children[i], userData->liftMaxes[i]);
+        CFRelease(str);
+    }
+    enableButton(vc->validator.button, true);
+}
+
+@implementation SettingsViewController
 - (void) viewDidLoad {
     [super viewDidLoad];
     setBackground(self.view, UIColor.systemGroupedBackgroundColor);
-    self.navigationItem.title = (__bridge NSString*) localize(CFSTR("titles2"));
-    validator.set = createNumberCharacterSet();
+    self.navigationItem.title = _nsstr(localize(CFSTR("titles2")));
+    textValidator_setup(&validator);
 
-    UILabel *planLabel = createLabel(localize(CFSTR("planPickerTitle")),
-                                     UIFontTextStyleFootnote, 4);
+    UILabel *planLabel = createLabel(localize(CFSTR("pickerTitle")), TextFootnote, 4);
     
     CFStringRef segments[3];
     for (int i = 0; i < 3; ++i) {
@@ -44,39 +50,32 @@
         segments[i] = localize(key);
         CFRelease(key);
     }
-    planPicker = createSegmentedControl(segments, 3, userData->currentPlan + 1, nil, nil);
+    picker = createSegmentedControl(segments, 3, userData->currentPlan + 1, nil, nil);
 
     UIView *planContainer = createView(nil, false);
     [planContainer addSubview:planLabel];
-    [planContainer addSubview:planPicker];
+    [planContainer addSubview:picker];
 
-    InputView *views[4];
+    UIView *views[4];
     UIToolbar *toolbar = createToolbar(self, @selector(dismissKeyboard));
 
     for (int i = 0; i < 4; ++i) {
         CFStringRef key = CFStringCreateWithFormat(NULL, NULL, CFSTR("maxWeight%d"), i);
-        views[i] = [[InputView alloc] initWithDelegate:self fieldHint:localize(key)
-                                                          tag:i min:0 max:999];
-        validator.children[i].inputView = views[i];
-        views[i]->field.inputAccessoryView = toolbar;
+        views[i] = validator_addChild(&validator, self, localize(key), 0, 999, toolbar);
         CFRelease(key);
     }
 
-    UIButton *saveButton = createButton(localize(CFSTR("settingsSaveButtonTitle")),
-                                        UIColor.systemBlueColor, UIFontTextStyleBody,
-                                        UIColor.secondarySystemGroupedBackgroundColor, false, true,
-                                        0, self, @selector(buttonTapped:));
+    UIButton *saveButton = createButton(localize(CFSTR("settingsSave")), UIColor.systemBlueColor,
+                                        BtnBackground, 0, self, @selector(buttonTapped:));
     validator.button = saveButton;
 
-    UIButton *deleteButton = createButton(localize(CFSTR("settingsDeleteButtonTitle")),
-                                          UIColor.systemRedColor, UIFontTextStyleBody,
-                                          UIColor.secondarySystemGroupedBackgroundColor,
-                                          false, true, 1, self, @selector(buttonTapped:));
+    UIButton *deleteButton = createButton(localize(CFSTR("settingsDelete")), UIColor.systemRedColor,
+                                          BtnBackground, 1, self, @selector(buttonTapped:));
 
     id subviews[] = {
         planContainer, views[0], views[1], views[2], views[3], saveButton, deleteButton
     };
-    UIStackView *vStack = createStackView(subviews, 7, 1, 0, 0, (HAEdgeInsets){20, 0, 20, 0});
+    UIStackView *vStack = createStackView(subviews, 7, 1, 0, (Padding){20, 0, 20, 0});
 
     UIScrollView *scrollView = createScrollView();
     [self.view addSubview:scrollView];
@@ -103,12 +102,11 @@
         [planLabel.trailingAnchor constraintEqualToAnchor:planContainer.trailingAnchor constant:-8],
         [planLabel.heightAnchor constraintEqualToConstant:20],
 
-        [planPicker.topAnchor constraintEqualToAnchor:planLabel.bottomAnchor constant:2],
-        [planPicker.leadingAnchor constraintEqualToAnchor:planContainer.leadingAnchor constant:8],
-        [planPicker.trailingAnchor constraintEqualToAnchor:planContainer.trailingAnchor
-                                                  constant:-8],
-        [planPicker.bottomAnchor constraintEqualToAnchor:planContainer.bottomAnchor],
-        [planPicker.heightAnchor constraintEqualToConstant:40],
+        [picker.topAnchor constraintEqualToAnchor:planLabel.bottomAnchor constant:2],
+        [picker.leadingAnchor constraintEqualToAnchor:planContainer.leadingAnchor constant:8],
+        [picker.trailingAnchor constraintEqualToAnchor:planContainer.trailingAnchor constant:-8],
+        [picker.bottomAnchor constraintEqualToAnchor:planContainer.bottomAnchor],
+        [picker.heightAnchor constraintEqualToConstant:40],
 
         [saveButton.heightAnchor constraintEqualToConstant:40],
         [deleteButton.heightAnchor constraintEqualToConstant:40]
@@ -118,29 +116,17 @@
     [scrollView release];
     [planContainer release];
     [planLabel release];
-    for (int i = 0; i < 4; ++i)
-        [views[i] release];
     [toolbar release];
 
-    [self updateWeightFields];
+    settingsVC_updateWeightFields(self);
     appCoordinator->loadedViewControllers |= LoadedViewController_Settings;
-}
-
-- (void) updateWeightFields {
-    for (int i = 0; i < 4; ++i) {
-        CFStringRef str = CFStringCreateWithFormat(NULL, NULL, CFSTR("%d"), userData->liftMaxes[i]);
-        setLabelText(((InputView *) validator.children[i].inputView)->field, str);
-        resetInputChild(&validator.children[i], userData->liftMaxes[i]);
-        CFRelease(str);
-    }
-    enableButton(validator.button, true);
 }
 
 - (void) dismissKeyboard { [self.view endEditing:true]; }
 
 - (void) buttonTapped: (UIButton *)sender {
     if (!sender.tag) {
-        schar plan = ((schar) planPicker.selectedSegmentIndex - 1);
+        schar plan = ((schar) picker.selectedSegmentIndex - 1);
         for (int i = 0; i < 4; ++i)
             results[i] = validator.children[i].result;
         settingsCoordinator_handleSaveTap(delegate, results, plan);
@@ -151,8 +137,7 @@
 
 - (BOOL) textField: (UITextField *)textField
 shouldChangeCharactersInRange: (NSRange)range replacementString: (NSString *)string {
-    return checkInput(textField, (CFRange){range.location, range.length},
-                      (__bridge CFStringRef) string, &validator);
+    return checkInput(&validator, textField, (CFRange){range.location,range.length},_cfstr(string));
 }
 
 - (BOOL) textFieldShouldReturn: (UITextField *)textField {

@@ -11,8 +11,8 @@
 #import "ExerciseContainer.h"
 
 @interface WorkoutViewController() {
-    AddWorkoutCoordinator *delegate;
-    Workout *workout;
+    @public AddWorkoutCoordinator *delegate;
+    @public Workout *workout;
     UIStackView *groupsStack;
     ExerciseContainer *firstContainer;
     NSObject *observers[2];
@@ -20,14 +20,6 @@
 @end
 
 @implementation WorkoutViewController
-- (id) initWithDelegate: (AddWorkoutCoordinator *)delegate {
-    if (!(self = [super initWithNibName:nil bundle:nil])) return nil;
-    self->delegate = delegate;
-    workout = delegate->workout;
-    setupTimers(workout, self);
-    return self;
-}
-
 - (void) dealloc {
     cleanupWorkoutNotifications(observers);
     [groupsStack release];
@@ -37,19 +29,17 @@
 - (void) viewDidLoad {
     [super viewDidLoad];
     setBackground(self.view, UIColor.systemGroupedBackgroundColor);
-    self.navigationItem.title = (__bridge NSString*) workout->title;
+    self.navigationItem.title = _nsstr(workout->title);
     setTintColor(self.navigationController.navigationBar, UIColor.systemBlueColor);
 
-    groupsStack = createStackView(NULL, 0, 1, 20, 0, (HAEdgeInsets){20, 4, 20, 4});
-    UIButton *startBtn = createButton(localize(CFSTR("start")),
-                                      UIColor.systemGreenColor, UIFontTextStyleSubheadline,
-                                      nil, true, true, 0, self, @selector(startEndWorkout:));
+    groupsStack = createStackView(NULL, 0, 1, 20, (Padding){20, 4, 20, 4});
+    UIButton *startBtn = createButton(localize(CFSTR("start")), UIColor.systemGreenColor,
+                                      0, 0, self, @selector(startEndWorkout:));
     setNavButton(self.navigationItem, false, startBtn, self.view.frame.size.width);
 
-    for (unsigned i = 0; i < workout->activities->size; ++i) {
-        ExerciseContainer *v = [[ExerciseContainer alloc]
-                                initWithGroup:&workout->activities->arr[i] tag:i
-                                target:self action:@selector(handleTap:)];
+    unsigned i = 0; ExerciseGroup *g;
+    array_iter(workout->activities, g) {
+        UIView *v = exerciseContainer_init(g, i++, self, @selector(handleTap:));
         [groupsStack addArrangedSubview:v];
         [v release];
     }
@@ -119,7 +109,7 @@
             goto cleanup;
     }
 
-    ExerciseView *v = firstContainer->viewsArr[workout->group->index];
+    StatusButton *v = firstContainer->viewsArr[workout->group->index];
     switch (workout_findTransitionForEvent(workout, v, v->button, option)) {
         case TransitionCompletedWorkout:
             finishedWorkout = true;
@@ -136,14 +126,14 @@
             ExerciseEntry *e;
             int i = 0;
             array_iter(workout->group->exercises, e) {
-                [firstContainer->viewsArr[i++] configureWithEntry:e];
+                exerciseView_configure(firstContainer->viewsArr[i++], e);
             }
             if (header)
                 CFRelease(header);
             break;
         case TransitionFinishedExercise:
             v = firstContainer->viewsArr[workout->group->index];
-            [v configureWithEntry:workout->entry];
+            exerciseView_configure(v, workout->entry);
         case TransitionNoChange:
             break;
     }
@@ -152,10 +142,6 @@ cleanup:
     pthread_mutex_unlock(&timerLock);
     if (finishedWorkout)
         addWorkoutCoordinator_completedWorkout(delegate, false, true);
-}
-
-- (void) finishedWorkoutTimerForType: (uchar)type group: (uint)group entry: (uint)entry {
-    [self handleTapForGroup:group exercise:entry option:type ? 0 : EventOptionFinishGroup];
 }
 
 - (void) stopTimers {
@@ -187,3 +173,15 @@ cleanup:
         [self handleTapForGroup:groupIdx exercise:0 option:EventOptionFinishGroup];
 }
 @end
+
+id workoutVC_init(void *delegate) {
+    WorkoutViewController *this = [[WorkoutViewController alloc] initWithNibName:nil bundle:nil];
+    this->delegate = delegate;
+    this->workout = ((AddWorkoutCoordinator *) delegate)->workout;
+    setupTimers(this->workout, this);
+    return this;
+}
+
+void workoutVC_finishedTimer(WorkoutViewController *vc, uchar type, uint group, uint entry) {
+    [vc handleTapForGroup:group exercise:entry option:type ? 0 : EventOptionFinishGroup];
+}

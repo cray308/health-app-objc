@@ -13,7 +13,7 @@
 
 typedef struct {
     id navVC;
-    HistoryViewModel viewModel;
+    HistoryViewModel model;
 } HistoryTabCoordinator;
 
 void historyCoordinator_start(HistoryTabCoordinator *this);

@@ -8,51 +8,49 @@
 #import "WorkoutTypeChart.h"
 #include "SwiftBridging.h"
 
-@implementation WorkoutTypeChart
-- (id) initWithViewModel: (HistoryWorkoutTypeChartViewModel *)viewModel
-               formatter: (id<AxisValueFormatter>)xAxisFormatter {
-    if (!(self = [super initWithFrame:CGRectZero])) return nil;
-    self->viewModel = viewModel;
+id workoutTypeChart_init(WorkoutTypeChartViewModel *model, id formatter) {
+    WorkoutTypeChart *this = [[WorkoutTypeChart alloc] initWithFrame:CGRectZero];
+    this->model = model;
 
     for (int i = 1; i < 5; ++i) {
-        LineChartDataSet *dataSet = viewModel->dataSets[i];
-        dataSet.fillColor = ((LegendEntry*) viewModel->legendEntries[i - 1]).formColor;
+        LineChartDataSet *dataSet = model->dataSets[i];
+        dataSet.fillColor = ((LegendEntry*) model->legendEntries[i - 1]).formColor;
         dataSet.drawFilledEnabled = true;
         dataSet.fillAlpha = 0.75;
-        AreaChartFormatter *fillFormatter = [[AreaChartFormatter alloc]
-                                             initWithBoundaryDataSet:viewModel->dataSets[i - 1]];
-        dataSet.fillFormatter = fillFormatter;
-        [fillFormatter release];
+        AreaChartFormatter *f = [[AreaChartFormatter alloc] initWithBoundaryDataSet:model->dataSets[i - 1]];
+        dataSet.fillFormatter = f;
+        [f release];
     }
-    [((LineChartData*) viewModel->chartData) setValueFormatter:self];
+    [((LineChartData*) model->chartData) setValueFormatter:this];
 
-    chartView = createChartView(self, xAxisFormatter, viewModel->legendEntries, 4, 425);
-    chartView.leftAxis.valueFormatter = self;
+    this->chartView = createChartView(this, formatter, model->legendEntries, 4, 425);
+    this->chartView.leftAxis.valueFormatter = this;
 
-    ChartRenderer *renderer = [[AreaChartRenderer alloc] initWithView:chartView];
-    chartView.renderer = renderer;
+    ChartRenderer *renderer = [[AreaChartRenderer alloc] initWithView:this->chartView];
+    this->chartView.renderer = renderer;
     [renderer release];
-    return self;
+    return this;
 }
 
-- (void) updateWithCount: (int)count isSmall: (bool)isSmall {
-    CFArrayRef array = CFArrayCreate(NULL, (const void **)viewModel->entries[0]->arr,
+void workoutTypeChart_update(WorkoutTypeChart *this, int count, bool isSmall) {
+    CFArrayRef array = CFArrayCreate(NULL, (const void **)this->model->entries[0]->arr,
                                      count, &kCocoaArrCallbacks);
-    [((LineChartDataSet *) viewModel->dataSets[0]) replaceEntries:(__bridge NSArray*)array];
+    [((LineChartDataSet *) this->model->dataSets[0]) replaceEntries:_nsarr(array)];
     for (int i = 1; i < 5; ++i) {
-        updateDataSet(isSmall, count, viewModel->dataSets[i], viewModel->entries[i]->arr);
+        updateDataSet(isSmall, count, this->model->dataSets[i], this->model->entries[i]->arr);
     }
-    updateChart(isSmall, count, chartView, viewModel->chartData, viewModel->yMax);
+    updateChart(isSmall, count, this->chartView, this->model->chartData, this->model->yMax);
     CFRelease(array);
 }
 
-- (NSString * _Nonnull) stringForValue: (double)value axis: (AxisBase *_Nullable)axis {
-    return (__bridge NSString*) workoutTypeViewModel_getDuration(viewModel, value);
+@implementation WorkoutTypeChart
+- (NSString *) stringForValue: (double)value axis: (AxisBase *)axis {
+    return _nsstr(workoutTypeViewModel_getDuration(model, value));
 }
 
-- (NSString * _Nonnull) stringForValue: (double)value entry: (ChartDataEntry *_Nonnull)entry
-                          dataSetIndex: (NSInteger)dataSetIndex
-                       viewPortHandler: (ViewPortHandler *_Nullable)viewPortHandler {
-    return (__bridge NSString*) workoutTypeViewModel_getDuration(viewModel, value);
+- (NSString *) stringForValue: (double)value entry: (ChartDataEntry *)entry
+                 dataSetIndex: (NSInteger)dataSetIndex
+              viewPortHandler: (ViewPortHandler *)viewPortHandler {
+    return _nsstr(workoutTypeViewModel_getDuration(model, value));
 }
 @end

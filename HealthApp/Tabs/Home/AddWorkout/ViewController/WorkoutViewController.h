@@ -11,9 +11,6 @@
 #import <UIKit/UIKit.h>
 #include "AddWorkoutCoordinator.h"
 
-@interface WorkoutViewController: UIViewController
-- (id) initWithDelegate: (AddWorkoutCoordinator *)delegate;
-- (void) finishedWorkoutTimerForType: (uchar)type group: (uint)group entry: (uint)entry;
-@end
+@interface WorkoutViewController: UIViewController @end
 
 #endif /* WorkoutViewController_h */

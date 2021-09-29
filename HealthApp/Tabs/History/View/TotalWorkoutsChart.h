@@ -12,17 +12,15 @@
 #import "UIKit/UIKit.h"
 @import Charts;
 
-@interface TotalWorkoutsChart: UIView
-- (id) initWithViewModel: (HistoryTotalWorkoutsChartViewModel *)viewModel
-               formatter: (id<AxisValueFormatter>)xAxisFormatter;
-- (void) updateWithCount: (int)count isSmall: (bool)isSmall;
-@end
-
+@interface TotalWorkoutsChart: UIView @end
 @interface TotalWorkoutsChart() {
-    HistoryTotalWorkoutsChartViewModel *viewModel;
+    @public TotalWorkoutsChartViewModel *model;
     @public LineChartView *chartView;
-    ChartLimitLine *limitLine;
+    @public ChartLimitLine *limitLine;
 }
 @end
+
+id totalWorkoutsChart_init(TotalWorkoutsChartViewModel *model, id formatter);
+void totalWorkoutsChart_update(TotalWorkoutsChart *this, int count, bool isSmall);
 
 #endif /* TotalWorkoutsChart_h */

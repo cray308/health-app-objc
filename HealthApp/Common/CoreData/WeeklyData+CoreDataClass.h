@@ -11,12 +11,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface WeeklyData : NSManagedObject
-
-@end
-
+@interface WeeklyData: NSManagedObject @end
 @interface WeeklyData (CoreDataProperties)
-
 + (NSFetchRequest<WeeklyData *> *) fetchRequest;
 
 @property (nonatomic) int16_t bestBench;
@@ -29,7 +25,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) int16_t timeStrength;
 @property (nonatomic) int16_t totalWorkouts;
 @property (nonatomic) int64_t weekStart;
-
 @end
 
 NS_ASSUME_NONNULL_END

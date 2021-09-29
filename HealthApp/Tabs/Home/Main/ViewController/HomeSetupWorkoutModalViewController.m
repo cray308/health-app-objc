@@ -8,33 +8,29 @@
 #import "HomeSetupWorkoutModalViewController.h"
 #include "HomeTabCoordinator.h"
 #include "ViewControllerHelpers.h"
-#include "InputView.h"
+#include "Exercise.h"
 
-@interface HomeSetupWorkoutModalViewController() {
-    HomeTabCoordinator *delegate;
-    Array_str *names;
+@interface SetupWorkoutSheet() {
+    @public HomeTabCoordinator *delegate;
+    @public Array_str *names;
     UITextField *workoutTextField;
-    TextValidator validator;
-    WorkoutParams output;
+    @public Validator validator;
+    @public WorkoutParams output;
 }
 @end
 
-@implementation HomeSetupWorkoutModalViewController
-- (id) initWithDelegate: (void *)delegate type: (uchar)type names: (Array_str *)names {
-    if (!(self = [super initWithNibName:nil bundle:nil])) return nil;
-    self->delegate = delegate;
-    self->names = names;
-    memcpy(&validator, &(TextValidator){
-        .children = {[0 ... 3] = {.minVal = 1}}
-    }, sizeof(TextValidator));
-    workoutParams_init(&output, -1);
-    output.type = type;
-    return self;
+id setupWorkoutVC_init(void *delegate, uchar type, Array_str *names) {
+    SetupWorkoutSheet *this = [[SetupWorkoutSheet alloc] initWithNibName:nil bundle:nil];
+    this->delegate = delegate;
+    this->names = names;
+    workoutParams_init(&this->output, -1);
+    this->output.type = type;
+    return this;
 }
 
+@implementation SetupWorkoutSheet
 - (void) dealloc {
-    if (validator.set)
-        uset_free(char, validator.set);
+    textValidator_free(&validator);
     array_free(str, names);
     [workoutTextField release];
     [super dealloc];
@@ -44,9 +40,8 @@
     [super viewDidLoad];
     setBackground(self.view, UIColor.systemGroupedBackgroundColor);
 
-    workoutTextField = createTextfield(nil, names->arr[0], NSTextAlignmentCenter, 0);
-    UILabel *workoutLabel = createLabel(localize(CFSTR("setupWorkoutPickerTitle")),
-                                        UIFontTextStyleFootnote, 4);
+    workoutTextField = createTextfield(nil, names->arr[0], NSTextAlignmentCenter, 0, 0);
+    UILabel *workoutLabel = createLabel(localize(CFSTR("setupWorkoutPickerTitle")),TextFootnote, 4);
 
     UIPickerView *workoutPicker = [[UIPickerView alloc] init];
     workoutPicker.delegate = self;
@@ -57,10 +52,10 @@
     [workoutContainer addSubview:workoutTextField];
     [self.view addSubview:workoutContainer];
 
-    UIButton *cancelButton = createButton(localize(CFSTR("cancel")), UIColor.systemBlueColor,
-                                          nil, nil, false, true, 0, self, @selector(pressedCancel));
-    UIButton *submitButton = createButton(localize(CFSTR("go")), UIColor.systemBlueColor, nil, nil,
-                                          false, false, 0, self, @selector(didPressFinish));
+    UIButton *cancelButton = createButton(localize(CFSTR("cancel")), UIColor.systemBlueColor, 0,
+                                          0, self, @selector(pressedCancel));
+    UIButton *submitButton = createButton(localize(CFSTR("go")), UIColor.systemBlueColor, 0,
+                                          0, self, @selector(pressedFinish));
     setNavButton(self.navigationItem, true, cancelButton, self.view.frame.size.width);
     setNavButton(self.navigationItem, false, submitButton, self.view.frame.size.width);
     enableButton(submitButton, false);
@@ -88,22 +83,17 @@
     }
 
     UIToolbar *toolbar = createToolbar(self, @selector(dismissKeyboard));
-    UIStackView *textFieldStack = createStackView(NULL, 0, 1, 0, 0, (HAEdgeInsets){0});
+    UIStackView *textFieldStack = createStackView(NULL, 0, 1, 0, (Padding){0});
     [self.view addSubview:textFieldStack];
 
     for (int i = 0; i < 3; ++i) {
         if (!titles[i]) continue;
-        InputView *v = [[InputView alloc] initWithDelegate:self fieldHint:localize(titles[i])
-                                                       tag:validator.count min:1 max:maxes[i]];
-        validator.children[validator.count].inputView = v;
-        validator.children[validator.count++].maxVal = maxes[i];
-        v->field.inputAccessoryView = toolbar;
+        UIView *v = validator_addChild(&validator, self, localize(titles[i]), 1, maxes[i], toolbar);
         [textFieldStack addArrangedSubview:v];
-        [v release];
     }
 
     if (validator.count)
-        validator.set = createNumberCharacterSet();
+        textValidator_setup(&validator);
 
     UILayoutGuide *guide = self.view.safeAreaLayoutGuide;
     activateConstraints((id []){
@@ -137,7 +127,7 @@
     [toolbar release];
 }
 
-- (void) didPressFinish {
+- (void) pressedFinish {
     switch (output.type) {
         case WorkoutTypeStrength:
             output.weight = validator.children[2].result;
@@ -162,8 +152,7 @@
 
 - (BOOL) textField: (UITextField *)textField
 shouldChangeCharactersInRange: (NSRange)range replacementString: (NSString *)string {
-    return checkInput(textField, (CFRange){range.location, range.length},
-                      (__bridge CFStringRef) string, &validator);
+    return checkInput(&validator, textField, (CFRange){range.location,range.length},_cfstr(string));
 }
 
 - (BOOL) textFieldShouldReturn: (UITextField *)textField {
@@ -178,7 +167,7 @@ shouldChangeCharactersInRange: (NSRange)range replacementString: (NSString *)str
 
 - (NSString *) pickerView: (UIPickerView *)pickerView
               titleForRow: (NSInteger)row forComponent: (NSInteger)component {
-    return (__bridge NSString*) names->arr[row];
+    return _nsstr(names->arr[row]);
 }
 
 - (void) pickerView: (UIPickerView *)pickerView

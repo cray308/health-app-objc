@@ -12,6 +12,16 @@
 gen_uset_source(char, unsigned short, ds_cmp_num_eq, DSDefault_addrOfVal, DSDefault_sizeOfVal,
                 DSDefault_shallowCopy, DSDefault_shallowDelete)
 
+static CFStringRef inputFieldError;
+
+extern id UIFontTextStyleTitle1;
+extern id UIFontTextStyleTitle2;
+extern id UIFontTextStyleTitle3;
+extern id UIFontTextStyleHeadline;
+extern id UIFontTextStyleSubheadline;
+extern id UIFontTextStyleBody;
+extern id UIFontTextStyleFootnote;
+
 struct AnchorNames anchors = {
     "topAnchor",
     "bottomAnchor",
@@ -95,37 +105,87 @@ id createDivider(void) {
     return view;
 }
 
-USet_char *createNumberCharacterSet(void) {
+void textValidator_setup(Validator *this) {
     unsigned short nums[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
-    return uset_new_fromArray(char, nums, 10);
+    this->set = uset_new_fromArray(char, nums, 10);
 }
 
-static void showInputError(TextValidator *validator, struct ChildValidator *child) {
+void textValidator_free(Validator *this) {
+    if (this->set)
+        uset_free(char, this->set);
+    for (int i = 0; i < 4; ++i) {
+        if (this->children[i].view) {
+            releaseObj(this->children[i].hintLabel);
+            releaseObj(this->children[i].field);
+            releaseObj(this->children[i].errorLabel);
+            releaseObj(this->children[i].view);
+        }
+    }
+}
+
+id validator_addChild(Validator *v, id delegate, CFStringRef hint, int min, int max, id toolbar) {
+    struct InputView *child = &v->children[v->count];
+    child->view = createView(nil, false);
+    child->minVal = min;
+    child->maxVal = max;
+    if (!inputFieldError)
+        inputFieldError = localize(CFSTR("inputFieldError"));
+    CFStringRef errorText = CFStringCreateWithFormat(NULL, NULL, inputFieldError, min, max);
+    child->hintLabel = createLabel(hint, TextFootnote, 4);
+    child->field = createTextfield(delegate, NULL, 4, 4, v->count++);
+    child->errorLabel = createLabel(errorText, TextFootnote, 4);
+    setTextColor(child->errorLabel, createColor("systemRedColor"));
+    id vStack = createStackView((id []){child->hintLabel, child->field, child->errorLabel},
+                                3, 1, 4, (Padding){4, 8, 4, 8});
+    addSubview(child->view, vStack);
+    activateConstraints((id []){
+        createConstraint(getAnchor(vStack, anchors.top), getAnchor(child->view, anchors.top), 0),
+        createConstraint(getAnchor(vStack, anchors.left), getAnchor(child->view, anchors.left), 0),
+        createConstraint(getAnchor(vStack, anchors.right),
+                         getAnchor(child->view, anchors.right), 0),
+        createConstraint(getAnchor(vStack, anchors.bottom),
+                         getAnchor(child->view, anchors.bottom), 0),
+        createConstraint(getAnchor(child->hintLabel, anchors.height), nil, 20),
+        createConstraint(getAnchor(child->field, anchors.height), nil, 40),
+        createConstraint(getAnchor(child->errorLabel, anchors.height), nil, 20),
+    }, 7);
+    releaseObj(vStack);
+    CFRelease(errorText);
+    inputView_toggleError(child, false);
+    ((void(*)(id,SEL,id))objc_msgSend)(child->field, sel_getUid("setInputAccessoryView:"), toolbar);
+    return child->view;
+}
+
+void inputView_toggleError(struct InputView *this, bool show) {
+    ((void(*)(id,SEL,bool))objc_msgSend)(this->errorLabel, sel_getUid("setHidden:"), !show);
+}
+
+void inputView_reset(struct InputView *this, short value) {
+    this->valid = true;
+    this->result = value;
+    inputView_toggleError(this, false);
+}
+
+static void showInputError(Validator *validator, struct InputView *child) {
     enableButton(validator->button, false);
     child->valid = false;
-    ((void(*)(id,SEL,bool))objc_msgSend)(child->inputView, sel_getUid("toggleError:"), true);
+    inputView_toggleError(child, true);
 }
 
-void resetInputChild(struct ChildValidator *child, short value) {
-    child->valid = true;
-    child->result = value;
-    ((void(*)(id,SEL,bool))objc_msgSend)(child->inputView, sel_getUid("toggleError:"), false);
-}
-
-bool checkInput(id field, CFRange range, CFStringRef replacement, TextValidator *validator) {
+bool checkInput(Validator *this, id field, CFRange range, CFStringRef replacement) {
     int len = (int) CFStringGetLength(replacement);
     if (len) {
         CFStringInlineBuffer buf;
         CFStringInitInlineBuffer(replacement, &buf, CFRangeMake(0, len));
         for (int i = 0; i < len; ++i) {
-            if (!uset_contains(char, validator->set, CFStringGetCharacterFromInlineBuffer(&buf, i)))
+            if (!uset_contains(char, this->set, CFStringGetCharacterFromInlineBuffer(&buf, i)))
                 return false;
         }
     }
 
     int i = ((int(*)(id,SEL))objc_msgSend)(field, sel_getUid("tag"));
-    if (i == validator->count) return true;
-    struct ChildValidator *child = &validator->children[i];
+    if (i == this->count) return true;
+    struct InputView *child = &this->children[i];
 
     CFStringRef text = ((CFStringRef(*)(id,SEL))objc_msgSend)(field, sel_getUid("text"));
     CFMutableStringRef newText = CFStringCreateMutableCopy(NULL, 0, text ? text : CFSTR(""));
@@ -133,7 +193,7 @@ bool checkInput(id field, CFRange range, CFStringRef replacement, TextValidator 
 
     if (!CFStringGetLength(newText)) {
         CFRelease(newText);
-        showInputError(validator, child);
+        showInputError(this, child);
         return true;
     }
 
@@ -141,26 +201,21 @@ bool checkInput(id field, CFRange range, CFStringRef replacement, TextValidator 
     CFRelease(newText);
 
     if (newVal < child->minVal || newVal > child->maxVal) {
-        showInputError(validator, child);
+        showInputError(this, child);
         return true;
     }
 
-    resetInputChild(child, newVal);
+    inputView_reset(child, newVal);
 
-    for (i = 0; i < validator->count; ++i) {
-        if (!validator->children[i].valid) return true;
+    for (i = 0; i < this->count; ++i) {
+        if (!this->children[i].valid) return true;
     }
 
-    enableButton(validator->button, true);
+    enableButton(this->button, true);
     return true;
 }
 
 #pragma mark - VC Functions
-
-id createVCWithDelegate(const char *name, void *delegate) {
-    return ((id(*)(id,SEL,void*))objc_msgSend)(allocClass(name),
-                                               sel_getUid("initWithDelegate:"), delegate);
-}
 
 void setupNavVC(id navVC, id firstVC) {
     id ctrls[] = {firstVC};
@@ -256,8 +311,7 @@ id createView(id color, bool rounded) {
     return view;
 }
 
-id createStackView(id *subviews, int count, int axis, CGFloat spacing,
-                   int distribution, HAEdgeInsets margins) {
+id createStackView(id *subviews, int count, int axis, int spacing, Padding margins) {
     id view;
     const char *name = "UIStackView";
     if (count) {
@@ -271,7 +325,6 @@ id createStackView(id *subviews, int count, int axis, CGFloat spacing,
     disableAutoresizing(view);
     ((void(*)(id,SEL,int))objc_msgSend)(view, sel_getUid("setAxis:"), axis);
     ((void(*)(id,SEL,CGFloat))objc_msgSend)(view, sel_getUid("setSpacing:"), spacing);
-    ((void(*)(id,SEL,int))objc_msgSend)(view, sel_getUid("setDistribution:"), distribution);
     ((void(*)(id,SEL,bool))objc_msgSend)(view, sel_getUid("setLayoutMarginsRelativeArrangement:"),
                                          true);
     setLayoutMargins(view, &margins);
@@ -288,20 +341,18 @@ id createScrollView(void) {
     return view;
 }
 
-id createLabel(CFStringRef text, id style, int alignment) {
+id createLabel(CFStringRef text, int style, int alignment) {
     id view = createObjectWithFrame("UILabel", CGRectZero);
     disableAutoresizing(view);
     setLabelText(view, text);
     setLabelFontWithStyle(view, style);
     setDynamicFont(view);
-    ((void(*)(id,SEL,id))objc_msgSend)(view,
-                                       sel_getUid("setTextColor:"), createColor("labelColor"));
+    setTextColor(view, createColor("labelColor"));
     setAlignment(view, alignment);
     return view;
 }
 
-id createButton(CFStringRef title, id color, id style, id background,
-                bool rounded, bool enabled, int tag, id target, SEL action) {
+id createButton(CFStringRef title, id color, int params, int tag, id target, SEL action) {
     id view = ((id(*)(Class,SEL,int))objc_msgSend)(objc_getClass("UIButton"),
                                                    sel_getUid("buttonWithType:"), 1);
     disableAutoresizing(view);
@@ -309,13 +360,14 @@ id createButton(CFStringRef title, id color, id style, id background,
     setButtonColor(view, color, 0);
     setButtonColor(view, createColor("secondaryLabelColor"), 2);
     id label = ((id(*)(id,SEL))objc_msgSend)(view, sel_getUid("titleLabel"));
+    int style = (params & BtnLargeFont) ? TextHead : TextBody;
     setLabelFontWithStyle(label, style);
     setDynamicFont(label);
-    setBackground(view, background);
-    if (rounded)
+    if (params & BtnBackground)
+        setBackground(view, createColor("secondarySystemGroupedBackgroundColor"));
+    if (params & BtnRounded)
         setCornerRadius(view);
     setTag(view, tag);
-    enableButton(view, enabled);
     addTarget(view, target, action, 64);
     return view;
 }
@@ -334,12 +386,13 @@ id createSegmentedControl(CFStringRef *items, int count, int startIndex, id targ
     return view;
 }
 
-id createTextfield(id delegate, CFStringRef text, int alignment, int keyboard) {
+id createTextfield(id delegate, CFStringRef text, int alignment, int keyboard, int tag) {
     id view = createObjectWithFrame("UITextField", CGRectZero);
     disableAutoresizing(view);
     setBackground(view, createColor("tertiarySystemBackgroundColor"));
     setLabelText(view, text);
     setAlignment(view, alignment);
+    setTag(view, tag);
     ((void(*)(id,SEL,int))objc_msgSend)(view, sel_getUid("setBorderStyle:"), 3);
     ((void(*)(id,SEL,int))objc_msgSend)(view, sel_getUid("setKeyboardType:"), keyboard);
     ((void(*)(id,SEL,id))objc_msgSend)(view, sel_getUid("setDelegate:"), delegate);
@@ -361,6 +414,10 @@ void setTag(id view, int tag) {
     ((void(*)(id,SEL,int))objc_msgSend)(view, sel_getUid("setTag:"), tag);
 }
 
+void setTextColor(id view, id color) {
+    ((void(*)(id,SEL,id))objc_msgSend)(view, sel_getUid("setTextColor:"), color);
+}
+
 void setBackground(id view, id color) {
     ((void(*)(id,SEL,id))objc_msgSend)(view, sel_getUid("setBackgroundColor:"), color);
 }
@@ -373,12 +430,34 @@ void setLabelText(id view, CFStringRef text) {
     ((void(*)(id,SEL,CFStringRef))objc_msgSend)(view, sel_getUid("setText:"), text);
 }
 
-void setLabelFontWithStyle(id view, id style) {
-    if (style) {
-        id font = ((id(*)(Class,SEL,CFStringRef))objc_msgSend)
-        (objc_getClass("UIFont"), sel_getUid("preferredFontForTextStyle:"), (CFStringRef)style);
-        setFont(view, font);
+void setLabelFontWithStyle(id view, int style) {
+    if (!style) return;
+    id fontStyle;
+    switch (style) {
+        case TextFootnote:
+            fontStyle = UIFontTextStyleFootnote;
+            break;
+        case TextSubhead:
+            fontStyle = UIFontTextStyleSubheadline;
+            break;
+        case TextBody:
+            fontStyle = UIFontTextStyleBody;
+            break;
+        case TextHead:
+            fontStyle = UIFontTextStyleHeadline;
+            break;
+        case TextTitle1:
+            fontStyle = UIFontTextStyleTitle1;
+            break;
+        case TextTitle2:
+            fontStyle = UIFontTextStyleTitle2;
+            break;
+        default:
+            fontStyle = UIFontTextStyleTitle3;
     }
+    id font = ((id(*)(Class,SEL,CFStringRef))objc_msgSend)
+    (objc_getClass("UIFont"), sel_getUid("preferredFontForTextStyle:"), (CFStringRef)fontStyle);
+    setFont(view, font);
 }
 
 void setLabelFontWithSize(id view, CGFloat size) {

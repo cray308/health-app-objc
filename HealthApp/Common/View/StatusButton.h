@@ -9,21 +9,15 @@
 #define StatusButton_h
 
 #import <UIKit/UIKit.h>
-#include "ViewControllerHelpers.h"
 
-@interface StatusButton: UIView
-- (id) initWithButtonText: (CFStringRef)buttonText hideHeader: (bool)hideHeader
-                  hideBox: (bool)hideBox tag: (int)tag target: (id)target action: (SEL)action;
-- (void) updateWithLabelText: (CFStringRef)labelText buttonText: (CFStringRef)buttonText
-                       state: (StatusViewState)state enable:(bool)enable;
-- (void) updateState: (StatusViewState)state enable:(bool)enable;
-@end
-
+@interface StatusButton: UIView @end
 @interface StatusButton() {
-    @public UIView *checkbox;
+    @public UIView *box;
     @public UILabel *headerLabel;
     @public UIButton *button;
 }
 @end
+
+id statusButton_init(CFStringRef text, bool hideViews, int tag, id target, SEL action);
 
 #endif /* StatusButton_h */

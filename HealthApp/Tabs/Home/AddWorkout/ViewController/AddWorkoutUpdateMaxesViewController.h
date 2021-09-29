@@ -10,8 +10,6 @@
 
 #import <UIKit/UIKit.h>
 
-@interface AddWorkoutUpdateMaxesViewController: UIViewController<UITextFieldDelegate>
-- (id) initWithDelegate: (void *)delegate;
-@end
+@interface UpdateMaxesSheet: UIViewController<UITextFieldDelegate> @end
 
 #endif /* AddWorkoutUpdateMaxesViewController_h */

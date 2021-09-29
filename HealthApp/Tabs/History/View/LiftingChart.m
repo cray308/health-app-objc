@@ -7,22 +7,20 @@
 
 #import "LiftingChart.h"
 #include "SwiftBridging.h"
+@implementation LiftingChart @end
 
-@implementation LiftingChart
-- (id) initWithViewModel: (HistoryLiftChartViewModel *)viewModel
-               formatter: (id<AxisValueFormatter>)xAxisFormatter {
-    if (!(self = [super initWithFrame:CGRectZero])) return nil;
-    self->viewModel = viewModel;
+id liftingChart_init(LiftChartViewModel *model, id formatter) {
+    LiftingChart *this = [[LiftingChart alloc] initWithFrame:CGRectZero];
+    this->model = model;
     for (int i = 0; i < 4; ++i)
-        ((LineChartDataSet *) viewModel->dataSets[i]).lineWidth = 2;
-    chartView = createChartView(self, xAxisFormatter, viewModel->legendEntries, 4, 550);
-    return self;
+        ((LineChartDataSet *) model->dataSets[i]).lineWidth = 2;
+    this->chartView = createChartView(this, formatter, model->legendEntries, 4, 550);
+    return this;
 }
 
-- (void) updateWithCount: (int)count isSmall: (bool)isSmall {
+void liftingChart_update(LiftingChart *this, int count, bool isSmall) {
     for (int i = 0; i < 4; ++i) {
-        updateDataSet(isSmall, count, viewModel->dataSets[i], viewModel->entries[i]->arr);
+        updateDataSet(isSmall, count, this->model->dataSets[i], this->model->entries[i]->arr);
     }
-    updateChart(isSmall, count, chartView, viewModel->chartData, viewModel->yMax);
+    updateChart(isSmall, count, this->chartView, this->model->chartData, this->model->yMax);
 }
-@end

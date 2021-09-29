@@ -11,16 +11,19 @@
 #import "PersistenceService.h"
 #include "ViewControllerHelpers.h"
 
+extern id settingsVC_init(void *delegate);
+extern void settingsVC_updateWeightFields(id vc);
+
 static id cancelAction(void) {
     return createAlertAction(localize(CFSTR("cancel")), 1, NULL);
 }
 
 void settingsCoordinator_start(SettingsTabCoordinator *this) {
-    setupNavVC(this->navVC, createVCWithDelegate("SettingsViewController", this));
+    setupNavVC(this->navVC, settingsVC_init(this));
 }
 
 void settingsCoordinator_updateWeightText(SettingsTabCoordinator *this) {
-    objc_singleArg(getFirstVC(this->navVC), sel_getUid("updateWeightFields"));
+    settingsVC_updateWeightFields(getFirstVC(this->navVC));
 }
 
 void settingsCoordinator_handleSaveTap(SettingsTabCoordinator *this,

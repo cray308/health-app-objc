@@ -13,7 +13,7 @@
 
 typedef struct {
     id navVC;
-    HomeViewModel viewModel;
+    HomeViewModel model;
     void *childCoordinator;
 } HomeTabCoordinator;
 
