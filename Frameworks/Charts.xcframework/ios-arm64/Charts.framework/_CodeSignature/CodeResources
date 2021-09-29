@@ -6,7 +6,7 @@
 	<dict>
 		<key>Headers/Charts-Swift.h</key>
 		<data>
-		eJcGxredlvTMDt86rnJhllsTZpM=
+		fDDxlc6P2H7Vh56TXbDL1CF0SLI=
 		</data>
 		<key>Headers/Charts.h</key>
 		<data>
@@ -22,11 +22,11 @@
 		</data>
 		<key>Modules/Charts.swiftmodule/arm64-apple-ios.swiftinterface</key>
 		<data>
-		rWSjRhXFMtFfGWD1DuZ6ZnRQnJ8=
+		qFWY2cFtVhSZLwwGthD0LiG424k=
 		</data>
 		<key>Modules/Charts.swiftmodule/arm64-apple-ios.swiftmodule</key>
 		<data>
-		UH2oqam66lcPF6+KAz75aKUpe5c=
+		EHYXZzHOjYxqZVVMZ0vCcZcLHmI=
 		</data>
 		<key>Modules/Charts.swiftmodule/arm64.swiftdoc</key>
 		<data>
@@ -34,11 +34,11 @@
 		</data>
 		<key>Modules/Charts.swiftmodule/arm64.swiftinterface</key>
 		<data>
-		rWSjRhXFMtFfGWD1DuZ6ZnRQnJ8=
+		qFWY2cFtVhSZLwwGthD0LiG424k=
 		</data>
 		<key>Modules/Charts.swiftmodule/arm64.swiftmodule</key>
 		<data>
-		UH2oqam66lcPF6+KAz75aKUpe5c=
+		EHYXZzHOjYxqZVVMZ0vCcZcLHmI=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -51,7 +51,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			ZYpvZY7BiZT3wtZZ1liH0rdrTZT/62awVhLWcFJbTuo=
+			lwlofdRWx7vfh3jWxGSTvXWgBOGksayIRtOIvLnw9uY=
 			</data>
 		</dict>
 		<key>Headers/Charts.h</key>
@@ -72,14 +72,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			xpjd65jKz53pQi2lKbZn9YJtvizBaos90RJmfeetZY8=
+			Dy+98R3wDwpBa+3cGdmoBjXn93DWbiC4bRLjYZyjZ1Y=
 			</data>
 		</dict>
 		<key>Modules/Charts.swiftmodule/arm64-apple-ios.swiftmodule</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			cGFrhriOiXuAsHSkUeAFV3kufLmUOmnMyutnuTDpLVk=
+			A0Pc5pd9XfUnIR7hKDtNxsZ4qIiED+wdlUNl7AwjJVc=
 			</data>
 		</dict>
 		<key>Modules/Charts.swiftmodule/arm64.swiftdoc</key>
@@ -93,14 +93,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			xpjd65jKz53pQi2lKbZn9YJtvizBaos90RJmfeetZY8=
+			Dy+98R3wDwpBa+3cGdmoBjXn93DWbiC4bRLjYZyjZ1Y=
 			</data>
 		</dict>
 		<key>Modules/Charts.swiftmodule/arm64.swiftmodule</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			cGFrhriOiXuAsHSkUeAFV3kufLmUOmnMyutnuTDpLVk=
+			A0Pc5pd9XfUnIR7hKDtNxsZ4qIiED+wdlUNl7AwjJVc=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>

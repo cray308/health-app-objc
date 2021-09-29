@@ -220,7 +220,7 @@ SWIFT_PROTOCOL("_TtP6Charts13FillFormatter_")
 
 SWIFT_CLASS("_TtC6Charts18AreaChartFormatter")
 @interface AreaChartFormatter : NSObject <FillFormatter>
-- (nonnull instancetype)initWithBoundaryDataSet:(LineChartDataSet * _Nonnull)boundaryDataSet OBJC_DESIGNATED_INITIALIZER;
+- (nonnull instancetype)initWithDataSet:(LineChartDataSet * _Nonnull)dataSet OBJC_DESIGNATED_INITIALIZER;
 - (CGFloat)getFillLinePositionWithDataSet:(LineChartDataSet * _Nonnull)dataSet dataProvider:(LineChartView * _Nonnull)dataProvider SWIFT_WARN_UNUSED_RESULT;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");

@@ -17,7 +17,7 @@ id workoutTypeChart_init(WorkoutTypeChartViewModel *model, id formatter) {
         dataSet.fillColor = ((LegendEntry*) model->legendEntries[i - 1]).formColor;
         dataSet.drawFilledEnabled = true;
         dataSet.fillAlpha = 0.75;
-        AreaChartFormatter *f = [[AreaChartFormatter alloc] initWithBoundaryDataSet:model->dataSets[i - 1]];
+        AreaChartFormatter *f = [[AreaChartFormatter alloc] initWithDataSet:model->dataSets[i - 1]];
         dataSet.fillFormatter = f;
         [f release];
     }

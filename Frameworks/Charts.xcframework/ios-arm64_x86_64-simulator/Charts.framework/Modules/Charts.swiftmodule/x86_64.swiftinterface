@@ -186,7 +186,7 @@ extension ChartDataSet : Swift.RangeReplaceableCollection {
   @objc override dynamic public func observeValue(forKeyPath keyPath: Swift.String?, of object: Any?, change: [Foundation.NSKeyValueChangeKey : Any]?, context: Swift.UnsafeMutableRawPointer?)
 }
 @objc public class AreaChartFormatter : ObjectiveC.NSObject, Charts.FillFormatter {
-  @objc public init(boundaryDataSet: Charts.LineChartDataSet)
+  @objc public init(dataSet: Charts.LineChartDataSet)
   @objc public func getFillLinePosition(dataSet: Charts.LineChartDataSet, dataProvider: Charts.LineChartView) -> CoreGraphics.CGFloat
   @objc deinit
   @objc override dynamic public init()
