@@ -13,7 +13,6 @@
 #include "AppCoordinator.h"
 #include "HistoryTabCoordinator.h"
 #include "HistoryChartHelpers.h"
-#include "ViewControllerHelpers.h"
 
 @interface HistoryViewController() {
     @public HistoryViewModel *model;
@@ -58,21 +57,10 @@
     [scrollView addSubview:vStack];
     [vStack setCustomSpacing:20 afterView:rangePicker];
 
-    UILayoutGuide *guide = self.view.safeAreaLayoutGuide;
-    activateConstraints((id []){
-        [scrollView.leadingAnchor constraintEqualToAnchor:guide.leadingAnchor],
-        [scrollView.trailingAnchor constraintEqualToAnchor:guide.trailingAnchor],
-        [scrollView.topAnchor constraintEqualToAnchor:guide.topAnchor],
-        [scrollView.bottomAnchor constraintEqualToAnchor:guide.bottomAnchor],
-
-        [vStack.leadingAnchor constraintEqualToAnchor:scrollView.leadingAnchor],
-        [vStack.trailingAnchor constraintEqualToAnchor:scrollView.trailingAnchor],
-        [vStack.topAnchor constraintEqualToAnchor:scrollView.topAnchor],
-        [vStack.bottomAnchor constraintEqualToAnchor:scrollView.bottomAnchor],
-        [vStack.widthAnchor constraintEqualToAnchor:scrollView.widthAnchor],
-
-        [rangePicker.heightAnchor constraintEqualToConstant:30]
-    }, 10);
+    pin(scrollView, self.view.safeAreaLayoutGuide, (Padding){0}, 0);
+    pin(vStack, scrollView, (Padding){0}, 0);
+    setEqualWidths(vStack, scrollView);
+    setHeight(rangePicker, 30);
 
     [vStack release];
     [scrollView release];
@@ -107,9 +95,9 @@
 }
 @end
 
-id historyVC_init(void *delegate) {
+id historyVC_init(HistoryTabCoordinator *delegate) {
     HistoryViewController *this = [[HistoryViewController alloc] initWithNibName:nil bundle:nil];
-    this->model = &((HistoryTabCoordinator *) delegate)->model;
+    this->model = &delegate->model;
     return this;
 }
 

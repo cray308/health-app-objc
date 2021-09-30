@@ -22,5 +22,5 @@ void liftingChart_update(LiftingChart *this, int count, bool isSmall) {
     for (int i = 0; i < 4; ++i) {
         updateDataSet(isSmall, count, this->model->dataSets[i], this->model->entries[i]->arr);
     }
-    updateChart(isSmall, count, this->chartView, this->model->chartData, this->model->yMax);
+    updateChart(isSmall, this->chartView, this->model->chartData, this->model->yMax);
 }

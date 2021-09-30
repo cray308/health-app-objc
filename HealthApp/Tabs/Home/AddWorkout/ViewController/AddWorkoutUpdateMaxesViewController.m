@@ -15,7 +15,7 @@
 }
 @end
 
-id updateMaxesVC_init(void *delegate) {
+id updateMaxesVC_init(AddWorkoutCoordinator *delegate) {
     UpdateMaxesSheet *this = [[UpdateMaxesSheet alloc] initWithNibName:nil bundle:nil];
     this->delegate = delegate;
     return this;
@@ -40,10 +40,7 @@ id updateMaxesVC_init(void *delegate) {
         CFStringRef key = CFStringCreateWithFormat(NULL, NULL, CFSTR("maxWeight%d"), i);
         views[i] = validator_addChild(&validator, self, localize(key), 1, 999, toolbar);
         [self.view addSubview:views[i]];
-        activateConstraints((id []){
-            [views[i].leadingAnchor constraintEqualToAnchor:guide.leadingAnchor],
-            [views[i].trailingAnchor constraintEqualToAnchor:guide.trailingAnchor],
-        }, 2);
+        pin(views[i], guide, (Padding){0}, EdgeTop | EdgeBottom);
         CFRelease(key);
     }
 
@@ -53,14 +50,9 @@ id updateMaxesVC_init(void *delegate) {
     enableButton(finishButton, false);
     validator.button = finishButton;
 
-    activateConstraints((id []){
-        [views[0].topAnchor constraintEqualToAnchor:guide.topAnchor constant:20]
-    }, 1);
-    for (int i = 1; i < 4; ++i) {
-        activateConstraints((id []){
-            [views[i].topAnchor constraintEqualToAnchor:views[i - 1].bottomAnchor]
-        }, 1);
-    }
+    pinTopToTop(views[0], self.view.safeAreaLayoutGuide, 20);
+    for (int i = 1; i < 4; ++i)
+        pinTopToBottom(views[i], views[i - 1], 0);
 
     [toolbar release];
 }

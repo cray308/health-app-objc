@@ -92,14 +92,14 @@ void historyViewModel_fetchData(HistoryViewModel *this) {
         id request = fetchRequest();
         id predicate = createPredicate(CFSTR("weekStart > %lld AND weekStart < %lld"),
                                        date_twoYears, userData->weekStart);
-        id descriptors[] = {createSortDescriptor()};
-        CFArrayRef array = CFArrayCreate(NULL, (const void **)descriptors, 1, &kCocoaArrCallbacks);
+        id descriptor = createSortDescriptor();
+        CFArrayRef array = CFArrayCreate(NULL, (const void *[]){descriptor}, 1, &kCocoaArrCallbacks);
 
         setPredicate(request, predicate);
         setDescriptors(request, array);
 
         CFArrayRef data = persistenceService_executeFetchRequest(request, &count);
-        releaseObj(descriptors[0]);
+        releaseObj(descriptor);
         CFRelease(array);
         if (data) {
             for (int i = 0; i < count; ++i) {

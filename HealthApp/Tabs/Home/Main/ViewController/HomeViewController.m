@@ -20,10 +20,10 @@
 }
 @end
 
-id homeVC_init(void *delegate) {
+id homeVC_init(HomeTabCoordinator *delegate) {
     HomeViewController *this = [[HomeViewController alloc] initWithNibName:nil bundle:nil];
     this->delegate = delegate;
-    this->model = &this->delegate->model;
+    this->model = &delegate->model;
     return this;
 }
 
@@ -68,7 +68,7 @@ void homeVC_createWorkoutsList(HomeViewController *vc) {
         CFRelease(key);
     }
 
-    activateConstraints((id []){[headerLabel.heightAnchor constraintEqualToConstant:40]}, 1);
+    setHeight(headerLabel, 40);
     [headerLabel release];
     [divider release];
     [vc->weeklyWorkoutsStack setHidden:false];
@@ -106,21 +106,10 @@ void homeVC_createWorkoutsList(HomeViewController *vc) {
     [scrollView addSubview:vStack];
     [vStack setCustomSpacing:20 afterView:greetingLabel];
 
-    UILayoutGuide *guide = self.view.safeAreaLayoutGuide;
-    activateConstraints((id []){
-        [scrollView.leadingAnchor constraintEqualToAnchor:guide.leadingAnchor],
-        [scrollView.trailingAnchor constraintEqualToAnchor:guide.trailingAnchor],
-        [scrollView.topAnchor constraintEqualToAnchor:guide.topAnchor],
-        [scrollView.bottomAnchor constraintEqualToAnchor:guide.bottomAnchor],
-
-        [vStack.leadingAnchor constraintEqualToAnchor:scrollView.leadingAnchor],
-        [vStack.trailingAnchor constraintEqualToAnchor:scrollView.trailingAnchor],
-        [vStack.topAnchor constraintEqualToAnchor:scrollView.topAnchor],
-        [vStack.bottomAnchor constraintEqualToAnchor:scrollView.bottomAnchor],
-        [vStack.widthAnchor constraintEqualToAnchor:scrollView.widthAnchor],
-
-        [greetingLabel.heightAnchor constraintEqualToConstant:50]
-    }, 10);
+    pin(scrollView, self.view.safeAreaLayoutGuide, (Padding){0}, 0);
+    pin(vStack, scrollView, (Padding){0}, 0);
+    setEqualWidths(vStack, scrollView);
+    setHeight(greetingLabel, 50);
 
     [customWorkoutStack release];
     [headerLabel release];

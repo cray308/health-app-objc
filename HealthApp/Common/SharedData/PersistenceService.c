@@ -221,8 +221,7 @@ void persistenceService_start(int tzOffset) {
         }
 
         id descriptor = createSortDescriptor();
-        id _descriptors[] = {descriptor};
-        CFArrayRef array = CFArrayCreate(NULL, (const void **)_descriptors, 1, &kCocoaArrCallbacks);
+        CFArrayRef array = CFArrayCreate(NULL, (const void *[]){descriptor}, 1, &kCocoaArrCallbacks);
         setPredicate(request, createPredicate(CFSTR("weekStart < %lld"), userData->weekStart));
         setDescriptors(request, array);
         data = persistenceService_executeFetchRequest(request, &count);

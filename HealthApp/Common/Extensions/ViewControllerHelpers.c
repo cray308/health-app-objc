@@ -28,7 +28,8 @@ struct AnchorNames anchors = {
     "leadingAnchor",
     "trailingAnchor",
     "widthAnchor",
-    "heightAnchor"
+    "heightAnchor",
+    "centerYAnchor"
 };
 
 static void disableAutoresizing(id view) {
@@ -59,6 +60,29 @@ static void addTarget(id view, id target, SEL action, int event) {
     (view, sel_getUid("addTarget:action:forControlEvents:"), target, action, event);
 }
 
+static void activateConstraints(id *constraints, int count) {
+    CFArrayRef array = CFArrayCreate(NULL, (const void **)constraints, count, &kCocoaArrCallbacks);
+    ((void(*)(Class,SEL,CFArrayRef))objc_msgSend)(objc_getClass("NSLayoutConstraint"),
+                                                  sel_getUid("activateConstraints:"), array);
+    CFRelease(array);
+}
+
+static id getAnchor(id view, const char *name) {
+    return ((id(*)(id,SEL))objc_msgSend)(view, sel_getUid(name));
+}
+
+static id createConstraint(id a1, id a2, int constant) {
+    id result;
+    if (a2) {
+        result = ((id(*)(id,SEL,id,CGFloat))objc_msgSend)
+        (a1, sel_getUid("constraintEqualToAnchor:constant:"), a2, constant);
+    } else {
+        result = ((id(*)(id,SEL,CGFloat))objc_msgSend)(a1, sel_getUid("constraintEqualToConstant:"),
+                                                       constant);
+    }
+    return result;
+}
+
 id createToolbar(id target, SEL doneSelector) {
     CGRect bounds;
     getScreenBounds(&bounds);
@@ -74,8 +98,8 @@ id createToolbar(id target, SEL doneSelector) {
     (allocClass(btnName),
      sel_getUid("initWithTitle:style:target:action:"), CFSTR("Done"), 0, target, doneSelector);
 
-    id buttons[] = {flexSpace, doneButton};
-    CFArrayRef array = CFArrayCreate(NULL, (const void **)buttons, 2, &kCocoaArrCallbacks);
+    CFArrayRef array = CFArrayCreate(NULL, (const void *[]){flexSpace, doneButton},
+                                     2, &kCocoaArrCallbacks);
     ((void(*)(id,SEL,CFArrayRef,bool))objc_msgSend)(toolbar,
                                             sel_getUid("setItems:animated:"), array, false);
     ((void(*)(id,SEL,bool))objc_msgSend)(toolbar, sel_getUid("setUserInteractionEnabled:"), true);
@@ -100,8 +124,7 @@ void setNavButton(id navItem, bool left, id button, CGFloat totalWidth) {
 
 id createDivider(void) {
     id view = createView(createColor("separatorColor"), false);
-    id constraint = createConstraint(getAnchor(view, anchors.height), nil, 1);
-    activateConstraints((id[]){constraint}, 1);
+    activateConstraints((id []){createConstraint(getAnchor(view, anchors.height), nil, 1)}, 1);
     return view;
 }
 
@@ -218,8 +241,7 @@ bool checkInput(Validator *this, id field, CFRange range, CFStringRef replacemen
 #pragma mark - VC Functions
 
 void setupNavVC(id navVC, id firstVC) {
-    id ctrls[] = {firstVC};
-    CFArrayRef array = CFArrayCreate(NULL, (const void **)ctrls, 1, &kCocoaArrCallbacks);
+    CFArrayRef array = CFArrayCreate(NULL, (const void *[]){firstVC}, 1, &kCocoaArrCallbacks);
     ((void(*)(id,SEL,CFArrayRef))objc_msgSend)(navVC, sel_getUid("setViewControllers:"), array);
     releaseObj(firstVC);
     CFRelease(array);
@@ -281,20 +303,78 @@ void addAlertAction(id ctrl, id action) {
 
 #pragma mark - View Functions
 
-id getAnchor(id view, const char *name) {
-    return ((id(*)(id,SEL))objc_msgSend)(view, sel_getUid(name));
+void setWidth(id v, int width) {
+    activateConstraints((id []){createConstraint(getAnchor(v, anchors.width), nil, width)}, 1);
 }
 
-id createConstraint(id a1, id a2, CGFloat constant) {
-    id result;
-    if (a2) {
-        result = ((id(*)(id,SEL,id,CGFloat))objc_msgSend)
-        (a1, sel_getUid("constraintEqualToAnchor:constant:"), a2, constant);
-    } else {
-        result = ((id(*)(id,SEL,CGFloat))objc_msgSend)(a1, sel_getUid("constraintEqualToConstant:"),
-                                                       constant);
+void setHeight(id v, int height) {
+    activateConstraints((id []){createConstraint(getAnchor(v,anchors.height), nil, height)}, 1);
+}
+
+void setEqualWidths(id v, id v2) {
+    activateConstraints((id []){
+        createConstraint(getAnchor(v, anchors.width), getAnchor(v2, anchors.width), 0)
+    }, 1);
+}
+
+void setEqualCenterY(id v, id v2) {
+    activateConstraints((id []){
+        createConstraint(getAnchor(v, anchors.centerY), getAnchor(v2, anchors.centerY), 0)
+    }, 1);
+}
+
+void pinTopToTop(id v1, id v2, int offset) {
+    activateConstraints((id []){
+        createConstraint(getAnchor(v1, anchors.top), getAnchor(v2, anchors.top), offset)
+    }, 1);
+}
+
+void pinTopToBottom(id v1, id v2, int offset) {
+    activateConstraints((id []){
+        createConstraint(getAnchor(v1, anchors.top), getAnchor(v2, anchors.bottom), offset)
+    }, 1);
+}
+
+void pinRightToRight(id v1, id v2, int offset) {
+    activateConstraints((id []){
+        createConstraint(getAnchor(v1, anchors.right), getAnchor(v2, anchors.right), offset)
+    }, 1);
+}
+
+void pinRightToLeft(id v1, id v2, int offset) {
+    activateConstraints((id []){
+        createConstraint(getAnchor(v1, anchors.right), getAnchor(v2, anchors.left), offset)
+    }, 1);
+}
+
+void pin(id v, id container, Padding margins, uint excluded) {
+    id constraints[4] = {0};
+    const uint edges[] = {EdgeTop, EdgeLeft, EdgeBottom, EdgeRight};
+    int j = 0;
+    for (int i = 0; i < 4; ++i) {
+        if (edges[i] & excluded) continue;
+        id c;
+        switch (edges[i]) {
+            case EdgeTop:
+                c = createConstraint(getAnchor(v, anchors.top),
+                                     getAnchor(container, anchors.top), margins.top);
+                break;
+            case EdgeLeft:
+                c = createConstraint(getAnchor(v, anchors.left),
+                                     getAnchor(container, anchors.left), margins.left);
+                break;
+            case EdgeBottom:
+                c = createConstraint(getAnchor(container, anchors.bottom),
+                                     getAnchor(v, anchors.bottom), margins.bottom);
+                break;
+            default:
+                c = createConstraint(getAnchor(container, anchors.right),
+                                     getAnchor(v, anchors.right), margins.right);
+                break;
+        }
+        constraints[j++] = c;
     }
-    return result;
+    activateConstraints(constraints, j);
 }
 
 id createObjectWithFrame(const char *name, CGRect rect) {
@@ -327,7 +407,7 @@ id createStackView(id *subviews, int count, int axis, int spacing, Padding margi
     ((void(*)(id,SEL,CGFloat))objc_msgSend)(view, sel_getUid("setSpacing:"), spacing);
     ((void(*)(id,SEL,bool))objc_msgSend)(view, sel_getUid("setLayoutMarginsRelativeArrangement:"),
                                          true);
-    setLayoutMargins(view, &margins);
+    setLayoutMargins(view, margins);
     return view;
 }
 
@@ -401,13 +481,6 @@ id createTextfield(id delegate, CFStringRef text, int alignment, int keyboard, i
 
 void enableButton(id view, bool enabled) {
     ((void(*)(id,SEL,bool))objc_msgSend)(view, sel_getUid("setEnabled:"), enabled);
-}
-
-void activateConstraints(id *constraints, int count) {
-    CFArrayRef array = CFArrayCreate(NULL, (const void **)constraints, count, &kCocoaArrCallbacks);
-    ((void(*)(Class,SEL,CFArrayRef))objc_msgSend)(objc_getClass("NSLayoutConstraint"),
-                                                  sel_getUid("activateConstraints:"), array);
-    CFRelease(array);
 }
 
 void setTag(id view, int tag) {

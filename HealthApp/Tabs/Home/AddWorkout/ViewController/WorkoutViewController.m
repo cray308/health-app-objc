@@ -48,19 +48,9 @@
     [self.view addSubview:scrollView];
     [scrollView addSubview:groupsStack];
 
-    UILayoutGuide *guide = self.view.safeAreaLayoutGuide;
-    activateConstraints((id []){
-        [scrollView.leadingAnchor constraintEqualToAnchor:guide.leadingAnchor],
-        [scrollView.trailingAnchor constraintEqualToAnchor:guide.trailingAnchor],
-        [scrollView.topAnchor constraintEqualToAnchor:guide.topAnchor],
-        [scrollView.bottomAnchor constraintEqualToAnchor:guide.bottomAnchor],
-
-        [groupsStack.leadingAnchor constraintEqualToAnchor:scrollView.leadingAnchor],
-        [groupsStack.trailingAnchor constraintEqualToAnchor:scrollView.trailingAnchor],
-        [groupsStack.topAnchor constraintEqualToAnchor:scrollView.topAnchor],
-        [groupsStack.bottomAnchor constraintEqualToAnchor:scrollView.bottomAnchor],
-        [groupsStack.widthAnchor constraintEqualToAnchor:scrollView.widthAnchor]
-    }, 9);
+    pin(scrollView, self.view.safeAreaLayoutGuide, (Padding){0}, 0);
+    pin(groupsStack, scrollView, (Padding){0}, 0);
+    setEqualWidths(groupsStack, scrollView);
 
     [scrollView release];
 
@@ -174,10 +164,10 @@ cleanup:
 }
 @end
 
-id workoutVC_init(void *delegate) {
+id workoutVC_init(AddWorkoutCoordinator *delegate) {
     WorkoutViewController *this = [[WorkoutViewController alloc] initWithNibName:nil bundle:nil];
     this->delegate = delegate;
-    this->workout = ((AddWorkoutCoordinator *) delegate)->workout;
+    this->workout = delegate->workout;
     setupTimers(this->workout, this);
     return this;
 }

@@ -31,7 +31,7 @@ id totalWorkoutsChart_init(TotalWorkoutsChartViewModel *model, id formatter) {
 void totalWorkoutsChart_update(TotalWorkoutsChart *this, int count, bool isSmall) {
     this->limitLine.limit = this->model->avgWorkouts;
     updateDataSet(isSmall, count, this->model->dataSet, this->model->entries->arr);
-    updateChart(isSmall, count, this->chartView, this->model->chartData, this->model->yMax);
+    updateChart(isSmall, this->chartView, this->model->chartData, this->model->yMax);
     NSNumberFormatter *nFormatter = [[NSNumberFormatter alloc] init];
     DefaultValueFormatter *formatter = [[DefaultValueFormatter alloc] initWithFormatter:nFormatter];
     [((LineChartData *) this->model->chartData) setValueFormatter:formatter];

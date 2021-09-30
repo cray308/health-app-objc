@@ -49,14 +49,8 @@ id exerciseContainer_init(ExerciseGroup *g, int idx, id target, SEL action) {
                                           3, 1, 0, (Padding){0, 8, 0, 8});
     [this addSubview:vStack];
     [vStack setCustomSpacing:20 afterView:this->divider];
-    activateConstraints((id []){
-        [vStack.topAnchor constraintEqualToAnchor:this.topAnchor],
-        [vStack.leadingAnchor constraintEqualToAnchor:this.leadingAnchor],
-        [vStack.trailingAnchor constraintEqualToAnchor:this.trailingAnchor],
-        [vStack.bottomAnchor constraintEqualToAnchor:this.bottomAnchor],
-        [this->headerLabel.heightAnchor constraintEqualToConstant:20]
-    }, 5);
-
+    pin(vStack, this, (Padding){0}, 0);
+    setHeight(this->headerLabel, 20);
 
     for (unsigned i = 0; i < this->size; ++i) {
         this->viewsArr[i] = statusButton_init(NULL, false, (idx << 8) | i, target, action);

@@ -19,7 +19,7 @@
 }
 @end
 
-id settingsVC_init(void *delegate) {
+id settingsVC_init(SettingsTabCoordinator *delegate) {
     SettingsViewController *this = [[SettingsViewController alloc] initWithNibName:nil bundle:nil];
     this->delegate = delegate;
     return this;
@@ -42,7 +42,7 @@ void settingsVC_updateWeightFields(SettingsViewController *vc) {
     self.navigationItem.title = _nsstr(localize(CFSTR("titles2")));
     textValidator_setup(&validator);
 
-    UILabel *planLabel = createLabel(localize(CFSTR("pickerTitle")), TextFootnote, 4);
+    UILabel *planLabel = createLabel(localize(CFSTR("planPickerTitle")), TextFootnote, 4);
     
     CFStringRef segments[3];
     for (int i = 0; i < 3; ++i) {
@@ -84,33 +84,16 @@ void settingsVC_updateWeightFields(SettingsViewController *vc) {
     [vStack setCustomSpacing:20 afterView:views[3]];
     [vStack setCustomSpacing:40 afterView:saveButton];
 
-    UILayoutGuide *guide = self.view.safeAreaLayoutGuide;
-    activateConstraints((id []){
-        [scrollView.leadingAnchor constraintEqualToAnchor:guide.leadingAnchor],
-        [scrollView.trailingAnchor constraintEqualToAnchor:guide.trailingAnchor],
-        [scrollView.topAnchor constraintEqualToAnchor:guide.topAnchor],
-        [scrollView.bottomAnchor constraintEqualToAnchor:guide.bottomAnchor],
-
-        [vStack.leadingAnchor constraintEqualToAnchor:scrollView.leadingAnchor],
-        [vStack.trailingAnchor constraintEqualToAnchor:scrollView.trailingAnchor],
-        [vStack.topAnchor constraintEqualToAnchor:scrollView.topAnchor],
-        [vStack.bottomAnchor constraintEqualToAnchor:scrollView.bottomAnchor],
-        [vStack.widthAnchor constraintEqualToAnchor:scrollView.widthAnchor],
-
-        [planLabel.topAnchor constraintEqualToAnchor:planContainer.topAnchor],
-        [planLabel.leadingAnchor constraintEqualToAnchor:planContainer.leadingAnchor constant:8],
-        [planLabel.trailingAnchor constraintEqualToAnchor:planContainer.trailingAnchor constant:-8],
-        [planLabel.heightAnchor constraintEqualToConstant:20],
-
-        [picker.topAnchor constraintEqualToAnchor:planLabel.bottomAnchor constant:2],
-        [picker.leadingAnchor constraintEqualToAnchor:planContainer.leadingAnchor constant:8],
-        [picker.trailingAnchor constraintEqualToAnchor:planContainer.trailingAnchor constant:-8],
-        [picker.bottomAnchor constraintEqualToAnchor:planContainer.bottomAnchor],
-        [picker.heightAnchor constraintEqualToConstant:40],
-
-        [saveButton.heightAnchor constraintEqualToConstant:40],
-        [deleteButton.heightAnchor constraintEqualToConstant:40]
-    }, 20);
+    pin(scrollView, self.view.safeAreaLayoutGuide, (Padding){0}, 0);
+    pin(vStack, scrollView, (Padding){0}, 0);
+    setEqualWidths(vStack, scrollView);
+    pin(planLabel, planContainer, (Padding){0, 8, 0, 8}, EdgeBottom);
+    setHeight(planLabel, 20);
+    pinTopToBottom(picker, planLabel, 2);
+    pin(picker, planContainer, (Padding){0, 8, 0, 8}, EdgeTop);
+    setHeight(picker, 40);
+    setHeight(saveButton, 40);
+    setHeight(deleteButton, 40);
 
     [vStack release];
     [scrollView release];

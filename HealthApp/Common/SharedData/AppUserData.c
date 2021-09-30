@@ -18,7 +18,7 @@ typedef enum {
 UserInfo *userData = NULL;
 static CFStringRef const userInfoKey = CFSTR("userinfo");
 
-static CFStringRef const keys[] = {
+static const void *keys[] = {
     CFSTR("planStart"), CFSTR("weekStart"), CFSTR("tzOffset"), CFSTR("currentPlan"),
     CFSTR("completedWorkouts"), CFSTR("squatMax"), CFSTR("pullUpMax"), CFSTR("benchMax"),
     CFSTR("deadliftMax")
@@ -37,7 +37,7 @@ static void saveData(void) {
         CFNumberCreate(NULL, kCFNumberShortType, &userData->liftMaxes[3])
     };
 
-    CFDictionaryRef dict = CFDictionaryCreate(NULL, (const void **)keys, (const void **)values, 9,
+    CFDictionaryRef dict = CFDictionaryCreate(NULL, keys, (const void **)values, 9,
                                               &kCFCopyStringDictionaryKeyCallBacks,
                                               &kCFTypeDictionaryValueCallBacks);
 

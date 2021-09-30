@@ -39,7 +39,7 @@ void workoutTypeChart_update(WorkoutTypeChart *this, int count, bool isSmall) {
     for (int i = 1; i < 5; ++i) {
         updateDataSet(isSmall, count, this->model->dataSets[i], this->model->entries[i]->arr);
     }
-    updateChart(isSmall, count, this->chartView, this->model->chartData, this->model->yMax);
+    updateChart(isSmall, this->chartView, this->model->chartData, this->model->yMax);
     CFRelease(array);
 }
 

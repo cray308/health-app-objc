@@ -41,10 +41,11 @@ struct AnchorNames {
     const char *right;
     const char *width;
     const char *height;
+    const char *centerY;
 };
 
 typedef struct {
-    CGFloat top, left, bottom, right;
+    short top, left, bottom, right;
 } Padding;
 
 typedef enum {
@@ -52,6 +53,13 @@ typedef enum {
     BtnBackground = 0x2,
     BtnRounded = 0x4
 } ButtonParams;
+
+typedef enum {
+    EdgeTop = 0x1,
+    EdgeLeft = 0x2,
+    EdgeBottom = 0x4,
+    EdgeRight = 0x8
+} ExcludedEdge;
 
 typedef enum {
     TextFootnote = 1,
@@ -88,8 +96,15 @@ id createAlertController(CFStringRef title, CFStringRef message);
 id createAlertAction(CFStringRef title, int style, CallbackBlock handler);
 void addAlertAction(id ctrl, id action);
 
-id getAnchor(id view, const char *name);
-id createConstraint(id a1, id a2, CGFloat constant);
+void setWidth(id v, int width);
+void setHeight(id v, int height);
+void setEqualWidths(id v, id container);
+void setEqualCenterY(id v, id container);
+void pinTopToTop(id v1, id v2, int offset);
+void pinTopToBottom(id v1, id v2, int offset);
+void pinRightToRight(id v1, id v2, int offset);
+void pinRightToLeft(id v1, id v2, int offset);
+void pin(id v, id container, Padding margins, uint excluded);
 id createObjectWithFrame(const char *name, CGRect rect);
 id createView(id color, bool rounded);
 id createStackView(id *subviews, int count, int axis, int spacing, Padding margins);
@@ -100,7 +115,6 @@ id createButton(CFStringRef title, id color, int params, int tag, id target, SEL
 id createSegmentedControl(CFStringRef *items, int count, int startIndex, id target, SEL action);
 
 void enableButton(id view, bool enabled);
-void activateConstraints(id *constraints, int count);
 void setTextColor(id view, id color);
 void setTag(id view, int tag);
 void setBackground(id view, id color);

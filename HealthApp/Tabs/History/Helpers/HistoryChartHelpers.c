@@ -16,21 +16,10 @@ id createChartSeparator(CFStringRef title) {
     addSubview(view, topDivider);
     addSubview(view, titleLabel);
 
-    id leading = getAnchor(view, anchors.left);
-    id trailing = getAnchor(view, anchors.right);
-
-    activateConstraints((id []){
-        createConstraint(getAnchor(topDivider, anchors.left), leading, 0),
-        createConstraint(getAnchor(topDivider, anchors.right), trailing, 0),
-        createConstraint(getAnchor(topDivider, anchors.top), getAnchor(view, anchors.top), 0),
-
-        createConstraint(getAnchor(titleLabel, anchors.left), leading, 0),
-        createConstraint(getAnchor(titleLabel, anchors.right), trailing, 0),
-        createConstraint(getAnchor(titleLabel, anchors.top),
-                         getAnchor(topDivider, anchors.bottom), 5),
-        createConstraint(getAnchor(titleLabel, anchors.height), nil, 40),
-        createConstraint(getAnchor(titleLabel, anchors.bottom), getAnchor(view, anchors.bottom), 0)
-    }, 8);
+    pin(topDivider, view, (Padding){0}, EdgeBottom);
+    pin(titleLabel, view, (Padding){0}, EdgeTop);
+    setHeight(titleLabel, 40);
+    pinTopToBottom(titleLabel, topDivider, 5);
     releaseObj(topDivider);
     releaseObj(titleLabel);
     return view;

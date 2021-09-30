@@ -19,7 +19,7 @@
 }
 @end
 
-id setupWorkoutVC_init(void *delegate, uchar type, Array_str *names) {
+id setupWorkoutVC_init(HomeTabCoordinator *delegate, uchar type, Array_str *names) {
     SetupWorkoutSheet *this = [[SetupWorkoutSheet alloc] initWithNibName:nil bundle:nil];
     this->delegate = delegate;
     this->names = names;
@@ -95,28 +95,14 @@ id setupWorkoutVC_init(void *delegate, uchar type, Array_str *names) {
     if (validator.count)
         textValidator_setup(&validator);
 
-    UILayoutGuide *guide = self.view.safeAreaLayoutGuide;
-    activateConstraints((id []){
-        [workoutContainer.topAnchor constraintEqualToAnchor:guide.topAnchor constant:30],
-        [workoutContainer.leadingAnchor constraintEqualToAnchor:guide.leadingAnchor constant:8],
-        [workoutContainer.trailingAnchor constraintEqualToAnchor:guide.trailingAnchor constant:-8],
-
-        [workoutLabel.topAnchor constraintEqualToAnchor:workoutContainer.topAnchor],
-        [workoutLabel.leadingAnchor constraintEqualToAnchor:workoutContainer.leadingAnchor],
-        [workoutLabel.trailingAnchor constraintEqualToAnchor:workoutContainer.trailingAnchor],
-        [workoutLabel.heightAnchor constraintEqualToConstant:20],
-
-        [workoutTextField.topAnchor constraintEqualToAnchor:workoutLabel.bottomAnchor constant:2],
-        [workoutTextField.leadingAnchor constraintEqualToAnchor:workoutContainer.leadingAnchor],
-        [workoutTextField.trailingAnchor constraintEqualToAnchor:workoutContainer.trailingAnchor],
-        [workoutTextField.bottomAnchor constraintEqualToAnchor:workoutContainer.bottomAnchor],
-        [workoutTextField.heightAnchor constraintEqualToConstant:40],
-
-        [textFieldStack.leadingAnchor constraintEqualToAnchor:guide.leadingAnchor],
-        [textFieldStack.trailingAnchor constraintEqualToAnchor:guide.trailingAnchor],
-        [textFieldStack.topAnchor constraintEqualToAnchor:workoutContainer.bottomAnchor
-                                                 constant:20]
-    }, 15);
+    pin(workoutContainer, self.view.safeAreaLayoutGuide, (Padding){30, 8, 0, 8}, EdgeBottom);
+    pin(workoutLabel, workoutContainer, (Padding){0}, EdgeBottom);
+    setHeight(workoutLabel, 20);
+    pinTopToBottom(workoutTextField, workoutLabel, 2);
+    pin(workoutTextField, workoutContainer, (Padding){0}, EdgeTop);
+    setHeight(workoutTextField, 40);
+    pinTopToBottom(textFieldStack, workoutContainer, 20);
+    pin(textFieldStack, self.view.safeAreaLayoutGuide, (Padding){0}, EdgeTop | EdgeBottom);
 
     workoutTextField.inputAccessoryView = toolbar;
 

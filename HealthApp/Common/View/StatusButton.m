@@ -16,33 +16,25 @@ id statusButton_init(CFStringRef text, bool hideViews, int tag, id target, SEL a
     this->headerLabel = createLabel(NULL, TextSubhead, 4);
     this->box = createView(UIColor.systemGrayColor, true);
     [this addSubview:this->button];
-    id top = [this->button.topAnchor constraintEqualToAnchor:this.topAnchor constant:4];
-    id right = [this->button.trailingAnchor constraintEqualToAnchor:this.trailingAnchor];
 
     if (!hideViews) {
         [this addSubview:this->headerLabel];
         [this addSubview:this->box];
-        top = [this->button.topAnchor constraintEqualToAnchor:this->headerLabel.bottomAnchor
-                                                     constant:4];
-        right = [this->button.trailingAnchor constraintEqualToAnchor:this->box.leadingAnchor
-                                                            constant:-5];
-        activateConstraints((id []){
-            [this->headerLabel.topAnchor constraintEqualToAnchor:this.topAnchor constant:2],
-            [this->headerLabel.heightAnchor constraintEqualToConstant:20],
-            [this->headerLabel.leadingAnchor constraintEqualToAnchor:this.leadingAnchor],
-            [this->headerLabel.trailingAnchor constraintEqualToAnchor:this.trailingAnchor],
-            [this->box.trailingAnchor constraintEqualToAnchor:this.trailingAnchor],
-            [this->box.centerYAnchor constraintEqualToAnchor:this->button.centerYAnchor],
-            [this->box.widthAnchor constraintEqualToConstant:20],
-            [this->box.heightAnchor constraintEqualToAnchor:this->box.widthAnchor]
-        }, 8);
+
+        pin(this->headerLabel, this, (Padding){2, 0, 0, 0}, EdgeBottom);
+        setHeight(this->headerLabel, 20);
+        pinTopToBottom(this->button, this->headerLabel, 4);
+        setWidth(this->box, 20);
+        setHeight(this->box, 20);
+        pinRightToRight(this->box, this, 0);
+        setEqualCenterY(this->box, this->button);
+        pinRightToLeft(this->button, this->box, -5);
+    } else {
+        pinTopToTop(this->button, this, 4);
+        pinRightToRight(this->button, this, 0);
     }
-    activateConstraints((id []){
-        top, right,
-        [this->button.heightAnchor constraintEqualToConstant:50],
-        [this->button.bottomAnchor constraintEqualToAnchor:this.bottomAnchor constant:-4],
-        [this->button.leadingAnchor constraintEqualToAnchor:this.leadingAnchor],
-    }, 5);
+    pin(this->button, this, (Padding){0, 0, 4, 0}, EdgeTop | EdgeRight);
+    setHeight(this->button, 50);
     return this;
 }
 
