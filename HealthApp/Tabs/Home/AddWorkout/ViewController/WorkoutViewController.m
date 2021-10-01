@@ -8,13 +8,40 @@
 #import "WorkoutViewController.h"
 #include "ViewControllerHelpers.h"
 #include "WorkoutScreenHelpers.h"
-#import "ExerciseContainer.h"
+#import "StatusButton.h"
+
+void exerciseView_configure(StatusButton *v, ExerciseEntry *e) {
+    CFStringRef setsStr = exerciseEntry_createSetsTitle(e);
+    CFStringRef title = exerciseEntry_createTitle(e);
+    setButtonTitle(v->button, title, 0);
+    setLabelText(v->headerLabel, setsStr);
+
+    switch (e->state) {
+        case ExerciseStateDisabled:
+            setBackground(v->box, UIColor.systemGrayColor);
+            enableButton(v->button, false);
+            break;
+        case ExerciseStateActive:
+            if (e->type == ExerciseTypeDuration)
+                v->button.userInteractionEnabled = false;
+        case ExerciseStateResting:
+            enableButton(v->button, true);
+            setBackground(v->box, UIColor.systemOrangeColor);
+            break;
+        case ExerciseStateCompleted:
+            enableButton(v->button, false);
+            setBackground(v->box, UIColor.systemGreenColor);
+    }
+
+    CFRelease(title);
+    if (setsStr)
+        CFRelease(setsStr);
+}
 
 @interface WorkoutViewController() {
     @public AddWorkoutCoordinator *delegate;
     @public Workout *workout;
-    UIStackView *groupsStack;
-    ExerciseContainer *firstContainer;
+    SectionContainer containers[10], *first;
     NSObject *observers[2];
 }
 @end
@@ -22,7 +49,7 @@
 @implementation WorkoutViewController
 - (void) dealloc {
     cleanupWorkoutNotifications(observers);
-    [groupsStack release];
+    containers_free(containers, 10);
     [super dealloc];
 }
 
@@ -32,30 +59,39 @@
     self.navigationItem.title = _nsstr(workout->title);
     setTintColor(self.navigationController.navigationBar, UIColor.systemBlueColor);
 
-    groupsStack = createStackView(NULL, 0, 1, 20, (Padding){20, 4, 20, 4});
+    UIStackView *stack = createStackView(NULL, 0, 1, 20, (Padding){20, 8, 20, 8});
     UIButton *startBtn = createButton(localize(CFSTR("start")), UIColor.systemGreenColor,
-                                      0, 0, self, @selector(startEndWorkout:));
+                                      0, 0, self, @selector(startEndWorkout:), -1);
     setNavButton(self.navigationItem, false, startBtn, self.view.frame.size.width);
 
-    unsigned i = 0; ExerciseGroup *g;
-    array_iter(workout->activities, g) {
-        UIView *v = exerciseContainer_init(g, i++, self, @selector(handleTap:));
-        [groupsStack addArrangedSubview:v];
-        [v release];
+    for (uint i = 0; i < workout->activities->size; ++i) {
+        ExerciseGroup *g = &workout->activities->arr[i];
+        CFStringRef header = exerciseGroup_createHeader(g);
+        [stack addArrangedSubview:createContainer(&containers[i], header, 0, 0, 0)];
+
+        for (unsigned j = 0; j < g->exercises->size; ++j) {
+            id v = statusButton_init(NULL, false, (i << 8) | j, self, @selector(handleTap:));
+            exerciseView_configure(v, &g->exercises->arr[j]);
+            container_add(&containers[i], v);
+        }
+        hideView(containers[i].headerLabel, !header);
+        if (header)
+            CFRelease(header);
     }
 
     UIScrollView *scrollView = createScrollView();
     [self.view addSubview:scrollView];
-    [scrollView addSubview:groupsStack];
+    [scrollView addSubview:stack];
 
     pin(scrollView, self.view.safeAreaLayoutGuide, (Padding){0}, 0);
-    pin(groupsStack, scrollView, (Padding){0}, 0);
-    setEqualWidths(groupsStack, scrollView);
+    pin(stack, scrollView, (Padding){0}, 0);
+    setEqualWidths(stack, scrollView);
 
     [scrollView release];
+    [stack release];
 
-    firstContainer = groupsStack.arrangedSubviews[0];
-    firstContainer->divider.hidden = true;
+    first = &containers[0];
+    hideView(first->divider, true);
     __weak WorkoutViewController *weakSelf = self;
     observers[0] = createDeviceEventNotification(UIApplicationDidBecomeActiveNotification,
                                                  ^(id note _U_){ [weakSelf restartTimers]; });
@@ -99,7 +135,7 @@
             goto cleanup;
     }
 
-    StatusButton *v = firstContainer->viewsArr[workout->group->index];
+    StatusButton *v = first->views->arr[workout->group->index];
     switch (workout_findTransitionForEvent(workout, v, v->button, option)) {
         case TransitionCompletedWorkout:
             finishedWorkout = true;
@@ -107,22 +143,20 @@
             workout = NULL;
             break;
         case TransitionFinishedCircuitDeleteFirst:
-            firstContainer = groupsStack.arrangedSubviews[1];
-            [groupsStack.arrangedSubviews.firstObject removeFromSuperview];
+            first = &containers[workout->index];
+            removeView(containers[workout->index - 1].view);
         case TransitionFinishedCircuit: ;
-            firstContainer->divider.hidden = true;
+            hideView(first->divider, true);
             CFStringRef header = exerciseGroup_createHeader(workout->group);
-            setLabelText(firstContainer->headerLabel, header);
-            ExerciseEntry *e;
-            int i = 0;
-            array_iter(workout->group->exercises, e) {
-                exerciseView_configure(firstContainer->viewsArr[i++], e);
-            }
+            setLabelText(first->headerLabel, header);
+            ExerciseEntry *e; int i = 0;
+            array_iter(workout->group->exercises, e)
+                exerciseView_configure(first->views->arr[i++], e);
             if (header)
                 CFRelease(header);
             break;
         case TransitionFinishedExercise:
-            v = firstContainer->viewsArr[workout->group->index];
+            v = first->views->arr[workout->group->index];
             exerciseView_configure(v, workout->entry);
         case TransitionNoChange:
             break;

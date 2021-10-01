@@ -30,30 +30,24 @@ id updateMaxesVC_init(AddWorkoutCoordinator *delegate) {
 - (void) viewDidLoad {
     [super viewDidLoad];
     setBackground(self.view, UIColor.secondarySystemBackgroundColor);
-    textValidator_setup(&validator);
+    textValidator_setup(&validator, 8);
 
+    CFStringRef titles[4]; fillStringArray(titles, CFSTR("maxWeight%d"), 4);
     UIToolbar *toolbar = createToolbar(self, @selector(dismissKeyboard));
-    UIView *views[4];
-    UILayoutGuide *guide = self.view.safeAreaLayoutGuide;
+    UIStackView *stack = createStackView(nil, 0, 1, 0, (Padding){20,0,0,0});
+    [self.view addSubview:stack];
+    pin(stack, self.view.safeAreaLayoutGuide, (Padding){0}, EdgeBottom);
 
-    for (int i = 0; i < 4; ++i) {
-        CFStringRef key = CFStringCreateWithFormat(NULL, NULL, CFSTR("maxWeight%d"), i);
-        views[i] = validator_addChild(&validator, self, localize(key), 1, 999, toolbar);
-        [self.view addSubview:views[i]];
-        pin(views[i], guide, (Padding){0}, EdgeTop | EdgeBottom);
-        CFRelease(key);
-    }
+    for (int i = 0; i < 4; ++i)
+        [stack addArrangedSubview:validator_add(&validator, self, titles[i], 1, 999, toolbar)];
 
     UIButton *finishButton = createButton(localize(CFSTR("finish")), UIColor.systemBlueColor, 0,
-                                          0, self, @selector(didPressFinish));
+                                          0, self, @selector(didPressFinish), -1);
     setNavButton(self.navigationItem, false, finishButton, self.view.frame.size.width);
     enableButton(finishButton, false);
     validator.button = finishButton;
 
-    pinTopToTop(views[0], self.view.safeAreaLayoutGuide, 20);
-    for (int i = 1; i < 4; ++i)
-        pinTopToBottom(views[i], views[i - 1], 0);
-
+    [stack release];
     [toolbar release];
 }
 

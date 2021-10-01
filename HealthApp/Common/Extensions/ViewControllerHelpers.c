@@ -123,14 +123,21 @@ void setNavButton(id navItem, bool left, id button, CGFloat totalWidth) {
 }
 
 id createDivider(void) {
-    id view = createView(createColor("separatorColor"), false);
-    activateConstraints((id []){createConstraint(getAnchor(view, anchors.height), nil, 1)}, 1);
-    return view;
+    return createView(createColor("separatorColor"), false, -1, 1);
 }
 
-void textValidator_setup(Validator *this) {
+void fillStringArray(CFStringRef *arr, CFStringRef format, int count) {
+    for (int i = 0; i < count; ++i) {
+        CFStringRef key = CFStringCreateWithFormat(NULL, NULL, format, i);
+        arr[i] = localize(key);
+        CFRelease(key);
+    }
+}
+
+void textValidator_setup(Validator *this, short margins) {
     unsigned short nums[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
     this->set = uset_new_fromArray(char, nums, 10);
+    memcpy(&this->padding, &(Padding){4,margins,4,margins}, sizeof(Padding));
 }
 
 void textValidator_free(Validator *this) {
@@ -146,53 +153,39 @@ void textValidator_free(Validator *this) {
     }
 }
 
-id validator_addChild(Validator *v, id delegate, CFStringRef hint, int min, int max, id toolbar) {
+id validator_add(Validator *v, id delegate, CFStringRef hint, int min, int max, id toolbar) {
     struct InputView *child = &v->children[v->count];
-    child->view = createView(nil, false);
+    child->view = createView(nil, false, -1, -1);
     child->minVal = min;
     child->maxVal = max;
     if (!inputFieldError)
         inputFieldError = localize(CFSTR("inputFieldError"));
     CFStringRef errorText = CFStringCreateWithFormat(NULL, NULL, inputFieldError, min, max);
-    child->hintLabel = createLabel(hint, TextFootnote, 4);
-    child->field = createTextfield(delegate, NULL, 4, 4, v->count++);
-    child->errorLabel = createLabel(errorText, TextFootnote, 4);
+    child->hintLabel = createLabel(hint, TextFootnote, 4, 20);
+    child->field = createTextfield(delegate, NULL, 4, 4, v->count++, 40);
+    child->errorLabel = createLabel(errorText, TextFootnote, 4, 20);
     setTextColor(child->errorLabel, createColor("systemRedColor"));
     id vStack = createStackView((id []){child->hintLabel, child->field, child->errorLabel},
-                                3, 1, 4, (Padding){4, 8, 4, 8});
+                                3, 1, 4, v->padding);
     addSubview(child->view, vStack);
-    activateConstraints((id []){
-        createConstraint(getAnchor(vStack, anchors.top), getAnchor(child->view, anchors.top), 0),
-        createConstraint(getAnchor(vStack, anchors.left), getAnchor(child->view, anchors.left), 0),
-        createConstraint(getAnchor(vStack, anchors.right),
-                         getAnchor(child->view, anchors.right), 0),
-        createConstraint(getAnchor(vStack, anchors.bottom),
-                         getAnchor(child->view, anchors.bottom), 0),
-        createConstraint(getAnchor(child->hintLabel, anchors.height), nil, 20),
-        createConstraint(getAnchor(child->field, anchors.height), nil, 40),
-        createConstraint(getAnchor(child->errorLabel, anchors.height), nil, 20),
-    }, 7);
+    pin(vStack, child->view, (Padding){0}, 0);
     releaseObj(vStack);
     CFRelease(errorText);
-    inputView_toggleError(child, false);
+    hideView(child->errorLabel, true);
     ((void(*)(id,SEL,id))objc_msgSend)(child->field, sel_getUid("setInputAccessoryView:"), toolbar);
     return child->view;
-}
-
-void inputView_toggleError(struct InputView *this, bool show) {
-    ((void(*)(id,SEL,bool))objc_msgSend)(this->errorLabel, sel_getUid("setHidden:"), !show);
 }
 
 void inputView_reset(struct InputView *this, short value) {
     this->valid = true;
     this->result = value;
-    inputView_toggleError(this, false);
+    hideView(this->errorLabel, true);
 }
 
 static void showInputError(Validator *validator, struct InputView *child) {
     enableButton(validator->button, false);
     child->valid = false;
-    inputView_toggleError(child, true);
+    hideView(child->errorLabel, false);
 }
 
 bool checkInput(Validator *this, id field, CFRange range, CFStringRef replacement) {
@@ -382,12 +375,16 @@ id createObjectWithFrame(const char *name, CGRect rect) {
                                                 sel_getUid("initWithFrame:"), rect);
 }
 
-id createView(id color, bool rounded) {
+id createView(id color, bool rounded, int width, int height) {
     id view = createObjectWithFrame("UIView", CGRectZero);
     disableAutoresizing(view);
     setBackground(view, color);
     if (rounded)
         setCornerRadius(view);
+    if (width >= 0)
+        setWidth(view, width);
+    if (height >= 0)
+        setHeight(view, height);
     return view;
 }
 
@@ -421,7 +418,7 @@ id createScrollView(void) {
     return view;
 }
 
-id createLabel(CFStringRef text, int style, int alignment) {
+id createLabel(CFStringRef text, int style, int alignment, int height) {
     id view = createObjectWithFrame("UILabel", CGRectZero);
     disableAutoresizing(view);
     setLabelText(view, text);
@@ -429,10 +426,52 @@ id createLabel(CFStringRef text, int style, int alignment) {
     setDynamicFont(view);
     setTextColor(view, createColor("labelColor"));
     setAlignment(view, alignment);
+    setHeight(view, height);
     return view;
 }
 
-id createButton(CFStringRef title, id color, int params, int tag, id target, SEL action) {
+id createContainer(SectionContainer *c, CFStringRef title, int hidden, int spacing, bool margins) {
+    c->views = array_new(object);
+    c->view = createView(nil, false, -1, -1);
+    c->divider = createDivider();
+    c->headerLabel = createLabel(title, TextTitle3, 4, 20);
+    c->stack = createStackView(NULL, 0, 1, spacing, (Padding){.top = 5});
+    Padding padding = {0};
+    if (margins)
+        padding.left = padding.right = 8;
+    id vStack = createStackView((id []){c->divider, c->headerLabel, c->stack}, 3, 1, 0, padding);
+    addSubview(c->view, vStack);
+    ((void(*)(id,SEL,CGFloat,id))objc_msgSend)(vStack, sel_getUid("setCustomSpacing:afterView:"),
+                                               20, c->divider);
+    pin(vStack, c->view, (Padding){0}, 0);
+
+    if (hidden & HideDivider)
+        hideView(c->divider, true);
+    if (hidden & HideLabel)
+        hideView(c->headerLabel, true);
+
+    releaseObj(vStack);
+    return c->view;
+}
+
+void containers_free(SectionContainer *c, int size) {
+    for (int i = 0; i < size; ++i) {
+        if (c[i].view) {
+            releaseObj(c[i].view);
+            releaseObj(c[i].divider);
+            releaseObj(c[i].headerLabel);
+            releaseObj(c[i].stack);
+            array_free(object, c[i].views);
+        }
+    }
+}
+
+void container_add(SectionContainer *c, id v) {
+    array_push_back(object, c->views, v);
+    ((void(*)(id,SEL,id))objc_msgSend)(c->stack, sel_getUid("addArrangedSubview:"), v);
+}
+
+id createButton(CFStringRef title, id color, int params, int tag, id target, SEL action, int h) {
     id view = ((id(*)(Class,SEL,int))objc_msgSend)(objc_getClass("UIButton"),
                                                    sel_getUid("buttonWithType:"), 1);
     disableAutoresizing(view);
@@ -449,11 +488,16 @@ id createButton(CFStringRef title, id color, int params, int tag, id target, SEL
         setCornerRadius(view);
     setTag(view, tag);
     addTarget(view, target, action, 64);
+    if (h >= 0)
+        setHeight(view, h);
     return view;
 }
 
-id createSegmentedControl(CFStringRef *items, int count, int startIndex, id target, SEL action) {
-    CFArrayRef array = CFArrayCreate(NULL, (const void **)items, count, &kCocoaArrCallbacks);
+id createSegmentedControl(CFStringRef format, int count, int startIndex,
+                          id target, SEL action, int height) {
+    CFStringRef segments[count];
+    fillStringArray(segments, format, count);
+    CFArrayRef array = CFArrayCreate(NULL, (const void **)segments, count, &kCocoaArrCallbacks);
     id view = ((id(*)(id,SEL,CFArrayRef))objc_msgSend)(allocClass("UISegmentedControl"),
                                                        sel_getUid("initWithItems:"), array);
     disableAutoresizing(view);
@@ -462,11 +506,13 @@ id createSegmentedControl(CFStringRef *items, int count, int startIndex, id targ
     setTintColor(view, createColor("systemGray2Color"));
     if (action)
         addTarget(view, target, action, 4096);
+    if (height >= 0)
+        setHeight(view, height);
     CFRelease(array);
     return view;
 }
 
-id createTextfield(id delegate, CFStringRef text, int alignment, int keyboard, int tag) {
+id createTextfield(id delegate, CFStringRef text, int alignment, int keyboard, int tag, int h) {
     id view = createObjectWithFrame("UITextField", CGRectZero);
     disableAutoresizing(view);
     setBackground(view, createColor("tertiarySystemBackgroundColor"));
@@ -476,7 +522,16 @@ id createTextfield(id delegate, CFStringRef text, int alignment, int keyboard, i
     ((void(*)(id,SEL,int))objc_msgSend)(view, sel_getUid("setBorderStyle:"), 3);
     ((void(*)(id,SEL,int))objc_msgSend)(view, sel_getUid("setKeyboardType:"), keyboard);
     ((void(*)(id,SEL,id))objc_msgSend)(view, sel_getUid("setDelegate:"), delegate);
+    setHeight(view, h);
     return view;
+}
+
+void hideView(id view, bool hide) {
+    ((void(*)(id,SEL,bool))objc_msgSend)(view, sel_getUid("setHidden:"), hide);
+}
+
+void removeView(id v) {
+    ((void(*)(id,SEL))objc_msgSend)(v, sel_getUid("removeFromSuperview"));
 }
 
 void enableButton(id view, bool enabled) {

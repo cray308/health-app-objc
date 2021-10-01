@@ -12,11 +12,11 @@
 #import "LiftingChart.h"
 #include "AppCoordinator.h"
 #include "HistoryTabCoordinator.h"
-#include "HistoryChartHelpers.h"
 
 @interface HistoryViewController() {
     @public HistoryViewModel *model;
-    @public UISegmentedControl *rangePicker;
+    @public UISegmentedControl *picker;
+    SectionContainer containers[3];
     TotalWorkoutsChart *totalWorkoutsChart;
     WorkoutTypeChart *workoutTypeChart;
     LiftingChart *liftChart;
@@ -29,49 +29,38 @@
     setBackground(self.view, UIColor.systemBackgroundColor);
     self.navigationItem.title = _nsstr(localize(CFSTR("titles1")));
 
-    UIView *separators[] = {
-        createChartSeparator(localize(CFSTR("chartHeaderTotalWorkouts"))),
-        createChartSeparator(localize(CFSTR("chartHeaderWorkoutType"))),
-        createChartSeparator(localize(CFSTR("chartHeaderLifts")))
-    };
-    CFStringRef segments[3];
-    for (int i = 0; i < 3; ++i) {
-        CFStringRef key = CFStringCreateWithFormat(NULL, NULL, CFSTR("historySegment%d"), i);
-        segments[i] = localize(key);
-        CFRelease(key);
-    }
-
-    rangePicker = createSegmentedControl(segments, 3, 0, self, @selector(updateSelectedSegment:));
+    CFStringRef titles[3]; fillStringArray(titles, CFSTR("chartHeader%d"), 3);
     totalWorkoutsChart = totalWorkoutsChart_init(&model->totalWorkoutsModel, self);
     workoutTypeChart = workoutTypeChart_init(&model->workoutTypeModel, self);
     liftChart = liftingChart_init(&model->liftModel, self);
+    id charts[] = {totalWorkoutsChart, workoutTypeChart, liftChart};
+    UIStackView *vStack = createStackView(nil, 0, 1, 5, (Padding){10, 8, 10, 8});
 
-    id subviews[] = {
-        rangePicker, separators[0], totalWorkoutsChart, separators[1], workoutTypeChart,
-        separators[2], liftChart
-    };
-    UIStackView *vStack = createStackView(subviews, 7, 1, 5, (Padding){10, 8, 10, 8});
+    picker = createSegmentedControl(CFSTR("historySegment%d"),3,0,self,@selector(updateSegment:),-1);
+    self.navigationItem.titleView = picker;
+
+    for (int i = 0; i < 3; ++i) {
+        [vStack addArrangedSubview:createContainer(&containers[i], titles[i], !i ? 1 : 0, 0, 0)];
+        container_add(&containers[i], charts[i]);
+    }
+
     UIScrollView *scrollView = createScrollView();
 
     [self.view addSubview:scrollView];
     [scrollView addSubview:vStack];
-    [vStack setCustomSpacing:20 afterView:rangePicker];
 
     pin(scrollView, self.view.safeAreaLayoutGuide, (Padding){0}, 0);
     pin(vStack, scrollView, (Padding){0}, 0);
     setEqualWidths(vStack, scrollView);
-    setHeight(rangePicker, 30);
 
     [vStack release];
     [scrollView release];
-    for (int i = 0; i < 3; ++i)
-        [separators[i] release];
 
-    [self updateSelectedSegment:rangePicker];
+    [self updateSegment:picker];
     appCoordinator->loadedViewControllers |= LoadedViewController_History;
 }
 
-- (void) updateSelectedSegment: (UISegmentedControl *)sender {
+- (void) updateSegment: (UISegmentedControl *)sender {
     historyViewModel_formatDataForTimeRange(model, (int) sender.selectedSegmentIndex);
     [self updateCharts];
 }
@@ -102,6 +91,6 @@ id historyVC_init(HistoryTabCoordinator *delegate) {
 }
 
 void historyVC_refresh(HistoryViewController *vc) {
-    vc->rangePicker.selectedSegmentIndex = 0;
-    [vc updateSelectedSegment:vc->rangePicker];
+    vc->picker.selectedSegmentIndex = 0;
+    [vc updateSegment:vc->picker];
 }

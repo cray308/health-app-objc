@@ -22,10 +22,9 @@ typedef struct {
 } HistoryWeekDataModel;
 
 gen_array_headers(weekData, HistoryWeekDataModel)
-gen_array_headers(chartData, id)
 
 typedef struct {
-    Array_chartData *entries;
+    Array_object *entries;
     id legendEntries[1];
     id dataSet;
     id chartData;
@@ -34,7 +33,7 @@ typedef struct {
 } TotalWorkoutsChartViewModel;
 
 typedef struct {
-    Array_chartData *entries[5];
+    Array_object *entries[5];
     id legendEntries[4];
     id dataSets[5];
     id chartData;
@@ -45,7 +44,7 @@ typedef struct {
 } WorkoutTypeChartViewModel;
 
 typedef struct {
-    Array_chartData *entries[4];
+    Array_object *entries[4];
     id legendEntries[4];
     id dataSets[4];
     id chartData;

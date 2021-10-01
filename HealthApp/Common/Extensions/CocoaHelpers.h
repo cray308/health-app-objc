@@ -14,6 +14,7 @@
 #include <CoreGraphics/CoreGraphics.h>
 #include <objc/runtime.h>
 #include <objc/message.h>
+#include "array.h"
 
 extern CFArrayCallBacks kCocoaArrCallbacks;
 typedef unsigned char uchar;
@@ -21,6 +22,8 @@ typedef signed char schar;
 typedef unsigned int uint;
 
 typedef void (^CallbackBlock)(void);
+
+gen_array_headers(object, id)
 
 id objc_staticMethod(Class _self, SEL _cmd);
 void objc_singleArg(id obj, SEL _cmd);

@@ -9,6 +9,8 @@
 
 CFArrayCallBacks kCocoaArrCallbacks = {0};
 
+gen_array_source(object, id, DSDefault_shallowCopy, releaseObj)
+
 id objc_staticMethod(Class _self, SEL _cmd) {
     return ((id(*)(Class,SEL))objc_msgSend)(_self, _cmd);
 }

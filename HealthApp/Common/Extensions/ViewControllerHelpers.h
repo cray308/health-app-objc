@@ -19,9 +19,14 @@ gen_uset_headers(char, unsigned short)
 #define _cfarr(x) ((__bridge CFArrayRef) x)
 
 typedef struct {
+    short top, left, bottom, right;
+} Padding;
+
+typedef struct {
     USet_char *set;
     id button;
     int count;
+    Padding padding;
     struct InputView {
         id view;
         id hintLabel;
@@ -34,6 +39,19 @@ typedef struct {
     } children[4];
 } Validator;
 
+typedef struct {
+    id view;
+    id divider;
+    id headerLabel;
+    id stack;
+    Array_object *views;
+} SectionContainer;
+
+typedef enum {
+    HideDivider = 0x1,
+    HideLabel = 0x2
+} HiddenView;
+
 struct AnchorNames {
     const char *top;
     const char *bottom;
@@ -43,10 +61,6 @@ struct AnchorNames {
     const char *height;
     const char *centerY;
 };
-
-typedef struct {
-    short top, left, bottom, right;
-} Padding;
 
 typedef enum {
     BtnLargeFont = 0x1,
@@ -76,12 +90,16 @@ extern struct AnchorNames anchors;
 id createToolbar(id target, SEL doneSelector);
 void setNavButton(id navItem, bool left, id button, CGFloat totalWidth);
 id createDivider(void);
-void textValidator_setup(Validator *this);
+void fillStringArray(CFStringRef *arr, CFStringRef format, int count);
+void textValidator_setup(Validator *this, short margins);
 void textValidator_free(Validator *this);
-id validator_addChild(Validator *this, id delegate, CFStringRef hint, int min, int max, id toolbar);
-void inputView_toggleError(struct InputView *this, bool show);
+id validator_add(Validator *this, id delegate, CFStringRef hint, int min, int max, id toolbar);
 void inputView_reset(struct InputView *this, short value);
 bool checkInput(Validator *this, id field, CFRange range, CFStringRef replacement);
+
+id createContainer(SectionContainer *c, CFStringRef title, int hidden, int spacing, bool margins);
+void containers_free(SectionContainer *c, int size);
+void container_add(SectionContainer *c, id v);
 
 id getFirstVC(id navVC);
 void setupNavVC(id navVC, id firstVC);
@@ -106,14 +124,17 @@ void pinRightToRight(id v1, id v2, int offset);
 void pinRightToLeft(id v1, id v2, int offset);
 void pin(id v, id container, Padding margins, uint excluded);
 id createObjectWithFrame(const char *name, CGRect rect);
-id createView(id color, bool rounded);
+id createView(id color, bool rounded, int width, int height);
 id createStackView(id *subviews, int count, int axis, int spacing, Padding margins);
 id createScrollView(void);
-id createLabel(CFStringRef text, int style, int alignment);
-id createTextfield(id delegate, CFStringRef text, int alignment, int keyboard, int tag);
-id createButton(CFStringRef title, id color, int params, int tag, id target, SEL action);
-id createSegmentedControl(CFStringRef *items, int count, int startIndex, id target, SEL action);
+id createLabel(CFStringRef text, int style, int alignment, int height);
+id createTextfield(id delegate, CFStringRef text, int alignment, int keyboard, int tag, int height);
+id createButton(CFStringRef title, id color, int params, int tag, id target, SEL action, int height);
+id createSegmentedControl(CFStringRef format, int count, int startIndex,
+                          id target, SEL action, int height);
 
+void hideView(id view, bool hide);
+void removeView(id v);
 void enableButton(id view, bool enabled);
 void setTextColor(id view, id color);
 void setTag(id view, int tag);

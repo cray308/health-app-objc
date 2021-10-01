@@ -40,61 +40,37 @@ void settingsVC_updateWeightFields(SettingsViewController *vc) {
     [super viewDidLoad];
     setBackground(self.view, UIColor.systemGroupedBackgroundColor);
     self.navigationItem.title = _nsstr(localize(CFSTR("titles2")));
-    textValidator_setup(&validator);
+    textValidator_setup(&validator, 0);
 
-    UILabel *planLabel = createLabel(localize(CFSTR("planPickerTitle")), TextFootnote, 4);
-    
-    CFStringRef segments[3];
-    for (int i = 0; i < 3; ++i) {
-        CFStringRef key = CFStringCreateWithFormat(NULL, NULL, CFSTR("settingsSegment%d"), i);
-        segments[i] = localize(key);
-        CFRelease(key);
-    }
-    picker = createSegmentedControl(segments, 3, userData->currentPlan + 1, nil, nil);
+    CFStringRef titles[4]; fillStringArray(titles, CFSTR("maxWeight%d"), 4);
+    UILabel *planLabel = createLabel(localize(CFSTR("planPickerTitle")), TextFootnote, 4, 20);
+    picker = createSegmentedControl(CFSTR("settingsSegment%d"),3,userData->currentPlan + 1,0,0,40);
+    UIView *planContainer = createStackView((id []){planLabel, picker}, 2, 1, 2, (Padding){0});
+    UIStackView *cStack = createStackView((id []){planContainer}, 1, 1, 0, (Padding){0,8,0,8});
+    [cStack setCustomSpacing:20 afterView:planContainer];
+    UIStackView *vStack = createStackView((id[]){cStack}, 1, 1, 20, (Padding){20, 0, 20, 0});
 
-    UIView *planContainer = createView(nil, false);
-    [planContainer addSubview:planLabel];
-    [planContainer addSubview:picker];
-
-    UIView *views[4];
     UIToolbar *toolbar = createToolbar(self, @selector(dismissKeyboard));
 
-    for (int i = 0; i < 4; ++i) {
-        CFStringRef key = CFStringCreateWithFormat(NULL, NULL, CFSTR("maxWeight%d"), i);
-        views[i] = validator_addChild(&validator, self, localize(key), 0, 999, toolbar);
-        CFRelease(key);
-    }
+    for (int i = 0; i < 4; ++i)
+        [cStack addArrangedSubview:validator_add(&validator, self, titles[i], 0, 999, toolbar)];
 
-    UIButton *saveButton = createButton(localize(CFSTR("settingsSave")), UIColor.systemBlueColor,
-                                        BtnBackground, 0, self, @selector(buttonTapped:));
-    validator.button = saveButton;
+    validator.button = createButton(localize(CFSTR("settingsSave")), UIColor.systemBlueColor,
+                                    BtnBackground, 0, self, @selector(buttonTapped:), 40);
+    [vStack addArrangedSubview:validator.button];
 
-    UIButton *deleteButton = createButton(localize(CFSTR("settingsDelete")), UIColor.systemRedColor,
-                                          BtnBackground, 1, self, @selector(buttonTapped:));
-
-    id subviews[] = {
-        planContainer, views[0], views[1], views[2], views[3], saveButton, deleteButton
-    };
-    UIStackView *vStack = createStackView(subviews, 7, 1, 0, (Padding){20, 0, 20, 0});
+    [vStack addArrangedSubview:createButton(localize(CFSTR("settingsDelete")), UIColor.systemRedColor,
+                                            BtnBackground, 1, self, @selector(buttonTapped:), 40)];
 
     UIScrollView *scrollView = createScrollView();
     [self.view addSubview:scrollView];
     [scrollView addSubview:vStack];
-    [vStack setCustomSpacing:20 afterView:planContainer];
-    [vStack setCustomSpacing:20 afterView:views[3]];
-    [vStack setCustomSpacing:40 afterView:saveButton];
 
     pin(scrollView, self.view.safeAreaLayoutGuide, (Padding){0}, 0);
     pin(vStack, scrollView, (Padding){0}, 0);
     setEqualWidths(vStack, scrollView);
-    pin(planLabel, planContainer, (Padding){0, 8, 0, 8}, EdgeBottom);
-    setHeight(planLabel, 20);
-    pinTopToBottom(picker, planLabel, 2);
-    pin(picker, planContainer, (Padding){0, 8, 0, 8}, EdgeTop);
-    setHeight(picker, 40);
-    setHeight(saveButton, 40);
-    setHeight(deleteButton, 40);
 
+    [cStack release];
     [vStack release];
     [scrollView release];
     [planContainer release];

@@ -61,8 +61,8 @@
 "delete" = "Delete";
 "finish" = "Finish";
 
-"weeklyWorkoutsHeader" = "Workouts this week";
-"customWorkoutsHeader" = "Add Custom Workout";
+"homeHeader0" = "Workouts this week";
+"homeHeader1" = "Add Custom Workout";
 "homeWorkoutType0" = "Test Max";
 "homeWorkoutType1" = "Endurance";
 "homeWorkoutType2" = "Strength";
@@ -74,9 +74,9 @@
 "historySegment0" = "6 Months";
 "historySegment1" = "1 Year";
 "historySegment2" = "2 Years";
-"chartHeaderWorkoutType" = "Activity Time Each Week (By Type)";
-"chartHeaderLifts" = "Lift Progress";
-"chartHeaderTotalWorkouts" = "Workouts Each Week";
+"chartHeader1" = "Activity Time Each Week (By Type)";
+"chartHeader2" = "Lift Progress";
+"chartHeader0" = "Workouts Each Week";
 "totalWorkoutsLegend" = "Avg Workouts (%.2f)";
 "workoutTypeLegend" = "%@ (Avg: %s)";
 "liftLegend" = "%@ (Avg: %.1f)";
@@ -96,7 +96,7 @@
 "settingsAlertMessageSave" = "This will save the currently entered data.";
 "settingsAlertMessageDelete" = "This will delete all workout history.";
 
-"setupWorkoutPickerTitle" = "Choose workout";
+"setupWorkoutTitle" = "Choose workout";
 "setupWorkoutSets" = "Sets";
 "setupWorkoutReps" = "Reps";
 "setupWorkoutMaxWeight" = "Max Weight Percentage";

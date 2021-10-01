@@ -40,22 +40,26 @@ id setupWorkoutVC_init(HomeTabCoordinator *delegate, uchar type, Array_str *name
     [super viewDidLoad];
     setBackground(self.view, UIColor.systemGroupedBackgroundColor);
 
-    workoutTextField = createTextfield(nil, names->arr[0], NSTextAlignmentCenter, 0, 0);
-    UILabel *workoutLabel = createLabel(localize(CFSTR("setupWorkoutPickerTitle")),TextFootnote, 4);
+    UILabel *workoutLabel = createLabel(localize(CFSTR("planPickerTitle")), TextFootnote, 4, 20);
+    workoutTextField = createTextfield(nil, names->arr[0], NSTextAlignmentCenter, 0, 0, 40);
+    UIStackView *workoutContainer = createStackView((id []){workoutLabel, workoutTextField},
+                                                    2, 1, 2, (Padding){30,8,0,8});
 
     UIPickerView *workoutPicker = [[UIPickerView alloc] init];
+    UIToolbar *toolbar = createToolbar(self, @selector(dismissKeyboard));
     workoutPicker.delegate = self;
     workoutTextField.inputView = workoutPicker;
+    workoutTextField.inputAccessoryView = toolbar;
 
-    UIView *workoutContainer = createView(nil, false);
-    [workoutContainer addSubview:workoutLabel];
-    [workoutContainer addSubview:workoutTextField];
-    [self.view addSubview:workoutContainer];
+    UIStackView *stack = createStackView((id []){workoutContainer}, 1, 1, 0, (Padding){0});
+    [stack setCustomSpacing:20 afterView:workoutContainer];
+    [self.view addSubview:stack];
+    pin(stack, self.view.safeAreaLayoutGuide, (Padding){0}, EdgeBottom);
 
     UIButton *cancelButton = createButton(localize(CFSTR("cancel")), UIColor.systemBlueColor, 0,
-                                          0, self, @selector(pressedCancel));
+                                          0, self, @selector(pressedCancel), -1);
     UIButton *submitButton = createButton(localize(CFSTR("go")), UIColor.systemBlueColor, 0,
-                                          0, self, @selector(pressedFinish));
+                                          0, self, @selector(pressedFinish), -1);
     setNavButton(self.navigationItem, true, cancelButton, self.view.frame.size.width);
     setNavButton(self.navigationItem, false, submitButton, self.view.frame.size.width);
     enableButton(submitButton, false);
@@ -82,33 +86,18 @@ id setupWorkoutVC_init(HomeTabCoordinator *delegate, uchar type, Array_str *name
             enableButton(submitButton, true);
     }
 
-    UIToolbar *toolbar = createToolbar(self, @selector(dismissKeyboard));
-    UIStackView *textFieldStack = createStackView(NULL, 0, 1, 0, (Padding){0});
-    [self.view addSubview:textFieldStack];
+    if (output.type != WorkoutTypeHIC)
+        textValidator_setup(&validator, 8);
 
     for (int i = 0; i < 3; ++i) {
         if (!titles[i]) continue;
-        UIView *v = validator_addChild(&validator, self, localize(titles[i]), 1, maxes[i], toolbar);
-        [textFieldStack addArrangedSubview:v];
+        UIView *v = validator_add(&validator, self, localize(titles[i]), 1, maxes[i], toolbar);
+        [stack addArrangedSubview:v];
     }
 
-    if (validator.count)
-        textValidator_setup(&validator);
-
-    pin(workoutContainer, self.view.safeAreaLayoutGuide, (Padding){30, 8, 0, 8}, EdgeBottom);
-    pin(workoutLabel, workoutContainer, (Padding){0}, EdgeBottom);
-    setHeight(workoutLabel, 20);
-    pinTopToBottom(workoutTextField, workoutLabel, 2);
-    pin(workoutTextField, workoutContainer, (Padding){0}, EdgeTop);
-    setHeight(workoutTextField, 40);
-    pinTopToBottom(textFieldStack, workoutContainer, 20);
-    pin(textFieldStack, self.view.safeAreaLayoutGuide, (Padding){0}, EdgeTop | EdgeBottom);
-
-    workoutTextField.inputAccessoryView = toolbar;
-
+    [stack release];
     [workoutLabel release];
     [workoutContainer release];
-    [textFieldStack release];
     [workoutPicker release];
     [toolbar release];
 }

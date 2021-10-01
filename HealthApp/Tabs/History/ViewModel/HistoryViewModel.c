@@ -22,12 +22,11 @@ static id getCustomColor(CFStringRef name) {
                                                         sel_getUid("colorNamed:"), name);
 }
 
-static inline void createNewEntry(Array_chartData *arr, int x, int y) {
-    array_push_back(chartData, arr, createChartEntry(x, y));
+static inline void createNewEntry(Array_object *arr, int x, int y) {
+    array_push_back(object, arr, createChartEntry(x, y));
 }
 
 gen_array_source(weekData, HistoryWeekDataModel, DSDefault_shallowCopy, DSDefault_shallowDelete)
-gen_array_source(chartData, id, DSDefault_shallowCopy, releaseObj)
 
 void historyViewModel_init(HistoryViewModel *this) {
     id colors[] = {
@@ -40,27 +39,22 @@ void historyViewModel_init(HistoryViewModel *this) {
     setupLegendEntries(this->workoutTypeModel.legendEntries, colors, 4);
     setupLegendEntries(this->liftModel.legendEntries, colors, 4);
 
-    this->totalWorkoutsModel.entries = array_new(chartData);
+    this->totalWorkoutsModel.entries = array_new(object);
     this->totalWorkoutsModel.dataSet = createDataSet(createColor("systemRedColor"));
     this->workoutTypeModel.dataSets[0] = createEmptyDataSet();
+    fillStringArray(this->workoutTypeModel.names, CFSTR("workoutTypes%d"), 4);
+    fillStringArray(this->liftModel.names, CFSTR("liftTypes%d"), 4);
+    fillStringArray(this->formatter.months, CFSTR("months%02d"), 12);
 
     for (int i = 0; i < 4; ++i) {
-        this->workoutTypeModel.entries[i] = array_new(chartData);
-        this->liftModel.entries[i] = array_new(chartData);
+        this->workoutTypeModel.entries[i] = array_new(object);
+        this->liftModel.entries[i] = array_new(object);
 
         this->workoutTypeModel.dataSets[i + 1] = createDataSet(colors[i]);
         this->liftModel.dataSets[i] = createDataSet(colors[i]);
-
-        CFStringRef key = CFStringCreateWithFormat(NULL, NULL, CFSTR("workoutTypes%d"), i);
-        this->workoutTypeModel.names[i] = localize(key);
-        CFRelease(key);
-
-        key = CFStringCreateWithFormat(NULL, NULL, CFSTR("liftTypes%d"), i);
-        this->liftModel.names[i] = localize(key);
-        CFRelease(key);
     }
 
-    this->workoutTypeModel.entries[4] = array_new(chartData);
+    this->workoutTypeModel.entries[4] = array_new(object);
 
     this->totalWorkoutsModel.chartData = createChartData((id []){
         this->totalWorkoutsModel.dataSet
@@ -71,12 +65,6 @@ void historyViewModel_init(HistoryViewModel *this) {
     this->liftModel.chartData = createChartData(this->liftModel.dataSets, 4);
 
     this->workoutTypeModel.durationStr = CFStringCreateCopy(NULL, CFSTR(""));
-
-    for (int i = 0; i < 12; ++i) {
-        CFStringRef key = CFStringCreateWithFormat(NULL, NULL, CFSTR("months%02d"), i);
-        this->formatter.months[i] = localize(key);
-        CFRelease(key);
-    }
     this->formatter.currString = CFStringCreateCopy(NULL, CFSTR(""));
 
     this->data = array_new(weekData);
@@ -143,12 +131,12 @@ void historyViewModel_formatDataForTimeRange(HistoryViewModel *this, int index) 
     this->liftModel.yMax = 0;
     memset(this->liftModel.totalByExercise, 0, 4 * sizeof(int));
     memset(this->workoutTypeModel.totalByType, 0, 4 * sizeof(int));
-    array_clear(chartData, this->totalWorkoutsModel.entries);
+    array_clear(object, this->totalWorkoutsModel.entries);
     for (int i = 0; i < 4; ++i) {
-        array_clear(chartData, this->workoutTypeModel.entries[i]);
-        array_clear(chartData, this->liftModel.entries[i]);
+        array_clear(object, this->workoutTypeModel.entries[i]);
+        array_clear(object, this->liftModel.entries[i]);
     }
-    array_clear(chartData, this->workoutTypeModel.entries[4]);
+    array_clear(object, this->workoutTypeModel.entries[4]);
 
     int size = 0;
     if (!(size = (this->data->size))) return;

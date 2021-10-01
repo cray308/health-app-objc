@@ -16,7 +16,7 @@
     @public HomeViewModel *model;
     @public HomeTabCoordinator *delegate;
     UILabel *greetingLabel;
-    @public UIStackView *weeklyWorkoutsStack;
+    SectionContainer customContainer, planContainer;
 }
 @end
 
@@ -28,50 +28,32 @@ id homeVC_init(HomeTabCoordinator *delegate) {
 }
 
 void homeVC_updateWorkoutsList(HomeViewController *vc) {
-    CFArrayRef subviews = _cfarr(vc->weeklyWorkoutsStack.arrangedSubviews);
-    int count = (int) CFArrayGetCount(subviews);
-    if (!(homeViewModel_hasWorkoutsForThisWeek(vc->model) && count > 2)) return;
-
-    const unsigned char completed = userData->completedWorkouts;
-
-    for (int i = 2; i < count; ++i) {
-        StatusButton *v = (StatusButton *) CFArrayGetValueAtIndex(subviews, i);
-        bool enable = !(completed & (1 << (int) v.tag));
+    if (!(homeViewModel_hasWorkoutsForThisWeek(vc->model) && vc->planContainer.views->size)) return;
+    for (uint i = 0; i < vc->planContainer.views->size; ++i) {
+        StatusButton *v = vc->planContainer.views->arr[i];
+        bool enable = !(userData->completedWorkouts & (1 << (int) v.tag));
         enableButton(v->button, enable);
         setBackground(v->box, enable ? UIColor.systemGrayColor : UIColor.systemGreenColor);
     }
 }
 
 void homeVC_createWorkoutsList(HomeViewController *vc) {
-    CFArrayRef subviews = _cfarr(vc->weeklyWorkoutsStack.arrangedSubviews);
-    for (int i = 0; i < (int) CFArrayGetCount(subviews); ++i)
-        [((UIView *) CFArrayGetValueAtIndex(subviews, i)) removeFromSuperview];
-
+    array_clear(object, vc->planContainer.views);
     if (!homeViewModel_hasWorkoutsForThisWeek(vc->model)) {
-        [vc->weeklyWorkoutsStack setHidden:true];
+        hideView(vc->planContainer.view, true);
         return;
     }
 
-    UIView *divider = createDivider();
-    UILabel *headerLabel = createLabel(localize(CFSTR("weeklyWorkoutsHeader")), TextTitle2, 4);
-    [vc->weeklyWorkoutsStack addArrangedSubview:headerLabel];
-    [vc->weeklyWorkoutsStack addArrangedSubview:divider];
-
+    CFStringRef days[7]; fillStringArray(days, CFSTR("dayNames%d"), 7);
     for (int i = 0; i < 7; ++i) {
         if (!vc->model->workoutNames[i]) continue;
-        CFStringRef key = CFStringCreateWithFormat(NULL, NULL, CFSTR("dayNames%d"), i);
         StatusButton *btn = statusButton_init(NULL, 0, i, vc, sel_getUid("workoutButtonTapped:"));
-        setLabelText(btn->headerLabel, localize(key));
+        setLabelText(btn->headerLabel, days[i]);
         setButtonTitle(btn->button, vc->model->workoutNames[i], 0);
-        [vc->weeklyWorkoutsStack addArrangedSubview:btn];
-        [btn release];
-        CFRelease(key);
+        container_add(&vc->planContainer, btn);
     }
 
-    setHeight(headerLabel, 40);
-    [headerLabel release];
-    [divider release];
-    [vc->weeklyWorkoutsStack setHidden:false];
+    hideView(vc->planContainer.view, false);
     homeVC_updateWorkoutsList(vc);
 }
 
@@ -81,39 +63,27 @@ void homeVC_createWorkoutsList(HomeViewController *vc) {
     setBackground(self.view, UIColor.systemGroupedBackgroundColor);
     self.navigationItem.title = _nsstr(localize(CFSTR("titles0")));
 
-    greetingLabel = createLabel(NULL, TextTitle1, NSTextAlignmentCenter);
-    weeklyWorkoutsStack = createStackView(NULL, 0, 1, 0, (Padding){5, 8, 5, 8});
-    [weeklyWorkoutsStack setHidden:true];
-
-    UIView *divider = createDivider();
-    UILabel *headerLabel = createLabel(localize(CFSTR("customWorkoutsHeader")), TextTitle2, 4);
-    UIStackView *customWorkoutStack = createStackView((id []){divider, headerLabel}, 2, 1, 4,
-                                               (Padding){5, 8, 5, 8});
+    greetingLabel = createLabel(NULL, TextTitle1, NSTextAlignmentCenter, 50);
+    UIStackView *vStack = createStackView((id[]){greetingLabel}, 1, 1, 20, (Padding){10, 0, 16, 0});
+    CFStringRef titles[5]; fillStringArray(titles, CFSTR("homeWorkoutType%d"), 5);
+    CFStringRef headers[2]; fillStringArray(headers, CFSTR("homeHeader%d"), 2);
+    [vStack addArrangedSubview:createContainer(&planContainer, headers[0], 0, 0, 1)];
+    [vStack addArrangedSubview:createContainer(&customContainer, headers[1], 0, 4, 1)];
+    hideView(planContainer.view, true);
 
     for (int i = 0; i < 5; ++i) {
-        CFStringRef key = CFStringCreateWithFormat(NULL, NULL, CFSTR("homeWorkoutType%d"), i);
-        UIView *btn = statusButton_init(localize(key), 1, i, self, @selector(customButtonTapped:));
-        [customWorkoutStack addArrangedSubview:btn];
-        CFRelease(key);
-        [btn release];
+        UIView *btn = statusButton_init(titles[i], 1, i, self, @selector(customButtonTapped:));
+        container_add(&customContainer, btn);
     }
 
-    id subviews[] = {greetingLabel, weeklyWorkoutsStack, customWorkoutStack};
-    UIStackView *vStack = createStackView(subviews, 3, 1, 5, (Padding){10, 0, 16, 0});
     UIScrollView *scrollView = createScrollView();
-
     [self.view addSubview:scrollView];
     [scrollView addSubview:vStack];
-    [vStack setCustomSpacing:20 afterView:greetingLabel];
 
     pin(scrollView, self.view.safeAreaLayoutGuide, (Padding){0}, 0);
     pin(vStack, scrollView, (Padding){0}, 0);
     setEqualWidths(vStack, scrollView);
-    setHeight(greetingLabel, 50);
 
-    [customWorkoutStack release];
-    [headerLabel release];
-    [divider release];
     [vStack release];
     [scrollView release];
 

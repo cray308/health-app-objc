@@ -13,7 +13,7 @@ id createChartEntry(int x, int y) { return [[ChartDataEntry alloc] initWithX:x y
 
 void setLegendLabel(LegendEntry *entry, CFStringRef text) { entry.label = _nsstr(text); }
 
-void setLayoutMargins(UIStackView *v, Padding margins) {
+void setLayoutMargins(UIView *v, Padding margins) {
     v.layoutMargins = (UIEdgeInsets){margins.top, margins.left, margins.bottom, margins.right};
 }
 
