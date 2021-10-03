@@ -49,8 +49,7 @@ static void createRootAndLibDict(struct DictWrapper *data) {
     CFStringRef path = ((CFStringRef(*)(id,SEL,CFStringRef,CFStringRef))objc_msgSend)
     (getBundle(), sel_getUid("pathForResource:ofType:"), CFSTR("WorkoutData"), CFSTR("plist"));
 #endif
-    data->root = ((CFDictionaryRef(*)(id,SEL,CFStringRef))objc_msgSend)
-    (allocClass("NSDictionary"), sel_getUid("initWithContentsOfFile:"), path);
+    data->root = getDict(allocClass("NSDictionary"), sel_getUid("initWithContentsOfFile:"), path);
     data->lib = CFDictionaryGetValue(data->root, CFSTR("library"));
 }
 

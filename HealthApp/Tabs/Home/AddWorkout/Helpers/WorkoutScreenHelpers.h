@@ -11,8 +11,6 @@
 #include "CocoaHelpers.h"
 #include "Exercise.h"
 
-typedef void (^ObserverCallback)(id);
-
 typedef enum {
     TimerSignalGroup = SIGUSR2,
     TimerSignalExercise = SIGUSR1
@@ -41,7 +39,7 @@ extern pthread_mutex_t timerLock;
 extern const uint ExerciseTagNA;
 
 void setupTimers(Workout *w, id parent);
-id createDeviceEventNotification(id name, ObserverCallback block);
+void setupDeviceEventNotifications(id *observers, ObjectBlock active, ObjectBlock resign);
 void cleanupWorkoutNotifications(id *observers);
 void startWorkoutTimer(WorkoutTimer *t, int duration, unsigned container, unsigned exercise);
 

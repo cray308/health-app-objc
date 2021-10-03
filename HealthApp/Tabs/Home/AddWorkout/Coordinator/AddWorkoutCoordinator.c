@@ -35,7 +35,7 @@ static void updateStoredData(AddWorkoutCoordinator *this) {
     array_free(exGroup, this->workout->activities);
     CFRelease(this->workout->title);
 
-    ((void(*)(id,SEL,void(^)(void)))objc_msgSend)(backgroundContext, sel_getUid("performBlock:"), ^{
+    runInBackground((^{
         Workout *w = this->workout;
         if (w->duration >= 15) {
             id data = persistenceService_getCurrentWeek();
@@ -53,7 +53,7 @@ static void updateStoredData(AddWorkoutCoordinator *this) {
             free(w->newLifts);
         free(w);
         free(this);
-    });
+    }));
 }
 
 void addWorkoutCoordinator_start(AddWorkoutCoordinator *this) {

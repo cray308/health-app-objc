@@ -93,10 +93,8 @@ void exerciseView_configure(StatusButton *v, ExerciseEntry *e) {
     first = &containers[0];
     hideView(first->divider, true);
     __weak WorkoutViewController *weakSelf = self;
-    observers[0] = createDeviceEventNotification(UIApplicationDidBecomeActiveNotification,
-                                                 ^(id note _U_){ [weakSelf restartTimers]; });
-    observers[1] = createDeviceEventNotification(UIApplicationWillResignActiveNotification,
-                                                 ^(id note _U_){ [weakSelf stopTimers]; });
+    setupDeviceEventNotifications(observers, ^(id note _U_){ [weakSelf restartTimers]; },
+                                  ^(id note _U_){ [weakSelf stopTimers]; });
 }
 
 - (void) startEndWorkout: (UIButton *)btn {

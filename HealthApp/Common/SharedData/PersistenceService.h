@@ -12,10 +12,7 @@
 
 extern id backgroundContext;
 
-id createSortDescriptor(void);
-id fetchRequest(void);
-void setPredicate(id request, id pred);
-void setDescriptors(id request, CFArrayRef descriptors);
+id fetchRequest(id predicate);
 
 int16_t weekData_getLiftingLimitForType(id weekData, unsigned char type);
 int16_t weekData_getWorkoutTimeForType(id weekData, unsigned char type);
@@ -25,6 +22,9 @@ int64_t weekData_getWeekStart(id data);
 void weekData_setWorkoutTimeForType(id weekData, unsigned char type, int16_t duration);
 void weekData_setLiftingMaxForType(id weekData, unsigned char type, int16_t weight);
 void weekData_setTotalWorkouts(id weekData, int16_t value);
+
+#define runInBackground(block) ((void(*)(id,SEL,void(^)(void)))objc_msgSend)\
+(backgroundContext, sel_getUid("performBlock:"), block);
 
 #define createPredicate(format, ...)                                                        \
 ((id(*)(Class,SEL,CFStringRef,...))objc_msgSend)                                            \
@@ -36,6 +36,6 @@ void persistenceService_init(void);
 void persistenceService_start(int tzOffset);
 void persistenceService_deleteUserData(void);
 id persistenceService_getCurrentWeek(void);
-CFArrayRef persistenceService_executeFetchRequest(id req, int *count);
+CFArrayRef persistenceService_executeFetchRequest(id req, int *count, bool sorted);
 
 #endif /* PersistenceService_h */

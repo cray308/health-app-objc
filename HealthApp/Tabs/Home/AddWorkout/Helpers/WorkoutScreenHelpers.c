@@ -6,9 +6,13 @@
 //
 
 #include "WorkoutScreenHelpers.h"
+#include "ViewControllerHelpers.h"
 
 extern void exerciseView_configure(id v, ExerciseEntry *e);
 extern void workoutVC_finishedTimer(id vc, uchar type, uint group, uint entry);
+
+extern id UIApplicationDidBecomeActiveNotification;
+extern id UIApplicationWillResignActiveNotification;
 
 pthread_mutex_t timerLock;
 const uint ExerciseTagNA = 255;
@@ -50,15 +54,13 @@ static void *timer_loop(void *arg) {
 
 static void scheduleNotification(int secondsFromNow, int type) {
     static int identifier = 0;
-    CFStringRef idString = CFStringCreateWithFormat(NULL, NULL, CFSTR("%d"), identifier++);
+    CFStringRef idString = getNumberString(identifier++);
 
-    id content = ((id(*)(id,SEL))objc_msgSend)(allocClass("UNMutableNotificationContent"),
-                                               sel_getUid("init"));
-    ((void(*)(id,SEL,CFStringRef))objc_msgSend)(content, sel_getUid("setTitle:"), notifTitle);
-    ((void(*)(id,SEL,CFStringRef))objc_msgSend)(content, sel_getUid("setSubtitle:"),
-                                                notificationMessages[type]);
-    id sound = objc_staticMethod(objc_getClass("UNNotificationSound"), sel_getUid("defaultSound"));
-    ((void(*)(id,SEL,id))objc_msgSend)(content, sel_getUid("setSound:"), sound);
+    id content = getObject(allocClass("UNMutableNotificationContent"), sel_getUid("init"));
+    setString(content, sel_getUid("setTitle:"), notifTitle);
+    setString(content, sel_getUid("setSubtitle:"), notificationMessages[type]);
+    id sound = staticMethod(objc_getClass("UNNotificationSound"), sel_getUid("defaultSound"));
+    setObject(content, sel_getUid("setSound:"), sound);
 
     id trigger = ((id(*)(Class,SEL,double,bool))objc_msgSend)
     (objc_getClass("UNTimeIntervalNotificationTrigger"),
@@ -76,11 +78,13 @@ static void scheduleNotification(int secondsFromNow, int type) {
 }
 
 static id getDeviceNotificationCenter(void) {
-    return objc_staticMethod(objc_getClass("NSNotificationCenter"), sel_getUid("defaultCenter"));
+    return staticMethod(objc_getClass("NSNotificationCenter"), sel_getUid("defaultCenter"));
 }
 
-static void removeNotificationObserver(id center, id observer) {
-    ((void(*)(id,SEL,id))objc_msgSend)(center, sel_getUid("removeObserver:"), observer);
+static id createObserver(id center, id name, id queue, ObjectBlock block) {
+    return ((id(*)(id,SEL,CFStringRef,id,id,void(^)(id)))objc_msgSend)
+    (center, sel_getUid("addObserverForName:object:queue:usingBlock:"),
+     (CFStringRef)name, nil, queue, block);
 }
 
 static bool cycleCurrentEntry(Workout *w) {
@@ -159,20 +163,20 @@ void setupTimers(Workout *w, id parent) {
     pthread_create(&w->threads[0], NULL, timer_loop, &w->timers[0]);
 }
 
-id createDeviceEventNotification(id name, ObserverCallback block) {
-    id main = objc_staticMethod(objc_getClass("NSOperationQueue"), sel_getUid("mainQueue"));
-    return ((id(*)(id,SEL,CFStringRef,id,id,void(^)(id)))objc_msgSend)
-    (getDeviceNotificationCenter(), sel_getUid("addObserverForName:object:queue:usingBlock:"),
-     (CFStringRef) name, nil, main, block);
+void setupDeviceEventNotifications(id *observers, ObjectBlock active, ObjectBlock resign) {
+    id main = staticMethod(objc_getClass("NSOperationQueue"), sel_getUid("mainQueue"));
+    id center = getDeviceNotificationCenter();
+    observers[0] = createObserver(center, UIApplicationDidBecomeActiveNotification, main, active);
+    observers[1] = createObserver(center, UIApplicationWillResignActiveNotification, main, resign);
 }
 
 void cleanupWorkoutNotifications(id *observers) {
     id center = getDeviceNotificationCenter();
-    removeNotificationObserver(center, observers[0]);
-    removeNotificationObserver(center, observers[1]);
+    for (int i = 0; i < 2; ++i)
+        setObject(center, sel_getUid("removeObserver:"), observers[i]);
     center = getNotificationCenter();
-    objc_singleArg(center, sel_getUid("removeAllPendingNotificationRequests"));
-    objc_singleArg(center, sel_getUid("removeAllDeliveredNotifications"));
+    singleArgVoid(center, sel_getUid("removeAllPendingNotificationRequests"));
+    singleArgVoid(center, sel_getUid("removeAllDeliveredNotifications"));
     exerciseTimerThread = NULL;
 }
 
@@ -221,8 +225,8 @@ WorkoutTransition workout_findTransitionForEvent(Workout *w, id view, id btn, ui
     }
 
     if (w->entry->type == ExerciseTypeDuration && w->entry->state == ExerciseStateActive &&
-        !((bool(*)(id,SEL))objc_msgSend)(btn, sel_getUid("isUserInteractionEnabled"))) {
-        ((void(*)(id,SEL,bool))objc_msgSend)(btn, sel_getUid("setUserInteractionEnabled:"), true);
+        !getBool(btn, sel_getUid("isUserInteractionEnabled"))) {
+        enableInteraction(btn, true);
         if (w->type == WorkoutTypeEndurance)
             return TransitionNoChange;
     }

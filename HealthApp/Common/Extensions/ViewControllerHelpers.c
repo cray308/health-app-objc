@@ -21,8 +21,17 @@ extern id UIFontTextStyleHeadline;
 extern id UIFontTextStyleSubheadline;
 extern id UIFontTextStyleBody;
 extern id UIFontTextStyleFootnote;
+extern id NSForegroundColorAttributeName;
 
-struct AnchorNames anchors = {
+static struct AnchorNames {
+    char const *top;
+    char const *bottom;
+    char const *left;
+    char const *right;
+    char const *width;
+    char const *height;
+    char const *centerY;
+} const anchors = {
     "topAnchor",
     "bottomAnchor",
     "leadingAnchor",
@@ -33,26 +42,20 @@ struct AnchorNames anchors = {
 };
 
 static void disableAutoresizing(id view) {
-    ((void(*)(id,SEL,bool))objc_msgSend)
-    (view, sel_getUid("setTranslatesAutoresizingMaskIntoConstraints:"), false);
+    setBool(view, sel_getUid("setTranslatesAutoresizingMaskIntoConstraints:"), false);
 }
 
 static void setAlignment(id view, int alignment) {
-    ((void(*)(id,SEL,int))objc_msgSend)(view, sel_getUid("setTextAlignment:"), alignment);
+    setInt(view, sel_getUid("setTextAlignment:"), alignment);
 }
 
 static void setDynamicFont(id view) {
-    ((void(*)(id,SEL,bool))objc_msgSend)(view, sel_getUid("setAdjustsFontSizeToFitWidth:"), true);
-    ((void(*)(id,SEL,CGFloat))objc_msgSend)(view, sel_getUid("setMinimumScaleFactor:"), 0.85);
+    setBool(view, sel_getUid("setAdjustsFontSizeToFitWidth:"), true);
+    setCGFloat(view, sel_getUid("setMinimumScaleFactor:"), 0.85);
 }
 
 static void setCornerRadius(id view) {
-    id layer = ((id(*)(id,SEL))objc_msgSend)(view, sel_getUid("layer"));
-    ((void(*)(id,SEL,CGFloat))objc_msgSend)(layer, sel_getUid("setCornerRadius:"), 5);
-}
-
-static void setFont(id view, id font) {
-    ((void(*)(id,SEL,id))objc_msgSend)(view, sel_getUid("setFont:"), font);
+    setCGFloat(getLayer(view), sel_getUid("setCornerRadius:"), 5);
 }
 
 static void addTarget(id view, id target, SEL action, int event) {
@@ -67,8 +70,8 @@ static void activateConstraints(id *constraints, int count) {
     CFRelease(array);
 }
 
-static id getAnchor(id view, const char *name) {
-    return ((id(*)(id,SEL))objc_msgSend)(view, sel_getUid(name));
+static inline id getAnchor(id view, const char *name) {
+    return getObject(view, sel_getUid(name));
 }
 
 static id createConstraint(id a1, id a2, int constant) {
@@ -77,10 +80,36 @@ static id createConstraint(id a1, id a2, int constant) {
         result = ((id(*)(id,SEL,id,CGFloat))objc_msgSend)
         (a1, sel_getUid("constraintEqualToAnchor:constant:"), a2, constant);
     } else {
-        result = ((id(*)(id,SEL,CGFloat))objc_msgSend)(a1, sel_getUid("constraintEqualToConstant:"),
-                                                       constant);
+        result = getObjectWithFloat(a1, sel_getUid("constraintEqualToConstant:"), constant);
     }
     return result;
+}
+
+static void setLabelFont(id view, int style) {
+    if (!style) return;
+    id fStyle;
+    switch (style) {
+        case TextFootnote:
+            fStyle = UIFontTextStyleFootnote;
+            break;
+        case TextSubhead:
+            fStyle = UIFontTextStyleSubheadline;
+            break;
+        case TextBody:
+            fStyle = UIFontTextStyleBody;
+            break;
+        case TextHead:
+            fStyle = UIFontTextStyleHeadline;
+            break;
+        case TextTitle1:
+            fStyle = UIFontTextStyleTitle1;
+            break;
+        default:
+            fStyle = UIFontTextStyleTitle3;
+    }
+    id font = staticMethodWithString(objc_getClass("UIFont"),
+                                     sel_getUid("preferredFontForTextStyle:"), (CFStringRef)fStyle);
+    setObject(view, sel_getUid("setFont:"), font);
 }
 
 id createToolbar(id target, SEL doneSelector) {
@@ -89,7 +118,7 @@ id createToolbar(id target, SEL doneSelector) {
     CGFloat width = bounds.size.width;
 
     id toolbar = createObjectWithFrame("UIToolbar", (CGRect){{0}, {width, 50}});
-    objc_singleArg(toolbar, sel_getUid("sizeToFit"));
+    singleArgVoid(toolbar, sel_getUid("sizeToFit"));
 
     const char *btnName = "UIBarButtonItem";
     id flexSpace = ((id(*)(id,SEL,int,id,SEL))objc_msgSend)
@@ -102,7 +131,7 @@ id createToolbar(id target, SEL doneSelector) {
                                      2, &kCocoaArrCallbacks);
     ((void(*)(id,SEL,CFArrayRef,bool))objc_msgSend)(toolbar,
                                             sel_getUid("setItems:animated:"), array, false);
-    ((void(*)(id,SEL,bool))objc_msgSend)(toolbar, sel_getUid("setUserInteractionEnabled:"), true);
+    enableInteraction(toolbar, true);
 
     CFRelease(array);
     releaseObj(flexSpace);
@@ -113,25 +142,13 @@ id createToolbar(id target, SEL doneSelector) {
 void setNavButton(id navItem, bool left, id button, CGFloat totalWidth) {
     ((void(*)(id,SEL,CGRect))objc_msgSend)(button, sel_getUid("setFrame:"),
                                            (CGRect){{0}, {totalWidth / 3, 30}});
-    id item = ((id(*)(id,SEL,id))objc_msgSend)(allocClass("UIBarButtonItem"),
-                                               sel_getUid("initWithCustomView:"), button);
+    id item = getObjectWithObject(allocClass("UIBarButtonItem"),
+                                  sel_getUid("initWithCustomView:"), button);
     if (left)
-        ((void(*)(id,SEL,id))objc_msgSend)(navItem, sel_getUid("setLeftBarButtonItem:"), item);
+        setObject(navItem, sel_getUid("setLeftBarButtonItem:"), item);
     else
-        ((void(*)(id,SEL,id))objc_msgSend)(navItem, sel_getUid("setRightBarButtonItem:"), item);
+        setObject(navItem, sel_getUid("setRightBarButtonItem:"), item);
     releaseObj(item);
-}
-
-id createDivider(void) {
-    return createView(createColor("separatorColor"), false, -1, 1);
-}
-
-void fillStringArray(CFStringRef *arr, CFStringRef format, int count) {
-    for (int i = 0; i < count; ++i) {
-        CFStringRef key = CFStringCreateWithFormat(NULL, NULL, format, i);
-        arr[i] = localize(key);
-        CFRelease(key);
-    }
 }
 
 void textValidator_setup(Validator *this, short margins) {
@@ -172,7 +189,7 @@ id validator_add(Validator *v, id delegate, CFStringRef hint, int min, int max, 
     releaseObj(vStack);
     CFRelease(errorText);
     hideView(child->errorLabel, true);
-    ((void(*)(id,SEL,id))objc_msgSend)(child->field, sel_getUid("setInputAccessoryView:"), toolbar);
+    setObject(child->field, sel_getUid("setInputAccessoryView:"), toolbar);
     return child->view;
 }
 
@@ -199,7 +216,7 @@ bool checkInput(Validator *this, id field, CFRange range, CFStringRef replacemen
         }
     }
 
-    int i = ((int(*)(id,SEL))objc_msgSend)(field, sel_getUid("tag"));
+    int i = getInt(field, sel_getUid("tag"));
     if (i == this->count) return true;
     struct InputView *child = &this->children[i];
 
@@ -235,7 +252,7 @@ bool checkInput(Validator *this, id field, CFRange range, CFStringRef replacemen
 
 void setupNavVC(id navVC, id firstVC) {
     CFArrayRef array = CFArrayCreate(NULL, (const void *[]){firstVC}, 1, &kCocoaArrCallbacks);
-    ((void(*)(id,SEL,CFArrayRef))objc_msgSend)(navVC, sel_getUid("setViewControllers:"), array);
+    setArray(navVC, sel_getUid("setViewControllers:"), array);
     releaseObj(firstVC);
     CFRelease(array);
 }
@@ -255,8 +272,8 @@ void presentVC(id presenter, id child) {
 }
 
 void presentModalVC(id presenter, id modal) {
-    id container = ((id(*)(id,SEL,id))objc_msgSend)
-    (allocNavVC(), sel_getUid("initWithRootViewController:"), modal);
+    id container = getObjectWithObject(allocNavVC(),
+                                       sel_getUid("initWithRootViewController:"), modal);
     presentVC(presenter, container);
     releaseObj(container);
     releaseObj(modal);
@@ -267,12 +284,8 @@ void dismissPresentedVC(id presenter) {
     (presenter, sel_getUid("dismissViewControllerAnimated:completion:"), true, nil);
 }
 
-id getRootView(id vc) {
-    return ((id(*)(id,SEL))objc_msgSend)(vc, sel_getUid("view"));
-}
-
 void addSubview(id view, id subview) {
-    ((void(*)(id,SEL,id))objc_msgSend)(view, sel_getUid("addSubview:"), subview);
+    setObject(view, sel_getUid("addSubview:"), subview);
 }
 
 id createAlertController(CFStringRef title, CFStringRef message) {
@@ -281,24 +294,17 @@ id createAlertController(CFStringRef title, CFStringRef message) {
      sel_getUid("alertControllerWithTitle:message:preferredStyle:"), title, message, 1);
 }
 
-id createAlertAction(CFStringRef title, int style, CallbackBlock handler) {
-    return ((id(*)(Class,SEL,CFStringRef,int,void(^)(id)))objc_msgSend)
+void addAlertAction(id ctrl, CFStringRef title, int style, CallbackBlock handler) {
+    id action = ((id(*)(Class,SEL,CFStringRef,int,void(^)(id)))objc_msgSend)
     (objc_getClass("UIAlertAction"), sel_getUid("actionWithTitle:style:handler:"), title, style,
      ^(id action _U_) {
         if (handler)
             handler();
     });
-}
-
-void addAlertAction(id ctrl, id action) {
-    ((void(*)(id,SEL,id))objc_msgSend)(ctrl, sel_getUid("addAction:"), action);
+    setObject(ctrl, sel_getUid("addAction:"), action);
 }
 
 #pragma mark - View Functions
-
-void setWidth(id v, int width) {
-    activateConstraints((id []){createConstraint(getAnchor(v, anchors.width), nil, width)}, 1);
-}
 
 void setHeight(id v, int height) {
     activateConstraints((id []){createConstraint(getAnchor(v,anchors.height), nil, height)}, 1);
@@ -307,36 +313,6 @@ void setHeight(id v, int height) {
 void setEqualWidths(id v, id v2) {
     activateConstraints((id []){
         createConstraint(getAnchor(v, anchors.width), getAnchor(v2, anchors.width), 0)
-    }, 1);
-}
-
-void setEqualCenterY(id v, id v2) {
-    activateConstraints((id []){
-        createConstraint(getAnchor(v, anchors.centerY), getAnchor(v2, anchors.centerY), 0)
-    }, 1);
-}
-
-void pinTopToTop(id v1, id v2, int offset) {
-    activateConstraints((id []){
-        createConstraint(getAnchor(v1, anchors.top), getAnchor(v2, anchors.top), offset)
-    }, 1);
-}
-
-void pinTopToBottom(id v1, id v2, int offset) {
-    activateConstraints((id []){
-        createConstraint(getAnchor(v1, anchors.top), getAnchor(v2, anchors.bottom), offset)
-    }, 1);
-}
-
-void pinRightToRight(id v1, id v2, int offset) {
-    activateConstraints((id []){
-        createConstraint(getAnchor(v1, anchors.right), getAnchor(v2, anchors.right), offset)
-    }, 1);
-}
-
-void pinRightToLeft(id v1, id v2, int offset) {
-    activateConstraints((id []){
-        createConstraint(getAnchor(v1, anchors.right), getAnchor(v2, anchors.left), offset)
     }, 1);
 }
 
@@ -370,6 +346,41 @@ void pin(id v, id container, Padding margins, uint excluded) {
     activateConstraints(constraints, j);
 }
 
+id createTabController(void) {
+    id appearance = getObject(allocClass("UITabBarAppearance"), sel_getUid("init"));
+    setBackground(appearance, createColor("systemBackgroundColor"));
+    char const *items[] = {
+        "stackedLayoutAppearance", "inlineLayoutAppearance", "compactInlineLayoutAppearance"
+    };
+    CFDictionaryValueCallBacks valueCallbacks = {0};
+    const void *keys[] = {(CFStringRef) NSForegroundColorAttributeName};
+    id normalColor = createColor("systemGrayColor"), selectedColor = createColor("systemRedColor");
+    const void *normalVals[] = {normalColor}, *selectedVals[] = {selectedColor};
+    CFDictionaryRef normalDict = CFDictionaryCreate(NULL, keys, normalVals, 1,
+                                                    &kCFCopyStringDictionaryKeyCallBacks,
+                                                    &valueCallbacks);
+    CFDictionaryRef selectedDict = CFDictionaryCreate(NULL, keys, selectedVals, 1,
+                                                      &kCFCopyStringDictionaryKeyCallBacks,
+                                                      &valueCallbacks);
+
+    for (int i = 0; i < 3; ++i) {
+        id item = getObject(appearance, sel_getUid(items[i]));
+        id normal = getObject(item, sel_getUid("normal"));
+        setObject(normal, sel_getUid("setIconColor:"), normalColor);
+        setDict(normal, sel_getUid("setTitleTextAttributes:"), normalDict);
+        id selected = getObject(item, sel_getUid("selected"));
+        setObject(selected, sel_getUid("setIconColor:"), selectedColor);
+        setDict(selected, sel_getUid("setTitleTextAttributes:"), selectedDict);
+    }
+    id tabVC = getObject(allocClass("UITabBarController"), sel_getUid("init"));
+    id bar = getObject(tabVC, sel_getUid("tabBar"));
+    setObject(bar, sel_getUid("setStandardAppearance:"), appearance);
+    CFRelease(normalDict);
+    CFRelease(selectedDict);
+    releaseObj(appearance);
+    return tabVC;
+}
+
 id createObjectWithFrame(const char *name, CGRect rect) {
     return ((id(*)(id,SEL,CGRect))objc_msgSend)(allocClass(name),
                                                 sel_getUid("initWithFrame:"), rect);
@@ -382,7 +393,7 @@ id createView(id color, bool rounded, int width, int height) {
     if (rounded)
         setCornerRadius(view);
     if (width >= 0)
-        setWidth(view, width);
+        activateConstraints((id []){createConstraint(getAnchor(view, anchors.width), nil, width)},1);
     if (height >= 0)
         setHeight(view, height);
     return view;
@@ -393,17 +404,15 @@ id createStackView(id *subviews, int count, int axis, int spacing, Padding margi
     const char *name = "UIStackView";
     if (count) {
         CFArrayRef array = CFArrayCreate(NULL, (const void **)subviews, count, &kCocoaArrCallbacks);
-        view = ((id(*)(id,SEL,CFArrayRef))objc_msgSend)
-        (allocClass(name), sel_getUid("initWithArrangedSubviews:"), array);
+        view = getObjectWithArr(allocClass(name), sel_getUid("initWithArrangedSubviews:"), array);
         CFRelease(array);
     } else {
         view = createObjectWithFrame(name, CGRectZero);
     }
     disableAutoresizing(view);
-    ((void(*)(id,SEL,int))objc_msgSend)(view, sel_getUid("setAxis:"), axis);
-    ((void(*)(id,SEL,CGFloat))objc_msgSend)(view, sel_getUid("setSpacing:"), spacing);
-    ((void(*)(id,SEL,bool))objc_msgSend)(view, sel_getUid("setLayoutMarginsRelativeArrangement:"),
-                                         true);
+    setInt(view, sel_getUid("setAxis:"), axis);
+    setCGFloat(view, sel_getUid("setSpacing:"), spacing);
+    setBool(view, sel_getUid("setLayoutMarginsRelativeArrangement:"), true);
     setLayoutMargins(view, margins);
     return view;
 }
@@ -411,10 +420,9 @@ id createStackView(id *subviews, int count, int axis, int spacing, Padding margi
 id createScrollView(void) {
     id view = createObjectWithFrame("UIScrollView", CGRectZero);
     disableAutoresizing(view);
-    ((void(*)(id,SEL,int))objc_msgSend)(view, sel_getUid("setAutoresizingMask:"), 16);
-    ((void(*)(id,SEL,bool))objc_msgSend)(view, sel_getUid("setBounces:"), true);
-    ((void(*)(id,SEL,bool))objc_msgSend)(view, sel_getUid("setShowsVerticalScrollIndicator:"),
-                                         true);
+    setInt(view, sel_getUid("setAutoresizingMask:"), 16);
+    setBool(view, sel_getUid("setBounces:"), true);
+    setBool(view, sel_getUid("setShowsVerticalScrollIndicator:"), true);
     return view;
 }
 
@@ -422,7 +430,7 @@ id createLabel(CFStringRef text, int style, int alignment, int height) {
     id view = createObjectWithFrame("UILabel", CGRectZero);
     disableAutoresizing(view);
     setLabelText(view, text);
-    setLabelFontWithStyle(view, style);
+    setLabelFont(view, style);
     setDynamicFont(view);
     setTextColor(view, createColor("labelColor"));
     setAlignment(view, alignment);
@@ -433,7 +441,7 @@ id createLabel(CFStringRef text, int style, int alignment, int height) {
 id createContainer(SectionContainer *c, CFStringRef title, int hidden, int spacing, bool margins) {
     c->views = array_new(object);
     c->view = createView(nil, false, -1, -1);
-    c->divider = createDivider();
+    c->divider = createView(createColor("separatorColor"), false, -1, 1);
     c->headerLabel = createLabel(title, TextTitle3, 4, 20);
     c->stack = createStackView(NULL, 0, 1, spacing, (Padding){.top = 5});
     Padding padding = {0};
@@ -468,7 +476,7 @@ void containers_free(SectionContainer *c, int size) {
 
 void container_add(SectionContainer *c, id v) {
     array_push_back(object, c->views, v);
-    ((void(*)(id,SEL,id))objc_msgSend)(c->stack, sel_getUid("addArrangedSubview:"), v);
+    setObject(c->stack, sel_getUid("addArrangedSubview:"), v);
 }
 
 id createButton(CFStringRef title, id color, int params, int tag, id target, SEL action, int h) {
@@ -478,9 +486,8 @@ id createButton(CFStringRef title, id color, int params, int tag, id target, SEL
     setButtonTitle(view, title, 0);
     setButtonColor(view, color, 0);
     setButtonColor(view, createColor("secondaryLabelColor"), 2);
-    id label = ((id(*)(id,SEL))objc_msgSend)(view, sel_getUid("titleLabel"));
-    int style = (params & BtnLargeFont) ? TextHead : TextBody;
-    setLabelFontWithStyle(label, style);
+    id label = getObject(view, sel_getUid("titleLabel"));
+    setLabelFont(label, (params & BtnLargeFont) ? TextHead : TextBody);
     setDynamicFont(label);
     if (params & BtnBackground)
         setBackground(view, createColor("secondarySystemGroupedBackgroundColor"));
@@ -498,10 +505,10 @@ id createSegmentedControl(CFStringRef format, int count, int startIndex,
     CFStringRef segments[count];
     fillStringArray(segments, format, count);
     CFArrayRef array = CFArrayCreate(NULL, (const void **)segments, count, &kCocoaArrCallbacks);
-    id view = ((id(*)(id,SEL,CFArrayRef))objc_msgSend)(allocClass("UISegmentedControl"),
-                                                       sel_getUid("initWithItems:"), array);
+    id view = getObjectWithArr(allocClass("UISegmentedControl"),
+                               sel_getUid("initWithItems:"), array);
     disableAutoresizing(view);
-    ((void(*)(id,SEL,int))objc_msgSend)(view, sel_getUid("setSelectedSegmentIndex:"), startIndex);
+    setInt(view, sel_getUid("setSelectedSegmentIndex:"), startIndex);
     setCornerRadius(view);
     setTintColor(view, createColor("systemGray2Color"));
     if (action)
@@ -519,79 +526,51 @@ id createTextfield(id delegate, CFStringRef text, int alignment, int keyboard, i
     setLabelText(view, text);
     setAlignment(view, alignment);
     setTag(view, tag);
-    ((void(*)(id,SEL,int))objc_msgSend)(view, sel_getUid("setBorderStyle:"), 3);
-    ((void(*)(id,SEL,int))objc_msgSend)(view, sel_getUid("setKeyboardType:"), keyboard);
-    ((void(*)(id,SEL,id))objc_msgSend)(view, sel_getUid("setDelegate:"), delegate);
+    setInt(view, sel_getUid("setBorderStyle:"), 3);
+    setInt(view, sel_getUid("setKeyboardType:"), keyboard);
+    setObject(view, sel_getUid("setDelegate:"), delegate);
     setHeight(view, h);
     return view;
 }
 
+id getLayer(id view) {
+    return getObject(view, sel_getUid("layer"));
+}
+
+void enableInteraction(id view, bool enabled) {
+    setBool(view, sel_getUid("setUserInteractionEnabled:"), enabled);
+}
+
 void hideView(id view, bool hide) {
-    ((void(*)(id,SEL,bool))objc_msgSend)(view, sel_getUid("setHidden:"), hide);
+    setBool(view, sel_getUid("setHidden:"), hide);
 }
 
 void removeView(id v) {
-    ((void(*)(id,SEL))objc_msgSend)(v, sel_getUid("removeFromSuperview"));
+    singleArgVoid(v, sel_getUid("removeFromSuperview"));
 }
 
 void enableButton(id view, bool enabled) {
-    ((void(*)(id,SEL,bool))objc_msgSend)(view, sel_getUid("setEnabled:"), enabled);
+    setBool(view, sel_getUid("setEnabled:"), enabled);
 }
 
 void setTag(id view, int tag) {
-    ((void(*)(id,SEL,int))objc_msgSend)(view, sel_getUid("setTag:"), tag);
+    setInt(view, sel_getUid("setTag:"), tag);
 }
 
 void setTextColor(id view, id color) {
-    ((void(*)(id,SEL,id))objc_msgSend)(view, sel_getUid("setTextColor:"), color);
+    setObject(view, sel_getUid("setTextColor:"), color);
 }
 
 void setBackground(id view, id color) {
-    ((void(*)(id,SEL,id))objc_msgSend)(view, sel_getUid("setBackgroundColor:"), color);
+    setObject(view, sel_getUid("setBackgroundColor:"), color);
 }
 
 void setTintColor(id view, id color) {
-    ((void(*)(id,SEL,id))objc_msgSend)(view, sel_getUid("setTintColor:"), color);
+    setObject(view, sel_getUid("setTintColor:"), color);
 }
 
 void setLabelText(id view, CFStringRef text) {
-    ((void(*)(id,SEL,CFStringRef))objc_msgSend)(view, sel_getUid("setText:"), text);
-}
-
-void setLabelFontWithStyle(id view, int style) {
-    if (!style) return;
-    id fontStyle;
-    switch (style) {
-        case TextFootnote:
-            fontStyle = UIFontTextStyleFootnote;
-            break;
-        case TextSubhead:
-            fontStyle = UIFontTextStyleSubheadline;
-            break;
-        case TextBody:
-            fontStyle = UIFontTextStyleBody;
-            break;
-        case TextHead:
-            fontStyle = UIFontTextStyleHeadline;
-            break;
-        case TextTitle1:
-            fontStyle = UIFontTextStyleTitle1;
-            break;
-        case TextTitle2:
-            fontStyle = UIFontTextStyleTitle2;
-            break;
-        default:
-            fontStyle = UIFontTextStyleTitle3;
-    }
-    id font = ((id(*)(Class,SEL,CFStringRef))objc_msgSend)
-    (objc_getClass("UIFont"), sel_getUid("preferredFontForTextStyle:"), (CFStringRef)fontStyle);
-    setFont(view, font);
-}
-
-void setLabelFontWithSize(id view, CGFloat size) {
-    id font = ((id(*)(Class,SEL,CGFloat))objc_msgSend)
-    (objc_getClass("UIFont"), sel_getUid("systemFontOfSize:"), size);
-    setFont(view, font);
+    setString(view, sel_getUid("setText:"), text);
 }
 
 void setButtonTitle(id view, CFStringRef title, int state) {

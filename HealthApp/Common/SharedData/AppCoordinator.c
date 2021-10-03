@@ -22,23 +22,21 @@ void appCoordinator_start(id tabVC) {
     id controllers[3];
     id items[3];
     CFStringRef imgNames[] = {CFSTR("house"), CFSTR("chart.bar"), CFSTR("gear")};
+    CFStringRef titles[3]; fillStringArray(titles, CFSTR("tabs%d"), 3);
 
     for (int i = 0; i < 3; ++i) {
-        id image = createImage(imgNames[i]);
-        CFStringRef title = CFStringCreateWithFormat(NULL, NULL, CFSTR("tabs%d"), i);
+        id image = createImage(imgNames[i], true);
         items[i] = ((id(*)(id,SEL,CFStringRef,id,int))objc_msgSend)
-        (allocClass("UITabBarItem"),
-         sel_getUid("initWithTitle:image:tag:"), localize(title), image, i);
+        (allocClass("UITabBarItem"), sel_getUid("initWithTitle:image:tag:"), titles[i], image, i);
 
         controllers[i] = ((id(*)(id,SEL,CFStringRef,id))objc_msgSend)
         (allocNavVC(), sel_getUid("initWithNibName:bundle:"), NULL, nil);
 
-        id navBar = ((id(*)(id,SEL))objc_msgSend)(controllers[i], sel_getUid("navigationBar"));
+        id navBar = getObject(controllers[i], sel_getUid("navigationBar"));
 
-        ((void(*)(id,SEL,id))objc_msgSend)(navBar, sel_getUid("setBarTintColor:"),
-                                           createColor("tertiarySystemGroupedBackgroundColor"));
-        ((void(*)(id,SEL,id))objc_msgSend)(controllers[i], sel_getUid("setTabBarItem:"), items[i]);
-        CFRelease(title);
+        setObject(navBar, sel_getUid("setBarTintColor:"),
+                  createColor("tertiarySystemGroupedBackgroundColor"));
+        setObject(controllers[i], sel_getUid("setTabBarItem:"), items[i]);
     }
 
     HomeTabCoordinator *homeCoord = calloc(1, sizeof(HomeTabCoordinator));

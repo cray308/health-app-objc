@@ -10,6 +10,12 @@
 
 #include "CocoaHelpers.h"
 
-id createConfettiView(CGRect frame);
+typedef struct {
+    CGRect frame;
+    id view;
+    id cells[16];
+} ConfettiContainer;
+
+void setupConfettiView(ConfettiContainer *c);
 
 #endif /* ConfettiView_h */

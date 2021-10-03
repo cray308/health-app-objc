@@ -11,11 +11,7 @@
 #include "Exercise.h"
 
 void homeViewModel_init(HomeViewModel *model) {
-    for (int i = 0; i < 3; ++i) {
-        CFStringRef key = CFStringCreateWithFormat(NULL, NULL, CFSTR("timesOfDay%d"), i);
-        model->timeNames[i] = localize(key);
-        CFRelease(key);
-    }
+    fillStringArray(model->timeNames, CFSTR("timesOfDay%d"), 3);
     homeViewModel_updateTimeOfDay(model);
 }
 

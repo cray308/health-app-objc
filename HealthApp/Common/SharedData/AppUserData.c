@@ -16,7 +16,7 @@ typedef enum {
 } WorkoutPlan;
 
 UserInfo *userData = NULL;
-static CFStringRef const userInfoKey = CFSTR("userinfo");
+static CFStringRef const dictKey = CFSTR("userinfo");
 
 static const void *keys[] = {
     CFSTR("planStart"), CFSTR("weekStart"), CFSTR("tzOffset"), CFSTR("currentPlan"),
@@ -43,7 +43,7 @@ static void saveData(void) {
 
     id defaults = getUserDefaults();
     ((void(*)(id,SEL,CFDictionaryRef,CFStringRef))objc_msgSend)
-    (defaults, sel_getUid("setObject:forKey:"), dict, userInfoKey);
+    (defaults, sel_getUid("setObject:forKey:"), dict, dictKey);
     CFRelease(dict);
     for (int i = 0; i < 9; ++i) CFRelease(values[i]);
 }
@@ -65,8 +65,7 @@ int userInfo_initFromStorage(void) {
     static int const planLengths[] = {8, 13};
     time_t now = time(NULL);
     time_t weekStart = date_calcStartOfWeek(now);
-    CFDictionaryRef savedInfo = ((CFDictionaryRef(*)(id,SEL,CFStringRef))objc_msgSend)
-    (getUserDefaults(), sel_getUid("dictionaryForKey:"), userInfoKey);
+    CFDictionaryRef savedInfo = getDict(getUserDefaults(), sel_getUid("dictionaryForKey:"), dictKey);
     CFNumberRef value;
 
     UserInfo *info = malloc(sizeof(UserInfo));

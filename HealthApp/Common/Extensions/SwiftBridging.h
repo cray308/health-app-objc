@@ -21,6 +21,5 @@ void setupLegendEntries(id *entries, id *colors, int count);
 void disableLineChartView(id v);
 void updateDataSet(bool isSmall, int count, id dataSet, id *entries);
 void updateChart(bool isSmall, id view, id data, float axisMax);
-void setTabBarItemColors(id appearance);
 
 #endif /* SwiftBridging_h */

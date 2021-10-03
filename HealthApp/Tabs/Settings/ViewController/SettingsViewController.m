@@ -27,7 +27,7 @@ id settingsVC_init(SettingsTabCoordinator *delegate) {
 
 void settingsVC_updateWeightFields(SettingsViewController *vc) {
     for (int i = 0; i < 4; ++i) {
-        CFStringRef str = CFStringCreateWithFormat(NULL, NULL, CFSTR("%d"), userData->liftMaxes[i]);
+        CFStringRef str = getNumberString(userData->liftMaxes[i]);
         setLabelText(vc->validator.children[i].field, str);
         inputView_reset(&vc->validator.children[i], userData->liftMaxes[i]);
         CFRelease(str);

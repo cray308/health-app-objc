@@ -37,20 +37,22 @@ static void navigateToAddWorkout(HomeTabCoordinator *this, bool dismissVC, Worko
 }
 
 static void showConfetti(id vc) {
-    id ctrl = createAlertController(localize(CFSTR("homeAlertTitle")),
-                                    localize(CFSTR("homeAlertMessage")));
-    addAlertAction(ctrl, createAlertAction(localize(CFSTR("ok")), 0, NULL));
-
-    id view = getRootView(vc);
+    id view = getObject(vc, sel_getUid("view"));
     CGRect frame;
-    getViewFrame(view, &frame);
-    id confettiView = createConfettiView((CGRect){{0}, frame.size});
-    addSubview(view, confettiView);
+    ((void(*)(CGRect*,id,SEL))objc_msgSend_stret)(&frame, view, sel_getUid("frame"));
+    ConfettiContainer container = {.frame = (CGRect){{0}, frame.size}};
+    setupConfettiView(&container);
+    addSubview(view, container.view);
 
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 5),
                    dispatch_get_main_queue(), ^(void) {
-        objc_singleArg(confettiView, sel_getUid("removeFromSuperview"));
-        releaseObj(confettiView);
+        removeView(container.view);
+        releaseObj(container.view);
+        for (int i = 0; i < 16; ++i)
+            releaseObj(container.cells[i]);
+        id ctrl = createAlertController(localize(CFSTR("homeAlertTitle")),
+                                        localize(CFSTR("homeAlertMessage")));
+        addAlertAction(ctrl, localize(CFSTR("ok")), 0, NULL);
         presentVC(vc, ctrl);
     });
 }
@@ -64,7 +66,7 @@ void homeCoordinator_didFinishAddingWorkout(HomeTabCoordinator *this, int totalC
     id homeVC = getFirstVC(this->navVC);
     homeVC_updateWorkoutsList(homeVC);
 
-    ((id(*)(id,SEL,bool))objc_msgSend)(this->navVC, sel_getUid("popViewControllerAnimated:"), true);
+    setBool(this->navVC, sel_getUid("popViewControllerAnimated:"), true);
     this->childCoordinator = NULL;
 
     if (homeViewModel_shouldShowConfetti(&this->model, totalCompletedWorkouts)) {

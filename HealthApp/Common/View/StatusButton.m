@@ -21,8 +21,8 @@ id statusButton_init(CFStringRef text, bool hideViews, int tag, id target, SEL a
     addSubview(this, vStack);
     pin(vStack, this, (Padding){0}, 0);
     if (hideViews) {
-        [this->headerLabel setHidden:true];
-        [this->box setHidden:true];
+        hideView(this->headerLabel, true);
+        hideView(this->box, true);
     }
     [hStack release];
     releaseObj(vStack);

@@ -25,6 +25,7 @@ gen_array_headers(weekData, HistoryWeekDataModel)
 
 typedef struct {
     Array_object *entries;
+    CFStringRef legendFormat;
     id legendEntries[1];
     id dataSet;
     id chartData;
@@ -34,6 +35,7 @@ typedef struct {
 
 typedef struct {
     Array_object *entries[5];
+    CFStringRef legendFormat;
     id legendEntries[4];
     id dataSets[5];
     id chartData;
@@ -45,6 +47,7 @@ typedef struct {
 
 typedef struct {
     Array_object *entries[4];
+    CFStringRef legendFormat;
     id legendEntries[4];
     id dataSets[4];
     id chartData;
