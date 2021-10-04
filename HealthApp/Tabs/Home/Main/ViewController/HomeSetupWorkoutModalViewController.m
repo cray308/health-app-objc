@@ -30,7 +30,7 @@ id setupWorkoutVC_init(HomeTabCoordinator *delegate, uchar type, Array_str *name
 
 @implementation SetupWorkoutSheet
 - (void) dealloc {
-    textValidator_free(&validator);
+    validator_free(&validator);
     array_free(str, names);
     [workoutTextField release];
     [super dealloc];
@@ -39,6 +39,7 @@ id setupWorkoutVC_init(HomeTabCoordinator *delegate, uchar type, Array_str *name
 - (void) viewDidLoad {
     [super viewDidLoad];
     setBackground(self.view, UIColor.systemGroupedBackgroundColor);
+    validator_setup(&validator, 8, output.type != WorkoutHIC, self, @selector(dismissKeyboard));
 
     UILabel *workoutLabel = createLabel(localize(CFSTR("planPickerTitle")), TextFootnote, 4, 20);
     workoutTextField = createTextfield(nil, names->arr[0], NSTextAlignmentCenter, 0, 0, 40);
@@ -46,10 +47,9 @@ id setupWorkoutVC_init(HomeTabCoordinator *delegate, uchar type, Array_str *name
                                                     2, 1, 2, (Padding){30,8,0,8});
 
     UIPickerView *workoutPicker = [[UIPickerView alloc] init];
-    UIToolbar *toolbar = createToolbar(self, @selector(dismissKeyboard));
     workoutPicker.delegate = self;
     workoutTextField.inputView = workoutPicker;
-    workoutTextField.inputAccessoryView = toolbar;
+    workoutTextField.inputAccessoryView = validator.toolbar;
 
     UIStackView *stack = createStackView((id []){workoutContainer}, 1, 1, 0, (Padding){0});
     [stack setCustomSpacing:20 afterView:workoutContainer];
@@ -66,52 +66,47 @@ id setupWorkoutVC_init(HomeTabCoordinator *delegate, uchar type, Array_str *name
     validator.button = submitButton;
 
     short maxes[] = {5, 5, 100};
-    CFStringRef titles[] = {CFSTR("setupWorkoutSets"), CFSTR("setupWorkoutReps"), NULL};
+    CFStringRef rows[] = {CFSTR("setupWorkoutSets"), CFSTR("setupWorkoutReps"), NULL};
 
     switch (output.type) {
-        case WorkoutTypeStrength:
-            titles[2] = CFSTR("setupWorkoutMaxWeight");
+        case WorkoutStrength:
+            rows[2] = CFSTR("setupWorkoutMaxWeight");
             break;
-        case WorkoutTypeSE:
+        case WorkoutSE:
             maxes[0] = 3;
             maxes[1] = 50;
             break;
-        case WorkoutTypeEndurance:
-            titles[0] = NULL;
-            titles[1] = CFSTR("setupWorkoutDuration");
+        case WorkoutEndurance:
+            rows[0] = NULL;
+            rows[1] = CFSTR("setupWorkoutDuration");
             maxes[1] = 180;
             break;
         default:
-            titles[0] = titles[1] = NULL;
+            rows[0] = rows[1] = NULL;
             enableButton(submitButton, true);
     }
 
-    if (output.type != WorkoutTypeHIC)
-        textValidator_setup(&validator, 8);
-
     for (int i = 0; i < 3; ++i) {
-        if (!titles[i]) continue;
-        UIView *v = validator_add(&validator, self, localize(titles[i]), 1, maxes[i], toolbar);
-        [stack addArrangedSubview:v];
+        if (!rows[i]) continue;
+        [stack addArrangedSubview:validator_add(&validator, self, localize(rows[i]), 1, maxes[i])];
     }
 
     [stack release];
     [workoutLabel release];
     [workoutContainer release];
     [workoutPicker release];
-    [toolbar release];
 }
 
 - (void) pressedFinish {
     switch (output.type) {
-        case WorkoutTypeStrength:
+        case WorkoutStrength:
             output.weight = validator.children[2].result;
-        case WorkoutTypeSE:
+        case WorkoutSE:
             output.sets = validator.children[0].result;
             output.reps = validator.children[1].result;
             break;
 
-        case WorkoutTypeEndurance:
+        case WorkoutEndurance:
             output.reps = validator.children[0].result;
         default: ;
     }

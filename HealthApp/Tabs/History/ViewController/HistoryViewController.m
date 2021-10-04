@@ -16,7 +16,7 @@
 @interface HistoryViewController() {
     @public HistoryViewModel *model;
     @public UISegmentedControl *picker;
-    SectionContainer containers[3];
+    Container containers[3];
     TotalWorkoutsChart *totalWorkoutsChart;
     WorkoutTypeChart *workoutTypeChart;
     LiftingChart *liftChart;

@@ -23,23 +23,22 @@ id updateMaxesVC_init(AddWorkoutCoordinator *delegate) {
 
 @implementation UpdateMaxesSheet
 - (void) dealloc {
-    textValidator_free(&validator);
+    validator_free(&validator);
     [super dealloc];
 }
 
 - (void) viewDidLoad {
     [super viewDidLoad];
     setBackground(self.view, UIColor.secondarySystemBackgroundColor);
-    textValidator_setup(&validator, 8);
+    validator_setup(&validator, 8, true, self, @selector(dismissKeyboard));
 
     CFStringRef titles[4]; fillStringArray(titles, CFSTR("maxWeight%d"), 4);
-    UIToolbar *toolbar = createToolbar(self, @selector(dismissKeyboard));
     UIStackView *stack = createStackView(nil, 0, 1, 0, (Padding){20,0,0,0});
     [self.view addSubview:stack];
     pin(stack, self.view.safeAreaLayoutGuide, (Padding){0}, EdgeBottom);
 
     for (int i = 0; i < 4; ++i)
-        [stack addArrangedSubview:validator_add(&validator, self, titles[i], 1, 999, toolbar)];
+        [stack addArrangedSubview:validator_add(&validator, self, titles[i], 1, 999)];
 
     UIButton *finishButton = createButton(localize(CFSTR("finish")), UIColor.systemBlueColor, 0,
                                           0, self, @selector(didPressFinish), -1);
@@ -48,7 +47,6 @@ id updateMaxesVC_init(AddWorkoutCoordinator *delegate) {
     validator.button = finishButton;
 
     [stack release];
-    [toolbar release];
 }
 
 - (void) didPressFinish {

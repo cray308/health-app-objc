@@ -26,16 +26,23 @@ typedef unsigned char uchar;
 typedef signed char schar;
 typedef unsigned int uint;
 
-typedef void (^CallbackBlock)(void);
+typedef void (^Callback)(void);
 typedef void (^ObjectBlock)(id);
+
+enum {
+    TextFootnote = 1,
+    TextSubhead,
+    TextBody,
+    TextHead,
+    TextTitle1,
+    TextTitle3
+};
 
 gen_array_headers(object, id)
 
-void setupClasses(void);
-
 id staticMethod(Class _self, SEL _cmd);
 id staticMethodWithString(Class _self, SEL _cmd, CFStringRef arg);
-void singleArgVoid(id obj, SEL _cmd);
+void voidFunc(id obj, SEL _cmd);
 id getObject(id obj, SEL _cmd);
 void setObject(id obj, SEL _cmd, id arg);
 bool getBool(id obj, SEL _cmd);
@@ -64,6 +71,7 @@ id getBundle(void);
 id getUserDefaults(void);
 id getNotificationCenter(void);
 id createColor(const char *name);
+id createFont(int style);
 id createImage(CFStringRef name, bool system);
 CFStringRef localize(CFStringRef key);
 void fillStringArray(CFStringRef *arr, CFStringRef format, int count);

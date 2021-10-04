@@ -70,7 +70,7 @@ static void scheduleNotification(int secondsFromNow, int type) {
     (objc_getClass("UNNotificationRequest"), sel_getUid("requestWithIdentifier:content:trigger:"),
      idString, content, trigger);
 
-    ((void(*)(id,SEL,id,void(^)(id)))objc_msgSend)
+    ((void(*)(id,SEL,id,ObjectBlock))objc_msgSend)
     (getNotificationCenter(), sel_getUid("addNotificationRequest:withCompletionHandler:"),
      req, ^(id error _U_) {});
     CFRelease(idString);
@@ -82,7 +82,7 @@ static id getDeviceNotificationCenter(void) {
 }
 
 static id createObserver(id center, id name, id queue, ObjectBlock block) {
-    return ((id(*)(id,SEL,CFStringRef,id,id,void(^)(id)))objc_msgSend)
+    return ((id(*)(id,SEL,CFStringRef,id,id,ObjectBlock))objc_msgSend)
     (center, sel_getUid("addObserverForName:object:queue:usingBlock:"),
      (CFStringRef)name, nil, queue, block);
 }
@@ -93,7 +93,7 @@ static bool cycleCurrentEntry(Workout *w) {
     switch (e->state) {
         case ExerciseStateDisabled:
             e->state = ExerciseStateActive;
-            if (e->type == ExerciseTypeDuration) {
+            if (e->type == ExerciseDuration) {
                 startWorkoutTimer(&w->timers[TimerTypeExercise],
                                   e->reps, w->index, w->group->index);
                 scheduleNotification(e->reps, TimerTypeExercise);
@@ -123,18 +123,18 @@ static bool cycleCurrentEntry(Workout *w) {
 static bool finishedExerciseGroup(ExerciseGroup *g) {
     bool isDone = false;
     switch (g->type) {
-        case ExerciseContainerTypeRounds:
+        case CircuitRounds:
             if (++g->completedReps == g->reps)
                 isDone = true;
             break;
 
-        case ExerciseContainerTypeDecrement:
+        case CircuitDecrement:
             if (--g->completedReps == 0) {
                 isDone = true;
             } else {
                 ExerciseEntry *e;
                 array_iter(g->exercises, e) {
-                    if (e->type == ExerciseTypeReps)
+                    if (e->type == ExerciseReps)
                         e->reps -= 1;
                 }
             }
@@ -175,8 +175,8 @@ void cleanupWorkoutNotifications(id *observers) {
     for (int i = 0; i < 2; ++i)
         setObject(center, sel_getUid("removeObserver:"), observers[i]);
     center = getNotificationCenter();
-    singleArgVoid(center, sel_getUid("removeAllPendingNotificationRequests"));
-    singleArgVoid(center, sel_getUid("removeAllDeliveredNotifications"));
+    voidFunc(center, sel_getUid("removeAllPendingNotificationRequests"));
+    voidFunc(center, sel_getUid("removeAllDeliveredNotifications"));
     exerciseTimerThread = NULL;
 }
 
@@ -202,7 +202,7 @@ static void startGroup(Workout *w, bool startTimer) {
         e->completedSets = 0;
     }
 
-    if (w->group->type == ExerciseContainerTypeAMRAP && startTimer) {
+    if (w->group->type == CircuitAMRAP && startTimer) {
         int duration = 60 * w->group->reps;
         startWorkoutTimer(&w->timers[TimerTypeGroup], duration, w->index, ExerciseTagNA);
         scheduleNotification(duration, TimerTypeGroup);
@@ -224,10 +224,10 @@ WorkoutTransition workout_findTransitionForEvent(Workout *w, id view, id btn, ui
         return t;
     }
 
-    if (w->entry->type == ExerciseTypeDuration && w->entry->state == ExerciseStateActive &&
+    if (w->entry->type == ExerciseDuration && w->entry->state == ExerciseStateActive &&
         !getBool(btn, sel_getUid("isUserInteractionEnabled"))) {
         enableInteraction(btn, true);
-        if (w->type == WorkoutTypeEndurance)
+        if (w->type == WorkoutEndurance)
             return TransitionNoChange;
     }
 
@@ -284,7 +284,7 @@ bool workout_restartExerciseTimer(Workout *w, time_t refTime) {
 
     if (timerActive && w->index == group && w->group->index == index) {
         ExerciseEntry *e = &w->group->exercises->arr[index];
-        if (e->type == ExerciseTypeDuration) {
+        if (e->type == ExerciseDuration) {
             int diff = (int) (refTime - w->timers[TimerTypeExercise].refTime);
             if (diff >= w->timers[TimerTypeExercise].duration) {
                 endExercise = true;
@@ -301,7 +301,7 @@ bool workout_restartGroupTimer(Workout *w, time_t refTime) {
     unsigned group = w->savedInfo.groupTag;
     bool endGroup = false, timerActive = group != ExerciseTagNA;
     
-    if (timerActive && w->index == group && w->group->type == ExerciseContainerTypeAMRAP) {
+    if (timerActive && w->index == group && w->group->type == CircuitAMRAP) {
         int diff = (int) (refTime - w->timers[TimerTypeGroup].refTime);
         if (diff >= w->timers[TimerTypeGroup].duration) {
             endGroup = true;

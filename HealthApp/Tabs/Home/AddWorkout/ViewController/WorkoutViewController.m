@@ -22,7 +22,7 @@ void exerciseView_configure(StatusButton *v, ExerciseEntry *e) {
             enableButton(v->button, false);
             break;
         case ExerciseStateActive:
-            if (e->type == ExerciseTypeDuration)
+            if (e->type == ExerciseDuration)
                 v->button.userInteractionEnabled = false;
         case ExerciseStateResting:
             enableButton(v->button, true);
@@ -41,7 +41,7 @@ void exerciseView_configure(StatusButton *v, ExerciseEntry *e) {
 @interface WorkoutViewController() {
     @public AddWorkoutCoordinator *delegate;
     @public Workout *workout;
-    SectionContainer containers[10], *first;
+    Container containers[10], *first;
     NSObject *observers[2];
 }
 @end

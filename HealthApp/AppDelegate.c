@@ -40,7 +40,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
     id tabVC = createTabController();
     appCoordinator_start(tabVC);
     setObject(self->window, sel_getUid("setRootViewController:"), tabVC);
-    singleArgVoid(self->window, sel_getUid("makeKeyAndVisible"));
+    voidFunc(self->window, sel_getUid("makeKeyAndVisible"));
 
     if (!hasLaunched) {
         ((void(*)(id,SEL,int,void(^)(BOOL,id)))objc_msgSend)

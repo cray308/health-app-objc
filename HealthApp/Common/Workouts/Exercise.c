@@ -109,7 +109,7 @@ static void buildWorkoutFromDict(CFDictionaryRef dict, WorkoutParams *params, Wo
             array_push_back(exEntry, activities.exercises, exercise);
         }
 
-        if (activities.type == ExerciseContainerTypeDecrement) {
+        if (activities.type == CircuitDecrement) {
             activities.completedReps = activities.exercises->arr[0].reps;
         }
         array_push_back(exGroup, w->activities, activities);
@@ -118,7 +118,7 @@ static void buildWorkoutFromDict(CFDictionaryRef dict, WorkoutParams *params, Wo
     Array_exEntry *exercises = w->activities->arr[0].exercises;
     ExerciseEntry *e;
     switch (params->type) {
-        case WorkoutTypeStrength: ;
+        case WorkoutStrength: ;
             short *lifts = userData->liftMaxes;
             int nExercises = exercises->size;
             float multiplier = params->weight / 100.f;
@@ -130,11 +130,11 @@ static void buildWorkoutFromDict(CFDictionaryRef dict, WorkoutParams *params, Wo
             entries[0].weight = (int) (multiplier * lifts[0]);
 
             if (nExercises >= 3 && params->index <= 1) {
-                entries[1].weight = (int) (multiplier * lifts[LiftTypeBench]);
+                entries[1].weight = (int) (multiplier * lifts[LiftBench]);
                 if (params->index == 0) {
-                    entries[2].weight = (int) (multiplier * lifts[LiftTypePullup]);
+                    entries[2].weight = (int) (multiplier * lifts[LiftPullup]);
                 } else {
-                    entries[2].weight = (int) (multiplier * lifts[LiftTypeDeadlift]);
+                    entries[2].weight = (int) (multiplier * lifts[LiftDeadlift]);
                 }
             } else if (nExercises >= 4 && params->index == 2) {
                 for (int i = 1; i < 4; ++i) {
@@ -142,13 +142,13 @@ static void buildWorkoutFromDict(CFDictionaryRef dict, WorkoutParams *params, Wo
                 }
             }
             break;
-        case WorkoutTypeSE:
+        case WorkoutSE:
             w->activities->arr[0].reps = params->sets;
             array_iter(exercises, e) {
                 e->reps = params->reps;
             }
             break;
-        case WorkoutTypeEndurance: ;
+        case WorkoutEndurance: ;
             int duration = params->reps * 60;
             array_iter(exercises, e) {
                 e->reps = duration;
@@ -239,7 +239,7 @@ Array_str *exerciseManager_getWorkoutNamesForType(unsigned char type) {
     CFArrayRef libArr = getLibraryArrayForType(&info, type);
     if (!(libArr && (len = (int) CFArrayGetCount(libArr)))) goto cleanup;
 
-    if (type == WorkoutTypeStrength) len = 2;
+    if (type == WorkoutStrength) len = 2;
 
     results = array_new(str);
     array_reserve(str, results, len);
@@ -269,10 +269,10 @@ cleanup:
 }
 
 CFStringRef exerciseGroup_createHeader(ExerciseGroup *g) {
-    if (g->type == ExerciseContainerTypeRounds && g->reps > 1) {
+    if (g->type == CircuitRounds && g->reps > 1) {
         int completed = g->completedReps == g->reps ? g->reps : g->completedReps + 1;
         return CFStringCreateWithFormat(NULL, NULL, circuitHeaderRounds, completed, g->reps);
-    } else if (g->type == ExerciseContainerTypeAMRAP) {
+    } else if (g->type == CircuitAMRAP) {
         return CFStringCreateWithFormat(NULL, NULL, circuitHeaderAMRAP, g->reps);
     }
     return NULL;
@@ -288,14 +288,14 @@ CFStringRef exerciseEntry_createTitle(ExerciseEntry *e) {
     if (e->state == ExerciseStateResting)
         return CFStringCreateWithFormat(NULL, NULL, exerciseTitleRest, e->rest);
     switch (e->type) {
-        case ExerciseTypeReps:
+        case ExerciseReps:
             if (e->weight > 1) {
                 return CFStringCreateWithFormat(NULL, NULL, exerciseTitleRepsWithWeight,
                                                 e->name, e->reps, e->weight);
             }
             return CFStringCreateWithFormat(NULL, NULL, exerciseTitleReps, e->name, e->reps);
 
-        case ExerciseTypeDuration:
+        case ExerciseDuration:
             if (e->reps > 120) {
                 return CFStringCreateWithFormat(NULL, NULL, exerciseTitleDurationMinutes,
                                                 e->name, e->reps / 60.f);

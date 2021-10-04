@@ -1,0 +1,137 @@
+//
+//  TextValidator.c
+//  HealthApp
+//
+//  Created by Christopher Ray on 10/3/21.
+//
+
+#include "TextValidator.h"
+
+static CFStringRef inputFieldError;
+
+gen_uset_source(char, unsigned short, ds_cmp_num_eq, DSDefault_addrOfVal, DSDefault_sizeOfVal,
+                DSDefault_shallowCopy, DSDefault_shallowDelete)
+
+static inline void showInputError(Validator *validator, struct InputView *child) {
+    enableButton(validator->button, false);
+    child->valid = false;
+    hideView(child->errorLabel, false);
+}
+
+void validator_setup(Validator *this, short margins, bool createSet, id target, SEL doneSelector) {
+    if (createSet) {
+        unsigned short nums[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
+        this->set = uset_new_fromArray(char, nums, 10);
+    }
+    memcpy(&this->padding, &(Padding){4, margins, 4, margins}, sizeof(Padding));
+
+    CGRect bounds;
+    getScreenBounds(&bounds);
+    CGFloat width = bounds.size.width;
+
+    this->toolbar = createObjectWithFrame("UIToolbar", (CGRect){{0}, {width, 50}});
+    voidFunc(this->toolbar, sel_getUid("sizeToFit"));
+
+    const char *btnName = "UIBarButtonItem";
+    id flexSpace = ((id(*)(id,SEL,int,id,SEL))objc_msgSend)
+    (allocClass(btnName), sel_getUid("initWithBarButtonSystemItem:target:action:"), 5, nil, nil);
+    id doneButton = ((id(*)(id,SEL,CFStringRef,int,id,SEL))objc_msgSend)
+    (allocClass(btnName),
+     sel_getUid("initWithTitle:style:target:action:"), CFSTR("Done"), 0, target, doneSelector);
+
+    CFArrayRef array = CFArrayCreate(NULL, (const void *[]){flexSpace, doneButton},
+                                     2, &kCocoaArrCallbacks);
+    ((void(*)(id,SEL,CFArrayRef,bool))objc_msgSend)(this->toolbar,
+                                                    sel_getUid("setItems:animated:"), array, false);
+    enableInteraction(this->toolbar, true);
+
+    CFRelease(array);
+    releaseObj(flexSpace);
+    releaseObj(doneButton);
+}
+
+void validator_free(Validator *this) {
+    if (this->set)
+        uset_free(char, this->set);
+    for (int i = 0; i < 4; ++i) {
+        if (this->children[i].view) {
+            releaseObj(this->children[i].hintLabel);
+            releaseObj(this->children[i].field);
+            releaseObj(this->children[i].errorLabel);
+            releaseObj(this->children[i].view);
+        }
+    }
+    releaseObj(this->toolbar);
+}
+
+id validator_add(Validator *v, id delegate, CFStringRef hint, short min, short max) {
+    struct InputView *child = &v->children[v->count];
+    child->view = createView(nil, false, -1, -1);
+    child->minVal = min;
+    child->maxVal = max;
+    if (!inputFieldError)
+        inputFieldError = localize(CFSTR("inputFieldError"));
+    CFStringRef errorText = CFStringCreateWithFormat(NULL, NULL, inputFieldError, min, max);
+    child->hintLabel = createLabel(hint, TextFootnote, 4, 20);
+    child->field = createTextfield(delegate, NULL, 4, 4, v->count++, 40);
+    child->errorLabel = createLabel(errorText, TextFootnote, 4, 20);
+    setTextColor(child->errorLabel, createColor("systemRedColor"));
+    id vStack = createStackView((id []){child->hintLabel, child->field, child->errorLabel},
+                                3, 1, 4, v->padding);
+    addSubview(child->view, vStack);
+    pin(vStack, child->view, (Padding){0}, 0);
+    releaseObj(vStack);
+    CFRelease(errorText);
+    hideView(child->errorLabel, true);
+    setObject(child->field, sel_getUid("setInputAccessoryView:"), v->toolbar);
+    return child->view;
+}
+
+void inputView_reset(struct InputView *this, short value) {
+    this->valid = true;
+    this->result = value;
+    hideView(this->errorLabel, true);
+}
+
+bool checkInput(Validator *this, id field, CFRange range, CFStringRef replacement) {
+    int len = (int) CFStringGetLength(replacement);
+    if (len) {
+        CFStringInlineBuffer buf;
+        CFStringInitInlineBuffer(replacement, &buf, CFRangeMake(0, len));
+        for (int i = 0; i < len; ++i) {
+            if (!uset_contains(char, this->set, CFStringGetCharacterFromInlineBuffer(&buf, i)))
+                return false;
+        }
+    }
+
+    int i = getInt(field, sel_getUid("tag"));
+    if (i == this->count) return true;
+    struct InputView *child = &this->children[i];
+
+    CFStringRef text = ((CFStringRef(*)(id,SEL))objc_msgSend)(field, sel_getUid("text"));
+    CFMutableStringRef newText = CFStringCreateMutableCopy(NULL, 0, text ? text : CFSTR(""));
+    CFStringReplace(newText, range, replacement);
+
+    if (!CFStringGetLength(newText)) {
+        CFRelease(newText);
+        showInputError(this, child);
+        return true;
+    }
+
+    short newVal = CFStringGetIntValue(newText);
+    CFRelease(newText);
+
+    if (newVal < child->minVal || newVal > child->maxVal) {
+        showInputError(this, child);
+        return true;
+    }
+
+    inputView_reset(child, newVal);
+
+    for (i = 0; i < this->count; ++i) {
+        if (!this->children[i].valid) return true;
+    }
+
+    enableButton(this->button, true);
+    return true;
+}

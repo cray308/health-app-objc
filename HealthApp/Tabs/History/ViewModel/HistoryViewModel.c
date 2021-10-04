@@ -83,7 +83,7 @@ void historyViewModel_fetchData(HistoryViewModel *this) {
         if (data) {
             for (int i = 0; i < count; ++i) {
                 const id d = (const id) CFArrayGetValueAtIndex(data, i);
-                int timeStrength = weekData_getWorkoutTimeForType(d, WorkoutTypeStrength);
+                int timeStrength = weekData_getWorkoutTimeForType(d, WorkoutStrength);
                 time_t timestamp = weekData_getWeekStart(d);
                 localtime_r(&timestamp, &localInfo);
                 HistoryWeekDataModel m = {
@@ -92,16 +92,16 @@ void historyViewModel_fetchData(HistoryViewModel *this) {
                     .day = localInfo.tm_mday,
                     .totalWorkouts = weekData_getTotalWorkouts(d),
                     .weightArray = {
-                        weekData_getLiftingLimitForType(d, LiftTypeSquat),
-                        weekData_getLiftingLimitForType(d, LiftTypePullup),
-                        weekData_getLiftingLimitForType(d, LiftTypeBench),
-                        weekData_getLiftingLimitForType(d, LiftTypeDeadlift)
+                        weekData_getLiftingLimitForType(d, LiftSquat),
+                        weekData_getLiftingLimitForType(d, LiftPullup),
+                        weekData_getLiftingLimitForType(d, LiftBench),
+                        weekData_getLiftingLimitForType(d, LiftDeadlift)
                     },
                     .durationByType = {
                         timeStrength,
-                        weekData_getWorkoutTimeForType(d, WorkoutTypeHIC),
-                        weekData_getWorkoutTimeForType(d, WorkoutTypeSE),
-                        weekData_getWorkoutTimeForType(d, WorkoutTypeEndurance)
+                        weekData_getWorkoutTimeForType(d, WorkoutHIC),
+                        weekData_getWorkoutTimeForType(d, WorkoutSE),
+                        weekData_getWorkoutTimeForType(d, WorkoutEndurance)
                     },
                     .cumulativeDuration = {[0] = timeStrength}
                 };

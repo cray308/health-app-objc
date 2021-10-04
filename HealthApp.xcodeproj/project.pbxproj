@@ -7,6 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		610B92B4270A67CC00358DBD /* Constraints.h in Headers */ = {isa = PBXBuildFile; fileRef = 610B92B2270A67CC00358DBD /* Constraints.h */; };
+		610B92B5270A67CC00358DBD /* Constraints.c in Sources */ = {isa = PBXBuildFile; fileRef = 610B92B3270A67CC00358DBD /* Constraints.c */; };
+		610B92B9270A6E9000358DBD /* Views.h in Headers */ = {isa = PBXBuildFile; fileRef = 610B92B7270A6E9000358DBD /* Views.h */; };
+		610B92BA270A6E9000358DBD /* Views.c in Sources */ = {isa = PBXBuildFile; fileRef = 610B92B8270A6E9000358DBD /* Views.c */; };
+		610B92C3270A771900358DBD /* TextValidator.h in Headers */ = {isa = PBXBuildFile; fileRef = 610B92C1270A771900358DBD /* TextValidator.h */; };
+		610B92C4270A771900358DBD /* TextValidator.c in Sources */ = {isa = PBXBuildFile; fileRef = 610B92C2270A771900358DBD /* TextValidator.c */; };
+		610B92CB270A7F4900358DBD /* ContainerView.h in Headers */ = {isa = PBXBuildFile; fileRef = 610B92C9270A7F4900358DBD /* ContainerView.h */; };
+		610B92CC270A7F4900358DBD /* ContainerView.c in Sources */ = {isa = PBXBuildFile; fileRef = 610B92CA270A7F4900358DBD /* ContainerView.c */; };
 		611B591326C5F6830082F6CA /* alg_helper.h in Headers */ = {isa = PBXBuildFile; fileRef = 611B590E26C5F6830082F6CA /* alg_helper.h */; };
 		611B591426C5F6830082F6CA /* unordered_set.h in Headers */ = {isa = PBXBuildFile; fileRef = 611B590F26C5F6830082F6CA /* unordered_set.h */; };
 		611B591526C5F6830082F6CA /* ds.h in Headers */ = {isa = PBXBuildFile; fileRef = 611B591026C5F6830082F6CA /* ds.h */; };
@@ -83,6 +91,14 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		610B92B2270A67CC00358DBD /* Constraints.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Constraints.h; sourceTree = "<group>"; };
+		610B92B3270A67CC00358DBD /* Constraints.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = Constraints.c; sourceTree = "<group>"; };
+		610B92B7270A6E9000358DBD /* Views.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Views.h; sourceTree = "<group>"; };
+		610B92B8270A6E9000358DBD /* Views.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = Views.c; sourceTree = "<group>"; };
+		610B92C1270A771900358DBD /* TextValidator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TextValidator.h; sourceTree = "<group>"; };
+		610B92C2270A771900358DBD /* TextValidator.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = TextValidator.c; sourceTree = "<group>"; };
+		610B92C9270A7F4900358DBD /* ContainerView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ContainerView.h; sourceTree = "<group>"; };
+		610B92CA270A7F4900358DBD /* ContainerView.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = ContainerView.c; sourceTree = "<group>"; };
 		611B590E26C5F6830082F6CA /* alg_helper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alg_helper.h; sourceTree = "<group>"; };
 		611B590F26C5F6830082F6CA /* unordered_set.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = unordered_set.h; sourceTree = "<group>"; };
 		611B591026C5F6830082F6CA /* ds.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ds.h; sourceTree = "<group>"; };
@@ -264,8 +280,16 @@
 		617BDE1926FE48CB00BDDB73 /* View */ = {
 			isa = PBXGroup;
 			children = (
+				610B92B2270A67CC00358DBD /* Constraints.h */,
+				610B92B3270A67CC00358DBD /* Constraints.c */,
+				610B92C9270A7F4900358DBD /* ContainerView.h */,
+				610B92CA270A7F4900358DBD /* ContainerView.c */,
 				617BDE1A26FE48FD00BDDB73 /* StatusButton.h */,
 				617BDE1E26FE491000BDDB73 /* StatusButton.m */,
+				610B92C1270A771900358DBD /* TextValidator.h */,
+				610B92C2270A771900358DBD /* TextValidator.c */,
+				610B92B7270A6E9000358DBD /* Views.h */,
+				610B92B8270A6E9000358DBD /* Views.c */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -512,13 +536,17 @@
 				617BDE1B26FE48FD00BDDB73 /* StatusButton.h in Headers */,
 				6151C91126C4B23200C95A93 /* hash.h in Headers */,
 				611B591326C5F6830082F6CA /* alg_helper.h in Headers */,
+				610B92B9270A6E9000358DBD /* Views.h in Headers */,
 				6150870426D3370400521269 /* WorkoutScreenHelpers.h in Headers */,
 				61BC6F55266EA9A80022D6F7 /* WeeklyData+CoreDataClass.h in Headers */,
+				610B92B4270A67CC00358DBD /* Constraints.h in Headers */,
 				611B591426C5F6830082F6CA /* unordered_set.h in Headers */,
 				611B591726C5F6830082F6CA /* hash_table.h in Headers */,
 				611B591526C5F6830082F6CA /* ds.h in Headers */,
 				611B591626C5F6830082F6CA /* array.h in Headers */,
+				610B92C3270A771900358DBD /* TextValidator.h in Headers */,
 				6150872626D34EFD00521269 /* ConfettiView.h in Headers */,
+				610B92CB270A7F4900358DBD /* ContainerView.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -626,18 +654,22 @@
 			buildActionMask = 2147483647;
 			files = (
 				61594D1826068105000D01A1 /* HealthApp.xcdatamodeld in Sources */,
+				61BC6F56266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m in Sources */,
 				6151C92226C4B24200C95A93 /* hash.c in Sources */,
 				6151A323260F012300D88F1B /* CalendarDateHelpers.c in Sources */,
-				615086ED26D3222500521269 /* SwiftBridging.m in Sources */,
 				6161838226AC80A0001587B2 /* CocoaHelpers.c in Sources */,
-				616E2F842676A22700342CD8 /* Exercise.c in Sources */,
-				61594D652606C7C6000D01A1 /* AppUserData.c in Sources */,
-				617BDE1F26FE491000BDDB73 /* StatusButton.m in Sources */,
-				61BC6F56266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m in Sources */,
-				615A1C4C2608406100858C32 /* PersistenceService.c in Sources */,
+				610B92B5270A67CC00358DBD /* Constraints.c in Sources */,
+				610B92BA270A6E9000358DBD /* Views.c in Sources */,
+				610B92C4270A771900358DBD /* TextValidator.c in Sources */,
+				610B92CC270A7F4900358DBD /* ContainerView.c in Sources */,
 				614DC13026082BBE00B9588E /* ViewControllerHelpers.c in Sources */,
-				6150870526D3370400521269 /* WorkoutScreenHelpers.c in Sources */,
+				615086ED26D3222500521269 /* SwiftBridging.m in Sources */,
 				6150872726D34EFD00521269 /* ConfettiView.c in Sources */,
+				61594D652606C7C6000D01A1 /* AppUserData.c in Sources */,
+				615A1C4C2608406100858C32 /* PersistenceService.c in Sources */,
+				616E2F842676A22700342CD8 /* Exercise.c in Sources */,
+				617BDE1F26FE491000BDDB73 /* StatusButton.m in Sources */,
+				6150870526D3370400521269 /* WorkoutScreenHelpers.c in Sources */,
 				61C7796026102CC6001326A1 /* HistoryViewModel.c in Sources */,
 				615174E826D5E04700BE5741 /* TotalWorkoutsChart.m in Sources */,
 				615174EC26D5E06C00BE5741 /* WorkoutTypeChart.m in Sources */,

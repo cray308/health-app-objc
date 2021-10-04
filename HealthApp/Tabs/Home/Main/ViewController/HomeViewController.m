@@ -16,7 +16,7 @@
     @public HomeViewModel *model;
     @public HomeTabCoordinator *delegate;
     UILabel *greetingLabel;
-    SectionContainer customContainer, planContainer;
+    Container customContainer, planContainer;
 }
 @end
 

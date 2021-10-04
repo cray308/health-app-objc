@@ -27,32 +27,32 @@ typedef struct {
     pthread_cond_t cond;
 } WorkoutTimer;
 
-typedef enum {
-    LiftTypeSquat,
-    LiftTypePullup,
-    LiftTypeBench,
-    LiftTypeDeadlift
-} LiftType;
+enum {
+    LiftSquat,
+    LiftPullup,
+    LiftBench,
+    LiftDeadlift
+};
 
-typedef enum {
-    ExerciseTypeReps,
-    ExerciseTypeDuration,
-    ExerciseTypeDistance
-} ExerciseType;
+enum {
+    ExerciseReps,
+    ExerciseDuration,
+    ExerciseDistance
+};
 
-typedef enum {
-    ExerciseContainerTypeRounds,
-    ExerciseContainerTypeAMRAP,
-    ExerciseContainerTypeDecrement
-} ExerciseContainerType;
+enum {
+    CircuitRounds,
+    CircuitAMRAP,
+    CircuitDecrement
+};
 
-typedef enum {
-    WorkoutTypeStrength,
-    WorkoutTypeSE,
-    WorkoutTypeEndurance,
-    WorkoutTypeHIC,
-    WorkoutTypeRest
-} WorkoutType;
+enum {
+    WorkoutStrength,
+    WorkoutSE,
+    WorkoutEndurance,
+    WorkoutHIC,
+    WorkoutRest
+};
 
 gen_array_headers(str, CFStringRef)
 

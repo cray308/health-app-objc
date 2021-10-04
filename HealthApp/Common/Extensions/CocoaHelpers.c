@@ -7,6 +7,14 @@
 
 #include "CocoaHelpers.h"
 
+extern id UIFontTextStyleTitle1;
+extern id UIFontTextStyleTitle2;
+extern id UIFontTextStyleTitle3;
+extern id UIFontTextStyleHeadline;
+extern id UIFontTextStyleSubheadline;
+extern id UIFontTextStyleBody;
+extern id UIFontTextStyleFootnote;
+
 CFArrayCallBacks kCocoaArrCallbacks = {0};
 
 gen_array_source(object, id, DSDefault_shallowCopy, releaseObj)
@@ -19,7 +27,7 @@ id staticMethodWithString(Class _self, SEL _cmd, CFStringRef arg) {
     return ((id(*)(Class,SEL,CFStringRef))objc_msgSend)(_self, _cmd, arg);
 }
 
-void singleArgVoid(id obj, SEL _cmd) {
+void voidFunc(id obj, SEL _cmd) {
     ((void(*)(id,SEL))objc_msgSend)(obj, _cmd);
 }
 
@@ -104,7 +112,7 @@ id getObjectWithArr(id obj, SEL _cmd, CFArrayRef arg) {
 }
 
 void releaseObj(id obj) {
-    singleArgVoid(obj, sel_getUid("release"));
+    voidFunc(obj, sel_getUid("release"));
 }
 
 void getScreenBounds(CGRect *result) {
@@ -127,6 +135,31 @@ id getNotificationCenter(void) {
 
 id createColor(const char *name) {
     return staticMethod(objc_getClass("UIColor"), sel_getUid(name));
+}
+
+id createFont(int style) {
+    id fStyle;
+    switch (style) {
+        case TextFootnote:
+            fStyle = UIFontTextStyleFootnote;
+            break;
+        case TextSubhead:
+            fStyle = UIFontTextStyleSubheadline;
+            break;
+        case TextBody:
+            fStyle = UIFontTextStyleBody;
+            break;
+        case TextHead:
+            fStyle = UIFontTextStyleHeadline;
+            break;
+        case TextTitle1:
+            fStyle = UIFontTextStyleTitle1;
+            break;
+        default:
+            fStyle = UIFontTextStyleTitle3;
+    }
+    return staticMethodWithString(objc_getClass("UIFont"),
+                                  sel_getUid("preferredFontForTextStyle:"), (CFStringRef)fStyle);
 }
 
 id createImage(CFStringRef name, bool system) {

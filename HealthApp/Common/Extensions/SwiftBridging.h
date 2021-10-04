@@ -15,7 +15,6 @@ id createEmptyDataSet(void);
 id createDataSet(id color);
 id createChartData(id *dataSets, int count);
 id createChartView(id parent, id xAxisFormatter, id *legendEntries, int count, int height);
-void setLayoutMargins(id view, Padding margins);
 void setLegendLabel(id entry, CFStringRef text);
 void setupLegendEntries(id *entries, id *colors, int count);
 void disableLineChartView(id v);
