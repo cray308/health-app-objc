@@ -8,7 +8,7 @@
 #include "HistoryViewModel.h"
 #include "AppUserData.h"
 #include "CalendarDateHelpers.h"
-#include "Exercise.h"
+#include "Workout.h"
 #include "PersistenceService.h"
 #include "SwiftBridging.h"
 
@@ -107,7 +107,7 @@ void historyViewModel_fetchData(HistoryViewModel *this) {
                 };
 
                 for (int j = 1; j < 4; ++j)
-                m.cumulativeDuration[j] = m.cumulativeDuration[j - 1] + m.durationByType[j];
+                    m.cumulativeDuration[j] = m.cumulativeDuration[j - 1] + m.durationByType[j];
                 array_push_back(weekData, this->data, m);
             }
         }

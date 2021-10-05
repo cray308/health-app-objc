@@ -12,16 +12,24 @@
 #include "CalendarDateHelpers.h"
 #include "ViewControllerHelpers.h"
 
-static CFStringRef const hasLaunchedKey = CFSTR("hasLaunched");
+extern void initExerciseStrings(void);
+extern void initCircuitStrings(void);
+extern void initTimerStrings(void);
+extern void initValidatorStrings(void);
 
 Class AppDelegateClass;
 
 bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
                                     id application _U_, id options _U_) {
+    initValidatorStrings();
+    initExerciseStrings();
+    initCircuitStrings();
+    initTimerStrings();
     CGRect bounds;
     getScreenBounds(&bounds);
     self->window = createObjectWithFrame("UIWindow", bounds);
 
+    CFStringRef hasLaunchedKey = CFSTR("hasLaunched");
     bool hasLaunched = ((bool(*)(id,SEL,CFStringRef))objc_msgSend)
     (getUserDefaults(), sel_getUid("boolForKey:"), hasLaunchedKey);
 

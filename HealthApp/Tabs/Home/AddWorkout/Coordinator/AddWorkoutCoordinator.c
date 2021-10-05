@@ -6,7 +6,6 @@
 //
 
 #include "AddWorkoutCoordinator.h"
-#include "HomeTabCoordinator.h"
 #include "AppCoordinator.h"
 #include "AppUserData.h"
 #include "PersistenceService.h"
@@ -15,14 +14,15 @@
 
 extern id workoutVC_init(void *delegate);
 extern id updateMaxesVC_init(void *delegate);
+extern void homeCoordinator_didFinishAddingWorkout(void *this, int totalCompletedWorkouts);
 
 static void updateStoredData(AddWorkoutCoordinator *this) {
-    if (this->workout->timers[TimerTypeGroup].info.active == 1)
-        pthread_kill(this->workout->threads[TimerTypeGroup], TimerSignalGroup);
-    if (this->workout->timers[TimerTypeExercise].info.active == 1)
-        pthread_kill(this->workout->threads[TimerTypeExercise], TimerSignalExercise);
-    startWorkoutTimer(&this->workout->timers[TimerTypeGroup], 0, 0, ExerciseTagNA);
-    startWorkoutTimer(&this->workout->timers[TimerTypeExercise], 0, ExerciseTagNA, 0);
+    if (this->workout->timers[TimerGroup].info.active == 1)
+        pthread_kill(this->workout->threads[TimerGroup], SignalGroup);
+    if (this->workout->timers[TimerExercise].info.active == 1)
+        pthread_kill(this->workout->threads[TimerExercise], SignalExercise);
+    startWorkoutTimer(&this->workout->timers[TimerGroup], 0);
+    startWorkoutTimer(&this->workout->timers[TimerExercise], 0);
     pthread_join(this->workout->threads[1], NULL);
     pthread_join(this->workout->threads[0], NULL);
     signal(SIGUSR1, SIG_DFL);
@@ -32,7 +32,7 @@ static void updateStoredData(AddWorkoutCoordinator *this) {
         pthread_mutex_destroy(&this->workout->timers[i].lock);
     }
     pthread_mutex_destroy(&timerLock);
-    array_free(exGroup, this->workout->activities);
+    array_free(circuit, this->workout->activities);
     CFRelease(this->workout->title);
 
     runInBackground((^{
@@ -57,7 +57,6 @@ static void updateStoredData(AddWorkoutCoordinator *this) {
 }
 
 void addWorkoutCoordinator_start(AddWorkoutCoordinator *this) {
-    initWorkoutStrings();
     pthread_mutex_init(&timerLock, NULL);
     id vc = workoutVC_init(this);
     ((void(*)(id,SEL,id,bool))objc_msgSend)(this->navVC,

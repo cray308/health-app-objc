@@ -1,45 +1,28 @@
 //
-//  Exercise.c
+//  ExerciseManager.c
 //  HealthApp
 //
-//  Created by Christopher Ray on 6/13/21.
+//  Created by Christopher Ray on 10/3/21.
 //
 
-#include "Exercise.h"
+#include "ExerciseManager.h"
 #include "AppUserData.h"
-#include "CocoaHelpers.h"
 
-#define freeExerciseEntry(x) CFRelease((x).name)
-#define freeExerciseGroup(x) array_free(exEntry, (x).exercises)
 #define copyStringRef(x, y) x = CFStringCreateCopy(NULL, y)
-#define deleteStringRef(x) CFRelease(x)
 
-gen_array_source(exEntry, ExerciseEntry, DSDefault_shallowCopy, freeExerciseEntry)
-gen_array_source(exGroup, ExerciseGroup, DSDefault_shallowCopy, freeExerciseGroup)
-gen_array_source(str, CFStringRef, copyStringRef, deleteStringRef)
+gen_array_source(str, CFStringRef, copyStringRef, CFRelease)
 
 struct DictWrapper {
     CFDictionaryRef root;
     CFDictionaryRef lib;
 };
 
-static struct keys {
+static struct __WorkoutKeys {
     CFStringRef const reps;
     CFStringRef const type;
     CFStringRef const index;
     CFStringRef const title;
 } const Keys = {CFSTR("reps"), CFSTR("type"), CFSTR("index"), CFSTR("title")};
-
-static CFStringRef circuitHeaderRounds = NULL;
-static CFStringRef circuitHeaderAMRAP = NULL;
-
-static CFStringRef exerciseHeader = NULL;
-static CFStringRef exerciseTitleRest = NULL;
-static CFStringRef exerciseTitleReps = NULL;
-static CFStringRef exerciseTitleRepsWithWeight = NULL;
-static CFStringRef exerciseTitleDurationMinutes = NULL;
-static CFStringRef exerciseTitleDurationSeconds = NULL;
-static CFStringRef exerciseTitleDistance = NULL;
 
 static void createRootAndLibDict(struct DictWrapper *data) {
 #if DEBUG
@@ -76,7 +59,7 @@ static void buildWorkoutFromDict(CFDictionaryRef dict, WorkoutParams *params, Wo
     int nActivities = (int) CFArrayGetCount(foundActivities);
 
     w->type = params->type;
-    w->activities = array_new(exGroup);
+    w->activities = array_new(circuit);
     str = CFDictionaryGetValue(dict, Keys.title);
     w->title = CFStringCreateCopy(NULL, str);
 
@@ -84,7 +67,7 @@ static void buildWorkoutFromDict(CFDictionaryRef dict, WorkoutParams *params, Wo
 
     for (int i = 0; i < nActivities; ++i) {
         CFDictionaryRef act = CFArrayGetValueAtIndex(foundActivities, i);
-        ExerciseGroup activities = { .exercises = array_new(exEntry) };
+        Circuit activities = {.exercises = array_new(exEntry), .timer = &w->timers[TimerGroup]};
 
         number = CFDictionaryGetValue(act, Keys.type);
         CFNumberGetValue(number, kCFNumberIntType, &tempInt);
@@ -95,7 +78,7 @@ static void buildWorkoutFromDict(CFDictionaryRef dict, WorkoutParams *params, Wo
         CFArrayRef foundExercises = CFDictionaryGetValue(act, CFSTR("exercises"));
         for (int j = 0; j < CFArrayGetCount(foundExercises); ++j) {
             CFDictionaryRef ex = CFArrayGetValueAtIndex(foundExercises, j);
-            ExerciseEntry exercise = { .sets = 1 };
+            ExerciseEntry exercise = {.sets = 1, .timer = &w->timers[TimerExercise]};
 
             number = CFDictionaryGetValue(ex, Keys.type);
             CFNumberGetValue(number, kCFNumberIntType, &tempInt);
@@ -112,7 +95,7 @@ static void buildWorkoutFromDict(CFDictionaryRef dict, WorkoutParams *params, Wo
         if (activities.type == CircuitDecrement) {
             activities.completedReps = activities.exercises->arr[0].reps;
         }
-        array_push_back(exGroup, w->activities, activities);
+        array_push_back(circuit, w->activities, activities);
     }
 
     Array_exEntry *exercises = w->activities->arr[0].exercises;
@@ -163,6 +146,11 @@ static void buildWorkoutFromDict(CFDictionaryRef dict, WorkoutParams *params, Wo
         pthread_mutex_init(&w->timers[i].lock, NULL);
         pthread_cond_init(&w->timers[i].cond, NULL);
     }
+    w->timers[TimerGroup].exercise = ExerciseTagNA;
+}
+
+void workoutParams_init(WorkoutParams *this, schar day) {
+    memcpy(this, &(WorkoutParams){day, 0, 0, 1, 1, 1}, sizeof(WorkoutParams));
 }
 
 void exerciseManager_setWeeklyWorkoutNames(unsigned char plan, int week, CFStringRef *names) {
@@ -266,72 +254,4 @@ Workout *exerciseManager_getWorkoutFromLibrary(WorkoutParams *params) {
 cleanup:
     CFRelease(info.root);
     return w;
-}
-
-CFStringRef exerciseGroup_createHeader(ExerciseGroup *g) {
-    if (g->type == CircuitRounds && g->reps > 1) {
-        int completed = g->completedReps == g->reps ? g->reps : g->completedReps + 1;
-        return CFStringCreateWithFormat(NULL, NULL, circuitHeaderRounds, completed, g->reps);
-    } else if (g->type == CircuitAMRAP) {
-        return CFStringCreateWithFormat(NULL, NULL, circuitHeaderAMRAP, g->reps);
-    }
-    return NULL;
-}
-
-CFStringRef exerciseEntry_createSetsTitle(ExerciseEntry *e) {
-    if (e->sets == 1) return NULL;
-    int completed = e->completedSets == e->sets ? e->sets : e->completedSets + 1;
-    return CFStringCreateWithFormat(NULL, NULL, exerciseHeader, completed, e->sets);
-}
-
-CFStringRef exerciseEntry_createTitle(ExerciseEntry *e) {
-    if (e->state == ExerciseStateResting)
-        return CFStringCreateWithFormat(NULL, NULL, exerciseTitleRest, e->rest);
-    switch (e->type) {
-        case ExerciseReps:
-            if (e->weight > 1) {
-                return CFStringCreateWithFormat(NULL, NULL, exerciseTitleRepsWithWeight,
-                                                e->name, e->reps, e->weight);
-            }
-            return CFStringCreateWithFormat(NULL, NULL, exerciseTitleReps, e->name, e->reps);
-
-        case ExerciseDuration:
-            if (e->reps > 120) {
-                return CFStringCreateWithFormat(NULL, NULL, exerciseTitleDurationMinutes,
-                                                e->name, e->reps / 60.f);
-            }
-            return CFStringCreateWithFormat(NULL, NULL,
-                                            exerciseTitleDurationSeconds, e->name, e->reps);
-
-        default:
-            return CFStringCreateWithFormat(NULL, NULL, exerciseTitleDistance,
-                                            e->reps, (5 * e->reps) / 4);
-    }
-}
-
-void workoutParams_init(WorkoutParams *this, schar day) {
-    memcpy(this, &(WorkoutParams){day, 0, 0, 1, 1, 1}, sizeof(WorkoutParams));
-}
-
-void workout_setDuration(Workout *w) {
-    time_t stopTime = time(NULL) + 1;
-    w->duration = (int16_t) ((stopTime - w->startTime) / 60.f);
-#if DEBUG
-    w->duration *= 10;
-#endif
-}
-
-void initWorkoutStrings(void) {
-    if (circuitHeaderRounds) return;
-
-    circuitHeaderRounds = localize(CFSTR("circuitHeaderRounds"));
-    circuitHeaderAMRAP = localize(CFSTR("circuitHeaderAMRAP"));
-
-    exerciseHeader = localize(CFSTR("exerciseHeader"));
-    exerciseTitleRest = localize(CFSTR("exerciseTitleRest"));
-    exerciseTitleReps = localize(CFSTR("exerciseTitleReps"));
-    exerciseTitleRepsWithWeight = localize(CFSTR("exerciseTitleRepsWithWeight"));
-    exerciseTitleDurationMinutes = localize(CFSTR("exerciseTitleDurationMinutes"));
-    exerciseTitleDurationSeconds = localize(CFSTR("exerciseTitleDurationSeconds"));
-    exerciseTitleDistance = localize(CFSTR("exerciseTitleDistance"));
 }

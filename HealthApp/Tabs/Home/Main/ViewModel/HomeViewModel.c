@@ -8,7 +8,7 @@
 #include "HomeViewModel.h"
 #include "AppUserData.h"
 #include "CalendarDateHelpers.h"
-#include "Exercise.h"
+#include "ExerciseManager.h"
 
 void homeViewModel_init(HomeViewModel *model) {
     fillStringArray(model->timeNames, CFSTR("timesOfDay%d"), 3);

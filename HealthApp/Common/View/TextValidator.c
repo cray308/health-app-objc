@@ -18,6 +18,10 @@ static inline void showInputError(Validator *validator, struct InputView *child)
     hideView(child->errorLabel, false);
 }
 
+void initValidatorStrings(void) {
+    inputFieldError = localize(CFSTR("inputFieldError"));
+}
+
 void validator_setup(Validator *this, short margins, bool createSet, id target, SEL doneSelector) {
     if (createSet) {
         unsigned short nums[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
@@ -69,8 +73,6 @@ id validator_add(Validator *v, id delegate, CFStringRef hint, short min, short m
     child->view = createView(nil, false, -1, -1);
     child->minVal = min;
     child->maxVal = max;
-    if (!inputFieldError)
-        inputFieldError = localize(CFSTR("inputFieldError"));
     CFStringRef errorText = CFStringCreateWithFormat(NULL, NULL, inputFieldError, min, max);
     child->hintLabel = createLabel(hint, TextFootnote, 4, 20);
     child->field = createTextfield(delegate, NULL, 4, 4, v->count++, 40);

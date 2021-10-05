@@ -9,7 +9,7 @@
 #define AddWorkoutCoordinator_h
 
 #include "CocoaHelpers.h"
-#include "Exercise.h"
+#include "Workout.h"
 
 typedef struct {
     id navVC;

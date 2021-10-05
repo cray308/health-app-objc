@@ -11,6 +11,7 @@
 #include "CalendarDateHelpers.h"
 #include "ViewControllerHelpers.h"
 #include "ConfettiView.h"
+#include "ExerciseManager.h"
 
 extern id homeVC_init(void *delegate);
 extern void homeVC_createWorkoutsList(id vc);

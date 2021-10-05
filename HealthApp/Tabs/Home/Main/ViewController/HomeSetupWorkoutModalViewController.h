@@ -8,7 +8,6 @@
 #ifndef HomeSetupWorkoutModalViewController_h
 #define HomeSetupWorkoutModalViewController_h
 
-#include "Exercise.h"
 #import <UIKit/UIKit.h>
 
 @interface SetupWorkoutSheet:

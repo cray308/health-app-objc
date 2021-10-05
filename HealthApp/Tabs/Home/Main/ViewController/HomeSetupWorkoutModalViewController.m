@@ -8,7 +8,7 @@
 #import "HomeSetupWorkoutModalViewController.h"
 #include "HomeTabCoordinator.h"
 #include "ViewControllerHelpers.h"
-#include "Exercise.h"
+#include "ExerciseManager.h"
 
 @interface SetupWorkoutSheet() {
     @public HomeTabCoordinator *delegate;
