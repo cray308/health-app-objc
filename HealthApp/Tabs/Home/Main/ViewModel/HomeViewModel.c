@@ -22,7 +22,7 @@ void homeViewModel_fetchData(HomeViewModel *model) {
         model->workoutNames[i] = NULL;
     }
     if (userData->currentPlan >= 0 && userData->planStart <= time(NULL)) {
-        exerciseManager_setWeeklyWorkoutNames((unsigned char) userData->currentPlan,
+        exerciseManager_setWeeklyWorkoutNames((ubyte) userData->currentPlan,
                                               appUserData_getWeekInPlan(), model->workoutNames);
     }
 }

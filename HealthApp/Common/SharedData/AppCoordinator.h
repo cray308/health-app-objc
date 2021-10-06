@@ -23,10 +23,4 @@ typedef struct {
 
 extern AppCoordinator *appCoordinator;
 
-void appCoordinator_start(id tabVC);
-void appCoordinator_updatedUserInfo(void);
-void appCoordinator_fetchHistory(void);
-void appCoordinator_deletedAppData(void);
-void appCoordinator_updateMaxWeights(void);
-
 #endif /* AppCoordinator_h */

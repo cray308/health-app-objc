@@ -11,8 +11,8 @@
 #include "Workout.h"
 
 typedef struct {
-    const schar day;
-    uchar type;
+    const signed char day;
+    unsigned char type;
     int index;
     int sets;
     int reps;
@@ -21,7 +21,7 @@ typedef struct {
 
 gen_array_headers(str, CFStringRef)
 
-void workoutParams_init(WorkoutParams *this, schar day);
+void workoutParams_init(WorkoutParams *this, signed char day);
 
 void exerciseManager_setWeeklyWorkoutNames(unsigned char plan, int week, CFStringRef *names);
 Workout *exerciseManager_getWeeklyWorkoutAtIndex(unsigned char plan, int week, int index);

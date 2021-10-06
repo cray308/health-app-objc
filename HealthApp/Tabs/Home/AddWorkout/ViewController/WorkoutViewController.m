@@ -204,6 +204,6 @@ id workoutVC_init(AddWorkoutCoordinator *delegate) {
     return this;
 }
 
-void workoutVC_finishedTimer(WorkoutViewController *vc, uchar type, uint group, uint entry) {
+void workoutVC_finishedTimer(WorkoutViewController *vc, ubyte type, uint group, uint entry) {
     [vc handleTapForGroup:group exercise:entry option:type ? EventNone : EventFinishGroup];
 }

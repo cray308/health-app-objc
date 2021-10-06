@@ -8,7 +8,7 @@
 #include "WorkoutScreenHelpers.h"
 #include "ViewControllerHelpers.h"
 
-extern void workoutVC_finishedTimer(id vc, uchar type, uint group, uint entry);
+extern void workoutVC_finishedTimer(id vc, ubyte type, uint group, uint entry);
 
 extern id UIApplicationDidBecomeActiveNotification;
 extern id UIApplicationWillResignActiveNotification;

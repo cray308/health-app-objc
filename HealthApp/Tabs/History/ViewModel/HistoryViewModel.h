@@ -8,7 +8,6 @@
 #ifndef HistoryViewModel_h
 #define HistoryViewModel_h
 
-#include "array.h"
 #include "CocoaHelpers.h"
 
 typedef struct {

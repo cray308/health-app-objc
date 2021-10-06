@@ -6,16 +6,23 @@
 //
 
 #include "AppDelegate.h"
-#include "AppCoordinator.h"
-#include "PersistenceService.h"
-#include "AppUserData.h"
-#include "CalendarDateHelpers.h"
 #include "ViewControllerHelpers.h"
 
 extern void initExerciseStrings(void);
 extern void initCircuitStrings(void);
 extern void initTimerStrings(void);
 extern void initValidatorStrings(void);
+extern void userInfo_create(void);
+extern int userInfo_initFromStorage(void);
+extern id createTabController(void);
+extern void persistenceService_init(void);
+extern void persistenceService_start(int tzOffset);
+extern void appCoordinator_start(id tabVC);
+extern void appCoordinator_fetchHistory(void);
+
+#if DEBUG
+extern void persistenceService_create(void);
+#endif
 
 Class AppDelegateClass;
 
@@ -40,7 +47,9 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
         ((void(*)(id,SEL,bool,CFStringRef))objc_msgSend)
         (getUserDefaults(), sel_getUid("setBool:forKey:"), true, hasLaunchedKey);
         userInfo_create();
+#if DEBUG
         persistenceService_create();
+#endif
     } else {
         tzOffset = userInfo_initFromStorage();
     }

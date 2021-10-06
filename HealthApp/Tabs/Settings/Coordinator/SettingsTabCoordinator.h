@@ -14,8 +14,6 @@ typedef struct {
     id navVC;
 } SettingsTabCoordinator;
 
-void settingsCoordinator_start(SettingsTabCoordinator *this);
-void settingsCoordinator_updateWeightText(SettingsTabCoordinator *this);
 void settingsCoordinator_handleSaveTap(SettingsTabCoordinator *this,
                                        short *weights, signed char plan);
 void settingsCoordinator_handleDeleteTap(SettingsTabCoordinator *this);

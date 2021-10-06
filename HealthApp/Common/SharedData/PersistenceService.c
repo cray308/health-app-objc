@@ -77,8 +77,8 @@ id fetchRequest(id predicate) {
     return request;
 }
 
-void persistenceService_create(void) {
 #if DEBUG
+void persistenceService_create(void) {
     runInBackground((^{
         int16_t lifts[] = {300, 20, 185, 235};
         int i = 0;
@@ -161,10 +161,8 @@ void persistenceService_create(void) {
         }
         persistenceService_saveContext();
     }));
-#else
-
-#endif
 }
+#endif
 
 void persistenceService_init(void) {
     persistenceService = ((id(*)(id,SEL,CFStringRef))objc_msgSend)

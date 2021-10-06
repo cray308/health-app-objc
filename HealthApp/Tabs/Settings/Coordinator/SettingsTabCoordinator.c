@@ -7,12 +7,16 @@
 
 #include "SettingsTabCoordinator.h"
 #include "AppUserData.h"
-#include "AppCoordinator.h"
 #import "PersistenceService.h"
 #include "ViewControllerHelpers.h"
 
 extern id settingsVC_init(void *delegate);
 extern void settingsVC_updateWeightFields(id vc);
+extern void appCoordinator_updatedUserInfo(void);
+extern void appCoordinator_deletedAppData(void);
+extern void appUserData_setWorkoutPlan(signed char);
+extern void appUserData_deleteSavedData(void);
+extern void persistenceService_deleteUserData(void);
 
 static void addCancelAction(id ctrl) {
     addAlertAction(ctrl, localize(CFSTR("cancel")), 1, NULL);

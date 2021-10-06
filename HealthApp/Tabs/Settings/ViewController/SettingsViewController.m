@@ -82,7 +82,7 @@ void settingsVC_updateWeightFields(SettingsViewController *vc) {
 
 - (void) buttonTapped: (UIButton *)sender {
     if (!sender.tag) {
-        schar plan = ((schar) picker.selectedSegmentIndex - 1);
+        byte plan = ((byte) picker.selectedSegmentIndex - 1);
         for (int i = 0; i < 4; ++i)
             results[i] = validator.children[i].result;
         settingsCoordinator_handleSaveTap(delegate, results, plan);

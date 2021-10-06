@@ -23,6 +23,4 @@ void dismissPresentedVC(id presenter);
 id createAlertController(CFStringRef title, CFStringRef message);
 void addAlertAction(id ctrl, CFStringRef title, int style, Callback handler);
 
-id createTabController(void);
-
 #endif /* ViewControllerHelpers_h */

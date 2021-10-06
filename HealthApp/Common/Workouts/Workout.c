@@ -116,8 +116,7 @@ bool workout_restartGroupTimer(Workout *w, time_t refTime) {
 }
 
 void workout_setDuration(Workout *w) {
-    time_t stopTime = time(NULL) + 1;
-    w->duration = (int16_t) ((stopTime - w->startTime) / 60.f);
+    w->duration = ((int16_t) ((time(NULL) - w->startTime) / 60.f)) + 1;
 #if DEBUG
     w->duration *= 10;
 #endif

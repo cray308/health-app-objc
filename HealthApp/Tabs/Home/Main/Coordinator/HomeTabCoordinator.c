@@ -16,7 +16,7 @@
 extern id homeVC_init(void *delegate);
 extern void homeVC_createWorkoutsList(id vc);
 extern void homeVC_updateWorkoutsList(id vc);
-extern id setupWorkoutVC_init(void *delegate, uchar type, Array_str *names);
+extern id setupWorkoutVC_init(void *delegate, ubyte type, Array_str *names);
 
 typedef enum {
     CustomWorkoutIndexTestMax,
@@ -79,14 +79,14 @@ void homeCoordinator_didFinishAddingWorkout(HomeTabCoordinator *this, int totalC
 }
 
 void homeCoordinator_addWorkoutFromPlan(HomeTabCoordinator *this, int index) {
-    unsigned char plan = (unsigned char) userData->currentPlan;
+    ubyte plan = (ubyte) userData->currentPlan;
     Workout *w = exerciseManager_getWeeklyWorkoutAtIndex(plan, appUserData_getWeekInPlan(), index);
     if (w)
         navigateToAddWorkout(this, false, w);
 }
 
 void homeCoordinator_addWorkoutFromCustomButton(HomeTabCoordinator *this, int index) {
-    unsigned char type = WorkoutStrength;
+    ubyte type = WorkoutStrength;
     switch (index) {
         case CustomWorkoutIndexSE:
             type = WorkoutSE;

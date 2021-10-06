@@ -42,7 +42,7 @@ static CFArrayRef getLibraryArrayForType(struct DictWrapper *data, unsigned char
     return CFDictionaryGetValue(data->lib, keys[type]);
 }
 
-static CFArrayRef getCurrentWeekForPlan(struct DictWrapper *data, uchar plan, int week) {
+static CFArrayRef getCurrentWeekForPlan(struct DictWrapper *data, unsigned char plan, int week) {
     static CFStringRef const planKeys[] = {CFSTR("bb"), CFSTR("cc")};
     CFDictionaryRef plans = CFDictionaryGetValue(data->root, CFSTR("plans"));
     CFArrayRef weeks = CFDictionaryGetValue(plans, planKeys[plan]);
@@ -71,7 +71,7 @@ static void buildWorkoutFromDict(CFDictionaryRef dict, WorkoutParams *params, Wo
 
         number = CFDictionaryGetValue(act, Keys.type);
         CFNumberGetValue(number, kCFNumberIntType, &tempInt);
-        activities.type = (unsigned char) tempInt;
+        activities.type = (ubyte) tempInt;
         number = CFDictionaryGetValue(act, Keys.reps);
         CFNumberGetValue(number, kCFNumberIntType, &activities.reps);
 
@@ -82,7 +82,7 @@ static void buildWorkoutFromDict(CFDictionaryRef dict, WorkoutParams *params, Wo
 
             number = CFDictionaryGetValue(ex, Keys.type);
             CFNumberGetValue(number, kCFNumberIntType, &tempInt);
-            exercise.type = (unsigned char) tempInt;
+            exercise.type = (ubyte) tempInt;
             number = CFDictionaryGetValue(ex, Keys.reps);
             CFNumberGetValue(number, kCFNumberIntType, &exercise.reps);
             number = CFDictionaryGetValue(ex, CFSTR("rest"));
@@ -149,7 +149,7 @@ static void buildWorkoutFromDict(CFDictionaryRef dict, WorkoutParams *params, Wo
     w->timers[TimerGroup].exercise = ExerciseTagNA;
 }
 
-void workoutParams_init(WorkoutParams *this, schar day) {
+void workoutParams_init(WorkoutParams *this, signed char day) {
     memcpy(this, &(WorkoutParams){day, 0, 0, 1, 1, 1}, sizeof(WorkoutParams));
 }
 
@@ -184,7 +184,7 @@ cleanup:
 Workout *exerciseManager_getWeeklyWorkoutAtIndex(unsigned char plan, int week, int index) {
     Workout *w = NULL;
     WorkoutParams params;
-    workoutParams_init(&params, (schar) index);
+    workoutParams_init(&params, (signed char) index);
     struct DictWrapper info;
     createRootAndLibDict(&info);
 
@@ -194,7 +194,7 @@ Workout *exerciseManager_getWeeklyWorkoutAtIndex(unsigned char plan, int week, i
 
     CFNumberRef number = CFDictionaryGetValue(day, Keys.type);
     CFNumberGetValue(number, kCFNumberIntType, &params.index);
-    params.type = (uchar) params.index;
+    params.type = (unsigned char) params.index;
 
     CFArrayRef libArr = getLibraryArrayForType(&info, params.type);
     if (!libArr) goto cleanup;
@@ -218,7 +218,7 @@ cleanup:
     return w;
 }
 
-Array_str *exerciseManager_getWorkoutNamesForType(unsigned char type) {
+Array_str *exerciseManager_getWorkoutNamesForType(ubyte type) {
     Array_str *results = NULL;
     struct DictWrapper info;
     createRootAndLibDict(&info);

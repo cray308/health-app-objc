@@ -17,10 +17,6 @@ typedef struct {
     void *childCoordinator;
 } HomeTabCoordinator;
 
-void homeCoordinator_start(HomeTabCoordinator *this);
-
-void homeCoordinator_resetUI(HomeTabCoordinator *this);
-void homeCoordinator_updateUI(HomeTabCoordinator *this);
 void homeCoordinator_addWorkoutFromPlan(HomeTabCoordinator *this, int index);
 void homeCoordinator_addWorkoutFromCustomButton(HomeTabCoordinator *this, int index);
 void homeCoordinator_finishedSettingUpCustomWorkout(HomeTabCoordinator *this, void *params);

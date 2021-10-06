@@ -19,7 +19,7 @@
 }
 @end
 
-id setupWorkoutVC_init(HomeTabCoordinator *delegate, uchar type, Array_str *names) {
+id setupWorkoutVC_init(HomeTabCoordinator *delegate, ubyte type, Array_str *names) {
     SetupWorkoutSheet *this = [[SetupWorkoutSheet alloc] initWithNibName:nil bundle:nil];
     this->delegate = delegate;
     this->names = names;

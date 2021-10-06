@@ -16,8 +16,4 @@ typedef struct {
     HistoryViewModel model;
 } HistoryTabCoordinator;
 
-void historyCoordinator_start(HistoryTabCoordinator *this);
-void historyCoordinator_fetchData(HistoryTabCoordinator *this);
-void historyCoordinator_updateUI(HistoryTabCoordinator *this, bool callVC);
-
 #endif /* HistoryTabCoordinator_h */

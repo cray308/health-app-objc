@@ -22,8 +22,8 @@
 #define _cfarr(x) ((__bridge CFArrayRef) x)
 
 extern CFArrayCallBacks kCocoaArrCallbacks;
-typedef unsigned char uchar;
-typedef signed char schar;
+typedef unsigned char ubyte;
+typedef signed char byte;
 typedef unsigned int uint;
 
 typedef void (^Callback)(void);

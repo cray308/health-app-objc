@@ -73,8 +73,6 @@ void addAlertAction(id ctrl, CFStringRef title, int style, Callback handler) {
     setObject(ctrl, sel_getUid("addAction:"), action);
 }
 
-#pragma mark - View Functions
-
 id createTabController(void) {
     id appearance = getObject(allocClass("UITabBarAppearance"), sel_getUid("init"));
     setBackground(appearance, createColor("systemBackgroundColor"));

@@ -11,6 +11,15 @@
 #include "SettingsTabCoordinator.h"
 #include "ViewControllerHelpers.h"
 
+extern void homeCoordinator_start(HomeTabCoordinator*);
+extern void homeCoordinator_resetUI(HomeTabCoordinator*);
+extern void homeCoordinator_updateUI(HomeTabCoordinator*);
+extern void historyCoordinator_start(HistoryTabCoordinator*);
+extern void historyCoordinator_fetchData(HistoryTabCoordinator*);
+extern void historyCoordinator_updateUI(HistoryTabCoordinator*, bool);
+extern void settingsCoordinator_start(SettingsTabCoordinator*);
+extern void settingsCoordinator_updateWeightText(SettingsTabCoordinator*);
+
 typedef enum {
     TabHome, TabHistory, TabSettings
 } AppTab;

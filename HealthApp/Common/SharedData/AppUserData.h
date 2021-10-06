@@ -21,12 +21,6 @@ typedef struct {
 
 extern UserInfo *userData;
 
-void userInfo_create(void);
-int userInfo_initFromStorage(void);
-
-void appUserData_setWorkoutPlan(signed char plan);
-void appUserData_deleteSavedData(void);
-unsigned char appUserData_addCompletedWorkout(unsigned char day);
 int appUserData_getWeekInPlan(void);
 void appUserData_updateWeightMaxes(short *weights);
 

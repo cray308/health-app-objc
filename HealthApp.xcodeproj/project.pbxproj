@@ -20,8 +20,6 @@
 		611B591526C5F6830082F6CA /* ds.h in Headers */ = {isa = PBXBuildFile; fileRef = 611B591026C5F6830082F6CA /* ds.h */; };
 		611B591626C5F6830082F6CA /* array.h in Headers */ = {isa = PBXBuildFile; fileRef = 611B591126C5F6830082F6CA /* array.h */; };
 		611B591726C5F6830082F6CA /* hash_table.h in Headers */ = {isa = PBXBuildFile; fileRef = 611B591226C5F6830082F6CA /* hash_table.h */; };
-		612E7D552703F547007052C6 /* Charts.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 612E7D522703F53F007052C6 /* Charts.xcframework */; };
-		612E7D562703F547007052C6 /* Charts.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 612E7D522703F53F007052C6 /* Charts.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		612FD048266DAF25002C9993 /* WorkoutData.plist in Resources */ = {isa = PBXBuildFile; fileRef = 612FD047266DAF25002C9993 /* WorkoutData.plist */; };
 		614DA69A270A8D1F00EC90C4 /* ExerciseManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 614DA698270A8D1F00EC90C4 /* ExerciseManager.h */; };
 		614DA69B270A8D1F00EC90C4 /* ExerciseManager.c in Sources */ = {isa = PBXBuildFile; fileRef = 614DA699270A8D1F00EC90C4 /* ExerciseManager.c */; };
@@ -48,6 +46,8 @@
 		61594D5726068C41000D01A1 /* AppCoordinator.c in Sources */ = {isa = PBXBuildFile; fileRef = 61594D5626068C41000D01A1 /* AppCoordinator.c */; };
 		61594D652606C7C6000D01A1 /* AppUserData.c in Sources */ = {isa = PBXBuildFile; fileRef = 61594D642606C7C6000D01A1 /* AppUserData.c */; };
 		615A1C4C2608406100858C32 /* PersistenceService.c in Sources */ = {isa = PBXBuildFile; fileRef = 615A1C4B2608406100858C32 /* PersistenceService.c */; };
+		615B5A3C270D1E5D00AE68D7 /* Charts.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 615B5A39270D1E5800AE68D7 /* Charts.xcframework */; };
+		615B5A3D270D1E5D00AE68D7 /* Charts.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 615B5A39270D1E5800AE68D7 /* Charts.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		6161838226AC80A0001587B2 /* CocoaHelpers.c in Sources */ = {isa = PBXBuildFile; fileRef = 6161838126AC80A0001587B2 /* CocoaHelpers.c */; };
 		616DC23E267152BA00EFD3D4 /* WorkoutViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 616DC23D267152BA00EFD3D4 /* WorkoutViewController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		616E2F6826755D2B00342CD8 /* HomeSetupWorkoutModalViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 616E2F6726755D2B00342CD8 /* HomeSetupWorkoutModalViewController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
@@ -92,7 +92,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				612E7D562703F547007052C6 /* Charts.xcframework in Embed Frameworks */,
+				615B5A3D270D1E5D00AE68D7 /* Charts.xcframework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -113,7 +113,6 @@
 		611B591026C5F6830082F6CA /* ds.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ds.h; sourceTree = "<group>"; };
 		611B591126C5F6830082F6CA /* array.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = array.h; sourceTree = "<group>"; };
 		611B591226C5F6830082F6CA /* hash_table.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hash_table.h; sourceTree = "<group>"; };
-		612E7D522703F53F007052C6 /* Charts.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = Charts.xcframework; sourceTree = "<group>"; };
 		612FD047266DAF25002C9993 /* WorkoutData.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = WorkoutData.plist; sourceTree = "<group>"; };
 		614DA698270A8D1F00EC90C4 /* ExerciseManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ExerciseManager.h; sourceTree = "<group>"; };
 		614DA699270A8D1F00EC90C4 /* ExerciseManager.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = ExerciseManager.c; sourceTree = "<group>"; };
@@ -154,6 +153,7 @@
 		61594D642606C7C6000D01A1 /* AppUserData.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = AppUserData.c; sourceTree = "<group>"; };
 		615A1C4A2608403900858C32 /* PersistenceService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PersistenceService.h; sourceTree = "<group>"; };
 		615A1C4B2608406100858C32 /* PersistenceService.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = PersistenceService.c; sourceTree = "<group>"; };
+		615B5A39270D1E5800AE68D7 /* Charts.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = Charts.xcframework; sourceTree = "<group>"; };
 		6161838026AC8089001587B2 /* CocoaHelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CocoaHelpers.h; sourceTree = "<group>"; };
 		6161838126AC80A0001587B2 /* CocoaHelpers.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = CocoaHelpers.c; sourceTree = "<group>"; };
 		616DC23C267152A800EFD3D4 /* WorkoutViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WorkoutViewController.h; sourceTree = "<group>"; };
@@ -199,7 +199,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				612E7D552703F547007052C6 /* Charts.xcframework in Frameworks */,
+				615B5A3C270D1E5D00AE68D7 /* Charts.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -336,7 +336,7 @@
 		6185D9B926E4263700DB2BF2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				612E7D522703F53F007052C6 /* Charts.xcframework */,
+				615B5A39270D1E5800AE68D7 /* Charts.xcframework */,
 			);
 			path = Frameworks;
 			sourceTree = "<group>";
@@ -893,6 +893,7 @@
 				GCC_UNROLL_LOOPS = NO;
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = HealthApp/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -926,10 +927,11 @@
 				EXCLUDED_SOURCE_FILE_NAMES = WorkoutData_d.plist;
 				GCC_CHAR_IS_UNSIGNED_CHAR = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_UNROLL_LOOPS = YES;
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = HealthApp/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

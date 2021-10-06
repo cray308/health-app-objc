@@ -62,7 +62,7 @@ void userInfo_create(void) {
 }
 
 int userInfo_initFromStorage(void) {
-    static int const planLengths[] = {8, 13};
+    const int planLengths[] = {8, 13};
     time_t now = time(NULL);
     time_t weekStart = date_calcStartOfWeek(now);
     CFDictionaryRef savedInfo = getDict(getUserDefaults(), sel_getUid("dictionaryForKey:"), dictKey);

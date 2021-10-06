@@ -9,7 +9,6 @@
 #define Workout_h
 
 #include "Circuit.h"
-#include "WorkoutTimer.h"
 
 enum {
     LiftSquat,
