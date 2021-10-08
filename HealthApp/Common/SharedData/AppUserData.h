@@ -10,6 +10,12 @@
 
 #include <time.h>
 
+typedef enum {
+    WorkoutPlanNone = -1,
+    WorkoutPlanBaseBuilding = 0,
+    WorkoutPlanContinuation = 1
+} WorkoutPlan;
+
 typedef struct {
     time_t planStart;
     time_t weekStart;

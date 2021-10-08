@@ -29,7 +29,7 @@ id homeVC_init(HomeTabCoordinator *delegate) {
 
 void homeVC_updateWorkoutsList(HomeViewController *vc) {
     if (!(homeViewModel_hasWorkoutsForThisWeek(vc->model) && vc->planContainer.views->size)) return;
-    for (uint i = 0; i < vc->planContainer.views->size; ++i) {
+    for (unsigned i = 0; i < vc->planContainer.views->size; ++i) {
         StatusButton *v = vc->planContainer.views->arr[i];
         bool enable = !(userData->completedWorkouts & (1 << (int) v.tag));
         enableButton(v->button, enable);

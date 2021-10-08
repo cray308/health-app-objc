@@ -6,6 +6,8 @@
 //
 
 #include "ContainerView.h"
+#include <objc/message.h>
+#include "CocoaHelpers.h"
 #include "Views.h"
 
 id createContainer(Container *c, CFStringRef title, int hidden, int spacing, bool margins) {

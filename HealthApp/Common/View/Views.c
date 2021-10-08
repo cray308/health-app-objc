@@ -6,6 +6,8 @@
 //
 
 #include "Views.h"
+#include <objc/message.h>
+#include "CocoaHelpers.h"
 
 extern void setLayoutMargins(id v, Padding margins);
 

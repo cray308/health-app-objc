@@ -6,6 +6,10 @@
 //
 
 #include "TextValidator.h"
+#include <CoreFoundation/CFString.h>
+#include <objc/message.h>
+#include "CocoaHelpers.h"
+#include "Views.h"
 
 static CFStringRef inputFieldError;
 

@@ -8,13 +8,11 @@
 #ifndef AppCoordinator_h
 #define AppCoordinator_h
 
-#include "CocoaHelpers.h"
-
-typedef enum {
+enum {
     LoadedViewController_Home = 0x1,
     LoadedViewController_History = 0x2,
     LoadedViewController_Settings = 0x4
-} LoadedViewController;
+};
 
 typedef struct {
     unsigned char loadedViewControllers;

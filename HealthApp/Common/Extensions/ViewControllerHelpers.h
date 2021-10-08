@@ -8,8 +8,16 @@
 #ifndef ViewControllerHelpers_h
 #define ViewControllerHelpers_h
 
-#include "TextValidator.h"
+#include "CocoaHelpers.h"
 #include "ContainerView.h"
+#include "TextValidator.h"
+#include "Views.h"
+
+#define _cfstr(x) ((__bridge CFStringRef) x)
+#define _nsstr(x) ((__bridge NSString*) x)
+#define _nsarr(x) ((__bridge NSArray*) x)
+
+typedef void (^Callback)(void);
 
 void setNavButton(id navItem, bool left, id button, CGFloat totalWidth);
 

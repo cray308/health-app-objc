@@ -6,8 +6,14 @@
 //
 
 #include "PersistenceService.h"
+#include <CoreFoundation/CFString.h>
+#include <objc/message.h>
+#if DEBUG
+#include <stdlib.h>
+#endif
 #include "AppUserData.h"
 #include "CalendarDateHelpers.h"
+#include "CocoaHelpers.h"
 
 static id persistenceService = nil;
 id backgroundContext = nil;

@@ -8,7 +8,8 @@
 #ifndef ContainerView_h
 #define ContainerView_h
 
-#include "CocoaHelpers.h"
+#include <CoreFoundation/CFBase.h>
+#include "ObjectArray.h"
 
 enum {
     HideDivider = 0x1,

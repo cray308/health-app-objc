@@ -8,7 +8,8 @@
 #ifndef TextValidator_h
 #define TextValidator_h
 
-#include "Views.h"
+#include <CoreFoundation/CFBase.h>
+#include "Constraints.h"
 #include "unordered_set.h"
 
 gen_uset_headers(char, unsigned short)

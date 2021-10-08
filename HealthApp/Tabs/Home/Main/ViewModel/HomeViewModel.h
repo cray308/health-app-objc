@@ -8,7 +8,7 @@
 #ifndef HomeViewModel_h
 #define HomeViewModel_h
 
-#include <CoreFoundation/CoreFoundation.h>
+#include <CoreFoundation/CFBase.h>
 
 typedef struct {
     CFStringRef workoutNames[7];

@@ -6,7 +6,10 @@
 //
 
 #include "AppDelegate.h"
-#include "ViewControllerHelpers.h"
+#include <CoreFoundation/CFString.h>
+#include <objc/message.h>
+#include "CocoaHelpers.h"
+#include "Views.h"
 
 extern void initExerciseStrings(void);
 extern void initCircuitStrings(void);

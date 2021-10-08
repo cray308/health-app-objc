@@ -6,6 +6,9 @@
 //
 
 #include "HomeTabCoordinator.h"
+#include <CoreFoundation/CFString.h>
+#include <dispatch/queue.h>
+#include <objc/message.h>
 #include "AddWorkoutCoordinator.h"
 #include "AppUserData.h"
 #include "CalendarDateHelpers.h"
@@ -13,18 +16,18 @@
 #include "ConfettiView.h"
 #include "ExerciseManager.h"
 
-extern id homeVC_init(void *delegate);
-extern void homeVC_createWorkoutsList(id vc);
-extern void homeVC_updateWorkoutsList(id vc);
-extern id setupWorkoutVC_init(void *delegate, ubyte type, Array_str *names);
+extern id homeVC_init(void *);
+extern void homeVC_createWorkoutsList(id);
+extern void homeVC_updateWorkoutsList(id);
+extern id setupWorkoutVC_init(void *, WorkoutType, Array_str *);
 
-typedef enum {
+enum {
     CustomWorkoutIndexTestMax,
     CustomWorkoutIndexEndurance,
     CustomWorkoutIndexStrength,
     CustomWorkoutIndexSE,
     CustomWorkoutIndexHIC
-} CustomWorkoutIndex;
+};
 
 static void navigateToAddWorkout(HomeTabCoordinator *this, bool dismissVC, Workout *workout) {
     if (dismissVC)
@@ -79,14 +82,14 @@ void homeCoordinator_didFinishAddingWorkout(HomeTabCoordinator *this, int totalC
 }
 
 void homeCoordinator_addWorkoutFromPlan(HomeTabCoordinator *this, int index) {
-    ubyte plan = (ubyte) userData->currentPlan;
-    Workout *w = exerciseManager_getWeeklyWorkoutAtIndex(plan, appUserData_getWeekInPlan(), index);
+    Workout *w = exerciseManager_getWeeklyWorkoutAtIndex(userData->currentPlan,
+                                                         appUserData_getWeekInPlan(), index);
     if (w)
         navigateToAddWorkout(this, false, w);
 }
 
 void homeCoordinator_addWorkoutFromCustomButton(HomeTabCoordinator *this, int index) {
-    ubyte type = WorkoutStrength;
+    WorkoutType type = WorkoutStrength;
     switch (index) {
         case CustomWorkoutIndexSE:
             type = WorkoutSE;

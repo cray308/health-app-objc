@@ -6,6 +6,7 @@
 //
 
 #include "ViewControllerHelpers.h"
+#include <objc/message.h>
 
 extern id NSForegroundColorAttributeName;
 
@@ -64,7 +65,7 @@ id createAlertController(CFStringRef title, CFStringRef message) {
 }
 
 void addAlertAction(id ctrl, CFStringRef title, int style, Callback handler) {
-    id action = ((id(*)(Class,SEL,CFStringRef,int,ObjectBlock))objc_msgSend)
+    id action = ((id(*)(Class,SEL,CFStringRef,int,void(^)(id)))objc_msgSend)
     (objc_getClass("UIAlertAction"), sel_getUid("actionWithTitle:style:handler:"), title, style,
      ^(id action _U_) {
         if (handler)

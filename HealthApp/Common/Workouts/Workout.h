@@ -9,6 +9,7 @@
 #define Workout_h
 
 #include "Circuit.h"
+#include <signal.h>
 
 enum {
     LiftSquat,
@@ -17,14 +18,21 @@ enum {
     LiftDeadlift
 };
 
+enum {
+    SignalGroup = SIGUSR2,
+    SignalExercise = SIGUSR1
+};
+
+typedef enum {
+    WorkoutStrength,
+    WorkoutSE,
+    WorkoutEndurance,
+    WorkoutHIC,
+    WorkoutRest
+} WorkoutType;
+
 typedef struct {
-    enum {
-        WorkoutStrength,
-        WorkoutSE,
-        WorkoutEndurance,
-        WorkoutHIC,
-        WorkoutRest
-    } type;
+    WorkoutType type;
     signed char day;
     unsigned index;
     time_t startTime;
@@ -53,15 +61,17 @@ typedef enum {
     TransitionNoChange
 } WorkoutTransition;
 
-enum {
+typedef enum {
     EventNone,
     EventStartGroup,
     EventFinishGroup,
-};
+} CircuitEvent;
+
+extern const unsigned ExerciseTagNA;
 
 void workout_setDuration(Workout *w);
 
-WorkoutTransition workout_findTransitionForEvent(Workout *w, id view, id btn, uint option);
+WorkoutTransition workout_findTransitionForEvent(Workout *w, id view, id btn, CircuitEvent option);
 void workout_stopTimers(Workout *w);
 bool workout_restartExerciseTimer(Workout *w, time_t refTime);
 bool workout_restartGroupTimer(Workout *w, time_t refTime);

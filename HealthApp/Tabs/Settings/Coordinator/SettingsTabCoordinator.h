@@ -8,14 +8,15 @@
 #ifndef SettingsTabCoordinator_h
 #define SettingsTabCoordinator_h
 
-#include "CocoaHelpers.h"
+#include <objc/objc.h>
+#include "AppUserData.h"
 
 typedef struct {
     id navVC;
 } SettingsTabCoordinator;
 
 void settingsCoordinator_handleSaveTap(SettingsTabCoordinator *this,
-                                       short *weights, signed char plan);
+                                       short *weights, WorkoutPlan plan);
 void settingsCoordinator_handleDeleteTap(SettingsTabCoordinator *this);
 
 #endif /* SettingsTabCoordinator_h */

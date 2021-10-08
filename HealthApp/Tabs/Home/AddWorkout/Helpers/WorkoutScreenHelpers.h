@@ -8,8 +8,9 @@
 #ifndef WorkoutScreenHelpers_h
 #define WorkoutScreenHelpers_h
 
-#include "CocoaHelpers.h"
 #include "Workout.h"
+
+typedef void (^ObjectBlock)(id);
 
 extern pthread_mutex_t timerLock;
 

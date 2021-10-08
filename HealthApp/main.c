@@ -5,8 +5,7 @@
 //  Created by Christopher Ray on 3/20/21.
 //
 
-#include <CoreFoundation/CoreFoundation.h>
-#include <objc/runtime.h>
+#include <CoreFoundation/CFString.h>
 #include <objc/message.h>
 #include "AppDelegate.h"
 

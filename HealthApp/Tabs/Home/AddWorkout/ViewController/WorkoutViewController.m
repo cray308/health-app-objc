@@ -64,7 +64,7 @@ void exerciseView_configure(StatusButton *v, ExerciseEntry *e) {
                                       0, 0, self, @selector(startEndWorkout:), -1);
     setNavButton(self.navigationItem, false, startBtn, self.view.frame.size.width);
 
-    for (uint i = 0; i < workout->activities->size; ++i) {
+    for (unsigned i = 0; i < workout->activities->size; ++i) {
         Circuit *c = &workout->activities->arr[i];
         CFStringRef header = circuit_createHeader(c);
         [stack addArrangedSubview:createContainer(&containers[i], header, 0, 0, 0)];
@@ -98,12 +98,12 @@ void exerciseView_configure(StatusButton *v, ExerciseEntry *e) {
 }
 
 - (void) startEndWorkout: (UIButton *)btn {
-    if (!btn.tag) { // tapped start
+    if (!btn.tag) {
         setButtonTitle(btn, localize(CFSTR("end")), 0);
         setButtonColor(btn, UIColor.systemRedColor, 0);
         setTag(btn, 1);
         workout->startTime = time(NULL);
-        [self handleTapForGroup:0 exercise:0 option:EventStartGroup];
+        [self handleTapForGroup:0 exercise:0 event:EventStartGroup];
     } else {
         Workout *w = NULL;
         pthread_mutex_lock(&timerLock);
@@ -120,21 +120,21 @@ void exerciseView_configure(StatusButton *v, ExerciseEntry *e) {
 
 - (void) handleTap: (UIButton *)btn {
     unsigned tag = (unsigned) btn.tag, groupIdx = (tag & 0xff00) >> 8, exerciseIdx = tag & 0xff;
-    [self handleTapForGroup:groupIdx exercise:exerciseIdx option:EventNone];
+    [self handleTapForGroup:groupIdx exercise:exerciseIdx event:EventNone];
 }
 
-- (void) handleTapForGroup: (uint)groupIdx exercise: (uint)exerciseIdx option: (uint)option {
+- (void) handleTapForGroup: (unsigned)gIdx exercise: (unsigned)eIdx event: (CircuitEvent)event {
     bool finishedWorkout = false;
     pthread_mutex_lock(&timerLock);
     if (!workout) {
         goto cleanup;
-    } else if (groupIdx != workout->index || exerciseIdx != workout->group->index) {
-        if (option != EventFinishGroup || groupIdx != workout->index)
+    } else if (gIdx != workout->index || eIdx != workout->group->index) {
+        if (event != EventFinishGroup || gIdx != workout->index)
             goto cleanup;
     }
 
     StatusButton *v = first->views->arr[workout->group->index];
-    switch (workout_findTransitionForEvent(workout, v, v->button, option)) {
+    switch (workout_findTransitionForEvent(workout, v, v->button, event)) {
         case TransitionCompletedWorkout:
             finishedWorkout = true;
             workout_setDuration(workout);
@@ -190,9 +190,9 @@ cleanup:
     pthread_mutex_unlock(&timerLock);
 
     if (endExercise)
-        [self handleTapForGroup:groupIdx exercise:exerciseIdx option:EventNone];
+        [self handleTapForGroup:groupIdx exercise:exerciseIdx event:EventNone];
     if (endGroup)
-        [self handleTapForGroup:groupIdx exercise:0 option:EventFinishGroup];
+        [self handleTapForGroup:groupIdx exercise:0 event:EventFinishGroup];
 }
 @end
 
@@ -204,6 +204,6 @@ id workoutVC_init(AddWorkoutCoordinator *delegate) {
     return this;
 }
 
-void workoutVC_finishedTimer(WorkoutViewController *vc, ubyte type, uint group, uint entry) {
-    [vc handleTapForGroup:group exercise:entry option:type ? EventNone : EventFinishGroup];
+void workoutVC_finishedTimer(WorkoutViewController *vc, TimerType type, unsigned g, unsigned e) {
+    [vc handleTapForGroup:g exercise:e event:type ? EventNone : EventFinishGroup];
 }

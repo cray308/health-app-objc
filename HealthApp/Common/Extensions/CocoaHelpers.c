@@ -6,6 +6,8 @@
 //
 
 #include "CocoaHelpers.h"
+#include <CoreFoundation/CFString.h>
+#include <objc/message.h>
 
 extern id UIFontTextStyleTitle1;
 extern id UIFontTextStyleTitle2;
@@ -16,8 +18,6 @@ extern id UIFontTextStyleBody;
 extern id UIFontTextStyleFootnote;
 
 CFArrayCallBacks kCocoaArrCallbacks = {0};
-
-gen_array_source(object, id, DSDefault_shallowCopy, releaseObj)
 
 id staticMethod(Class _self, SEL _cmd) {
     return ((id(*)(Class,SEL))objc_msgSend)(_self, _cmd);

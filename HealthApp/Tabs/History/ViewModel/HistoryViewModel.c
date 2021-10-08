@@ -6,16 +6,26 @@
 //
 
 #include "HistoryViewModel.h"
+#include <CoreFoundation/CFString.h>
+#include <objc/message.h>
+#include <stdio.h>
 #include "AppUserData.h"
 #include "CalendarDateHelpers.h"
+#include "CocoaHelpers.h"
 #include "Workout.h"
 #include "PersistenceService.h"
-#include "SwiftBridging.h"
 
-typedef enum {
+extern id createChartEntry(int x, int y);
+extern id createEmptyDataSet(void);
+extern id createDataSet(id color);
+extern id createChartData(id *dataSets, int count);
+extern void setLegendLabel(id entry, CFStringRef text);
+extern void setupLegendEntries(id *entries, id *colors, int count);
+
+enum {
     HistoryTimeRange6Months,
     HistoryTimeRange1Year
-} HistoryTimeRange;
+};
 
 static inline void createNewEntry(Array_object *arr, int x, int y) {
     array_push_back(object, arr, createChartEntry(x, y));

@@ -6,7 +6,10 @@
 //
 
 #include "Workout.h"
+#include "CocoaHelpers.h"
 #include "Views.h"
+
+const unsigned ExerciseTagNA = 255;
 
 extern void exerciseView_configure(id v, ExerciseEntry *e);
 
@@ -18,7 +21,7 @@ static inline void startGroup(Workout *w, bool startTimer) {
     exerciseEntry_cycle(w->entry);
 }
 
-WorkoutTransition workout_findTransitionForEvent(Workout *w, id view, id btn, uint option) {
+WorkoutTransition workout_findTransitionForEvent(Workout *w, id view, id btn, CircuitEvent option) {
     WorkoutTransition t = TransitionNoChange;
     if (option) {
         t = TransitionFinishedCircuit;

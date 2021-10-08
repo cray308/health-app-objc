@@ -6,8 +6,9 @@
 //
 
 #include "WorkoutTimer.h"
-
-const unsigned ExerciseTagNA = 255;
+#include <CoreFoundation/CFString.h>
+#include <objc/message.h>
+#include "CocoaHelpers.h"
 
 static CFStringRef notifTitle;
 static CFStringRef notificationMessages[2];
@@ -18,7 +19,7 @@ void initTimerStrings(void) {
     notificationMessages[1] = localize(CFSTR("notifications1"));
 }
 
-void scheduleNotification(int secondsFromNow, int type) {
+void scheduleNotification(int secondsFromNow, TimerType type) {
     static int identifier = 0;
     CFStringRef idString = getNumberString(identifier++);
 
@@ -36,7 +37,7 @@ void scheduleNotification(int secondsFromNow, int type) {
     (objc_getClass("UNNotificationRequest"), sel_getUid("requestWithIdentifier:content:trigger:"),
      idString, content, trigger);
 
-    ((void(*)(id,SEL,id,ObjectBlock))objc_msgSend)
+    ((void(*)(id,SEL,id,void(^)(id)))objc_msgSend)
     (getNotificationCenter(), sel_getUid("addNotificationRequest:withCompletionHandler:"),
      req, ^(id error _U_) {});
     CFRelease(idString);

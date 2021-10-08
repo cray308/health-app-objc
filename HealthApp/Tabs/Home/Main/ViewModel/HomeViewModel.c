@@ -6,8 +6,9 @@
 //
 
 #include "HomeViewModel.h"
-#include "AppUserData.h"
+#include <CoreFoundation/CFString.h>
 #include "CalendarDateHelpers.h"
+#include "CocoaHelpers.h"
 #include "ExerciseManager.h"
 
 void homeViewModel_init(HomeViewModel *model) {
@@ -22,7 +23,7 @@ void homeViewModel_fetchData(HomeViewModel *model) {
         model->workoutNames[i] = NULL;
     }
     if (userData->currentPlan >= 0 && userData->planStart <= time(NULL)) {
-        exerciseManager_setWeeklyWorkoutNames((ubyte) userData->currentPlan,
+        exerciseManager_setWeeklyWorkoutNames(userData->currentPlan,
                                               appUserData_getWeekInPlan(), model->workoutNames);
     }
 }

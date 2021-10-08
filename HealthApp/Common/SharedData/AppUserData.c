@@ -6,14 +6,13 @@
 //
 
 #include "AppUserData.h"
+#include <CoreFoundation/CFString.h>
+#include <CoreFoundation/CFNumber.h>
+#include <stdlib.h>
+#include <string.h>
+#include <objc/message.h>
 #include "CocoaHelpers.h"
 #include "CalendarDateHelpers.h"
-
-typedef enum {
-    WorkoutPlanNone = -1,
-    WorkoutPlanBaseBuilding = 0,
-    WorkoutPlanContinuation = 1
-} WorkoutPlan;
 
 UserInfo *userData = NULL;
 static CFStringRef const dictKey = CFSTR("userinfo");
@@ -111,7 +110,7 @@ int userInfo_initFromStorage(void) {
     return tzDiff;
 }
 
-void appUserData_setWorkoutPlan(signed char plan) {
+void appUserData_setWorkoutPlan(WorkoutPlan plan) {
     if (plan != WorkoutPlanNone && plan != userData->currentPlan) {
 #if DEBUG
         userData->planStart = userData->weekStart;

@@ -8,7 +8,8 @@
 #ifndef HistoryViewModel_h
 #define HistoryViewModel_h
 
-#include "CocoaHelpers.h"
+#include <CoreFoundation/CFBase.h>
+#include "ObjectArray.h"
 
 typedef struct {
     int year;

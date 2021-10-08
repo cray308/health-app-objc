@@ -8,7 +8,8 @@
 #ifndef PersistenceService_h
 #define PersistenceService_h
 
-#include "CocoaHelpers.h"
+#include <objc/objc.h>
+#include <CoreFoundation/CFArray.h>
 
 extern id backgroundContext;
 
@@ -23,7 +24,7 @@ void weekData_setWorkoutTimeForType(id weekData, unsigned char type, int16_t dur
 void weekData_setLiftingMaxForType(id weekData, unsigned char type, int16_t weight);
 void weekData_setTotalWorkouts(id weekData, int16_t value);
 
-#define runInBackground(block) ((void(*)(id,SEL,Callback))objc_msgSend)\
+#define runInBackground(block) ((void(*)(id,SEL,void(^)(void)))objc_msgSend)\
 (backgroundContext, sel_getUid("performBlock:"), block);
 
 #define createPredicate(format, ...)                                                        \

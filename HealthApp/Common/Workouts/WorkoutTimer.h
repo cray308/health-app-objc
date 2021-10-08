@@ -9,17 +9,12 @@
 #define WorkoutTimer_h
 
 #include <pthread.h>
-#include "CocoaHelpers.h"
+#include <objc/objc.h>
 
-enum {
-    SignalGroup = SIGUSR2,
-    SignalExercise = SIGUSR1
-};
-
-enum {
+typedef enum {
     TimerGroup,
     TimerExercise
-};
+} TimerType;
 
 typedef struct {
     id parent;
@@ -36,9 +31,7 @@ typedef struct {
     pthread_cond_t cond;
 } WorkoutTimer;
 
-extern const unsigned ExerciseTagNA;
-
-void scheduleNotification(int secondsFromNow, int type);
+void scheduleNotification(int secondsFromNow, TimerType type);
 void startWorkoutTimer(WorkoutTimer *t, int duration);
 
 #endif /* WorkoutTimer_h */

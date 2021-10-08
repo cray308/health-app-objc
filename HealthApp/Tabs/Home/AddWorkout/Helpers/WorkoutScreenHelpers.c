@@ -6,9 +6,12 @@
 //
 
 #include "WorkoutScreenHelpers.h"
+#include <unistd.h>
+#include <dispatch/queue.h>
+#include <objc/message.h>
 #include "ViewControllerHelpers.h"
 
-extern void workoutVC_finishedTimer(id vc, ubyte type, uint group, uint entry);
+extern void workoutVC_finishedTimer(id, TimerType, unsigned, unsigned);
 
 extern id UIApplicationDidBecomeActiveNotification;
 extern id UIApplicationWillResignActiveNotification;
@@ -52,7 +55,7 @@ static id getDeviceNotificationCenter(void) {
 }
 
 static id createObserver(id center, id name, id queue, ObjectBlock block) {
-    return ((id(*)(id,SEL,CFStringRef,id,id,ObjectBlock))objc_msgSend)
+    return ((id(*)(id,SEL,CFStringRef,id,id,void(^)(id)))objc_msgSend)
     (center, sel_getUid("addObserverForName:object:queue:usingBlock:"),
      (CFStringRef)name, nil, queue, block);
 }

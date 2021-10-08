@@ -10,24 +10,11 @@
 
 #define _U_ __attribute__((__unused__))
 
-#include <CoreFoundation/CoreFoundation.h>
-#include <CoreGraphics/CoreGraphics.h>
-#include <objc/runtime.h>
-#include <objc/message.h>
-#include "array.h"
-
-#define _cfstr(x) ((__bridge CFStringRef) x)
-#define _nsstr(x) ((__bridge NSString*) x)
-#define _nsarr(x) ((__bridge NSArray*) x)
-#define _cfarr(x) ((__bridge CFArrayRef) x)
+#include <CoreFoundation/CFArray.h>
+#include <CoreGraphics/CGGeometry.h>
+#include <objc/objc.h>
 
 extern CFArrayCallBacks kCocoaArrCallbacks;
-typedef unsigned char ubyte;
-typedef signed char byte;
-typedef unsigned int uint;
-
-typedef void (^Callback)(void);
-typedef void (^ObjectBlock)(id);
 
 enum {
     TextFootnote = 1,
@@ -37,8 +24,6 @@ enum {
     TextTitle1,
     TextTitle3
 };
-
-gen_array_headers(object, id)
 
 id staticMethod(Class _self, SEL _cmd);
 id staticMethodWithString(Class _self, SEL _cmd, CFStringRef arg);

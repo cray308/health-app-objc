@@ -6,6 +6,8 @@
 //
 
 #include "ExerciseEntry.h"
+#include <CoreFoundation/CFString.h>
+#include "CocoaHelpers.h"
 
 #define freeExerciseEntry(x) CFRelease((x).name)
 

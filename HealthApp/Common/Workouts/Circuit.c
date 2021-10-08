@@ -6,6 +6,8 @@
 //
 
 #include "Circuit.h"
+#include <CoreFoundation/CFString.h>
+#include "CocoaHelpers.h"
 
 #define freeCircuit(x) array_free(exEntry, (x).exercises)
 

@@ -8,8 +8,9 @@
 #ifndef ExerciseEntry_h
 #define ExerciseEntry_h
 
-#include "CocoaHelpers.h"
+#include <CoreFoundation/CFBase.h>
 #include "WorkoutTimer.h"
+#include "array.h"
 
 typedef struct {
     enum {

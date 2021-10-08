@@ -10,13 +10,7 @@
 
 #include "ViewControllerHelpers.h"
 
-id createChartEntry(int x, int y);
-id createEmptyDataSet(void);
-id createDataSet(id color);
-id createChartData(id *dataSets, int count);
 id createChartView(id parent, id xAxisFormatter, id *legendEntries, int count, int height);
-void setLegendLabel(id entry, CFStringRef text);
-void setupLegendEntries(id *entries, id *colors, int count);
 void disableLineChartView(id v);
 void updateDataSet(bool isSmall, int count, id dataSet, id *entries);
 void updateChart(bool isSmall, id view, id data, float axisMax);

@@ -6,6 +6,8 @@
 //
 
 #include "AddWorkoutCoordinator.h"
+#include <CoreFoundation/CFString.h>
+#include <objc/message.h>
 #include "AppUserData.h"
 #include "PersistenceService.h"
 #include "ViewControllerHelpers.h"
@@ -82,12 +84,12 @@ void addWorkoutCoordinator_completedWorkout(AddWorkoutCoordinator *this,
         return;
     }
 
-    const byte day = this->workout->day;
-    ubyte totalCompleted = 0;
+    const signed char day = this->workout->day;
+    unsigned char totalCompleted = 0;
     bool longEnough = this->workout->duration >= 15;
     if (longEnough) {
         if (day >= 0)
-            totalCompleted = appUserData_addCompletedWorkout((ubyte) day);
+            totalCompleted = appUserData_addCompletedWorkout((unsigned char) day);
         if (this->workout->newLifts)
             appUserData_updateWeightMaxes(this->workout->newLifts);
     }

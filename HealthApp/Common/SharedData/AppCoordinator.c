@@ -6,6 +6,8 @@
 //
 
 #include "AppCoordinator.h"
+#include <CoreFoundation/CFString.h>
+#include <objc/message.h>
 #include "HomeTabCoordinator.h"
 #include "HistoryTabCoordinator.h"
 #include "SettingsTabCoordinator.h"

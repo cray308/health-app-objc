@@ -54,6 +54,8 @@
 		616E2F9B2677195C00342CD8 /* AddWorkoutUpdateMaxesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 616E2F9A2677195C00342CD8 /* AddWorkoutUpdateMaxesViewController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		617BDE1B26FE48FD00BDDB73 /* StatusButton.h in Headers */ = {isa = PBXBuildFile; fileRef = 617BDE1A26FE48FD00BDDB73 /* StatusButton.h */; };
 		617BDE1F26FE491000BDDB73 /* StatusButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 617BDE1E26FE491000BDDB73 /* StatusButton.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		61BA4652270FBF290066A981 /* ObjectArray.h in Headers */ = {isa = PBXBuildFile; fileRef = 61BA4650270FBF290066A981 /* ObjectArray.h */; };
+		61BA4653270FBF290066A981 /* ObjectArray.c in Sources */ = {isa = PBXBuildFile; fileRef = 61BA4651270FBF290066A981 /* ObjectArray.c */; };
 		61BC6F55266EA9A80022D6F7 /* WeeklyData+CoreDataClass.h in Headers */ = {isa = PBXBuildFile; fileRef = 61BC6F51266EA9A80022D6F7 /* WeeklyData+CoreDataClass.h */; };
 		61BC6F56266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m in Sources */ = {isa = PBXBuildFile; fileRef = 61BC6F52266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61C7793626102C19001326A1 /* HistoryTabCoordinator.c in Sources */ = {isa = PBXBuildFile; fileRef = 61C7793526102C19001326A1 /* HistoryTabCoordinator.c */; };
@@ -164,6 +166,8 @@
 		616E2F9A2677195C00342CD8 /* AddWorkoutUpdateMaxesViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AddWorkoutUpdateMaxesViewController.m; sourceTree = "<group>"; };
 		617BDE1A26FE48FD00BDDB73 /* StatusButton.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StatusButton.h; sourceTree = "<group>"; };
 		617BDE1E26FE491000BDDB73 /* StatusButton.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StatusButton.m; sourceTree = "<group>"; };
+		61BA4650270FBF290066A981 /* ObjectArray.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ObjectArray.h; sourceTree = "<group>"; };
+		61BA4651270FBF290066A981 /* ObjectArray.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = ObjectArray.c; sourceTree = "<group>"; };
 		61BC6F51266EA9A80022D6F7 /* WeeklyData+CoreDataClass.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "WeeklyData+CoreDataClass.h"; sourceTree = "<group>"; };
 		61BC6F52266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "WeeklyData+CoreDataClass.m"; sourceTree = "<group>"; };
 		61C77914261028BE001326A1 /* HomeTabCoordinator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HomeTabCoordinator.h; sourceTree = "<group>"; };
@@ -543,6 +547,8 @@
 				6151A322260F012300D88F1B /* CalendarDateHelpers.c */,
 				6161838026AC8089001587B2 /* CocoaHelpers.h */,
 				6161838126AC80A0001587B2 /* CocoaHelpers.c */,
+				61BA4650270FBF290066A981 /* ObjectArray.h */,
+				61BA4651270FBF290066A981 /* ObjectArray.c */,
 				615086F026D3223400521269 /* SwiftBridging.h */,
 				615086EC26D3222500521269 /* SwiftBridging.m */,
 				614DC12826081E9E00B9588E /* ViewControllerHelpers.h */,
@@ -563,6 +569,7 @@
 				61C82985270B76F700E33B51 /* WorkoutTimer.h in Headers */,
 				61C82978270B6E2200E33B51 /* ExerciseEntry.h in Headers */,
 				614DA6A9270A8D8F00EC90C4 /* Workout.h in Headers */,
+				61BA4652270FBF290066A981 /* ObjectArray.h in Headers */,
 				611B591326C5F6830082F6CA /* alg_helper.h in Headers */,
 				610B92B9270A6E9000358DBD /* Views.h in Headers */,
 				6150870426D3370400521269 /* WorkoutScreenHelpers.h in Headers */,
@@ -687,6 +694,7 @@
 				61BC6F56266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m in Sources */,
 				6151C92226C4B24200C95A93 /* hash.c in Sources */,
 				6151A323260F012300D88F1B /* CalendarDateHelpers.c in Sources */,
+				61BA4653270FBF290066A981 /* ObjectArray.c in Sources */,
 				6161838226AC80A0001587B2 /* CocoaHelpers.c in Sources */,
 				610B92B5270A67CC00358DBD /* Constraints.c in Sources */,
 				610B92BA270A6E9000358DBD /* Views.c in Sources */,

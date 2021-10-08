@@ -5,7 +5,7 @@
 //  Created by Christopher Ray on 3/20/21.
 //
 
-#include "CocoaHelpers.h"
+#include <objc/objc.h>
 
 extern Class AppDelegateClass;
 

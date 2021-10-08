@@ -8,7 +8,8 @@
 #ifndef ConfettiView_h
 #define ConfettiView_h
 
-#include "CocoaHelpers.h"
+#include <CoreGraphics/CGGeometry.h>
+#include <objc/objc.h>
 
 typedef struct {
     CGRect frame;

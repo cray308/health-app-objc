@@ -8,7 +8,7 @@
 #ifndef Constraints_h
 #define Constraints_h
 
-#include "CocoaHelpers.h"
+#include <objc/objc.h>
 
 typedef struct {
     short top, left, bottom, right;
@@ -24,6 +24,6 @@ enum {
 void setWidth(id v, int width);
 void setHeight(id v, int height);
 void setEqualWidths(id v, id container);
-void pin(id v, id container, Padding margins, uint excluded);
+void pin(id v, id container, Padding margins, unsigned excluded);
 
 #endif /* Constraints_h */

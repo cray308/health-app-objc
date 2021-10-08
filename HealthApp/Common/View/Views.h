@@ -9,6 +9,7 @@
 #define Views_h
 
 #include "Constraints.h"
+#include <CoreGraphics/CGGeometry.h>
 
 enum {
     BtnLargeFont = 0x1,

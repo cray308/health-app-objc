@@ -6,6 +6,8 @@
 //
 
 #include "Constraints.h"
+#include <objc/message.h>
+#include "CocoaHelpers.h"
 
 static struct AnchorNames {
     char const *const top;
@@ -61,8 +63,8 @@ void setEqualWidths(id v, id v2) {
     }, 1);
 }
 
-void pin(id v, id container, Padding margins, uint excluded) {
-    static const uint edges[] = {EdgeTop, EdgeLeft, EdgeBottom, EdgeRight};
+void pin(id v, id container, Padding margins, unsigned excluded) {
+    static const unsigned edges[] = {EdgeTop, EdgeLeft, EdgeBottom, EdgeRight};
     id constraints[4] = {0};
     int len = 0;
     for (int i = 0; i < 4; ++i) {

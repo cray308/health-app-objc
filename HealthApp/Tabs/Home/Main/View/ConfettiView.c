@@ -6,7 +6,13 @@
 //
 
 #include "ConfettiView.h"
-#include "ViewControllerHelpers.h"
+#include <CoreFoundation/CFString.h>
+#include <CoreGraphics/CGColor.h>
+#include <objc/message.h>
+#include <math.h>
+#include <stdlib.h>
+#include "CocoaHelpers.h"
+#include "Views.h"
 
 void setupConfettiView(ConfettiContainer *c) {
     c->view = createObjectWithFrame("UIView", c->frame);
