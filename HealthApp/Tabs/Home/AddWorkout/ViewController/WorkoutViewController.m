@@ -123,7 +123,7 @@ void exerciseView_configure(StatusButton *v, ExerciseEntry *e) {
     [self handleTapForGroup:groupIdx exercise:exerciseIdx event:EventNone];
 }
 
-- (void) handleTapForGroup: (unsigned)gIdx exercise: (unsigned)eIdx event: (CircuitEvent)event {
+- (void) handleTapForGroup: (unsigned)gIdx exercise: (unsigned)eIdx event: (byte)event {
     bool finishedWorkout = false;
     pthread_mutex_lock(&timerLock);
     if (!workout) {
@@ -204,6 +204,6 @@ id workoutVC_init(AddWorkoutCoordinator *delegate) {
     return this;
 }
 
-void workoutVC_finishedTimer(WorkoutViewController *vc, TimerType type, unsigned g, unsigned e) {
-    [vc handleTapForGroup:g exercise:e event:type ? EventNone : EventFinishGroup];
+void workoutVC_finishedTimer(WorkoutViewController *vc, byte type, unsigned gIdx, unsigned eIdx) {
+    [vc handleTapForGroup:gIdx exercise:eIdx event:type ? EventNone : EventFinishGroup];
 }

@@ -19,7 +19,7 @@
 extern id homeVC_init(void *);
 extern void homeVC_createWorkoutsList(id);
 extern void homeVC_updateWorkoutsList(id);
-extern id setupWorkoutVC_init(void *, WorkoutType, Array_str *);
+extern id setupWorkoutVC_init(void *, byte, Array_str *);
 
 enum {
     CustomWorkoutIndexTestMax,
@@ -89,7 +89,7 @@ void homeCoordinator_addWorkoutFromPlan(HomeTabCoordinator *this, int index) {
 }
 
 void homeCoordinator_addWorkoutFromCustomButton(HomeTabCoordinator *this, int index) {
-    WorkoutType type = WorkoutStrength;
+    byte type = WorkoutStrength;
     switch (index) {
         case CustomWorkoutIndexSE:
             type = WorkoutSE;

@@ -60,6 +60,6 @@ id createFont(int style);
 id createImage(CFStringRef name, bool system);
 CFStringRef localize(CFStringRef key);
 void fillStringArray(CFStringRef *arr, CFStringRef format, int count);
-CFStringRef getNumberString(int value);
+CFStringRef createNumberString(int value);
 
 #endif /* CocoaBridging_h */

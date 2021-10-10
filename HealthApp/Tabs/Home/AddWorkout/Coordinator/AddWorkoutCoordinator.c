@@ -17,7 +17,7 @@ extern id workoutVC_init(void *delegate);
 extern id updateMaxesVC_init(void *delegate);
 extern void homeCoordinator_didFinishAddingWorkout(void *, int);
 extern void appCoordinator_updateMaxWeights(void);
-extern unsigned char appUserData_addCompletedWorkout(unsigned char);
+extern byte appUserData_addCompletedWorkout(byte);
 
 static void updateStoredData(AddWorkoutCoordinator *this) {
     if (this->workout->timers[TimerGroup].info.active == 1)
@@ -85,11 +85,11 @@ void addWorkoutCoordinator_completedWorkout(AddWorkoutCoordinator *this,
     }
 
     const signed char day = this->workout->day;
-    unsigned char totalCompleted = 0;
+    byte totalCompleted = 0;
     bool longEnough = this->workout->duration >= 15;
     if (longEnough) {
         if (day >= 0)
-            totalCompleted = appUserData_addCompletedWorkout((unsigned char) day);
+            totalCompleted = appUserData_addCompletedWorkout(day);
         if (this->workout->newLifts)
             appUserData_updateWeightMaxes(this->workout->newLifts);
     }

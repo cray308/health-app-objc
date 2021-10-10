@@ -21,7 +21,7 @@ static inline void startGroup(Workout *w, bool startTimer) {
     exerciseEntry_cycle(w->entry);
 }
 
-WorkoutTransition workout_findTransitionForEvent(Workout *w, id view, id btn, CircuitEvent option) {
+WorkoutTransition workout_findTransitionForEvent(Workout *w, id view, id btn, byte option) {
     WorkoutTransition t = TransitionNoChange;
     if (option) {
         t = TransitionFinishedCircuit;

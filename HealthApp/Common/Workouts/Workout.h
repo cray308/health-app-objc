@@ -23,16 +23,16 @@ enum {
     SignalExercise = SIGUSR1
 };
 
-typedef enum {
+enum {
     WorkoutStrength,
     WorkoutSE,
     WorkoutEndurance,
     WorkoutHIC,
     WorkoutRest
-} WorkoutType;
+};
 
 typedef struct {
-    WorkoutType type;
+    byte type;
     signed char day;
     unsigned index;
     time_t startTime;
@@ -61,17 +61,17 @@ typedef enum {
     TransitionNoChange
 } WorkoutTransition;
 
-typedef enum {
+enum {
     EventNone,
     EventStartGroup,
     EventFinishGroup,
-} CircuitEvent;
+};
 
 extern const unsigned ExerciseTagNA;
 
 void workout_setDuration(Workout *w);
 
-WorkoutTransition workout_findTransitionForEvent(Workout *w, id view, id btn, CircuitEvent option);
+WorkoutTransition workout_findTransitionForEvent(Workout *w, id view, id btn, byte option);
 void workout_stopTimers(Workout *w);
 bool workout_restartExerciseTimer(Workout *w, time_t refTime);
 bool workout_restartGroupTimer(Workout *w, time_t refTime);

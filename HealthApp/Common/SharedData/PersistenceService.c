@@ -27,12 +27,12 @@ static void deleteWeekData(id data) {
     setObject(backgroundContext, sel_getUid("deleteObject:"), data);
 }
 
-int16_t weekData_getLiftingLimitForType(id data, unsigned char type) {
+int16_t weekData_getLiftingLimitForType(id data, byte type) {
     static char const *getterStrs[] = {"bestSquat", "bestPullup", "bestBench", "bestDeadlift"};
     return getInt16(data, sel_getUid(getterStrs[type]));
 }
 
-int16_t weekData_getWorkoutTimeForType(id data, unsigned char type) {
+int16_t weekData_getWorkoutTimeForType(id data, byte type) {
     static char const *getterStrs[] = {"timeStrength", "timeSE", "timeEndurance", "timeHIC"};
     return getInt16(data, sel_getUid(getterStrs[type]));
 }
@@ -45,14 +45,14 @@ int64_t weekData_getWeekStart(id data) {
     return getInt64(data, sel_getUid("weekStart"));
 }
 
-void weekData_setWorkoutTimeForType(id data, unsigned char type, int16_t duration) {
+void weekData_setWorkoutTimeForType(id data, byte type, int16_t duration) {
     static char const *setters[] = {
         "setTimeStrength:", "setTimeSE:", "setTimeEndurance:", "setTimeHIC:"
     };
     setInt16(data, sel_getUid(setters[type]), duration + weekData_getWorkoutTimeForType(data,type));
 }
 
-void weekData_setLiftingMaxForType(id data, unsigned char type, int16_t weight) {
+void weekData_setLiftingMaxForType(id data, byte type, int16_t weight) {
     static char const *setterStrs[] = {
         "setBestSquat:", "setBestPullup:", "setBestBench:", "setBestDeadlift:"
     };
@@ -88,7 +88,7 @@ void persistenceService_create(void) {
     runInBackground((^{
         int16_t lifts[] = {300, 20, 185, 235};
         int i = 0;
-        unsigned char plan = 0;
+        byte plan = 0;
         time_t start = date_calcStartOfWeek(time(NULL) - 126489600);
         time_t end = date_calcStartOfWeek(time(NULL) - 2678400);
 

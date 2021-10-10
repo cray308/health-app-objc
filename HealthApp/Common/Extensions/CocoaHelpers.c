@@ -180,6 +180,6 @@ void fillStringArray(CFStringRef *arr, CFStringRef format, int count) {
     }
 }
 
-CFStringRef getNumberString(int value) {
+CFStringRef createNumberString(int value) {
     return CFStringCreateWithFormat(NULL, NULL, CFSTR("%d"), value);
 }

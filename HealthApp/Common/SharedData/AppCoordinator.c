@@ -22,9 +22,9 @@ extern void historyCoordinator_updateUI(HistoryTabCoordinator*, bool);
 extern void settingsCoordinator_start(SettingsTabCoordinator*);
 extern void settingsCoordinator_updateWeightText(SettingsTabCoordinator*);
 
-typedef enum {
+enum {
     TabHome, TabHistory, TabSettings
-} AppTab;
+};
 
 AppCoordinator *appCoordinator = NULL;
 

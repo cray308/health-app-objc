@@ -11,7 +11,7 @@
 #include <objc/message.h>
 #include "ViewControllerHelpers.h"
 
-extern void workoutVC_finishedTimer(id, TimerType, unsigned, unsigned);
+extern void workoutVC_finishedTimer(id, byte, unsigned, unsigned);
 
 extern id UIApplicationDidBecomeActiveNotification;
 extern id UIApplicationWillResignActiveNotification;

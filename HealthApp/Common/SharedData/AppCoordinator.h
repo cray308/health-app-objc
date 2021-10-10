@@ -8,6 +8,8 @@
 #ifndef AppCoordinator_h
 #define AppCoordinator_h
 
+#include "AppTypes.h"
+
 enum {
     LoadedViewController_Home = 0x1,
     LoadedViewController_History = 0x2,
@@ -15,7 +17,7 @@ enum {
 };
 
 typedef struct {
-    unsigned char loadedViewControllers;
+    byte loadedViewControllers;
     void *children[3];
 } AppCoordinator;
 

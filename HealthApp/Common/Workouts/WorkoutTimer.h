@@ -10,18 +10,19 @@
 
 #include <pthread.h>
 #include <objc/objc.h>
+#include "AppTypes.h"
 
-typedef enum {
+enum {
     TimerGroup,
     TimerExercise
-} TimerType;
+};
 
 typedef struct {
     id parent;
     struct _TimerInfo {
-        const unsigned char type : 2;
-        unsigned char active : 2;
-        unsigned char stop : 4;
+        const byte type : 2;
+        byte active : 2;
+        byte stop : 4;
     } info;
     unsigned container;
     unsigned exercise;
@@ -31,7 +32,7 @@ typedef struct {
     pthread_cond_t cond;
 } WorkoutTimer;
 
-void scheduleNotification(int secondsFromNow, TimerType type);
+void scheduleNotification(int secondsFromNow, byte type);
 void startWorkoutTimer(WorkoutTimer *t, int duration);
 
 #endif /* WorkoutTimer_h */

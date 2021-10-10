@@ -14,7 +14,7 @@ extern id settingsVC_init(void *delegate);
 extern void settingsVC_updateWeightFields(id vc);
 extern void appCoordinator_updatedUserInfo(void);
 extern void appCoordinator_deletedAppData(void);
-extern void appUserData_setWorkoutPlan(WorkoutPlan);
+extern void appUserData_setWorkoutPlan(signed char);
 extern void appUserData_deleteSavedData(void);
 extern void persistenceService_deleteUserData(void);
 
@@ -31,7 +31,7 @@ void settingsCoordinator_updateWeightText(SettingsTabCoordinator *this) {
 }
 
 void settingsCoordinator_handleSaveTap(SettingsTabCoordinator *this,
-                                       short *weights, WorkoutPlan plan) {
+                                       short *weights, signed char plan) {
     id ctrl = createAlertController(localize(CFSTR("settingsAlertTitle")),
                                     localize(CFSTR("settingsAlertMessageSave")));
     addAlertAction(ctrl, localize(CFSTR("save")), 0, ^{

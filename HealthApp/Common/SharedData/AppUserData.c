@@ -14,6 +14,12 @@
 #include "CocoaHelpers.h"
 #include "CalendarDateHelpers.h"
 
+enum {
+    WorkoutPlanNone = -1,
+    WorkoutPlanBaseBuilding = 0,
+    WorkoutPlanContinuation = 1
+};
+
 UserInfo *userData = NULL;
 static CFStringRef const dictKey = CFSTR("userinfo");
 
@@ -98,8 +104,7 @@ int userInfo_initFromStorage(void) {
         userData->weekStart = weekStart;
 
         if (userData->currentPlan != WorkoutPlanNone) {
-            const int nWeeks = planLengths[userData->currentPlan];
-            if ((appUserData_getWeekInPlan() / WeekSeconds) >= nWeeks) {
+            if ((appUserData_getWeekInPlan() / WeekSeconds) >= planLengths[userData->currentPlan]) {
                 if (userData->currentPlan == WorkoutPlanBaseBuilding)
                     userData->currentPlan = WorkoutPlanContinuation;
                 userData->planStart = weekStart;
@@ -110,7 +115,7 @@ int userInfo_initFromStorage(void) {
     return tzDiff;
 }
 
-void appUserData_setWorkoutPlan(WorkoutPlan plan) {
+void appUserData_setWorkoutPlan(signed char plan) {
     if (plan != WorkoutPlanNone && plan != userData->currentPlan) {
 #if DEBUG
         userData->planStart = userData->weekStart;
@@ -127,13 +132,12 @@ void appUserData_deleteSavedData(void) {
     saveData();
 }
 
-unsigned char appUserData_addCompletedWorkout(unsigned char day) {
-    unsigned char total = 0;
+byte appUserData_addCompletedWorkout(byte day) {
+    byte total = 0;
     userData->completedWorkouts |= (1 << day);
     saveData();
-    const unsigned char completedMask = userData->completedWorkouts;
-    for (unsigned char i = 0; i < 7; ++i) {
-        if ((1 << i) & completedMask)
+    for (byte i = 0; i < 7; ++i) {
+        if ((1 << i) & userData->completedWorkouts)
             ++total;
     }
     return total;

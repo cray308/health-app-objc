@@ -9,19 +9,14 @@
 #define AppUserData_h
 
 #include <time.h>
-
-typedef enum {
-    WorkoutPlanNone = -1,
-    WorkoutPlanBaseBuilding = 0,
-    WorkoutPlanContinuation = 1
-} WorkoutPlan;
+#include "AppTypes.h"
 
 typedef struct {
     time_t planStart;
     time_t weekStart;
     int tzOffset;
     signed char currentPlan;
-    unsigned char completedWorkouts;
+    byte completedWorkouts;
     short liftMaxes[4];
 } UserInfo;
 

@@ -9,6 +9,7 @@
 #include <CoreFoundation/CFString.h>
 #include "CalendarDateHelpers.h"
 #include "CocoaHelpers.h"
+#include "AppUserData.h"
 #include "ExerciseManager.h"
 
 void homeViewModel_init(HomeViewModel *model) {

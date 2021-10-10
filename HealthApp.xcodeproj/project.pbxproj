@@ -75,6 +75,7 @@
 		61C82986270B76F700E33B51 /* WorkoutTimer.c in Sources */ = {isa = PBXBuildFile; fileRef = 61C82984270B76F700E33B51 /* WorkoutTimer.c */; };
 		61E8ED6726FD60B400942368 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 61E8ED6926FD60B400942368 /* Localizable.strings */; };
 		61E8ED6C26FD87AB00942368 /* WorkoutData_d.plist in Resources */ = {isa = PBXBuildFile; fileRef = 61E8ED6B26FD87AB00942368 /* WorkoutData_d.plist */; };
+		61FFEA552712352C0065381B /* AppTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 61FFEA542712352C0065381B /* AppTypes.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -196,6 +197,7 @@
 		61C82984270B76F700E33B51 /* WorkoutTimer.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = WorkoutTimer.c; sourceTree = "<group>"; };
 		61E8ED6826FD60B400942368 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		61E8ED6B26FD87AB00942368 /* WorkoutData_d.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = WorkoutData_d.plist; sourceTree = "<group>"; };
+		61FFEA542712352C0065381B /* AppTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppTypes.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -543,6 +545,7 @@
 		61C7790426102663001326A1 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				61FFEA542712352C0065381B /* AppTypes.h */,
 				6151A321260F010F00D88F1B /* CalendarDateHelpers.h */,
 				6151A322260F012300D88F1B /* CalendarDateHelpers.c */,
 				6161838026AC8089001587B2 /* CocoaHelpers.h */,
@@ -573,6 +576,7 @@
 				611B591326C5F6830082F6CA /* alg_helper.h in Headers */,
 				610B92B9270A6E9000358DBD /* Views.h in Headers */,
 				6150870426D3370400521269 /* WorkoutScreenHelpers.h in Headers */,
+				61FFEA552712352C0065381B /* AppTypes.h in Headers */,
 				61BC6F55266EA9A80022D6F7 /* WeeklyData+CoreDataClass.h in Headers */,
 				610B92B4270A67CC00358DBD /* Constraints.h in Headers */,
 				611B591426C5F6830082F6CA /* unordered_set.h in Headers */,

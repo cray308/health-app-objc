@@ -19,9 +19,9 @@ void initTimerStrings(void) {
     notificationMessages[1] = localize(CFSTR("notifications1"));
 }
 
-void scheduleNotification(int secondsFromNow, TimerType type) {
+void scheduleNotification(int secondsFromNow, byte type) {
     static int identifier = 0;
-    CFStringRef idString = getNumberString(identifier++);
+    CFStringRef idString = createNumberString(identifier++);
 
     id content = getObject(allocClass("UNMutableNotificationContent"), sel_getUid("init"));
     setString(content, sel_getUid("setTitle:"), notifTitle);
