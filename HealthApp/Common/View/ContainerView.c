@@ -14,7 +14,7 @@ id createContainer(Container *c, CFStringRef title, int hidden, int spacing, boo
     c->views = array_new(object);
     c->view = createView(nil, false, -1, -1);
     c->divider = createView(createColor("separatorColor"), false, -1, 1);
-    c->headerLabel = createLabel(title, TextTitle3, 4, 20);
+    c->headerLabel = createLabel(title, TextTitle3, 4, true);
     c->stack = createStackView(NULL, 0, 1, spacing, (Padding){.top = 5});
     Padding padding = {0};
     if (margins)

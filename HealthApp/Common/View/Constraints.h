@@ -22,6 +22,7 @@ enum {
 };
 
 void setWidth(id v, int width);
+void setMinHeight(id v, int height);
 void setHeight(id v, int height);
 void setEqualWidths(id v, id container);
 void pin(id v, id container, Padding margins, unsigned excluded);

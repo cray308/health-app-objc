@@ -26,6 +26,7 @@ void hideView(id view, bool hide);
 void setBackground(id view, id color);
 void setTintColor(id view, id color);
 
+void setAccessibilityLabel(id view, CFStringRef text);
 void setLabelText(id view, CFStringRef text);
 void setTextColor(id view, id color);
 
@@ -38,8 +39,9 @@ id createObjectWithFrame(const char *name, CGRect rect);
 id createView(id color, bool rounded, int width, int height);
 id createStackView(id *subviews, int count, int axis, int spacing, Padding margins);
 id createScrollView(void);
-id createLabel(CFStringRef text, int style, int alignment, int height);
-id createTextfield(id delegate, CFStringRef text, int alignment, int keyboard, int tag, int height);
+id createLabel(CFStringRef text, int style, int alignment, bool accessible);
+id createTextfield(id delegate, CFStringRef text, CFStringRef hint,
+                   int alignment, int keyboard, int tag);
 id createButton(CFStringRef title, id color, int params,
                 int tag, id target, SEL action, int height);
 id createSegmentedControl(CFStringRef format, int count, int startIndex,

@@ -12,6 +12,7 @@
 
 typedef struct {
     CFStringRef workoutNames[7];
+    CFStringRef stateNames[2];
     CFStringRef timeNames[3];
     enum { Morning, Afternoon, Evening } timeOfDay;
 } HomeViewModel;

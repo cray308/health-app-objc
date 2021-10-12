@@ -20,6 +20,10 @@ static inline void showInputError(Validator *validator, struct InputView *child)
     enableButton(validator->button, false);
     child->valid = false;
     hideView(child->errorLabel, false);
+    CFStringRef text = CFStringCreateWithFormat(NULL, NULL, CFSTR("%@. %@"),
+                                                child->hintText, child->errorText);
+    setAccessibilityLabel(child->field, text);
+    CFRelease(text);
 }
 
 void initValidatorStrings(void) {
@@ -41,21 +45,18 @@ void validator_setup(Validator *this, short margins, bool createSet, id target, 
     voidFunc(this->toolbar, sel_getUid("sizeToFit"));
 
     const char *btnName = "UIBarButtonItem";
-    id flexSpace = ((id(*)(id,SEL,int,id,SEL))objc_msgSend)
+    this->flexSpace = ((id(*)(id,SEL,int,id,SEL))objc_msgSend)
     (allocClass(btnName), sel_getUid("initWithBarButtonSystemItem:target:action:"), 5, nil, nil);
-    id doneButton = ((id(*)(id,SEL,CFStringRef,int,id,SEL))objc_msgSend)
+    this->doneButton = ((id(*)(id,SEL,CFStringRef,int,id,SEL))objc_msgSend)
     (allocClass(btnName),
      sel_getUid("initWithTitle:style:target:action:"), CFSTR("Done"), 0, target, doneSelector);
 
-    CFArrayRef array = CFArrayCreate(NULL, (const void *[]){flexSpace, doneButton},
+    CFArrayRef array = CFArrayCreate(NULL, (const void *[]){this->flexSpace, this->doneButton},
                                      2, &kCocoaArrCallbacks);
     ((void(*)(id,SEL,CFArrayRef,bool))objc_msgSend)(this->toolbar,
                                                     sel_getUid("setItems:animated:"), array, false);
     enableInteraction(this->toolbar, true);
-
     CFRelease(array);
-    releaseObj(flexSpace);
-    releaseObj(doneButton);
 }
 
 void validator_free(Validator *this) {
@@ -67,9 +68,12 @@ void validator_free(Validator *this) {
             releaseObj(this->children[i].field);
             releaseObj(this->children[i].errorLabel);
             releaseObj(this->children[i].view);
+            CFRelease(this->children[i].errorText);
         }
     }
     releaseObj(this->toolbar);
+    releaseObj(this->flexSpace);
+    releaseObj(this->doneButton);
 }
 
 id validator_add(Validator *v, id delegate, CFStringRef hint, short min, short max) {
@@ -77,17 +81,17 @@ id validator_add(Validator *v, id delegate, CFStringRef hint, short min, short m
     child->view = createView(nil, false, -1, -1);
     child->minVal = min;
     child->maxVal = max;
-    CFStringRef errorText = CFStringCreateWithFormat(NULL, NULL, inputFieldError, min, max);
-    child->hintLabel = createLabel(hint, TextFootnote, 4, 20);
-    child->field = createTextfield(delegate, NULL, 4, 4, v->count++, 40);
-    child->errorLabel = createLabel(errorText, TextFootnote, 4, 20);
+    child->hintText = hint;
+    child->errorText = CFStringCreateWithFormat(NULL, NULL, inputFieldError, min, max);
+    child->hintLabel = createLabel(hint, TextFootnote, 4, false);
+    child->field = createTextfield(delegate, NULL, hint, 4, 4, v->count++);
+    child->errorLabel = createLabel(child->errorText, TextFootnote, 4, false);
     setTextColor(child->errorLabel, createColor("systemRedColor"));
     id vStack = createStackView((id []){child->hintLabel, child->field, child->errorLabel},
                                 3, 1, 4, v->padding);
     addSubview(child->view, vStack);
     pin(vStack, child->view, (Padding){0}, 0);
     releaseObj(vStack);
-    CFRelease(errorText);
     hideView(child->errorLabel, true);
     setObject(child->field, sel_getUid("setInputAccessoryView:"), v->toolbar);
     return child->view;
@@ -97,6 +101,7 @@ void inputView_reset(struct InputView *this, short value) {
     this->valid = true;
     this->result = value;
     hideView(this->errorLabel, true);
+    setAccessibilityLabel(this->field, this->hintText);
 }
 
 bool checkInput(Validator *this, id field, CFRange range, CFStringRef replacement) {

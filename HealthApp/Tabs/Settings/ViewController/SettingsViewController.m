@@ -43,8 +43,8 @@ void settingsVC_updateWeightFields(SettingsViewController *vc) {
     validator_setup(&validator, 0, true, self, @selector(dismissKeyboard));
 
     CFStringRef titles[4]; fillStringArray(titles, CFSTR("maxWeight%d"), 4);
-    UILabel *planLabel = createLabel(localize(CFSTR("planPickerTitle")), TextFootnote, 4, 20);
-    picker = createSegmentedControl(CFSTR("settingsSegment%d"),3,userData->currentPlan + 1,0,0,32);
+    UILabel *planLabel = createLabel(localize(CFSTR("planPickerTitle")), TextFootnote, 4, true);
+    picker = createSegmentedControl(CFSTR("settingsSegment%d"),3,userData->currentPlan + 1,0,0,44);
     UIView *planContainer = createStackView((id []){planLabel, picker}, 2, 1, 2, (Padding){0});
     UIStackView *cStack = createStackView((id []){planContainer}, 1, 1, 0, (Padding){0,8,0,8});
     [cStack setCustomSpacing:20 afterView:planContainer];
@@ -54,11 +54,11 @@ void settingsVC_updateWeightFields(SettingsViewController *vc) {
         [cStack addArrangedSubview:validator_add(&validator, self, titles[i], 0, 999)];
 
     validator.button = createButton(localize(CFSTR("settingsSave")), UIColor.systemBlueColor,
-                                    BtnBackground, 0, self, @selector(buttonTapped:), 40);
+                                    BtnBackground, 0, self, @selector(buttonTapped:), 44);
     [vStack addArrangedSubview:validator.button];
 
     [vStack addArrangedSubview:createButton(localize(CFSTR("settingsDelete")), UIColor.systemRedColor,
-                                            BtnBackground, 1, self, @selector(buttonTapped:), 40)];
+                                            BtnBackground, 1, self, @selector(buttonTapped:), 44)];
 
     UIScrollView *scrollView = createScrollView();
     [self.view addSubview:scrollView];

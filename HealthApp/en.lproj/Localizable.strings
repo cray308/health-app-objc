@@ -52,6 +52,11 @@
 "liftTypes2" = "Bench";
 "liftTypes3" = "Deadlift";
 
+"exerciseState0" = "Not active";
+"exerciseState1" = "Active";
+"exerciseState2" = "Resting";
+"exerciseState3" = "Completed";
+
 "workoutNotificationTitle" = "Workout Update";
 
 "cancel" = "Cancel";
@@ -63,6 +68,8 @@
 
 "homeHeader0" = "Workouts this week";
 "homeHeader1" = "Add Custom Workout";
+"homeState0" = "Completed";
+"homeState1" = "Not completed";
 "homeWorkoutType0" = "Test Max";
 "homeWorkoutType1" = "Endurance";
 "homeWorkoutType2" = "Strength";

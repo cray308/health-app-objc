@@ -18,6 +18,8 @@ typedef struct {
     USet_char *set;
     id button;
     id toolbar;
+    id flexSpace;
+    id doneButton;
     int count;
     Padding padding;
     struct InputView {
@@ -25,6 +27,8 @@ typedef struct {
         id hintLabel;
         id field;
         id errorLabel;
+        CFStringRef hintText;
+        CFStringRef errorText;
         short minVal;
         short maxVal;
         short result;

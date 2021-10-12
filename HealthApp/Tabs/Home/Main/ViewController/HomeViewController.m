@@ -34,6 +34,7 @@ void homeVC_updateWorkoutsList(HomeViewController *vc) {
         bool enable = !(userData->completedWorkouts & (1 << (int) v.tag));
         enableButton(v->button, enable);
         setBackground(v->box, enable ? UIColor.systemGrayColor : UIColor.systemGreenColor);
+        statusButton_updateAccessibility(v, vc->model->stateNames[enable]);
     }
 }
 
@@ -63,7 +64,7 @@ void homeVC_createWorkoutsList(HomeViewController *vc) {
     setBackground(self.view, UIColor.systemGroupedBackgroundColor);
     self.navigationItem.title = _nsstr(localize(CFSTR("titles0")));
 
-    greetingLabel = createLabel(NULL, TextTitle1, NSTextAlignmentCenter, 50);
+    greetingLabel = createLabel(NULL, TextTitle1, NSTextAlignmentCenter, true);
     UIStackView *vStack = createStackView((id[]){greetingLabel}, 1, 1, 20, (Padding){10, 0, 16, 0});
     CFStringRef titles[5]; fillStringArray(titles, CFSTR("homeWorkoutType%d"), 5);
     CFStringRef headers[2]; fillStringArray(headers, CFSTR("homeHeader%d"), 2);
@@ -73,6 +74,7 @@ void homeVC_createWorkoutsList(HomeViewController *vc) {
 
     for (int i = 0; i < 5; ++i) {
         UIView *btn = statusButton_init(titles[i], 1, i, self, @selector(customButtonTapped:));
+        statusButton_updateAccessibility(btn, NULL);
         container_add(&customContainer, btn);
     }
 

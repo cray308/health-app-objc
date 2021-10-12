@@ -29,6 +29,8 @@ static struct __WorkoutKeys {
     CFStringRef const title;
 } const Keys = {CFSTR("reps"), CFSTR("type"), CFSTR("index"), CFSTR("title")};
 
+static CFStringRef ExerciseStates[4];
+
 static void createRootAndLibDict(struct DictWrapper *data) {
 #if DEBUG
     CFStringRef path = ((CFStringRef(*)(id,SEL,CFStringRef,CFStringRef))objc_msgSend)
@@ -83,7 +85,9 @@ static void buildWorkoutFromDict(CFDictionaryRef dict, WorkoutParams *params, Wo
         CFArrayRef foundExercises = CFDictionaryGetValue(act, CFSTR("exercises"));
         for (int j = 0; j < CFArrayGetCount(foundExercises); ++j) {
             CFDictionaryRef ex = CFArrayGetValueAtIndex(foundExercises, j);
-            ExerciseEntry exercise = {.sets = 1, .timer = &w->timers[TimerExercise]};
+            ExerciseEntry exercise = {
+                .sets = 1, .timer = &w->timers[TimerExercise], .stateNames = ExerciseStates
+            };
 
             number = CFDictionaryGetValue(ex, Keys.type);
             CFNumberGetValue(number, kCFNumberIntType, &tempInt);
@@ -152,6 +156,10 @@ static void buildWorkoutFromDict(CFDictionaryRef dict, WorkoutParams *params, Wo
         pthread_cond_init(&w->timers[i].cond, NULL);
     }
     w->timers[TimerGroup].exercise = ExerciseTagNA;
+}
+
+void initExerciseMgrStrings(void) {
+    fillStringArray(ExerciseStates, CFSTR("exerciseState%d"), 4);
 }
 
 void workoutParams_init(WorkoutParams *this, signed char day) {

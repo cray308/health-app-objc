@@ -14,6 +14,7 @@
 extern void initExerciseStrings(void);
 extern void initCircuitStrings(void);
 extern void initTimerStrings(void);
+extern void initExerciseMgrStrings(void);
 extern void initValidatorStrings(void);
 extern void userInfo_create(void);
 extern int userInfo_initFromStorage(void);
@@ -35,6 +36,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
     initExerciseStrings();
     initCircuitStrings();
     initTimerStrings();
+    initExerciseMgrStrings();
     CGRect bounds;
     getScreenBounds(&bounds);
     self->window = createObjectWithFrame("UIWindow", bounds);

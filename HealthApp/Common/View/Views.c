@@ -19,8 +19,13 @@ static inline void setAlignment(id view, int alignment) {
     setInt(view, sel_getUid("setTextAlignment:"), alignment);
 }
 
+static inline void adjustFontForSizeCategory(id view) {
+    setBool(view, sel_getUid("setAdjustsFontForContentSizeCategory:"), true);
+}
+
 static inline void setDynamicFont(id view) {
     setBool(view, sel_getUid("setAdjustsFontSizeToFitWidth:"), true);
+    adjustFontForSizeCategory(view);
     setCGFloat(view, sel_getUid("setMinimumScaleFactor:"), 0.85);
 }
 
@@ -65,6 +70,10 @@ void setBackground(id view, id color) {
 
 void setTintColor(id view, id color) {
     setObject(view, sel_getUid("setTintColor:"), color);
+}
+
+void setAccessibilityLabel(id view, CFStringRef text) {
+    setString(view, sel_getUid("setAccessibilityLabel:"), text);
 }
 
 void setLabelText(id view, CFStringRef text) {
@@ -140,7 +149,7 @@ id createScrollView(void) {
     return view;
 }
 
-id createLabel(CFStringRef text, int style, int alignment, int height) {
+id createLabel(CFStringRef text, int style, int alignment, bool accessible) {
     id view = createObjectWithFrame("UILabel", CGRectZero);
     disableAutoresizing(view);
     setLabelText(view, text);
@@ -148,7 +157,7 @@ id createLabel(CFStringRef text, int style, int alignment, int height) {
     setDynamicFont(view);
     setTextColor(view, createColor("labelColor"));
     setAlignment(view, alignment);
-    setHeight(view, height);
+    setBool(view, sel_getUid("setIsAccessibilityElement:"), accessible);
     return view;
 }
 
@@ -193,16 +202,20 @@ id createSegmentedControl(CFStringRef format, int count, int startIndex,
     return view;
 }
 
-id createTextfield(id delegate, CFStringRef text, int alignment, int keyboard, int tag, int h) {
+id createTextfield(id delegate, CFStringRef text, CFStringRef hint,
+                   int alignment, int keyboard, int tag) {
     id view = createObjectWithFrame("UITextField", CGRectZero);
     disableAutoresizing(view);
     setBackground(view, createColor("tertiarySystemBackgroundColor"));
     setLabelText(view, text);
+    setLabelFont(view, TextBody);
+    adjustFontForSizeCategory(view);
     setAlignment(view, alignment);
     setTag(view, tag);
     setInt(view, sel_getUid("setBorderStyle:"), 3);
     setInt(view, sel_getUid("setKeyboardType:"), keyboard);
     setObject(view, sel_getUid("setDelegate:"), delegate);
-    setHeight(view, h);
+    setMinHeight(view, 44);
+    setAccessibilityLabel(view, hint);
     return view;
 }

@@ -53,6 +53,12 @@ void setWidth(id v, int width) {
     activateConstraints((id []){createConstraint(getAnchor(v, anchors.width), nil, width)}, 1);
 }
 
+void setMinHeight(id v, int height) {
+    id c = getObjectWithFloat(getAnchor(v, anchors.height),
+                              sel_getUid("constraintGreaterThanOrEqualToConstant:"), height);
+    activateConstraints((id []){c}, 1);
+}
+
 void setHeight(id v, int height) {
     activateConstraints((id []){createConstraint(getAnchor(v, anchors.height), nil, height)}, 1);
 }

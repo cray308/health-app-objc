@@ -41,8 +41,9 @@ id setupWorkoutVC_init(HomeTabCoordinator *delegate, byte type, Array_str *names
     setBackground(self.view, UIColor.systemGroupedBackgroundColor);
     validator_setup(&validator, 8, output.type != WorkoutHIC, self, @selector(dismissKeyboard));
 
-    UILabel *workoutLabel = createLabel(localize(CFSTR("planPickerTitle")), TextFootnote, 4, 20);
-    workoutTextField = createTextfield(nil, names->arr[0], NSTextAlignmentCenter, 0, 0, 40);
+    CFStringRef pickerTitle = localize(CFSTR("planPickerTitle"));
+    UILabel *workoutLabel = createLabel(pickerTitle, TextFootnote, 4, false);
+    workoutTextField = createTextfield(nil, names->arr[0], pickerTitle, NSTextAlignmentCenter, 0, 0);
     UIStackView *workoutContainer = createStackView((id []){workoutLabel, workoutTextField},
                                                     2, 1, 2, (Padding){30,8,0,8});
 

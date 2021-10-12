@@ -29,6 +29,7 @@ typedef struct {
         ExerciseStateResting,
         ExerciseStateCompleted
     } state;
+    CFStringRef *stateNames;
     CFStringRef name;
     WorkoutTimer *timer;
 } ExerciseEntry;

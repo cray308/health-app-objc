@@ -13,6 +13,7 @@
 #include "ExerciseManager.h"
 
 void homeViewModel_init(HomeViewModel *model) {
+    fillStringArray(model->stateNames, CFSTR("homeState%d"), 2);
     fillStringArray(model->timeNames, CFSTR("timesOfDay%d"), 3);
     homeViewModel_updateTimeOfDay(model);
 }

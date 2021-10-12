@@ -15,6 +15,7 @@ void exerciseView_configure(StatusButton *v, ExerciseEntry *e) {
     CFStringRef title = exerciseEntry_createTitle(e);
     setButtonTitle(v->button, title, 0);
     setLabelText(v->headerLabel, setsStr);
+    statusButton_updateAccessibility(v, e->stateNames[e->state]);
 
     switch (e->state) {
         case ExerciseStateDisabled:
