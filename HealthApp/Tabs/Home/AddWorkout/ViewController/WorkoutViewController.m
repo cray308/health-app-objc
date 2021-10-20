@@ -58,7 +58,6 @@ void exerciseView_configure(StatusButton *v, ExerciseEntry *e) {
     [super viewDidLoad];
     setBackground(self.view, UIColor.systemGroupedBackgroundColor);
     self.navigationItem.title = _nsstr(workout->title);
-    setTintColor(self.navigationController.navigationBar, UIColor.systemBlueColor);
 
     UIStackView *stack = createStackView(NULL, 0, 1, 20, (Padding){20, 8, 20, 8});
     UIButton *startBtn = createButton(localize(CFSTR("start")), UIColor.systemGreenColor,

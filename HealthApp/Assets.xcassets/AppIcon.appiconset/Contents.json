@@ -1,109 +1,109 @@
 {
   "images" : [
     {
-      "filename" : "token_icon_40x40.png",
+      "filename" : "Coin_Frame_40p.png",
       "idiom" : "iphone",
       "scale" : "2x",
       "size" : "20x20"
     },
     {
-      "filename" : "token_icon_60x60.png",
+      "filename" : "Coin_Frame_60p.png",
       "idiom" : "iphone",
       "scale" : "3x",
       "size" : "20x20"
     },
     {
-      "filename" : "token_icon_58x58.png",
+      "filename" : "Coin_Frame_58p.png",
       "idiom" : "iphone",
       "scale" : "2x",
       "size" : "29x29"
     },
     {
-      "filename" : "token_icon_87x87.png",
+      "filename" : "Coin_Frame_87p.png",
       "idiom" : "iphone",
       "scale" : "3x",
       "size" : "29x29"
     },
     {
-      "filename" : "token_icon_80x80.png",
+      "filename" : "Coin_Frame_80p.png",
       "idiom" : "iphone",
       "scale" : "2x",
       "size" : "40x40"
     },
     {
-      "filename" : "token_icon_120x120.png",
+      "filename" : "Coin_Frame_120p.png",
       "idiom" : "iphone",
       "scale" : "3x",
       "size" : "40x40"
     },
     {
-      "filename" : "token_icon_120x120-1.png",
+      "filename" : "Coin_Frame_120p-1.png",
       "idiom" : "iphone",
       "scale" : "2x",
       "size" : "60x60"
     },
     {
-      "filename" : "token_icon_180x180.png",
+      "filename" : "Coin_Frame_180p.png",
       "idiom" : "iphone",
       "scale" : "3x",
       "size" : "60x60"
     },
     {
-      "filename" : "token_icon_ipad_20.png",
+      "filename" : "Coin_Frame_20p.png",
       "idiom" : "ipad",
       "scale" : "1x",
       "size" : "20x20"
     },
     {
-      "filename" : "token_icon_ipad_40.png",
+      "filename" : "Coin_Frame_40p-1.png",
       "idiom" : "ipad",
       "scale" : "2x",
       "size" : "20x20"
     },
     {
-      "filename" : "token_icon_ipad_29.png",
+      "filename" : "Coin_Frame_29p.png",
       "idiom" : "ipad",
       "scale" : "1x",
       "size" : "29x29"
     },
     {
-      "filename" : "token_icon_ipad_58.png",
+      "filename" : "Coin_Frame_58p-1.png",
       "idiom" : "ipad",
       "scale" : "2x",
       "size" : "29x29"
     },
     {
-      "filename" : "token_icon_ipad_40-1.png",
+      "filename" : "Coin_Frame_40p-2.png",
       "idiom" : "ipad",
       "scale" : "1x",
       "size" : "40x40"
     },
     {
-      "filename" : "token_icon_ipad_80.png",
+      "filename" : "Coin_Frame_80p-1.png",
       "idiom" : "ipad",
       "scale" : "2x",
       "size" : "40x40"
     },
     {
-      "filename" : "token_icon_ipad_76.png",
+      "filename" : "Coin_Frame_76p.png",
       "idiom" : "ipad",
       "scale" : "1x",
       "size" : "76x76"
     },
     {
-      "filename" : "token_icon_ipad_152.png",
+      "filename" : "Coin_Frame_152p.png",
       "idiom" : "ipad",
       "scale" : "2x",
       "size" : "76x76"
     },
     {
-      "filename" : "token_icon_ipad_167.png",
+      "filename" : "Coin_Frame_167p.png",
       "idiom" : "ipad",
       "scale" : "2x",
       "size" : "83.5x83.5"
     },
     {
-      "filename" : "token_icon_1024x1024.png",
+      "filename" : "Coin_Frame_1024p.png",
       "idiom" : "ios-marketing",
       "scale" : "1x",
       "size" : "1024x1024"

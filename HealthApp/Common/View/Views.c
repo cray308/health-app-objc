@@ -68,10 +68,6 @@ void setBackground(id view, id color) {
     setObject(view, sel_getUid("setBackgroundColor:"), color);
 }
 
-void setTintColor(id view, id color) {
-    setObject(view, sel_getUid("setTintColor:"), color);
-}
-
 void setAccessibilityLabel(id view, CFStringRef text) {
     setString(view, sel_getUid("setAccessibilityLabel:"), text);
 }
@@ -193,7 +189,7 @@ id createSegmentedControl(CFStringRef format, int count, int startIndex,
     disableAutoresizing(view);
     setInt(view, sel_getUid("setSelectedSegmentIndex:"), startIndex);
     setCornerRadius(view);
-    setTintColor(view, createColor("systemGray2Color"));
+    setObject(view, sel_getUid("setTintColor:"), createColor("systemGray2Color"));
     if (action)
         addTarget(view, target, action, 4096);
     if (height >= 0)

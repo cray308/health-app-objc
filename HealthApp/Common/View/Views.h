@@ -24,7 +24,6 @@ id getLayer(id view);
 void setTag(id view, int tag);
 void hideView(id view, bool hide);
 void setBackground(id view, id color);
-void setTintColor(id view, id color);
 
 void setAccessibilityLabel(id view, CFStringRef text);
 void setLabelText(id view, CFStringRef text);
