@@ -115,13 +115,17 @@ void releaseObj(id obj) {
     voidFunc(obj, sel_getUid("release"));
 }
 
-void getScreenBounds(CGRect *result) {
-    id screen = staticMethod(objc_getClass("UIScreen"), sel_getUid("mainScreen"));
+void getRect(id view, CGRect *result, char type) {
+    SEL func = sel_getUid(!type ? "frame" : "bounds");
 #if defined(__arm64__)
-    *result = ((CGRect(*)(id,SEL))objc_msgSend)(screen, sel_getUid("bounds"));
+    *result = ((CGRect(*)(id,SEL))objc_msgSend)(view, func);
 #else
-    ((void(*)(CGRect*,id,SEL))objc_msgSend_stret)(result, screen, sel_getUid("bounds"));
+    ((void(*)(CGRect*,id,SEL))objc_msgSend_stret)(result, view, func);
 #endif
+}
+
+void getScreenBounds(CGRect *result) {
+    getRect(staticMethod(objc_getClass("UIScreen"), sel_getUid("mainScreen")), result, 1);
 }
 
 id getBundle(void) {
