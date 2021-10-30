@@ -1,11 +1,5 @@
-//
-//  WorkoutViewController.m
-//  HealthApp
-//
-//  Created by Christopher Ray on 6/9/21.
-//
-
-#import "WorkoutViewController.h"
+#import <UIKit/UIKit.h>
+#include "AddWorkoutCoordinator.h"
 #include "ViewControllerHelpers.h"
 #include "WorkoutScreenHelpers.h"
 #import "StatusButton.h"
@@ -39,6 +33,7 @@ void exerciseView_configure(StatusButton *v, ExerciseEntry *e) {
         CFRelease(setsStr);
 }
 
+@interface WorkoutViewController: UIViewController @end
 @interface WorkoutViewController() {
     @public AddWorkoutCoordinator *delegate;
     @public Workout *workout;

@@ -1,15 +1,9 @@
-//
-//  HomeSetupWorkoutModalViewController.m
-//  HealthApp
-//
-//  Created by Christopher Ray on 6/12/21.
-//
-
-#import "HomeSetupWorkoutModalViewController.h"
+#import <UIKit/UIKit.h>
 #include "HomeTabCoordinator.h"
 #include "ViewControllerHelpers.h"
 #include "ExerciseManager.h"
 
+@interface SetupWorkoutSheet: UIViewController<UIPickerViewDelegate, UIPickerViewDataSource, UITextFieldDelegate> @end
 @interface SetupWorkoutSheet() {
     @public HomeTabCoordinator *delegate;
     @public Array_str *names;
@@ -18,16 +12,6 @@
     @public WorkoutParams output;
 }
 @end
-
-id setupWorkoutVC_init(HomeTabCoordinator *delegate, byte type, Array_str *names) {
-    SetupWorkoutSheet *this = [[SetupWorkoutSheet alloc] initWithNibName:nil bundle:nil];
-    this->delegate = delegate;
-    this->names = names;
-    workoutParams_init(&this->output, -1);
-    this->output.type = type;
-    return this;
-}
-
 @implementation SetupWorkoutSheet
 - (void) dealloc {
     validator_free(&validator);
@@ -147,3 +131,12 @@ shouldChangeCharactersInRange: (NSRange)range replacementString: (NSString *)str
     setLabelText(workoutTextField, names->arr[output.index]);
 }
 @end
+
+id setupWorkoutVC_init(HomeTabCoordinator *delegate, byte type, Array_str *names) {
+    SetupWorkoutSheet *this = [[SetupWorkoutSheet alloc] initWithNibName:nil bundle:nil];
+    this->delegate = delegate;
+    this->names = names;
+    workoutParams_init(&this->output, -1);
+    this->output.type = type;
+    return this;
+}

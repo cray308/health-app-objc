@@ -73,38 +73,3 @@ void addAlertAction(id ctrl, CFStringRef title, int style, Callback handler) {
     });
     setObject(ctrl, sel_getUid("addAction:"), action);
 }
-
-id createTabController(void) {
-    id appearance = getObject(allocClass("UITabBarAppearance"), sel_getUid("init"));
-    setBackground(appearance, createColor("systemBackgroundColor"));
-    char const *items[] = {
-        "stackedLayoutAppearance", "inlineLayoutAppearance", "compactInlineLayoutAppearance"
-    };
-    CFDictionaryValueCallBacks valueCallbacks = {0};
-    const void *keys[] = {(CFStringRef) NSForegroundColorAttributeName};
-    id normalColor = createColor("systemGrayColor"), selectedColor = createColor("systemRedColor");
-    const void *normalVals[] = {normalColor}, *selectedVals[] = {selectedColor};
-    CFDictionaryRef normalDict = CFDictionaryCreate(NULL, keys, normalVals, 1,
-                                                    &kCFCopyStringDictionaryKeyCallBacks,
-                                                    &valueCallbacks);
-    CFDictionaryRef selectedDict = CFDictionaryCreate(NULL, keys, selectedVals, 1,
-                                                      &kCFCopyStringDictionaryKeyCallBacks,
-                                                      &valueCallbacks);
-
-    for (int i = 0; i < 3; ++i) {
-        id item = getObject(appearance, sel_getUid(items[i]));
-        id normal = getObject(item, sel_getUid("normal"));
-        setObject(normal, sel_getUid("setIconColor:"), normalColor);
-        setDict(normal, sel_getUid("setTitleTextAttributes:"), normalDict);
-        id selected = getObject(item, sel_getUid("selected"));
-        setObject(selected, sel_getUid("setIconColor:"), selectedColor);
-        setDict(selected, sel_getUid("setTitleTextAttributes:"), selectedDict);
-    }
-    id tabVC = getObject(allocClass("UITabBarController"), sel_getUid("init"));
-    id bar = getObject(tabVC, sel_getUid("tabBar"));
-    setObject(bar, sel_getUid("setStandardAppearance:"), appearance);
-    CFRelease(normalDict);
-    CFRelease(selectedDict);
-    releaseObj(appearance);
-    return tabVC;
-}

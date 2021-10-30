@@ -1,10 +1,3 @@
-//
-//  StatusButton.m
-//  HealthApp
-//
-//  Created by Christopher Ray on 9/24/21.
-//
-
 #import "StatusButton.h"
 #include "ViewControllerHelpers.h"
 

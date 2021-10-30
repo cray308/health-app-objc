@@ -1,12 +1,5 @@
-//
-//  TotalWorkoutsChart.m
-//  HealthApp
-//
-//  Created by Christopher Ray on 8/24/21.
-//
-
 #import "TotalWorkoutsChart.h"
-#include "SwiftBridging.h"
+#import "SwiftBridging.h"
 @implementation TotalWorkoutsChart @end
 
 id totalWorkoutsChart_init(TotalWorkoutsChartViewModel *model, id formatter) {

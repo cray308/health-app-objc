@@ -1,26 +1,13 @@
-//
-//  AddWorkoutUpdateMaxesViewController.m
-//  HealthApp
-//
-//  Created by Christopher Ray on 6/13/21.
-//
-
-#import "AddWorkoutUpdateMaxesViewController.h"
+#import <UIKit/UIKit.h>
 #include "AddWorkoutCoordinator.h"
 #include "ViewControllerHelpers.h"
 
+@interface UpdateMaxesSheet: UIViewController<UITextFieldDelegate> @end
 @interface UpdateMaxesSheet() {
     @public AddWorkoutCoordinator *delegate;
     @public Validator validator;
 }
 @end
-
-id updateMaxesVC_init(AddWorkoutCoordinator *delegate) {
-    UpdateMaxesSheet *this = [[UpdateMaxesSheet alloc] initWithNibName:nil bundle:nil];
-    this->delegate = delegate;
-    return this;
-}
-
 @implementation UpdateMaxesSheet
 - (void) dealloc {
     validator_free(&validator);
@@ -67,3 +54,9 @@ shouldChangeCharactersInRange: (NSRange)range replacementString: (NSString *)str
     return [textField resignFirstResponder];
 }
 @end
+
+id updateMaxesVC_init(AddWorkoutCoordinator *delegate) {
+    UpdateMaxesSheet *this = [[UpdateMaxesSheet alloc] initWithNibName:nil bundle:nil];
+    this->delegate = delegate;
+    return this;
+}

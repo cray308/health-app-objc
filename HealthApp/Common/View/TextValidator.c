@@ -38,7 +38,12 @@ void validator_setup(Validator *this, short margins, bool createSet, id target, 
     memcpy(&this->padding, &(Padding){4, margins, 4, margins}, sizeof(Padding));
 
     CGRect bounds;
-    getScreenBounds(&bounds);
+    id screen = staticMethod(objc_getClass("UIScreen"), sel_getUid("mainScreen"));
+#if defined(__arm64__)
+    bounds = ((CGRect(*)(id,SEL))objc_msgSend)(screen, sel_getUid("bounds"));
+#else
+    ((void(*)(CGRect*,id,SEL))objc_msgSend_stret)(&bounds, screen, sel_getUid("bounds"));
+#endif
     CGFloat width = bounds.size.width;
 
     this->toolbar = createObjectWithFrame("UIToolbar", (CGRect){{0}, {width, 50}});

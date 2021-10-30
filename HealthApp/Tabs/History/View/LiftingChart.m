@@ -1,12 +1,5 @@
-//
-//  LiftingChart.m
-//  HealthApp
-//
-//  Created by Christopher Ray on 8/24/21.
-//
-
 #import "LiftingChart.h"
-#include "SwiftBridging.h"
+#import "SwiftBridging.h"
 @implementation LiftingChart @end
 
 id liftingChart_init(LiftChartViewModel *model, id formatter) {

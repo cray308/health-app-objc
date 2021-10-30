@@ -1,10 +1,3 @@
-//
-//  SwiftBridging.h
-//  HealthApp
-//
-//  Created by Christopher Ray on 8/22/21.
-//
-
 #ifndef SwiftBridging_h
 #define SwiftBridging_h
 

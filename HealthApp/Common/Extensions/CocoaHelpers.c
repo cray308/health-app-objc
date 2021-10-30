@@ -115,11 +115,6 @@ void releaseObj(id obj) {
     voidFunc(obj, sel_getUid("release"));
 }
 
-void getScreenBounds(CGRect *result) {
-    id screen = staticMethod(objc_getClass("UIScreen"), sel_getUid("mainScreen"));
-    ((void(*)(CGRect*,id,SEL))objc_msgSend_stret)(result, screen, sel_getUid("bounds"));
-}
-
 id getBundle(void) {
     return staticMethod(objc_getClass("NSBundle"), sel_getUid("mainBundle"));
 }

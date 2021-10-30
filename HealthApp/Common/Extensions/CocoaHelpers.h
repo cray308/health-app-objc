@@ -51,7 +51,6 @@ id getObjectWithFloat(id obj, SEL _cmd, CGFloat arg);
 id getObjectWithArr(id obj, SEL _cmd, CFArrayRef arg);
 void releaseObj(id obj);
 
-void getScreenBounds(CGRect *result);
 id getBundle(void);
 id getUserDefaults(void);
 id getNotificationCenter(void);

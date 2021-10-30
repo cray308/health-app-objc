@@ -43,7 +43,11 @@ static void navigateToAddWorkout(HomeTabCoordinator *this, bool dismissVC, Worko
 static void showConfetti(id vc) {
     id view = getObject(vc, sel_getUid("view"));
     CGRect frame;
+#if defined(__arm64__)
+    frame = ((CGRect(*)(id,SEL))objc_msgSend)(view, sel_getUid("frame"));
+#else
     ((void(*)(CGRect*,id,SEL))objc_msgSend_stret)(&frame, view, sel_getUid("frame"));
+#endif
     ConfettiContainer container = {.frame = (CGRect){{0}, frame.size}};
     setupConfettiView(&container);
     addSubview(view, container.view);

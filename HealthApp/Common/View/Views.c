@@ -188,8 +188,6 @@ id createSegmentedControl(CFStringRef format, int count, int startIndex,
                                sel_getUid("initWithItems:"), array);
     disableAutoresizing(view);
     setInt(view, sel_getUid("setSelectedSegmentIndex:"), startIndex);
-    setCornerRadius(view);
-    setObject(view, sel_getUid("setTintColor:"), createColor("systemGray2Color"));
     if (action)
         addTarget(view, target, action, 4096);
     if (height >= 0)

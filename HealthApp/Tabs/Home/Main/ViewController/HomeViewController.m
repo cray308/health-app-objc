@@ -1,17 +1,11 @@
-//
-//  HomeViewController.m
-//  HealthApp
-//
-//  Created by Christopher Ray on 3/27/21.
-//
-
-#import "HomeViewController.h"
+#import <UIKit/UIKit.h>
 #include "ViewControllerHelpers.h"
 #include "HomeTabCoordinator.h"
 #include "AppCoordinator.h"
 #include "AppUserData.h"
 #import "StatusButton.h"
 
+@interface HomeViewController: UIViewController @end
 @interface HomeViewController() {
     @public HomeViewModel *model;
     @public HomeTabCoordinator *delegate;

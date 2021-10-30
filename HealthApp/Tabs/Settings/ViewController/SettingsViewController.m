@@ -1,16 +1,10 @@
-//
-//  SettingsViewController.m
-//  HealthApp
-//
-//  Created by Christopher Ray on 3/27/21.
-//
-
-#import "SettingsViewController.h"
+#import <UIKit/UIKit.h>
 #include "SettingsTabCoordinator.h"
 #include "ViewControllerHelpers.h"
 #include "AppUserData.h"
 #include "AppCoordinator.h"
 
+@interface SettingsViewController: UIViewController<UITextFieldDelegate> @end
 @interface SettingsViewController() {
     @public SettingsTabCoordinator *delegate;
     UISegmentedControl *picker;

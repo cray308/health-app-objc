@@ -1,13 +1,3 @@
-//
-//  StatusButton.h
-//  HealthApp
-//
-//  Created by Christopher Ray on 9/24/21.
-//
-
-#ifndef StatusButton_h
-#define StatusButton_h
-
 #import <UIKit/UIKit.h>
 
 @interface StatusButton: UIView @end
@@ -20,5 +10,3 @@
 
 id statusButton_init(CFStringRef text, bool hideViews, int tag, id target, SEL action);
 void statusButton_updateAccessibility(id b, CFStringRef stateText);
-
-#endif /* StatusButton_h */

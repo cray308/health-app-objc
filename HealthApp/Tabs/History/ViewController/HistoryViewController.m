@@ -1,11 +1,3 @@
-//
-//  HistoryViewController.m
-//  HealthApp
-//
-//  Created by Christopher Ray on 3/27/21.
-//
-
-#import "HistoryViewController.h"
 #import "SwiftBridging.h"
 #import "TotalWorkoutsChart.h"
 #import "WorkoutTypeChart.h"
@@ -13,6 +5,7 @@
 #include "AppCoordinator.h"
 #include "HistoryTabCoordinator.h"
 
+@interface HistoryViewController: UIViewController<AxisValueFormatter> @end
 @interface HistoryViewController() {
     @public HistoryViewModel *model;
     @public UISegmentedControl *picker;
@@ -22,7 +15,6 @@
     LiftingChart *liftChart;
 }
 @end
-
 @implementation HistoryViewController
 - (void) viewDidLoad {
     [super viewDidLoad];

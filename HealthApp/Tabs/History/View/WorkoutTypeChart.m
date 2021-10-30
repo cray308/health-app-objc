@@ -1,12 +1,5 @@
-//
-//  WorkoutTypeChart.m
-//  HealthApp
-//
-//  Created by Christopher Ray on 8/24/21.
-//
-
 #import "WorkoutTypeChart.h"
-#include "SwiftBridging.h"
+#import "SwiftBridging.h"
 
 id workoutTypeChart_init(WorkoutTypeChartViewModel *model, id formatter) {
     WorkoutTypeChart *this = [[WorkoutTypeChart alloc] initWithFrame:CGRectZero];

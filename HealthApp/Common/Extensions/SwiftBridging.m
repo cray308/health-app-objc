@@ -1,10 +1,3 @@
-//
-//  SwiftBridging.m
-//  HealthApp
-//
-//  Created by Christopher Ray on 8/22/21.
-//
-
 #import "SwiftBridging.h"
 #import "UIKit/UIKit.h"
 @import Charts;
