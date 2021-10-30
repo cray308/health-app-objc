@@ -37,11 +37,11 @@
 		6151A323260F012300D88F1B /* CalendarDateHelpers.c in Sources */ = {isa = PBXBuildFile; fileRef = 6151A322260F012300D88F1B /* CalendarDateHelpers.c */; };
 		6151C91126C4B23200C95A93 /* hash.h in Headers */ = {isa = PBXBuildFile; fileRef = 6151C90226C4B23100C95A93 /* hash.h */; };
 		6151C92226C4B24200C95A93 /* hash.c in Sources */ = {isa = PBXBuildFile; fileRef = 6151C92026C4B24200C95A93 /* hash.c */; };
-		61594D0C26068105000D01A1 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 61594D0B26068105000D01A1 /* AppDelegate.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		61594D0C26068105000D01A1 /* AppDelegate.c in Sources */ = {isa = PBXBuildFile; fileRef = 61594D0B26068105000D01A1 /* AppDelegate.c */; };
 		61594D1826068105000D01A1 /* HealthApp.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 61594D1626068105000D01A1 /* HealthApp.xcdatamodeld */; };
 		61594D1A26068106000D01A1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 61594D1926068106000D01A1 /* Assets.xcassets */; };
 		61594D1D26068106000D01A1 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 61594D1B26068106000D01A1 /* LaunchScreen.storyboard */; };
-		61594D2026068106000D01A1 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 61594D1F26068106000D01A1 /* main.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		61594D2026068106000D01A1 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 61594D1F26068106000D01A1 /* main.c */; };
 		61594D2A26068106000D01A1 /* HealthAppTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 61594D2926068106000D01A1 /* HealthAppTests.m */; };
 		61594D5726068C41000D01A1 /* AppCoordinator.c in Sources */ = {isa = PBXBuildFile; fileRef = 61594D5626068C41000D01A1 /* AppCoordinator.c */; };
 		61594D652606C7C6000D01A1 /* AppUserData.c in Sources */ = {isa = PBXBuildFile; fileRef = 61594D642606C7C6000D01A1 /* AppUserData.c */; };
@@ -75,6 +75,7 @@
 		61E8ED6726FD60B400942368 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 61E8ED6926FD60B400942368 /* Localizable.strings */; };
 		61E8ED6C26FD87AB00942368 /* WorkoutData_d.plist in Resources */ = {isa = PBXBuildFile; fileRef = 61E8ED6B26FD87AB00942368 /* WorkoutData_d.plist */; };
 		61FFEA552712352C0065381B /* AppTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 61FFEA542712352C0065381B /* AppTypes.h */; };
+		61FFEEA2272CCCB5002BFFA6 /* AppDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 61FFEEA1272CCCAE002BFFA6 /* AppDelegate.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -139,12 +140,12 @@
 		6151C90226C4B23100C95A93 /* hash.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hash.h; sourceTree = "<group>"; };
 		6151C92026C4B24200C95A93 /* hash.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = hash.c; sourceTree = "<group>"; };
 		61594D0726068105000D01A1 /* HealthApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HealthApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		61594D0B26068105000D01A1 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		61594D0B26068105000D01A1 /* AppDelegate.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = AppDelegate.c; sourceTree = "<group>"; };
 		61594D1726068105000D01A1 /* HealthApp.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = HealthApp.xcdatamodel; sourceTree = "<group>"; };
 		61594D1926068106000D01A1 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		61594D1C26068106000D01A1 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		61594D1E26068106000D01A1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		61594D1F26068106000D01A1 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		61594D1F26068106000D01A1 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 		61594D2526068106000D01A1 /* HealthAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HealthAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		61594D2926068106000D01A1 /* HealthAppTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HealthAppTests.m; sourceTree = "<group>"; };
 		61594D2B26068106000D01A1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -189,6 +190,7 @@
 		61E8ED6826FD60B400942368 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		61E8ED6B26FD87AB00942368 /* WorkoutData_d.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = WorkoutData_d.plist; sourceTree = "<group>"; };
 		61FFEA542712352C0065381B /* AppTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppTypes.h; sourceTree = "<group>"; };
+		61FFEEA1272CCCAE002BFFA6 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -269,11 +271,12 @@
 			children = (
 				61C779022610260B001326A1 /* Common */,
 				61C778E926102446001326A1 /* Tabs */,
-				61594D0B26068105000D01A1 /* AppDelegate.m */,
+				61FFEEA1272CCCAE002BFFA6 /* AppDelegate.h */,
+				61594D0B26068105000D01A1 /* AppDelegate.c */,
 				61594D1926068106000D01A1 /* Assets.xcassets */,
 				61594D1E26068106000D01A1 /* Info.plist */,
 				61594D1B26068106000D01A1 /* LaunchScreen.storyboard */,
-				61594D1F26068106000D01A1 /* main.m */,
+				61594D1F26068106000D01A1 /* main.c */,
 				61E8ED6926FD60B400942368 /* Localizable.strings */,
 			);
 			path = HealthApp;
@@ -555,6 +558,7 @@
 				61C82985270B76F700E33B51 /* WorkoutTimer.h in Headers */,
 				61C82978270B6E2200E33B51 /* ExerciseEntry.h in Headers */,
 				614DA6A9270A8D8F00EC90C4 /* Workout.h in Headers */,
+				61FFEEA2272CCCB5002BFFA6 /* AppDelegate.h in Headers */,
 				61BA4652270FBF290066A981 /* ObjectArray.h in Headers */,
 				611B591326C5F6830082F6CA /* alg_helper.h in Headers */,
 				610B92B9270A6E9000358DBD /* Views.h in Headers */,
@@ -714,8 +718,8 @@
 				616E2F6826755D2B00342CD8 /* HomeSetupWorkoutModalViewController.m in Sources */,
 				61C7797C26102D5F001326A1 /* HomeTabCoordinator.c in Sources */,
 				61594D5726068C41000D01A1 /* AppCoordinator.c in Sources */,
-				61594D0C26068105000D01A1 /* AppDelegate.m in Sources */,
-				61594D2026068106000D01A1 /* main.m in Sources */,
+				61594D0C26068105000D01A1 /* AppDelegate.c in Sources */,
+				61594D2026068106000D01A1 /* main.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
