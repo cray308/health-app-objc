@@ -55,6 +55,7 @@ void getRect(id view, CGRect *result, char type);
 void getScreenBounds(CGRect *result);
 id getBundle(void);
 id getUserDefaults(void);
+id getDeviceNotificationCenter(void);
 id getNotificationCenter(void);
 id createColor(const char *name);
 id createFont(int style);

@@ -3,6 +3,7 @@
 #include "ViewControllerHelpers.h"
 #include "WorkoutScreenHelpers.h"
 #import "StatusButton.h"
+#import "SwiftBridging.h"
 
 void exerciseView_configure(StatusButton *v, ExerciseEntry *e) {
     CFStringRef setsStr = exerciseEntry_createSetsTitle(e);
@@ -53,6 +54,8 @@ void exerciseView_configure(StatusButton *v, ExerciseEntry *e) {
     [super viewDidLoad];
     setBackground(self.view, UIColor.systemGroupedBackgroundColor);
     self.navigationItem.title = _nsstr(workout->title);
+    if (!checkGreaterThanMinVersion())
+        self.navigationController.navigationBar.tintColor = UIColor.systemRedColor;
 
     UIStackView *stack = createStackView(NULL, 0, 1, 20, (Padding){20, 8, 20, 8});
     UIButton *startBtn = createButton(localize(CFSTR("start")), UIColor.systemGreenColor,
@@ -76,11 +79,8 @@ void exerciseView_configure(StatusButton *v, ExerciseEntry *e) {
 
     UIScrollView *scrollView = createScrollView();
     [self.view addSubview:scrollView];
-    [scrollView addSubview:stack];
-
     pin(scrollView, self.view.safeAreaLayoutGuide, (Padding){0}, 0);
-    pin(stack, scrollView, (Padding){0}, 0);
-    setEqualWidths(stack, scrollView);
+    addVStackToScrollView(stack, scrollView);
 
     [scrollView release];
     [stack release];

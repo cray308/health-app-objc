@@ -7,5 +7,6 @@ id createChartView(id parent, id xAxisFormatter, id *legendEntries, int count, i
 void disableLineChartView(id v);
 void updateDataSet(bool isSmall, int count, id dataSet, id *entries);
 void updateChart(bool isSmall, id view, id data, float axisMax);
+bool checkGreaterThanMinVersion(void);
 
 #endif /* SwiftBridging_h */

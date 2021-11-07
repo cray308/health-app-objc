@@ -74,6 +74,8 @@
 		61C82986270B76F700E33B51 /* WorkoutTimer.c in Sources */ = {isa = PBXBuildFile; fileRef = 61C82984270B76F700E33B51 /* WorkoutTimer.c */; };
 		61E8ED6726FD60B400942368 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 61E8ED6926FD60B400942368 /* Localizable.strings */; };
 		61E8ED6C26FD87AB00942368 /* WorkoutData_d.plist in Resources */ = {isa = PBXBuildFile; fileRef = 61E8ED6B26FD87AB00942368 /* WorkoutData_d.plist */; };
+		61EF50A327374A9100736C45 /* TextFieldViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 61EF50A127374A9100736C45 /* TextFieldViewController.h */; };
+		61EF50A427374A9100736C45 /* TextFieldViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 61EF50A227374A9100736C45 /* TextFieldViewController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61FFEA552712352C0065381B /* AppTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 61FFEA542712352C0065381B /* AppTypes.h */; };
 		61FFEEA2272CCCB5002BFFA6 /* AppDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 61FFEEA1272CCCAE002BFFA6 /* AppDelegate.h */; };
 /* End PBXBuildFile section */
@@ -189,6 +191,8 @@
 		61C82984270B76F700E33B51 /* WorkoutTimer.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = WorkoutTimer.c; sourceTree = "<group>"; };
 		61E8ED6826FD60B400942368 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		61E8ED6B26FD87AB00942368 /* WorkoutData_d.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = WorkoutData_d.plist; sourceTree = "<group>"; };
+		61EF50A127374A9100736C45 /* TextFieldViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TextFieldViewController.h; sourceTree = "<group>"; };
+		61EF50A227374A9100736C45 /* TextFieldViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TextFieldViewController.m; sourceTree = "<group>"; };
 		61FFEA542712352C0065381B /* AppTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppTypes.h; sourceTree = "<group>"; };
 		61FFEEA1272CCCAE002BFFA6 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -309,6 +313,8 @@
 				610B92CA270A7F4900358DBD /* ContainerView.c */,
 				617BDE1A26FE48FD00BDDB73 /* StatusButton.h */,
 				617BDE1E26FE491000BDDB73 /* StatusButton.m */,
+				61EF50A127374A9100736C45 /* TextFieldViewController.h */,
+				61EF50A227374A9100736C45 /* TextFieldViewController.m */,
 				610B92C1270A771900358DBD /* TextValidator.h */,
 				610B92C2270A771900358DBD /* TextValidator.c */,
 				610B92B7270A6E9000358DBD /* Views.h */,
@@ -562,6 +568,7 @@
 				61BA4652270FBF290066A981 /* ObjectArray.h in Headers */,
 				611B591326C5F6830082F6CA /* alg_helper.h in Headers */,
 				610B92B9270A6E9000358DBD /* Views.h in Headers */,
+				61EF50A327374A9100736C45 /* TextFieldViewController.h in Headers */,
 				6150870426D3370400521269 /* WorkoutScreenHelpers.h in Headers */,
 				61FFEA552712352C0065381B /* AppTypes.h in Headers */,
 				610B92B4270A67CC00358DBD /* Constraints.h in Headers */,
@@ -695,6 +702,7 @@
 				6150872726D34EFD00521269 /* ConfettiView.c in Sources */,
 				61594D652606C7C6000D01A1 /* AppUserData.c in Sources */,
 				615A1C4C2608406100858C32 /* PersistenceService.c in Sources */,
+				61EF50A427374A9100736C45 /* TextFieldViewController.m in Sources */,
 				617BDE1F26FE491000BDDB73 /* StatusButton.m in Sources */,
 				61C82986270B76F700E33B51 /* WorkoutTimer.c in Sources */,
 				61C82979270B6E2200E33B51 /* ExerciseEntry.c in Sources */,

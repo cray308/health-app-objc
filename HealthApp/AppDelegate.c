@@ -8,8 +8,7 @@
 #include "AppDelegate.h"
 #include <CoreFoundation/CFString.h>
 #include <objc/message.h>
-#include "CocoaHelpers.h"
-#include "Views.h"
+#include "ViewControllerHelpers.h"
 
 extern void initExerciseStrings(void);
 extern void initCircuitStrings(void);
@@ -61,7 +60,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
         tzOffset = userInfo_initFromStorage();
     }
 
-    id tabVC = getObject(allocClass("UITabBarController"), sel_getUid("init"));
+    id tabVC = createTabController();
     appCoordinator_start(tabVC);
     setObject(self->window, sel_getUid("setRootViewController:"), tabVC);
     voidFunc(self->window, sel_getUid("makeKeyAndVisible"));

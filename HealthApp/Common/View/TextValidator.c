@@ -10,6 +10,12 @@
 #include <objc/message.h>
 #include "CocoaHelpers.h"
 #include "Views.h"
+#include "SwiftBridging.h"
+
+extern id UIKeyboardDidShowNotification;
+extern id UIKeyboardWillHideNotification;
+extern id UIKeyboardFrameEndUserInfoKey;
+extern void setScrollViewInsets(id v, Padding margins);
 
 static CFStringRef inputFieldError;
 
@@ -26,16 +32,34 @@ static inline void showInputError(Validator *validator, struct InputView *child)
     CFRelease(text);
 }
 
+static inline void addNotifObserver(id target, SEL action, id name) {
+    ((void(*)(id,SEL,id,SEL,id,id))objc_msgSend)
+    (getDeviceNotificationCenter(), sel_getUid("addObserver:selector:name:object:"),
+     target, action, name, nil);
+}
+
+static inline void removeNotifObserver(id target, id name) {
+    ((void(*)(id,SEL,id,id,id))objc_msgSend)
+    (getDeviceNotificationCenter(), sel_getUid("removeObserver:name:object:"), target, name, nil);
+}
+
+static inline void toggleScrolling(id view, bool enable) {
+    setBool(view, sel_getUid("setScrollEnabled:"), enable);
+}
+
 void initValidatorStrings(void) {
     inputFieldError = localize(CFSTR("inputFieldError"));
 }
 
-void validator_setup(Validator *this, short margins, bool createSet, id target, SEL doneSelector) {
+void validator_setup(Validator *this, short margins, bool createSet, id target) {
     if (createSet) {
         unsigned short nums[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
         this->set = uset_new_fromArray(char, nums, 10);
     }
     memcpy(&this->padding, &(Padding){4, margins, 4, margins}, sizeof(Padding));
+
+    addNotifObserver(target, sel_getUid("keyboardShown:"), UIKeyboardDidShowNotification);
+    addNotifObserver(target, sel_getUid("keyboardWillHide:"), UIKeyboardWillHideNotification);
 
     CGRect bounds;
     getScreenBounds(&bounds);
@@ -48,8 +72,14 @@ void validator_setup(Validator *this, short margins, bool createSet, id target, 
     this->flexSpace = ((id(*)(id,SEL,int,id,SEL))objc_msgSend)
     (allocClass(btnName), sel_getUid("initWithBarButtonSystemItem:target:action:"), 5, nil, nil);
     this->doneButton = ((id(*)(id,SEL,CFStringRef,int,id,SEL))objc_msgSend)
-    (allocClass(btnName),
-     sel_getUid("initWithTitle:style:target:action:"), CFSTR("Done"), 0, target, doneSelector);
+    (allocClass(btnName), sel_getUid("initWithTitle:style:target:action:"),
+     CFSTR("Done"), 0, target, sel_getUid("dismissKeyboard"));
+
+    if (!checkGreaterThanMinVersion()) {
+        CFDictionaryRef titleDict = createTitleTextDict(createColor("systemRedColor"));
+        ((void(*)(id,SEL,CFDictionaryRef,int))objc_msgSend)(this->doneButton, sel_getUid("setTitleTextAttributes:forState:"), titleDict, 0);
+        CFRelease(titleDict);
+    }
 
     CFArrayRef array = CFArrayCreate(NULL, (const void *[]){this->flexSpace, this->doneButton},
                                      2, &kCocoaArrCallbacks);
@@ -59,7 +89,7 @@ void validator_setup(Validator *this, short margins, bool createSet, id target, 
     CFRelease(array);
 }
 
-void validator_free(Validator *this) {
+void validator_free(Validator *this, id target) {
     if (this->set)
         uset_free(char, this->set);
     for (int i = 0; i < 4; ++i) {
@@ -74,6 +104,10 @@ void validator_free(Validator *this) {
     releaseObj(this->toolbar);
     releaseObj(this->flexSpace);
     releaseObj(this->doneButton);
+    releaseObj(this->scrollView);
+    releaseObj(this->vStack);
+    removeNotifObserver(target, UIKeyboardDidShowNotification);
+    removeNotifObserver(target, UIKeyboardWillHideNotification);
 }
 
 id validator_add(Validator *v, id delegate, CFStringRef hint, short min, short max) {
@@ -95,6 +129,39 @@ id validator_add(Validator *v, id delegate, CFStringRef hint, short min, short m
     hideView(child->errorLabel, true);
     setObject(child->field, sel_getUid("setInputAccessoryView:"), v->toolbar);
     return child->view;
+}
+
+void validator_getScrollHeight(Validator *this) {
+    CGRect bounds;
+    getRect(this->scrollView, &bounds, 1);
+    this->scrollHeight = bounds.size.height;
+}
+
+void validator_handleKeyboardShow(Validator *this, id view, id notif) {
+    toggleScrolling(this->scrollView, true);
+    id info = ((id(*)(id,SEL,id))objc_msgSend)(getObject(notif, sel_getUid("userInfo")), sel_getUid("objectForKey:"), UIKeyboardFrameEndUserInfoKey);
+    CGRect kbRect, viewRect, fieldRect;
+#if defined(__arm64__)
+    kbRect = ((CGRect(*)(id,SEL))objc_msgSend)(info, sel_getUid("CGRectValue"));
+#else
+    ((void(*)(CGRect*,id,SEL))objc_msgSend_stret)(&kbRect, info, sel_getUid("CGRectValue"));
+#endif
+    setScrollViewInsets(this->scrollView, (Padding){0, 0, kbRect.size.height, 0});
+
+    getRect(this->activeField, &fieldRect, 0);
+    getRect(view, &viewRect, 0);
+    viewRect.size.height -= kbRect.size.height;
+    if (!CGRectContainsPoint(viewRect, fieldRect.origin)) {
+        ((void(*)(id,SEL,CGRect,bool))objc_msgSend)
+        (this->scrollView, sel_getUid("scrollRectToVisible:animated:"), fieldRect, true);
+    }
+}
+
+void validator_handleKeyboardHide(Validator *this) {
+    setScrollViewInsets(this->scrollView, (Padding){0});
+    CGRect bounds;
+    getRect(this->vStack, &bounds, 1);
+    toggleScrolling(this->scrollView, (int) bounds.size.height >= this->scrollHeight);
 }
 
 void inputView_reset(struct InputView *this, short value) {

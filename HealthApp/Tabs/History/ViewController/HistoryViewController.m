@@ -39,11 +39,8 @@
     UIScrollView *scrollView = createScrollView();
 
     [self.view addSubview:scrollView];
-    [scrollView addSubview:vStack];
-
     pin(scrollView, self.view.safeAreaLayoutGuide, (Padding){0}, 0);
-    pin(vStack, scrollView, (Padding){0}, 0);
-    setEqualWidths(vStack, scrollView);
+    addVStackToScrollView(vStack, scrollView);
 
     [vStack release];
     [scrollView release];

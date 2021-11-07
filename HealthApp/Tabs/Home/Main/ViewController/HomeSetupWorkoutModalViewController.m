@@ -1,20 +1,17 @@
-#import <UIKit/UIKit.h>
+#import "TextFieldViewController.h"
 #include "HomeTabCoordinator.h"
-#include "ViewControllerHelpers.h"
 #include "ExerciseManager.h"
 
-@interface SetupWorkoutSheet: UIViewController<UIPickerViewDelegate, UIPickerViewDataSource, UITextFieldDelegate> @end
+@interface SetupWorkoutSheet: TextFieldViewController<UIPickerViewDelegate, UIPickerViewDataSource> @end
 @interface SetupWorkoutSheet() {
     @public HomeTabCoordinator *delegate;
     @public Array_str *names;
     UITextField *workoutTextField;
-    @public Validator validator;
     @public WorkoutParams output;
 }
 @end
 @implementation SetupWorkoutSheet
 - (void) dealloc {
-    validator_free(&validator);
     array_free(str, names);
     [workoutTextField release];
     [super dealloc];
@@ -23,7 +20,7 @@
 - (void) viewDidLoad {
     [super viewDidLoad];
     setBackground(self.view, UIColor.systemGroupedBackgroundColor);
-    validator_setup(&validator, 8, output.type != WorkoutHIC, self, @selector(dismissKeyboard));
+    validator_setup(&validator, 8, output.type != WorkoutHIC, self);
 
     CFStringRef pickerTitle = localize(CFSTR("planPickerTitle"));
     UILabel *workoutLabel = createLabel(pickerTitle, TextFootnote, 4, false);
@@ -36,10 +33,9 @@
     workoutTextField.inputView = workoutPicker;
     workoutTextField.inputAccessoryView = validator.toolbar;
 
-    UIStackView *stack = createStackView((id []){workoutContainer}, 1, 1, 0, (Padding){0});
-    [stack setCustomSpacing:20 afterView:workoutContainer];
-    [self.view addSubview:stack];
-    pin(stack, self.view.safeAreaLayoutGuide, (Padding){0}, EdgeBottom);
+    validator.vStack = createStackView((id []){workoutContainer}, 1, 1, 0, (Padding){0});
+    [validator.vStack setCustomSpacing:20 afterView:workoutContainer];
+    addVStackToScrollView(validator.vStack, validator.scrollView);
 
     UIButton *cancelButton = createButton(localize(CFSTR("cancel")), UIColor.systemBlueColor, 0,
                                           0, self, @selector(pressedCancel), -1);
@@ -73,10 +69,9 @@
 
     for (int i = 0; i < 3; ++i) {
         if (!rows[i]) continue;
-        [stack addArrangedSubview:validator_add(&validator, self, localize(rows[i]), 1, maxes[i])];
+        [validator.vStack addArrangedSubview:validator_add(&validator, self, localize(rows[i]), 1, maxes[i])];
     }
 
-    [stack release];
     [workoutLabel release];
     [workoutContainer release];
     [workoutPicker release];
@@ -101,17 +96,6 @@
 - (void) pressedCancel {
     UINavigationController *navVC = delegate->navVC;
     [navVC.viewControllers[0] dismissViewControllerAnimated:true completion:nil];
-}
-
-- (void) dismissKeyboard { [self.view endEditing:true]; }
-
-- (BOOL) textField: (UITextField *)textField
-shouldChangeCharactersInRange: (NSRange)range replacementString: (NSString *)string {
-    return checkInput(&validator, textField, (CFRange){range.location,range.length},_cfstr(string));
-}
-
-- (BOOL) textFieldShouldReturn: (UITextField *)textField {
-    return [textField resignFirstResponder];
 }
 
 - (NSInteger) numberOfComponentsInPickerView: (UIPickerView *)pickerView { return 1; }

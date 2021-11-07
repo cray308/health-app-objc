@@ -33,6 +33,7 @@ void enableButton(id view, bool enabled);
 void enableInteraction(id view, bool enabled);
 void setButtonTitle(id view, CFStringRef title, int state);
 void setButtonColor(id view, id color, int state);
+CFDictionaryRef createTitleTextDict(id color);
 
 id createObjectWithFrame(const char *name, CGRect rect);
 id createView(id color, bool rounded, int width, int height);
@@ -45,5 +46,6 @@ id createButton(CFStringRef title, id color, int params,
                 int tag, id target, SEL action, int height);
 id createSegmentedControl(CFStringRef format, int count, int startIndex,
                           id target, SEL action, int height);
+void addVStackToScrollView(id vStack, id scrollView);
 
 #endif /* Views_h */

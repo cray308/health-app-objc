@@ -50,10 +50,6 @@ static void *timer_loop(void *arg) {
     return NULL;
 }
 
-static id getDeviceNotificationCenter(void) {
-    return staticMethod(objc_getClass("NSNotificationCenter"), sel_getUid("defaultCenter"));
-}
-
 static id createObserver(id center, id name, id queue, ObjectBlock block) {
     return ((id(*)(id,SEL,CFStringRef,id,id,void(^)(id)))objc_msgSend)
     (center, sel_getUid("addObserverForName:object:queue:usingBlock:"),

@@ -10,6 +10,17 @@ void setLayoutMargins(UIView *v, Padding margins) {
     v.layoutMargins = (UIEdgeInsets){margins.top, margins.left, margins.bottom, margins.right};
 }
 
+bool checkGreaterThanMinVersion(void) {
+    if (@available(iOS 14, *)) return true;
+    else return false;
+}
+
+void setScrollViewInsets(UIScrollView *v, Padding margins) {
+    UIEdgeInsets insets = (UIEdgeInsets){margins.top, margins.left, margins.bottom, margins.right};
+    v.contentInset = insets;
+    v.scrollIndicatorInsets = insets;
+}
+
 id createChartView(UIView *parent, id formatter, id *legendEntries, int count, int height) {
     CFArrayRef arr = CFArrayCreate(NULL, (const void **)legendEntries, count, &kCocoaArrCallbacks);
     LineChartView *view = [[LineChartView alloc] initWithLegendEntries:_nsarr(arr)];

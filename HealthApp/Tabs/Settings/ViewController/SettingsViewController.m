@@ -1,14 +1,12 @@
-#import <UIKit/UIKit.h>
+#import "TextFieldViewController.h"
 #include "SettingsTabCoordinator.h"
-#include "ViewControllerHelpers.h"
 #include "AppUserData.h"
 #include "AppCoordinator.h"
 
-@interface SettingsViewController: UIViewController<UITextFieldDelegate> @end
+@interface SettingsViewController: TextFieldViewController @end
 @interface SettingsViewController() {
     @public SettingsTabCoordinator *delegate;
     UISegmentedControl *picker;
-    @public Validator validator;
     short results[4];
 }
 @end
@@ -34,7 +32,7 @@ void settingsVC_updateWeightFields(SettingsViewController *vc) {
     [super viewDidLoad];
     setBackground(self.view, UIColor.systemGroupedBackgroundColor);
     self.navigationItem.title = _nsstr(localize(CFSTR("titles2")));
-    validator_setup(&validator, 0, true, self, @selector(dismissKeyboard));
+    validator_setup(&validator, 0, true, self);
 
     CFStringRef titles[4]; fillStringArray(titles, CFSTR("maxWeight%d"), 4);
     UILabel *planLabel = createLabel(localize(CFSTR("planPickerTitle")), TextFootnote, 4, true);
@@ -42,37 +40,26 @@ void settingsVC_updateWeightFields(SettingsViewController *vc) {
     UIView *planContainer = createStackView((id []){planLabel, picker}, 2, 1, 2, (Padding){0});
     UIStackView *cStack = createStackView((id []){planContainer}, 1, 1, 0, (Padding){0,8,0,8});
     [cStack setCustomSpacing:20 afterView:planContainer];
-    UIStackView *vStack = createStackView((id[]){cStack}, 1, 1, 20, (Padding){20, 0, 20, 0});
+    validator.vStack = createStackView((id[]){cStack}, 1, 1, 20, (Padding){20, 0, 20, 0});
 
     for (int i = 0; i < 4; ++i)
         [cStack addArrangedSubview:validator_add(&validator, self, titles[i], 0, 999)];
 
     validator.button = createButton(localize(CFSTR("settingsSave")), UIColor.systemBlueColor,
                                     BtnBackground, 0, self, @selector(buttonTapped:), 44);
-    [vStack addArrangedSubview:validator.button];
+    [validator.vStack addArrangedSubview:validator.button];
 
-    [vStack addArrangedSubview:createButton(localize(CFSTR("settingsDelete")), UIColor.systemRedColor,
+    [validator.vStack addArrangedSubview:createButton(localize(CFSTR("settingsDelete")), UIColor.systemRedColor,
                                             BtnBackground, 1, self, @selector(buttonTapped:), 44)];
-
-    UIScrollView *scrollView = createScrollView();
-    [self.view addSubview:scrollView];
-    [scrollView addSubview:vStack];
-
-    pin(scrollView, self.view.safeAreaLayoutGuide, (Padding){0}, 0);
-    pin(vStack, scrollView, (Padding){0}, 0);
-    setEqualWidths(vStack, scrollView);
+    addVStackToScrollView(validator.vStack, validator.scrollView);
 
     [cStack release];
-    [vStack release];
-    [scrollView release];
     [planContainer release];
     [planLabel release];
 
     settingsVC_updateWeightFields(self);
     appCoordinator->loadedViewControllers |= LoadedViewController_Settings;
 }
-
-- (void) dismissKeyboard { [self.view endEditing:true]; }
 
 - (void) buttonTapped: (UIButton *)sender {
     if (!sender.tag) {
@@ -83,14 +70,5 @@ void settingsVC_updateWeightFields(SettingsViewController *vc) {
     } else {
         settingsCoordinator_handleDeleteTap(delegate);
     }
-}
-
-- (BOOL) textField: (UITextField *)textField
-shouldChangeCharactersInRange: (NSRange)range replacementString: (NSString *)string {
-    return checkInput(&validator, textField, (CFRange){range.location,range.length},_cfstr(string));
-}
-
-- (BOOL) textFieldShouldReturn: (UITextField *)textField {
-    return [textField resignFirstResponder];
 }
 @end

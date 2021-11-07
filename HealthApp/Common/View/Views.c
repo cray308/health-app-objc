@@ -9,6 +9,7 @@
 #include <objc/message.h>
 #include "CocoaHelpers.h"
 
+extern id NSForegroundColorAttributeName;
 extern void setLayoutMargins(id v, Padding margins);
 
 static inline void disableAutoresizing(id view) {
@@ -96,6 +97,14 @@ void setButtonTitle(id view, CFStringRef title, int state) {
 void setButtonColor(id view, id color, int state) {
     ((void(*)(id,SEL,id,int))objc_msgSend)(view, sel_getUid("setTitleColor:forState:"),
                                            color, state);
+}
+
+CFDictionaryRef createTitleTextDict(id color) {
+    CFDictionaryValueCallBacks valueCallbacks = {0};
+    const void *keys[] = {(CFStringRef) NSForegroundColorAttributeName};
+    const void *vals[] = {color};
+    return CFDictionaryCreate(NULL, keys, vals, 1,
+                              &kCFCopyStringDictionaryKeyCallBacks, &valueCallbacks);
 }
 
 #pragma mark - View initializers
@@ -212,4 +221,10 @@ id createTextfield(id delegate, CFStringRef text, CFStringRef hint,
     setMinHeight(view, 44);
     setAccessibilityLabel(view, hint);
     return view;
+}
+
+void addVStackToScrollView(id vStack, id scrollView) {
+    addSubview(scrollView, vStack);
+    pin(vStack, scrollView, (Padding){0}, 0);
+    setEqualWidths(vStack, scrollView);
 }

@@ -136,6 +136,10 @@ id getUserDefaults(void) {
     return staticMethod(objc_getClass("NSUserDefaults"), sel_getUid("standardUserDefaults"));
 }
 
+id getDeviceNotificationCenter(void) {
+    return staticMethod(objc_getClass("NSNotificationCenter"), sel_getUid("defaultCenter"));
+}
+
 id getNotificationCenter(void) {
     return staticMethod(objc_getClass("UNUserNotificationCenter"),
                         sel_getUid("currentNotificationCenter"));
