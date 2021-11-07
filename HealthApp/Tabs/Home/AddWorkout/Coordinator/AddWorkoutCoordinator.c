@@ -19,24 +19,37 @@ extern void homeCoordinator_didFinishAddingWorkout(void *, int);
 extern void appCoordinator_updateMaxWeights(void);
 extern byte appUserData_addCompletedWorkout(byte);
 
-static void updateStoredData(AddWorkoutCoordinator *this) {
-    if (this->workout->timers[TimerGroup].info.active == 1)
-        pthread_kill(this->workout->threads[TimerGroup], SignalGroup);
-    if (this->workout->timers[TimerExercise].info.active == 1)
-        pthread_kill(this->workout->threads[TimerExercise], SignalExercise);
-    startWorkoutTimer(&this->workout->timers[TimerGroup], 0);
-    startWorkoutTimer(&this->workout->timers[TimerExercise], 0);
-    pthread_join(this->workout->threads[1], NULL);
-    pthread_join(this->workout->threads[0], NULL);
+static void cleanupTimers(Workout *w) {
+    if (w->timers[TimerGroup].info.active == 1)
+        pthread_kill(w->threads[TimerGroup], SignalGroup);
+    if (w->timers[TimerExercise].info.active == 1)
+        pthread_kill(w->threads[TimerExercise], SignalExercise);
+    startWorkoutTimer(&w->timers[TimerGroup], 0);
+    startWorkoutTimer(&w->timers[TimerExercise], 0);
+    pthread_join(w->threads[1], NULL);
+    pthread_join(w->threads[0], NULL);
     signal(SIGUSR1, SIG_DFL);
     signal(SIGUSR2, SIG_DFL);
     for (int i = 0; i < 2; ++i) {
-        pthread_cond_destroy(&this->workout->timers[i].cond);
-        pthread_mutex_destroy(&this->workout->timers[i].lock);
+        pthread_cond_destroy(&w->timers[i].cond);
+        pthread_mutex_destroy(&w->timers[i].lock);
     }
     pthread_mutex_destroy(&timerLock);
-    array_free(circuit, this->workout->activities);
-    CFRelease(this->workout->title);
+}
+
+static void cleanupCoordinator(AddWorkoutCoordinator *this) {
+    Workout *w = this->workout;
+    CFRelease(w->title);
+    array_free(circuit, w->activities);
+    if (w->newLifts)
+        free(w->newLifts);
+    free(w);
+    free(this);
+}
+
+static void updateStoredData(AddWorkoutCoordinator *this) {
+    cleanupTimers(this->workout);
+    AddWorkoutCoordinator *coordinator = this;
 
     runInBackground((^{
         Workout *w = this->workout;
@@ -52,10 +65,7 @@ static void updateStoredData(AddWorkoutCoordinator *this) {
             }
             persistenceService_saveContext();
         }
-        if (w->newLifts)
-            free(w->newLifts);
-        free(w);
-        free(this);
+        cleanupCoordinator(coordinator);
     }));
 }
 
@@ -107,5 +117,8 @@ void addWorkoutCoordinator_stopWorkoutFromBackButtonPress(AddWorkoutCoordinator 
     if (this->workout->startTime) {
         workout_setDuration(this->workout);
         updateStoredData(this);
+    } else {
+        cleanupTimers(this->workout);
+        cleanupCoordinator(this);
     }
 }
