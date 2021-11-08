@@ -44,16 +44,13 @@ static void showConfetti(id vc) {
     id view = getObject(vc, sel_getUid("view"));
     CGRect frame;
     getRect(view, &frame, 0);
-    ConfettiContainer container = {.frame = (CGRect){{0}, frame.size}};
-    setupConfettiView(&container);
-    addSubview(view, container.view);
+    id confettiView = createConfettiView((CGRect){{0}, frame.size});
+    addSubview(view, confettiView);
 
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 5),
                    dispatch_get_main_queue(), ^(void) {
-        removeView(container.view);
-        releaseObj(container.view);
-        for (int i = 0; i < 16; ++i)
-            releaseObj(container.cells[i]);
+        removeView(confettiView);
+        releaseObj(confettiView);
         id ctrl = createAlertController(localize(CFSTR("homeAlertTitle")),
                                         localize(CFSTR("homeAlertMessage")));
         addAlertAction(ctrl, localize(CFSTR("ok")), 0, NULL);

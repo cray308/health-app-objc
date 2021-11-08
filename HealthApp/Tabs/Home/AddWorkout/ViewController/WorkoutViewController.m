@@ -1,4 +1,3 @@
-#import <UIKit/UIKit.h>
 #include "AddWorkoutCoordinator.h"
 #include "ViewControllerHelpers.h"
 #include "WorkoutScreenHelpers.h"

@@ -24,7 +24,7 @@ void setNavButton(id navItem, bool left, id button, CGFloat totalWidth) {
 #pragma mark - VC Functions
 
 void setupNavVC(id navVC, id firstVC) {
-    CFArrayRef array = CFArrayCreate(NULL, (const void *[]){firstVC}, 1, &kCocoaArrCallbacks);
+    CFArrayRef array = CFArrayCreate(NULL, (const void *[]){firstVC}, 1, &(CFArrayCallBacks){0});
     setArray(navVC, sel_getUid("setViewControllers:"), array);
     releaseObj(firstVC);
     CFRelease(array);

@@ -27,7 +27,7 @@ id workoutTypeChart_init(WorkoutTypeChartViewModel *model, id formatter) {
 
 void workoutTypeChart_update(WorkoutTypeChart *this, int count, bool isSmall) {
     CFArrayRef array = CFArrayCreate(NULL, (const void **)this->model->entries[0]->arr,
-                                     count, &kCocoaArrCallbacks);
+                                     count, &(CFArrayCallBacks){0});
     [((LineChartDataSet *) this->model->dataSets[0]) replaceEntries:_nsarr(array)];
     for (int i = 1; i < 5; ++i) {
         updateDataSet(isSmall, count, this->model->dataSets[i], this->model->entries[i]->arr);

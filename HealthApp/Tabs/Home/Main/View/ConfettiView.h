@@ -11,12 +11,6 @@
 #include <CoreGraphics/CGGeometry.h>
 #include <objc/objc.h>
 
-typedef struct {
-    CGRect frame;
-    id view;
-    id cells[16];
-} ConfettiContainer;
-
-void setupConfettiView(ConfettiContainer *c);
+id createConfettiView(CGRect frame);
 
 #endif /* ConfettiView_h */

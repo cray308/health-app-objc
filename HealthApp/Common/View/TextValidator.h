@@ -22,8 +22,6 @@ typedef struct {
     id vStack;
     id activeField;
     id toolbar;
-    id flexSpace;
-    id doneButton;
     int count;
     Padding padding;
     struct InputView {

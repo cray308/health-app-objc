@@ -101,12 +101,6 @@ void historyViewModel_fetchData(HistoryViewModel *this) {
                     .month = localInfo.tm_mon,
                     .day = localInfo.tm_mday,
                     .totalWorkouts = weekData_getTotalWorkouts(d),
-                    .weightArray = {
-                        weekData_getLiftingLimitForType(d, LiftSquat),
-                        weekData_getLiftingLimitForType(d, LiftPullup),
-                        weekData_getLiftingLimitForType(d, LiftBench),
-                        weekData_getLiftingLimitForType(d, LiftDeadlift)
-                    },
                     .durationByType = {
                         timeStrength,
                         weekData_getWorkoutTimeForType(d, WorkoutHIC),
@@ -116,6 +110,7 @@ void historyViewModel_fetchData(HistoryViewModel *this) {
                     .cumulativeDuration = {[0] = timeStrength}
                 };
 
+                weekData_getLiftingLimits(d, m.weightArray);
                 for (int j = 1; j < 4; ++j)
                     m.cumulativeDuration[j] = m.cumulativeDuration[j - 1] + m.durationByType[j];
                 array_push_back(weekData, this->data, m);

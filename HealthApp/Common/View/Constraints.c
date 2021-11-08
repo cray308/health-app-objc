@@ -28,7 +28,7 @@ static struct AnchorNames {
 };
 
 static inline void activateConstraints(id *constraints, int count) {
-    CFArrayRef array = CFArrayCreate(NULL, (const void **)constraints, count, &kCocoaArrCallbacks);
+    CFArrayRef array = CFArrayCreate(NULL, (const void **)constraints, count, &(CFArrayCallBacks){0});
     ((void(*)(Class,SEL,CFArrayRef))objc_msgSend)(objc_getClass("NSLayoutConstraint"),
                                                   sel_getUid("activateConstraints:"), array);
     CFRelease(array);
@@ -38,7 +38,7 @@ static inline id getAnchor(id view, const char *name) {
     return getObject(view, sel_getUid(name));
 }
 
-static inline id createConstraint(id a1, id a2, int constant) {
+static id createConstraint(id a1, id a2, int constant) {
     id result;
     if (a2) {
         result = ((id(*)(id,SEL,id,CGFloat))objc_msgSend)

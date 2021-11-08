@@ -16,13 +16,13 @@ extern id backgroundContext;
 
 id fetchRequest(id predicate);
 
-int16_t weekData_getLiftingLimitForType(id weekData, byte type);
+void weekData_getLiftingLimits(id weekData, int16_t *output);
 int16_t weekData_getWorkoutTimeForType(id weekData, byte type);
 int16_t weekData_getTotalWorkouts(id weekData);
 int64_t weekData_getWeekStart(id data);
 
 void weekData_setWorkoutTimeForType(id weekData, byte type, int16_t duration);
-void weekData_setLiftingMaxForType(id weekData, byte type, int16_t weight);
+void weekData_setLiftingMaxArray(id weekData, int16_t *weights);
 void weekData_setTotalWorkouts(id weekData, int16_t value);
 
 #define runInBackground(block) ((void(*)(id,SEL,void(^)(void)))objc_msgSend)\

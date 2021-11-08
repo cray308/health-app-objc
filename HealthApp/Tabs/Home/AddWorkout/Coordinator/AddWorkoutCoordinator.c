@@ -60,8 +60,7 @@ static void updateStoredData(AddWorkoutCoordinator *this) {
             weekData_setWorkoutTimeForType(data, w->type, duration);
             weekData_setTotalWorkouts(data, weekData_getTotalWorkouts(data) + 1);
             if (w->newLifts) {
-                for (int i = 0; i < 4; ++i)
-                    weekData_setLiftingMaxForType(data, i, w->newLifts[i]);
+                weekData_setLiftingMaxArray(data, w->newLifts);
             }
             persistenceService_saveContext();
         }

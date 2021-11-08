@@ -69,24 +69,26 @@ void validator_setup(Validator *this, short margins, bool createSet, id target) 
     voidFunc(this->toolbar, sel_getUid("sizeToFit"));
 
     const char *btnName = "UIBarButtonItem";
-    this->flexSpace = ((id(*)(id,SEL,int,id,SEL))objc_msgSend)
+    id flexSpace = ((id(*)(id,SEL,int,id,SEL))objc_msgSend)
     (allocClass(btnName), sel_getUid("initWithBarButtonSystemItem:target:action:"), 5, nil, nil);
-    this->doneButton = ((id(*)(id,SEL,CFStringRef,int,id,SEL))objc_msgSend)
+    id doneButton = ((id(*)(id,SEL,CFStringRef,int,id,SEL))objc_msgSend)
     (allocClass(btnName), sel_getUid("initWithTitle:style:target:action:"),
      CFSTR("Done"), 0, target, sel_getUid("dismissKeyboard"));
 
     if (!checkGreaterThanMinVersion()) {
         CFDictionaryRef titleDict = createTitleTextDict(createColor("systemRedColor"));
-        ((void(*)(id,SEL,CFDictionaryRef,int))objc_msgSend)(this->doneButton, sel_getUid("setTitleTextAttributes:forState:"), titleDict, 0);
+        ((void(*)(id,SEL,CFDictionaryRef,int))objc_msgSend)(doneButton, sel_getUid("setTitleTextAttributes:forState:"), titleDict, 0);
         CFRelease(titleDict);
     }
 
-    CFArrayRef array = CFArrayCreate(NULL, (const void *[]){this->flexSpace, this->doneButton},
-                                     2, &kCocoaArrCallbacks);
+    CFArrayRef array = CFArrayCreate(NULL, (const void *[]){flexSpace, doneButton},
+                                     2, &retainedArrCallbacks);
     ((void(*)(id,SEL,CFArrayRef,bool))objc_msgSend)(this->toolbar,
                                                     sel_getUid("setItems:animated:"), array, false);
     enableInteraction(this->toolbar, true);
     CFRelease(array);
+    releaseObj(flexSpace);
+    releaseObj(doneButton);
 }
 
 void validator_free(Validator *this, id target) {
@@ -102,8 +104,6 @@ void validator_free(Validator *this, id target) {
         }
     }
     releaseObj(this->toolbar);
-    releaseObj(this->flexSpace);
-    releaseObj(this->doneButton);
     releaseObj(this->scrollView);
     releaseObj(this->vStack);
     removeNotifObserver(target, UIKeyboardDidShowNotification);

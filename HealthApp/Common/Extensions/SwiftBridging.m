@@ -22,7 +22,7 @@ void setScrollViewInsets(UIScrollView *v, Padding margins) {
 }
 
 id createChartView(UIView *parent, id formatter, id *legendEntries, int count, int height) {
-    CFArrayRef arr = CFArrayCreate(NULL, (const void **)legendEntries, count, &kCocoaArrCallbacks);
+    CFArrayRef arr = CFArrayCreate(NULL, (const void **)legendEntries, count, &(CFArrayCallBacks){0});
     LineChartView *view = [[LineChartView alloc] initWithLegendEntries:_nsarr(arr)];
     view.translatesAutoresizingMaskIntoConstraints = false;
     view.xAxis.valueFormatter = (id<AxisValueFormatter>)formatter;
@@ -34,14 +34,14 @@ id createChartView(UIView *parent, id formatter, id *legendEntries, int count, i
 }
 
 id createEmptyDataSet(void) {
-    CFArrayRef entries = CFArrayCreate(NULL, (const void *[]){}, 0, &kCocoaArrCallbacks);
+    CFArrayRef entries = CFArrayCreate(NULL, (const void *[]){}, 0, &(CFArrayCallBacks){0});
     id dataSet = [[LineChartDataSet alloc] initWithEntries:_nsarr(entries)];
     CFRelease(entries);
     return dataSet;
 }
 
 id createDataSet(id color) {
-    CFArrayRef colors = CFArrayCreate(NULL, (const void *[]){color}, 1, &kCocoaArrCallbacks);
+    CFArrayRef colors = CFArrayCreate(NULL, (const void *[]){color}, 1, &(CFArrayCallBacks){0});
     LineChartDataSet *dataSet = createEmptyDataSet();
     dataSet.colors = _nsarr(colors);
     [dataSet setCircleColor:color];
@@ -50,7 +50,7 @@ id createDataSet(id color) {
 }
 
 id createChartData(id *dataSets, int count) {
-    CFArrayRef arr = CFArrayCreate(NULL, (const void **)dataSets, count, &kCocoaArrCallbacks);
+    CFArrayRef arr = CFArrayCreate(NULL, (const void **)dataSets, count, &(CFArrayCallBacks){0});
     id data = [[LineChartData alloc] initWithDataSets:_nsarr(arr)];
     CFRelease(arr);
     return data;
@@ -69,7 +69,7 @@ void disableLineChartView(LineChartView *v) {
 
 void updateDataSet(bool isSmall, int count, LineChartDataSet *set, id *entries) {
     set.drawCirclesEnabled = isSmall;
-    CFArrayRef array = CFArrayCreate(NULL, (const void **)entries, count, &kCocoaArrCallbacks);
+    CFArrayRef array = CFArrayCreate(NULL, (const void **)entries, count, &(CFArrayCallBacks){0});
     [set replaceEntries:_nsarr(array)];
     CFRelease(array);
 }

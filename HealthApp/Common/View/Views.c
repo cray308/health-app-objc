@@ -131,7 +131,7 @@ id createStackView(id *subviews, int count, int axis, int spacing, Padding margi
     id view;
     const char *name = "UIStackView";
     if (count) {
-        CFArrayRef array = CFArrayCreate(NULL, (const void **)subviews, count, &kCocoaArrCallbacks);
+        CFArrayRef array = CFArrayCreate(NULL, (const void **)subviews, count, &(CFArrayCallBacks){0});
         view = getObjectWithArr(allocClass(name), sel_getUid("initWithArrangedSubviews:"), array);
         CFRelease(array);
     } else {
@@ -192,7 +192,7 @@ id createSegmentedControl(CFStringRef format, int count, int startIndex,
                           id target, SEL action, int height) {
     CFStringRef segments[count];
     fillStringArray(segments, format, count);
-    CFArrayRef array = CFArrayCreate(NULL, (const void **)segments, count, &kCocoaArrCallbacks);
+    CFArrayRef array = CFArrayCreate(NULL, (const void **)segments, count, &(CFArrayCallBacks){0});
     id view = getObjectWithArr(allocClass("UISegmentedControl"),
                                sel_getUid("initWithItems:"), array);
     disableAutoresizing(view);

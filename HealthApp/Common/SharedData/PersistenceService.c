@@ -18,18 +18,19 @@
 static id persistenceService = nil;
 id backgroundContext = nil;
 
-static id createWeekData(void) {
+static inline id createWeekData(void) {
     return getObjectWithObject(allocClass("WeeklyData"),
                                sel_getUid("initWithContext:"), backgroundContext);
 }
 
-static void deleteWeekData(id data) {
+static inline void deleteWeekData(id data) {
     setObject(backgroundContext, sel_getUid("deleteObject:"), data);
 }
 
-int16_t weekData_getLiftingLimitForType(id data, byte type) {
+void weekData_getLiftingLimits(id data, int16_t *output) {
     static char const *getterStrs[] = {"bestSquat", "bestPullup", "bestBench", "bestDeadlift"};
-    return getInt16(data, sel_getUid(getterStrs[type]));
+    for (int i = 0; i < 4; ++i)
+        output[i] = getInt16(data, sel_getUid(getterStrs[i]));
 }
 
 int16_t weekData_getWorkoutTimeForType(id data, byte type) {
@@ -52,11 +53,12 @@ void weekData_setWorkoutTimeForType(id data, byte type, int16_t duration) {
     setInt16(data, sel_getUid(setters[type]), duration + weekData_getWorkoutTimeForType(data,type));
 }
 
-void weekData_setLiftingMaxForType(id data, byte type, int16_t weight) {
+void weekData_setLiftingMaxArray(id data, int16_t *weights) {
     static char const *setterStrs[] = {
         "setBestSquat:", "setBestPullup:", "setBestBench:", "setBestDeadlift:"
     };
-    setInt16(data, sel_getUid(setterStrs[type]), weight);
+    for (int i = 0; i < 4; ++i)
+        setInt16(data, sel_getUid(setterStrs[i]), weights[i]);
 }
 
 void weekData_setTotalWorkouts(id data, int16_t value) {
@@ -72,7 +74,7 @@ void persistenceService_saveContext(void) {
         setObject(backgroundContext, sel_getUid("save:"), nil);
 }
 
-static void setPredicate(id request, id pred) {
+static inline void setPredicate(id request, id pred) {
     setObject(request, sel_getUid("setPredicate:"), pred);
 }
 
@@ -153,9 +155,9 @@ void persistenceService_create(void) {
                 lifts[3] = 235 + (rand() % 50);
             }
             weekData_setTotalWorkouts(data, totalWorkouts);
+            weekData_setLiftingMaxArray(data, lifts);
             for (int l = 0; l < 4; ++l) {
                 weekData_setWorkoutTimeForType(data, l, times[l]);
-                weekData_setLiftingMaxForType(data, l, lifts[l]);
             }
             releaseObj(data);
 
@@ -223,22 +225,19 @@ void persistenceService_start(int tzOffset) {
 
         id last = (id) CFArrayGetValueAtIndex(data, count - 1);
         int16_t lastLifts[4];
-        for (int i = 0; i < 4; ++i)
-            lastLifts[i] = weekData_getLiftingLimitForType(last, i);
+        weekData_getLiftingLimits(last, lastLifts);
 
         for (time_t currStart = weekData_getWeekStart(last) + WeekSeconds;
              currStart < userData->weekStart;
              currStart += WeekSeconds) {
             id curr = createWeekData();
             weekData_setWeekStart(curr, currStart);
-            for (int i = 0; i < 4; ++i)
-                weekData_setLiftingMaxForType(curr, i, lastLifts[i]);
+            weekData_setLiftingMaxArray(curr, lastLifts);
             releaseObj(curr);
         }
 
         if (newEntryForCurrentWeek) {
-            for (int i = 0; i < 4; ++i)
-                weekData_setLiftingMaxForType(currWeek, i, lastLifts[i]);
+            weekData_setLiftingMaxArray(currWeek, lastLifts);
             releaseObj(currWeek);
         }
 
@@ -276,24 +275,21 @@ id persistenceService_getCurrentWeek(void) {
 }
 
 CFArrayRef persistenceService_executeFetchRequest(id req, int *count, bool sorted) {
-    CFArrayRef descriptorArr = NULL, data = NULL;
-    id descriptor = nil;
     int len = 0;
     if (sorted) {
-        descriptor = ((id(*)(id,SEL,CFStringRef,bool))objc_msgSend)
+        id descriptor = ((id(*)(id,SEL,CFStringRef,bool))objc_msgSend)
         (allocClass("NSSortDescriptor"),
          sel_getUid("initWithKey:ascending:"), CFSTR("weekStart"), true);
-        descriptorArr = CFArrayCreate(NULL, (const void *[]){descriptor}, 1, &kCocoaArrCallbacks);
+        CFArrayRef descriptorArr = CFArrayCreate(NULL, (const void *[]){descriptor},
+                                                 1, &retainedArrCallbacks);
         setArray(req, sel_getUid("setSortDescriptors:"), descriptorArr);
+        releaseObj(descriptor);
+        CFRelease(descriptorArr);
     }
-    data = ((CFArrayRef(*)(id,SEL,id,id))objc_msgSend)
+    CFArrayRef data = ((CFArrayRef(*)(id,SEL,id,id))objc_msgSend)
     (backgroundContext, sel_getUid("executeFetchRequest:error:"), req, nil);
     if (!(data && (len = (int)(CFArrayGetCount(data)))))
         data = NULL;
     *count = len;
-    if (descriptorArr) {
-        releaseObj(descriptor);
-        CFRelease(descriptorArr);
-    }
     return data;
 }

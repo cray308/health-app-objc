@@ -18,7 +18,7 @@ extern void appUserData_setWorkoutPlan(signed char);
 extern void appUserData_deleteSavedData(void);
 extern void persistenceService_deleteUserData(void);
 
-static void addCancelAction(id ctrl) {
+static inline void addCancelAction(id ctrl) {
     addAlertAction(ctrl, localize(CFSTR("cancel")), 1, NULL);
 }
 

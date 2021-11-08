@@ -18,7 +18,7 @@ typedef struct {
     int totalWorkouts;
     int durationByType[4];
     int cumulativeDuration[4];
-    int weightArray[4];
+    short weightArray[4];
 } HistoryWeekDataModel;
 
 gen_array_headers(weekData, HistoryWeekDataModel)

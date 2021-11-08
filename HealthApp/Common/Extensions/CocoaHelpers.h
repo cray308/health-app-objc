@@ -14,7 +14,7 @@
 #include <CoreGraphics/CGGeometry.h>
 #include <objc/objc.h>
 
-extern CFArrayCallBacks kCocoaArrCallbacks;
+extern CFArrayCallBacks retainedArrCallbacks;
 
 enum {
     TextFootnote = 1,

@@ -65,7 +65,7 @@ void appCoordinator_start(id tabVC) {
     memcpy(appCoordinator->children,
            (void *[]){homeCoord, histCoord, settingsCoord}, 3 * sizeof(void *));
 
-    CFArrayRef array = CFArrayCreate(NULL, (const void **)controllers, 3, &kCocoaArrCallbacks);
+    CFArrayRef array = CFArrayCreate(NULL, (const void **)controllers, 3, &(CFArrayCallBacks){0});
     ((void(*)(id,SEL,CFArrayRef,bool))objc_msgSend)
     (tabVC, sel_getUid("setViewControllers:animated:"), array, false);
 

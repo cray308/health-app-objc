@@ -17,7 +17,16 @@ extern id UIFontTextStyleSubheadline;
 extern id UIFontTextStyleBody;
 extern id UIFontTextStyleFootnote;
 
-CFArrayCallBacks kCocoaArrCallbacks = {0};
+static const void *cocoaArrRetain(CFAllocatorRef allocator _U_, const void *value) {
+    voidFunc((id) value, sel_getUid("retain"));
+    return value;
+}
+
+static void cocoaArrRelease(CFAllocatorRef allocator _U_, const void *value) {
+    releaseObj((id) value);
+}
+
+CFArrayCallBacks retainedArrCallbacks = {0, cocoaArrRetain, cocoaArrRelease, NULL, NULL};
 
 id staticMethod(Class _self, SEL _cmd) {
     return ((id(*)(Class,SEL))objc_msgSend)(_self, _cmd);

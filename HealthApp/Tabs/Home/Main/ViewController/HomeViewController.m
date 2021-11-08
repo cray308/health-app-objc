@@ -1,4 +1,3 @@
-#import <UIKit/UIKit.h>
 #include "ViewControllerHelpers.h"
 #include "HomeTabCoordinator.h"
 #include "AppCoordinator.h"

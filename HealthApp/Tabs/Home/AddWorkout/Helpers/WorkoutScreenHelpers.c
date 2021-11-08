@@ -50,7 +50,7 @@ static void *timer_loop(void *arg) {
     return NULL;
 }
 
-static id createObserver(id center, id name, id queue, ObjectBlock block) {
+static inline id createObserver(id center, id name, id queue, ObjectBlock block) {
     return ((id(*)(id,SEL,CFStringRef,id,id,void(^)(id)))objc_msgSend)
     (center, sel_getUid("addObserverForName:object:queue:usingBlock:"),
      (CFStringRef)name, nil, queue, block);
