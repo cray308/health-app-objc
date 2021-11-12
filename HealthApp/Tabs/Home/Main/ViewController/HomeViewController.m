@@ -26,13 +26,13 @@ void homeVC_updateWorkoutsList(HomeViewController *vc) {
         StatusButton *v = vc->planContainer.views->arr[i];
         bool enable = !(userData->completedWorkouts & (1 << (int) v.tag));
         enableButton(v->button, enable);
-        setBackground(v->box, enable ? UIColor.systemGrayColor : UIColor.systemGreenColor);
+        setBackground(v->box, createColor(enable ? ColorGray : ColorGreen));
         statusButton_updateAccessibility(v, vc->model->stateNames[enable]);
     }
 }
 
 void homeVC_createWorkoutsList(HomeViewController *vc) {
-    array_clear(object, vc->planContainer.views);
+    container_clear(&vc->planContainer);
     if (!homeViewModel_hasWorkoutsForThisWeek(vc->model)) {
         hideView(vc->planContainer.view, true);
         return;
@@ -51,10 +51,20 @@ void homeVC_createWorkoutsList(HomeViewController *vc) {
     homeVC_updateWorkoutsList(vc);
 }
 
+void homeVC_refreshUI(HomeViewController *vc) {
+    setTextColor(vc->greetingLabel, createColor(ColorLabel));
+    container_refresh(&vc->planContainer);
+    id *v;
+    array_iter(vc->planContainer.views, v) statusButton_refresh(*v);
+    container_refresh(&vc->customContainer);
+    array_iter(vc->customContainer.views, v) statusButton_refresh(*v);
+    homeVC_updateWorkoutsList(vc);
+}
+
 @implementation HomeViewController
 - (void) viewDidLoad {
     [super viewDidLoad];
-    setBackground(self.view, UIColor.systemGroupedBackgroundColor);
+    setBackground(self.view, createColor(ColorSystemGroupedBackground));
     self.navigationItem.title = _nsstr(localize(CFSTR("titles0")));
 
     greetingLabel = createLabel(NULL, TextTitle1, NSTextAlignmentCenter, true);

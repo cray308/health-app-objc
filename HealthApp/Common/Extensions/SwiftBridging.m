@@ -2,17 +2,22 @@
 #import "UIKit/UIKit.h"
 @import Charts;
 
+void toggleDarkModeForCharts(bool enabled) { [ChartUtility setDarkModeWithEnabled:enabled]; }
+
 id createChartEntry(int x, int y) { return [[ChartDataEntry alloc] initWithX:x y:y]; }
 
 void setLegendLabel(LegendEntry *entry, CFStringRef text) { entry.label = _nsstr(text); }
+
+void updateLegendColor(LegendEntry *entry, UIColor *color) { entry.formColor = color; }
 
 void setLayoutMargins(UIView *v, Padding margins) {
     v.layoutMargins = (UIEdgeInsets){margins.top, margins.left, margins.bottom, margins.right};
 }
 
-bool checkGreaterThanMinVersion(void) {
-    if (@available(iOS 14, *)) return true;
-    else return false;
+int getOSVersion(void) {
+    if (@available(iOS 14, *)) return 14;
+    else if (@available(iOS 13, *)) return 13;
+    return 12;
 }
 
 void setScrollViewInsets(UIScrollView *v, Padding margins) {

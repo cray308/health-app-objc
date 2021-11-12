@@ -7,10 +7,33 @@
 
 #include "Views.h"
 #include <objc/message.h>
+#include <stdlib.h>
+#include "AppUserData.h"
 #include "CocoaHelpers.h"
 
+extern id UIFontTextStyleTitle1;
+extern id UIFontTextStyleTitle2;
+extern id UIFontTextStyleTitle3;
+extern id UIFontTextStyleHeadline;
+extern id UIFontTextStyleSubheadline;
+extern id UIFontTextStyleBody;
+extern id UIFontTextStyleFootnote;
+
+extern CGFloat UIFontWeightRegular;
+extern CGFloat UIFontWeightMedium;
+extern CGFloat UIFontWeightSemibold;
+
 extern id NSForegroundColorAttributeName;
+extern id NSFontAttributeName;
 extern void setLayoutMargins(id v, Padding margins);
+
+static inline void setInt(id obj, SEL _cmd, int arg) {
+    ((void(*)(id,SEL,int))objc_msgSend)(obj, _cmd, arg);
+}
+
+static inline id getObjectWithArr(id obj, SEL _cmd, CFArrayRef arg) {
+    return ((id(*)(id,SEL,CFArrayRef))objc_msgSend)(obj, _cmd, arg);
+}
 
 static inline void disableAutoresizing(id view) {
     setBool(view, sel_getUid("setTranslatesAutoresizingMaskIntoConstraints:"), false);
@@ -39,8 +62,51 @@ static inline void addTarget(id view, id target, SEL action, int event) {
     (view, sel_getUid("addTarget:action:forControlEvents:"), target, action, event);
 }
 
-static inline void setLabelFont(id view, int style) {
-    setObject(view, sel_getUid("setFont:"), createFont(style));
+static void setLabelFont(id view, int style) {
+    id fStyle;
+    switch (style) {
+        case TextFootnote:
+            fStyle = UIFontTextStyleFootnote;
+            break;
+        case TextSubhead:
+            fStyle = UIFontTextStyleSubheadline;
+            break;
+        case TextBody:
+            fStyle = UIFontTextStyleBody;
+            break;
+        case TextHead:
+            fStyle = UIFontTextStyleHeadline;
+            break;
+        case TextTitle1:
+            fStyle = UIFontTextStyleTitle1;
+            break;
+        default:
+            fStyle = UIFontTextStyleTitle3;
+    }
+    id font = staticMethodWithString(objc_getClass("UIFont"),
+                                     sel_getUid("preferredFontForTextStyle:"), (CFStringRef)fStyle);
+    setObject(view, sel_getUid("setFont:"), font);
+}
+
+static inline void setControlTextAttribs(id view, CFDictionaryRef dict, int state) {
+    ((void(*)(id,SEL,CFDictionaryRef,int))objc_msgSend)
+    (view, sel_getUid("setTitleTextAttributes:forState:"), dict, state);
+}
+
+id createCustomFont(int style, int size) {
+    CGFloat weight;
+    switch (style) {
+        case WeightSemiBold:
+            weight = UIFontWeightSemibold;
+            break;
+        case WeightMed:
+            weight = UIFontWeightMedium;
+            break;
+        default:
+            weight = UIFontWeightRegular;
+    }
+    return ((id(*)(Class,SEL,CGFloat,CGFloat))objc_msgSend)
+    (objc_getClass("UIFont"), sel_getUid("systemFontOfSize:weight:"), size, weight);
 }
 
 #pragma mark - Simple getters/setters
@@ -67,6 +133,10 @@ void hideView(id view, bool hide) {
 
 void setBackground(id view, id color) {
     setObject(view, sel_getUid("setBackgroundColor:"), color);
+}
+
+void setTintColor(id view, id color) {
+    setObject(view, sel_getUid("setTintColor:"), color);
 }
 
 void setAccessibilityLabel(id view, CFStringRef text) {
@@ -99,11 +169,13 @@ void setButtonColor(id view, id color, int state) {
                                            color, state);
 }
 
-CFDictionaryRef createTitleTextDict(id color) {
+CFDictionaryRef createTitleTextDict(id color, id font) {
     CFDictionaryValueCallBacks valueCallbacks = {0};
-    const void *keys[] = {(CFStringRef) NSForegroundColorAttributeName};
-    const void *vals[] = {color};
-    return CFDictionaryCreate(NULL, keys, vals, 1,
+    const void *keys[] = {
+        (CFStringRef) NSForegroundColorAttributeName, (CFStringRef) NSFontAttributeName
+    };
+    const void *vals[] = {color, font};
+    return CFDictionaryCreate(NULL, keys, vals, font ? 2 : 1,
                               &kCFCopyStringDictionaryKeyCallBacks, &valueCallbacks);
 }
 
@@ -160,7 +232,7 @@ id createLabel(CFStringRef text, int style, int alignment, bool accessible) {
     setLabelText(view, text);
     setLabelFont(view, style);
     setDynamicFont(view);
-    setTextColor(view, createColor("labelColor"));
+    setTextColor(view, createColor(ColorLabel));
     setAlignment(view, alignment);
     setBool(view, sel_getUid("setIsAccessibilityElement:"), accessible);
     return view;
@@ -173,12 +245,12 @@ id createButton(CFStringRef title, id color, int params,
     disableAutoresizing(view);
     setButtonTitle(view, title, 0);
     setButtonColor(view, color, 0);
-    setButtonColor(view, createColor("secondaryLabelColor"), 2);
+    setButtonColor(view, createColor(ColorSecondaryLabel), 2);
     id label = getObject(view, sel_getUid("titleLabel"));
     setLabelFont(label, (params & BtnLargeFont) ? TextHead : TextBody);
     setDynamicFont(label);
     if (params & BtnBackground)
-        setBackground(view, createColor("secondarySystemGroupedBackgroundColor"));
+        setBackground(view, createColor(ColorSecondarySystemGroupedBackground));
     if (params & BtnRounded)
         setCornerRadius(view);
     setTag(view, tag);
@@ -202,6 +274,8 @@ id createSegmentedControl(CFStringRef format, int count, int startIndex,
     if (height >= 0)
         setHeight(view, height);
     CFRelease(array);
+    if (osVersion == Version12)
+        updateSegmentedControl(view);
     return view;
 }
 
@@ -209,9 +283,10 @@ id createTextfield(id delegate, CFStringRef text, CFStringRef hint,
                    int alignment, int keyboard, int tag) {
     id view = createObjectWithFrame("UITextField", CGRectZero);
     disableAutoresizing(view);
-    setBackground(view, createColor("tertiarySystemBackgroundColor"));
+    setBackground(view, createColor(ColorTertiarySystemBackground));
     setLabelText(view, text);
     setLabelFont(view, TextBody);
+    setTextColor(view, createColor(ColorLabel));
     adjustFontForSizeCategory(view);
     setAlignment(view, alignment);
     setTag(view, tag);
@@ -223,8 +298,45 @@ id createTextfield(id delegate, CFStringRef text, CFStringRef hint,
     return view;
 }
 
+SwitchContainer *createSwitch(CFStringRef label, bool enabled) {
+    SwitchContainer *c = malloc(sizeof(SwitchContainer));
+    c->view = createView(createColor(ColorSecondarySystemGroupedBackground), 0, -1, 44);
+    c->switchView = createObjectWithFrame("UISwitch", CGRectZero);
+    setBool(c->switchView, sel_getUid("setOn:"), enabled);
+    c->label = createLabel(label, TextBody, 4, true);
+    id sv = createStackView((id[]){c->label,c->switchView}, 2, 0, 5, (Padding){0,8,0,8});
+    setInt(sv, sel_getUid("setAlignment:"), 3);
+    addSubview(c->view, sv);
+    pin(sv, c->view, (Padding){0}, 0);
+    releaseObj(sv);
+    return c;
+}
+
 void addVStackToScrollView(id vStack, id scrollView) {
     addSubview(scrollView, vStack);
     pin(vStack, scrollView, (Padding){0}, 0);
     setEqualWidths(vStack, scrollView);
+}
+
+void updateButton(id view, id color) {
+    setButtonColor(view, color, 0);
+    setButtonColor(view, createColor(ColorSecondaryLabel), 2);
+    if (getObject(view, sel_getUid("backgroundColor")))
+        setBackground(view, createColor(ColorSecondarySystemGroupedBackground));
+}
+
+void updateSegmentedControl(id view) {
+    id fg = createColor(ColorLabel);
+    float redGreen = 0.78, blue = 0.8;
+    if (userData->darkMode) {
+        redGreen = 0.28;
+        blue = 0.29;
+    }
+    setTintColor(view, getColorRef(redGreen, redGreen, blue, 1));
+    CFDictionaryRef normalDict = createTitleTextDict(fg, createCustomFont(WeightReg, 13));
+    CFDictionaryRef selectedDict = createTitleTextDict(fg, createCustomFont(WeightMed, 13));
+    setControlTextAttribs(view, normalDict, 0);
+    setControlTextAttribs(view, selectedDict, 4);
+    CFRelease(normalDict);
+    CFRelease(selectedDict);
 }

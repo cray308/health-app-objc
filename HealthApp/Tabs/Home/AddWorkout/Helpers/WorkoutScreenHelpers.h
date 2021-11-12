@@ -16,6 +16,6 @@ extern pthread_mutex_t timerLock;
 
 void setupTimers(Workout *w, id parent);
 void setupDeviceEventNotifications(id *observers, ObjectBlock active, ObjectBlock resign);
-void cleanupWorkoutNotifications(id *observers);
+void cleanupWorkoutNotifications(id *observers, bool *removed);
 
 #endif /* WorkoutScreenHelpers_h */

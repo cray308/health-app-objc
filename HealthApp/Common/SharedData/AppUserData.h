@@ -10,11 +10,13 @@
 
 #include <time.h>
 #include "AppTypes.h"
+#include <stdbool.h>
 
 typedef struct {
     time_t planStart;
     time_t weekStart;
     int tzOffset;
+    bool darkMode;
     signed char currentPlan;
     byte completedWorkouts;
     short liftMaxes[4];
@@ -23,6 +25,5 @@ typedef struct {
 extern UserInfo *userData;
 
 int appUserData_getWeekInPlan(void);
-void appUserData_updateWeightMaxes(short *weights);
 
 #endif /* AppUserData_h */

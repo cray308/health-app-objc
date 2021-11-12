@@ -7,6 +7,9 @@
 @interface SettingsViewController() {
     @public SettingsTabCoordinator *delegate;
     UISegmentedControl *picker;
+    SwitchContainer *switchContainer;
+    UILabel *planLabel;
+    UIButton *deleteButton;
     short results[4];
 }
 @end
@@ -27,35 +30,50 @@ void settingsVC_updateWeightFields(SettingsViewController *vc) {
     enableButton(vc->validator.button, true);
 }
 
+void settingsVC_refreshUI(SettingsViewController *vc) {
+    updateSegmentedControl(vc->picker);
+    setBackground(vc->switchContainer->view, createColor(ColorSecondarySystemGroupedBackground));
+    setTextColor(vc->planLabel, createColor(ColorLabel));
+    setTextColor(vc->switchContainer->label, createColor(ColorLabel));
+    updateButton(vc->deleteButton, createColor(ColorRed));
+    validator_refresh(&vc->validator);
+}
+
 @implementation SettingsViewController
 - (void) viewDidLoad {
     [super viewDidLoad];
-    setBackground(self.view, UIColor.systemGroupedBackgroundColor);
+    setBackground(self.view, createColor(ColorSystemGroupedBackground));
     self.navigationItem.title = _nsstr(localize(CFSTR("titles2")));
-    validator_setup(&validator, 0, true, self);
+    validator_setup(&validator, 8, true, self);
 
     CFStringRef titles[4]; fillStringArray(titles, CFSTR("maxWeight%d"), 4);
-    UILabel *planLabel = createLabel(localize(CFSTR("planPickerTitle")), TextFootnote, 4, true);
+    planLabel = createLabel(localize(CFSTR("planPickerTitle")), TextFootnote, 4, true);
     picker = createSegmentedControl(CFSTR("settingsSegment%d"),3,userData->currentPlan + 1,0,0,44);
-    UIView *planContainer = createStackView((id []){planLabel, picker}, 2, 1, 2, (Padding){0});
-    UIStackView *cStack = createStackView((id []){planContainer}, 1, 1, 0, (Padding){0,8,0,8});
+    UIView *planContainer = createStackView((id []){planLabel, picker}, 2, 1, 2, (Padding){0,8,0,8});
+    UIStackView *cStack = createStackView((id []){planContainer}, 1, 1, 0, (Padding){0});
     [cStack setCustomSpacing:20 afterView:planContainer];
     validator.vStack = createStackView((id[]){cStack}, 1, 1, 20, (Padding){20, 0, 20, 0});
+
+    if (osVersion == Version12) {
+        switchContainer = createSwitch(localize(CFSTR("darkMode")), userData->darkMode);
+        [cStack addArrangedSubview:switchContainer->view];
+        [cStack setCustomSpacing:20 afterView:switchContainer->view];
+    }
 
     for (int i = 0; i < 4; ++i)
         [cStack addArrangedSubview:validator_add(&validator, self, titles[i], 0, 999)];
 
-    validator.button = createButton(localize(CFSTR("settingsSave")), UIColor.systemBlueColor,
+    validator.button = createButton(localize(CFSTR("settingsSave")), createColor(ColorBlue),
                                     BtnBackground, 0, self, @selector(buttonTapped:), 44);
     [validator.vStack addArrangedSubview:validator.button];
 
-    [validator.vStack addArrangedSubview:createButton(localize(CFSTR("settingsDelete")), UIColor.systemRedColor,
-                                            BtnBackground, 1, self, @selector(buttonTapped:), 44)];
+    deleteButton = createButton(localize(CFSTR("settingsDelete")), createColor(ColorRed),
+                                BtnBackground, 1, self, @selector(buttonTapped:), 44);
+    [validator.vStack addArrangedSubview:deleteButton];
     addVStackToScrollView(validator.vStack, validator.scrollView);
 
     [cStack release];
     [planContainer release];
-    [planLabel release];
 
     settingsVC_updateWeightFields(self);
     appCoordinator->loadedViewControllers |= LoadedViewController_Settings;
@@ -63,10 +81,11 @@ void settingsVC_updateWeightFields(SettingsViewController *vc) {
 
 - (void) buttonTapped: (UIButton *)sender {
     if (!sender.tag) {
+        bool dark = switchContainer ? ((UISwitch *) switchContainer->switchView).on : false;
         signed char plan = ((signed char) picker.selectedSegmentIndex - 1);
         for (int i = 0; i < 4; ++i)
             results[i] = validator.children[i].result;
-        settingsCoordinator_handleSaveTap(delegate, results, plan);
+        settingsCoordinator_handleSaveTap(delegate, results, plan, dark);
     } else {
         settingsCoordinator_handleDeleteTap(delegate);
     }

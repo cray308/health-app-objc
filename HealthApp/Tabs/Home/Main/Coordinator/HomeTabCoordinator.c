@@ -19,6 +19,7 @@
 extern id homeVC_init(void *);
 extern void homeVC_createWorkoutsList(id);
 extern void homeVC_updateWorkoutsList(id);
+extern void homeVC_refreshUI(id);
 extern id setupWorkoutVC_init(void *, byte, Array_str *);
 
 enum {
@@ -30,18 +31,25 @@ enum {
 };
 
 static void navigateToAddWorkout(HomeTabCoordinator *this, bool dismissVC, Workout *workout) {
-    if (dismissVC)
-        dismissPresentedVC(getFirstVC(this->navVC));
+    HomeTabCoordinator *coord = this;
     AddWorkoutCoordinator *child = malloc(sizeof(AddWorkoutCoordinator));
     child->navVC = this->navVC;
     child->parent = this;
     child->workout = workout;
-    this->childCoordinator = child;
-    addWorkoutCoordinator_start(child);
+
+    if (dismissVC) {
+        dismissPresentedVC(getFirstVC(this->navVC), ^{
+            coord->childCoordinator = child;
+            addWorkoutCoordinator_start(child);
+        });
+    } else {
+        coord->childCoordinator = child;
+        addWorkoutCoordinator_start(child);
+    }
 }
 
 static void showConfetti(id vc) {
-    id view = getObject(vc, sel_getUid("view"));
+    id view = getView(vc);
     CGRect frame;
     getRect(view, &frame, 0);
     id confettiView = createConfettiView((CGRect){{0}, frame.size});
@@ -130,9 +138,15 @@ void homeCoordinator_checkForChildCoordinator(HomeTabCoordinator *this) {
     }
 }
 
-void homeCoordinator_resetUI(HomeTabCoordinator *this) {
+void homeCoordinator_resetUI(HomeTabCoordinator *this, bool reloadUI) {
     homeViewModel_fetchData(&this->model);
     homeVC_createWorkoutsList(getFirstVC(this->navVC));
+    if (reloadUI) {
+        updateNavBar(this->navVC);
+        id vc = getFirstVC(this->navVC);
+        setBackground(getView(vc), createColor(ColorSystemGroupedBackground));
+        homeVC_refreshUI(vc);
+    }
 }
 
 void homeCoordinator_updateUI(HomeTabCoordinator *this) {

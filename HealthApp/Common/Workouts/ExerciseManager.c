@@ -83,7 +83,8 @@ static void buildWorkoutFromDict(CFDictionaryRef dict, WorkoutParams *params, Wo
         CFNumberGetValue(number, kCFNumberIntType, &activities.reps);
 
         CFArrayRef foundExercises = CFDictionaryGetValue(act, CFSTR("exercises"));
-        for (int j = 0; j < CFArrayGetCount(foundExercises); ++j) {
+        int nExercises = (int) CFArrayGetCount(foundExercises);
+        for (int j = 0; j < nExercises; ++j) {
             CFDictionaryRef ex = CFArrayGetValueAtIndex(foundExercises, j);
             ExerciseEntry exercise = {
                 .sets = 1, .timer = &w->timers[TimerExercise], .stateNames = ExerciseStates

@@ -26,11 +26,11 @@ static CFStringRef const dictKey = CFSTR("userinfo");
 static const void *keys[] = {
     CFSTR("planStart"), CFSTR("weekStart"), CFSTR("tzOffset"), CFSTR("currentPlan"),
     CFSTR("completedWorkouts"), CFSTR("squatMax"), CFSTR("pullUpMax"), CFSTR("benchMax"),
-    CFSTR("deadliftMax")
+    CFSTR("deadliftMax"), CFSTR("darkMode")
 };
 
 static void saveData(void) {
-    CFNumberRef values[] = {
+    CFNumberRef values[10] = {
         CFNumberCreate(NULL, kCFNumberLongType, &userData->planStart),
         CFNumberCreate(NULL, kCFNumberLongType, &userData->weekStart),
         CFNumberCreate(NULL, kCFNumberIntType, &userData->tzOffset),
@@ -42,7 +42,11 @@ static void saveData(void) {
         CFNumberCreate(NULL, kCFNumberShortType, &userData->liftMaxes[3])
     };
 
-    CFDictionaryRef dict = CFDictionaryCreate(NULL, keys, (const void **)values, 9,
+    int nValues = 9;
+    if (osVersion == Version12)
+        values[nValues++] = CFNumberCreate(NULL, kCFNumberCharType, &userData->darkMode);
+
+    CFDictionaryRef dict = CFDictionaryCreate(NULL, keys, (const void **)values, nValues,
                                               &kCFCopyStringDictionaryKeyCallBacks,
                                               &kCFTypeDictionaryValueCallBacks);
 
@@ -50,7 +54,7 @@ static void saveData(void) {
     ((void(*)(id,SEL,CFDictionaryRef,CFStringRef))objc_msgSend)
     (defaults, sel_getUid("setObject:forKey:"), dict, dictKey);
     CFRelease(dict);
-    for (int i = 0; i < 9; ++i) CFRelease(values[i]);
+    for (int i = 0; i < nValues; ++i) CFRelease(values[i]);
 }
 
 void userInfo_create(void) {
@@ -89,6 +93,11 @@ int userInfo_initFromStorage(void) {
         value = CFDictionaryGetValue(savedInfo, keys[5 + i]);
         CFNumberGetValue(value, kCFNumberShortType, &info->liftMaxes[i]);
     }
+
+    if (osVersion == Version12) {
+        value = CFDictionaryGetValue(savedInfo, keys[9]);
+        CFNumberGetValue(value, kCFNumberCharType, &info->darkMode);
+    }
     userData = info;
 
     int newOffset = date_getOffsetFromGMT(now);
@@ -113,18 +122,6 @@ int userInfo_initFromStorage(void) {
         saveData();
     }
     return tzDiff;
-}
-
-void appUserData_setWorkoutPlan(signed char plan) {
-    if (plan != WorkoutPlanNone && plan != userData->currentPlan) {
-#if DEBUG
-        userData->planStart = userData->weekStart;
-#else
-        userData->planStart = userData->weekStart + WeekSeconds;
-#endif
-    }
-    userData->currentPlan = plan;
-    saveData();
 }
 
 void appUserData_deleteSavedData(void) {
@@ -153,4 +150,23 @@ void appUserData_updateWeightMaxes(short *weights) {
             userData->liftMaxes[i] = weights[i];
     }
     saveData();
+}
+
+bool appUserData_updateUserSettings(signed char plan, bool darkMode, short *weights) {
+    bool rv = false;
+    if (plan != WorkoutPlanNone && plan != userData->currentPlan) {
+#if DEBUG
+        userData->planStart = userData->weekStart;
+#else
+        userData->planStart = userData->weekStart + WeekSeconds;
+#endif
+    }
+    userData->currentPlan = plan;
+
+    if (osVersion == Version12) {
+        rv = darkMode != userData->darkMode;
+        userData->darkMode = darkMode;
+    }
+    appUserData_updateWeightMaxes(weights);
+    return rv;
 }

@@ -27,5 +27,7 @@ typedef struct {
 id createContainer(Container *c, CFStringRef title, int hidden, int spacing, bool margins);
 void containers_free(Container *c, int size);
 void container_add(Container *c, id v);
+void container_clear(Container *c);
+void container_refresh(Container *c);
 
 #endif /* ContainerView_h */

@@ -9,7 +9,7 @@
 @implementation UpdateMaxesSheet
 - (void) viewDidLoad {
     [super viewDidLoad];
-    setBackground(self.view, UIColor.secondarySystemBackgroundColor);
+    setBackground(self.view, createColor(ColorSecondarySystemBackground));
     validator_setup(&validator, 8, true, self);
 
     CFStringRef titles[4]; fillStringArray(titles, CFSTR("maxWeight%d"), 4);
@@ -19,7 +19,7 @@
     for (int i = 0; i < 4; ++i)
         [validator.vStack addArrangedSubview:validator_add(&validator, self, titles[i], 1, 999)];
 
-    UIButton *finishButton = createButton(localize(CFSTR("finish")), UIColor.systemBlueColor, 0,
+    UIButton *finishButton = createButton(localize(CFSTR("finish")), createColor(ColorBlue), 0,
                                           0, self, @selector(didPressFinish), -1);
     setNavButton(self.navigationItem, false, finishButton, self.view.frame.size.width);
     enableButton(finishButton, false);

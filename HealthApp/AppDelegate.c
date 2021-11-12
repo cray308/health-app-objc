@@ -21,6 +21,7 @@ extern void persistenceService_init(void);
 extern void persistenceService_start(int tzOffset);
 extern void appCoordinator_start(id tabVC);
 extern void appCoordinator_fetchHistory(void);
+extern void handleIOSVersion(void);
 
 #if DEBUG
 extern void persistenceService_create(void);
@@ -35,6 +36,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
     initCircuitStrings();
     initTimerStrings();
     initExerciseMgrStrings();
+    handleIOSVersion();
     CGRect bounds;
     getScreenBounds(&bounds);
     self->window = createObjectWithFrame("UIWindow", bounds);
@@ -60,11 +62,14 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
         tzOffset = userInfo_initFromStorage();
     }
 
-    id tabVC = createTabController();
+    if (osVersion != Version14)
+        setTintColor(self->window, createColor(ColorRed));
+    id tabVC = getObject(allocClass("UITabBarController"), sel_getUid("init"));
+    if (osVersion == Version12)
+        updateTabBar(tabVC);
     appCoordinator_start(tabVC);
     setObject(self->window, sel_getUid("setRootViewController:"), tabVC);
     voidFunc(self->window, sel_getUid("makeKeyAndVisible"));
-    releaseObj(tabVC);
 
     persistenceService_start(tzOffset);
     appCoordinator_fetchHistory();

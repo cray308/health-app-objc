@@ -16,7 +16,7 @@ typedef struct {
 } SettingsTabCoordinator;
 
 void settingsCoordinator_handleSaveTap(SettingsTabCoordinator *this,
-                                       short *weights, signed char plan);
+                                       short *weights, signed char plan, bool dark);
 void settingsCoordinator_handleDeleteTap(SettingsTabCoordinator *this);
 
 #endif /* SettingsTabCoordinator_h */

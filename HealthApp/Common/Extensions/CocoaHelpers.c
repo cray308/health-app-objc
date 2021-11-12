@@ -6,16 +6,12 @@
 //
 
 #include "CocoaHelpers.h"
+#include "AppUserData.h"
 #include <CoreFoundation/CFString.h>
 #include <objc/message.h>
+#include <stdlib.h>
 
-extern id UIFontTextStyleTitle1;
-extern id UIFontTextStyleTitle2;
-extern id UIFontTextStyleTitle3;
-extern id UIFontTextStyleHeadline;
-extern id UIFontTextStyleSubheadline;
-extern id UIFontTextStyleBody;
-extern id UIFontTextStyleFootnote;
+extern int getOSVersion(void);
 
 static const void *cocoaArrRetain(CFAllocatorRef allocator _U_, const void *value) {
     voidFunc((id) value, sel_getUid("retain"));
@@ -26,7 +22,64 @@ static void cocoaArrRelease(CFAllocatorRef allocator _U_, const void *value) {
     releaseObj((id) value);
 }
 
+static inline id allocColor(float red, float green, float blue, float alpha) {
+    return ((id(*)(id,SEL,CGFloat,CGFloat,CGFloat,CGFloat))objc_msgSend)
+    (allocClass("UIColor"), sel_getUid("initWithRed:green:blue:alpha:"), red, green, blue, alpha);
+}
+
 CFArrayCallBacks retainedArrCallbacks = {0, cocoaArrRetain, cocoaArrRelease, NULL, NULL};
+static id **appColors = NULL;
+int osVersion;
+static const char *const ColorNames[] = {
+    "systemBackgroundColor",
+    "secondarySystemBackgroundColor",
+    "tertiarySystemBackgroundColor",
+    "systemGroupedBackgroundColor",
+    "secondarySystemGroupedBackgroundColor",
+    "separatorColor",
+    "labelColor",
+    "secondaryLabelColor",
+    "systemGrayColor",
+    "systemRedColor",
+    "systemBlueColor",
+    "systemGreenColor",
+    "systemOrangeColor",
+};
+
+void handleIOSVersion(void) {
+    osVersion = getOSVersion();
+    if (osVersion == Version12) {
+        appColors = malloc(13 * sizeof(id*));
+        for (int i = 0; i < 13; ++i)
+            appColors[i] = malloc(2 * sizeof(id));
+        appColors[ColorSystemBackground][0] = allocColor(1, 1, 1, 1);
+        appColors[ColorSystemBackground][1] = allocColor(0, 0, 0, 1);
+        appColors[ColorSecondarySystemBackground][0] = allocColor(0.95, 0.95, 0.97, 1);
+        appColors[ColorSecondarySystemBackground][1] = allocColor(0.11, 0.11, 0.12, 1);
+        appColors[ColorTertiarySystemBackground][0] = allocColor(1, 1, 1, 1);
+        appColors[ColorTertiarySystemBackground][1] = allocColor(0.17, 0.17, 0.18, 1);
+        appColors[ColorSystemGroupedBackground][0] = allocColor(0.95, 0.95, 0.97, 1);
+        appColors[ColorSystemGroupedBackground][1] = allocColor(0, 0, 0, 1);
+        appColors[ColorSecondarySystemGroupedBackground][0] = allocColor(1, 1, 1, 1);
+        appColors[ColorSecondarySystemGroupedBackground][1] = allocColor(0.11, 0.11, 0.12, 1);
+        appColors[ColorSeparator][0] = allocColor(0.24, 0.24, 0.26, 0.29);
+        appColors[ColorSeparator][1] = allocColor(0.33, 0.33, 0.35, 0.6);
+        appColors[ColorLabel][0] = allocColor(0, 0, 0, 1);
+        appColors[ColorLabel][1] = allocColor(1, 1, 1, 1);
+        appColors[ColorSecondaryLabel][0] = allocColor(0.24, 0.24, 0.26, 0.6);
+        appColors[ColorSecondaryLabel][1] = allocColor(0.92, 0.92, 0.96, 0.6);
+        appColors[ColorGray][0] = allocColor(0.56, 0.56, 0.58, 1);
+        appColors[ColorGray][1] = allocColor(0.56, 0.56, 0.58, 1);
+        appColors[ColorRed][0] = allocColor(1, 0.23, 0.19, 1);
+        appColors[ColorRed][1] = allocColor(1, 0.27, 0.23, 1);
+        appColors[ColorBlue][0] = allocColor(0, 0.48, 1, 1);
+        appColors[ColorBlue][1] = allocColor(0.04, 0.52, 1, 1);
+        appColors[ColorGreen][0] = allocColor(0.2, 0.78, 0.35, 1);
+        appColors[ColorGreen][1] = allocColor(0.19, 0.82, 0.35, 1);
+        appColors[ColorOrange][0] = allocColor(1, 0.58, 0, 1);
+        appColors[ColorOrange][1] = allocColor(1, 0.62, 0.04, 1);
+    }
+}
 
 id staticMethod(Class _self, SEL _cmd) {
     return ((id(*)(Class,SEL))objc_msgSend)(_self, _cmd);
@@ -60,32 +113,8 @@ void setString(id obj, SEL _cmd, CFStringRef arg) {
     ((void(*)(id,SEL,CFStringRef))objc_msgSend)(obj, _cmd, arg);
 }
 
-void setInt(id obj, SEL _cmd, int arg) {
-    ((void(*)(id,SEL,int))objc_msgSend)(obj, _cmd, arg);
-}
-
 int getInt(id obj, SEL _cmd) {
     return ((int(*)(id,SEL))objc_msgSend)(obj, _cmd);
-}
-
-void setInt16(id obj, SEL _cmd, int16_t arg) {
-    ((void(*)(id,SEL,int16_t))objc_msgSend)(obj, _cmd, arg);
-}
-
-int16_t getInt16(id obj, SEL _cmd) {
-    return ((int16_t(*)(id,SEL))objc_msgSend)(obj, _cmd);
-}
-
-void setInt64(id obj, SEL _cmd, int64_t arg) {
-    ((void(*)(id,SEL,int64_t))objc_msgSend)(obj, _cmd, arg);
-}
-
-int64_t getInt64(id obj, SEL _cmd) {
-    return ((int64_t(*)(id,SEL))objc_msgSend)(obj, _cmd);
-}
-
-void setFloat(id obj, SEL _cmd, float arg) {
-    ((void(*)(id,SEL,float))objc_msgSend)(obj, _cmd, arg);
 }
 
 void setCGFloat(id obj, SEL _cmd, CGFloat arg) {
@@ -96,12 +125,12 @@ void setArray(id obj, SEL _cmd, CFArrayRef arg) {
     ((void(*)(id,SEL,CFArrayRef))objc_msgSend)(obj, _cmd, arg);
 }
 
-void setDict(id obj, SEL _cmd, CFDictionaryRef arg) {
-    ((void(*)(id,SEL,CFDictionaryRef))objc_msgSend)(obj, _cmd, arg);
-}
-
 CFDictionaryRef getDict(id obj, SEL _cmd, CFStringRef arg) {
     return ((CFDictionaryRef(*)(id,SEL,CFStringRef))objc_msgSend)(obj, _cmd, arg);
+}
+
+CFArrayRef getArray(id obj, SEL _cmd) {
+    return ((CFArrayRef(*)(id,SEL))objc_msgSend)(obj, _cmd);
 }
 
 id allocClass(const char *name) {
@@ -114,10 +143,6 @@ id getObjectWithFloat(id obj, SEL _cmd, CGFloat arg) {
 
 id getObjectWithObject(id obj, SEL _cmd, id arg) {
     return ((id(*)(id,SEL,id))objc_msgSend)(obj, _cmd, arg);
-}
-
-id getObjectWithArr(id obj, SEL _cmd, CFArrayRef arg) {
-    return ((id(*)(id,SEL,CFArrayRef))objc_msgSend)(obj, _cmd, arg);
 }
 
 void releaseObj(id obj) {
@@ -154,38 +179,18 @@ id getNotificationCenter(void) {
                         sel_getUid("currentNotificationCenter"));
 }
 
-id createColor(const char *name) {
-    return staticMethod(objc_getClass("UIColor"), sel_getUid(name));
+id getColorRef(float red, float green, float blue, float alpha) {
+    return ((id(*)(Class,SEL,CGFloat,CGFloat,CGFloat,CGFloat))objc_msgSend)
+    (objc_getClass("UIColor"), sel_getUid("colorWithRed:green:blue:alpha:"), red, green, blue, alpha);
 }
 
-id createFont(int style) {
-    id fStyle;
-    switch (style) {
-        case TextFootnote:
-            fStyle = UIFontTextStyleFootnote;
-            break;
-        case TextSubhead:
-            fStyle = UIFontTextStyleSubheadline;
-            break;
-        case TextBody:
-            fStyle = UIFontTextStyleBody;
-            break;
-        case TextHead:
-            fStyle = UIFontTextStyleHeadline;
-            break;
-        case TextTitle1:
-            fStyle = UIFontTextStyleTitle1;
-            break;
-        default:
-            fStyle = UIFontTextStyleTitle3;
-    }
-    return staticMethodWithString(objc_getClass("UIFont"),
-                                  sel_getUid("preferredFontForTextStyle:"), (CFStringRef)fStyle);
+id createColor(int type) {
+    if (osVersion == Version12) return appColors[type][userData->darkMode];
+    return staticMethod(objc_getClass("UIColor"), sel_getUid(ColorNames[type]));
 }
 
-id createImage(CFStringRef name, bool system) {
-    SEL method = system ? sel_getUid("systemImageNamed:") : sel_getUid("imageNamed:");
-    return staticMethodWithString(objc_getClass("UIImage"), method, name);
+id createImage(CFStringRef name) {
+    return staticMethodWithString(objc_getClass("UIImage"), sel_getUid("imageNamed:"), name);
 }
 
 CFStringRef localize(CFStringRef key) {

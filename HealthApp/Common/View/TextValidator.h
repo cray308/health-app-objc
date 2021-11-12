@@ -41,6 +41,7 @@ typedef struct {
 void validator_setup(Validator *this, short margins, bool createSet, id target);
 void validator_free(Validator *this, id target);
 id validator_add(Validator *this, id delegate, CFStringRef hint, short min, short max);
+void validator_refresh(Validator *this);
 void validator_getScrollHeight(Validator *this);
 void validator_handleKeyboardShow(Validator *this, id view, id notif);
 void validator_handleKeyboardHide(Validator *this);

@@ -14,7 +14,9 @@
 #include "ViewControllerHelpers.h"
 
 extern void homeCoordinator_start(HomeTabCoordinator*);
-extern void homeCoordinator_resetUI(HomeTabCoordinator*);
+extern void homeCoordinator_resetUI(HomeTabCoordinator*, bool);
+extern void historyCoordinator_reloadUI(HistoryTabCoordinator*, bool);
+extern void settingsCoordinator_reloadUI(SettingsTabCoordinator*);
 extern void homeCoordinator_updateUI(HomeTabCoordinator*);
 extern void historyCoordinator_start(HistoryTabCoordinator*);
 extern void historyCoordinator_fetchData(HistoryTabCoordinator*);
@@ -32,21 +34,19 @@ void appCoordinator_start(id tabVC) {
     appCoordinator = calloc(1, sizeof(AppCoordinator));
     id controllers[3];
     id items[3];
-    CFStringRef imgNames[] = {CFSTR("house"), CFSTR("chart.bar"), CFSTR("gear")};
+    CFStringRef imgNames[] = {CFSTR("ico_house"), CFSTR("ico_chart"), CFSTR("ico_gear")};
     CFStringRef titles[3]; fillStringArray(titles, CFSTR("tabs%d"), 3);
 
     for (int i = 0; i < 3; ++i) {
-        id image = createImage(imgNames[i], true);
+        id image = createImage(imgNames[i]);
         items[i] = ((id(*)(id,SEL,CFStringRef,id,int))objc_msgSend)
         (allocClass("UITabBarItem"), sel_getUid("initWithTitle:image:tag:"), titles[i], image, i);
 
         controllers[i] = ((id(*)(id,SEL,CFStringRef,id))objc_msgSend)
         (allocNavVC(), sel_getUid("initWithNibName:bundle:"), NULL, nil);
 
-        id navBar = getObject(controllers[i], sel_getUid("navigationBar"));
-
-        setObject(navBar, sel_getUid("setBarTintColor:"),
-                  createColor("tertiarySystemGroupedBackgroundColor"));
+        if (osVersion == Version12)
+            updateNavBar(controllers[i]);
         setObject(controllers[i], sel_getUid("setTabBarItem:"), items[i]);
     }
 
@@ -68,6 +68,7 @@ void appCoordinator_start(id tabVC) {
     CFArrayRef array = CFArrayCreate(NULL, (const void **)controllers, 3, &(CFArrayCallBacks){0});
     ((void(*)(id,SEL,CFArrayRef,bool))objc_msgSend)
     (tabVC, sel_getUid("setViewControllers:animated:"), array, false);
+    appCoordinator->tabVC = tabVC;
 
     for (int i = 0; i < 3; ++i) {
         releaseObj(controllers[i]);
@@ -76,8 +77,14 @@ void appCoordinator_start(id tabVC) {
     CFRelease(array);
 }
 
-void appCoordinator_updatedUserInfo(void) {
-    homeCoordinator_resetUI(appCoordinator->children[TabHome]);
+void appCoordinator_updatedUserInfo(bool reloadScreens) {
+    homeCoordinator_resetUI(appCoordinator->children[TabHome], reloadScreens);
+    if (reloadScreens) {
+        updateTabBar(appCoordinator->tabVC);
+        bool reloadHistory = appCoordinator->loadedViewControllers & LoadedViewController_History;
+        historyCoordinator_reloadUI(appCoordinator->children[TabHistory], reloadHistory);
+        settingsCoordinator_reloadUI(appCoordinator->children[TabSettings]);
+    }
 }
 
 void appCoordinator_fetchHistory(void) {

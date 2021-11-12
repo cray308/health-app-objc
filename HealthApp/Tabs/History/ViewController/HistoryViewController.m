@@ -18,7 +18,7 @@
 @implementation HistoryViewController
 - (void) viewDidLoad {
     [super viewDidLoad];
-    setBackground(self.view, UIColor.systemBackgroundColor);
+    setBackground(self.view, createColor(ColorSystemBackground));
     self.navigationItem.title = _nsstr(localize(CFSTR("titles1")));
 
     CFStringRef titles[3]; fillStringArray(titles, CFSTR("chartHeader%d"), 3);
@@ -82,4 +82,13 @@ id historyVC_init(HistoryTabCoordinator *delegate) {
 void historyVC_refresh(HistoryViewController *vc) {
     vc->picker.selectedSegmentIndex = 0;
     [vc updateSegment:vc->picker];
+}
+
+void historyVC_refreshUI(HistoryViewController *vc) {
+    updateSegmentedControl(vc->picker);
+    for (int i = 0; i < 3; ++i) container_refresh(&vc->containers[i]);
+    vc->totalWorkoutsChart->limitLine.lineColor = ((LegendEntry*) vc->model->totalWorkoutsModel.legendEntries[0]).formColor;
+    [vc->totalWorkoutsChart->chartView setNeedsDisplay];
+    [vc->workoutTypeChart->chartView setNeedsDisplay];
+    [vc->liftChart->chartView setNeedsDisplay];
 }

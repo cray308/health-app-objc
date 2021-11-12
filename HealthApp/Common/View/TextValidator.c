@@ -10,7 +10,6 @@
 #include <objc/message.h>
 #include "CocoaHelpers.h"
 #include "Views.h"
-#include "SwiftBridging.h"
 
 extern id UIKeyboardDidShowNotification;
 extern id UIKeyboardWillHideNotification;
@@ -75,11 +74,8 @@ void validator_setup(Validator *this, short margins, bool createSet, id target) 
     (allocClass(btnName), sel_getUid("initWithTitle:style:target:action:"),
      CFSTR("Done"), 0, target, sel_getUid("dismissKeyboard"));
 
-    if (!checkGreaterThanMinVersion()) {
-        CFDictionaryRef titleDict = createTitleTextDict(createColor("systemRedColor"));
-        ((void(*)(id,SEL,CFDictionaryRef,int))objc_msgSend)(doneButton, sel_getUid("setTitleTextAttributes:forState:"), titleDict, 0);
-        CFRelease(titleDict);
-    }
+    if (osVersion != Version14)
+        setTintColor(doneButton, createColor(ColorRed));
 
     CFArrayRef array = CFArrayCreate(NULL, (const void *[]){flexSpace, doneButton},
                                      2, &retainedArrCallbacks);
@@ -120,7 +116,7 @@ id validator_add(Validator *v, id delegate, CFStringRef hint, short min, short m
     child->hintLabel = createLabel(hint, TextFootnote, 4, false);
     child->field = createTextfield(delegate, NULL, hint, 4, 4, v->count++);
     child->errorLabel = createLabel(child->errorText, TextFootnote, 4, false);
-    setTextColor(child->errorLabel, createColor("systemRedColor"));
+    setTextColor(child->errorLabel, createColor(ColorRed));
     id vStack = createStackView((id []){child->hintLabel, child->field, child->errorLabel},
                                 3, 1, 4, v->padding);
     addSubview(child->view, vStack);
@@ -131,6 +127,22 @@ id validator_add(Validator *v, id delegate, CFStringRef hint, short min, short m
     return child->view;
 }
 
+void validator_refresh(Validator *this) {
+    CFArrayRef items = getArray(this->toolbar, sel_getUid("items"));
+    id doneButton = (id) CFArrayGetValueAtIndex(items, 1);
+    id red = createColor(ColorRed), fg = createColor(ColorLabel);
+    id bg = createColor(ColorTertiarySystemBackground);
+    setTintColor(doneButton, red);
+    updateButton(this->button, createColor(ColorBlue));
+    for (int i = 0; i < this->count; ++i) {
+        struct InputView *child = &this->children[i];
+        setTextColor(child->errorLabel, red);
+        setTextColor(child->hintLabel, fg);
+        setBackground(child->field, bg);
+        setTextColor(child->field, fg);
+    }
+}
+
 void validator_getScrollHeight(Validator *this) {
     CGRect bounds;
     getRect(this->scrollView, &bounds, 1);
@@ -139,7 +151,8 @@ void validator_getScrollHeight(Validator *this) {
 
 void validator_handleKeyboardShow(Validator *this, id view, id notif) {
     toggleScrolling(this->scrollView, true);
-    id info = ((id(*)(id,SEL,id))objc_msgSend)(getObject(notif, sel_getUid("userInfo")), sel_getUid("objectForKey:"), UIKeyboardFrameEndUserInfoKey);
+    id info = getObjectWithObject(getObject(notif, sel_getUid("userInfo")),
+                                  sel_getUid("objectForKey:"), UIKeyboardFrameEndUserInfoKey);
     CGRect kbRect, viewRect, fieldRect;
 #if defined(__arm64__)
     kbRect = ((CGRect(*)(id,SEL))objc_msgSend)(info, sel_getUid("CGRectValue"));

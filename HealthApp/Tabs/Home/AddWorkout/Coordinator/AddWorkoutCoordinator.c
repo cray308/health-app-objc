@@ -8,7 +8,6 @@
 #include "AddWorkoutCoordinator.h"
 #include <CoreFoundation/CFString.h>
 #include <objc/message.h>
-#include "AppUserData.h"
 #include "PersistenceService.h"
 #include "ViewControllerHelpers.h"
 #include "WorkoutScreenHelpers.h"
@@ -17,6 +16,7 @@ extern id workoutVC_init(void *delegate);
 extern id updateMaxesVC_init(void *delegate);
 extern void homeCoordinator_didFinishAddingWorkout(void *, int);
 extern void appCoordinator_updateMaxWeights(void);
+extern void appUserData_updateWeightMaxes(short *weights);
 extern byte appUserData_addCompletedWorkout(byte);
 
 static void cleanupTimers(Workout *w) {
@@ -103,13 +103,17 @@ void addWorkoutCoordinator_completedWorkout(AddWorkoutCoordinator *this,
             appUserData_updateWeightMaxes(this->workout->newLifts);
     }
 
-    if (dismissVC) {
-        dismissPresentedVC(this->navVC);
-        appCoordinator_updateMaxWeights();
-    }
+    id navVC = this->navVC;
     void *parent = this->parent;
     updateStoredData(this);
-    homeCoordinator_didFinishAddingWorkout(parent, totalCompleted);
+    if (dismissVC) {
+        dismissPresentedVC(navVC, ^{
+            appCoordinator_updateMaxWeights();
+            homeCoordinator_didFinishAddingWorkout(parent, totalCompleted);
+        });
+    } else {
+        homeCoordinator_didFinishAddingWorkout(parent, totalCompleted);
+    }
 }
 
 void addWorkoutCoordinator_stopWorkoutFromBackButtonPress(AddWorkoutCoordinator *this) {

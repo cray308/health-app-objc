@@ -12,9 +12,10 @@
 
 extern id settingsVC_init(void *delegate);
 extern void settingsVC_updateWeightFields(id vc);
-extern void appCoordinator_updatedUserInfo(void);
+extern void settingsVC_refreshUI(id vc);
+extern void appCoordinator_updatedUserInfo(bool reloadScreens);
 extern void appCoordinator_deletedAppData(void);
-extern void appUserData_setWorkoutPlan(signed char);
+extern bool appUserData_updateUserSettings(signed char, bool, short *);
 extern void appUserData_deleteSavedData(void);
 extern void persistenceService_deleteUserData(void);
 
@@ -30,14 +31,20 @@ void settingsCoordinator_updateWeightText(SettingsTabCoordinator *this) {
     settingsVC_updateWeightFields(getFirstVC(this->navVC));
 }
 
+void settingsCoordinator_reloadUI(SettingsTabCoordinator *this) {
+    updateNavBar(this->navVC);
+    id vc = getFirstVC(this->navVC);
+    setBackground(getView(vc), createColor(ColorSystemGroupedBackground));
+    settingsVC_refreshUI(vc);
+}
+
 void settingsCoordinator_handleSaveTap(SettingsTabCoordinator *this,
-                                       short *weights, signed char plan) {
+                                       short *weights, signed char plan, bool dark) {
     id ctrl = createAlertController(localize(CFSTR("settingsAlertTitle")),
                                     localize(CFSTR("settingsAlertMessageSave")));
     addAlertAction(ctrl, localize(CFSTR("save")), 0, ^{
-        appUserData_updateWeightMaxes(weights);
-        appUserData_setWorkoutPlan(plan);
-        appCoordinator_updatedUserInfo();
+        bool rv = appUserData_updateUserSettings(plan, dark, weights);
+        appCoordinator_updatedUserInfo(rv);
     });
     addCancelAction(ctrl);
     presentVC(getFirstVC(this->navVC), ctrl);

@@ -1,6 +1,6 @@
 // swift-interface-format-version: 1.0
 // swift-compiler-version: Apple Swift version 5.3.2 (swiftlang-1200.0.45 clang-1200.0.32.28)
-// swift-module-flags: -target arm64-apple-ios13.0 -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -module-name Charts
+// swift-module-flags: -target arm64-apple-ios12.1 -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -module-name Charts
 @_exported import Charts
 import CoreGraphics
 import QuartzCore
@@ -51,6 +51,11 @@ import UIKit
   @objc deinit
   @objc required dynamic public init()
   @objc override public init(entries: [Charts.ChartDataEntry])
+}
+@objc @_inheritsConvenienceInitializers public class ChartUtility : ObjectiveC.NSObject {
+  @objc public class func setDarkMode(enabled: Swift.Bool)
+  @objc deinit
+  @objc override dynamic public init()
 }
 extension CGContext {
   public func drawText(_ text: Swift.String, at point: CoreGraphics.CGPoint, align: UIKit.NSTextAlignment, anchor: CoreGraphics.CGPoint = CGPoint(x: 0.5, y: 0.5), angleRadians: CoreGraphics.CGFloat = 0.0, attributes: [Foundation.NSAttributedString.Key : Any]?)

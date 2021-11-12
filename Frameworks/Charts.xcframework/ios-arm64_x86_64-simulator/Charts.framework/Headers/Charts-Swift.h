@@ -362,6 +362,13 @@ SWIFT_CLASS("_TtC6Charts14ChartLimitLine")
 
 
 
+SWIFT_CLASS("_TtC6Charts12ChartUtility")
+@interface ChartUtility : NSObject
++ (void)setDarkModeWithEnabled:(BOOL)enabled;
+- (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
+@end
+
+
 
 @class ViewPortHandler;
 
@@ -466,6 +473,7 @@ SWIFT_CLASS("_TtC6Charts18LinearGradientFill")
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
+
 
 
 
@@ -854,6 +862,13 @@ SWIFT_CLASS("_TtC6Charts14ChartLimitLine")
 
 
 
+SWIFT_CLASS("_TtC6Charts12ChartUtility")
+@interface ChartUtility : NSObject
++ (void)setDarkModeWithEnabled:(BOOL)enabled;
+- (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
+@end
+
+
 
 @class ViewPortHandler;
 
@@ -958,6 +973,7 @@ SWIFT_CLASS("_TtC6Charts18LinearGradientFill")
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
+
 
 
 

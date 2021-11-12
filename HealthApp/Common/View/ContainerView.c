@@ -10,10 +10,15 @@
 #include "CocoaHelpers.h"
 #include "Views.h"
 
+void container_refresh(Container *c) {
+    setTextColor(c->headerLabel, createColor(ColorLabel));
+    setBackground(c->divider, createColor(ColorSeparator));
+}
+
 id createContainer(Container *c, CFStringRef title, int hidden, int spacing, bool margins) {
     c->views = array_new(object);
     c->view = createView(nil, false, -1, -1);
-    c->divider = createView(createColor("separatorColor"), false, -1, 1);
+    c->divider = createView(createColor(ColorSeparator), false, -1, 1);
     c->headerLabel = createLabel(title, TextTitle3, 4, true);
     c->stack = createStackView(NULL, 0, 1, spacing, (Padding){.top = 5});
     Padding padding = {0};
@@ -49,4 +54,14 @@ void containers_free(Container *c, int size) {
 void container_add(Container *c, id v) {
     array_push_back(object, c->views, v);
     setObject(c->stack, sel_getUid("addArrangedSubview:"), v);
+}
+
+void container_clear(Container *c) {
+    array_clear(object, c->views);
+    CFArrayRef views = getArray(c->stack, sel_getUid("arrangedSubviews"));
+    int count = (int) CFArrayGetCount(views);
+    for (int i = 0; i < count; ++i) {
+        id v = (id) CFArrayGetValueAtIndex(views, i);
+        removeView(v);
+    }
 }

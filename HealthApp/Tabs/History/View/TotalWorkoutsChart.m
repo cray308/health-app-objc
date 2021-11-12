@@ -10,7 +10,7 @@ id totalWorkoutsChart_init(TotalWorkoutsChartViewModel *model, id formatter) {
     this->limitLine.lineColor = ((LegendEntry*) model->legendEntries[0]).formColor;
 
     LineChartDataSet *dataSet = model->dataSet;
-    NSObject<Fill> *fill = [[LinearGradientFill alloc] initWithEndColor:UIColor.systemRedColor];
+    NSObject<Fill> *fill = [[LinearGradientFill alloc] initWithEndColor:[UIColor colorNamed:@"chartColor2"]];
     dataSet.fill = fill;
     dataSet.drawFilledEnabled = true;
     dataSet.fillAlpha = 0.75;

@@ -2,7 +2,6 @@
 #include "ViewControllerHelpers.h"
 #include "WorkoutScreenHelpers.h"
 #import "StatusButton.h"
-#import "SwiftBridging.h"
 
 void exerciseView_configure(StatusButton *v, ExerciseEntry *e) {
     CFStringRef setsStr = exerciseEntry_createSetsTitle(e);
@@ -13,7 +12,7 @@ void exerciseView_configure(StatusButton *v, ExerciseEntry *e) {
 
     switch (e->state) {
         case ExerciseStateDisabled:
-            setBackground(v->box, UIColor.systemGrayColor);
+            setBackground(v->box, createColor(ColorGray));
             enableButton(v->button, false);
             break;
         case ExerciseStateActive:
@@ -21,11 +20,11 @@ void exerciseView_configure(StatusButton *v, ExerciseEntry *e) {
                 v->button.userInteractionEnabled = false;
         case ExerciseStateResting:
             enableButton(v->button, true);
-            setBackground(v->box, UIColor.systemOrangeColor);
+            setBackground(v->box, createColor(ColorOrange));
             break;
         case ExerciseStateCompleted:
             enableButton(v->button, false);
-            setBackground(v->box, UIColor.systemGreenColor);
+            setBackground(v->box, createColor(ColorGreen));
     }
 
     CFRelease(title);
@@ -39,25 +38,24 @@ void exerciseView_configure(StatusButton *v, ExerciseEntry *e) {
     @public Workout *workout;
     Container containers[10], *first;
     NSObject *observers[2];
+    bool removedObservers;
 }
 @end
 
 @implementation WorkoutViewController
 - (void) dealloc {
-    cleanupWorkoutNotifications(observers);
+    cleanupWorkoutNotifications(observers, &removedObservers);
     containers_free(containers, 10);
     [super dealloc];
 }
 
 - (void) viewDidLoad {
     [super viewDidLoad];
-    setBackground(self.view, UIColor.systemGroupedBackgroundColor);
+    setBackground(self.view, createColor(ColorSystemGroupedBackground));
     self.navigationItem.title = _nsstr(workout->title);
-    if (!checkGreaterThanMinVersion())
-        self.navigationController.navigationBar.tintColor = UIColor.systemRedColor;
 
     UIStackView *stack = createStackView(NULL, 0, 1, 20, (Padding){20, 8, 20, 8});
-    UIButton *startBtn = createButton(localize(CFSTR("start")), UIColor.systemGreenColor,
+    UIButton *startBtn = createButton(localize(CFSTR("start")), createColor(ColorGreen),
                                       0, 0, self, @selector(startEndWorkout:), -1);
     setNavButton(self.navigationItem, false, startBtn, self.view.frame.size.width);
 
@@ -94,20 +92,21 @@ void exerciseView_configure(StatusButton *v, ExerciseEntry *e) {
 - (void) startEndWorkout: (UIButton *)btn {
     if (!btn.tag) {
         setButtonTitle(btn, localize(CFSTR("end")), 0);
-        setButtonColor(btn, UIColor.systemRedColor, 0);
+        setButtonColor(btn, createColor(ColorRed), 0);
         setTag(btn, 1);
         workout->startTime = time(NULL);
         [self handleTapForGroup:0 exercise:0 event:EventStartGroup];
     } else {
-        Workout *w = NULL;
+        bool valid = false;
         pthread_mutex_lock(&timerLock);
         if (workout) {
             workout_setDuration(workout);
-            w = workout;
+            valid = true;
             workout = NULL;
+            cleanupWorkoutNotifications(observers, &removedObservers);
         }
         pthread_mutex_unlock(&timerLock);
-        if (w)
+        if (valid)
             addWorkoutCoordinator_stoppedWorkout(delegate);
     }
 }
@@ -133,6 +132,7 @@ void exerciseView_configure(StatusButton *v, ExerciseEntry *e) {
             finishedWorkout = true;
             workout_setDuration(workout);
             workout = NULL;
+            cleanupWorkoutNotifications(observers, &removedObservers);
             break;
         case TransitionFinishedCircuitDeleteFirst:
             first = &containers[workout->index];

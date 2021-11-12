@@ -6,7 +6,7 @@ id liftingChart_init(LiftChartViewModel *model, id formatter) {
     LiftingChart *this = [[LiftingChart alloc] initWithFrame:CGRectZero];
     this->model = model;
     for (int i = 0; i < 4; ++i)
-        ((LineChartDataSet *) model->dataSets[i]).lineWidth = 2;
+        ((LineChartDataSet *) model->dataSets[i]).lineWidth = 3;
     this->chartView = createChartView(this, formatter, model->legendEntries, 4, 550);
     return this;
 }

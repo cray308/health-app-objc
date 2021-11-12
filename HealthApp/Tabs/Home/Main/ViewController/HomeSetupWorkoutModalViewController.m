@@ -19,10 +19,10 @@
 
 - (void) viewDidLoad {
     [super viewDidLoad];
-    setBackground(self.view, UIColor.systemGroupedBackgroundColor);
+    setBackground(self.view, createColor(ColorSecondarySystemBackground));
     validator_setup(&validator, 8, output.type != WorkoutHIC, self);
 
-    CFStringRef pickerTitle = localize(CFSTR("planPickerTitle"));
+    CFStringRef pickerTitle = localize(CFSTR("setupWorkoutTitle"));
     UILabel *workoutLabel = createLabel(pickerTitle, TextFootnote, 4, false);
     workoutTextField = createTextfield(nil, names->arr[0], pickerTitle, NSTextAlignmentCenter, 0, 0);
     UIStackView *workoutContainer = createStackView((id []){workoutLabel, workoutTextField},
@@ -37,9 +37,9 @@
     [validator.vStack setCustomSpacing:20 afterView:workoutContainer];
     addVStackToScrollView(validator.vStack, validator.scrollView);
 
-    UIButton *cancelButton = createButton(localize(CFSTR("cancel")), UIColor.systemBlueColor, 0,
+    UIButton *cancelButton = createButton(localize(CFSTR("cancel")), createColor(ColorBlue), 0,
                                           0, self, @selector(pressedCancel), -1);
-    UIButton *submitButton = createButton(localize(CFSTR("go")), UIColor.systemBlueColor, 0,
+    UIButton *submitButton = createButton(localize(CFSTR("go")), createColor(ColorBlue), 0,
                                           0, self, @selector(pressedFinish), -1);
     setNavButton(self.navigationItem, true, cancelButton, self.view.frame.size.width);
     setNavButton(self.navigationItem, false, submitButton, self.view.frame.size.width);
@@ -93,10 +93,7 @@
     homeCoordinator_finishedSettingUpCustomWorkout(delegate, &output);
 }
 
-- (void) pressedCancel {
-    UINavigationController *navVC = delegate->navVC;
-    [navVC.viewControllers[0] dismissViewControllerAnimated:true completion:nil];
-}
+- (void) pressedCancel { dismissPresentedVC(self.presentingViewController, nil); }
 
 - (NSInteger) numberOfComponentsInPickerView: (UIPickerView *)pickerView { return 1; }
 

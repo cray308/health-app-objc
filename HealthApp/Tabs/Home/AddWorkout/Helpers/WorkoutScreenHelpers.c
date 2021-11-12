@@ -75,7 +75,8 @@ void setupDeviceEventNotifications(id *observers, ObjectBlock active, ObjectBloc
     observers[1] = createObserver(center, UIApplicationWillResignActiveNotification, main, resign);
 }
 
-void cleanupWorkoutNotifications(id *observers) {
+void cleanupWorkoutNotifications(id *observers, bool *removed) {
+    if (*removed) return;
     id center = getDeviceNotificationCenter();
     for (int i = 0; i < 2; ++i)
         setObject(center, sel_getUid("removeObserver:"), observers[i]);
@@ -83,4 +84,5 @@ void cleanupWorkoutNotifications(id *observers) {
     voidFunc(center, sel_getUid("removeAllPendingNotificationRequests"));
     voidFunc(center, sel_getUid("removeAllDeliveredNotifications"));
     exerciseTimerThread = NULL;
+    *removed = true;
 }

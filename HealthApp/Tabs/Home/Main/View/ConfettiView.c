@@ -16,20 +16,24 @@
 
 extern id kCAEmitterLayerLine;
 
+static inline void setFloat(id obj, SEL _cmd, float arg) {
+    ((void(*)(id,SEL,float))objc_msgSend)(obj, _cmd, arg);
+}
+
 id createConfettiView(CGRect frame) {
     id view = createObjectWithFrame("UIView", frame);
-    id bg = getObjectWithFloat(createColor("systemGrayColor"),
+    id bg = getObjectWithFloat(createColor(ColorGray),
                                sel_getUid("colorWithAlphaComponent:"), 0.8);
     setBackground(view, bg);
 
     id shapeColors[] = {
-        createColor("systemRedColor"), createColor("systemBlueColor"),
-        createColor("systemGreenColor"), createColor("systemYellowColor")
+        createColor(ColorRed), createColor(ColorBlue),
+        createColor(ColorGreen), getColorRef(1, 0.84, 0.04, 1)
     };
     id images[4];
     for (int i = 0; i < 4; ++i) {
         CFStringRef name = CFStringCreateWithFormat(NULL, NULL, CFSTR("confetti%d"), i);
-        images[i] = createImage(name, false);
+        images[i] = createImage(name);
         CFRelease(name);
     }
     int const velocities[] = {100, 90, 150, 200};

@@ -18,6 +18,22 @@
 static id persistenceService = nil;
 id backgroundContext = nil;
 
+static inline void setInt16(id obj, SEL _cmd, int16_t arg) {
+    ((void(*)(id,SEL,int16_t))objc_msgSend)(obj, _cmd, arg);
+}
+
+static inline int16_t getInt16(id obj, SEL _cmd) {
+    return ((int16_t(*)(id,SEL))objc_msgSend)(obj, _cmd);
+}
+
+static inline void setInt64(id obj, SEL _cmd, int64_t arg) {
+    ((void(*)(id,SEL,int64_t))objc_msgSend)(obj, _cmd, arg);
+}
+
+static inline int64_t getInt64(id obj, SEL _cmd) {
+    return ((int64_t(*)(id,SEL))objc_msgSend)(obj, _cmd);
+}
+
 static inline id createWeekData(void) {
     return getObjectWithObject(allocClass("WeeklyData"),
                                sel_getUid("initWithContext:"), backgroundContext);

@@ -6,7 +6,7 @@
 	<dict>
 		<key>Headers/Charts-Swift.h</key>
 		<data>
-		fDDxlc6P2H7Vh56TXbDL1CF0SLI=
+		7M244/Uy4lsvzcMoKndI/JnMpfM=
 		</data>
 		<key>Headers/Charts.h</key>
 		<data>
@@ -14,31 +14,31 @@
 		</data>
 		<key>Info.plist</key>
 		<data>
-		lf7a7JoSokxQCVfu4f6XmJtE484=
+		Y4eM2UtvS8zhNO6F8jRUBGdYTF0=
 		</data>
 		<key>Modules/Charts.swiftmodule/arm64-apple-ios.swiftdoc</key>
 		<data>
-		Ru6ukjMubM/HVSMoIC+EwPxD90k=
+		QoIRrA8h9JwYENdVz+a54ceyszc=
 		</data>
 		<key>Modules/Charts.swiftmodule/arm64-apple-ios.swiftinterface</key>
 		<data>
-		JK9I+mMN1j/bdGZbLVjXfDjMTxA=
+		6x+9u4CQeOiOxIQP92TulCXyLRU=
 		</data>
 		<key>Modules/Charts.swiftmodule/arm64-apple-ios.swiftmodule</key>
 		<data>
-		gHZ/gUdeJKS23qi+Jl949zD7Ymg=
+		T1dNON0zeBGHPSlzFAPDjWRcqVs=
 		</data>
 		<key>Modules/Charts.swiftmodule/arm64.swiftdoc</key>
 		<data>
-		Ru6ukjMubM/HVSMoIC+EwPxD90k=
+		QoIRrA8h9JwYENdVz+a54ceyszc=
 		</data>
 		<key>Modules/Charts.swiftmodule/arm64.swiftinterface</key>
 		<data>
-		JK9I+mMN1j/bdGZbLVjXfDjMTxA=
+		6x+9u4CQeOiOxIQP92TulCXyLRU=
 		</data>
 		<key>Modules/Charts.swiftmodule/arm64.swiftmodule</key>
 		<data>
-		gHZ/gUdeJKS23qi+Jl949zD7Ymg=
+		T1dNON0zeBGHPSlzFAPDjWRcqVs=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -51,7 +51,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			lwlofdRWx7vfh3jWxGSTvXWgBOGksayIRtOIvLnw9uY=
+			HlFbcGqeSzNIIYqV08PcYatP7D5VS0OI1GFeUHglDiQ=
 			</data>
 		</dict>
 		<key>Headers/Charts.h</key>
@@ -65,42 +65,42 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			s+J095ulWQvanUDkFvfUJBbKMB294CaHay7Obdz6YP8=
+			C7S4w+7HjF+z2JmCD1/2msJKA1HJxW0ed55zdoLImsY=
 			</data>
 		</dict>
 		<key>Modules/Charts.swiftmodule/arm64-apple-ios.swiftinterface</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			a0IMEwqT24TmGUzDLaHIlZj6BtllAP1mcUC35EHqxPc=
+			mqS8SnYx7umfVXTtnumH1UMkYdGr79ByXn7G/6eNMf8=
 			</data>
 		</dict>
 		<key>Modules/Charts.swiftmodule/arm64-apple-ios.swiftmodule</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			0EBdujXc1R+YpxnU9dmSmjK17I3jExccxWTfwDcTeds=
+			5khyNmyu+3/nmRZkN+tTeVULGOp0ovwBEsCsNVDme6c=
 			</data>
 		</dict>
 		<key>Modules/Charts.swiftmodule/arm64.swiftdoc</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			s+J095ulWQvanUDkFvfUJBbKMB294CaHay7Obdz6YP8=
+			C7S4w+7HjF+z2JmCD1/2msJKA1HJxW0ed55zdoLImsY=
 			</data>
 		</dict>
 		<key>Modules/Charts.swiftmodule/arm64.swiftinterface</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			a0IMEwqT24TmGUzDLaHIlZj6BtllAP1mcUC35EHqxPc=
+			mqS8SnYx7umfVXTtnumH1UMkYdGr79ByXn7G/6eNMf8=
 			</data>
 		</dict>
 		<key>Modules/Charts.swiftmodule/arm64.swiftmodule</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			0EBdujXc1R+YpxnU9dmSmjK17I3jExccxWTfwDcTeds=
+			5khyNmyu+3/nmRZkN+tTeVULGOp0ovwBEsCsNVDme6c=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>

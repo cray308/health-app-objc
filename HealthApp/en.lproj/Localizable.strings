@@ -89,6 +89,7 @@
 "liftLegend" = "%@ (Avg: %.1f)";
 
 "planPickerTitle" = "Change workout plan";
+"darkMode" = "Dark Mode";
 "settingsSegment0" = "None";
 "settingsSegment1" = "Base-Building";
 "settingsSegment2" = "Continuation";
