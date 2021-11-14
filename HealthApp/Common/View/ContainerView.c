@@ -10,15 +10,10 @@
 #include "CocoaHelpers.h"
 #include "Views.h"
 
-void container_refresh(Container *c) {
-    setTextColor(c->headerLabel, createColor(ColorLabel));
-    setBackground(c->divider, createColor(ColorSeparator));
-}
-
 id createContainer(Container *c, CFStringRef title, int hidden, int spacing, bool margins) {
     c->views = array_new(object);
-    c->view = createView(nil, false, -1, -1);
-    c->divider = createView(createColor(ColorSeparator), false, -1, 1);
+    c->view = createView(false, -1, -1);
+    c->divider = createBackgroundView(false, false, -1, 1);
     c->headerLabel = createLabel(title, TextTitle3, 4, true);
     c->stack = createStackView(NULL, 0, 1, spacing, (Padding){.top = 5});
     Padding padding = {0};

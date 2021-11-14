@@ -12,6 +12,11 @@
 #include <CoreFoundation/CFArray.h>
 #include <CoreGraphics/CGGeometry.h>
 
+extern Class DMButtonClass;
+extern Class DMLabelClass;
+extern Class DMTextFieldClass;
+extern Class DMBackgroundViewClass;
+
 enum {
     TextFootnote = 1,
     TextSubhead,
@@ -34,8 +39,23 @@ enum {
 };
 
 typedef struct {
+    Class isa;
+    int colorCode;
+    bool background;
+} DMButton;
+
+typedef struct {
+    Class isa;
+    int colorCode;
+} DMLabel;
+
+typedef struct {
+    Class isa;
+    bool colorType;
+} DMBackgroundView;
+
+typedef struct {
     id view;
-    id label;
     id switchView;
 } SwitchContainer;
 
@@ -60,20 +80,24 @@ void setButtonColor(id view, id color, int state);
 CFDictionaryRef createTitleTextDict(id color, id font);
 
 id createObjectWithFrame(const char *name, CGRect rect);
-id createView(id color, bool rounded, int width, int height);
+id createBackgroundView(bool colorType, bool rounded, int width, int height);
+id createView(bool rounded, int width, int height);
 id createStackView(id *subviews, int count, int axis, int spacing, Padding margins);
 id createScrollView(void);
 id createLabel(CFStringRef text, int style, int alignment, bool accessible);
 id createTextfield(id delegate, CFStringRef text, CFStringRef hint,
                    int alignment, int keyboard, int tag);
-id createButton(CFStringRef title, id color, int params,
+id createButton(CFStringRef title, int color, int params,
                 int tag, id target, SEL action, int height);
 id createSegmentedControl(CFStringRef format, int count, int startIndex,
                           id target, SEL action, int height);
 SwitchContainer *createSwitch(CFStringRef label, bool enabled);
 void addVStackToScrollView(id vStack, id scrollView);
 
-void updateButton(id view, id color);
 void updateSegmentedControl(id view);
+void dmButton_updateColors(DMButton* self, SEL _cmd);
+void dmLabel_updateColors(DMLabel *self, SEL _cmd);
+void dmField_updateColors(id self, SEL _cmd);
+void dmBackgroundView_updateColors(DMBackgroundView *self, SEL _cmd);
 
 #endif /* Views_h */

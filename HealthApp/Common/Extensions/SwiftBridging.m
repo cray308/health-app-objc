@@ -8,8 +8,6 @@ id createChartEntry(int x, int y) { return [[ChartDataEntry alloc] initWithX:x y
 
 void setLegendLabel(LegendEntry *entry, CFStringRef text) { entry.label = _nsstr(text); }
 
-void updateLegendColor(LegendEntry *entry, UIColor *color) { entry.formColor = color; }
-
 void setLayoutMargins(UIView *v, Padding margins) {
     v.layoutMargins = (UIEdgeInsets){margins.top, margins.left, margins.bottom, margins.right};
 }
@@ -38,19 +36,10 @@ id createChartView(UIView *parent, id formatter, id *legendEntries, int count, i
     return view;
 }
 
-id createEmptyDataSet(void) {
+id createDataSet(int color, bool withFill) {
     CFArrayRef entries = CFArrayCreate(NULL, (const void *[]){}, 0, &(CFArrayCallBacks){0});
-    id dataSet = [[LineChartDataSet alloc] initWithEntries:_nsarr(entries)];
+    LineChartDataSet *dataSet = [[LineChartDataSet alloc] initWithEntries:_nsarr(entries) colorVal:color withFill:withFill];
     CFRelease(entries);
-    return dataSet;
-}
-
-id createDataSet(id color) {
-    CFArrayRef colors = CFArrayCreate(NULL, (const void *[]){color}, 1, &(CFArrayCallBacks){0});
-    LineChartDataSet *dataSet = createEmptyDataSet();
-    dataSet.colors = _nsarr(colors);
-    [dataSet setCircleColor:color];
-    CFRelease(colors);
     return dataSet;
 }
 
@@ -61,9 +50,9 @@ id createChartData(id *dataSets, int count) {
     return data;
 }
 
-void setupLegendEntries(id *entries, id *colors, int count) {
+void setupLegendEntries(id *entries, int *colors, int count) {
     for (int i = 0; i < count; ++i)
-        entries[i] = [[LegendEntry alloc] initWithLabel:@"" color:colors[i]];
+        entries[i] = [[LegendEntry alloc] initWithLabel:@"" colorType:colors[i]];
 }
 
 void disableLineChartView(LineChartView *v) {

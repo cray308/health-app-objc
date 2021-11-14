@@ -50,8 +50,6 @@
 		616DC23E267152BA00EFD3D4 /* WorkoutViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 616DC23D267152BA00EFD3D4 /* WorkoutViewController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		616E2F6826755D2B00342CD8 /* HomeSetupWorkoutModalViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 616E2F6726755D2B00342CD8 /* HomeSetupWorkoutModalViewController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		616E2F9B2677195C00342CD8 /* AddWorkoutUpdateMaxesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 616E2F9A2677195C00342CD8 /* AddWorkoutUpdateMaxesViewController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		6171254A273DF15D00C023B6 /* Charts.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61712547273DF15300C023B6 /* Charts.xcframework */; };
-		6171254B273DF15D00C023B6 /* Charts.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 61712547273DF15300C023B6 /* Charts.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		617BDE1B26FE48FD00BDDB73 /* StatusButton.h in Headers */ = {isa = PBXBuildFile; fileRef = 617BDE1A26FE48FD00BDDB73 /* StatusButton.h */; };
 		617BDE1F26FE491000BDDB73 /* StatusButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 617BDE1E26FE491000BDDB73 /* StatusButton.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61BA4652270FBF290066A981 /* ObjectArray.h in Headers */ = {isa = PBXBuildFile; fileRef = 61BA4650270FBF290066A981 /* ObjectArray.h */; };
@@ -76,6 +74,8 @@
 		61E8ED6C26FD87AB00942368 /* WorkoutData_d.plist in Resources */ = {isa = PBXBuildFile; fileRef = 61E8ED6B26FD87AB00942368 /* WorkoutData_d.plist */; };
 		61EF50A327374A9100736C45 /* TextFieldViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 61EF50A127374A9100736C45 /* TextFieldViewController.h */; };
 		61EF50A427374A9100736C45 /* TextFieldViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 61EF50A227374A9100736C45 /* TextFieldViewController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		61F2B55B27408D9A00E2544B /* Charts.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61F2B55827408D9200E2544B /* Charts.xcframework */; };
+		61F2B55C27408D9A00E2544B /* Charts.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 61F2B55827408D9200E2544B /* Charts.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		61FFEA552712352C0065381B /* AppTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 61FFEA542712352C0065381B /* AppTypes.h */; };
 		61FFEEA2272CCCB5002BFFA6 /* AppDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 61FFEEA1272CCCAE002BFFA6 /* AppDelegate.h */; };
 /* End PBXBuildFile section */
@@ -97,7 +97,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				6171254B273DF15D00C023B6 /* Charts.xcframework in Embed Frameworks */,
+				61F2B55C27408D9A00E2544B /* Charts.xcframework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -162,7 +162,6 @@
 		616DC23D267152BA00EFD3D4 /* WorkoutViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WorkoutViewController.m; sourceTree = "<group>"; };
 		616E2F6726755D2B00342CD8 /* HomeSetupWorkoutModalViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HomeSetupWorkoutModalViewController.m; sourceTree = "<group>"; };
 		616E2F9A2677195C00342CD8 /* AddWorkoutUpdateMaxesViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AddWorkoutUpdateMaxesViewController.m; sourceTree = "<group>"; };
-		61712547273DF15300C023B6 /* Charts.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = Charts.xcframework; sourceTree = "<group>"; };
 		617BDE1A26FE48FD00BDDB73 /* StatusButton.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StatusButton.h; sourceTree = "<group>"; };
 		617BDE1E26FE491000BDDB73 /* StatusButton.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StatusButton.m; sourceTree = "<group>"; };
 		61BA4650270FBF290066A981 /* ObjectArray.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ObjectArray.h; sourceTree = "<group>"; };
@@ -193,6 +192,7 @@
 		61E8ED6B26FD87AB00942368 /* WorkoutData_d.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = WorkoutData_d.plist; sourceTree = "<group>"; };
 		61EF50A127374A9100736C45 /* TextFieldViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TextFieldViewController.h; sourceTree = "<group>"; };
 		61EF50A227374A9100736C45 /* TextFieldViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TextFieldViewController.m; sourceTree = "<group>"; };
+		61F2B55827408D9200E2544B /* Charts.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = Charts.xcframework; sourceTree = "<group>"; };
 		61FFEA542712352C0065381B /* AppTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppTypes.h; sourceTree = "<group>"; };
 		61FFEEA1272CCCAE002BFFA6 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -202,7 +202,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6171254A273DF15D00C023B6 /* Charts.xcframework in Frameworks */,
+				61F2B55B27408D9A00E2544B /* Charts.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -340,7 +340,7 @@
 		6185D9B926E4263700DB2BF2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				61712547273DF15300C023B6 /* Charts.xcframework */,
+				61F2B55827408D9200E2544B /* Charts.xcframework */,
 			);
 			path = Frameworks;
 			sourceTree = "<group>";

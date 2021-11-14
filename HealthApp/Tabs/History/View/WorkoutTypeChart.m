@@ -7,7 +7,6 @@ id workoutTypeChart_init(WorkoutTypeChartViewModel *model, id formatter) {
 
     for (int i = 1; i < 5; ++i) {
         LineChartDataSet *dataSet = model->dataSets[i];
-        dataSet.fillColor = ((LegendEntry*) model->legendEntries[i - 1]).formColor;
         dataSet.drawFilledEnabled = true;
         dataSet.fillAlpha = 0.75;
         AreaChartFormatter *f = [[AreaChartFormatter alloc] initWithDataSet:model->dataSets[i - 1]];

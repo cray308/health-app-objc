@@ -19,7 +19,6 @@
 extern id homeVC_init(void *);
 extern void homeVC_createWorkoutsList(id);
 extern void homeVC_updateWorkoutsList(id);
-extern void homeVC_refreshUI(id);
 extern id setupWorkoutVC_init(void *, byte, Array_str *);
 
 enum {
@@ -138,15 +137,9 @@ void homeCoordinator_checkForChildCoordinator(HomeTabCoordinator *this) {
     }
 }
 
-void homeCoordinator_resetUI(HomeTabCoordinator *this, bool reloadUI) {
+void homeCoordinator_resetUI(HomeTabCoordinator *this) {
     homeViewModel_fetchData(&this->model);
     homeVC_createWorkoutsList(getFirstVC(this->navVC));
-    if (reloadUI) {
-        updateNavBar(this->navVC);
-        id vc = getFirstVC(this->navVC);
-        setBackground(getView(vc), createColor(ColorSystemGroupedBackground));
-        homeVC_refreshUI(vc);
-    }
 }
 
 void homeCoordinator_updateUI(HomeTabCoordinator *this) {

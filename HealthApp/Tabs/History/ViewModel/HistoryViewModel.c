@@ -16,11 +16,10 @@
 #include "PersistenceService.h"
 
 extern id createChartEntry(int x, int y);
-extern id createEmptyDataSet(void);
-extern id createDataSet(id color);
+extern id createDataSet(int color, bool withFill);
 extern id createChartData(id *dataSets, int count);
 extern void setLegendLabel(id entry, CFStringRef text);
-extern void setupLegendEntries(id *entries, id *colors, int count);
+extern void setupLegendEntries(id *entries, int *colors, int count);
 
 enum {
     HistoryTimeRange6Months,
@@ -31,40 +30,18 @@ static inline void createNewEntry(Array_object *arr, int x, int y) {
     array_push_back(object, arr, createChartEntry(x, y));
 }
 
-static inline id getColorWithName(CFStringRef name) {
-    return staticMethodWithString(objc_getClass("UIColor"), sel_getUid("colorNamed:"), name);
-}
-
-id getLimitLineColor(void) {
-    if (osVersion != Version12) return getColorWithName(CFSTR("chartLimit"));
-    float red, green;
-    if (userData->darkMode) {
-        red = 0.39;
-        green = 0.82;
-    } else {
-        red = 0.251;
-        green = 0.322;
-    }
-    return getColorRef(red, green, 1, 1);
-}
-
 gen_array_source(weekData, HistoryWeekDataModel, DSDefault_shallowCopy, DSDefault_shallowDelete)
 
 void historyViewModel_init(HistoryViewModel *this) {
-    id chartColors[4];
-    for (int i = 0; i < 4; ++i) {
-        CFStringRef name = CFStringCreateWithFormat(NULL, NULL, CFSTR("chartColor%d"), i);
-        chartColors[i] = getColorWithName(name);
-        CFRelease(name);
-    }
+    int chartColors[] = {0, 1, 2, 3};
     id *areaDataSets = this->workoutTypeModel.dataSets;
-    setupLegendEntries(this->totalWorkoutsModel.legendEntries, (id []){getLimitLineColor()}, 1);
+    setupLegendEntries(this->totalWorkoutsModel.legendEntries, (int []){4}, 1);
     setupLegendEntries(this->workoutTypeModel.legendEntries, chartColors, 4);
     setupLegendEntries(this->liftModel.legendEntries, chartColors, 4);
 
     this->totalWorkoutsModel.entries = array_new(object);
-    this->totalWorkoutsModel.dataSet = createDataSet(chartColors[2]);
-    this->workoutTypeModel.dataSets[0] = createEmptyDataSet();
+    this->totalWorkoutsModel.dataSet = createDataSet(5, false);
+    this->workoutTypeModel.dataSets[0] = createDataSet(-1, false);
     fillStringArray(this->workoutTypeModel.names, CFSTR("workoutTypes%d"), 4);
     fillStringArray(this->liftModel.names, CFSTR("liftTypes%d"), 4);
     fillStringArray(this->formatter.months, CFSTR("months%02d"), 12);
@@ -76,8 +53,8 @@ void historyViewModel_init(HistoryViewModel *this) {
         this->workoutTypeModel.entries[i] = array_new(object);
         this->liftModel.entries[i] = array_new(object);
 
-        this->workoutTypeModel.dataSets[i + 1] = createDataSet(chartColors[i]);
-        this->liftModel.dataSets[i] = createDataSet(chartColors[i]);
+        this->workoutTypeModel.dataSets[i + 1] = createDataSet(chartColors[i], true);
+        this->liftModel.dataSets[i] = createDataSet(chartColors[i], false);
     }
 
     this->workoutTypeModel.entries[4] = array_new(object);

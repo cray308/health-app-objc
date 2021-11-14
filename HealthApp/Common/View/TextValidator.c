@@ -74,7 +74,7 @@ void validator_setup(Validator *this, short margins, bool createSet, id target) 
     (allocClass(btnName), sel_getUid("initWithTitle:style:target:action:"),
      CFSTR("Done"), 0, target, sel_getUid("dismissKeyboard"));
 
-    if (osVersion != Version14)
+    if (osVersion < Version14)
         setTintColor(doneButton, createColor(ColorRed));
 
     CFArrayRef array = CFArrayCreate(NULL, (const void *[]){flexSpace, doneButton},
@@ -108,7 +108,7 @@ void validator_free(Validator *this, id target) {
 
 id validator_add(Validator *v, id delegate, CFStringRef hint, short min, short max) {
     struct InputView *child = &v->children[v->count];
-    child->view = createView(nil, false, -1, -1);
+    child->view = createView(false, -1, -1);
     child->minVal = min;
     child->maxVal = max;
     child->hintText = hint;
@@ -116,6 +116,8 @@ id validator_add(Validator *v, id delegate, CFStringRef hint, short min, short m
     child->hintLabel = createLabel(hint, TextFootnote, 4, false);
     child->field = createTextfield(delegate, NULL, hint, 4, 4, v->count++);
     child->errorLabel = createLabel(child->errorText, TextFootnote, 4, false);
+    DMLabel *errorPtr = (DMLabel *) child->errorLabel;
+    errorPtr->colorCode = ColorRed;
     setTextColor(child->errorLabel, createColor(ColorRed));
     id vStack = createStackView((id []){child->hintLabel, child->field, child->errorLabel},
                                 3, 1, 4, v->padding);
@@ -125,22 +127,6 @@ id validator_add(Validator *v, id delegate, CFStringRef hint, short min, short m
     hideView(child->errorLabel, true);
     setObject(child->field, sel_getUid("setInputAccessoryView:"), v->toolbar);
     return child->view;
-}
-
-void validator_refresh(Validator *this) {
-    CFArrayRef items = getArray(this->toolbar, sel_getUid("items"));
-    id doneButton = (id) CFArrayGetValueAtIndex(items, 1);
-    id red = createColor(ColorRed), fg = createColor(ColorLabel);
-    id bg = createColor(ColorTertiarySystemBackground);
-    setTintColor(doneButton, red);
-    updateButton(this->button, createColor(ColorBlue));
-    for (int i = 0; i < this->count; ++i) {
-        struct InputView *child = &this->children[i];
-        setTextColor(child->errorLabel, red);
-        setTextColor(child->hintLabel, fg);
-        setBackground(child->field, bg);
-        setTextColor(child->field, fg);
-    }
 }
 
 void validator_getScrollHeight(Validator *this) {

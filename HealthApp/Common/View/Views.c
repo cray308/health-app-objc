@@ -27,6 +27,11 @@ extern id NSForegroundColorAttributeName;
 extern id NSFontAttributeName;
 extern void setLayoutMargins(id v, Padding margins);
 
+Class DMButtonClass;
+Class DMLabelClass;
+Class DMTextFieldClass;
+Class DMBackgroundViewClass;
+
 static inline void setInt(id obj, SEL _cmd, int arg) {
     ((void(*)(id,SEL,int))objc_msgSend)(obj, _cmd, arg);
 }
@@ -47,7 +52,7 @@ static inline void adjustFontForSizeCategory(id view) {
     setBool(view, sel_getUid("setAdjustsFontForContentSizeCategory:"), true);
 }
 
-static inline void setDynamicFont(id view) {
+static void setDynamicFont(id view) {
     setBool(view, sel_getUid("setAdjustsFontSizeToFitWidth:"), true);
     adjustFontForSizeCategory(view);
     setCGFloat(view, sel_getUid("setMinimumScaleFactor:"), 0.85);
@@ -88,6 +93,30 @@ static void setLabelFont(id view, int style) {
     setObject(view, sel_getUid("setFont:"), font);
 }
 
+static void setupView(id view, bool rounded, int width, int height) {
+    disableAutoresizing(view);
+    if (rounded)
+        setCornerRadius(view);
+    if (width >= 0)
+        setWidth(view, width);
+    if (height >= 0)
+        setHeight(view, height);
+}
+
+static id getBackgroundColor(bool colorType) {
+    id color;
+    if (colorType) {
+        color = getBackground(SecondaryBG, true);
+    } else {
+        if (userData->darkMode) {
+            color = getColorRef(0.33, 0.33, 0.35, 0.6);
+        } else {
+            color = getColorRef(0.24, 0.24, 0.26, 0.29);
+        }
+    }
+    return color;
+}
+
 static inline void setControlTextAttribs(id view, CFDictionaryRef dict, int state) {
     ((void(*)(id,SEL,CFDictionaryRef,int))objc_msgSend)
     (view, sel_getUid("setTitleTextAttributes:forState:"), dict, state);
@@ -107,6 +136,32 @@ id createCustomFont(int style, int size) {
     }
     return ((id(*)(Class,SEL,CGFloat,CGFloat))objc_msgSend)
     (objc_getClass("UIFont"), sel_getUid("systemFontOfSize:weight:"), size, weight);
+}
+
+#pragma mark - Custom View Selectors
+
+void dmBackgroundView_updateColors(DMBackgroundView *self, SEL _cmd _U_) {
+    id object = (id) self;
+    id color = getBackgroundColor(self->colorType);
+    setBackground(object, color);
+}
+
+void dmLabel_updateColors(DMLabel *self, SEL _cmd _U_) {
+    id object = (id) self;
+    setTextColor(object, createColor(self->colorCode));
+}
+
+void dmButton_updateColors(DMButton *self, SEL _cmd _U_) {
+    id object = (id) self;
+    setButtonColor(object, createColor(self->colorCode), 0);
+    setButtonColor(object, createColor(ColorSecondaryLabel), 2);
+    if (self->background)
+        setBackground(object, getBackground(SecondaryBG, true));
+}
+
+void dmField_updateColors(id self, SEL _cmd _U_) {
+    setBackground(self, getBackground(TertiaryBG, false));
+    setTextColor(self, createColor(ColorLabel));
 }
 
 #pragma mark - Simple getters/setters
@@ -186,16 +241,19 @@ id createObjectWithFrame(const char *name, CGRect rect) {
                                                 sel_getUid("initWithFrame:"), rect);
 }
 
-id createView(id color, bool rounded, int width, int height) {
-    id view = createObjectWithFrame("UIView", CGRectZero);
-    disableAutoresizing(view);
+id createBackgroundView(bool colorType, bool rounded, int width, int height) {
+    id view = createObjectWithFrame("DMBackgroundView", CGRectZero);
+    DMBackgroundView *ptr = (DMBackgroundView *) view;
+    ptr->colorType = colorType;
+    id color = osVersion >= 13 ? getSystemColor("separatorColor") : getBackgroundColor(colorType);
     setBackground(view, color);
-    if (rounded)
-        setCornerRadius(view);
-    if (width >= 0)
-        setWidth(view, width);
-    if (height >= 0)
-        setHeight(view, height);
+    setupView(view, rounded, width, height);
+    return view;
+}
+
+id createView(bool rounded, int width, int height) {
+    id view = createObjectWithFrame("UIView", CGRectZero);
+    setupView(view, rounded, width, height);
     return view;
 }
 
@@ -227,7 +285,9 @@ id createScrollView(void) {
 }
 
 id createLabel(CFStringRef text, int style, int alignment, bool accessible) {
-    id view = createObjectWithFrame("UILabel", CGRectZero);
+    id view = createObjectWithFrame("DMLabel", CGRectZero);
+    DMLabel *ptr = (DMLabel *) view;
+    ptr->colorCode = ColorLabel;
     disableAutoresizing(view);
     setLabelText(view, text);
     setLabelFont(view, style);
@@ -238,19 +298,23 @@ id createLabel(CFStringRef text, int style, int alignment, bool accessible) {
     return view;
 }
 
-id createButton(CFStringRef title, id color, int params,
+id createButton(CFStringRef title, int color, int params,
                 int tag, id target, SEL action, int height) {
-    id view = ((id(*)(Class,SEL,int))objc_msgSend)(objc_getClass("UIButton"),
+    id view = ((id(*)(Class,SEL,int))objc_msgSend)(objc_getClass("DMButton"),
                                                    sel_getUid("buttonWithType:"), 1);
+    DMButton *ptr = (DMButton *) view;
+    ptr->colorCode = color;
+    bool hasBG = params & BtnBackground;
+    ptr->background = hasBG;
     disableAutoresizing(view);
     setButtonTitle(view, title, 0);
-    setButtonColor(view, color, 0);
+    setButtonColor(view, createColor(color), 0);
     setButtonColor(view, createColor(ColorSecondaryLabel), 2);
     id label = getObject(view, sel_getUid("titleLabel"));
     setLabelFont(label, (params & BtnLargeFont) ? TextHead : TextBody);
     setDynamicFont(label);
-    if (params & BtnBackground)
-        setBackground(view, createColor(ColorSecondarySystemGroupedBackground));
+    if (hasBG)
+        setBackground(view, getBackground(SecondaryBG, true));
     if (params & BtnRounded)
         setCornerRadius(view);
     setTag(view, tag);
@@ -281,9 +345,9 @@ id createSegmentedControl(CFStringRef format, int count, int startIndex,
 
 id createTextfield(id delegate, CFStringRef text, CFStringRef hint,
                    int alignment, int keyboard, int tag) {
-    id view = createObjectWithFrame("UITextField", CGRectZero);
+    id view = createObjectWithFrame("DMTextField", CGRectZero);
     disableAutoresizing(view);
-    setBackground(view, createColor(ColorTertiarySystemBackground));
+    setBackground(view, getBackground(TertiaryBG, false));
     setLabelText(view, text);
     setLabelFont(view, TextBody);
     setTextColor(view, createColor(ColorLabel));
@@ -298,17 +362,18 @@ id createTextfield(id delegate, CFStringRef text, CFStringRef hint,
     return view;
 }
 
-SwitchContainer *createSwitch(CFStringRef label, bool enabled) {
+SwitchContainer *createSwitch(CFStringRef text, bool enabled) {
     SwitchContainer *c = malloc(sizeof(SwitchContainer));
-    c->view = createView(createColor(ColorSecondarySystemGroupedBackground), 0, -1, 44);
+    c->view = createBackgroundView(true, false, -1, 44);
     c->switchView = createObjectWithFrame("UISwitch", CGRectZero);
     setBool(c->switchView, sel_getUid("setOn:"), enabled);
-    c->label = createLabel(label, TextBody, 4, true);
-    id sv = createStackView((id[]){c->label,c->switchView}, 2, 0, 5, (Padding){0,8,0,8});
+    id label = createLabel(text, TextBody, 4, true);
+    id sv = createStackView((id[]){label,c->switchView}, 2, 0, 5, (Padding){0,8,0,8});
     setInt(sv, sel_getUid("setAlignment:"), 3);
     addSubview(c->view, sv);
     pin(sv, c->view, (Padding){0}, 0);
     releaseObj(sv);
+    releaseObj(label);
     return c;
 }
 
@@ -316,13 +381,6 @@ void addVStackToScrollView(id vStack, id scrollView) {
     addSubview(scrollView, vStack);
     pin(vStack, scrollView, (Padding){0}, 0);
     setEqualWidths(vStack, scrollView);
-}
-
-void updateButton(id view, id color) {
-    setButtonColor(view, color, 0);
-    setButtonColor(view, createColor(ColorSecondaryLabel), 2);
-    if (getObject(view, sel_getUid("backgroundColor")))
-        setBackground(view, createColor(ColorSecondarySystemGroupedBackground));
 }
 
 void updateSegmentedControl(id view) {

@@ -11,12 +11,7 @@
 #include <CoreFoundation/CFString.h>
 #include <objc/message.h>
 
-static void toggleWindowTint(bool enable) {
-    id color = enable ? createColor(ColorRed) : nil;
-    id app = staticMethod(objc_getClass("UIApplication"), sel_getUid("sharedApplication"));
-    AppDelegate *delegate = (AppDelegate *) getObject(app, sel_getUid("delegate"));
-    setTintColor(delegate->window, color);
-}
+Class DMTabVC;
 
 static inline id getNavBar(id navVC) {
     return getObject(navVC, sel_getUid("navigationBar"));
@@ -30,19 +25,13 @@ static inline void updateKVPair(id obj, CFStringRef key, id value) {
     ((void(*)(id,SEL,id,CFStringRef))objc_msgSend)(obj, sel_getUid("setValue:forKey:"), value, key);
 }
 
-static void setupBarTint(id navVC) {
-    float redGreen = 0.95, blue = 0.97;
-    if (userData->darkMode) {
-        redGreen = 0.17;
-        blue = 0.18;
-    }
-    setObject(getNavBar(navVC),
-              sel_getUid("setBarTintColor:"), getColorRef(redGreen, redGreen, blue, 1));
-}
-
 static inline id createAttribString(CFStringRef text, CFDictionaryRef dict) {
     return ((id(*)(id,SEL,CFStringRef,CFDictionaryRef))objc_msgSend)
     (allocClass("NSAttributedString"), sel_getUid("initWithString:attributes:"), text, dict);
+}
+
+static inline void setBarTint(id navBar) {
+    setObject(navBar, sel_getUid("setBarTintColor:"), getBackground(TertiaryBG, true));
 }
 
 void setNavButton(id navItem, bool left, id button, CGFloat totalWidth) {
@@ -57,7 +46,28 @@ void setNavButton(id navItem, bool left, id button, CGFloat totalWidth) {
     releaseObj(item);
 }
 
+void dmTabVC_updateColors(id self, SEL _cmd _U_) {
+    id tabBar = getObject(self, sel_getUid("tabBar"));
+    setObject(tabBar, sel_getUid("setBarTintColor:"), getBackground(PrimaryBG, false));
+    setObject(tabBar, sel_getUid("setUnselectedItemTintColor:"), createColor(ColorGray));
+    CFArrayRef ctrls = getViewControllers(self);
+    int count = (int) CFArrayGetCount(ctrls);
+    for (int i = 0; i < count; ++i) {
+        id navVC = (id) CFArrayGetValueAtIndex(ctrls, i);
+        id navBar = getNavBar(navVC);
+        setBarTint(navBar);
+        CFDictionaryRef dict = createTitleTextDict(createColor(ColorLabel), nil);
+        ((void(*)(id,SEL,CFDictionaryRef))objc_msgSend)(navBar,
+                                                        sel_getUid("setTitleTextAttributes:"), dict);
+        CFRelease(dict);
+    }
+}
+
 #pragma mark - VC Functions
+
+CFArrayRef getViewControllers(id tabVC) {
+    return getArray(tabVC, sel_getUid("viewControllers"));
+}
 
 id getView(id vc) {
     return getObject(vc, sel_getUid("view"));
@@ -70,20 +80,6 @@ void setupNavVC(id navVC, id firstVC) {
     CFRelease(array);
 }
 
-void updateTabBar(id tabVC) {
-    id bar = getObject(tabVC, sel_getUid("tabBar"));
-    setObject(bar, sel_getUid("setBarTintColor:"), createColor(ColorSystemBackground));
-    setObject(bar, sel_getUid("setUnselectedItemTintColor:"), createColor(ColorGray));
-}
-
-void updateNavBar(id navVC) {
-    setupBarTint(navVC);
-    CFDictionaryRef dict = createTitleTextDict(createColor(ColorLabel), nil);
-    ((void(*)(id,SEL,CFDictionaryRef))objc_msgSend)(getNavBar(navVC),
-                                                    sel_getUid("setTitleTextAttributes:"), dict);
-    CFRelease(dict);
-}
-
 id getFirstVC(id navVC) {
     CFArrayRef ctrls = getArray(navVC, sel_getUid("viewControllers"));
     return (id) CFArrayGetValueAtIndex(ctrls, 0);
@@ -94,8 +90,8 @@ id allocNavVC(void) {
 }
 
 void presentVC(id presenter, id child) {
-    if (osVersion != Version14)
-        toggleWindowTint(false);
+    if (osVersion < Version14)
+        appDel_setWindowTint(nil);
     ((void(*)(id,SEL,id,bool,id))objc_msgSend)
     (presenter, sel_getUid("presentViewController:animated:completion:"), child, true, nil);
 }
@@ -104,7 +100,7 @@ void presentModalVC(id presenter, id modal) {
     id container = getObjectWithObject(allocNavVC(),
                                        sel_getUid("initWithRootViewController:"), modal);
     if (osVersion == Version12)
-        setupBarTint(container);
+        setBarTint(getNavBar(container));
     presentVC(presenter, container);
     releaseObj(container);
     releaseObj(modal);
@@ -115,8 +111,8 @@ void dismissPresentedVC(id presenter, Callback handler) {
     (presenter, sel_getUid("dismissViewControllerAnimated:completion:"), true, ^{
         if (handler)
             handler();
-        if (osVersion != Version14)
-            toggleWindowTint(true);
+        if (osVersion < Version14)
+            appDel_setWindowTint(createColor(ColorRed));
     });
 }
 
@@ -134,13 +130,11 @@ id createAlertController(CFStringRef title, CFStringRef message) {
         updateKVPair(vc, CFSTR("attributedMessage"), msgString);
 
         id view = getView(vc);
-        CFArrayRef subviews = getSubviews(view);
-        view = (id) CFArrayGetValueAtIndex(subviews, 0);
-        subviews = getSubviews(view);
-        view = (id) CFArrayGetValueAtIndex(subviews, 0);
-        subviews = getSubviews(view);
-        view = (id) CFArrayGetValueAtIndex(subviews, 0);
-        setBackground(view, createColor(ColorTertiarySystemBackground));
+        for (int i = 0; i < 3; ++i) {
+            CFArrayRef subviews = getSubviews(view);
+            view = (id) CFArrayGetValueAtIndex(subviews, 0);
+        }
+        setBackground(view, getBackground(TertiaryBG, false));
 
         CFRelease(titleDict);
         CFRelease(msgDict);
@@ -156,8 +150,8 @@ void addAlertAction(id ctrl, CFStringRef title, int style, Callback handler) {
      ^(id action _U_) {
         if (handler)
             handler();
-        if (osVersion != Version14)
-            toggleWindowTint(true);
+        if (osVersion < Version14)
+            appDel_setWindowTint(createColor(ColorRed));
     });
     setObject(ctrl, sel_getUid("addAction:"), action);
 }

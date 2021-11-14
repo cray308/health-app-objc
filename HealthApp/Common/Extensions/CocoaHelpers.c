@@ -31,12 +31,6 @@ CFArrayCallBacks retainedArrCallbacks = {0, cocoaArrRetain, cocoaArrRelease, NUL
 static id **appColors = NULL;
 int osVersion;
 static const char *const ColorNames[] = {
-    "systemBackgroundColor",
-    "secondarySystemBackgroundColor",
-    "tertiarySystemBackgroundColor",
-    "systemGroupedBackgroundColor",
-    "secondarySystemGroupedBackgroundColor",
-    "separatorColor",
     "labelColor",
     "secondaryLabelColor",
     "systemGrayColor",
@@ -49,21 +43,9 @@ static const char *const ColorNames[] = {
 void handleIOSVersion(void) {
     osVersion = getOSVersion();
     if (osVersion == Version12) {
-        appColors = malloc(13 * sizeof(id*));
-        for (int i = 0; i < 13; ++i)
+        appColors = malloc(7 * sizeof(id*));
+        for (int i = 0; i < 7; ++i)
             appColors[i] = malloc(2 * sizeof(id));
-        appColors[ColorSystemBackground][0] = allocColor(1, 1, 1, 1);
-        appColors[ColorSystemBackground][1] = allocColor(0, 0, 0, 1);
-        appColors[ColorSecondarySystemBackground][0] = allocColor(0.95, 0.95, 0.97, 1);
-        appColors[ColorSecondarySystemBackground][1] = allocColor(0.11, 0.11, 0.12, 1);
-        appColors[ColorTertiarySystemBackground][0] = allocColor(1, 1, 1, 1);
-        appColors[ColorTertiarySystemBackground][1] = allocColor(0.17, 0.17, 0.18, 1);
-        appColors[ColorSystemGroupedBackground][0] = allocColor(0.95, 0.95, 0.97, 1);
-        appColors[ColorSystemGroupedBackground][1] = allocColor(0, 0, 0, 1);
-        appColors[ColorSecondarySystemGroupedBackground][0] = allocColor(1, 1, 1, 1);
-        appColors[ColorSecondarySystemGroupedBackground][1] = allocColor(0.11, 0.11, 0.12, 1);
-        appColors[ColorSeparator][0] = allocColor(0.24, 0.24, 0.26, 0.29);
-        appColors[ColorSeparator][1] = allocColor(0.33, 0.33, 0.35, 0.6);
         appColors[ColorLabel][0] = allocColor(0, 0, 0, 1);
         appColors[ColorLabel][1] = allocColor(1, 1, 1, 1);
         appColors[ColorSecondaryLabel][0] = allocColor(0.24, 0.24, 0.26, 0.6);
@@ -184,9 +166,35 @@ id getColorRef(float red, float green, float blue, float alpha) {
     (objc_getClass("UIColor"), sel_getUid("colorWithRed:green:blue:alpha:"), red, green, blue, alpha);
 }
 
+id getBackground(int type, bool grouped) {
+    if (osVersion >= 13) {
+        switch (type) {
+            case PrimaryBG: return getSystemColor(grouped ? "systemGroupedBackgroundColor" : "systemBackgroundColor");
+            case SecondaryBG: return getSystemColor(grouped ? "secondarySystemGroupedBackgroundColor" : "secondarySystemBackgroundColor");
+            default: return getSystemColor("tertiarySystemBackgroundColor");
+        }
+    }
+    switch (type) {
+        case PrimaryBG:
+            if (userData->darkMode) return getSystemColor("blackColor");
+            return grouped ? getColorRef(0.95, 0.95, 0.97, 1) : getSystemColor("whiteColor");
+        case SecondaryBG:
+            if (userData->darkMode) return getColorRef(0.11, 0.11, 0.12, 1);
+            return grouped ? getSystemColor("whiteColor") : getColorRef(0.95, 0.95, 0.97, 1);
+        default:
+            if (userData->darkMode) return getColorRef(0.17, 0.17, 0.18, 1);
+            return grouped ? getColorRef(0.95, 0.95, 0.97, 1) : getSystemColor("whiteColor");
+    }
+    return nil;
+}
+
+id getSystemColor(char const *name) {
+    return staticMethod(objc_getClass("UIColor"), sel_getUid(name));
+}
+
 id createColor(int type) {
     if (osVersion == Version12) return appColors[type][userData->darkMode];
-    return staticMethod(objc_getClass("UIColor"), sel_getUid(ColorNames[type]));
+    return getSystemColor(ColorNames[type]);
 }
 
 id createImage(CFStringRef name) {

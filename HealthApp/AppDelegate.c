@@ -62,14 +62,40 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
         tzOffset = userInfo_initFromStorage();
     }
 
-    if (osVersion != Version14)
+    DMTabVC = objc_allocateClassPair(objc_getClass("UITabBarController"), "DMTabVC", 0);
+    DMButtonClass = objc_allocateClassPair(objc_getClass("UIButton"), "DMButton", 0);
+    DMLabelClass = objc_allocateClassPair(objc_getClass("UILabel"), "DMLabel", 0);
+    DMTextFieldClass = objc_allocateClassPair(objc_getClass("UITextField"), "DMTextField", 0);
+    DMBackgroundViewClass = objc_allocateClassPair(objc_getClass("UIView"), "DMBackgroundView", 0);
+
+    if (osVersion == Version12) {
+        class_addIvar(DMBackgroundViewClass, "colorType", sizeof(bool), 0, "c");
+        class_addIvar(DMButtonClass, "colorCode", sizeof(int), 0, "i");
+        class_addIvar(DMButtonClass, "background", sizeof(bool), 0, "c");
+        class_addIvar(DMLabelClass, "colorCode", sizeof(int), 0, "i");
+
+        SEL tint = sel_getUid("tintColorDidChange");
+        class_addMethod(DMBackgroundViewClass, tint, (IMP) dmBackgroundView_updateColors, "v@:");
+        class_addMethod(DMButtonClass, tint, (IMP) dmButton_updateColors, "v@:");
+        class_addMethod(DMLabelClass, tint, (IMP) dmLabel_updateColors, "v@:");
+        class_addMethod(DMTextFieldClass, tint, (IMP) dmField_updateColors, "v@:");
+        class_addMethod(DMTabVC, sel_getUid("viewDidLayoutSubviews"),
+                        (IMP) dmTabVC_updateColors, "v@:");
+    }
+
+    objc_registerClassPair(DMTabVC);
+    objc_registerClassPair(DMBackgroundViewClass);
+    objc_registerClassPair(DMButtonClass);
+    objc_registerClassPair(DMLabelClass);
+    objc_registerClassPair(DMTextFieldClass);
+
+    if (osVersion < Version14)
         setTintColor(self->window, createColor(ColorRed));
-    id tabVC = getObject(allocClass("UITabBarController"), sel_getUid("init"));
-    if (osVersion == Version12)
-        updateTabBar(tabVC);
+    id tabVC = getObject(allocClass("DMTabVC"), sel_getUid("init"));
     appCoordinator_start(tabVC);
     setObject(self->window, sel_getUid("setRootViewController:"), tabVC);
     voidFunc(self->window, sel_getUid("makeKeyAndVisible"));
+    releaseObj(tabVC);
 
     persistenceService_start(tzOffset);
     appCoordinator_fetchHistory();
@@ -81,4 +107,11 @@ int appDelegate_supportedOrientations(AppDelegate *self _U_, SEL _cmd _U_,
     id device = staticMethod(objc_getClass("UIDevice"), sel_getUid("currentDevice"));
     int idiom = getInt(device, sel_getUid("userInterfaceIdiom"));
     return idiom == 1 ? 26 : 2;
+}
+
+id appDel_setWindowTint(id color) {
+    id app = staticMethod(objc_getClass("UIApplication"), sel_getUid("sharedApplication"));
+    AppDelegate *delegate = (AppDelegate *) getObject(app, sel_getUid("delegate"));
+    setTintColor(delegate->window, color);
+    return delegate->window;
 }

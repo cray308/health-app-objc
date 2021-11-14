@@ -24,12 +24,12 @@ extern CFArrayCallBacks retainedArrCallbacks;
 extern int osVersion;
 
 enum {
-    ColorSystemBackground,
-    ColorSecondarySystemBackground,
-    ColorTertiarySystemBackground,
-    ColorSystemGroupedBackground,
-    ColorSecondarySystemGroupedBackground,
-    ColorSeparator,
+    PrimaryBG,
+    SecondaryBG,
+    TertiaryBG
+};
+
+enum {
     ColorLabel,
     ColorSecondaryLabel,
     ColorGray,
@@ -64,7 +64,9 @@ id getBundle(void);
 id getUserDefaults(void);
 id getDeviceNotificationCenter(void);
 id getNotificationCenter(void);
+id getBackground(int type, bool grouped);
 id getColorRef(float red, float green, float blue, float alpha);
+id getSystemColor(char const *name);
 id createColor(int type);
 id createImage(CFStringRef name);
 CFStringRef localize(CFStringRef key);

@@ -51,23 +51,17 @@ void homeVC_createWorkoutsList(HomeViewController *vc) {
     homeVC_updateWorkoutsList(vc);
 }
 
-void homeVC_refreshUI(HomeViewController *vc) {
-    setTextColor(vc->greetingLabel, createColor(ColorLabel));
-    container_refresh(&vc->planContainer);
-    id *v;
-    array_iter(vc->planContainer.views, v) statusButton_refresh(*v);
-    container_refresh(&vc->customContainer);
-    array_iter(vc->customContainer.views, v) statusButton_refresh(*v);
-    homeVC_updateWorkoutsList(vc);
+void homeVC_updateColors(HomeViewController *vc, SEL _cmd _U_) {
+    setBackground(vc.view, getBackground(PrimaryBG, true));
 }
 
 @implementation HomeViewController
 - (void) viewDidLoad {
     [super viewDidLoad];
-    setBackground(self.view, createColor(ColorSystemGroupedBackground));
+    setBackground(self.view, getBackground(PrimaryBG, true));
     self.navigationItem.title = _nsstr(localize(CFSTR("titles0")));
 
-    greetingLabel = createLabel(NULL, TextTitle1, NSTextAlignmentCenter, true);
+    greetingLabel = createLabel(NULL, TextTitle1, 1, true);
     UIStackView *vStack = createStackView((id[]){greetingLabel}, 1, 1, 20, (Padding){10, 0, 16, 0});
     CFStringRef titles[5]; fillStringArray(titles, CFSTR("homeWorkoutType%d"), 5);
     CFStringRef headers[2]; fillStringArray(headers, CFSTR("homeHeader%d"), 2);

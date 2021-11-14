@@ -51,12 +51,12 @@ void exerciseView_configure(StatusButton *v, ExerciseEntry *e) {
 
 - (void) viewDidLoad {
     [super viewDidLoad];
-    setBackground(self.view, createColor(ColorSystemGroupedBackground));
+    setBackground(self.view, getBackground(PrimaryBG, true));
     self.navigationItem.title = _nsstr(workout->title);
 
     UIStackView *stack = createStackView(NULL, 0, 1, 20, (Padding){20, 8, 20, 8});
-    UIButton *startBtn = createButton(localize(CFSTR("start")), createColor(ColorGreen),
-                                      0, 0, self, @selector(startEndWorkout:), -1);
+    UIButton *startBtn = createButton(localize(CFSTR("start")), ColorGreen, 0, 0,
+                                      self, @selector(startEndWorkout:), -1);
     setNavButton(self.navigationItem, false, startBtn, self.view.frame.size.width);
 
     for (unsigned i = 0; i < workout->activities->size; ++i) {

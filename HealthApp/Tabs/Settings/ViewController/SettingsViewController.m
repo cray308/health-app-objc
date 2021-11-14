@@ -30,19 +30,17 @@ void settingsVC_updateWeightFields(SettingsViewController *vc) {
     enableButton(vc->validator.button, true);
 }
 
-void settingsVC_refreshUI(SettingsViewController *vc) {
+void settingsVC_updateColors(SettingsViewController *vc, SEL _cmd _U_) {
+    setBackground(vc.view, getBackground(PrimaryBG, true));
     updateSegmentedControl(vc->picker);
-    setBackground(vc->switchContainer->view, createColor(ColorSecondarySystemGroupedBackground));
-    setTextColor(vc->planLabel, createColor(ColorLabel));
-    setTextColor(vc->switchContainer->label, createColor(ColorLabel));
-    updateButton(vc->deleteButton, createColor(ColorRed));
-    validator_refresh(&vc->validator);
+    CFArrayRef items = getArray(vc->validator.toolbar, sel_getUid("items"));
+    setTintColor((id) CFArrayGetValueAtIndex(items, 1), createColor(ColorRed));
 }
 
 @implementation SettingsViewController
 - (void) viewDidLoad {
     [super viewDidLoad];
-    setBackground(self.view, createColor(ColorSystemGroupedBackground));
+    setBackground(self.view, getBackground(PrimaryBG, true));
     self.navigationItem.title = _nsstr(localize(CFSTR("titles2")));
     validator_setup(&validator, 8, true, self);
 
@@ -63,12 +61,12 @@ void settingsVC_refreshUI(SettingsViewController *vc) {
     for (int i = 0; i < 4; ++i)
         [cStack addArrangedSubview:validator_add(&validator, self, titles[i], 0, 999)];
 
-    validator.button = createButton(localize(CFSTR("settingsSave")), createColor(ColorBlue),
-                                    BtnBackground, 0, self, @selector(buttonTapped:), 44);
+    validator.button = createButton(localize(CFSTR("settingsSave")), ColorBlue, BtnBackground, 0,
+                                    self, @selector(buttonTapped:), 44);
     [validator.vStack addArrangedSubview:validator.button];
 
-    deleteButton = createButton(localize(CFSTR("settingsDelete")), createColor(ColorRed),
-                                BtnBackground, 1, self, @selector(buttonTapped:), 44);
+    deleteButton = createButton(localize(CFSTR("settingsDelete")), ColorRed, BtnBackground, 1,
+                                self, @selector(buttonTapped:), 44);
     [validator.vStack addArrangedSubview:deleteButton];
     addVStackToScrollView(validator.vStack, validator.scrollView);
 

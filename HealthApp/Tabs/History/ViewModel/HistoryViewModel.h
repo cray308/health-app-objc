@@ -71,7 +71,6 @@ typedef struct {
 void historyViewModel_init(HistoryViewModel *model);
 void historyViewModel_fetchData(HistoryViewModel *this);
 void historyViewModel_formatDataForTimeRange(HistoryViewModel *this, int index);
-id getLimitLineColor(void);
 
 CFStringRef historyViewModel_getXAxisLabel(HistoryViewModel *this, int index);
 CFStringRef workoutTypeViewModel_getDuration(WorkoutTypeChartViewModel *this, int minutes);

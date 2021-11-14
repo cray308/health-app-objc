@@ -8,21 +8,24 @@
 #include "AppCoordinator.h"
 #include <CoreFoundation/CFString.h>
 #include <objc/message.h>
+#include "AppDelegate.h"
 #include "HomeTabCoordinator.h"
 #include "HistoryTabCoordinator.h"
 #include "SettingsTabCoordinator.h"
 #include "ViewControllerHelpers.h"
 
 extern void homeCoordinator_start(HomeTabCoordinator*);
-extern void homeCoordinator_resetUI(HomeTabCoordinator*, bool);
-extern void historyCoordinator_reloadUI(HistoryTabCoordinator*, bool);
-extern void settingsCoordinator_reloadUI(SettingsTabCoordinator*);
+extern void homeCoordinator_resetUI(HomeTabCoordinator*);
 extern void homeCoordinator_updateUI(HomeTabCoordinator*);
 extern void historyCoordinator_start(HistoryTabCoordinator*);
 extern void historyCoordinator_fetchData(HistoryTabCoordinator*);
 extern void historyCoordinator_updateUI(HistoryTabCoordinator*, bool);
 extern void settingsCoordinator_start(SettingsTabCoordinator*);
 extern void settingsCoordinator_updateWeightText(SettingsTabCoordinator*);
+extern void toggleDarkModeForCharts(bool);
+extern void homeVC_updateColors(id vc);
+extern void historyVC_updateColors(id vc);
+extern void settingsVC_updateColors(id vc);
 
 enum {
     TabHome, TabHistory, TabSettings
@@ -31,6 +34,7 @@ enum {
 AppCoordinator *appCoordinator = NULL;
 
 void appCoordinator_start(id tabVC) {
+    toggleDarkModeForCharts(userData->darkMode);
     appCoordinator = calloc(1, sizeof(AppCoordinator));
     id controllers[3];
     id items[3];
@@ -44,9 +48,6 @@ void appCoordinator_start(id tabVC) {
 
         controllers[i] = ((id(*)(id,SEL,CFStringRef,id))objc_msgSend)
         (allocNavVC(), sel_getUid("initWithNibName:bundle:"), NULL, nil);
-
-        if (osVersion == Version12)
-            updateNavBar(controllers[i]);
         setObject(controllers[i], sel_getUid("setTabBarItem:"), items[i]);
     }
 
@@ -68,7 +69,6 @@ void appCoordinator_start(id tabVC) {
     CFArrayRef array = CFArrayCreate(NULL, (const void **)controllers, 3, &(CFArrayCallBacks){0});
     ((void(*)(id,SEL,CFArrayRef,bool))objc_msgSend)
     (tabVC, sel_getUid("setViewControllers:animated:"), array, false);
-    appCoordinator->tabVC = tabVC;
 
     for (int i = 0; i < 3; ++i) {
         releaseObj(controllers[i]);
@@ -78,13 +78,18 @@ void appCoordinator_start(id tabVC) {
 }
 
 void appCoordinator_updatedUserInfo(bool reloadScreens) {
-    homeCoordinator_resetUI(appCoordinator->children[TabHome], reloadScreens);
     if (reloadScreens) {
-        updateTabBar(appCoordinator->tabVC);
-        bool reloadHistory = appCoordinator->loadedViewControllers & LoadedViewController_History;
-        historyCoordinator_reloadUI(appCoordinator->children[TabHistory], reloadHistory);
-        settingsCoordinator_reloadUI(appCoordinator->children[TabSettings]);
+        id window = appDel_setWindowTint(createColor(ColorRed));
+        id tabVC = getObject(window, sel_getUid("rootViewController"));
+        voidFunc(tabVC, sel_getUid("viewDidLayoutSubviews"));
+        toggleDarkModeForCharts(userData->darkMode);
+        CFArrayRef ctrls = getViewControllers(tabVC);
+        homeVC_updateColors(getFirstVC((id) CFArrayGetValueAtIndex(ctrls, TabHome)));
+        settingsVC_updateColors(getFirstVC((id) CFArrayGetValueAtIndex(ctrls, TabSettings)));
+        if (appCoordinator->loadedViewControllers & LoadedViewController_History)
+            historyVC_updateColors(getFirstVC((id) CFArrayGetValueAtIndex(ctrls, TabHistory)));
     }
+    homeCoordinator_resetUI(appCoordinator->children[TabHome]);
 }
 
 void appCoordinator_fetchHistory(void) {

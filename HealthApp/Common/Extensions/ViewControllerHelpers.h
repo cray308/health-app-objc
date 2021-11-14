@@ -17,16 +17,18 @@
 #define _nsstr(x) ((__bridge NSString*) x)
 #define _nsarr(x) ((__bridge NSArray*) x)
 
+extern Class DMTabVC;
+
 typedef void (^Callback)(void);
 
+CFArrayRef getViewControllers(id tabVC);
+id getFirstVC(id navVC);
 id getView(id vc);
 
 void setNavButton(id navItem, bool left, id button, CGFloat totalWidth);
+void dmTabVC_updateColors(id self, SEL _cmd);
 
-id getFirstVC(id navVC);
 void setupNavVC(id navVC, id firstVC);
-void updateTabBar(id tabVC);
-void updateNavBar(id navVC);
 id allocNavVC(void);
 void presentVC(id presenter, id child);
 void presentModalVC(id presenter, id modal);

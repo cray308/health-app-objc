@@ -9,7 +9,6 @@
 #define AppCoordinator_h
 
 #include "AppTypes.h"
-#include <objc/objc.h>
 
 enum {
     LoadedViewController_Home = 0x1,
@@ -20,7 +19,6 @@ enum {
 typedef struct {
     byte loadedViewControllers;
     void *children[3];
-    id tabVC;
 } AppCoordinator;
 
 extern AppCoordinator *appCoordinator;

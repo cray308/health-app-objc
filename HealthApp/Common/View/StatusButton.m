@@ -5,9 +5,9 @@ id statusButton_init(CFStringRef text, bool hideViews, int tag, id target, SEL a
     StatusButton *this = [[StatusButton alloc] initWithFrame:CGRectZero];
     setTag(this, tag);
     int params = BtnLargeFont | BtnBackground | BtnRounded;
-    this->button = createButton(text, createColor(ColorLabel), params, tag, target, action, 50);
+    this->button = createButton(text, ColorLabel, params, tag, target, action, 50);
     this->headerLabel = createLabel(NULL, TextSubhead, 4, false);
-    this->box = createView(createColor(ColorGray), true, 20, 20);
+    this->box = createView(true, 20, 20);
     UIStackView *hStack = createStackView((id []){this->button, this->box}, 2, 0, 5, (Padding){0});
     hStack.alignment = UIStackViewAlignmentCenter;
     id vStack = createStackView((id []){this->headerLabel, hStack}, 2, 1, 4, (Padding){4, 0, 4, 0});
@@ -30,11 +30,6 @@ void statusButton_updateAccessibility(StatusButton *b, CFStringRef stateText) {
     if (stateText) CFStringAppendFormat(label, NULL, CFSTR(". %@"), stateText);
     setAccessibilityLabel(b->button, label);
     CFRelease(label);
-}
-
-void statusButton_refresh(StatusButton *b) {
-    updateButton(b->button, createColor(ColorLabel));
-    setTextColor(b->headerLabel, createColor(ColorLabel));
 }
 
 @implementation StatusButton

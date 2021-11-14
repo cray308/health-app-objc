@@ -28,6 +28,5 @@ id createContainer(Container *c, CFStringRef title, int hidden, int spacing, boo
 void containers_free(Container *c, int size);
 void container_add(Container *c, id v);
 void container_clear(Container *c);
-void container_refresh(Container *c);
 
 #endif /* ContainerView_h */

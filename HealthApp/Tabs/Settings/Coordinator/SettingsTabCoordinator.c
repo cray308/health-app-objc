@@ -12,7 +12,6 @@
 
 extern id settingsVC_init(void *delegate);
 extern void settingsVC_updateWeightFields(id vc);
-extern void settingsVC_refreshUI(id vc);
 extern void appCoordinator_updatedUserInfo(bool reloadScreens);
 extern void appCoordinator_deletedAppData(void);
 extern bool appUserData_updateUserSettings(signed char, bool, short *);
@@ -29,13 +28,6 @@ void settingsCoordinator_start(SettingsTabCoordinator *this) {
 
 void settingsCoordinator_updateWeightText(SettingsTabCoordinator *this) {
     settingsVC_updateWeightFields(getFirstVC(this->navVC));
-}
-
-void settingsCoordinator_reloadUI(SettingsTabCoordinator *this) {
-    updateNavBar(this->navVC);
-    id vc = getFirstVC(this->navVC);
-    setBackground(getView(vc), createColor(ColorSystemGroupedBackground));
-    settingsVC_refreshUI(vc);
 }
 
 void settingsCoordinator_handleSaveTap(SettingsTabCoordinator *this,
