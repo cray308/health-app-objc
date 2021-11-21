@@ -8,17 +8,19 @@ id createChartEntry(int x, int y) { return [[ChartDataEntry alloc] initWithX:x y
 
 void setLegendLabel(LegendEntry *entry, CFStringRef text) { entry.label = _nsstr(text); }
 
-void setLineLimit(LineChartView *v, float limit) { v.leftAxis.limitLine.limit = limit; }
+void setLineLimit(LineChartView *v, float limit) { [v setLineLimit:limit]; }
+
+Protocol *getValueFormatterType(void) { return @protocol(AxisValueFormatter); }
+
+SEL getValueFormatterAction(void) { return @selector(stringForValue:axis:); }
+
+void disableLineChartView(LineChartView *v) { v.data = nil; }
 
 int getOSVersion(void) {
     if (@available(iOS 14, *)) return 14;
     else if (@available(iOS 13, *)) return 13;
     return 12;
 }
-
-Protocol *getValueFormatterType(void) { return @protocol(AxisValueFormatter); }
-
-SEL getValueFormatterAction(void) { return @selector(stringForValue:axis:); }
 
 id createChartView(id formatter, CFArrayRef legendArr, uint8_t options) {
     LineChartView *v = [[LineChartView alloc] initWithLegendEntries:_nsarr(legendArr) xFormatter:formatter options:options];
@@ -41,12 +43,6 @@ void setupLegendEntries(id *entries, int *colors, int count) {
     for (int i = 0; i < count; ++i) entries[i] = [[LegendEntry alloc] initWithColorType:colors[i]];
 }
 
-void disableLineChartView(LineChartView *v) {
-    v.legend.enabled = false;
-    v.data = nil;
-    [v notifyDataSetChanged];
-}
-
 void replaceDataSetEntries(LineChartDataSet *dataSet, id *entries, int count) {
     CFArrayRef array = CFArrayCreate(NULL, (const void **)entries, count, &(CFArrayCallBacks){0});
     [dataSet replaceEntries:_nsarr(array)];
@@ -59,11 +55,8 @@ void updateDataSet(bool isSmall, int count, LineChartDataSet *set, id *entries) 
 }
 
 void updateChart(bool isSmall, LineChartView *v, LineChartData *data, float axisMax) {
-    v.leftAxis.axisMaximum = axisMax;
-    v.legend.enabled = true;
+    [v setAxisMax:axisMax];
     [data setDrawValues:isSmall];
     v.data = data;
-    [v.data notifyDataChanged];
-    [v notifyDataSetChanged];
     [v animateWithXAxisDuration:isSmall ? 1.5 : 2.5];
 }

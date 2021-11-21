@@ -6,87 +6,113 @@ import CoreGraphics
 import QuartzCore
 import Swift
 import UIKit
-@objc @_hasMissingDesignatedInitializers public class ViewPortHandler : ObjectiveC.NSObject {
-  @objc deinit
-  @objc override dynamic public init()
-}
-@objc public class LineChartView : Charts.BarLineChartViewBase {
+@objc @_inheritsConvenienceInitializers public class LineChartView : UIKit.UIView, UIKit.UIGestureRecognizerDelegate {
+  @objc public var data: Charts.LineChartData? {
+    @objc get
+    @objc set
+  }
   @objc public init(legendEntries: [Charts.LegendEntry], xFormatter: Charts.AxisValueFormatter, options: Swift.UInt8)
-  @objc required dynamic public init?(coder aDecoder: Foundation.NSCoder)
-  @objc override dynamic public func tintColorDidChange()
-  public var lineData: Charts.LineChartData? {
-    get
-  }
-  @objc deinit
   @objc override dynamic public init(frame: CoreGraphics.CGRect)
-}
-@objc public protocol Fill : AnyObject {
-  @objc func fillPath(context: CoreGraphics.CGContext, rect: CoreGraphics.CGRect)
-}
-@objc @_inheritsConvenienceInitializers public class LinearGradientFill : ObjectiveC.NSObject, Charts.Fill {
-  @objc override dynamic public init()
-  @objc public func fillPath(context: CoreGraphics.CGContext, rect: CoreGraphics.CGRect)
+  @objc required dynamic public init?(coder aDecoder: Foundation.NSCoder)
   @objc deinit
-}
-@objc @_hasMissingDesignatedInitializers public class LegendRenderer : ObjectiveC.NSObject {
-  @objc deinit
-  @objc override dynamic public init()
-}
-@objc @_inheritsConvenienceInitializers public class LineRadarChartDataSet : Charts.LineScatterCandleRadarChartDataSet {
-  public var isDrawFilledEnabled: Swift.Bool {
-    get
-  }
-  @objc override public func copy(with zone: ObjectiveC.NSZone? = nil) -> Any
-  @objc deinit
-  @objc required dynamic public init()
-  @objc override public init(entries: [Charts.ChartDataEntry], colorVal: Swift.Int)
+  @objc override dynamic public func tintColorDidChange()
+  @objc public func setLineLimit(_ newVal: Swift.Double)
+  @objc public func setAxisMax(_ newVal: Swift.Double)
+  @objc override dynamic public func observeValue(forKeyPath keyPath: Swift.String?, of object: Any?, change: [Foundation.NSKeyValueChangeKey : Any]?, context: Swift.UnsafeMutableRawPointer?)
+  @objc override dynamic public func draw(_ rect: CoreGraphics.CGRect)
+  public func stopDeceleration()
+  @objc override dynamic public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIKit.UIGestureRecognizer) -> Swift.Bool
+  @objc public func gestureRecognizer(_ gestureRecognizer: UIKit.UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIKit.UIGestureRecognizer) -> Swift.Bool
+  @objc public func animate(xAxisDuration: Foundation.TimeInterval)
 }
 @objc @_inheritsConvenienceInitializers public class ChartUtility : ObjectiveC.NSObject {
   @objc public class func setDarkMode(enabled: Swift.Bool)
   @objc deinit
   @objc override dynamic public init()
 }
-extension CGContext {
-  public func drawText(_ text: Swift.String, at point: CoreGraphics.CGPoint, align: UIKit.NSTextAlignment, anchor: CoreGraphics.CGPoint = CGPoint(x: 0.5, y: 0.5), angleRadians: CoreGraphics.CGFloat = 0.0, attributes: [Foundation.NSAttributedString.Key : Any]?)
-  public func drawText(_ text: Swift.String, at point: CoreGraphics.CGPoint, anchor: CoreGraphics.CGPoint = CGPoint(x: 0.5, y: 0.5), angleRadians: CoreGraphics.CGFloat, attributes: [Foundation.NSAttributedString.Key : Any]?)
-}
-@objc @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers public class ComponentBase : ObjectiveC.NSObject {
-  @objc public var enabled: Swift.Bool
+@objc @_inheritsConvenienceInitializers public class LineChartData : ObjectiveC.NSObject, Swift.ExpressibleByArrayLiteral {
+  @objc required override dynamic public init()
+  @objc public init(dataSets: [Charts.LineChartDataSet], options: Swift.UInt8)
+  required public init(arrayLiteral elements: Charts.LineChartDataSet...)
+  @objc public func setDrawValues(_ enabled: Swift.Bool)
   @objc deinit
+  public typealias ArrayLiteralElement = Charts.LineChartDataSet
 }
-@objc @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers public class ChartLimitLine : Charts.ComponentBase {
-  @objc public var limit: Swift.Double
-  @objc deinit
+extension LineChartData : Swift.MutableCollection {
+  public typealias Index = Swift.Int
+  public typealias Element = Charts.LineChartDataSet
+  public var startIndex: Charts.LineChartData.Index {
+    get
+  }
+  public var endIndex: Charts.LineChartData.Index {
+    get
+  }
+  public func index(after: Charts.LineChartData.Index) -> Charts.LineChartData.Index
+  public subscript(position: Charts.LineChartData.Index) -> Charts.LineChartData.Element {
+    get
+    set
+  }
+  public typealias Iterator = Swift.IndexingIterator<Charts.LineChartData>
+  public typealias SubSequence = Swift.Slice<Charts.LineChartData>
+  public typealias Indices = Swift.Range<Charts.LineChartData.Index>
 }
-@objc @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers public class Legend : Charts.ComponentBase {
-  @objc deinit
+extension LineChartData : Swift.RandomAccessCollection {
+  public func index(before: Charts.LineChartData.Index) -> Charts.LineChartData.Index
 }
-@objc @_inheritsConvenienceInitializers public class BarLineScatterCandleBubbleChartDataSet : Charts.ChartDataSet {
-  @objc override public func copy(with zone: ObjectiveC.NSZone? = nil) -> Any
-  @objc required dynamic public init()
-  @objc override public init(entries: [Charts.ChartDataEntry], colorVal: Swift.Int)
-  @objc deinit
+extension LineChartData {
+  public func append(_ newElement: Charts.LineChartData.Element)
+  public func remove(at position: Charts.LineChartData.Index) -> Charts.LineChartData.Element
+  public func removeFirst() -> Charts.LineChartData.Element
+  public func removeFirst(_ n: Swift.Int)
+  public func removeLast() -> Charts.LineChartData.Element
+  public func removeLast(_ n: Swift.Int)
+  public func removeSubrange<R>(_ bounds: R) where R : Swift.RangeExpression, R.Bound == Charts.LineChartData.Index
+  public func removeAll(keepingCapacity keepCapacity: Swift.Bool)
+  public func replaceSubrange<C>(_ subrange: Swift.Range<Charts.LineChartData.Index>, with newElements: C) where C : Swift.Collection, C.Element == Charts.LineChartData.Element
 }
-@objc public protocol FillFormatter {
-  @objc func getFillLinePosition(dataSet: Charts.LineChartDataSet, dataProvider: Charts.LineChartView) -> CoreGraphics.CGFloat
+extension LineChartData {
+  public subscript(entry entry: Charts.ChartDataEntry) -> Charts.LineChartData.Element? {
+    get
+  }
 }
-@objc public class LineChartData : Charts.ChartData {
-  @objc required dynamic public init()
-  @objc public init(dataSets: [Charts.ChartDataSet], options: Swift.UInt8)
-  required public init(arrayLiteral elements: Charts.ChartDataSet...)
-  @objc deinit
-  @objc override public init(dataSets: [Charts.ChartData.Element])
-}
-@objc @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers public class XAxis : Charts.AxisBase {
-  @objc deinit
-}
-@objc public class LineChartDataSet : Charts.LineRadarChartDataSet {
-  @objc required dynamic public init()
+@objc @_inheritsConvenienceInitializers public class LineChartDataSet : ObjectiveC.NSObject, Foundation.NSCopying {
+  @objc required override dynamic public init()
   @objc public init(colorVal: Swift.Int, lineWidth: Swift.Int, options: Swift.UInt8, fillSet: Charts.LineChartDataSet?)
+  @objc public func replaceEntries(_ entries: [Charts.ChartDataEntry])
   @objc public var drawCirclesEnabled: Swift.Bool
-  @objc override public func copy(with zone: ObjectiveC.NSZone? = nil) -> Any
+  @objc public func copy(with zone: ObjectiveC.NSZone? = nil) -> Any
   @objc deinit
-  @objc override public init(entries: [Charts.ChartDataEntry], colorVal: Swift.Int)
+}
+extension LineChartDataSet : Swift.MutableCollection {
+  public typealias Index = Swift.Int
+  public typealias Element = Charts.ChartDataEntry
+  public var startIndex: Charts.LineChartDataSet.Index {
+    get
+  }
+  public var endIndex: Charts.LineChartDataSet.Index {
+    get
+  }
+  public func index(after: Charts.LineChartDataSet.Index) -> Charts.LineChartDataSet.Index
+  public subscript(position: Charts.LineChartDataSet.Index) -> Charts.LineChartDataSet.Element {
+    get
+    set
+  }
+  public typealias Iterator = Swift.IndexingIterator<Charts.LineChartDataSet>
+  public typealias SubSequence = Swift.Slice<Charts.LineChartDataSet>
+  public typealias Indices = Swift.Range<Charts.LineChartDataSet.Index>
+}
+extension LineChartDataSet : Swift.RandomAccessCollection {
+  public func index(before: Charts.LineChartDataSet.Index) -> Charts.LineChartDataSet.Index
+}
+extension LineChartDataSet : Swift.RangeReplaceableCollection {
+  public func append(_ newElement: Charts.LineChartDataSet.Element)
+  public func remove(at position: Charts.LineChartDataSet.Index) -> Charts.LineChartDataSet.Element
+  public func removeFirst() -> Charts.LineChartDataSet.Element
+  public func removeFirst(_ n: Swift.Int)
+  public func removeLast() -> Charts.LineChartDataSet.Element
+  public func removeLast(_ n: Swift.Int)
+  public func removeSubrange<R>(_ bounds: R) where R : Swift.RangeExpression, R.Bound == Charts.LineChartDataSet.Index
+  public func removeAll(keepingCapacity keepCapacity: Swift.Bool)
 }
 @objc @_inheritsConvenienceInitializers public class ChartDataEntry : ObjectiveC.NSObject, Foundation.NSCopying {
   @objc override required dynamic public init()
@@ -97,175 +123,16 @@ extension CGContext {
 extension ChartDataEntry {
   @objc override dynamic public func isEqual(_ object: Any?) -> Swift.Bool
 }
-@objc @_hasMissingDesignatedInitializers public class YAxis : Charts.AxisBase {
-  @objc deinit
-}
-@objc @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers public class DefaultValueFormatter : ObjectiveC.NSObject, Charts.ValueFormatter {
-  @objc public init(formatter: Foundation.NumberFormatter)
-  @objc public func stringForValue(_ value: Swift.Double, entry: Charts.ChartDataEntry, dataSetIndex: Swift.Int, viewPortHandler: Charts.ViewPortHandler?) -> Swift.String
-  @objc deinit
-}
-@objc public protocol ValueFormatter : AnyObject {
-  @objc func stringForValue(_ value: Swift.Double, entry: Charts.ChartDataEntry, dataSetIndex: Swift.Int, viewPortHandler: Charts.ViewPortHandler?) -> Swift.String
-}
-@objc @_inheritsConvenienceInitializers public class ChartDataSet : ObjectiveC.NSObject, Foundation.NSCopying {
-  @objc required override dynamic public init()
-  @objc public init(entries: [Charts.ChartDataEntry], colorVal: Swift.Int)
-  @objc public func replaceEntries(_ entries: [Charts.ChartDataEntry])
-  public func notifyDataSetChanged()
-  public func calcMinMax()
-  public func calcMinMaxX(entry e: Charts.ChartDataEntry)
-  public func calcMinMaxY(entry e: Charts.ChartDataEntry)
-  public func entryForXValue(_ xValue: Swift.Double, closestToY yValue: Swift.Double) -> Charts.ChartDataEntry?
-  public func entriesForXValue(_ xValue: Swift.Double) -> [Charts.ChartDataEntry]
-  @objc public func copy(with zone: ObjectiveC.NSZone? = nil) -> Any
-  @objc deinit
-}
-extension ChartDataSet : Swift.MutableCollection {
-  public typealias Index = Swift.Int
-  public typealias Element = Charts.ChartDataEntry
-  public var startIndex: Charts.ChartDataSet.Index {
-    get
-  }
-  public var endIndex: Charts.ChartDataSet.Index {
-    get
-  }
-  public func index(after: Charts.ChartDataSet.Index) -> Charts.ChartDataSet.Index
-  public subscript(position: Charts.ChartDataSet.Index) -> Charts.ChartDataSet.Element {
-    get
-    set
-  }
-  public typealias Iterator = Swift.IndexingIterator<Charts.ChartDataSet>
-  public typealias Indices = Swift.Range<Charts.ChartDataSet.Index>
-}
-extension ChartDataSet : Swift.RandomAccessCollection {
-  public func index(before: Charts.ChartDataSet.Index) -> Charts.ChartDataSet.Index
-}
-extension ChartDataSet : Swift.RangeReplaceableCollection {
-  public func append(_ newElement: Charts.ChartDataSet.Element)
-  public func remove(at position: Charts.ChartDataSet.Index) -> Charts.ChartDataSet.Element
-  public func removeFirst() -> Charts.ChartDataSet.Element
-  public func removeFirst(_ n: Swift.Int)
-  public func removeLast() -> Charts.ChartDataSet.Element
-  public func removeLast(_ n: Swift.Int)
-  public func removeSubrange<R>(_ bounds: R) where R : Swift.RangeExpression, R.Bound == Charts.ChartDataSet.Index
-  public func removeAll(keepingCapacity keepCapacity: Swift.Bool)
-  public typealias SubSequence = Swift.Slice<Charts.ChartDataSet>
-}
-@objc @_inheritsConvenienceInitializers public class ChartViewBase : UIKit.UIView {
-  @objc public var data: Charts.ChartData? {
-    @objc get
-    @objc set
-  }
-  @objc public var xAxis: Charts.XAxis {
-    @objc get
-  }
-  @objc public var legend: Charts.Legend {
-    @objc get
-  }
-  @objc public var renderer: Charts.ChartRenderer?
-  @objc override dynamic public init(frame: CoreGraphics.CGRect)
-  @objc required dynamic public init?(coder aDecoder: Foundation.NSCoder)
-  @objc deinit
-  @objc public func notifyDataSetChanged()
-  @objc override dynamic public func draw(_ rect: CoreGraphics.CGRect)
-  public func valuesToHighlight() -> Swift.Bool
-  @objc public func animate(xAxisDuration: Foundation.TimeInterval)
-  @objc override dynamic public func observeValue(forKeyPath keyPath: Swift.String?, of object: Any?, change: [Foundation.NSKeyValueChangeKey : Any]?, context: Swift.UnsafeMutableRawPointer?)
-}
 @objc public class LegendEntry : ObjectiveC.NSObject {
   @objc public init(colorType: Swift.Int)
   @objc public var label: Swift.String
   @objc deinit
   @objc override dynamic public init()
 }
-@objc @_inheritsConvenienceInitializers public class BarLineChartViewBase : Charts.ChartViewBase, UIKit.UIGestureRecognizerDelegate {
-  @objc public var leftAxis: Charts.YAxis {
-    get
-  }
-  @objc override dynamic public init(frame: CoreGraphics.CGRect)
-  @objc required dynamic public init?(coder aDecoder: Foundation.NSCoder)
-  @objc deinit
-  @objc override dynamic public func observeValue(forKeyPath keyPath: Swift.String?, of object: Any?, change: [Foundation.NSKeyValueChangeKey : Any]?, context: Swift.UnsafeMutableRawPointer?)
-  @objc override dynamic public func draw(_ rect: CoreGraphics.CGRect)
-  @objc override public func notifyDataSetChanged()
-  public func stopDeceleration()
-  @objc override dynamic public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIKit.UIGestureRecognizer) -> Swift.Bool
-  @objc public func gestureRecognizer(_ gestureRecognizer: UIKit.UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIKit.UIGestureRecognizer) -> Swift.Bool
-}
-@objc @_inheritsConvenienceInitializers public class LineScatterCandleRadarChartDataSet : Charts.BarLineScatterCandleBubbleChartDataSet {
-  @objc override public func copy(with zone: ObjectiveC.NSZone? = nil) -> Any
-  @objc required dynamic public init()
-  @objc override public init(entries: [Charts.ChartDataEntry], colorVal: Swift.Int)
-  @objc deinit
-}
-@objc @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers public class AxisBase : Charts.ComponentBase {
-  @objc public var limitLine: Charts.ChartLimitLine!
-  @objc public var valueFormatter: Charts.AxisValueFormatter {
-    @objc get
-    @objc set
-  }
-  @objc public var labelCount: Swift.Int {
-    @objc get
-    @objc set
-  }
-  @objc public var axisMaximum: Swift.Double {
-    @objc get
-    @objc set
-  }
+@objc @_inheritsConvenienceInitializers public class AxisBase : ObjectiveC.NSObject {
+  @objc override dynamic public init()
   @objc deinit
 }
 @objc public protocol AxisValueFormatter : AnyObject {
   @objc func stringForValue(_ value: Swift.Double, axis: Charts.AxisBase?) -> Swift.String
-}
-@objc @_hasMissingDesignatedInitializers public class ChartRenderer : ObjectiveC.NSObject {
-  @objc override dynamic public init()
-  @objc deinit
-}
-@objc @_inheritsConvenienceInitializers public class ChartData : ObjectiveC.NSObject, Swift.ExpressibleByArrayLiteral {
-  @objc override required dynamic public init()
-  required public init(arrayLiteral elements: Charts.ChartData.Element...)
-  @objc public init(dataSets: [Charts.ChartData.Element])
-  @objc public func notifyDataChanged()
-  @objc public func setValueFormatter(_ formatter: Charts.ValueFormatter)
-  @objc public func setDrawValues(_ enabled: Swift.Bool)
-  public typealias ArrayLiteralElement = Charts.ChartData.Element
-  @objc deinit
-}
-extension ChartData : Swift.MutableCollection {
-  public typealias Index = Swift.Int
-  public typealias Element = Charts.ChartDataSet
-  public var startIndex: Charts.ChartData.Index {
-    get
-  }
-  public var endIndex: Charts.ChartData.Index {
-    get
-  }
-  public func index(after: Charts.ChartData.Index) -> Charts.ChartData.Index
-  public subscript(position: Charts.ChartData.Index) -> Charts.ChartData.Element {
-    get
-    set
-  }
-  public typealias Iterator = Swift.IndexingIterator<Charts.ChartData>
-  public typealias SubSequence = Swift.Slice<Charts.ChartData>
-  public typealias Indices = Swift.Range<Charts.ChartData.Index>
-}
-extension ChartData : Swift.RandomAccessCollection {
-  public func index(before: Charts.ChartData.Index) -> Charts.ChartData.Index
-}
-extension ChartData {
-  public func append(_ newElement: Charts.ChartData.Element)
-  public func remove(at position: Charts.ChartData.Index) -> Charts.ChartData.Element
-  public func removeFirst() -> Charts.ChartData.Element
-  public func removeFirst(_ n: Swift.Int)
-  public func removeLast() -> Charts.ChartData.Element
-  public func removeLast(_ n: Swift.Int)
-  public func removeSubrange<R>(_ bounds: R) where R : Swift.RangeExpression, R.Bound == Charts.ChartData.Index
-  public func removeAll(keepingCapacity keepCapacity: Swift.Bool)
-  public func replaceSubrange<C>(_ subrange: Swift.Range<Charts.ChartData.Index>, with newElements: C) where C : Swift.Collection, C.Element == Charts.ChartData.Element
-}
-extension ChartData {
-  public subscript(entry entry: Charts.ChartDataEntry) -> Charts.ChartData.Element? {
-    get
-  }
 }

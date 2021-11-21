@@ -35,6 +35,8 @@
 		611EDDE827476ED50064B254 /* HistoryVC.h in Headers */ = {isa = PBXBuildFile; fileRef = 611EDDE627476ED50064B254 /* HistoryVC.h */; };
 		611EDDE927476ED50064B254 /* HistoryVC.c in Sources */ = {isa = PBXBuildFile; fileRef = 611EDDE727476ED50064B254 /* HistoryVC.c */; };
 		612FD048266DAF25002C9993 /* WorkoutData.plist in Resources */ = {isa = PBXBuildFile; fileRef = 612FD047266DAF25002C9993 /* WorkoutData.plist */; };
+		613A51B5274A15A800BF6D38 /* Charts.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 613A51B2274A15A200BF6D38 /* Charts.xcframework */; };
+		613A51B6274A15A800BF6D38 /* Charts.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 613A51B2274A15A200BF6D38 /* Charts.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		614DA69A270A8D1F00EC90C4 /* ExerciseManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 614DA698270A8D1F00EC90C4 /* ExerciseManager.h */; };
 		614DA69B270A8D1F00EC90C4 /* ExerciseManager.c in Sources */ = {isa = PBXBuildFile; fileRef = 614DA699270A8D1F00EC90C4 /* ExerciseManager.c */; };
 		614DC13026082BBE00B9588E /* ViewControllerHelpers.c in Sources */ = {isa = PBXBuildFile; fileRef = 614DC12F26082BBE00B9588E /* ViewControllerHelpers.c */; };
@@ -45,8 +47,6 @@
 		61592A85274861B600789264 /* TotalWorkoutsView.c in Sources */ = {isa = PBXBuildFile; fileRef = 61592A83274861B600789264 /* TotalWorkoutsView.c */; };
 		61592A892748651500789264 /* WorkoutTypeView.h in Headers */ = {isa = PBXBuildFile; fileRef = 61592A872748651500789264 /* WorkoutTypeView.h */; };
 		61592A8A2748651500789264 /* WorkoutTypeView.c in Sources */ = {isa = PBXBuildFile; fileRef = 61592A882748651500789264 /* WorkoutTypeView.c */; };
-		61592AA727488A0800789264 /* Charts.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61592AA427488A0300789264 /* Charts.xcframework */; };
-		61592AA827488A0800789264 /* Charts.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 61592AA427488A0300789264 /* Charts.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		61592AB027488DD000789264 /* LiftingView.h in Headers */ = {isa = PBXBuildFile; fileRef = 61592AAE27488DD000789264 /* LiftingView.h */; };
 		61592AB127488DD000789264 /* LiftingView.c in Sources */ = {isa = PBXBuildFile; fileRef = 61592AAF27488DD000789264 /* LiftingView.c */; };
 		61594D0C26068105000D01A1 /* AppDelegate.c in Sources */ = {isa = PBXBuildFile; fileRef = 61594D0B26068105000D01A1 /* AppDelegate.c */; };
@@ -88,7 +88,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				61592AA827488A0800789264 /* Charts.xcframework in Embed Frameworks */,
+				613A51B6274A15A800BF6D38 /* Charts.xcframework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -124,6 +124,7 @@
 		611EDDE627476ED50064B254 /* HistoryVC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HistoryVC.h; sourceTree = "<group>"; };
 		611EDDE727476ED50064B254 /* HistoryVC.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = HistoryVC.c; sourceTree = "<group>"; };
 		612FD047266DAF25002C9993 /* WorkoutData.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = WorkoutData.plist; sourceTree = "<group>"; };
+		613A51B2274A15A200BF6D38 /* Charts.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = Charts.xcframework; sourceTree = "<group>"; };
 		614DA698270A8D1F00EC90C4 /* ExerciseManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ExerciseManager.h; sourceTree = "<group>"; };
 		614DA699270A8D1F00EC90C4 /* ExerciseManager.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = ExerciseManager.c; sourceTree = "<group>"; };
 		614DC12826081E9E00B9588E /* ViewControllerHelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewControllerHelpers.h; sourceTree = "<group>"; };
@@ -136,7 +137,6 @@
 		61592A83274861B600789264 /* TotalWorkoutsView.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = TotalWorkoutsView.c; sourceTree = "<group>"; };
 		61592A872748651500789264 /* WorkoutTypeView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WorkoutTypeView.h; sourceTree = "<group>"; };
 		61592A882748651500789264 /* WorkoutTypeView.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = WorkoutTypeView.c; sourceTree = "<group>"; };
-		61592AA427488A0300789264 /* Charts.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = Charts.xcframework; sourceTree = "<group>"; };
 		61592AAE27488DD000789264 /* LiftingView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LiftingView.h; sourceTree = "<group>"; };
 		61592AAF27488DD000789264 /* LiftingView.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = LiftingView.c; sourceTree = "<group>"; };
 		61594D0726068105000D01A1 /* HealthApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HealthApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -178,7 +178,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				61592AA727488A0800789264 /* Charts.xcframework in Frameworks */,
+				613A51B5274A15A800BF6D38 /* Charts.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -288,7 +288,7 @@
 		6185D9B926E4263700DB2BF2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				61592AA427488A0300789264 /* Charts.xcframework */,
+				613A51B2274A15A200BF6D38 /* Charts.xcframework */,
 			);
 			path = Frameworks;
 			sourceTree = "<group>";
