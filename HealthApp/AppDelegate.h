@@ -1,10 +1,3 @@
-//
-//  AppDelegate.h
-//  HealthApp
-//
-//  Created by Christopher Ray on 3/20/21.
-//
-
 #include <objc/objc.h>
 
 extern Class AppDelegateClass;

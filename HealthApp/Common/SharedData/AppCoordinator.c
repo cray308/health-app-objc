@@ -1,41 +1,29 @@
-//
-//  AppCoordinator.c
-//  HealthApp
-//
-//  Created by Christopher Ray on 3/20/21.
-//
-
 #include "AppCoordinator.h"
-#include <CoreFoundation/CFString.h>
-#include <objc/message.h>
 #include "AppDelegate.h"
-#include "HomeTabCoordinator.h"
-#include "HistoryTabCoordinator.h"
-#include "SettingsTabCoordinator.h"
+#include "AppUserData.h"
+#include "HomeVC.h"
+#include "HistoryVC.h"
+#include "PersistenceService.h"
+#include "SettingsVC.h"
 #include "ViewControllerHelpers.h"
 
-extern void homeCoordinator_start(HomeTabCoordinator*);
-extern void homeCoordinator_resetUI(HomeTabCoordinator*);
-extern void homeCoordinator_updateUI(HomeTabCoordinator*);
-extern void historyCoordinator_start(HistoryTabCoordinator*);
-extern void historyCoordinator_fetchData(HistoryTabCoordinator*);
-extern void historyCoordinator_updateUI(HistoryTabCoordinator*, bool);
-extern void settingsCoordinator_start(SettingsTabCoordinator*);
-extern void settingsCoordinator_updateWeightText(SettingsTabCoordinator*);
 extern void toggleDarkModeForCharts(bool);
-extern void homeVC_updateColors(id vc);
-extern void historyVC_updateColors(id vc);
-extern void settingsVC_updateColors(id vc);
 
 enum {
     TabHome, TabHistory, TabSettings
 };
+
+typedef struct {
+    id navVC;
+} SettingsTabCoordinator;
 
 AppCoordinator *appCoordinator = NULL;
 
 void appCoordinator_start(id tabVC) {
     toggleDarkModeForCharts(userData->darkMode);
     appCoordinator = calloc(1, sizeof(AppCoordinator));
+    SEL itemInit = sel_getUid("initWithTitle:image:tag:");
+    SEL vcInit = sel_getUid("initWithNibName:bundle:"), setter = sel_getUid("setTabBarItem:");
     id controllers[3];
     id items[3];
     CFStringRef imgNames[] = {CFSTR("ico_house"), CFSTR("ico_chart"), CFSTR("ico_gear")};
@@ -43,12 +31,14 @@ void appCoordinator_start(id tabVC) {
 
     for (int i = 0; i < 3; ++i) {
         id image = createImage(imgNames[i]);
+        id _item = allocClass(objc_getClass("UITabBarItem"));
         items[i] = ((id(*)(id,SEL,CFStringRef,id,int))objc_msgSend)
-        (allocClass("UITabBarItem"), sel_getUid("initWithTitle:image:tag:"), titles[i], image, i);
+        (_item, itemInit, titles[i], image, i);
 
+        id _obj = allocNavVC();
         controllers[i] = ((id(*)(id,SEL,CFStringRef,id))objc_msgSend)
-        (allocNavVC(), sel_getUid("initWithNibName:bundle:"), NULL, nil);
-        setObject(controllers[i], sel_getUid("setTabBarItem:"), items[i]);
+        (_obj, vcInit, NULL, nil);
+        setObject(controllers[i], setter, items[i]);
     }
 
     HomeTabCoordinator *homeCoord = calloc(1, sizeof(HomeTabCoordinator));
@@ -61,7 +51,7 @@ void appCoordinator_start(id tabVC) {
 
     SettingsTabCoordinator *settingsCoord = malloc(sizeof(SettingsTabCoordinator));
     settingsCoord->navVC = controllers[2];
-    settingsCoordinator_start(settingsCoord);
+    setupNavVC(settingsCoord->navVC, settingsVC_init());
 
     memcpy(appCoordinator->children,
            (void *[]){homeCoord, histCoord, settingsCoord}, 3 * sizeof(void *));
@@ -77,8 +67,8 @@ void appCoordinator_start(id tabVC) {
     CFRelease(array);
 }
 
-void appCoordinator_updatedUserInfo(bool reloadScreens) {
-    if (reloadScreens) {
+void appCoordinator_updateUserInfo(signed char plan, bool darkMode, short *weights) {
+    if (appUserData_updateUserSettings(plan, darkMode, weights)) {
         id window = appDel_setWindowTint(createColor(ColorRed));
         id tabVC = getObject(window, sel_getUid("rootViewController"));
         voidFunc(tabVC, sel_getUid("viewDidLayoutSubviews"));
@@ -86,24 +76,32 @@ void appCoordinator_updatedUserInfo(bool reloadScreens) {
         CFArrayRef ctrls = getViewControllers(tabVC);
         homeVC_updateColors(getFirstVC((id) CFArrayGetValueAtIndex(ctrls, TabHome)));
         settingsVC_updateColors(getFirstVC((id) CFArrayGetValueAtIndex(ctrls, TabSettings)));
-        if (appCoordinator->loadedViewControllers & LoadedViewController_History)
+        if (appCoordinator->loadedViewControllers & LoadedVC_History)
             historyVC_updateColors(getFirstVC((id) CFArrayGetValueAtIndex(ctrls, TabHistory)));
     }
-    homeCoordinator_resetUI(appCoordinator->children[TabHome]);
+    HomeTabCoordinator *home = (HomeTabCoordinator *) appCoordinator->children[TabHome];
+    homeViewModel_fetchData(&home->model);
+    homeVC_createWorkoutsList(getFirstVC(home->navVC));
+    free(weights);
 }
 
-void appCoordinator_fetchHistory(void) {
-    historyCoordinator_fetchData(appCoordinator->children[TabHistory]);
-}
-
-void appCoordinator_deletedAppData(void) {
-    homeCoordinator_updateUI(appCoordinator->children[TabHome]);
-    bool updateVC = appCoordinator->loadedViewControllers & LoadedViewController_History;
-    historyCoordinator_updateUI(appCoordinator->children[TabHistory], updateVC);
-}
-
-void appCoordinator_updateMaxWeights(void) {
-    if (appCoordinator->loadedViewControllers & LoadedViewController_Settings) {
-        settingsCoordinator_updateWeightText(appCoordinator->children[TabSettings]);
+void appCoordinator_deleteAppData(void) {
+    appUserData_deleteSavedData();
+    persistenceService_deleteUserData();
+    HomeTabCoordinator *home = (HomeTabCoordinator *) appCoordinator->children[TabHome];
+    HistoryTabCoordinator *hist = (HistoryTabCoordinator *) appCoordinator->children[TabHistory];
+    homeVC_updateWorkoutsList(getFirstVC(home->navVC));
+    array_clear(weekData, hist->model.data);
+    if (appCoordinator->loadedViewControllers & LoadedVC_History) {
+        historyVC_refresh(getFirstVC(hist->navVC));
     }
+}
+
+void appCoordinator_updateMaxWeights(short *weights) {
+    appUserData_updateWeightMaxes(weights);
+    if (appCoordinator->loadedViewControllers & LoadedVC_Settings) {
+        id navVC = ((SettingsTabCoordinator *) appCoordinator->children[TabSettings])->navVC;
+        settingsVC_updateWeightFields(getFirstVC(navVC));
+    }
+    free(weights);
 }

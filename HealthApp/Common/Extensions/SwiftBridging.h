@@ -3,8 +3,8 @@
 
 #include "ViewControllerHelpers.h"
 
-id createChartView(id parent, id xAxisFormatter, id *legendEntries, int count, int height);
-void disableLineChartView(id v);
+id createChartView(id xAxisFormatter, CFArrayRef legendArr, uint8_t options);
+void replaceDataSetEntries(id dataSet, id *entries, int count);
 void updateDataSet(bool isSmall, int count, id dataSet, id *entries);
 void updateChart(bool isSmall, id view, id data, float axisMax);
 

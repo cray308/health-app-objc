@@ -101,8 +101,8 @@
 "settingsDelete" = "Delete Data";
 "settingsAlertTitle" = "Are you sure?";
 "inputFieldError" = "Input must be between %d and %d.";
-"settingsAlertMessageSave" = "This will save the currently entered data.";
-"settingsAlertMessageDelete" = "This will delete all workout history.";
+"alertMsgSave" = "This will save the currently entered data.";
+"alertMsgDelete" = "This will delete all workout history.";
 
 "setupWorkoutTitle" = "Choose workout";
 "setupWorkoutSets" = "Sets";

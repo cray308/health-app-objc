@@ -1,14 +1,12 @@
-//
-//  Constraints.h
-//  HealthApp
-//
-//  Created by Christopher Ray on 10/3/21.
-//
-
 #ifndef Constraints_h
 #define Constraints_h
 
 #include <objc/objc.h>
+#include <CoreGraphics/CGGeometry.h>
+
+typedef struct {
+    CGFloat top, left, bottom, right;
+} HAInsets;
 
 typedef struct {
     short top, left, bottom, right;

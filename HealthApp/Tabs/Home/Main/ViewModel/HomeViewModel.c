@@ -1,22 +1,6 @@
-//
-//  HomeViewModel.c
-//  HealthApp
-//
-//  Created by Christopher Ray on 3/27/21.
-//
-
 #include "HomeViewModel.h"
-#include <CoreFoundation/CFString.h>
-#include "CalendarDateHelpers.h"
-#include "CocoaHelpers.h"
 #include "AppUserData.h"
 #include "ExerciseManager.h"
-
-void homeViewModel_init(HomeViewModel *model) {
-    fillStringArray(model->stateNames, CFSTR("homeState%d"), 2);
-    fillStringArray(model->timeNames, CFSTR("timesOfDay%d"), 3);
-    homeViewModel_updateTimeOfDay(model);
-}
 
 void homeViewModel_fetchData(HomeViewModel *model) {
     for (int i = 0; i < 7; ++i) {
@@ -48,24 +32,4 @@ bool homeViewModel_updateTimeOfDay(HomeViewModel *model) {
         return true;
     }
     return false;
-}
-
-bool homeViewModel_hasWorkoutsForThisWeek(HomeViewModel *model) {
-    CFStringRef *names = model->workoutNames;
-    for (int i = 0; i < 7; ++i) {
-        if (names[i]) return true;
-    }
-    return false;
-}
-
-bool homeViewModel_shouldShowConfetti(HomeViewModel *model, int totalCompletedWorkouts) {
-    if (!totalCompletedWorkouts) return false;
-
-    int nWorkouts = 0;
-    CFStringRef *names = model->workoutNames;
-    for (int i = 0; i < 7; ++i) {
-        if (names[i])
-            ++nWorkouts;
-    }
-    return nWorkouts == totalCompletedWorkouts;
 }

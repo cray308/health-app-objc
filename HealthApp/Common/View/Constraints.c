@@ -1,13 +1,7 @@
-//
-//  Constraints.c
-//  HealthApp
-//
-//  Created by Christopher Ray on 10/3/21.
-//
-
 #include "Constraints.h"
-#include <objc/message.h>
 #include "CocoaHelpers.h"
+
+#define getAnchor(_v, name) getObject(_v, sel_getUid((name)))
 
 static struct AnchorNames {
     char const *const top;
@@ -32,10 +26,6 @@ static inline void activateConstraints(id *constraints, int count) {
     ((void(*)(Class,SEL,CFArrayRef))objc_msgSend)(objc_getClass("NSLayoutConstraint"),
                                                   sel_getUid("activateConstraints:"), array);
     CFRelease(array);
-}
-
-static inline id getAnchor(id view, const char *name) {
-    return getObject(view, sel_getUid(name));
 }
 
 static id createConstraint(id a1, id a2, int constant) {

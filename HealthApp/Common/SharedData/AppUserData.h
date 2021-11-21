@@ -1,16 +1,10 @@
-//
-//  AppUserData.h
-//  HealthApp
-//
-//  Created by Christopher Ray on 3/20/21.
-//
-
 #ifndef AppUserData_h
 #define AppUserData_h
 
 #include <time.h>
-#include "AppTypes.h"
 #include <stdbool.h>
+
+#define WeekSeconds 604800
 
 typedef struct {
     time_t planStart;
@@ -18,12 +12,19 @@ typedef struct {
     int tzOffset;
     bool darkMode;
     signed char currentPlan;
-    byte completedWorkouts;
+    unsigned char completedWorkouts;
     short liftMaxes[4];
 } UserInfo;
 
 extern UserInfo *userData;
 
+void userInfo_create(void);
+int userInfo_initFromStorage(void);
+
 int appUserData_getWeekInPlan(void);
+bool appUserData_updateUserSettings(signed char plan, bool darkMode, short *weights);
+void appUserData_deleteSavedData(void);
+unsigned char appUserData_addCompletedWorkout(unsigned char day);
+void appUserData_updateWeightMaxes(short *weights);
 
 #endif /* AppUserData_h */

@@ -1,44 +1,30 @@
-//
-//  ViewControllerHelpers.c
-//  HealthApp
-//
-//  Created by Christopher Ray on 3/21/21.
-//
-
 #include "ViewControllerHelpers.h"
 #include "AppDelegate.h"
 #include "AppUserData.h"
-#include <CoreFoundation/CFString.h>
-#include <objc/message.h>
+
+#define getNavBar(_navVC) getObject(_navVC, sel_getUid("navigationBar"))
+
+#define setBarTint(_nb) setObject(_nb, sel_getUid("setBarTintColor:"), createColor(ColorTertiaryBGGrouped))
+
+#define getSubviews(_view) getArray(_view, sel_getUid("subviews"))
+
+#define updateKVPair(_o, _k, _v) ((void(*)(id,SEL,id,CFStringRef))objc_msgSend)\
+((_o), sel_getUid("setValue:forKey:"), (_v), (_k))
 
 Class DMTabVC;
 
-static inline id getNavBar(id navVC) {
-    return getObject(navVC, sel_getUid("navigationBar"));
-}
-
-static inline CFArrayRef getSubviews(id view) {
-    return getArray(view, sel_getUid("subviews"));
-}
-
-static inline void updateKVPair(id obj, CFStringRef key, id value) {
-    ((void(*)(id,SEL,id,CFStringRef))objc_msgSend)(obj, sel_getUid("setValue:forKey:"), value, key);
-}
-
 static inline id createAttribString(CFStringRef text, CFDictionaryRef dict) {
+    id _obj = allocClass(objc_getClass("NSAttributedString"));
     return ((id(*)(id,SEL,CFStringRef,CFDictionaryRef))objc_msgSend)
-    (allocClass("NSAttributedString"), sel_getUid("initWithString:attributes:"), text, dict);
+    (_obj, sel_getUid("initWithString:attributes:"), text, dict);
 }
 
-static inline void setBarTint(id navBar) {
-    setObject(navBar, sel_getUid("setBarTintColor:"), getBackground(TertiaryBG, true));
-}
-
-void setNavButton(id navItem, bool left, id button, CGFloat totalWidth) {
+void setNavButton(id vc, bool left, id button, CGFloat totalWidth) {
+    id navItem = getNavItem(vc);
     ((void(*)(id,SEL,CGRect))objc_msgSend)(button, sel_getUid("setFrame:"),
                                            (CGRect){{0}, {totalWidth / 3, 30}});
-    id item = getObjectWithObject(allocClass("UIBarButtonItem"),
-                                  sel_getUid("initWithCustomView:"), button);
+    id _obj = allocClass(objc_getClass("UIBarButtonItem"));
+    id item = getObjectWithObject(_obj, sel_getUid("initWithCustomView:"), button);
     if (left)
         setObject(navItem, sel_getUid("setLeftBarButtonItem:"), item);
     else
@@ -46,10 +32,17 @@ void setNavButton(id navItem, bool left, id button, CGFloat totalWidth) {
     releaseObj(item);
 }
 
+void setVCTitle(id vc, CFStringRef title) {
+    id navItem = getNavItem(vc);
+    setString(navItem, sel_getUid("setTitle:"), title);
+}
+
 void dmTabVC_updateColors(id self, SEL _cmd _U_) {
+    SEL setter = sel_getUid("setTitleTextAttributes:");
     id tabBar = getObject(self, sel_getUid("tabBar"));
-    setObject(tabBar, sel_getUid("setBarTintColor:"), getBackground(PrimaryBG, false));
-    setObject(tabBar, sel_getUid("setUnselectedItemTintColor:"), createColor(ColorGray));
+    id tint = createColor(ColorPrimaryBG), unselected = createColor(ColorGray);
+    setObject(tabBar, sel_getUid("setBarTintColor:"), tint);
+    setObject(tabBar, sel_getUid("setUnselectedItemTintColor:"), unselected);
     CFArrayRef ctrls = getViewControllers(self);
     int count = (int) CFArrayGetCount(ctrls);
     for (int i = 0; i < count; ++i) {
@@ -57,21 +50,12 @@ void dmTabVC_updateColors(id self, SEL _cmd _U_) {
         id navBar = getNavBar(navVC);
         setBarTint(navBar);
         CFDictionaryRef dict = createTitleTextDict(createColor(ColorLabel), nil);
-        ((void(*)(id,SEL,CFDictionaryRef))objc_msgSend)(navBar,
-                                                        sel_getUid("setTitleTextAttributes:"), dict);
+        ((void(*)(id,SEL,CFDictionaryRef))objc_msgSend)(navBar, setter, dict);
         CFRelease(dict);
     }
 }
 
 #pragma mark - VC Functions
-
-CFArrayRef getViewControllers(id tabVC) {
-    return getArray(tabVC, sel_getUid("viewControllers"));
-}
-
-id getView(id vc) {
-    return getObject(vc, sel_getUid("view"));
-}
 
 void setupNavVC(id navVC, id firstVC) {
     CFArrayRef array = CFArrayCreate(NULL, (const void *[]){firstVC}, 1, &(CFArrayCallBacks){0});
@@ -85,10 +69,6 @@ id getFirstVC(id navVC) {
     return (id) CFArrayGetValueAtIndex(ctrls, 0);
 }
 
-id allocNavVC(void) {
-    return allocClass("UINavigationController");
-}
-
 void presentVC(id presenter, id child) {
     if (osVersion < Version14)
         appDel_setWindowTint(nil);
@@ -97,10 +77,12 @@ void presentVC(id presenter, id child) {
 }
 
 void presentModalVC(id presenter, id modal) {
-    id container = getObjectWithObject(allocNavVC(),
-                                       sel_getUid("initWithRootViewController:"), modal);
-    if (osVersion == Version12)
-        setBarTint(getNavBar(container));
+    id _obj = allocNavVC();
+    id container = getObjectWithObject(_obj, sel_getUid("initWithRootViewController:"), modal);
+    if (osVersion == Version12) {
+        id navBar = getNavBar(container);
+        setBarTint(navBar);
+    }
     presentVC(presenter, container);
     releaseObj(container);
     releaseObj(modal);
@@ -134,7 +116,7 @@ id createAlertController(CFStringRef title, CFStringRef message) {
             CFArrayRef subviews = getSubviews(view);
             view = (id) CFArrayGetValueAtIndex(subviews, 0);
         }
-        setBackground(view, getBackground(TertiaryBG, false));
+        setBackground(view, createColor(ColorTertiaryBG));
 
         CFRelease(titleDict);
         CFRelease(msgDict);

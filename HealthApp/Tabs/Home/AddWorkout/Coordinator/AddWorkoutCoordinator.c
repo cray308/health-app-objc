@@ -1,75 +1,83 @@
-//
-//  AddWorkoutCoordinator.c
-//  HealthApp
-//
-//  Created by Christopher Ray on 3/27/21.
-//
-
 #include "AddWorkoutCoordinator.h"
-#include <CoreFoundation/CFString.h>
-#include <objc/message.h>
+#include "AppCoordinator.h"
+#include "AppUserData.h"
 #include "PersistenceService.h"
 #include "ViewControllerHelpers.h"
-#include "WorkoutScreenHelpers.h"
+#include "WorkoutVC.h"
+#include "UpdateMaxesModal.h"
 
-extern id workoutVC_init(void *delegate);
-extern id updateMaxesVC_init(void *delegate);
-extern void homeCoordinator_didFinishAddingWorkout(void *, int);
-extern void appCoordinator_updateMaxWeights(void);
-extern void appUserData_updateWeightMaxes(short *weights);
-extern byte appUserData_addCompletedWorkout(byte);
+extern void homeCoordinator_didFinishAddingWorkout(void *parent, int totalCompleted, bool popStack);
 
-static void cleanupTimers(Workout *w) {
-    if (w->timers[TimerGroup].info.active == 1)
-        pthread_kill(w->threads[TimerGroup], SignalGroup);
-    if (w->timers[TimerExercise].info.active == 1)
-        pthread_kill(w->threads[TimerExercise], SignalExercise);
-    startWorkoutTimer(&w->timers[TimerGroup], 0);
-    startWorkoutTimer(&w->timers[TimerExercise], 0);
-    pthread_join(w->threads[1], NULL);
-    pthread_join(w->threads[0], NULL);
-    signal(SIGUSR1, SIG_DFL);
-    signal(SIGUSR2, SIG_DFL);
-    for (int i = 0; i < 2; ++i) {
-        pthread_cond_destroy(&w->timers[i].cond);
-        pthread_mutex_destroy(&w->timers[i].lock);
-    }
-    pthread_mutex_destroy(&timerLock);
+static bool checkEnduranceDuration(Workout *w) {
+    if (w->type != WorkoutEndurance) return false;
+    int planDuration = w->activities->arr[0].exercises->arr[0].reps / 60;
+    return w->duration >= planDuration;
 }
 
-static void cleanupCoordinator(AddWorkoutCoordinator *this) {
-    Workout *w = this->workout;
-    CFRelease(w->title);
-    array_free(circuit, w->activities);
-    if (w->newLifts)
-        free(w->newLifts);
-    free(w);
+static void setDuration(Workout *w) {
+    w->duration = ((int16_t) ((time(NULL) - w->startTime) / 60.f)) + 1;
+#if TARGET_OS_SIMULATOR
+    w->duration *= 10;
+#endif
+}
+
+static void updateStoredDataAndCleanup(AddWorkoutCoordinator *this, short *lifts) {
+    unsigned char type = this->workout->type;
+    int16_t duration = this->workout->duration;
+
+    CFRelease(this->workout->title);
+    array_free(circuit, this->workout->activities);
+    free(this->workout);
     free(this);
-}
 
-static void updateStoredData(AddWorkoutCoordinator *this) {
-    cleanupTimers(this->workout);
-    AddWorkoutCoordinator *coordinator = this;
+    if (duration < 15) return;
 
     runInBackground((^{
-        Workout *w = this->workout;
-        if (w->duration >= 15) {
-            id data = persistenceService_getCurrentWeek();
-
-            int16_t duration = w->duration + weekData_getWorkoutTimeForType(data, w->type);
-            weekData_setWorkoutTimeForType(data, w->type, duration);
-            weekData_setTotalWorkouts(data, weekData_getTotalWorkouts(data) + 1);
-            if (w->newLifts) {
-                weekData_setLiftingMaxArray(data, w->newLifts);
-            }
-            persistenceService_saveContext();
+        id data = persistenceService_getCurrentWeek();
+        int16_t newDuration = duration + weekData_getWorkoutTimeForType(data, type);
+        weekData_setWorkoutTimeForType(data, type, newDuration);
+        int16_t totalWorkouts = weekData_getTotalWorkouts(data);
+        totalWorkouts += 1;
+        weekData_setTotalWorkouts(data, totalWorkouts);
+        if (lifts) {
+            weekData_setLiftingMaxArray(data, lifts);
+            free(lifts);
         }
-        cleanupCoordinator(coordinator);
+        persistenceService_saveContext();
     }));
 }
 
+static void handleFinishedWorkout(AddWorkoutCoordinator *this,
+                                  bool dismissVC, bool goBack, short *lifts) {
+    const signed char day = this->workout->day;
+    unsigned char totalCompleted = 0;
+    bool longEnough = this->workout->duration >= 15;
+    short *liftsCopy = NULL;
+    if (longEnough) {
+        if (day >= 0)
+            totalCompleted = appUserData_addCompletedWorkout(day);
+        if (lifts) {
+            liftsCopy = malloc(sizeof(short) << 2);
+            memcpy(liftsCopy, lifts, sizeof(short) << 2);
+        }
+    }
+
+    id navVC = this->navVC;
+    void *parent = this->parent;
+    updateStoredDataAndCleanup(this, lifts);
+    if (dismissVC) {
+        dismissPresentedVC(navVC, ^{
+            appCoordinator_updateMaxWeights(liftsCopy);
+            homeCoordinator_didFinishAddingWorkout(parent, totalCompleted, true);
+        });
+    } else {
+        if (liftsCopy)
+            free(liftsCopy);
+        homeCoordinator_didFinishAddingWorkout(parent, totalCompleted, goBack);
+    }
+}
+
 void addWorkoutCoordinator_start(AddWorkoutCoordinator *this) {
-    pthread_mutex_init(&timerLock, NULL);
     id vc = workoutVC_init(this);
     ((void(*)(id,SEL,id,bool))objc_msgSend)(this->navVC,
                                             sel_getUid("pushViewController:animated:"), vc, true);
@@ -77,51 +85,38 @@ void addWorkoutCoordinator_start(AddWorkoutCoordinator *this) {
 }
 
 void addWorkoutCoordinator_stoppedWorkout(AddWorkoutCoordinator *this) {
+    setDuration(this->workout);
     void *parent = this->parent;
-    updateStoredData(this);
-    homeCoordinator_didFinishAddingWorkout(parent, 0);
+    if (checkEnduranceDuration(this->workout)) {
+        handleFinishedWorkout(this, false, true, NULL);
+    } else {
+        updateStoredDataAndCleanup(this, NULL);
+        homeCoordinator_didFinishAddingWorkout(parent, 0, true);
+    }
 }
 
-void addWorkoutCoordinator_completedWorkout(AddWorkoutCoordinator *this,
-                                            bool dismissVC, bool showModalIfRequired) {
+void addWorkoutCoordinator_completedWorkout(AddWorkoutCoordinator *this, bool dismissVC,
+                                            bool showModalIfRequired, short *lifts) {
     CFStringRef title = this->workout->title;
+    if (showModalIfRequired)
+        setDuration(this->workout);
     if (showModalIfRequired &&
         CFStringCompareWithOptions(title, localize(CFSTR("workoutTitleTestDay")),
                                    CFRangeMake(0, CFStringGetLength(title)),
                                    kCFCompareCaseInsensitive) == kCFCompareEqualTo) {
         presentModalVC(this->navVC, updateMaxesVC_init(this));
-        return;
-    }
-
-    const signed char day = this->workout->day;
-    byte totalCompleted = 0;
-    bool longEnough = this->workout->duration >= 15;
-    if (longEnough) {
-        if (day >= 0)
-            totalCompleted = appUserData_addCompletedWorkout(day);
-        if (this->workout->newLifts)
-            appUserData_updateWeightMaxes(this->workout->newLifts);
-    }
-
-    id navVC = this->navVC;
-    void *parent = this->parent;
-    updateStoredData(this);
-    if (dismissVC) {
-        dismissPresentedVC(navVC, ^{
-            appCoordinator_updateMaxWeights();
-            homeCoordinator_didFinishAddingWorkout(parent, totalCompleted);
-        });
     } else {
-        homeCoordinator_didFinishAddingWorkout(parent, totalCompleted);
+        handleFinishedWorkout(this, dismissVC, true, lifts);
     }
 }
 
 void addWorkoutCoordinator_stopWorkoutFromBackButtonPress(AddWorkoutCoordinator *this) {
     if (this->workout->startTime) {
-        workout_setDuration(this->workout);
-        updateStoredData(this);
-    } else {
-        cleanupTimers(this->workout);
-        cleanupCoordinator(this);
+        setDuration(this->workout);
+        if (checkEnduranceDuration(this->workout)) {
+            handleFinishedWorkout(this, false, false, NULL);
+            return;
+        }
     }
+    updateStoredDataAndCleanup(this, NULL);
 }

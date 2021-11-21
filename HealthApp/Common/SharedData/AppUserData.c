@@ -1,18 +1,10 @@
-//
-//  AppUserData.c
-//  HealthApp
-//
-//  Created by Christopher Ray on 3/20/21.
-//
-
 #include "AppUserData.h"
-#include <CoreFoundation/CFString.h>
 #include <CoreFoundation/CFNumber.h>
 #include <stdlib.h>
 #include <string.h>
-#include <objc/message.h>
 #include "CocoaHelpers.h"
-#include "CalendarDateHelpers.h"
+
+#define DaySeconds 86400
 
 enum {
     WorkoutPlanNone = -1,
@@ -29,6 +21,39 @@ static const void *keys[] = {
     CFSTR("deadliftMax"), CFSTR("darkMode")
 };
 
+static inline time_t getStartOfDay(time_t date, struct tm *info) {
+    const int seconds = (info->tm_hour * 3600) + (info->tm_min * 60) + info->tm_sec;
+    return date - seconds;
+}
+
+static int date_getOffsetFromGMT(time_t date) {
+    struct tm gmtInfo;
+    gmtime_r(&date, &gmtInfo);
+    gmtInfo.tm_isdst = -1;
+    return (int) (date - mktime(&gmtInfo));
+}
+
+#if DEBUG
+time_t
+#else
+static time_t
+#endif
+date_calcStartOfWeek(time_t date) {
+    struct tm localInfo;
+    localtime_r(&date, &localInfo);
+    int weekday = localInfo.tm_wday;
+
+    if (weekday == 1) return getStartOfDay(date, &localInfo);
+
+    date -= WeekSeconds;
+    while (weekday != 1) {
+        date += DaySeconds;
+        weekday = weekday == 6 ? 0 : weekday + 1;
+    }
+    localtime_r(&date, &localInfo);
+    return getStartOfDay(date, &localInfo);
+}
+
 static void saveData(void) {
     CFNumberRef values[10] = {
         CFNumberCreate(NULL, kCFNumberLongType, &userData->planStart),
@@ -39,14 +64,11 @@ static void saveData(void) {
         CFNumberCreate(NULL, kCFNumberShortType, &userData->liftMaxes[0]),
         CFNumberCreate(NULL, kCFNumberShortType, &userData->liftMaxes[1]),
         CFNumberCreate(NULL, kCFNumberShortType, &userData->liftMaxes[2]),
-        CFNumberCreate(NULL, kCFNumberShortType, &userData->liftMaxes[3])
+        CFNumberCreate(NULL, kCFNumberShortType, &userData->liftMaxes[3]),
+        CFNumberCreate(NULL, kCFNumberCharType, &userData->darkMode)
     };
 
-    int nValues = 9;
-    if (osVersion == Version12)
-        values[nValues++] = CFNumberCreate(NULL, kCFNumberCharType, &userData->darkMode);
-
-    CFDictionaryRef dict = CFDictionaryCreate(NULL, keys, (const void **)values, nValues,
+    CFDictionaryRef dict = CFDictionaryCreate(NULL, keys, (const void **)values, 10,
                                               &kCFCopyStringDictionaryKeyCallBacks,
                                               &kCFTypeDictionaryValueCallBacks);
 
@@ -54,7 +76,7 @@ static void saveData(void) {
     ((void(*)(id,SEL,CFDictionaryRef,CFStringRef))objc_msgSend)
     (defaults, sel_getUid("setObject:forKey:"), dict, dictKey);
     CFRelease(dict);
-    for (int i = 0; i < nValues; ++i) CFRelease(values[i]);
+    for (int i = 0; i < 10; ++i) CFRelease(values[i]);
 }
 
 void userInfo_create(void) {
@@ -74,7 +96,8 @@ int userInfo_initFromStorage(void) {
     const int planLengths[] = {8, 13};
     time_t now = time(NULL);
     time_t weekStart = date_calcStartOfWeek(now);
-    CFDictionaryRef savedInfo = getDict(getUserDefaults(), sel_getUid("dictionaryForKey:"), dictKey);
+    id defaults = getUserDefaults();
+    CFDictionaryRef savedInfo = getDict(defaults, sel_getUid("dictionaryForKey:"), dictKey);
     CFNumberRef value;
 
     UserInfo *info = malloc(sizeof(UserInfo));
@@ -94,21 +117,25 @@ int userInfo_initFromStorage(void) {
         CFNumberGetValue(value, kCFNumberShortType, &info->liftMaxes[i]);
     }
 
-    if (osVersion == Version12) {
-        value = CFDictionaryGetValue(savedInfo, keys[9]);
+    value = CFDictionaryGetValue(savedInfo, keys[9]);
+    if (value != NULL) {
         CFNumberGetValue(value, kCFNumberCharType, &info->darkMode);
+    } else {
+        info->darkMode = false;
     }
     userData = info;
 
     int newOffset = date_getOffsetFromGMT(now);
     int tzDiff = userData->tzOffset - newOffset;
+    bool madeChange = false;
     if (tzDiff) {
+        madeChange = true;
         userData->weekStart += tzDiff;
         userData->tzOffset = newOffset;
-        saveData();
     }
 
     if (weekStart != userData->weekStart) {
+        madeChange = true;
         userData->completedWorkouts = 0;
         userData->weekStart = weekStart;
 
@@ -119,6 +146,9 @@ int userInfo_initFromStorage(void) {
                 userData->planStart = weekStart;
             }
         }
+    }
+
+    if (madeChange) {
         saveData();
     }
     return tzDiff;
@@ -129,11 +159,11 @@ void appUserData_deleteSavedData(void) {
     saveData();
 }
 
-byte appUserData_addCompletedWorkout(byte day) {
-    byte total = 0;
+unsigned char appUserData_addCompletedWorkout(unsigned char day) {
+    unsigned char total = 0;
     userData->completedWorkouts |= (1 << day);
     saveData();
-    for (byte i = 0; i < 7; ++i) {
+    for (unsigned char i = 0; i < 7; ++i) {
         if ((1 << i) & userData->completedWorkouts)
             ++total;
     }
@@ -155,7 +185,7 @@ void appUserData_updateWeightMaxes(short *weights) {
 bool appUserData_updateUserSettings(signed char plan, bool darkMode, short *weights) {
     bool rv = false;
     if (plan != WorkoutPlanNone && plan != userData->currentPlan) {
-#if DEBUG
+#if TARGET_OS_SIMULATOR
         userData->planStart = userData->weekStart;
 #else
         userData->planStart = userData->weekStart + WeekSeconds;

@@ -211,36 +211,6 @@ typedef unsigned int swift_uint4  __attribute__((__ext_vector_type__(4)));
 # pragma pop_macro("any")
 #endif
 
-@class LineChartDataSet;
-@class LineChartView;
-
-SWIFT_PROTOCOL("_TtP6Charts13FillFormatter_")
-@protocol FillFormatter
-- (CGFloat)getFillLinePositionWithDataSet:(LineChartDataSet * _Nonnull)dataSet dataProvider:(LineChartView * _Nonnull)dataProvider SWIFT_WARN_UNUSED_RESULT;
-@end
-
-
-SWIFT_CLASS("_TtC6Charts18AreaChartFormatter")
-@interface AreaChartFormatter : NSObject <FillFormatter>
-- (nonnull instancetype)initWithDataSet:(LineChartDataSet * _Nonnull)dataSet OBJC_DESIGNATED_INITIALIZER;
-- (CGFloat)getFillLinePositionWithDataSet:(LineChartDataSet * _Nonnull)dataSet dataProvider:(LineChartView * _Nonnull)dataProvider SWIFT_WARN_UNUSED_RESULT;
-- (nonnull instancetype)init SWIFT_UNAVAILABLE;
-+ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
-@end
-
-
-SWIFT_CLASS("_TtC6Charts13ChartRenderer")
-@interface ChartRenderer : NSObject
-- (nonnull instancetype)init SWIFT_UNAVAILABLE;
-+ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
-@end
-
-
-SWIFT_CLASS("_TtC6Charts17AreaChartRenderer")
-@interface AreaChartRenderer : ChartRenderer
-- (nonnull instancetype)initWithView:(LineChartView * _Nonnull)view OBJC_DESIGNATED_INITIALIZER;
-@end
-
 
 SWIFT_CLASS("_TtC6Charts13ComponentBase")
 @interface ComponentBase : NSObject
@@ -249,14 +219,14 @@ SWIFT_CLASS("_TtC6Charts13ComponentBase")
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
 
-@protocol AxisValueFormatter;
 @class ChartLimitLine;
+@protocol AxisValueFormatter;
 
 SWIFT_CLASS("_TtC6Charts8AxisBase")
 @interface AxisBase : ComponentBase
+@property (nonatomic, strong) ChartLimitLine * _Null_unspecified limitLine;
 @property (nonatomic, strong) id <AxisValueFormatter> _Nonnull valueFormatter;
 @property (nonatomic) NSInteger labelCount;
-- (void)addLimitLine:(ChartLimitLine * _Nonnull)line;
 @property (nonatomic) double axisMaximum;
 @end
 
@@ -269,6 +239,7 @@ SWIFT_PROTOCOL("_TtP6Charts18AxisValueFormatter_")
 @class ChartData;
 @class XAxis;
 @class Legend;
+@class ChartRenderer;
 @class NSCoder;
 
 SWIFT_CLASS("_TtC6Charts13ChartViewBase")
@@ -354,9 +325,14 @@ SWIFT_CLASS("_TtC6Charts14ChartDataEntry")
 SWIFT_CLASS("_TtC6Charts14ChartLimitLine")
 @interface ChartLimitLine : ComponentBase
 @property (nonatomic) double limit;
-- (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
+
+SWIFT_CLASS("_TtC6Charts13ChartRenderer")
+@interface ChartRenderer : NSObject
+- (nonnull instancetype)init SWIFT_UNAVAILABLE;
++ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
+@end
 
 
 SWIFT_CLASS("_TtC6Charts12ChartUtility")
@@ -390,6 +366,13 @@ SWIFT_PROTOCOL("_TtP6Charts4Fill_")
 - (void)fillPathWithContext:(CGContextRef _Nonnull)context rect:(CGRect)rect;
 @end
 
+@class LineChartDataSet;
+@class LineChartView;
+
+SWIFT_PROTOCOL("_TtP6Charts13FillFormatter_")
+@protocol FillFormatter
+- (CGFloat)getFillLinePositionWithDataSet:(LineChartDataSet * _Nonnull)dataSet dataProvider:(LineChartView * _Nonnull)dataProvider SWIFT_WARN_UNUSED_RESULT;
+@end
 
 
 SWIFT_CLASS("_TtC6Charts6Legend")
@@ -399,8 +382,8 @@ SWIFT_CLASS("_TtC6Charts6Legend")
 
 SWIFT_CLASS("_TtC6Charts11LegendEntry")
 @interface LegendEntry : NSObject
-- (nonnull instancetype)initWithLabel:(NSString * _Nullable)label colorType:(NSInteger)colorType OBJC_DESIGNATED_INITIALIZER;
-@property (nonatomic, copy) NSString * _Nullable label;
+- (nonnull instancetype)initWithColorType:(NSInteger)colorType OBJC_DESIGNATED_INITIALIZER;
+@property (nonatomic, copy) NSString * _Nonnull label;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
@@ -416,7 +399,8 @@ SWIFT_CLASS("_TtC6Charts14LegendRenderer")
 SWIFT_CLASS("_TtC6Charts13LineChartData")
 @interface LineChartData : ChartData
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
-- (nonnull instancetype)initWithDataSets:(NSArray<ChartDataSet *> * _Nonnull)dataSets OBJC_DESIGNATED_INITIALIZER;
+- (nonnull instancetype)initWithDataSets:(NSArray<ChartDataSet *> * _Nonnull)dataSets options:(uint8_t)options OBJC_DESIGNATED_INITIALIZER;
+- (nonnull instancetype)initWithDataSets:(NSArray<ChartDataSet *> * _Nonnull)dataSets SWIFT_UNAVAILABLE;
 @end
 
 
@@ -427,15 +411,9 @@ SWIFT_CLASS("_TtC6Charts34LineScatterCandleRadarChartDataSet")
 - (nonnull instancetype)initWithEntries:(NSArray<ChartDataEntry *> * _Nonnull)entries colorVal:(NSInteger)colorVal OBJC_DESIGNATED_INITIALIZER;
 @end
 
-@class UIColor;
 
 SWIFT_CLASS("_TtC6Charts21LineRadarChartDataSet")
 @interface LineRadarChartDataSet : LineScatterCandleRadarChartDataSet
-@property (nonatomic, strong) UIColor * _Nonnull fillColor;
-@property (nonatomic, strong) id <Fill> _Nullable fill;
-@property (nonatomic) CGFloat fillAlpha;
-@property (nonatomic) CGFloat lineWidth;
-@property (nonatomic) BOOL drawFilledEnabled;
 - (id _Nonnull)copyWithZone:(struct _NSZone * _Nullable)zone SWIFT_WARN_UNUSED_RESULT;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 - (nonnull instancetype)initWithEntries:(NSArray<ChartDataEntry *> * _Nonnull)entries colorVal:(NSInteger)colorVal OBJC_DESIGNATED_INITIALIZER;
@@ -445,9 +423,8 @@ SWIFT_CLASS("_TtC6Charts21LineRadarChartDataSet")
 SWIFT_CLASS("_TtC6Charts16LineChartDataSet")
 @interface LineChartDataSet : LineRadarChartDataSet
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
-- (nonnull instancetype)initWithEntries:(NSArray<ChartDataEntry *> * _Nonnull)entries colorVal:(NSInteger)colorVal withFill:(BOOL)withFill OBJC_DESIGNATED_INITIALIZER;
+- (nonnull instancetype)initWithColorVal:(NSInteger)colorVal lineWidth:(NSInteger)lineWidth options:(uint8_t)options fillSet:(LineChartDataSet * _Nullable)fillSet OBJC_DESIGNATED_INITIALIZER;
 @property (nonatomic) BOOL drawCirclesEnabled;
-@property (nonatomic, strong) id <FillFormatter> _Nullable fillFormatter;
 - (id _Nonnull)copyWithZone:(struct _NSZone * _Nullable)zone SWIFT_WARN_UNUSED_RESULT;
 - (nonnull instancetype)initWithEntries:(NSArray<ChartDataEntry *> * _Nonnull)entries colorVal:(NSInteger)colorVal SWIFT_UNAVAILABLE;
 @end
@@ -455,7 +432,7 @@ SWIFT_CLASS("_TtC6Charts16LineChartDataSet")
 
 SWIFT_CLASS("_TtC6Charts13LineChartView")
 @interface LineChartView : BarLineChartViewBase
-- (nonnull instancetype)initWithLegendEntries:(NSArray<LegendEntry *> * _Nonnull)legendEntries OBJC_DESIGNATED_INITIALIZER;
+- (nonnull instancetype)initWithLegendEntries:(NSArray<LegendEntry *> * _Nonnull)legendEntries xFormatter:(id <AxisValueFormatter> _Nonnull)xFormatter options:(uint8_t)options OBJC_DESIGNATED_INITIALIZER;
 - (nullable instancetype)initWithCoder:(NSCoder * _Nonnull)aDecoder OBJC_DESIGNATED_INITIALIZER;
 - (void)tintColorDidChange;
 - (nonnull instancetype)initWithFrame:(CGRect)frame SWIFT_UNAVAILABLE;
@@ -707,36 +684,6 @@ typedef unsigned int swift_uint4  __attribute__((__ext_vector_type__(4)));
 # pragma pop_macro("any")
 #endif
 
-@class LineChartDataSet;
-@class LineChartView;
-
-SWIFT_PROTOCOL("_TtP6Charts13FillFormatter_")
-@protocol FillFormatter
-- (CGFloat)getFillLinePositionWithDataSet:(LineChartDataSet * _Nonnull)dataSet dataProvider:(LineChartView * _Nonnull)dataProvider SWIFT_WARN_UNUSED_RESULT;
-@end
-
-
-SWIFT_CLASS("_TtC6Charts18AreaChartFormatter")
-@interface AreaChartFormatter : NSObject <FillFormatter>
-- (nonnull instancetype)initWithDataSet:(LineChartDataSet * _Nonnull)dataSet OBJC_DESIGNATED_INITIALIZER;
-- (CGFloat)getFillLinePositionWithDataSet:(LineChartDataSet * _Nonnull)dataSet dataProvider:(LineChartView * _Nonnull)dataProvider SWIFT_WARN_UNUSED_RESULT;
-- (nonnull instancetype)init SWIFT_UNAVAILABLE;
-+ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
-@end
-
-
-SWIFT_CLASS("_TtC6Charts13ChartRenderer")
-@interface ChartRenderer : NSObject
-- (nonnull instancetype)init SWIFT_UNAVAILABLE;
-+ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
-@end
-
-
-SWIFT_CLASS("_TtC6Charts17AreaChartRenderer")
-@interface AreaChartRenderer : ChartRenderer
-- (nonnull instancetype)initWithView:(LineChartView * _Nonnull)view OBJC_DESIGNATED_INITIALIZER;
-@end
-
 
 SWIFT_CLASS("_TtC6Charts13ComponentBase")
 @interface ComponentBase : NSObject
@@ -745,14 +692,14 @@ SWIFT_CLASS("_TtC6Charts13ComponentBase")
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
 
-@protocol AxisValueFormatter;
 @class ChartLimitLine;
+@protocol AxisValueFormatter;
 
 SWIFT_CLASS("_TtC6Charts8AxisBase")
 @interface AxisBase : ComponentBase
+@property (nonatomic, strong) ChartLimitLine * _Null_unspecified limitLine;
 @property (nonatomic, strong) id <AxisValueFormatter> _Nonnull valueFormatter;
 @property (nonatomic) NSInteger labelCount;
-- (void)addLimitLine:(ChartLimitLine * _Nonnull)line;
 @property (nonatomic) double axisMaximum;
 @end
 
@@ -765,6 +712,7 @@ SWIFT_PROTOCOL("_TtP6Charts18AxisValueFormatter_")
 @class ChartData;
 @class XAxis;
 @class Legend;
+@class ChartRenderer;
 @class NSCoder;
 
 SWIFT_CLASS("_TtC6Charts13ChartViewBase")
@@ -850,9 +798,14 @@ SWIFT_CLASS("_TtC6Charts14ChartDataEntry")
 SWIFT_CLASS("_TtC6Charts14ChartLimitLine")
 @interface ChartLimitLine : ComponentBase
 @property (nonatomic) double limit;
-- (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
+
+SWIFT_CLASS("_TtC6Charts13ChartRenderer")
+@interface ChartRenderer : NSObject
+- (nonnull instancetype)init SWIFT_UNAVAILABLE;
++ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
+@end
 
 
 SWIFT_CLASS("_TtC6Charts12ChartUtility")
@@ -886,6 +839,13 @@ SWIFT_PROTOCOL("_TtP6Charts4Fill_")
 - (void)fillPathWithContext:(CGContextRef _Nonnull)context rect:(CGRect)rect;
 @end
 
+@class LineChartDataSet;
+@class LineChartView;
+
+SWIFT_PROTOCOL("_TtP6Charts13FillFormatter_")
+@protocol FillFormatter
+- (CGFloat)getFillLinePositionWithDataSet:(LineChartDataSet * _Nonnull)dataSet dataProvider:(LineChartView * _Nonnull)dataProvider SWIFT_WARN_UNUSED_RESULT;
+@end
 
 
 SWIFT_CLASS("_TtC6Charts6Legend")
@@ -895,8 +855,8 @@ SWIFT_CLASS("_TtC6Charts6Legend")
 
 SWIFT_CLASS("_TtC6Charts11LegendEntry")
 @interface LegendEntry : NSObject
-- (nonnull instancetype)initWithLabel:(NSString * _Nullable)label colorType:(NSInteger)colorType OBJC_DESIGNATED_INITIALIZER;
-@property (nonatomic, copy) NSString * _Nullable label;
+- (nonnull instancetype)initWithColorType:(NSInteger)colorType OBJC_DESIGNATED_INITIALIZER;
+@property (nonatomic, copy) NSString * _Nonnull label;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
@@ -912,7 +872,8 @@ SWIFT_CLASS("_TtC6Charts14LegendRenderer")
 SWIFT_CLASS("_TtC6Charts13LineChartData")
 @interface LineChartData : ChartData
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
-- (nonnull instancetype)initWithDataSets:(NSArray<ChartDataSet *> * _Nonnull)dataSets OBJC_DESIGNATED_INITIALIZER;
+- (nonnull instancetype)initWithDataSets:(NSArray<ChartDataSet *> * _Nonnull)dataSets options:(uint8_t)options OBJC_DESIGNATED_INITIALIZER;
+- (nonnull instancetype)initWithDataSets:(NSArray<ChartDataSet *> * _Nonnull)dataSets SWIFT_UNAVAILABLE;
 @end
 
 
@@ -923,15 +884,9 @@ SWIFT_CLASS("_TtC6Charts34LineScatterCandleRadarChartDataSet")
 - (nonnull instancetype)initWithEntries:(NSArray<ChartDataEntry *> * _Nonnull)entries colorVal:(NSInteger)colorVal OBJC_DESIGNATED_INITIALIZER;
 @end
 
-@class UIColor;
 
 SWIFT_CLASS("_TtC6Charts21LineRadarChartDataSet")
 @interface LineRadarChartDataSet : LineScatterCandleRadarChartDataSet
-@property (nonatomic, strong) UIColor * _Nonnull fillColor;
-@property (nonatomic, strong) id <Fill> _Nullable fill;
-@property (nonatomic) CGFloat fillAlpha;
-@property (nonatomic) CGFloat lineWidth;
-@property (nonatomic) BOOL drawFilledEnabled;
 - (id _Nonnull)copyWithZone:(struct _NSZone * _Nullable)zone SWIFT_WARN_UNUSED_RESULT;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 - (nonnull instancetype)initWithEntries:(NSArray<ChartDataEntry *> * _Nonnull)entries colorVal:(NSInteger)colorVal OBJC_DESIGNATED_INITIALIZER;
@@ -941,9 +896,8 @@ SWIFT_CLASS("_TtC6Charts21LineRadarChartDataSet")
 SWIFT_CLASS("_TtC6Charts16LineChartDataSet")
 @interface LineChartDataSet : LineRadarChartDataSet
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
-- (nonnull instancetype)initWithEntries:(NSArray<ChartDataEntry *> * _Nonnull)entries colorVal:(NSInteger)colorVal withFill:(BOOL)withFill OBJC_DESIGNATED_INITIALIZER;
+- (nonnull instancetype)initWithColorVal:(NSInteger)colorVal lineWidth:(NSInteger)lineWidth options:(uint8_t)options fillSet:(LineChartDataSet * _Nullable)fillSet OBJC_DESIGNATED_INITIALIZER;
 @property (nonatomic) BOOL drawCirclesEnabled;
-@property (nonatomic, strong) id <FillFormatter> _Nullable fillFormatter;
 - (id _Nonnull)copyWithZone:(struct _NSZone * _Nullable)zone SWIFT_WARN_UNUSED_RESULT;
 - (nonnull instancetype)initWithEntries:(NSArray<ChartDataEntry *> * _Nonnull)entries colorVal:(NSInteger)colorVal SWIFT_UNAVAILABLE;
 @end
@@ -951,7 +905,7 @@ SWIFT_CLASS("_TtC6Charts16LineChartDataSet")
 
 SWIFT_CLASS("_TtC6Charts13LineChartView")
 @interface LineChartView : BarLineChartViewBase
-- (nonnull instancetype)initWithLegendEntries:(NSArray<LegendEntry *> * _Nonnull)legendEntries OBJC_DESIGNATED_INITIALIZER;
+- (nonnull instancetype)initWithLegendEntries:(NSArray<LegendEntry *> * _Nonnull)legendEntries xFormatter:(id <AxisValueFormatter> _Nonnull)xFormatter options:(uint8_t)options OBJC_DESIGNATED_INITIALIZER;
 - (nullable instancetype)initWithCoder:(NSCoder * _Nonnull)aDecoder OBJC_DESIGNATED_INITIALIZER;
 - (void)tintColorDidChange;
 - (nonnull instancetype)initWithFrame:(CGRect)frame SWIFT_UNAVAILABLE;

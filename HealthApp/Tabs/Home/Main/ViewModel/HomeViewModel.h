@@ -1,10 +1,3 @@
-//
-//  HomeViewModel.h
-//  HealthApp
-//
-//  Created by Christopher Ray on 3/27/21.
-//
-
 #ifndef HomeViewModel_h
 #define HomeViewModel_h
 
@@ -17,11 +10,7 @@ typedef struct {
     enum { Morning, Afternoon, Evening } timeOfDay;
 } HomeViewModel;
 
-void homeViewModel_init(HomeViewModel *model);
-
 void homeViewModel_fetchData(HomeViewModel *model);
 bool homeViewModel_updateTimeOfDay(HomeViewModel *model);
-bool homeViewModel_hasWorkoutsForThisWeek(HomeViewModel *model);
-bool homeViewModel_shouldShowConfetti(HomeViewModel *model, int totalCompletedWorkouts);
 
 #endif /* HomeViewModel_h */

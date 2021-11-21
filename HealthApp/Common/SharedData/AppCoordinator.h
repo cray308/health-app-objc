@@ -1,26 +1,24 @@
-//
-//  AppCoordinator.h
-//  HealthApp
-//
-//  Created by Christopher Ray on 3/20/21.
-//
-
 #ifndef AppCoordinator_h
 #define AppCoordinator_h
 
-#include "AppTypes.h"
+#include <objc/objc.h>
 
 enum {
-    LoadedViewController_Home = 0x1,
-    LoadedViewController_History = 0x2,
-    LoadedViewController_Settings = 0x4
+    LoadedVC_Home = 0x1,
+    LoadedVC_History = 0x2,
+    LoadedVC_Settings = 0x4
 };
 
 typedef struct {
-    byte loadedViewControllers;
+    unsigned char loadedViewControllers;
     void *children[3];
 } AppCoordinator;
 
 extern AppCoordinator *appCoordinator;
+
+void appCoordinator_start(id tabVC);
+void appCoordinator_updateUserInfo(signed char plan, bool darkMode, short *weights);
+void appCoordinator_deleteAppData(void);
+void appCoordinator_updateMaxWeights(short *weights);
 
 #endif /* AppCoordinator_h */

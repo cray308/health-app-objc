@@ -11,7 +11,7 @@ import UIKit
   @objc override dynamic public init()
 }
 @objc public class LineChartView : Charts.BarLineChartViewBase {
-  @objc public init(legendEntries: [Charts.LegendEntry])
+  @objc public init(legendEntries: [Charts.LegendEntry], xFormatter: Charts.AxisValueFormatter, options: Swift.UInt8)
   @objc required dynamic public init?(coder aDecoder: Foundation.NSCoder)
   @objc override dynamic public func tintColorDidChange()
   public var lineData: Charts.LineChartData? {
@@ -33,17 +33,6 @@ import UIKit
   @objc override dynamic public init()
 }
 @objc @_inheritsConvenienceInitializers public class LineRadarChartDataSet : Charts.LineScatterCandleRadarChartDataSet {
-  @objc public var fillColor: UIKit.UIColor {
-    @objc get
-    @objc set
-  }
-  @objc public var fill: Charts.Fill?
-  @objc public var fillAlpha: CoreGraphics.CGFloat
-  @objc public var lineWidth: CoreGraphics.CGFloat {
-    @objc get
-    @objc set
-  }
-  @objc public var drawFilledEnabled: Swift.Bool
   public var isDrawFilledEnabled: Swift.Bool {
     get
   }
@@ -65,9 +54,8 @@ extension CGContext {
   @objc public var enabled: Swift.Bool
   @objc deinit
 }
-@objc @_inheritsConvenienceInitializers public class ChartLimitLine : Charts.ComponentBase {
+@objc @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers public class ChartLimitLine : Charts.ComponentBase {
   @objc public var limit: Swift.Double
-  @objc dynamic public init()
   @objc deinit
 }
 @objc @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers public class Legend : Charts.ComponentBase {
@@ -82,23 +70,20 @@ extension CGContext {
 @objc public protocol FillFormatter {
   @objc func getFillLinePosition(dataSet: Charts.LineChartDataSet, dataProvider: Charts.LineChartView) -> CoreGraphics.CGFloat
 }
-@objc @_inheritsConvenienceInitializers public class LineChartData : Charts.ChartData {
+@objc public class LineChartData : Charts.ChartData {
   @objc required dynamic public init()
-  @objc override public init(dataSets: [Charts.ChartDataSet])
+  @objc public init(dataSets: [Charts.ChartDataSet], options: Swift.UInt8)
   required public init(arrayLiteral elements: Charts.ChartDataSet...)
   @objc deinit
+  @objc override public init(dataSets: [Charts.ChartData.Element])
 }
 @objc @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers public class XAxis : Charts.AxisBase {
   @objc deinit
 }
 @objc public class LineChartDataSet : Charts.LineRadarChartDataSet {
   @objc required dynamic public init()
-  @objc public init(entries: [Charts.ChartDataEntry], colorVal: Swift.Int, withFill: Swift.Bool)
+  @objc public init(colorVal: Swift.Int, lineWidth: Swift.Int, options: Swift.UInt8, fillSet: Charts.LineChartDataSet?)
   @objc public var drawCirclesEnabled: Swift.Bool
-  @objc public var fillFormatter: Charts.FillFormatter? {
-    @objc get
-    @objc set
-  }
   @objc override public func copy(with zone: ObjectiveC.NSZone? = nil) -> Any
   @objc deinit
   @objc override public init(entries: [Charts.ChartDataEntry], colorVal: Swift.Int)
@@ -188,19 +173,9 @@ extension ChartDataSet : Swift.RangeReplaceableCollection {
   @objc public func animate(xAxisDuration: Foundation.TimeInterval)
   @objc override dynamic public func observeValue(forKeyPath keyPath: Swift.String?, of object: Any?, change: [Foundation.NSKeyValueChangeKey : Any]?, context: Swift.UnsafeMutableRawPointer?)
 }
-@objc public class AreaChartFormatter : ObjectiveC.NSObject, Charts.FillFormatter {
-  @objc public init(dataSet: Charts.LineChartDataSet)
-  @objc public func getFillLinePosition(dataSet: Charts.LineChartDataSet, dataProvider: Charts.LineChartView) -> CoreGraphics.CGFloat
-  @objc deinit
-  @objc override dynamic public init()
-}
-@objc @_hasMissingDesignatedInitializers public class AreaChartRenderer : Charts.ChartRenderer {
-  @objc public init(view: Charts.LineChartView)
-  @objc deinit
-}
 @objc public class LegendEntry : ObjectiveC.NSObject {
-  @objc public init(label: Swift.String?, colorType: Swift.Int)
-  @objc public var label: Swift.String?
+  @objc public init(colorType: Swift.Int)
+  @objc public var label: Swift.String
   @objc deinit
   @objc override dynamic public init()
 }
@@ -225,6 +200,7 @@ extension ChartDataSet : Swift.RangeReplaceableCollection {
   @objc deinit
 }
 @objc @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers public class AxisBase : Charts.ComponentBase {
+  @objc public var limitLine: Charts.ChartLimitLine!
   @objc public var valueFormatter: Charts.AxisValueFormatter {
     @objc get
     @objc set
@@ -233,7 +209,6 @@ extension ChartDataSet : Swift.RangeReplaceableCollection {
     @objc get
     @objc set
   }
-  @objc public func addLimitLine(_ line: Charts.ChartLimitLine)
   @objc public var axisMaximum: Swift.Double {
     @objc get
     @objc set

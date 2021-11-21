@@ -1,14 +1,8 @@
-//
-//  AddWorkoutCoordinator.h
-//  HealthApp
-//
-//  Created by Christopher Ray on 3/27/21.
-//
-
 #ifndef AddWorkoutCoordinator_h
 #define AddWorkoutCoordinator_h
 
-#include "Workout.h"
+#include <objc/runtime.h>
+#include "ExerciseManager.h"
 
 typedef struct {
     id navVC;
@@ -20,7 +14,7 @@ void addWorkoutCoordinator_start(AddWorkoutCoordinator *this);
 
 void addWorkoutCoordinator_stoppedWorkout(AddWorkoutCoordinator *this);
 void addWorkoutCoordinator_completedWorkout(AddWorkoutCoordinator *this,
-                                            bool dismissVC, bool showModalIfRequired);
+                                            bool dismissVC, bool showModalIfRequired, short *lifts);
 void addWorkoutCoordinator_stopWorkoutFromBackButtonPress(AddWorkoutCoordinator *this);
 
 #endif /* AddWorkoutCoordinator_h */

@@ -4,8 +4,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface WeeklyData: NSManagedObject @end
 @interface WeeklyData (CoreDataProperties)
-+ (NSFetchRequest<WeeklyData *> *) fetchRequest;
-
 @property (nonatomic) int16_t bestBench;
 @property (nonatomic) int16_t bestDeadlift;
 @property (nonatomic) int16_t bestPullup;
@@ -22,10 +20,6 @@ NS_ASSUME_NONNULL_END
 
 @implementation WeeklyData @end
 @implementation WeeklyData (CoreDataProperties)
-+ (NSFetchRequest<WeeklyData *> *) fetchRequest {
-    return [NSFetchRequest fetchRequestWithEntityName:@"WeeklyData"];
-}
-
 @dynamic bestBench;
 @dynamic bestDeadlift;
 @dynamic bestPullup;

@@ -1,14 +1,7 @@
-//
-//  HomeTabCoordinator.h
-//  HealthApp
-//
-//  Created by Christopher Ray on 3/27/21.
-//
-
 #ifndef HomeTabCoordinator_h
 #define HomeTabCoordinator_h
 
-#include <objc/objc.h>
+#include <objc/runtime.h>
 #include "HomeViewModel.h"
 
 typedef struct {
@@ -16,6 +9,8 @@ typedef struct {
     HomeViewModel model;
     void *childCoordinator;
 } HomeTabCoordinator;
+
+void homeCoordinator_start(HomeTabCoordinator *this);
 
 void homeCoordinator_addWorkoutFromPlan(HomeTabCoordinator *this, int index);
 void homeCoordinator_addWorkoutFromCustomButton(HomeTabCoordinator *this, int index);
