@@ -5,7 +5,7 @@
 #include "AddWorkoutCoordinator.h"
 #include "AppUserData.h"
 #include "HomeVC.h"
-#include "SetupWorkoutModal.h"
+#include "SetupWorkoutVC.h"
 #include "ViewControllerHelpers.h"
 
 #define setFloat(_o, _cmd, _arg) (((void(*)(id,SEL,float))objc_msgSend)((_o), (_cmd), (_arg)))

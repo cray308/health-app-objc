@@ -4,7 +4,7 @@
 #include "PersistenceService.h"
 #include "ViewControllerHelpers.h"
 #include "WorkoutVC.h"
-#include "UpdateMaxesModal.h"
+#include "UpdateMaxesVC.h"
 
 extern void homeCoordinator_didFinishAddingWorkout(void *parent, int totalCompleted, bool popStack);
 

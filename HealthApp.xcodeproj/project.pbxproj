@@ -26,10 +26,10 @@
 		611EDDB42743660C0064B254 /* InputVC.c in Sources */ = {isa = PBXBuildFile; fileRef = 611EDDB22743660C0064B254 /* InputVC.c */; };
 		611EDDBA274487010064B254 /* SettingsVC.h in Headers */ = {isa = PBXBuildFile; fileRef = 611EDDB8274487010064B254 /* SettingsVC.h */; };
 		611EDDBB274487010064B254 /* SettingsVC.c in Sources */ = {isa = PBXBuildFile; fileRef = 611EDDB9274487010064B254 /* SettingsVC.c */; };
-		611EDDBF2744A9F70064B254 /* SetupWorkoutModal.h in Headers */ = {isa = PBXBuildFile; fileRef = 611EDDBD2744A9F70064B254 /* SetupWorkoutModal.h */; };
-		611EDDC02744A9F70064B254 /* SetupWorkoutModal.c in Sources */ = {isa = PBXBuildFile; fileRef = 611EDDBE2744A9F70064B254 /* SetupWorkoutModal.c */; };
-		611EDDC62744CB2D0064B254 /* UpdateMaxesModal.h in Headers */ = {isa = PBXBuildFile; fileRef = 611EDDC42744CB2D0064B254 /* UpdateMaxesModal.h */; };
-		611EDDC72744CB2D0064B254 /* UpdateMaxesModal.c in Sources */ = {isa = PBXBuildFile; fileRef = 611EDDC52744CB2D0064B254 /* UpdateMaxesModal.c */; };
+		611EDDBF2744A9F70064B254 /* SetupWorkoutVC.h in Headers */ = {isa = PBXBuildFile; fileRef = 611EDDBD2744A9F70064B254 /* SetupWorkoutVC.h */; };
+		611EDDC02744A9F70064B254 /* SetupWorkoutVC.c in Sources */ = {isa = PBXBuildFile; fileRef = 611EDDBE2744A9F70064B254 /* SetupWorkoutVC.c */; };
+		611EDDC62744CB2D0064B254 /* UpdateMaxesVC.h in Headers */ = {isa = PBXBuildFile; fileRef = 611EDDC42744CB2D0064B254 /* UpdateMaxesVC.h */; };
+		611EDDC72744CB2D0064B254 /* UpdateMaxesVC.c in Sources */ = {isa = PBXBuildFile; fileRef = 611EDDC52744CB2D0064B254 /* UpdateMaxesVC.c */; };
 		611EDDD02745FEA70064B254 /* WorkoutVC.h in Headers */ = {isa = PBXBuildFile; fileRef = 611EDDCE2745FEA70064B254 /* WorkoutVC.h */; };
 		611EDDD12745FEA70064B254 /* WorkoutVC.c in Sources */ = {isa = PBXBuildFile; fileRef = 611EDDCF2745FEA70064B254 /* WorkoutVC.c */; };
 		611EDDE827476ED50064B254 /* HistoryVC.h in Headers */ = {isa = PBXBuildFile; fileRef = 611EDDE627476ED50064B254 /* HistoryVC.h */; };
@@ -115,10 +115,10 @@
 		611EDDB22743660C0064B254 /* InputVC.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = InputVC.c; sourceTree = "<group>"; };
 		611EDDB8274487010064B254 /* SettingsVC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SettingsVC.h; sourceTree = "<group>"; };
 		611EDDB9274487010064B254 /* SettingsVC.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = SettingsVC.c; sourceTree = "<group>"; };
-		611EDDBD2744A9F70064B254 /* SetupWorkoutModal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SetupWorkoutModal.h; sourceTree = "<group>"; };
-		611EDDBE2744A9F70064B254 /* SetupWorkoutModal.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = SetupWorkoutModal.c; sourceTree = "<group>"; };
-		611EDDC42744CB2D0064B254 /* UpdateMaxesModal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UpdateMaxesModal.h; sourceTree = "<group>"; };
-		611EDDC52744CB2D0064B254 /* UpdateMaxesModal.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = UpdateMaxesModal.c; sourceTree = "<group>"; };
+		611EDDBD2744A9F70064B254 /* SetupWorkoutVC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SetupWorkoutVC.h; sourceTree = "<group>"; };
+		611EDDBE2744A9F70064B254 /* SetupWorkoutVC.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = SetupWorkoutVC.c; sourceTree = "<group>"; };
+		611EDDC42744CB2D0064B254 /* UpdateMaxesVC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UpdateMaxesVC.h; sourceTree = "<group>"; };
+		611EDDC52744CB2D0064B254 /* UpdateMaxesVC.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = UpdateMaxesVC.c; sourceTree = "<group>"; };
 		611EDDCE2745FEA70064B254 /* WorkoutVC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WorkoutVC.h; sourceTree = "<group>"; };
 		611EDDCF2745FEA70064B254 /* WorkoutVC.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = WorkoutVC.c; sourceTree = "<group>"; };
 		611EDDE627476ED50064B254 /* HistoryVC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HistoryVC.h; sourceTree = "<group>"; };
@@ -373,8 +373,8 @@
 			children = (
 				611EDDA7274355F10064B254 /* HomeVC.h */,
 				611EDDA8274355F10064B254 /* HomeVC.c */,
-				611EDDBD2744A9F70064B254 /* SetupWorkoutModal.h */,
-				611EDDBE2744A9F70064B254 /* SetupWorkoutModal.c */,
+				611EDDBD2744A9F70064B254 /* SetupWorkoutVC.h */,
+				611EDDBE2744A9F70064B254 /* SetupWorkoutVC.c */,
 			);
 			path = ViewController;
 			sourceTree = "<group>";
@@ -391,8 +391,8 @@
 		61C778F826102580001326A1 /* ViewController */ = {
 			isa = PBXGroup;
 			children = (
-				611EDDC42744CB2D0064B254 /* UpdateMaxesModal.h */,
-				611EDDC52744CB2D0064B254 /* UpdateMaxesModal.c */,
+				611EDDC42744CB2D0064B254 /* UpdateMaxesVC.h */,
+				611EDDC52744CB2D0064B254 /* UpdateMaxesVC.c */,
 				611EDDCE2745FEA70064B254 /* WorkoutVC.h */,
 				611EDDCF2745FEA70064B254 /* WorkoutVC.c */,
 			);
@@ -481,7 +481,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				611EDDBA274487010064B254 /* SettingsVC.h in Headers */,
-				611EDDC62744CB2D0064B254 /* UpdateMaxesModal.h in Headers */,
+				611EDDC62744CB2D0064B254 /* UpdateMaxesVC.h in Headers */,
 				6151C91126C4B23200C95A93 /* hash.h in Headers */,
 				61FFEEA2272CCCB5002BFFA6 /* AppDelegate.h in Headers */,
 				61BA4652270FBF290066A981 /* ObjectArray.h in Headers */,
@@ -490,7 +490,7 @@
 				61592AB027488DD000789264 /* LiftingView.h in Headers */,
 				611B591326C5F6830082F6CA /* alg_helper.h in Headers */,
 				611EDDA9274355F10064B254 /* HomeVC.h in Headers */,
-				611EDDBF2744A9F70064B254 /* SetupWorkoutModal.h in Headers */,
+				611EDDBF2744A9F70064B254 /* SetupWorkoutVC.h in Headers */,
 				610B92B9270A6E9000358DBD /* Views.h in Headers */,
 				611EDDD02745FEA70064B254 /* WorkoutVC.h in Headers */,
 				610B92B4270A67CC00358DBD /* Constraints.h in Headers */,
@@ -628,7 +628,7 @@
 				61C7797826102D45001326A1 /* HomeViewModel.c in Sources */,
 				61C7797C26102D5F001326A1 /* HomeTabCoordinator.c in Sources */,
 				611EDDAA274355F10064B254 /* HomeVC.c in Sources */,
-				611EDDC02744A9F70064B254 /* SetupWorkoutModal.c in Sources */,
+				611EDDC02744A9F70064B254 /* SetupWorkoutVC.c in Sources */,
 				61C7793626102C19001326A1 /* HistoryTabCoordinator.c in Sources */,
 				61592A85274861B600789264 /* TotalWorkoutsView.c in Sources */,
 				61592A8A2748651500789264 /* WorkoutTypeView.c in Sources */,
@@ -636,7 +636,7 @@
 				611EDDE927476ED50064B254 /* HistoryVC.c in Sources */,
 				61C779A426102E20001326A1 /* AddWorkoutCoordinator.c in Sources */,
 				611EDDD12745FEA70064B254 /* WorkoutVC.c in Sources */,
-				611EDDC72744CB2D0064B254 /* UpdateMaxesModal.c in Sources */,
+				611EDDC72744CB2D0064B254 /* UpdateMaxesVC.c in Sources */,
 				61594D5726068C41000D01A1 /* AppCoordinator.c in Sources */,
 				61594D0C26068105000D01A1 /* AppDelegate.c in Sources */,
 				61594D2026068106000D01A1 /* main.c in Sources */,

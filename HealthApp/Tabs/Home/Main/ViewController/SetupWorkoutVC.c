@@ -1,4 +1,4 @@
-#include "SetupWorkoutModal.h"
+#include "SetupWorkoutVC.h"
 #include "HomeTabCoordinator.h"
 #include "InputVC.h"
 #include "ViewControllerHelpers.h"

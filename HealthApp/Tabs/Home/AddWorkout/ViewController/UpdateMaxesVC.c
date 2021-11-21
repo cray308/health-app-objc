@@ -1,4 +1,4 @@
-#include "UpdateMaxesModal.h"
+#include "UpdateMaxesVC.h"
 #include "AddWorkoutCoordinator.h"
 #include "InputVC.h"
 #include "ViewControllerHelpers.h"

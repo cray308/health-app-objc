@@ -9,8 +9,8 @@
 #include "HistoryVC.h"
 #include "SettingsVC.h"
 #include "WorkoutVC.h"
-#include "SetupWorkoutModal.h"
-#include "UpdateMaxesModal.h"
+#include "SetupWorkoutVC.h"
+#include "UpdateMaxesVC.h"
 #include "AppDelegate.h"
 
 extern int UIApplicationMain(int, char *[], CFStringRef, CFStringRef);
