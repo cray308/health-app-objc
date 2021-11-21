@@ -27,38 +27,37 @@ int main(int argc, char *argv[]) {
     SEL btnTap = sel_getUid("buttonTapped:");
 
     StatusViewClass = objc_allocateClassPair(viewClass, "StatusView", 0);
-    class_addIvar(StatusViewClass, dataKey, sizeof(StatusViewData*), 0, "^{__statusViewData=@@@@}");
+    class_addIvar(StatusViewClass, dataKey, sizeof(StatusViewData*), 0, "^{__statusVData=@@@@}");
     class_addMethod(StatusViewClass, deinit, (IMP) statusView_deinit, voidSig);
     objc_registerClassPair(StatusViewClass);
     StatusViewDataRef = class_getInstanceVariable(StatusViewClass, dataKey);
 
     ContainerViewClass = objc_allocateClassPair(viewClass, "ContainerView", 0);
     class_addIvar(ContainerViewClass, dataKey,
-                  sizeof(ContainerViewData*), 0, "^{__containerViewData=@@@@}");
+                  sizeof(ContainerViewData*), 0, "^{__containerVData=@@@@}");
     class_addMethod(ContainerViewClass, deinit, (IMP) containerView_deinit, voidSig);
     objc_registerClassPair(ContainerViewClass);
     ContainerViewDataRef = class_getInstanceVariable(ContainerViewClass, dataKey);
 
-    TotalWorkoutsClass = objc_allocateClassPair(viewClass, "TotalWorkoutsView", 0);
-    class_addIvar(TotalWorkoutsClass, dataKey,
-                  sizeof(TotalWorkoutsData*), 0, "^{__totalWorkoutsData=@@}");
-    objc_registerClassPair(TotalWorkoutsClass);
-    TotalWorkoutsDataRef = class_getInstanceVariable(TotalWorkoutsClass, dataKey);
+    TotalWorkoutsViewClass = objc_allocateClassPair(viewClass, "TotalWorkoutsView", 0);
+    class_addIvar(TotalWorkoutsViewClass, dataKey,
+                  sizeof(TotalWorkoutsViewData*), 0, "^{__totalWorkoutsVData=@@}");
+    objc_registerClassPair(TotalWorkoutsViewClass);
+    TotalWorkoutsViewDataRef = class_getInstanceVariable(TotalWorkoutsViewClass, dataKey);
 
-    WorkoutTypeClass = objc_allocateClassPair(viewClass, "WorkoutTypeView", 0);
-    class_addIvar(WorkoutTypeClass, dataKey,
-                  sizeof(WorkoutTypeData*), 0, "^{__workoutTypeData=@@}");
-    objc_registerClassPair(WorkoutTypeClass);
-    WorkoutTypeDataRef = class_getInstanceVariable(WorkoutTypeClass, dataKey);
+    WorkoutTypeViewClass = objc_allocateClassPair(viewClass, "WorkoutTypeView", 0);
+    class_addIvar(WorkoutTypeViewClass, dataKey,
+                  sizeof(WorkoutTypeViewData*), 0, "^{__workoutTypeVData=@@}");
+    objc_registerClassPair(WorkoutTypeViewClass);
+    WorkoutTypeViewDataRef = class_getInstanceVariable(WorkoutTypeViewClass, dataKey);
 
-    LiftVClass = objc_allocateClassPair(viewClass, "LiftView", 0);
-    class_addIvar(LiftVClass, dataKey, sizeof(LiftVData*), 0, "^{__liftVData=@@}");
-    objc_registerClassPair(LiftVClass);
-    LiftVDataRef = class_getInstanceVariable(LiftVClass, dataKey);
+    LiftViewClass = objc_allocateClassPair(viewClass, "LiftView", 0);
+    class_addIvar(LiftViewClass, dataKey, sizeof(LiftViewData*), 0, "^{__liftVData=@@}");
+    objc_registerClassPair(LiftViewClass);
+    LiftViewDataRef = class_getInstanceVariable(LiftViewClass, dataKey);
 
     InputViewClass = objc_allocateClassPair(viewClass, "InputView", 0);
-    class_addIvar(InputViewClass, dataKey,
-                  sizeof(InputViewData*), 0, "^{__inputViewData=sssB@@@@@}");
+    class_addIvar(InputViewClass, dataKey, sizeof(InputViewData*), 0, "^{__inputVData=sssB@@@@@}");
     class_addMethod(InputViewClass, deinit, (IMP) inputView_deinit, voidSig);
     objc_registerClassPair(InputViewClass);
     InputViewDataRef = class_getInstanceVariable(InputViewClass, dataKey);
@@ -99,32 +98,32 @@ int main(int argc, char *argv[]) {
     objc_registerClassPair(SettingsVCClass);
     SettingsVCDataRef = class_getInstanceVariable(SettingsVCClass, dataKey);
 
-    SetupWorkoutModalClass = objc_allocateClassPair(InputVCClass, "SetupWorkoutVC", 0);
-    class_addProtocol(SetupWorkoutModalClass, objc_getProtocol("UIPickerViewDelegate"));
-    class_addProtocol(SetupWorkoutModalClass, objc_getProtocol("UIPickerViewDataSource"));
-    class_addIvar(SetupWorkoutModalClass, dataKey, sizeof(SetupWorkoutModalData*), 0,
-                  "^{__setupWorkoutModalData=@@@{__workoutParams=cCiiii}}");
-    class_addMethod(SetupWorkoutModalClass, deinit, (IMP) setupWorkoutVC_deinit, voidSig);
-    class_addMethod(SetupWorkoutModalClass, viewLoad, (IMP) setupWorkoutVC_viewDidLoad, voidSig);
-    class_addMethod(SetupWorkoutModalClass, btnTap, (IMP) setupWorkoutVC_tappedButton, tapSig);
-    class_addMethod(SetupWorkoutModalClass, sel_getUid("numberOfComponentsInPickerView:"),
+    SetupWorkoutVCClass = objc_allocateClassPair(InputVCClass, "SetupWorkoutVC", 0);
+    class_addProtocol(SetupWorkoutVCClass, objc_getProtocol("UIPickerViewDelegate"));
+    class_addProtocol(SetupWorkoutVCClass, objc_getProtocol("UIPickerViewDataSource"));
+    class_addIvar(SetupWorkoutVCClass, dataKey, sizeof(SetupWorkoutVCData*), 0,
+                  "^{__setupWorkoutVCData=@@@{__workoutParams=cCiiii}}");
+    class_addMethod(SetupWorkoutVCClass, deinit, (IMP) setupWorkoutVC_deinit, voidSig);
+    class_addMethod(SetupWorkoutVCClass, viewLoad, (IMP) setupWorkoutVC_viewDidLoad, voidSig);
+    class_addMethod(SetupWorkoutVCClass, btnTap, (IMP) setupWorkoutVC_tappedButton, tapSig);
+    class_addMethod(SetupWorkoutVCClass, sel_getUid("numberOfComponentsInPickerView:"),
                     (IMP) setupWorkoutVC_numberOfComponents, "q@:@");
-    class_addMethod(SetupWorkoutModalClass, sel_getUid("pickerView:numberOfRowsInComponent:"),
+    class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:numberOfRowsInComponent:"),
                     (IMP) setupWorkoutVC_numberOfRows, "q@:@q");
-    class_addMethod(SetupWorkoutModalClass, sel_getUid("pickerView:titleForRow:forComponent:"),
+    class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:titleForRow:forComponent:"),
                     (IMP) setupWorkoutVC_titleForRow, "@@:@qq");
-    class_addMethod(SetupWorkoutModalClass, sel_getUid("pickerView:didSelectRow:inComponent:"),
+    class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:didSelectRow:inComponent:"),
                     (IMP) setupWorkoutVC_didSelectRow, "v@:@qq");
-    objc_registerClassPair(SetupWorkoutModalClass);
-    SetupWorkoutModalDataRef = class_getInstanceVariable(SetupWorkoutModalClass, dataKey);
+    objc_registerClassPair(SetupWorkoutVCClass);
+    SetupWorkoutVCDataRef = class_getInstanceVariable(SetupWorkoutVCClass, dataKey);
 
-    UpdateMaxesClass = objc_allocateClassPair(InputVCClass, "UpdateMaxesVC", 0);
-    class_addIvar(UpdateMaxesClass, dataKey, sizeof(void*), 0, "@");
-    class_addMethod(UpdateMaxesClass, viewLoad, (IMP) updateMaxesVC_viewDidLoad, voidSig);
-    class_addMethod(UpdateMaxesClass, sel_getUid("tappedFinish"),
+    UpdateMaxesVCClass = objc_allocateClassPair(InputVCClass, "UpdateMaxesVC", 0);
+    class_addIvar(UpdateMaxesVCClass, dataKey, sizeof(void*), 0, "@");
+    class_addMethod(UpdateMaxesVCClass, viewLoad, (IMP) updateMaxesVC_viewDidLoad, voidSig);
+    class_addMethod(UpdateMaxesVCClass, sel_getUid("tappedFinish"),
                     (IMP) updateMaxesVC_tappedFinish, voidSig);
-    objc_registerClassPair(UpdateMaxesClass);
-    UpdateMaxesDataRef = class_getInstanceVariable(UpdateMaxesClass, dataKey);
+    objc_registerClassPair(UpdateMaxesVCClass);
+    UpdateMaxesVCDataRef = class_getInstanceVariable(UpdateMaxesVCClass, dataKey);
 
     HomeVCClass = objc_allocateClassPair(VCClass, "HomeVC", 0);
     class_addIvar(HomeVCClass, dataKey, sizeof(HomeVCData*), 0, "^{__homeVCData=@@@@}");
@@ -150,11 +149,15 @@ int main(int argc, char *argv[]) {
     WorkoutVCClass = objc_allocateClassPair(VCClass, "WorkoutVC", 0);
 
 #if defined(__LP64__)
-    class_addIvar(WorkoutVCClass, dataKey, sizeof(WorkoutVCData*), 0,
-                  "^{__workoutVCData=@@@[10@][2@][2@]{__savedWorkoutInfo=I{__exerciseInfo=II}}[2{__workoutTimer=@{__timerInfo=CCC}{_opaque_pthread_mutex_t=q[56c]}{_opaque_pthread_cond_t=q[40c]}IIiq}]}");
+    char const *layout = "^{__workoutVCData="
+    "@@@[10@][2@][2@]{__savedWorkoutInfo=I{__exerciseInfo=II}}[2{__workoutTimer="
+    "@{__timerInfo=CCC}{_opaque_pthread_mutex_t=q[56c]}{_opaque_pthread_cond_t=q[40c]}IIiq}]}";
+    class_addIvar(WorkoutVCClass, dataKey, sizeof(WorkoutVCData*), 0, layout);
 #else
-    class_addIvar(WorkoutVCClass, dataKey, sizeof(WorkoutVCData*), 0,
-                  "^{__workoutVCData=@@@[10@][2@][2@]{__savedWorkoutInfo=I{__exerciseInfo=II}}[2{__workoutTimer=@{__timerInfo=CCC}{_opaque_pthread_mutex_t=q[40c]}{_opaque_pthread_cond_t=q[24c]}IIiq}]}");
+    char const *layout = "^{__workoutVCData="
+    "@@@[10@][2@][2@]{__savedWorkoutInfo=I{__exerciseInfo=II}}[2{__workoutTimer="
+    "@{__timerInfo=CCC}{_opaque_pthread_mutex_t=q[40c]}{_opaque_pthread_cond_t=q[24c]}IIiq}]}";
+    class_addIvar(WorkoutVCClass, dataKey, sizeof(WorkoutVCData*), 0, layout);
 #endif
 
     class_addMethod(WorkoutVCClass, deinit, (IMP) workoutVC_deinit, voidSig);

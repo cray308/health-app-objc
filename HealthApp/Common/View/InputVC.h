@@ -12,7 +12,7 @@ extern Ivar InputVCDataRef;
 extern Class InputViewClass;
 extern Ivar InputViewDataRef;
 
-typedef struct __inputViewData {
+typedef struct __inputVData {
     short minVal;
     short maxVal;
     short result;

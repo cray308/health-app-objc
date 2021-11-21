@@ -13,7 +13,7 @@ enum {
     HideLabel = 0x2
 };
 
-typedef struct __containerViewData {
+typedef struct __containerVData {
     id divider;
     id headerLabel;
     id stack;

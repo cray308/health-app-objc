@@ -3,12 +3,12 @@
 #include "InputVC.h"
 #include "ViewControllerHelpers.h"
 
-Class UpdateMaxesClass;
-Ivar UpdateMaxesDataRef;
+Class UpdateMaxesVCClass;
+Ivar UpdateMaxesVCDataRef;
 
 id updateMaxesVC_init(void *delegate) {
-    id self = createVC(UpdateMaxesClass);
-    object_setIvar(self, UpdateMaxesDataRef, (id) delegate);
+    id self = createVC(UpdateMaxesVCClass);
+    object_setIvar(self, UpdateMaxesVCDataRef, (id) delegate);
     return self;
 }
 
@@ -38,7 +38,7 @@ void updateMaxesVC_viewDidLoad(id self, SEL _cmd) {
 
 void updateMaxesVC_tappedFinish(id self, SEL _cmd _U_) {
     AddWorkoutCoordinator *delegate =
-    (AddWorkoutCoordinator *) object_getIvar(self, UpdateMaxesDataRef);
+    (AddWorkoutCoordinator *) object_getIvar(self, UpdateMaxesVCDataRef);
     short *lifts = malloc(sizeof(short) << 2);
     id *fields = ((InputVCData *) object_getIvar(self, InputVCDataRef))->children;
     for (int i = 0; i < 4; ++i) {

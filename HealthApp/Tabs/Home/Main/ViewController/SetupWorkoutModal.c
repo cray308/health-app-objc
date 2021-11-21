@@ -3,23 +3,22 @@
 #include "InputVC.h"
 #include "ViewControllerHelpers.h"
 
-Class SetupWorkoutModalClass;
-Ivar SetupWorkoutModalDataRef;
+Class SetupWorkoutVCClass;
+Ivar SetupWorkoutVCDataRef;
 
 id setupWorkoutVC_init(void *delegate, unsigned char type, CFArrayRef names) {
-    id self = createVC(SetupWorkoutModalClass);
-    SetupWorkoutModalData *data = calloc(1, sizeof(SetupWorkoutModalData));
+    id self = createVC(SetupWorkoutVCClass);
+    SetupWorkoutVCData *data = calloc(1, sizeof(SetupWorkoutVCData));
     data->delegate = delegate;
     data->names = names;
     workoutParams_init(&data->output, -1);
     data->output.type = type;
-    object_setIvar(self, SetupWorkoutModalDataRef, (id) data);
+    object_setIvar(self, SetupWorkoutVCDataRef, (id) data);
     return self;
 }
 
 void setupWorkoutVC_deinit(id self, SEL _cmd) {
-    SetupWorkoutModalData *data =
-    (SetupWorkoutModalData *) object_getIvar(self, SetupWorkoutModalDataRef);
+    SetupWorkoutVCData *data = (SetupWorkoutVCData *) object_getIvar(self, SetupWorkoutVCDataRef);
     struct objc_super super = {self, InputVCClass};
     CFRelease(data->names);
     releaseObj(data->workoutTextField);
@@ -31,8 +30,7 @@ void setupWorkoutVC_viewDidLoad(id self, SEL _cmd) {
     struct objc_super super = {self, InputVCClass};
     ((void(*)(struct objc_super *,SEL))objc_msgSendSuper)(&super, _cmd);
 
-    SetupWorkoutModalData *data =
-    (SetupWorkoutModalData *) object_getIvar(self, SetupWorkoutModalDataRef);
+    SetupWorkoutVCData *data = (SetupWorkoutVCData *) object_getIvar(self, SetupWorkoutVCDataRef);
     InputVCData *parent = (InputVCData *) object_getIvar(self, InputVCDataRef);
     id view = getView(self);
     setBackground(view, createColor(ColorSecondaryBG));
@@ -101,8 +99,7 @@ void setupWorkoutVC_tappedButton(id self, SEL _cmd _U_, id btn) {
         return;
     }
 
-    SetupWorkoutModalData *data =
-    (SetupWorkoutModalData *) object_getIvar(self, SetupWorkoutModalDataRef);
+    SetupWorkoutVCData *data = (SetupWorkoutVCData *) object_getIvar(self, SetupWorkoutVCDataRef);
     WorkoutParams *output = &data->output;
     id *fields = ((InputVCData *) object_getIvar(self, InputVCDataRef))->children;
     switch (output->type) {
@@ -126,20 +123,18 @@ long setupWorkoutVC_numberOfComponents(id self _U_, SEL _cmd _U_, id picker _U_)
 }
 
 long setupWorkoutVC_numberOfRows(id self, SEL _cmd _U_, id picker _U_, long section _U_) {
-    return CFArrayGetCount(((SetupWorkoutModalData *)
-                            object_getIvar(self, SetupWorkoutModalDataRef))->names);
+    return CFArrayGetCount(((SetupWorkoutVCData *)
+                            object_getIvar(self, SetupWorkoutVCDataRef))->names);
 }
 
 CFStringRef setupWorkoutVC_titleForRow(id self, SEL _cmd _U_,
                                        id picker _U_, long row, long section _U_) {
-    CFArrayRef names = ((SetupWorkoutModalData *)
-                        object_getIvar(self, SetupWorkoutModalDataRef))->names;
+    CFArrayRef names = ((SetupWorkoutVCData *) object_getIvar(self, SetupWorkoutVCDataRef))->names;
     return CFArrayGetValueAtIndex(names, row);
 }
 
 void setupWorkoutVC_didSelectRow(id self, SEL _cmd _U_, id picker _U_, long row, long section _U_) {
-    SetupWorkoutModalData *data =
-    (SetupWorkoutModalData *) object_getIvar(self, SetupWorkoutModalDataRef);
+    SetupWorkoutVCData *data = (SetupWorkoutVCData *) object_getIvar(self, SetupWorkoutVCDataRef);
     data->output.index = (int) row;
     CFStringRef name = CFArrayGetValueAtIndex(data->names, row);
     setLabelText(data->workoutTextField, name);

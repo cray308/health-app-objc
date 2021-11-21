@@ -3,13 +3,13 @@
 
 #include "HistoryTabCoordinator.h"
 
-extern Class WorkoutTypeClass;
-extern Ivar WorkoutTypeDataRef;
+extern Class WorkoutTypeViewClass;
+extern Ivar WorkoutTypeViewDataRef;
 
-typedef struct __workoutTypeData {
+typedef struct __workoutTypeVData {
     id chart;
     WorkoutTypeChartViewModel *model;
-} WorkoutTypeData;
+} WorkoutTypeViewData;
 
 id workoutTypeView_init(WorkoutTypeChartViewModel *model, id formatter);
 void workoutTypeView_update(id self, int count, bool isSmall);

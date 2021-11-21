@@ -8,7 +8,7 @@
 extern Class StatusViewClass;
 extern Ivar StatusViewDataRef;
 
-typedef struct __statusViewData {
+typedef struct __statusVData {
     id button;
     id headerLabel;
     id box;

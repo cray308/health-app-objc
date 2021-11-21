@@ -82,11 +82,11 @@ void historyVC_updateSegment(id self, SEL _cmd _U_, id picker) {
 
     int size = 0;
     if (!(size = (model->data->size))) {
-        TotalWorkoutsData *twData =
-        (TotalWorkoutsData *) object_getIvar(data->charts[0], TotalWorkoutsDataRef);
-        WorkoutTypeData *aData =
-        (WorkoutTypeData *) object_getIvar(data->charts[1], WorkoutTypeDataRef);
-        LiftVData *lData = (LiftVData *) object_getIvar(data->charts[2], LiftVDataRef);
+        TotalWorkoutsViewData *twData =
+        (TotalWorkoutsViewData *) object_getIvar(data->charts[0], TotalWorkoutsViewDataRef);
+        WorkoutTypeViewData *aData =
+        (WorkoutTypeViewData *) object_getIvar(data->charts[1], WorkoutTypeViewDataRef);
+        LiftViewData *lData = (LiftViewData *) object_getIvar(data->charts[2], LiftViewDataRef);
         disableLineChartView(twData->chart);
         disableLineChartView(aData->chart);
         disableLineChartView(lData->chart);
