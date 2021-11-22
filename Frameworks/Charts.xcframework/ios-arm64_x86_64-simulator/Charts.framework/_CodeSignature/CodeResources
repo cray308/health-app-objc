@@ -26,7 +26,7 @@
 		</data>
 		<key>Modules/Charts.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		mGIJJoMuABESkAJipNxgLASOzjc=
+		XuHGPZczMwLG4WtxRnFsz+bydnM=
 		</data>
 		<key>Modules/Charts.swiftmodule/arm64.swiftdoc</key>
 		<data>
@@ -38,7 +38,7 @@
 		</data>
 		<key>Modules/Charts.swiftmodule/arm64.swiftmodule</key>
 		<data>
-		mGIJJoMuABESkAJipNxgLASOzjc=
+		XuHGPZczMwLG4WtxRnFsz+bydnM=
 		</data>
 		<key>Modules/Charts.swiftmodule/x86_64-apple-ios-simulator.swiftdoc</key>
 		<data>
@@ -50,7 +50,7 @@
 		</data>
 		<key>Modules/Charts.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		rv+l664rvWErlpvkSbJbvqeUeCg=
+		Iwqins3wiCpThUPrUGtWul+e5ZA=
 		</data>
 		<key>Modules/Charts.swiftmodule/x86_64.swiftdoc</key>
 		<data>
@@ -62,7 +62,7 @@
 		</data>
 		<key>Modules/Charts.swiftmodule/x86_64.swiftmodule</key>
 		<data>
-		rv+l664rvWErlpvkSbJbvqeUeCg=
+		Iwqins3wiCpThUPrUGtWul+e5ZA=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -103,7 +103,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			zVcYX5CrSsIFDPMXv0TPlYb0jRKU37Q3o+i+sRc/bdg=
+			SQ3yq+flDjqjmCL6ZO0G463wWc20sHb2CyRUAex5VkA=
 			</data>
 		</dict>
 		<key>Modules/Charts.swiftmodule/arm64.swiftdoc</key>
@@ -124,7 +124,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			zVcYX5CrSsIFDPMXv0TPlYb0jRKU37Q3o+i+sRc/bdg=
+			SQ3yq+flDjqjmCL6ZO0G463wWc20sHb2CyRUAex5VkA=
 			</data>
 		</dict>
 		<key>Modules/Charts.swiftmodule/x86_64-apple-ios-simulator.swiftdoc</key>
@@ -145,7 +145,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			INtd0EPuZrv81dOM4UR9OhXvx+cSRyMuqqa5VUeQywM=
+			6bXmYDrxU3DjLyJv+rrfL/h9iFo+KfzltETzqe0cr3E=
 			</data>
 		</dict>
 		<key>Modules/Charts.swiftmodule/x86_64.swiftdoc</key>
@@ -166,7 +166,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			INtd0EPuZrv81dOM4UR9OhXvx+cSRyMuqqa5VUeQywM=
+			6bXmYDrxU3DjLyJv+rrfL/h9iFo+KfzltETzqe0cr3E=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>
