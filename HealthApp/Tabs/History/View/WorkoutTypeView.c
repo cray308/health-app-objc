@@ -4,7 +4,7 @@
 Class WorkoutTypeViewClass;
 Ivar WorkoutTypeViewDataRef;
 
-id workoutTypeView_init(WorkoutTypeChartViewModel *model, id formatter) {
+id workoutTypeView_init(WorkoutTypeChartModel *model, id formatter) {
     id self = createObjectWithFrame(WorkoutTypeViewClass, CGRectZero);
     WorkoutTypeViewData *data = malloc(sizeof(WorkoutTypeViewData));
     data->model = model;
@@ -20,11 +20,11 @@ id workoutTypeView_init(WorkoutTypeChartViewModel *model, id formatter) {
     return self;
 }
 
-void workoutTypeView_update(id self, int count, bool isSmall) {
+void workoutTypeView_update(id self, int count, int index) {
     WorkoutTypeViewData *ptr = (WorkoutTypeViewData *) object_getIvar(self, WorkoutTypeViewDataRef);
-    replaceDataSetEntries(ptr->model->dataSets[0], ptr->model->entries[0]->arr, count);
+    replaceDataSetEntries(ptr->model->dataSets[0], ptr->model->dataArrays[index][0], count);
     for (int i = 1; i < 5; ++i) {
-        updateDataSet(isSmall, count, ptr->model->dataSets[i], ptr->model->entries[i]->arr);
+        replaceDataSetEntries(ptr->model->dataSets[i], ptr->model->dataArrays[index][i], count);
     }
-    updateChart(isSmall, ptr->chart, ptr->model->chartData, ptr->model->yMax);
+    updateChart(ptr->chart, ptr->model->chartData, ptr->model->maxes[index]);
 }

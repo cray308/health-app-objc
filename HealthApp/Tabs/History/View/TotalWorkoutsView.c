@@ -6,7 +6,7 @@ extern void setLineLimit(id v, float limit);
 Class TotalWorkoutsViewClass;
 Ivar TotalWorkoutsViewDataRef;
 
-id totalWorkoutsView_init(TotalWorkoutsChartViewModel *model, id formatter) {
+id totalWorkoutsView_init(TotalWorkoutsChartModel *model, id formatter) {
     id self = createObjectWithFrame(TotalWorkoutsViewClass, CGRectZero);
     TotalWorkoutsViewData *data = malloc(sizeof(TotalWorkoutsViewData));
     data->model = model;
@@ -22,10 +22,10 @@ id totalWorkoutsView_init(TotalWorkoutsChartViewModel *model, id formatter) {
     return self;
 }
 
-void totalWorkoutsView_update(id self, int count, bool isSmall) {
+void totalWorkoutsView_update(id self, int count, int index) {
     TotalWorkoutsViewData *ptr =
     (TotalWorkoutsViewData *) object_getIvar(self, TotalWorkoutsViewDataRef);
-    setLineLimit(ptr->chart, ptr->model->avgWorkouts);
-    updateDataSet(isSmall, count, ptr->model->dataSet, ptr->model->entries->arr);
-    updateChart(isSmall, ptr->chart, ptr->model->chartData, ptr->model->yMax);
+    setLineLimit(ptr->chart, ptr->model->avgs[index]);
+    replaceDataSetEntries(ptr->model->dataSet, ptr->model->dataArrays[index], count);
+    updateChart(ptr->chart, ptr->model->chartData, ptr->model->maxes[index]);
 }

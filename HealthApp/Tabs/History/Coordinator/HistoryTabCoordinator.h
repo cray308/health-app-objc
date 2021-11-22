@@ -5,17 +5,11 @@
 #include <objc/runtime.h>
 #include "ObjectArray.h"
 
-typedef struct {
-    int year;
-    int month;
-    int day;
-    int totalWorkouts;
-    int durationByType[4];
-    int cumulativeDuration[4];
-    short weightArray[4];
-} HistoryWeekDataModel;
-
-gen_array_headers(weekData, HistoryWeekDataModel)
+struct HistTimeData {
+    short year;
+    short month;
+    short day;
+};
 
 typedef struct {
     Array_object *entries;
@@ -23,9 +17,10 @@ typedef struct {
     id legendEntries[1];
     id dataSet;
     id chartData;
-    float avgWorkouts;
-    float yMax;
-} TotalWorkoutsChartViewModel;
+    id *dataArrays[3];
+    float avgs[3];
+    float maxes[3];
+} TotalWorkoutsChartModel;
 
 typedef struct {
     Array_object *entries[5];
@@ -33,10 +28,11 @@ typedef struct {
     id legendEntries[4];
     id dataSets[5];
     id chartData;
-    int totalByType[4];
-    float yMax;
+    id *dataArrays[3][5];
+    int avgs[3][4];
+    float maxes[3];
     CFStringRef names[4];
-} WorkoutTypeChartViewModel;
+} WorkoutTypeChartModel;
 
 typedef struct {
     Array_object *entries[4];
@@ -44,20 +40,22 @@ typedef struct {
     id legendEntries[4];
     id dataSets[4];
     id chartData;
-    int totalByExercise[4];
-    float yMax;
+    id *dataArrays[3][4];
+    float avgs[3][4];
+    float maxes[3];
     CFStringRef names[4];
-} LiftChartViewModel;
+} LiftChartModel;
 
 typedef struct {
-    TotalWorkoutsChartViewModel totalWorkoutsModel;
-    WorkoutTypeChartViewModel workoutTypeModel;
-    LiftChartViewModel liftModel;
-    struct XAxisFormatter {
+    TotalWorkoutsChartModel totalWorkouts;
+    WorkoutTypeChartModel workoutTypes;
+    LiftChartModel lifts;
+    struct HistFormatter {
         CFStringRef months[12];
         CFStringRef currString;
+        struct HistTimeData data[128];
     } formatter;
-    Array_weekData *data;
+    int nEntries[3];
 } HistoryViewModel;
 
 typedef struct {
@@ -66,5 +64,6 @@ typedef struct {
 } HistoryTabCoordinator;
 
 void historyCoordinator_start(HistoryTabCoordinator *this);
+void historyCoordinator_clearData(HistoryTabCoordinator *this, bool callVC);
 
 #endif /* HistoryTabCoordinator_h */

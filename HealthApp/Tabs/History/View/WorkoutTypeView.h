@@ -8,10 +8,10 @@ extern Ivar WorkoutTypeViewDataRef;
 
 typedef struct __workoutTypeVData {
     id chart;
-    WorkoutTypeChartViewModel *model;
+    WorkoutTypeChartModel *model;
 } WorkoutTypeViewData;
 
-id workoutTypeView_init(WorkoutTypeChartViewModel *model, id formatter);
-void workoutTypeView_update(id self, int count, bool isSmall);
+id workoutTypeView_init(WorkoutTypeChartModel *model, id formatter);
+void workoutTypeView_update(id self, int count, int index);
 
 #endif /* WorkoutTypeView_h */

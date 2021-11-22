@@ -14,7 +14,9 @@ Protocol *getValueFormatterType(void) { return @protocol(AxisValueFormatter); }
 
 SEL getValueFormatterAction(void) { return @selector(stringForValue:axis:); }
 
-void disableLineChartView(LineChartView *v) { v.data = nil; }
+void disableLineChartView(LineChartView *v) { [v setData:nil axisMax:0]; }
+
+void updateChart(LineChartView *v, LineChartData *data, float max) { [v setData:data axisMax:max]; }
 
 int getOSVersion(void) {
     if (@available(iOS 14, *)) return 14;
@@ -47,16 +49,4 @@ void replaceDataSetEntries(LineChartDataSet *dataSet, id *entries, int count) {
     CFArrayRef array = CFArrayCreate(NULL, (const void **)entries, count, &(CFArrayCallBacks){0});
     [dataSet replaceEntries:_nsarr(array)];
     CFRelease(array);
-}
-
-void updateDataSet(bool isSmall, int count, LineChartDataSet *set, id *entries) {
-    set.drawCirclesEnabled = isSmall;
-    replaceDataSetEntries(set, entries, count);
-}
-
-void updateChart(bool isSmall, LineChartView *v, LineChartData *data, float axisMax) {
-    [v setAxisMax:axisMax];
-    [data setDrawValues:isSmall];
-    v.data = data;
-    [v animateWithXAxisDuration:isSmall ? 1.5 : 2.5];
 }

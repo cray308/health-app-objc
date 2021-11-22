@@ -7,23 +7,18 @@ import QuartzCore
 import Swift
 import UIKit
 @objc @_inheritsConvenienceInitializers public class LineChartView : UIKit.UIView, UIKit.UIGestureRecognizerDelegate {
-  @objc public var data: Charts.LineChartData? {
-    @objc get
-    @objc set
-  }
+  @objc public func setData(_ newData: Charts.LineChartData?, axisMax: Swift.Double)
   @objc public init(legendEntries: [Charts.LegendEntry], xFormatter: Charts.AxisValueFormatter, options: Swift.UInt8)
   @objc override dynamic public init(frame: CoreGraphics.CGRect)
   @objc required dynamic public init?(coder aDecoder: Foundation.NSCoder)
   @objc deinit
   @objc override dynamic public func tintColorDidChange()
   @objc public func setLineLimit(_ newVal: Swift.Double)
-  @objc public func setAxisMax(_ newVal: Swift.Double)
   @objc override dynamic public func observeValue(forKeyPath keyPath: Swift.String?, of object: Any?, change: [Foundation.NSKeyValueChangeKey : Any]?, context: Swift.UnsafeMutableRawPointer?)
   @objc override dynamic public func draw(_ rect: CoreGraphics.CGRect)
   public func stopDeceleration()
   @objc override dynamic public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIKit.UIGestureRecognizer) -> Swift.Bool
   @objc public func gestureRecognizer(_ gestureRecognizer: UIKit.UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIKit.UIGestureRecognizer) -> Swift.Bool
-  @objc public func animate(xAxisDuration: Foundation.TimeInterval)
 }
 @objc @_inheritsConvenienceInitializers public class ChartUtility : ObjectiveC.NSObject {
   @objc public class func setDarkMode(enabled: Swift.Bool)
@@ -34,7 +29,6 @@ import UIKit
   @objc required override dynamic public init()
   @objc public init(dataSets: [Charts.LineChartDataSet], options: Swift.UInt8)
   required public init(arrayLiteral elements: Charts.LineChartDataSet...)
-  @objc public func setDrawValues(_ enabled: Swift.Bool)
   @objc deinit
   public typealias ArrayLiteralElement = Charts.LineChartDataSet
 }
@@ -75,12 +69,10 @@ extension LineChartData {
     get
   }
 }
-@objc @_inheritsConvenienceInitializers public class LineChartDataSet : ObjectiveC.NSObject, Foundation.NSCopying {
+@objc @_inheritsConvenienceInitializers public class LineChartDataSet : ObjectiveC.NSObject {
   @objc required override dynamic public init()
   @objc public init(colorVal: Swift.Int, lineWidth: Swift.Int, options: Swift.UInt8, fillSet: Charts.LineChartDataSet?)
   @objc public func replaceEntries(_ entries: [Charts.ChartDataEntry])
-  @objc public var drawCirclesEnabled: Swift.Bool
-  @objc public func copy(with zone: ObjectiveC.NSZone? = nil) -> Any
   @objc deinit
 }
 extension LineChartDataSet : Swift.MutableCollection {
@@ -114,20 +106,19 @@ extension LineChartDataSet : Swift.RangeReplaceableCollection {
   public func removeSubrange<R>(_ bounds: R) where R : Swift.RangeExpression, R.Bound == Charts.LineChartDataSet.Index
   public func removeAll(keepingCapacity keepCapacity: Swift.Bool)
 }
-@objc @_inheritsConvenienceInitializers public class ChartDataEntry : ObjectiveC.NSObject, Foundation.NSCopying {
+@objc @_inheritsConvenienceInitializers public class ChartDataEntry : ObjectiveC.NSObject {
   @objc override required dynamic public init()
   @objc public init(x: Swift.Double, y: Swift.Double)
-  @objc public func copy(with zone: ObjectiveC.NSZone? = nil) -> Any
   @objc deinit
 }
 extension ChartDataEntry {
   @objc override dynamic public func isEqual(_ object: Any?) -> Swift.Bool
 }
-@objc public class LegendEntry : ObjectiveC.NSObject {
+@objc @_inheritsConvenienceInitializers public class LegendEntry : ObjectiveC.NSObject {
+  @objc override required dynamic public init()
   @objc public init(colorType: Swift.Int)
   @objc public var label: Swift.String
   @objc deinit
-  @objc override dynamic public init()
 }
 @objc @_inheritsConvenienceInitializers public class AxisBase : ObjectiveC.NSObject {
   @objc override dynamic public init()

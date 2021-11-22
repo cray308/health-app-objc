@@ -223,10 +223,9 @@ SWIFT_PROTOCOL("_TtP6Charts18AxisValueFormatter_")
 
 
 SWIFT_CLASS("_TtC6Charts14ChartDataEntry")
-@interface ChartDataEntry : NSObject <NSCopying>
+@interface ChartDataEntry : NSObject
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 - (nonnull instancetype)initWithX:(double)x y:(double)y OBJC_DESIGNATED_INITIALIZER;
-- (id _Nonnull)copyWithZone:(struct _NSZone * _Nullable)zone SWIFT_WARN_UNUSED_RESULT;
 @end
 
 
@@ -244,10 +243,9 @@ SWIFT_CLASS("_TtC6Charts12ChartUtility")
 
 SWIFT_CLASS("_TtC6Charts11LegendEntry")
 @interface LegendEntry : NSObject
+- (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 - (nonnull instancetype)initWithColorType:(NSInteger)colorType OBJC_DESIGNATED_INITIALIZER;
 @property (nonatomic, copy) NSString * _Nonnull label;
-- (nonnull instancetype)init SWIFT_UNAVAILABLE;
-+ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
 
 @class LineChartDataSet;
@@ -256,7 +254,6 @@ SWIFT_CLASS("_TtC6Charts13LineChartData")
 @interface LineChartData : NSObject
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 - (nonnull instancetype)initWithDataSets:(NSArray<LineChartDataSet *> * _Nonnull)dataSets options:(uint8_t)options OBJC_DESIGNATED_INITIALIZER;
-- (void)setDrawValues:(BOOL)enabled;
 @end
 
 
@@ -265,12 +262,10 @@ SWIFT_CLASS("_TtC6Charts13LineChartData")
 
 
 SWIFT_CLASS("_TtC6Charts16LineChartDataSet")
-@interface LineChartDataSet : NSObject <NSCopying>
+@interface LineChartDataSet : NSObject
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 - (nonnull instancetype)initWithColorVal:(NSInteger)colorVal lineWidth:(NSInteger)lineWidth options:(uint8_t)options fillSet:(LineChartDataSet * _Nullable)fillSet OBJC_DESIGNATED_INITIALIZER;
 - (void)replaceEntries:(NSArray<ChartDataEntry *> * _Nonnull)entries;
-@property (nonatomic) BOOL drawCirclesEnabled;
-- (id _Nonnull)copyWithZone:(struct _NSZone * _Nullable)zone SWIFT_WARN_UNUSED_RESULT;
 @end
 
 
@@ -281,18 +276,16 @@ SWIFT_CLASS("_TtC6Charts16LineChartDataSet")
 
 SWIFT_CLASS("_TtC6Charts13LineChartView")
 @interface LineChartView : UIView <UIGestureRecognizerDelegate>
-@property (nonatomic, strong) LineChartData * _Nullable data;
+- (void)setData:(LineChartData * _Nullable)newData axisMax:(double)axisMax;
 - (nonnull instancetype)initWithLegendEntries:(NSArray<LegendEntry *> * _Nonnull)legendEntries xFormatter:(id <AxisValueFormatter> _Nonnull)xFormatter options:(uint8_t)options OBJC_DESIGNATED_INITIALIZER;
 - (nonnull instancetype)initWithFrame:(CGRect)frame OBJC_DESIGNATED_INITIALIZER;
 - (nullable instancetype)initWithCoder:(NSCoder * _Nonnull)aDecoder OBJC_DESIGNATED_INITIALIZER;
 - (void)tintColorDidChange;
 - (void)setLineLimit:(double)newVal;
-- (void)setAxisMax:(double)newVal;
 - (void)observeValueForKeyPath:(NSString * _Nullable)keyPath ofObject:(id _Nullable)object change:(NSDictionary<NSKeyValueChangeKey, id> * _Nullable)change context:(void * _Nullable)context;
 - (void)drawRect:(CGRect)rect;
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer * _Nonnull)gestureRecognizer SWIFT_WARN_UNUSED_RESULT;
 - (BOOL)gestureRecognizer:(UIGestureRecognizer * _Nonnull)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer * _Nonnull)otherGestureRecognizer SWIFT_WARN_UNUSED_RESULT;
-- (void)animateWithXAxisDuration:(NSTimeInterval)xAxisDuration;
 @end
 
 

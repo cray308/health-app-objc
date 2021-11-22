@@ -89,12 +89,9 @@ void appCoordinator_deleteAppData(void) {
     appUserData_deleteSavedData();
     persistenceService_deleteUserData();
     HomeTabCoordinator *home = (HomeTabCoordinator *) appCoordinator->children[TabHome];
-    HistoryTabCoordinator *hist = (HistoryTabCoordinator *) appCoordinator->children[TabHistory];
     homeVC_updateWorkoutsList(getFirstVC(home->navVC));
-    array_clear(weekData, hist->model.data);
-    if (appCoordinator->loadedViewControllers & LoadedVC_History) {
-        historyVC_refresh(getFirstVC(hist->navVC));
-    }
+    bool reloadScreen = appCoordinator->loadedViewControllers & LoadedVC_History;
+    historyCoordinator_clearData(appCoordinator->children[TabHistory], reloadScreen);
 }
 
 void appCoordinator_updateMaxWeights(short *weights) {

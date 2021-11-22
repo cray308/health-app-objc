@@ -8,10 +8,10 @@ extern Ivar LiftViewDataRef;
 
 typedef struct __liftVData {
     id chart;
-    LiftChartViewModel *model;
+    LiftChartModel *model;
 } LiftViewData;
 
-id liftingView_init(LiftChartViewModel *model, id formatter);
-void liftingView_update(id self, int count, bool isSmall);
+id liftingView_init(LiftChartModel *model, id formatter);
+void liftingView_update(id self, int count, int index);
 
 #endif /* LiftingView_h */

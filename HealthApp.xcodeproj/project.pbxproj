@@ -35,8 +35,6 @@
 		611EDDE827476ED50064B254 /* HistoryVC.h in Headers */ = {isa = PBXBuildFile; fileRef = 611EDDE627476ED50064B254 /* HistoryVC.h */; };
 		611EDDE927476ED50064B254 /* HistoryVC.c in Sources */ = {isa = PBXBuildFile; fileRef = 611EDDE727476ED50064B254 /* HistoryVC.c */; };
 		612FD048266DAF25002C9993 /* WorkoutData.plist in Resources */ = {isa = PBXBuildFile; fileRef = 612FD047266DAF25002C9993 /* WorkoutData.plist */; };
-		613A51B5274A15A800BF6D38 /* Charts.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 613A51B2274A15A200BF6D38 /* Charts.xcframework */; };
-		613A51B6274A15A800BF6D38 /* Charts.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 613A51B2274A15A200BF6D38 /* Charts.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		614DA69A270A8D1F00EC90C4 /* ExerciseManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 614DA698270A8D1F00EC90C4 /* ExerciseManager.h */; };
 		614DA69B270A8D1F00EC90C4 /* ExerciseManager.c in Sources */ = {isa = PBXBuildFile; fileRef = 614DA699270A8D1F00EC90C4 /* ExerciseManager.c */; };
 		614DC13026082BBE00B9588E /* ViewControllerHelpers.c in Sources */ = {isa = PBXBuildFile; fileRef = 614DC12F26082BBE00B9588E /* ViewControllerHelpers.c */; };
@@ -68,6 +66,8 @@
 		61C779A426102E20001326A1 /* AddWorkoutCoordinator.c in Sources */ = {isa = PBXBuildFile; fileRef = 61C779A326102E20001326A1 /* AddWorkoutCoordinator.c */; };
 		61E8ED6726FD60B400942368 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 61E8ED6926FD60B400942368 /* Localizable.strings */; };
 		61E8ED6C26FD87AB00942368 /* WorkoutData_d.plist in Resources */ = {isa = PBXBuildFile; fileRef = 61E8ED6B26FD87AB00942368 /* WorkoutData_d.plist */; };
+		61F41727274B1643009B14D0 /* Charts.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61F41724274B163F009B14D0 /* Charts.xcframework */; };
+		61F41728274B1643009B14D0 /* Charts.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 61F41724274B163F009B14D0 /* Charts.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		61FFEEA2272CCCB5002BFFA6 /* AppDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 61FFEEA1272CCCAE002BFFA6 /* AppDelegate.h */; };
 /* End PBXBuildFile section */
 
@@ -88,7 +88,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				613A51B6274A15A800BF6D38 /* Charts.xcframework in Embed Frameworks */,
+				61F41728274B1643009B14D0 /* Charts.xcframework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -124,7 +124,6 @@
 		611EDDE627476ED50064B254 /* HistoryVC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HistoryVC.h; sourceTree = "<group>"; };
 		611EDDE727476ED50064B254 /* HistoryVC.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = HistoryVC.c; sourceTree = "<group>"; };
 		612FD047266DAF25002C9993 /* WorkoutData.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = WorkoutData.plist; sourceTree = "<group>"; };
-		613A51B2274A15A200BF6D38 /* Charts.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = Charts.xcframework; sourceTree = "<group>"; };
 		614DA698270A8D1F00EC90C4 /* ExerciseManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ExerciseManager.h; sourceTree = "<group>"; };
 		614DA699270A8D1F00EC90C4 /* ExerciseManager.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = ExerciseManager.c; sourceTree = "<group>"; };
 		614DC12826081E9E00B9588E /* ViewControllerHelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewControllerHelpers.h; sourceTree = "<group>"; };
@@ -170,6 +169,7 @@
 		61C779A326102E20001326A1 /* AddWorkoutCoordinator.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = AddWorkoutCoordinator.c; sourceTree = "<group>"; };
 		61E8ED6826FD60B400942368 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		61E8ED6B26FD87AB00942368 /* WorkoutData_d.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = WorkoutData_d.plist; sourceTree = "<group>"; };
+		61F41724274B163F009B14D0 /* Charts.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = Charts.xcframework; sourceTree = "<group>"; };
 		61FFEEA1272CCCAE002BFFA6 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -178,7 +178,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				613A51B5274A15A800BF6D38 /* Charts.xcframework in Frameworks */,
+				61F41727274B1643009B14D0 /* Charts.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -288,7 +288,7 @@
 		6185D9B926E4263700DB2BF2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				613A51B2274A15A200BF6D38 /* Charts.xcframework */,
+				61F41724274B163F009B14D0 /* Charts.xcframework */,
 			);
 			path = Frameworks;
 			sourceTree = "<group>";
