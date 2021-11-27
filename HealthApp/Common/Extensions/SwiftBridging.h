@@ -3,8 +3,8 @@
 
 #include "ViewControllerHelpers.h"
 
-id createChartView(id xAxisFormatter, CFArrayRef legendArr, uint8_t options);
-void replaceDataSetEntries(id dataSet, id *entries, int count);
+id createChartView(id formatter, long *colors, int count, uint8_t options);
+void replaceDataSetEntries(id dataSet, CGPoint *entries, int count);
 void updateChart(id view, id data, float axisMax);
 
 #endif /* SwiftBridging_h */

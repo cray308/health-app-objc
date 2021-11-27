@@ -9,14 +9,12 @@ id liftingView_init(LiftChartModel *model, id formatter) {
     LiftViewData *data = malloc(sizeof(LiftViewData));
     data->model = model;
 
-    CFArrayRef legendArr = CFArrayCreate(NULL, (const void **)model->legendEntries, 4,
-                                         &(CFArrayCallBacks){0});
-    data->chart = createChartView(formatter, legendArr, 0);
+    data->chart = createChartView(formatter, (long[]){0, 1, 2, 3}, 4, 0);
+    disableAutoresizing(data->chart);
     addSubview(self, data->chart);
     pin(data->chart, self, (Padding){0, 8, 0, 8}, 0);
     setHeight(data->chart, 550);
     object_setIvar(self, LiftViewDataRef, (id) data);
-    CFRelease(legendArr);
     return self;
 }
 

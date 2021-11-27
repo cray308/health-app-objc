@@ -209,28 +209,12 @@ typedef unsigned int swift_uint4  __attribute__((__ext_vector_type__(4)));
 # pragma pop_macro("any")
 #endif
 
+@class DataSet;
 
-SWIFT_CLASS("_TtC6Charts8AxisBase")
-@interface AxisBase : NSObject
+SWIFT_CLASS("_TtC6Charts9ChartData")
+@interface ChartData : NSObject
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
-@end
-
-
-SWIFT_PROTOCOL("_TtP6Charts18AxisValueFormatter_")
-@protocol AxisValueFormatter
-- (NSString * _Nonnull)stringForValue:(double)value axis:(AxisBase * _Nullable)axis SWIFT_WARN_UNUSED_RESULT;
-@end
-
-
-SWIFT_CLASS("_TtC6Charts14ChartDataEntry")
-@interface ChartDataEntry : NSObject
-- (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
-- (nonnull instancetype)initWithX:(double)x y:(double)y OBJC_DESIGNATED_INITIALIZER;
-@end
-
-
-@interface ChartDataEntry (SWIFT_EXTENSION(Charts))
-- (BOOL)isEqual:(id _Nullable)object SWIFT_WARN_UNUSED_RESULT;
+- (nonnull instancetype)initWithDataSets:(NSArray<DataSet *> * _Nonnull)dataSets lineWidth:(NSInteger)lineWidth options:(uint8_t)options OBJC_DESIGNATED_INITIALIZER;
 @end
 
 
@@ -241,53 +225,38 @@ SWIFT_CLASS("_TtC6Charts12ChartUtility")
 @end
 
 
-SWIFT_CLASS("_TtC6Charts11LegendEntry")
-@interface LegendEntry : NSObject
+SWIFT_CLASS("_TtC6Charts7DataSet")
+@interface DataSet : NSObject
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
-- (nonnull instancetype)initWithColorType:(NSInteger)colorType OBJC_DESIGNATED_INITIALIZER;
-@property (nonatomic, copy) NSString * _Nonnull label;
+- (nonnull instancetype)initWithColorVal:(NSInteger)colorVal fillSet:(DataSet * _Nullable)fillSet OBJC_DESIGNATED_INITIALIZER;
+- (void)replaceEntries:(CGPoint const * _Nonnull)ptr count:(NSInteger)count;
 @end
 
-@class LineChartDataSet;
-
-SWIFT_CLASS("_TtC6Charts13LineChartData")
-@interface LineChartData : NSObject
-- (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
-- (nonnull instancetype)initWithDataSets:(NSArray<LineChartDataSet *> * _Nonnull)dataSets options:(uint8_t)options OBJC_DESIGNATED_INITIALIZER;
-@end
-
-
-
-
-
-
-SWIFT_CLASS("_TtC6Charts16LineChartDataSet")
-@interface LineChartDataSet : NSObject
-- (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
-- (nonnull instancetype)initWithColorVal:(NSInteger)colorVal lineWidth:(NSInteger)lineWidth options:(uint8_t)options fillSet:(LineChartDataSet * _Nullable)fillSet OBJC_DESIGNATED_INITIALIZER;
-- (void)replaceEntries:(NSArray<ChartDataEntry *> * _Nonnull)entries;
-@end
-
-
-
-
+@protocol ValueFormatter;
 @class NSCoder;
 @class UIGestureRecognizer;
 
-SWIFT_CLASS("_TtC6Charts13LineChartView")
-@interface LineChartView : UIView <UIGestureRecognizerDelegate>
-- (void)setData:(LineChartData * _Nullable)newData axisMax:(double)axisMax;
-- (nonnull instancetype)initWithLegendEntries:(NSArray<LegendEntry *> * _Nonnull)legendEntries xFormatter:(id <AxisValueFormatter> _Nonnull)xFormatter options:(uint8_t)options OBJC_DESIGNATED_INITIALIZER;
+SWIFT_CLASS("_TtC6Charts9LineChart")
+@interface LineChart : UIView <UIGestureRecognizerDelegate>
+- (void)setData:(ChartData * _Nullable)newData axisMax:(CGFloat)axisMax;
+- (void)setLegendLabel:(NSInteger)index text:(NSString * _Nonnull)text;
+- (nonnull instancetype)initWithColors:(NSInteger const * _Nonnull)colors count:(NSInteger)count xFormatter:(id <ValueFormatter> _Nonnull)xFormatter options:(uint8_t)options OBJC_DESIGNATED_INITIALIZER;
 - (nonnull instancetype)initWithFrame:(CGRect)frame OBJC_DESIGNATED_INITIALIZER;
 - (nullable instancetype)initWithCoder:(NSCoder * _Nonnull)aDecoder OBJC_DESIGNATED_INITIALIZER;
 - (void)tintColorDidChange;
-- (void)setLineLimit:(double)newVal;
+- (void)setLineLimit:(CGFloat)newVal;
 - (void)observeValueForKeyPath:(NSString * _Nullable)keyPath ofObject:(id _Nullable)object change:(NSDictionary<NSKeyValueChangeKey, id> * _Nullable)change context:(void * _Nullable)context;
 - (void)drawRect:(CGRect)rect;
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer * _Nonnull)gestureRecognizer SWIFT_WARN_UNUSED_RESULT;
 - (BOOL)gestureRecognizer:(UIGestureRecognizer * _Nonnull)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer * _Nonnull)otherGestureRecognizer SWIFT_WARN_UNUSED_RESULT;
 @end
 
+
+
+SWIFT_PROTOCOL("_TtP6Charts14ValueFormatter_")
+@protocol ValueFormatter
+- (NSString * _Nonnull)stringForValue:(CGFloat)value SWIFT_WARN_UNUSED_RESULT;
+@end
 
 #if __has_attribute(external_source_symbol)
 # pragma clang attribute pop

@@ -11,14 +11,12 @@ id totalWorkoutsView_init(TotalWorkoutsChartModel *model, id formatter) {
     TotalWorkoutsViewData *data = malloc(sizeof(TotalWorkoutsViewData));
     data->model = model;
 
-    CFArrayRef legendArr = CFArrayCreate(NULL, (const void **)model->legendEntries, 1,
-                                         &(CFArrayCallBacks){0});
-    data->chart = createChartView(formatter, legendArr, 1);
+    data->chart = createChartView(formatter, (long[]){4}, 1, 1);
+    disableAutoresizing(data->chart);
     addSubview(self, data->chart);
     pin(data->chart, self, (Padding){0, 8, 0, 8}, 0);
     setHeight(data->chart, 390);
     object_setIvar(self, TotalWorkoutsViewDataRef, (id) data);
-    CFRelease(legendArr);
     return self;
 }
 

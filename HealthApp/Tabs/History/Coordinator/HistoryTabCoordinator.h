@@ -1,9 +1,11 @@
 #ifndef HistoryTabCoordinator_h
 #define HistoryTabCoordinator_h
 
-#include <CoreFoundation/CFBase.h>
+#include <CoreGraphics/CGGeometry.h>
 #include <objc/runtime.h>
-#include "ObjectArray.h"
+#include "array.h"
+
+gen_array_headers(pt, CGPoint)
 
 struct HistTimeData {
     short year;
@@ -12,35 +14,32 @@ struct HistTimeData {
 };
 
 typedef struct {
-    Array_object *entries;
+    Array_pt *entries;
     CFStringRef legendFormat;
-    id legendEntries[1];
     id dataSet;
     id chartData;
-    id *dataArrays[3];
+    CGPoint *dataArrays[3];
     float avgs[3];
     float maxes[3];
 } TotalWorkoutsChartModel;
 
 typedef struct {
-    Array_object *entries[5];
+    Array_pt *entries[5];
     CFStringRef legendFormat;
-    id legendEntries[4];
     id dataSets[5];
     id chartData;
-    id *dataArrays[3][5];
+    CGPoint *dataArrays[3][5];
     int avgs[3][4];
     float maxes[3];
     CFStringRef names[4];
 } WorkoutTypeChartModel;
 
 typedef struct {
-    Array_object *entries[4];
+    Array_pt *entries[4];
     CFStringRef legendFormat;
-    id legendEntries[4];
     id dataSets[4];
     id chartData;
-    id *dataArrays[3][4];
+    CGPoint *dataArrays[3][4];
     float avgs[3][4];
     float maxes[3];
     CFStringRef names[4];

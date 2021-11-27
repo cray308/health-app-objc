@@ -6,6 +6,8 @@
 #include "SwiftBridging.h"
 #include "ViewControllerHelpers.h"
 
+gen_array_source(pt, CGPoint, DSDefault_shallowCopy, DSDefault_shallowDelete)
+
 struct WeekDataModel {
     struct HistTimeData timeData;
     int totalWorkouts;
@@ -14,29 +16,25 @@ struct WeekDataModel {
     short weightArray[4];
 };
 
-extern id createDataSet(int color, int lineWidth, uint8_t options, id fillSet);
-extern id createChartData(id *dataSets, int count, uint8_t options);
+extern id createDataSet(int color, id fillSet);
+extern id createChartData(CFArrayRef dataSets, int lineWidth, uint8_t options);
 extern void setLegendLabel(id entry, CFStringRef text);
-extern void setupLegendEntries(id *entries, int *colors, int count);
-extern id createChartEntry(int x, int y);
 
 static void populateData(HistoryViewModel *m, struct WeekDataModel *results, int size);
 
-static inline void createNewEntry(Array_object *arr, int x, int y) {
-    array_push_back(object, arr, createChartEntry(x, y));
+static inline void createNewEntry(Array_pt *arr, int x, int y) {
+    CGPoint point = {x, y};
+    array_push_back(pt, arr, point);
 }
 
 void historyCoordinator_start(HistoryTabCoordinator *this) {
     HistoryViewModel *model = &this->model;
     int chartColors[] = {0, 1, 2, 3};
     id *areaDataSets = model->workoutTypes.dataSets;
-    setupLegendEntries(model->totalWorkouts.legendEntries, (int []){4}, 1);
-    setupLegendEntries(model->workoutTypes.legendEntries, chartColors, 4);
-    setupLegendEntries(model->lifts.legendEntries, chartColors, 4);
 
-    model->totalWorkouts.entries = array_new(object);
-    model->totalWorkouts.dataSet = createDataSet(5, 1, 3, nil);
-    model->workoutTypes.dataSets[0] = createDataSet(-1, 1, 0, nil);
+    model->totalWorkouts.entries = array_new(pt);
+    model->totalWorkouts.dataSet = createDataSet(5, nil);
+    model->workoutTypes.dataSets[0] = createDataSet(-1, nil);
     fillStringArray(model->workoutTypes.names, CFSTR("workoutTypes%d"), 4);
     fillStringArray(model->lifts.names, CFSTR("liftTypes%d"), 4);
     fillStringArray(model->formatter.months, CFSTR("months%02d"), 12);
@@ -46,22 +44,27 @@ void historyCoordinator_start(HistoryTabCoordinator *this) {
     model->workoutTypes.legendFormat = localize(CFSTR("workoutTypeLegend"));
 
     for (int i = 0; i < 4; ++i) {
-        model->workoutTypes.entries[i] = array_new(object);
-        model->lifts.entries[i] = array_new(object);
+        model->workoutTypes.entries[i] = array_new(pt);
+        model->lifts.entries[i] = array_new(pt);
 
         id boundary = model->workoutTypes.dataSets[i];
-        model->workoutTypes.dataSets[i + 1] = createDataSet(chartColors[i], 1, 1, boundary);
-        model->lifts.dataSets[i] = createDataSet(chartColors[i], 3, 0, nil);
+        model->workoutTypes.dataSets[i + 1] = createDataSet(chartColors[i], boundary);
+        model->lifts.dataSets[i] = createDataSet(chartColors[i], nil);
     }
-    model->workoutTypes.entries[4] = array_new(object);
+    model->workoutTypes.entries[4] = array_new(pt);
 
-    model->totalWorkouts.chartData = createChartData((id []){
-        model->totalWorkouts.dataSet
-    }, 1, 0);
-    model->workoutTypes.chartData = createChartData((id []){
+    CFArrayRef dataArr = CFArrayCreate(NULL, (const void **)(id []){model->totalWorkouts.dataSet},
+                                       1, &(CFArrayCallBacks){0});
+    model->totalWorkouts.chartData = createChartData(dataArr, 1, 3);
+    CFRelease(dataArr);
+    dataArr = CFArrayCreate(NULL, (const void **)(id []){
         areaDataSets[4], areaDataSets[3], areaDataSets[2], areaDataSets[1]
-    }, 4, 1);
-    model->lifts.chartData = createChartData(model->lifts.dataSets, 4, 0);
+    }, 4, &(CFArrayCallBacks){0});
+    model->workoutTypes.chartData = createChartData(dataArr, 1, 5);
+    CFRelease(dataArr);
+    dataArr = CFArrayCreate(NULL, (const void **)model->lifts.dataSets, 4, &(CFArrayCallBacks){0});
+    model->lifts.chartData = createChartData(dataArr, 3, 0);
+    CFRelease(dataArr);
 
     setupNavVC(this->navVC, historyVC_init(this));
 }
@@ -232,12 +235,12 @@ void historyCoordinator_clearData(HistoryTabCoordinator *this, bool callVC) {
         memset(model->lifts.avgs[i], 0, sizeof(float) << 2);
     }
 
-    array_clear(object, model->totalWorkouts.entries);
+    array_clear(pt, model->totalWorkouts.entries);
     for (int i = 0; i < 4; ++i) {
-        array_clear(object, model->workoutTypes.entries[i]);
-        array_clear(object, model->lifts.entries[i]);
+        array_clear(pt, model->workoutTypes.entries[i]);
+        array_clear(pt, model->lifts.entries[i]);
     }
-    array_clear(object, model->workoutTypes.entries[4]);
+    array_clear(pt, model->workoutTypes.entries[4]);
 
     replaceDataSetEntries(model->totalWorkouts.dataSet, model->totalWorkouts.entries->arr, 0);
     for (int i = 0; i < 4; ++i) {

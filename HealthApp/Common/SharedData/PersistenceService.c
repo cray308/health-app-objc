@@ -65,7 +65,7 @@ id fetchRequest(id predicate) {
 void persistenceService_create(void) {
     runInBackground((^{
         int16_t lifts[] = {300, 20, 185, 235};
-        int i = 0;
+        int i = 0, r = 0;
         unsigned char plan = 0;
         time_t start = date_calcStartOfWeek(time(NULL) - 126489600);
         time_t end = date_calcStartOfWeek(time(NULL) - 2678400);
@@ -74,6 +74,11 @@ void persistenceService_create(void) {
             int16_t totalWorkouts = 0;
             int16_t times[4] = {0};
             id data = createWeekData();
+            int addnlTime = 0, addnlWk = 1;
+            if (r == 0 || (i < 24)) {
+                addnlTime = rand() % 40;
+                addnlWk += rand() % 5;
+            }
             weekData_setWeekStart(data, start);
 
             if (plan == 0) {
@@ -84,16 +89,16 @@ void persistenceService_create(void) {
                         case 1:
                         case 2:
                         case 5:
-                            times[2] += ((rand() % 30) + 30);
-                            totalWorkouts += 1;
+                            times[2] += ((rand() % 30) + 30 + addnlTime);
+                            totalWorkouts += addnlWk;
                             break;
                         case 4:
                             if ((didSE = (rand() % 10 >= 5))) extra = 0;
                         case 0:
                         case 3:
                             if (didSE) {
-                                times[1] += ((rand() % 20) + extra);
-                                totalWorkouts += 1;
+                                times[1] += ((rand() % 20) + extra + addnlTime);
+                                totalWorkouts += addnlWk;
                             }
                         default:
                             break;
@@ -105,17 +110,17 @@ void persistenceService_create(void) {
                         case 0:
                         case 2:
                         case 4:
-                            times[0] += ((rand() % 20) + 20);
-                            totalWorkouts += 1;
+                            times[0] += ((rand() % 20) + 20 + addnlTime);
+                            totalWorkouts += addnlWk;
                             break;
                         case 1:
                         case 3:
-                            times[3] += ((rand() % 20) + 15);
-                            totalWorkouts += 1;
+                            times[3] += ((rand() % 20) + 15 + addnlTime);
+                            totalWorkouts += addnlWk;
                             break;
                         case 5:
-                            times[2] += ((rand() % 30) + 60);
-                            totalWorkouts += 1;
+                            times[2] += ((rand() % 30) + 60 + addnlTime);
+                            totalWorkouts += addnlWk;
                         default:
                             break;
                     }
@@ -140,6 +145,7 @@ void persistenceService_create(void) {
             if (++i == 52) {
                 i = 0;
                 plan = 0;
+                r += 1;
             }
             start += WeekSeconds;
         }

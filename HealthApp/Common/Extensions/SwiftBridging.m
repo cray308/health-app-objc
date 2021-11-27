@@ -4,19 +4,19 @@
 
 void toggleDarkModeForCharts(bool enabled) { [ChartUtility setDarkModeWithEnabled:enabled]; }
 
-id createChartEntry(int x, int y) { return [[ChartDataEntry alloc] initWithX:x y:y]; }
+void setLegendLabel(LineChart *v, int index, CFStringRef text) {
+    [v setLegendLabel:index text:_nsstr(text)];
+}
 
-void setLegendLabel(LegendEntry *entry, CFStringRef text) { entry.label = _nsstr(text); }
+void setLineLimit(LineChart *v, float limit) { [v setLineLimit:limit]; }
 
-void setLineLimit(LineChartView *v, float limit) { [v setLineLimit:limit]; }
+Protocol *getValueFormatterType(void) { return @protocol(ValueFormatter); }
 
-Protocol *getValueFormatterType(void) { return @protocol(AxisValueFormatter); }
+SEL getValueFormatterAction(void) { return @selector(stringForValue:); }
 
-SEL getValueFormatterAction(void) { return @selector(stringForValue:axis:); }
+void disableLineChartView(LineChart *v) { [v setData:nil axisMax:0]; }
 
-void disableLineChartView(LineChartView *v) { [v setData:nil axisMax:0]; }
-
-void updateChart(LineChartView *v, LineChartData *data, float max) { [v setData:data axisMax:max]; }
+void updateChart(LineChart *v, ChartData *data, float max) { [v setData:data axisMax:max]; }
 
 int getOSVersion(void) {
     if (@available(iOS 14, *)) return 14;
@@ -24,29 +24,18 @@ int getOSVersion(void) {
     return 12;
 }
 
-id createChartView(id formatter, CFArrayRef legendArr, uint8_t options) {
-    LineChartView *v = [[LineChartView alloc] initWithLegendEntries:_nsarr(legendArr) xFormatter:formatter options:options];
-    v.translatesAutoresizingMaskIntoConstraints = false;
-    return v;
+id createChartView(id formatter, long *colors, int count, uint8_t options) {
+    return [[LineChart alloc] initWithColors:colors count:count xFormatter:formatter options:options];
 }
 
-id createDataSet(int color, int lineWidth, uint8_t options, LineChartDataSet *fillSet) {
-    return [[LineChartDataSet alloc] initWithColorVal:color lineWidth:lineWidth options:options fillSet:fillSet];
+id createDataSet(int color, DataSet *fillSet) {
+    return [[DataSet alloc] initWithColorVal:color fillSet:fillSet];
 }
 
-id createChartData(id *dataSets, int count, uint8_t options) {
-    CFArrayRef arr = CFArrayCreate(NULL, (const void **)dataSets, count, &(CFArrayCallBacks){0});
-    id data = [[LineChartData alloc] initWithDataSets:_nsarr(arr) options:options];
-    CFRelease(arr);
-    return data;
+id createChartData(CFArrayRef dataSets, int lineWidth, uint8_t options) {
+    return [[ChartData alloc] initWithDataSets:_nsarr(dataSets) lineWidth:lineWidth options:options];
 }
 
-void setupLegendEntries(id *entries, int *colors, int count) {
-    for (int i = 0; i < count; ++i) entries[i] = [[LegendEntry alloc] initWithColorType:colors[i]];
-}
-
-void replaceDataSetEntries(LineChartDataSet *dataSet, id *entries, int count) {
-    CFArrayRef array = CFArrayCreate(NULL, (const void **)entries, count, &(CFArrayCallBacks){0});
-    [dataSet replaceEntries:_nsarr(array)];
-    CFRelease(array);
+void replaceDataSetEntries(DataSet *dataSet, CGPoint *entries, int count) {
+    [dataSet replaceEntries:entries count:count];
 }

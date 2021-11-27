@@ -142,7 +142,7 @@ int main(int argc, char *argv[]) {
     class_addMethod(HistoryVCClass, viewLoad, (IMP) historyVC_viewDidLoad, voidSig);
     class_addMethod(HistoryVCClass, btnTap, (IMP) historyVC_updateSegment, tapSig);
     class_addMethod(HistoryVCClass, getValueFormatterAction(),
-                    (IMP) historyVC_stringForValue, "@@:d@");
+                    (IMP) historyVC_stringForValue, "@@:d");
     objc_registerClassPair(HistoryVCClass);
     HistoryVCDataRef = class_getInstanceVariable(HistoryVCClass, dataKey);
 

@@ -17,6 +17,6 @@ void historyVC_refresh(id vc);
 void historyVC_updateColors(id vc);
 void historyVC_viewDidLoad(id self, SEL _cmd);
 void historyVC_updateSegment(id self, SEL _cmd, id picker);
-CFStringRef historyVC_stringForValue(id self, SEL _cmd, double value, id axis);
+CFStringRef historyVC_stringForValue(id self, SEL _cmd, double value);
 
 #endif /* HistoryVC_h */

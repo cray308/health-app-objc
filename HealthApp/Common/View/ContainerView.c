@@ -2,6 +2,8 @@
 #include "CocoaHelpers.h"
 #include "Views.h"
 
+gen_array_source(object, id, DSDefault_shallowCopy, releaseObj)
+
 Class ContainerViewClass;
 Ivar ContainerViewDataRef;
 

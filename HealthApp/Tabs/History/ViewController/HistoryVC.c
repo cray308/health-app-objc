@@ -7,8 +7,7 @@
 #include "TotalWorkoutsView.h"
 #include "WorkoutTypeView.h"
 
-extern id createChartEntry(int x, int y);
-extern void setLegendLabel(id entry, CFStringRef text);
+extern void setLegendLabel(id v, int index, CFStringRef text);
 extern void disableLineChartView(id v);
 
 Class HistoryVCClass;
@@ -70,12 +69,12 @@ void historyVC_viewDidLoad(id self, SEL _cmd) {
 void historyVC_updateSegment(id self, SEL _cmd _U_, id picker) {
     HistoryVCData *data = (HistoryVCData *) object_getIvar(self, HistoryVCDataRef);
     HistoryViewModel *model = data->model;
+    TotalWorkoutsViewData *twData =
+    (TotalWorkoutsViewData *) object_getIvar(data->charts[0], TotalWorkoutsViewDataRef);
+    WorkoutTypeViewData *aData =
+    (WorkoutTypeViewData *) object_getIvar(data->charts[1], WorkoutTypeViewDataRef);
+    LiftViewData *lData = (LiftViewData *) object_getIvar(data->charts[2], LiftViewDataRef);
     if (!model->nEntries[2]) {
-        TotalWorkoutsViewData *twData =
-        (TotalWorkoutsViewData *) object_getIvar(data->charts[0], TotalWorkoutsViewDataRef);
-        WorkoutTypeViewData *aData =
-        (WorkoutTypeViewData *) object_getIvar(data->charts[1], WorkoutTypeViewDataRef);
-        LiftViewData *lData = (LiftViewData *) object_getIvar(data->charts[2], LiftViewDataRef);
         disableLineChartView(twData->chart);
         disableLineChartView(aData->chart);
         disableLineChartView(lData->chart);
@@ -86,7 +85,7 @@ void historyVC_updateSegment(id self, SEL _cmd _U_, id picker) {
     char buf[10];
     CFStringRef label = CFStringCreateWithFormat(NULL, NULL, model->totalWorkouts.legendFormat,
                                                  model->totalWorkouts.avgs[index]);
-    setLegendLabel(model->totalWorkouts.legendEntries[0], label);
+    setLegendLabel(twData->chart, 0, label);
     CFRelease(label);
 
     for (int i = 0; i < 4; ++i) {
@@ -98,12 +97,12 @@ void historyVC_updateSegment(id self, SEL _cmd _U_, id picker) {
         }
         label = CFStringCreateWithFormat(NULL, NULL, model->workoutTypes.legendFormat,
                                          model->workoutTypes.names[i], buf);
-        setLegendLabel(model->workoutTypes.legendEntries[i], label);
+        setLegendLabel(aData->chart, i, label);
         CFRelease(label);
 
         label = CFStringCreateWithFormat(NULL, NULL, model->lifts.legendFormat,
                                          model->lifts.names[i], model->lifts.avgs[index][i]);
-        setLegendLabel(model->lifts.legendEntries[i], label);
+        setLegendLabel(lData->chart, i, label);
         CFRelease(label);
     }
 
@@ -112,7 +111,7 @@ void historyVC_updateSegment(id self, SEL _cmd _U_, id picker) {
     liftingView_update(data->charts[2], model->nEntries[index], index);
 }
 
-CFStringRef historyVC_stringForValue(id self, SEL _cmd _U_, double value, id axis _U_) {
+CFStringRef historyVC_stringForValue(id self, SEL _cmd _U_, double value) {
     struct HistFormatter *formatter = &((HistoryVCData *)
                                         object_getIvar(self, HistoryVCDataRef))->model->formatter;
     struct HistTimeData *data = &formatter->data[(int) value];

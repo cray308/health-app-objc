@@ -3,7 +3,9 @@
 
 #include <CoreFoundation/CFBase.h>
 #include <objc/runtime.h>
-#include "ObjectArray.h"
+#include "array.h"
+
+gen_array_headers(object, id)
 
 extern Class ContainerViewClass;
 extern Ivar ContainerViewDataRef;

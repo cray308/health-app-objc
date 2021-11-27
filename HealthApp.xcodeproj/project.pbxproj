@@ -57,8 +57,8 @@
 		61594D652606C7C6000D01A1 /* AppUserData.c in Sources */ = {isa = PBXBuildFile; fileRef = 61594D642606C7C6000D01A1 /* AppUserData.c */; };
 		615A1C4C2608406100858C32 /* PersistenceService.c in Sources */ = {isa = PBXBuildFile; fileRef = 615A1C4B2608406100858C32 /* PersistenceService.c */; };
 		6161838226AC80A0001587B2 /* CocoaHelpers.c in Sources */ = {isa = PBXBuildFile; fileRef = 6161838126AC80A0001587B2 /* CocoaHelpers.c */; };
-		61BA4652270FBF290066A981 /* ObjectArray.h in Headers */ = {isa = PBXBuildFile; fileRef = 61BA4650270FBF290066A981 /* ObjectArray.h */; };
-		61BA4653270FBF290066A981 /* ObjectArray.c in Sources */ = {isa = PBXBuildFile; fileRef = 61BA4651270FBF290066A981 /* ObjectArray.c */; };
+		619745022751DC000029254B /* Charts.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 619744FF2751DBFA0029254B /* Charts.xcframework */; };
+		619745032751DC000029254B /* Charts.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 619744FF2751DBFA0029254B /* Charts.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		61BC6F56266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m in Sources */ = {isa = PBXBuildFile; fileRef = 61BC6F52266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61C7793626102C19001326A1 /* HistoryTabCoordinator.c in Sources */ = {isa = PBXBuildFile; fileRef = 61C7793526102C19001326A1 /* HistoryTabCoordinator.c */; };
 		61C7797826102D45001326A1 /* HomeViewModel.c in Sources */ = {isa = PBXBuildFile; fileRef = 61C7797726102D45001326A1 /* HomeViewModel.c */; };
@@ -66,8 +66,6 @@
 		61C779A426102E20001326A1 /* AddWorkoutCoordinator.c in Sources */ = {isa = PBXBuildFile; fileRef = 61C779A326102E20001326A1 /* AddWorkoutCoordinator.c */; };
 		61E8ED6726FD60B400942368 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 61E8ED6926FD60B400942368 /* Localizable.strings */; };
 		61E8ED6C26FD87AB00942368 /* WorkoutData_d.plist in Resources */ = {isa = PBXBuildFile; fileRef = 61E8ED6B26FD87AB00942368 /* WorkoutData_d.plist */; };
-		61F41736274B30A7009B14D0 /* Charts.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61F41733274B30A0009B14D0 /* Charts.xcframework */; };
-		61F41737274B30A7009B14D0 /* Charts.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 61F41733274B30A0009B14D0 /* Charts.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		61FFEEA2272CCCB5002BFFA6 /* AppDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 61FFEEA1272CCCAE002BFFA6 /* AppDelegate.h */; };
 /* End PBXBuildFile section */
 
@@ -88,7 +86,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				61F41737274B30A7009B14D0 /* Charts.xcframework in Embed Frameworks */,
+				619745032751DC000029254B /* Charts.xcframework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -156,8 +154,7 @@
 		615A1C4B2608406100858C32 /* PersistenceService.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = PersistenceService.c; sourceTree = "<group>"; };
 		6161838026AC8089001587B2 /* CocoaHelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CocoaHelpers.h; sourceTree = "<group>"; };
 		6161838126AC80A0001587B2 /* CocoaHelpers.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = CocoaHelpers.c; sourceTree = "<group>"; };
-		61BA4650270FBF290066A981 /* ObjectArray.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ObjectArray.h; sourceTree = "<group>"; };
-		61BA4651270FBF290066A981 /* ObjectArray.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = ObjectArray.c; sourceTree = "<group>"; };
+		619744FF2751DBFA0029254B /* Charts.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = Charts.xcframework; sourceTree = "<group>"; };
 		61BC6F52266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "WeeklyData+CoreDataClass.m"; sourceTree = "<group>"; };
 		61C77914261028BE001326A1 /* HomeTabCoordinator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HomeTabCoordinator.h; sourceTree = "<group>"; };
 		61C7791A26102960001326A1 /* HomeViewModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HomeViewModel.h; sourceTree = "<group>"; };
@@ -169,7 +166,6 @@
 		61C779A326102E20001326A1 /* AddWorkoutCoordinator.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = AddWorkoutCoordinator.c; sourceTree = "<group>"; };
 		61E8ED6826FD60B400942368 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		61E8ED6B26FD87AB00942368 /* WorkoutData_d.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = WorkoutData_d.plist; sourceTree = "<group>"; };
-		61F41733274B30A0009B14D0 /* Charts.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = Charts.xcframework; sourceTree = "<group>"; };
 		61FFEEA1272CCCAE002BFFA6 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -178,7 +174,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				61F41736274B30A7009B14D0 /* Charts.xcframework in Frameworks */,
+				619745022751DC000029254B /* Charts.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -288,7 +284,7 @@
 		6185D9B926E4263700DB2BF2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				61F41733274B30A0009B14D0 /* Charts.xcframework */,
+				619744FF2751DBFA0029254B /* Charts.xcframework */,
 			);
 			path = Frameworks;
 			sourceTree = "<group>";
@@ -463,8 +459,6 @@
 			children = (
 				6161838026AC8089001587B2 /* CocoaHelpers.h */,
 				6161838126AC80A0001587B2 /* CocoaHelpers.c */,
-				61BA4650270FBF290066A981 /* ObjectArray.h */,
-				61BA4651270FBF290066A981 /* ObjectArray.c */,
 				615086F026D3223400521269 /* SwiftBridging.h */,
 				615086EC26D3222500521269 /* SwiftBridging.m */,
 				614DC12826081E9E00B9588E /* ViewControllerHelpers.h */,
@@ -484,7 +478,6 @@
 				611EDDC62744CB2D0064B254 /* UpdateMaxesVC.h in Headers */,
 				6151C91126C4B23200C95A93 /* hash.h in Headers */,
 				61FFEEA2272CCCB5002BFFA6 /* AppDelegate.h in Headers */,
-				61BA4652270FBF290066A981 /* ObjectArray.h in Headers */,
 				611EDDE827476ED50064B254 /* HistoryVC.h in Headers */,
 				61592A892748651500789264 /* WorkoutTypeView.h in Headers */,
 				61592AB027488DD000789264 /* LiftingView.h in Headers */,
@@ -615,7 +608,6 @@
 				6161838226AC80A0001587B2 /* CocoaHelpers.c in Sources */,
 				61594D652606C7C6000D01A1 /* AppUserData.c in Sources */,
 				615A1C4C2608406100858C32 /* PersistenceService.c in Sources */,
-				61BA4653270FBF290066A981 /* ObjectArray.c in Sources */,
 				610B92B5270A67CC00358DBD /* Constraints.c in Sources */,
 				610B92BA270A6E9000358DBD /* Views.c in Sources */,
 				614DC13026082BBE00B9588E /* ViewControllerHelpers.c in Sources */,
