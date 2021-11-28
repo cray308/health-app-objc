@@ -254,7 +254,6 @@ SWIFT_CLASS("_TtC6Charts9LineChart")
 @end
 
 
-
 SWIFT_PROTOCOL("_TtP6Charts14ValueFormatter_")
 @protocol ValueFormatter
 - (NSString * _Nonnull)stringForValue:(CGFloat)value SWIFT_WARN_UNUSED_RESULT;
@@ -519,7 +518,6 @@ SWIFT_CLASS("_TtC6Charts9LineChart")
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer * _Nonnull)gestureRecognizer SWIFT_WARN_UNUSED_RESULT;
 - (BOOL)gestureRecognizer:(UIGestureRecognizer * _Nonnull)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer * _Nonnull)otherGestureRecognizer SWIFT_WARN_UNUSED_RESULT;
 @end
-
 
 
 SWIFT_PROTOCOL("_TtP6Charts14ValueFormatter_")

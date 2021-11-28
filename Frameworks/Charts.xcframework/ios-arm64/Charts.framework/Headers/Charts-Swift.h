@@ -252,7 +252,6 @@ SWIFT_CLASS("_TtC6Charts9LineChart")
 @end
 
 
-
 SWIFT_PROTOCOL("_TtP6Charts14ValueFormatter_")
 @protocol ValueFormatter
 - (NSString * _Nonnull)stringForValue:(CGFloat)value SWIFT_WARN_UNUSED_RESULT;

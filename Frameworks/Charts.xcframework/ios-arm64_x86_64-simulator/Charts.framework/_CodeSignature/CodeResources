@@ -6,7 +6,7 @@
 	<dict>
 		<key>Headers/Charts-Swift.h</key>
 		<data>
-		QUzgMQfV1TfyHLEtjHwErbGMGrU=
+		M085+EAs+xCNxtE9xahOdsDRfaQ=
 		</data>
 		<key>Headers/Charts.h</key>
 		<data>
@@ -26,7 +26,7 @@
 		</data>
 		<key>Modules/Charts.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		C3gqtlcVymF+qIFniLPQxgAcv0s=
+		Wq4B++Up7KliYxMfGDlgCJfqjgQ=
 		</data>
 		<key>Modules/Charts.swiftmodule/arm64.swiftdoc</key>
 		<data>
@@ -38,7 +38,7 @@
 		</data>
 		<key>Modules/Charts.swiftmodule/arm64.swiftmodule</key>
 		<data>
-		C3gqtlcVymF+qIFniLPQxgAcv0s=
+		Wq4B++Up7KliYxMfGDlgCJfqjgQ=
 		</data>
 		<key>Modules/Charts.swiftmodule/x86_64-apple-ios-simulator.swiftdoc</key>
 		<data>
@@ -50,7 +50,7 @@
 		</data>
 		<key>Modules/Charts.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		LipO5W2anBugikmYw0XDL35ylhA=
+		sk+Np94f/KM1xz5WlgCXy9iH6jg=
 		</data>
 		<key>Modules/Charts.swiftmodule/x86_64.swiftdoc</key>
 		<data>
@@ -62,7 +62,7 @@
 		</data>
 		<key>Modules/Charts.swiftmodule/x86_64.swiftmodule</key>
 		<data>
-		LipO5W2anBugikmYw0XDL35ylhA=
+		sk+Np94f/KM1xz5WlgCXy9iH6jg=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -75,7 +75,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			cOtYQHa60d7t8tkF+VBJFClSBD4mpMGv7MzaN7Yd1XM=
+			AEnPztKoSzZm0SRE81pXSdin35ViR+GQmb9k5NzPjko=
 			</data>
 		</dict>
 		<key>Headers/Charts.h</key>
@@ -103,7 +103,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			iqrm3+oGXHg9SzonDlErLy8cU3lRP/SBErRC4kzC3MA=
+			SQ+/asvSt21nLi8GdY+yAwCQ8Nghr5RuNXQeQeb/Ol4=
 			</data>
 		</dict>
 		<key>Modules/Charts.swiftmodule/arm64.swiftdoc</key>
@@ -124,7 +124,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			iqrm3+oGXHg9SzonDlErLy8cU3lRP/SBErRC4kzC3MA=
+			SQ+/asvSt21nLi8GdY+yAwCQ8Nghr5RuNXQeQeb/Ol4=
 			</data>
 		</dict>
 		<key>Modules/Charts.swiftmodule/x86_64-apple-ios-simulator.swiftdoc</key>
@@ -145,7 +145,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			x1y3lOuIgeQIChnnsnnv6/LtXs0Ky6BmGwEGgnQPlAA=
+			H0pilG+XLZYCp2bFZmLlcP1rUbqHiWK3OJFyiSZf+Jk=
 			</data>
 		</dict>
 		<key>Modules/Charts.swiftmodule/x86_64.swiftdoc</key>
@@ -166,7 +166,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			x1y3lOuIgeQIChnnsnnv6/LtXs0Ky6BmGwEGgnQPlAA=
+			H0pilG+XLZYCp2bFZmLlcP1rUbqHiWK3OJFyiSZf+Jk=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>
