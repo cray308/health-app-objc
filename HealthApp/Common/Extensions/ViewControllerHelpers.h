@@ -25,7 +25,7 @@ typedef void (^Callback)(void);
 
 id getFirstVC(id navVC);
 
-void setNavButton(id vc, bool left, id button, CGFloat totalWidth);
+void setNavButton(id vc, bool left, id button, int totalWidth);
 void setVCTitle(id vc, CFStringRef title);
 void dmTabVC_updateColors(id self, SEL _cmd);
 

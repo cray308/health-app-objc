@@ -19,10 +19,10 @@ static inline id createAttribString(CFStringRef text, CFDictionaryRef dict) {
     (_obj, sel_getUid("initWithString:attributes:"), text, dict);
 }
 
-void setNavButton(id vc, bool left, id button, CGFloat totalWidth) {
+void setNavButton(id vc, bool left, id button, int totalWidth) {
     id navItem = getNavItem(vc);
     ((void(*)(id,SEL,CGRect))objc_msgSend)(button, sel_getUid("setFrame:"),
-                                           (CGRect){{0}, {totalWidth / 3, 30}});
+                                           (CGRect){{0}, {totalWidth >> 2, 30}});
     id _obj = allocClass(objc_getClass("UIBarButtonItem"));
     id item = getObjectWithObject(_obj, sel_getUid("initWithCustomView:"), button);
     if (left)

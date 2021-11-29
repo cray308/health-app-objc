@@ -104,14 +104,11 @@ void inputVC_deinit(id self, SEL _cmd) {
     releaseObj(data->toolbar);
     releaseObj(data->scrollView);
     releaseObj(data->vStack);
-    if (osVersion > 10) {
-        id center = getDeviceNotificationCenter();
-        SEL sig = sel_getUid("removeObserver:name:object:");
-        ((void(*)(id,SEL,id,id,id))objc_msgSend)(center, sig,
-                                                 self, UIKeyboardDidShowNotification, nil);
-        ((void(*)(id,SEL,id,id,id))objc_msgSend)(center, sig,
-                                                 self, UIKeyboardWillHideNotification, nil);
-    }
+    id center = getDeviceNotificationCenter();
+    SEL sig = sel_getUid("removeObserver:name:object:");
+    ((void(*)(id,SEL,id,id,id))objc_msgSend)(center, sig, self, UIKeyboardDidShowNotification, nil);
+    ((void(*)(id,SEL,id,id,id))objc_msgSend)(center, sig,
+                                             self, UIKeyboardWillHideNotification, nil);
     free(data);
     ((void(*)(struct objc_super *,SEL))objc_msgSendSuper)(&super, _cmd);
 }
@@ -158,14 +155,12 @@ void inputVC_viewDidLoad(id self, SEL _cmd) {
     releaseObj(flexSpace);
     releaseObj(doneButton);
 
-    if (osVersion > 10) {
-        id center = getDeviceNotificationCenter();
-        SEL sig = sel_getUid("addObserver:selector:name:object:");
-        ((void(*)(id,SEL,id,SEL,id,id))objc_msgSend)
-        (center, sig, self, sel_getUid("keyboardShown:"), UIKeyboardDidShowNotification, nil);
-        ((void(*)(id,SEL,id,SEL,id,id))objc_msgSend)
-        (center, sig, self, sel_getUid("keyboardWillHide:"), UIKeyboardWillHideNotification, nil);
-    }
+    id center = getDeviceNotificationCenter();
+    SEL sig = sel_getUid("addObserver:selector:name:object:");
+    ((void(*)(id,SEL,id,SEL,id,id))objc_msgSend)
+    (center, sig, self, sel_getUid("keyboardShown:"), UIKeyboardDidShowNotification, nil);
+    ((void(*)(id,SEL,id,SEL,id,id))objc_msgSend)
+    (center, sig, self, sel_getUid("keyboardWillHide:"), UIKeyboardWillHideNotification, nil);
 }
 
 void inputVC_viewDidAppear(id self, SEL _cmd, bool animated) {
@@ -175,8 +170,17 @@ void inputVC_viewDidAppear(id self, SEL _cmd, bool animated) {
     InputVCData *data = (InputVCData *) object_getIvar(self, InputVCDataRef);
     if (!data->scrollHeight) {
         CGRect bounds;
+        HAInsets insets;
         getRect(data->scrollView, &bounds, 1);
         data->scrollHeight = bounds.size.height;
+#if defined(__arm64__)
+        insets = ((HAInsets(*)(id,SEL))objc_msgSend)(data->scrollView, sel_getUid("contentInset"));
+#else
+        ((void(*)(HAInsets*,id,SEL))objc_msgSend_stret)(&insets, data->scrollView,
+                                                        sel_getUid("contentInset"));
+#endif
+        data->topOffset = insets.top;
+        data->bottomOffset = insets.bottom;
     }
 }
 
@@ -212,7 +216,7 @@ void inputVC_keyboardShown(id self, SEL _cmd _U_, id notif) {
 #endif
 
     viewRect.size.height -= kbRect.size.height;
-    setScrollInsets(data->scrollView, (HAInsets){0, 0, kbRect.size.height, 0});
+    setScrollInsets(data->scrollView, (HAInsets){data->topOffset, 0, kbRect.size.height, 0});
 
     CGPoint upperY = fieldInView.origin;
     upperY.y += fieldInView.size.height;
@@ -225,7 +229,7 @@ void inputVC_keyboardShown(id self, SEL _cmd _U_, id notif) {
 
 void inputVC_keyboardWillHide(id self, SEL _cmd _U_, id notif _U_) {
     InputVCData *data = (InputVCData *) object_getIvar(self, InputVCDataRef);
-    setScrollInsets(data->scrollView, (HAInsets){0});
+    setScrollInsets(data->scrollView, (HAInsets){data->topOffset, 0, data->bottomOffset, 0});
     CGRect bounds;
     getRect(data->vStack, &bounds, 1);
     toggleScrolling(data->scrollView, (int) bounds.size.height >= data->scrollHeight);

@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
     InputVCClass = objc_allocateClassPair(VCClass, "InputVC", 0);
     class_addProtocol(InputVCClass, objc_getProtocol("UITextFieldDelegate"));
     class_addIvar(InputVCClass, validatorKey,
-                  sizeof(InputVCData*), 0, "^{__inputVCData=ii[4@]@@@@@@}");
+                  sizeof(InputVCData*), 0, "^{__inputVCData=iiss[4@]@@@@@@}");
     class_addMethod(InputVCClass, sel_getUid("initWithNibName:bundle:"),
                     (IMP) inputVC_init, "@@:@@");
     class_addMethod(InputVCClass, deinit, (IMP) inputVC_deinit, voidSig);

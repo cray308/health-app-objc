@@ -27,6 +27,8 @@ typedef struct __inputVData {
 typedef struct __inputVCData {
     int count;
     int scrollHeight;
+    short topOffset;
+    short bottomOffset;
     id children[4];
     USet_char *set;
     id button;
