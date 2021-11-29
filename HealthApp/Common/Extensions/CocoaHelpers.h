@@ -61,12 +61,6 @@
 
 #define getNotificationCenter() staticMethod(objc_getClass("UNUserNotificationCenter"), sel_getUid("currentNotificationCenter"))
 
-enum {
-    Version12 = 12,
-    Version13,
-    Version14
-};
-
 extern CFArrayCallBacks retainedArrCallbacks;
 extern int osVersion;
 

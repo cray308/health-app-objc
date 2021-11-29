@@ -215,7 +215,7 @@ void persistenceService_start(int tzOffset, void (*completion)(void*), void *rec
         int16_t lastLifts[4];
         weekData_getLiftingLimits(last, lastLifts);
 
-        time_t currStart = weekData_getWeekStart(last);
+        time_t currStart = (time_t) weekData_getWeekStart(last);
         currStart += WeekSeconds;
         for (; currStart < userData->weekStart; currStart += WeekSeconds) {
             id curr = createWeekData();

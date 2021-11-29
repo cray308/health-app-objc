@@ -57,14 +57,15 @@ void settingsVC_viewDidLoad(id self, SEL _cmd) {
     data->picker = createSegmentedControl(CFSTR("settingsSegment%d"), 3,
                                           userData->currentPlan + 1, nil, nil, 44);
     id planContainer = createStackView((id []){planLabel, data->picker}, 2, 1, 2,
-                                       (Padding){0, 8, 0, 8});
+                                       (Padding){0, 8, 20, 8});
 
     setMargins(parent->vStack, ((HAInsets){20, 0, 20, 0}));
     addArrangedSubview(parent->vStack, planContainer);
-    setSpacingAfter(parent->vStack, planContainer, 20);
 
-    if (osVersion == Version12) {
-        id switchContainer = createBackgroundView(ColorSecondaryBGGrouped, 44);
+    if (osVersion < 13) {
+        id spacer = createView(false, -1);
+        setHeight(spacer, 20, true);
+        id switchContainer = createBackgroundView(ColorSecondaryBGGrouped, 44, true);
         data->switchView = createObjectWithFrame(objc_getClass("UISwitch"), CGRectZero);
         setBool(data->switchView, sel_getUid("setOn:"), userData->darkMode);
         id label = createLabel(localize(CFSTR("darkMode")), TextBody, 4, true);
@@ -74,24 +75,29 @@ void settingsVC_viewDidLoad(id self, SEL _cmd) {
         pin(sv, switchContainer, (Padding){0}, 0);
 
         addArrangedSubview(parent->vStack, switchContainer);
-        setSpacingAfter(parent->vStack, switchContainer, 20);
+        addArrangedSubview(parent->vStack, spacer);
 
         releaseObj(switchContainer);
         releaseObj(sv);
         releaseObj(label);
+        releaseObj(spacer);
     }
 
     CFStringRef titles[4];
     fillStringArray(titles, CFSTR("maxWeight%d"), 4);
     for (int i = 0; i < 4; ++i)
         inputVC_addChild(self, titles[i], 0, 999);
-    setSpacingAfter(parent->vStack, parent->children[3], 20);
+    id sp1 = createView(false, -1);
+    setHeight(sp1, 20, true);
+    addArrangedSubview(parent->vStack, sp1);
 
     SEL btnTap = sel_getUid("buttonTapped:");
     parent->button = createButton(localize(CFSTR("settingsSave")), ColorBlue, BtnBackground, 0,
                                   self, btnTap, 44);
     addArrangedSubview(parent->vStack, parent->button);
-    setSpacingAfter(parent->vStack, parent->button, 20);
+    id sp2 = createView(false, -1);
+    setHeight(sp2, 20, true);
+    addArrangedSubview(parent->vStack, sp2);
 
     id deleteButton = createButton(localize(CFSTR("settingsDelete")), ColorRed, BtnBackground, 1,
                                    self, btnTap, 44);
@@ -99,6 +105,8 @@ void settingsVC_viewDidLoad(id self, SEL _cmd) {
 
     releaseObj(planContainer);
     releaseObj(planLabel);
+    releaseObj(sp1);
+    releaseObj(sp2);
 
     settingsVC_updateWeightFields(self);
     appCoordinator->loadedViewControllers |= LoadedVC_Settings;

@@ -122,6 +122,11 @@ CFDictionaryRef createTitleTextDict(id color, id font) {
                               &kCFCopyStringDictionaryKeyCallBacks, &valueCallbacks);
 }
 
+id getLayoutGuide(id view) {
+    if (osVersion < 11) return view;
+    return getObject(view, sel_getUid("safeAreaLayoutGuide"));
+}
+
 #pragma mark - View initializers
 
 id createObjectWithFrame(Class cls, CGRect frame) {
@@ -129,13 +134,13 @@ id createObjectWithFrame(Class cls, CGRect frame) {
     return ((id(*)(id,SEL,CGRect))objc_msgSend)(_obj, sel_getUid("initWithFrame:"), frame);
 }
 
-id createBackgroundView(int colorCode, int height) {
+id createBackgroundView(int colorCode, int height, bool priority) {
     id view = createObjectWithFrame(DMBackgroundViewClass, CGRectZero);
     DMBackgroundView *ptr = (DMBackgroundView *) view;
     ptr->colorCode = colorCode;
     disableAutoresizing(view);
     setBackground(view, createColor(colorCode));
-    setHeight(view, height);
+    setHeight(view, height, priority);
     return view;
 }
 
@@ -145,8 +150,8 @@ id createView(bool rounded, int size) {
     if (rounded)
         setCornerRadius(view);
     if (size >= 0) {
-        setWidth(view, size);
-        setHeight(view, size);
+        setWidth(view, size, false);
+        setHeight(view, size, false);
     }
     return view;
 }
@@ -216,7 +221,7 @@ id createButton(CFStringRef title, int color, int params,
     setTag(view, tag);
     addTarget(view, target, action, 64);
     if (height >= 0)
-        setHeight(view, height);
+        setHeight(view, height, true);
     return view;
 }
 
@@ -232,9 +237,9 @@ id createSegmentedControl(CFStringRef format, int count, int startIndex,
     if (action)
         addTarget(view, target, action, 4096);
     if (height >= 0)
-        setHeight(view, height);
+        setHeight(view, height, true);
     CFRelease(array);
-    if (osVersion == Version12)
+    if (osVersion < 13)
         updateSegmentedControl(view);
     return view;
 }
@@ -253,7 +258,7 @@ id createTextfield(id delegate, CFStringRef text, CFStringRef hint,
     setInt(view, sel_getUid("setBorderStyle:"), 3);
     setInt(view, sel_getUid("setKeyboardType:"), keyboard);
     setDelegate(view, delegate);
-    setMinHeight(view, 44);
+    setMinHeight(view, 44, true);
     setAccessibilityLabel(view, hint);
     return view;
 }

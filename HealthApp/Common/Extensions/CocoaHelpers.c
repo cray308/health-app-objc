@@ -40,7 +40,7 @@ static const char *const ColorNames[] = {
 
 void handleIOSVersion(void) {
     osVersion = getOSVersion();
-    if (osVersion == Version12) {
+    if (osVersion < 13) {
         appColors = malloc(14 * sizeof(id*));
         for (int i = 0; i < 14; ++i)
             appColors[i] = malloc(sizeof(id) << 1);
@@ -91,8 +91,7 @@ void getScreenBounds(CGRect *result) {
 }
 
 id createColor(int type) {
-    return osVersion > Version12 ?
-    getSystemColor(ColorNames[type]) : appColors[type][userData->darkMode];
+    return osVersion > 12 ? getSystemColor(ColorNames[type]) : appColors[type][userData->darkMode];
 }
 
 CFStringRef localize(CFStringRef key) {

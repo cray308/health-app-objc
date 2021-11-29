@@ -40,7 +40,7 @@ void setupWorkoutVC_viewDidLoad(id self, SEL _cmd) {
     CFStringRef defaultTitle = CFArrayGetValueAtIndex(data->names, 0);
     data->workoutTextField = createTextfield(nil, defaultTitle, pickerTitle, 1, 0, 0);
     id workoutContainer = createStackView((id []){workoutLabel, data->workoutTextField},
-                                          2, 1, 2, (Padding){30, 8, 0, 8});
+                                          2, 1, 2, (Padding){30, 8, 20, 8});
 
     id _wkPicker = allocClass(objc_getClass("UIPickerView"));
     id workoutPicker = getObject(_wkPicker, sel_getUid("init"));
@@ -49,7 +49,6 @@ void setupWorkoutVC_viewDidLoad(id self, SEL _cmd) {
     setInputAccessory(data->workoutTextField, parent->toolbar);
 
     addArrangedSubview(parent->vStack, workoutContainer);
-    setSpacingAfter(parent->vStack, workoutContainer, 20);
 
     SEL tapSel = sel_getUid("buttonTapped:");
     id cancelButton = createButton(localize(CFSTR("cancel")), ColorBlue, 0, 0, self, tapSel, -1);

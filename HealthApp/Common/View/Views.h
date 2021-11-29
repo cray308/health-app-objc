@@ -22,8 +22,6 @@ setBool(_v, sel_getUid("setTranslatesAutoresizingMaskIntoConstraints:"), false)
 
 #define getLayer(_v) getObject(_v, sel_getUid("layer"))
 
-#define getLayoutGuide(_v) getObject(_v, sel_getUid("safeAreaLayoutGuide"))
-
 #define setTag(_v, _tag) setInt(_v, sel_getUid("setTag:"), _tag)
 
 #define getTag(_v) getInt(_v, sel_getUid("tag"))
@@ -110,9 +108,10 @@ typedef struct {
 
 id createCustomFont(int style, int size);
 CFDictionaryRef createTitleTextDict(id color, id font);
+id getLayoutGuide(id view);
 
 id createObjectWithFrame(Class cls, CGRect frame);
-id createBackgroundView(int color, int height);
+id createBackgroundView(int color, int height, bool priority);
 id createView(bool rounded, int size);
 id createStackView(id *subviews, int count, int axis, int spacing, Padding margins);
 id createScrollView(void);

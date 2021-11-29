@@ -11,11 +11,15 @@ id totalWorkoutsView_init(TotalWorkoutsChartModel *model, id formatter) {
     TotalWorkoutsViewData *data = malloc(sizeof(TotalWorkoutsViewData));
     data->model = model;
 
+#if defined(__LP64__)
     data->chart = createChartView(formatter, (long[]){4}, 1, 1);
+#else
+    data->chart = createChartView(formatter, (int[]){4}, 1, 1);
+#endif
     disableAutoresizing(data->chart);
     addSubview(self, data->chart);
     pin(data->chart, self, (Padding){0, 8, 0, 8}, 0);
-    setHeight(data->chart, 390);
+    setHeight(data->chart, 390, true);
     object_setIvar(self, TotalWorkoutsViewDataRef, (id) data);
     return self;
 }

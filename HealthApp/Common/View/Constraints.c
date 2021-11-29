@@ -3,6 +3,8 @@
 
 #define getAnchor(_v, name) getObject(_v, sel_getUid((name)))
 
+#define setPriority(_c, _arg) (((void(*)(id,SEL,float))objc_msgSend)((_c), sel_getUid("setPriority:"), (_arg)))
+
 static struct AnchorNames {
     char const *const top;
     char const *const bottom;
@@ -39,18 +41,29 @@ static id createConstraint(id a1, id a2, int constant) {
     return result;
 }
 
-void setWidth(id v, int width) {
-    activateConstraints((id []){createConstraint(getAnchor(v, anchors.width), nil, width)}, 1);
-}
-
-void setMinHeight(id v, int height) {
-    id c = getObjectWithFloat(getAnchor(v, anchors.height),
-                              sel_getUid("constraintGreaterThanOrEqualToConstant:"), height);
+void setWidth(id v, int width, bool priority) {
+    id c = createConstraint(getAnchor(v, anchors.width), nil, width);
+    if (!priority) {
+        setPriority(c, 999);
+    }
     activateConstraints((id []){c}, 1);
 }
 
-void setHeight(id v, int height) {
-    activateConstraints((id []){createConstraint(getAnchor(v, anchors.height), nil, height)}, 1);
+void setMinHeight(id v, int height, bool priority) {
+    id c = getObjectWithFloat(getAnchor(v, anchors.height),
+                              sel_getUid("constraintGreaterThanOrEqualToConstant:"), height);
+    if (!priority) {
+        setPriority(c, 999);
+    }
+    activateConstraints((id []){c}, 1);
+}
+
+void setHeight(id v, int height, bool priority) {
+    id c = createConstraint(getAnchor(v, anchors.height), nil, height);
+    if (!priority) {
+        setPriority(c, 999);
+    }
+    activateConstraints((id []){c}, 1);
 }
 
 void setEqualWidths(id v, id v2) {

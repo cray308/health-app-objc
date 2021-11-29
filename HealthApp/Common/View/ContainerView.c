@@ -13,9 +13,14 @@ id containerView_init(CFStringRef title, int hidden, int spacing, bool margins) 
 
     ContainerViewData *data = malloc(sizeof(ContainerViewData));
     data->views = array_new(object);
-    data->divider = createBackgroundView(ColorSeparator, 1);
+    data->divider = createView(false, -1);
     data->headerLabel = createLabel(title, TextTitle3, 4, true);
     data->stack = createStackView(NULL, 0, 1, spacing, (Padding){.top = 5});
+
+    setHeight(data->divider, 21, false);
+    id divLine = createBackgroundView(ColorSeparator, 1, false);
+    addSubview(data->divider, divLine);
+    pin(divLine, data->divider, (Padding){0}, EdgeBottom);
 
     Padding padding = {0};
     if (margins)
@@ -23,7 +28,6 @@ id containerView_init(CFStringRef title, int hidden, int spacing, bool margins) 
     id vStack = createStackView((id []){data->divider, data->headerLabel, data->stack},
                                 3, 1, 0, padding);
     addSubview(self, vStack);
-    setSpacingAfter(vStack, data->divider, 20);
     pin(vStack, self, (Padding){0}, 0);
 
     if (hidden & HideDivider)
@@ -32,6 +36,7 @@ id containerView_init(CFStringRef title, int hidden, int spacing, bool margins) 
         hideView(data->headerLabel, true);
 
     releaseObj(vStack);
+    releaseObj(divLine);
     object_setIvar(self, ContainerViewDataRef, (id) data);
     return self;
 }

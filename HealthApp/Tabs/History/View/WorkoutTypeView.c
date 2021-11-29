@@ -9,11 +9,15 @@ id workoutTypeView_init(WorkoutTypeChartModel *model, id formatter) {
     WorkoutTypeViewData *data = malloc(sizeof(WorkoutTypeViewData));
     data->model = model;
 
+#if defined(__LP64__)
     data->chart = createChartView(formatter, (long[]){0, 1, 2, 3}, 4, 6);
+#else
+    data->chart = createChartView(formatter, (int[]){0, 1, 2, 3}, 4, 6);
+#endif
     disableAutoresizing(data->chart);
     addSubview(self, data->chart);
     pin(data->chart, self, (Padding){0, 8, 0, 8}, 0);
-    setHeight(data->chart, 425);
+    setHeight(data->chart, 425, true);
     object_setIvar(self, WorkoutTypeViewDataRef, (id) data);
     return self;
 }

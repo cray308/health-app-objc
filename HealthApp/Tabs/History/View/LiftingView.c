@@ -9,11 +9,15 @@ id liftingView_init(LiftChartModel *model, id formatter) {
     LiftViewData *data = malloc(sizeof(LiftViewData));
     data->model = model;
 
+#if defined(__LP64__)
     data->chart = createChartView(formatter, (long[]){0, 1, 2, 3}, 4, 0);
+#else
+    data->chart = createChartView(formatter, (int[]){0, 1, 2, 3}, 4, 0);
+#endif
     disableAutoresizing(data->chart);
     addSubview(self, data->chart);
     pin(data->chart, self, (Padding){0, 8, 0, 8}, 0);
-    setHeight(data->chart, 550);
+    setHeight(data->chart, 550, true);
     object_setIvar(self, LiftViewDataRef, (id) data);
     return self;
 }

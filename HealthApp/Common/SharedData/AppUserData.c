@@ -193,7 +193,7 @@ bool appUserData_updateUserSettings(signed char plan, bool darkMode, short *weig
     }
     userData->currentPlan = plan;
 
-    if (osVersion == Version12) {
+    if (osVersion < 13) {
         rv = darkMode != userData->darkMode;
         userData->darkMode = darkMode;
     }

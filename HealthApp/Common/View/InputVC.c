@@ -23,7 +23,6 @@ void initValidatorStrings(void) {
 
 static inline void setScrollInsets(id sv, HAInsets margins) {
     ((void(*)(id,SEL,HAInsets))objc_msgSend)(sv, sel_getUid("setContentInset:"), margins);
-    ((void(*)(id,SEL,HAInsets))objc_msgSend)(sv, sel_getUid("setScrollIndicatorInsets:"), margins);
 }
 
 static void showInputError(InputVCData *data, InputViewData *child) {
@@ -105,11 +104,14 @@ void inputVC_deinit(id self, SEL _cmd) {
     releaseObj(data->toolbar);
     releaseObj(data->scrollView);
     releaseObj(data->vStack);
-    id center = getDeviceNotificationCenter();
-    SEL sig = sel_getUid("removeObserver:name:object:");
-    ((void(*)(id,SEL,id,id,id))objc_msgSend)(center, sig, self, UIKeyboardDidShowNotification, nil);
-    ((void(*)(id,SEL,id,id,id))objc_msgSend)(center, sig,
-                                             self, UIKeyboardWillHideNotification, nil);
+    if (osVersion > 10) {
+        id center = getDeviceNotificationCenter();
+        SEL sig = sel_getUid("removeObserver:name:object:");
+        ((void(*)(id,SEL,id,id,id))objc_msgSend)(center, sig,
+                                                 self, UIKeyboardDidShowNotification, nil);
+        ((void(*)(id,SEL,id,id,id))objc_msgSend)(center, sig,
+                                                 self, UIKeyboardWillHideNotification, nil);
+    }
     free(data);
     ((void(*)(struct objc_super *,SEL))objc_msgSendSuper)(&super, _cmd);
 }
@@ -137,7 +139,7 @@ void inputVC_viewDidLoad(id self, SEL _cmd) {
     (allocClass(btnClass), sel_getUid("initWithTitle:style:target:action:"),
      CFSTR("Done"), 0, self, sel_getUid("dismissKeyboard"));
 
-    if (osVersion < Version14)
+    if (osVersion < 14)
         setTintColor(doneButton, createColor(ColorRed));
 
     CFArrayRef array = CFArrayCreate(NULL, (const void *[]){flexSpace, doneButton},
@@ -156,12 +158,14 @@ void inputVC_viewDidLoad(id self, SEL _cmd) {
     releaseObj(flexSpace);
     releaseObj(doneButton);
 
-    id center = getDeviceNotificationCenter();
-    SEL obsSig = sel_getUid("addObserver:selector:name:object:");
-    ((void(*)(id,SEL,id,SEL,id,id))objc_msgSend)(center, obsSig, self, sel_getUid("keyboardShown:"),
-                                                 UIKeyboardDidShowNotification, nil);
-    ((void(*)(id,SEL,id,SEL,id,id))objc_msgSend)
-    (center, obsSig, self, sel_getUid("keyboardWillHide:"), UIKeyboardWillHideNotification, nil);
+    if (osVersion > 10) {
+        id center = getDeviceNotificationCenter();
+        SEL sig = sel_getUid("addObserver:selector:name:object:");
+        ((void(*)(id,SEL,id,SEL,id,id))objc_msgSend)
+        (center, sig, self, sel_getUid("keyboardShown:"), UIKeyboardDidShowNotification, nil);
+        ((void(*)(id,SEL,id,SEL,id,id))objc_msgSend)
+        (center, sig, self, sel_getUid("keyboardWillHide:"), UIKeyboardWillHideNotification, nil);
+    }
 }
 
 void inputVC_viewDidAppear(id self, SEL _cmd, bool animated) {

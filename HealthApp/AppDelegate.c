@@ -53,7 +53,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
     DMTextFieldClass = objc_allocateClassPair(objc_getClass("UITextField"), "DMTextField", 0);
     DMBackgroundViewClass = objc_allocateClassPair(objc_getClass("UIView"), "DMBackgroundView", 0);
 
-    if (osVersion == Version12) {
+    if (osVersion < 13) {
         char const *colorField = "colorCode", *voidSig = "v@:";
         class_addIvar(DMBackgroundViewClass, colorField, sizeof(int), 0, "i");
         class_addIvar(DMButtonClass, colorField, sizeof(int), 0, "i");
@@ -75,7 +75,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
     objc_registerClassPair(DMLabelClass);
     objc_registerClassPair(DMTextFieldClass);
 
-    if (osVersion < Version14)
+    if (osVersion < 14)
         setTintColor(self->window, createColor(ColorRed));
     id tabVC = getObject(allocClass(DMTabVC), sel_getUid("init"));
     appCoordinator_start(tabVC);

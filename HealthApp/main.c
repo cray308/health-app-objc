@@ -86,7 +86,12 @@ int main(int argc, char *argv[]) {
                     (IMP) inputVC_fieldStoppedEditing, tapSig);
     class_addMethod(InputVCClass,
                     sel_getUid("textField:shouldChangeCharactersInRange:replacementString:"),
-                    (IMP) inputVC_fieldChanged, "i@:@{?=qq}@");
+                    (IMP) inputVC_fieldChanged,
+#if defined(__LP64__)
+                    "i@:@{?=qq}@");
+#else
+                    "i@:@{?=ll}@");
+#endif
     objc_registerClassPair(InputVCClass);
     InputVCDataRef = class_getInstanceVariable(InputVCClass, validatorKey);
 
@@ -106,6 +111,7 @@ int main(int argc, char *argv[]) {
     class_addMethod(SetupWorkoutVCClass, deinit, (IMP) setupWorkoutVC_deinit, voidSig);
     class_addMethod(SetupWorkoutVCClass, viewLoad, (IMP) setupWorkoutVC_viewDidLoad, voidSig);
     class_addMethod(SetupWorkoutVCClass, btnTap, (IMP) setupWorkoutVC_tappedButton, tapSig);
+#if defined(__LP64__)
     class_addMethod(SetupWorkoutVCClass, sel_getUid("numberOfComponentsInPickerView:"),
                     (IMP) setupWorkoutVC_numberOfComponents, "q@:@");
     class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:numberOfRowsInComponent:"),
@@ -114,6 +120,16 @@ int main(int argc, char *argv[]) {
                     (IMP) setupWorkoutVC_titleForRow, "@@:@qq");
     class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:didSelectRow:inComponent:"),
                     (IMP) setupWorkoutVC_didSelectRow, "v@:@qq");
+#else
+    class_addMethod(SetupWorkoutVCClass, sel_getUid("numberOfComponentsInPickerView:"),
+                    (IMP) setupWorkoutVC_numberOfComponents, "l@:@");
+    class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:numberOfRowsInComponent:"),
+                    (IMP) setupWorkoutVC_numberOfRows, "l@:@l");
+    class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:titleForRow:forComponent:"),
+                    (IMP) setupWorkoutVC_titleForRow, "@@:@ll");
+    class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:didSelectRow:inComponent:"),
+                    (IMP) setupWorkoutVC_didSelectRow, "v@:@ll");
+#endif
     objc_registerClassPair(SetupWorkoutVCClass);
     SetupWorkoutVCDataRef = class_getInstanceVariable(SetupWorkoutVCClass, dataKey);
 
@@ -156,7 +172,7 @@ int main(int argc, char *argv[]) {
 #else
     char const *layout = "^{__workoutVCData="
     "@@@[10@][2@][2@]{__savedWorkoutInfo=I{__exerciseInfo=II}}[2{__workoutTimer="
-    "@{__timerInfo=CCC}{_opaque_pthread_mutex_t=q[40c]}{_opaque_pthread_cond_t=q[24c]}IIiq}]}";
+    "@{__timerInfo=CCC}{_opaque_pthread_mutex_t=l[40c]}{_opaque_pthread_cond_t=l[24c]}IIil}]}";
     class_addIvar(WorkoutVCClass, dataKey, sizeof(WorkoutVCData*), 0, layout);
 #endif
 

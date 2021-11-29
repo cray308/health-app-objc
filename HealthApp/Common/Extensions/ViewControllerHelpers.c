@@ -70,7 +70,7 @@ id getFirstVC(id navVC) {
 }
 
 void presentVC(id presenter, id child) {
-    if (osVersion < Version14)
+    if (osVersion < 14)
         appDel_setWindowTint(nil);
     ((void(*)(id,SEL,id,bool,id))objc_msgSend)
     (presenter, sel_getUid("presentViewController:animated:completion:"), child, true, nil);
@@ -79,7 +79,7 @@ void presentVC(id presenter, id child) {
 void presentModalVC(id presenter, id modal) {
     id _obj = allocNavVC();
     id container = getObjectWithObject(_obj, sel_getUid("initWithRootViewController:"), modal);
-    if (osVersion == Version12) {
+    if (osVersion < 13) {
         id navBar = getNavBar(container);
         setBarTint(navBar);
     }
@@ -93,7 +93,7 @@ void dismissPresentedVC(id presenter, Callback handler) {
     (presenter, sel_getUid("dismissViewControllerAnimated:completion:"), true, ^{
         if (handler)
             handler();
-        if (osVersion < Version14)
+        if (osVersion < 14)
             appDel_setWindowTint(createColor(ColorRed));
     });
 }
@@ -102,7 +102,7 @@ id createAlertController(CFStringRef title, CFStringRef message) {
     id vc = ((id(*)(Class,SEL,CFStringRef,CFStringRef,int))objc_msgSend)
     (objc_getClass("UIAlertController"),
      sel_getUid("alertControllerWithTitle:message:preferredStyle:"), title, message, 1);
-    if (osVersion == Version12) {
+    if (osVersion < 13) {
         id fg = createColor(ColorLabel);
         CFDictionaryRef titleDict = createTitleTextDict(fg, createCustomFont(WeightSemiBold, 17));
         CFDictionaryRef msgDict = createTitleTextDict(fg, createCustomFont(WeightReg, 13));
@@ -132,7 +132,7 @@ void addAlertAction(id ctrl, CFStringRef title, int style, Callback handler) {
      ^(id action _U_) {
         if (handler)
             handler();
-        if (osVersion < Version14)
+        if (osVersion < 14)
             appDel_setWindowTint(createColor(ColorRed));
     });
     setObject(ctrl, sel_getUid("addAction:"), action);

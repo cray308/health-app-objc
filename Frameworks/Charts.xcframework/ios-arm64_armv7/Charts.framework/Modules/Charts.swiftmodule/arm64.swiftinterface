@@ -1,0 +1,41 @@
+// swift-interface-format-version: 1.0
+// swift-compiler-version: Apple Swift version 5.3.2 (swiftlang-1200.0.45 clang-1200.0.32.28)
+// swift-module-flags: -target arm64-apple-ios10.0 -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -module-name Charts
+@_exported import Charts
+import CoreGraphics
+import QuartzCore
+import Swift
+import UIKit
+@objc @_inheritsConvenienceInitializers public class LineChart : UIKit.UIView, UIKit.UIGestureRecognizerDelegate {
+  @objc public func setData(_ newData: Charts.ChartData?, axisMax: CoreGraphics.CGFloat)
+  @objc public func setLegendLabel(_ index: Swift.Int, text: Swift.String)
+  @objc public init(colors: Swift.UnsafePointer<Swift.Int>, count: Swift.Int, xFormatter: Charts.ValueFormatter, options: Swift.UInt8)
+  @objc override dynamic public init(frame: CoreGraphics.CGRect)
+  @objc required dynamic public init?(coder aDecoder: Foundation.NSCoder)
+  @objc deinit
+  @objc override dynamic public func tintColorDidChange()
+  @objc public func setLineLimit(_ newVal: CoreGraphics.CGFloat)
+  @objc override dynamic public func observeValue(forKeyPath keyPath: Swift.String?, of object: Any?, change: [Foundation.NSKeyValueChangeKey : Any]?, context: Swift.UnsafeMutableRawPointer?)
+  @objc override dynamic public func draw(_ rect: CoreGraphics.CGRect)
+  @objc override dynamic public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIKit.UIGestureRecognizer) -> Swift.Bool
+  @objc public func gestureRecognizer(_ gestureRecognizer: UIKit.UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIKit.UIGestureRecognizer) -> Swift.Bool
+}
+@objc @_inheritsConvenienceInitializers public class ChartUtility : ObjectiveC.NSObject {
+  @objc public class func setDarkMode(enabled: Swift.Bool)
+  @objc deinit
+  @objc override dynamic public init()
+}
+@objc @_inheritsConvenienceInitializers public class ChartData : ObjectiveC.NSObject {
+  @objc required override dynamic public init()
+  @objc public init(dataSets: [Charts.DataSet], lineWidth: Swift.Int, options: Swift.UInt8)
+  @objc deinit
+}
+@objc @_inheritsConvenienceInitializers public class DataSet : ObjectiveC.NSObject {
+  @objc required override dynamic public init()
+  @objc public init(colorVal: Swift.Int, fillSet: Charts.DataSet?)
+  @objc public func replaceEntries(_ ptr: Swift.UnsafePointer<CoreGraphics.CGPoint>, count: Swift.Int)
+  @objc deinit
+}
+@objc public protocol ValueFormatter : AnyObject {
+  @objc func stringForValue(_ value: CoreGraphics.CGFloat) -> Swift.String
+}

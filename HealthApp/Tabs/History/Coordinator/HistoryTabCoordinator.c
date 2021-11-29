@@ -82,7 +82,7 @@ void historyCoordinator_fetchData(HistoryTabCoordinator *this) {
             for (int i = 0; i < count; ++i) {
                 id d = (id) CFArrayGetValueAtIndex(data, i);
                 struct WeekDataModel *r = &results[i];
-                time_t timestamp = weekData_getWeekStart(d);
+                time_t timestamp = (time_t) weekData_getWeekStart(d);
                 localtime_r(&timestamp, &localInfo);
                 r->timeData.year = localInfo.tm_year % 100;
                 r->timeData.month = localInfo.tm_mon;

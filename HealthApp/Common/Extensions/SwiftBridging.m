@@ -21,10 +21,16 @@ void updateChart(LineChart *v, ChartData *data, float max) { [v setData:data axi
 int getOSVersion(void) {
     if (@available(iOS 14, *)) return 14;
     else if (@available(iOS 13, *)) return 13;
-    return 12;
+    else if (@available(iOS 12, *)) return 12;
+    else if (@available(iOS 11, *)) return 11;
+    return 10;
 }
 
+#if defined(__LP64__)
 id createChartView(id formatter, long *colors, int count, uint8_t options) {
+#else
+id createChartView(id formatter, int *colors, int count, uint8_t options) {
+#endif
     return [[LineChart alloc] initWithColors:colors count:count xFormatter:formatter options:options];
 }
 
