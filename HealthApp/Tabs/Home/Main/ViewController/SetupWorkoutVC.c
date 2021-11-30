@@ -117,7 +117,10 @@ void setupWorkoutVC_tappedButton(id self, SEL _cmd _U_, id btn) {
     homeCoordinator_finishedSettingUpCustomWorkout(data->delegate, output);
 }
 
-long setupWorkoutVC_numberOfComponents(id self _U_, SEL _cmd _U_, id picker _U_) {
+long setupWorkoutVC_numberOfComponents(id self _U_, SEL _cmd _U_, id picker) {
+    if (osVersion < 13) {
+        setBackground(picker, createColor(ColorTertiaryBG));
+    }
     return 1;
 }
 
@@ -126,15 +129,28 @@ long setupWorkoutVC_numberOfRows(id self, SEL _cmd _U_, id picker _U_, long sect
                             object_getIvar(self, SetupWorkoutVCDataRef))->names);
 }
 
+id setupWorkoutVC_attrTitleForRow(id self, SEL _cmd _U_, id picker _U_, long row, long section _U_) {
+    SetupWorkoutVCData *data = (SetupWorkoutVCData *) object_getIvar(self, SetupWorkoutVCDataRef);
+    id color = createColor((int) row == data->output.index ? ColorLabel : ColorSecondaryLabel);
+    CFDictionaryRef dict = createTitleTextDict(color, createFont(TextTitle3));
+    id attrString = createAttribString(CFArrayGetValueAtIndex(data->names, row), dict);
+    voidFunc(attrString, sel_getUid("autorelease"));
+    CFRelease(dict);
+    return attrString;
+}
+
 CFStringRef setupWorkoutVC_titleForRow(id self, SEL _cmd _U_,
                                        id picker _U_, long row, long section _U_) {
     CFArrayRef names = ((SetupWorkoutVCData *) object_getIvar(self, SetupWorkoutVCDataRef))->names;
     return CFArrayGetValueAtIndex(names, row);
 }
 
-void setupWorkoutVC_didSelectRow(id self, SEL _cmd _U_, id picker _U_, long row, long section _U_) {
+void setupWorkoutVC_didSelectRow(id self, SEL _cmd _U_, id picker, long row, long section _U_) {
     SetupWorkoutVCData *data = (SetupWorkoutVCData *) object_getIvar(self, SetupWorkoutVCDataRef);
     data->output.index = (int) row;
     CFStringRef name = CFArrayGetValueAtIndex(data->names, row);
     setLabelText(data->workoutTextField, name);
+    if (osVersion < 13) {
+        setInt(picker, sel_getUid("reloadComponent:"), 0);
+    }
 }

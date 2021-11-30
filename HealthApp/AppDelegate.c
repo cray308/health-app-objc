@@ -47,6 +47,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
         tzOffset = userInfo_initFromStorage();
     }
 
+    DMNavVC = objc_allocateClassPair(objc_getClass("UINavigationController"), "DMNavVC", 0);
     DMTabVC = objc_allocateClassPair(objc_getClass("UITabBarController"), "DMTabVC", 0);
     DMButtonClass = objc_allocateClassPair(objc_getClass("UIButton"), "DMButton", 0);
     DMLabelClass = objc_allocateClassPair(objc_getClass("UILabel"), "DMLabel", 0);
@@ -67,8 +68,11 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
         class_addMethod(DMTextFieldClass, tint, (IMP) dmField_updateColors, voidSig);
         class_addMethod(DMTabVC, sel_getUid("viewDidLayoutSubviews"),
                         (IMP) dmTabVC_updateColors, voidSig);
+        class_addMethod(DMNavVC, sel_getUid("preferredStatusBarStyle"),
+                        (IMP) dmNavVC_getStatusBarStyle, "i@:");
     }
 
+    objc_registerClassPair(DMNavVC);
     objc_registerClassPair(DMTabVC);
     objc_registerClassPair(DMBackgroundViewClass);
     objc_registerClassPair(DMButtonClass);

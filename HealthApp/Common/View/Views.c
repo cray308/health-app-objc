@@ -14,6 +14,8 @@ setBool(_v, sel_getUid("setAdjustsFontForContentSizeCategory:"), true)
 #define setControlTextAttribs(_v, _dict, _state) (((void(*)(id,SEL,CFDictionaryRef,int))objc_msgSend)\
 ((_v), sel_getUid("setTitleTextAttributes:forState:"), (_dict), (_state)))
 
+#define setKBColor(_v, _a) setInt(_v, sel_getUid("setKeyboardAppearance:"), _a);
+
 extern id UIFontTextStyleTitle1;
 extern id UIFontTextStyleTitle2;
 extern id UIFontTextStyleTitle3;
@@ -45,7 +47,7 @@ static inline void setCornerRadius(id view) {
     setCGFloat(layer, sel_getUid("setCornerRadius:"), 5);
 }
 
-static void setLabelFont(id view, int style) {
+id createFont(int style) {
     id fStyle;
     switch (style) {
         case TextFootnote:
@@ -66,9 +68,12 @@ static void setLabelFont(id view, int style) {
         default:
             fStyle = UIFontTextStyleTitle3;
     }
-    id font = staticMethodWithString(objc_getClass("UIFont"),
-                                     sel_getUid("preferredFontForTextStyle:"), (CFStringRef)fStyle);
-    setObject(view, sel_getUid("setFont:"), font);
+    return staticMethodWithString(objc_getClass("UIFont"),
+                                  sel_getUid("preferredFontForTextStyle:"), (CFStringRef)fStyle);
+}
+
+static void setLabelFont(id view, int style) {
+    setObject(view, sel_getUid("setFont:"), createFont(style));
 }
 
 id createCustomFont(int style, int size) {
@@ -110,6 +115,7 @@ void dmButton_updateColors(DMButton *self, SEL _cmd _U_) {
 void dmField_updateColors(id self, SEL _cmd _U_) {
     setBackground(self, createColor(ColorTertiaryBG));
     setTextColor(self, createColor(ColorLabel));
+    setKBColor(self, userData->darkMode ? 1 : 0);
 }
 
 CFDictionaryRef createTitleTextDict(id color, id font) {
@@ -260,6 +266,9 @@ id createTextfield(id delegate, CFStringRef text, CFStringRef hint,
     setDelegate(view, delegate);
     setMinHeight(view, 44, true);
     setAccessibilityLabel(view, hint);
+    if (osVersion < 13 && userData->darkMode) {
+        setKBColor(view, 1);
+    }
     return view;
 }
 

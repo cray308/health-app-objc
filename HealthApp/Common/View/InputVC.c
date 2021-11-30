@@ -3,6 +3,9 @@
 
 #define toggleScrolling(_v, _enable) setBool(_v, sel_getUid("setScrollEnabled:"), _enable)
 
+#define setScrollInsets(_v, _mg) (((void(*)(id,SEL,HAInsets))objc_msgSend)\
+((_v), sel_getUid("setContentInset:"), (_mg)))
+
 gen_uset_source(char, unsigned short, ds_cmp_num_eq, DSDefault_addrOfVal, DSDefault_sizeOfVal,
                 DSDefault_shallowCopy, DSDefault_shallowDelete)
 
@@ -19,10 +22,6 @@ static CFStringRef inputFieldError;
 
 void initValidatorStrings(void) {
     inputFieldError = localize(CFSTR("inputFieldError"));
-}
-
-static inline void setScrollInsets(id sv, HAInsets margins) {
-    ((void(*)(id,SEL,HAInsets))objc_msgSend)(sv, sel_getUid("setContentInset:"), margins);
 }
 
 static void showInputError(InputVCData *data, InputViewData *child) {
@@ -127,6 +126,9 @@ void inputVC_viewDidLoad(id self, SEL _cmd) {
     data->scrollView = createScrollView();
     data->vStack = createStackView(nil, 0, 1, 0, (Padding){0});
     data->toolbar = createObjectWithFrame(objc_getClass("UIToolbar"), ((CGRect){{0}, {width, 50}}));
+    if (osVersion < 13) {
+        setBarTint(data->toolbar);
+    }
     voidFunc(data->toolbar, sel_getUid("sizeToFit"));
 
     Class btnClass = objc_getClass("UIBarButtonItem");
@@ -216,7 +218,7 @@ void inputVC_keyboardShown(id self, SEL _cmd _U_, id notif) {
 #endif
 
     viewRect.size.height -= kbRect.size.height;
-    setScrollInsets(data->scrollView, (HAInsets){data->topOffset, 0, kbRect.size.height, 0});
+    setScrollInsets(data->scrollView, ((HAInsets){data->topOffset, 0, kbRect.size.height, 0}));
 
     CGPoint upperY = fieldInView.origin;
     upperY.y += fieldInView.size.height;
@@ -229,7 +231,7 @@ void inputVC_keyboardShown(id self, SEL _cmd _U_, id notif) {
 
 void inputVC_keyboardWillHide(id self, SEL _cmd _U_, id notif _U_) {
     InputVCData *data = (InputVCData *) object_getIvar(self, InputVCDataRef);
-    setScrollInsets(data->scrollView, (HAInsets){data->topOffset, 0, data->bottomOffset, 0});
+    setScrollInsets(data->scrollView, ((HAInsets){data->topOffset, 0, data->bottomOffset, 0}));
     CGRect bounds;
     getRect(data->vStack, &bounds, 1);
     toggleScrolling(data->scrollView, (int) bounds.size.height >= data->scrollHeight);

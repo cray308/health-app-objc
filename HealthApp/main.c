@@ -1,5 +1,4 @@
-#include <CoreFoundation/CFString.h>
-#include <objc/message.h>
+#include "CocoaHelpers.h"
 #include "StatusView.h"
 #include "TotalWorkoutsView.h"
 #include "WorkoutTypeView.h"
@@ -16,8 +15,10 @@
 extern int UIApplicationMain(int, char *[], CFStringRef, CFStringRef);
 extern Protocol *getValueFormatterType(void);
 extern SEL getValueFormatterAction(void);
+extern int getOSVersion(void);
 
 int main(int argc, char *argv[]) {
+    osVersion = getOSVersion();
     Class viewClass = objc_getClass("UIView");
     Class VCClass = objc_getClass("UIViewController");
     char const *validatorKey = "validatorData", *dataKey = "data";
@@ -116,8 +117,6 @@ int main(int argc, char *argv[]) {
                     (IMP) setupWorkoutVC_numberOfComponents, "q@:@");
     class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:numberOfRowsInComponent:"),
                     (IMP) setupWorkoutVC_numberOfRows, "q@:@q");
-    class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:titleForRow:forComponent:"),
-                    (IMP) setupWorkoutVC_titleForRow, "@@:@qq");
     class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:didSelectRow:inComponent:"),
                     (IMP) setupWorkoutVC_didSelectRow, "v@:@qq");
 #else
@@ -125,11 +124,28 @@ int main(int argc, char *argv[]) {
                     (IMP) setupWorkoutVC_numberOfComponents, "l@:@");
     class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:numberOfRowsInComponent:"),
                     (IMP) setupWorkoutVC_numberOfRows, "l@:@l");
-    class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:titleForRow:forComponent:"),
-                    (IMP) setupWorkoutVC_titleForRow, "@@:@ll");
     class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:didSelectRow:inComponent:"),
                     (IMP) setupWorkoutVC_didSelectRow, "v@:@ll");
 #endif
+    if (osVersion < 13) {
+#if defined(__LP64__)
+        class_addMethod(SetupWorkoutVCClass,
+                        sel_getUid("pickerView:attributedTitleForRow:forComponent:"),
+                        (IMP) setupWorkoutVC_attrTitleForRow, "@@:@qq");
+#else
+        class_addMethod(SetupWorkoutVCClass,
+                        sel_getUid("pickerView:attributedTitleForRow:forComponent:"),
+                        (IMP) setupWorkoutVC_attrTitleForRow, "@@:@ll");
+#endif
+    } else {
+#if defined(__LP64__)
+        class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:titleForRow:forComponent:"),
+                        (IMP) setupWorkoutVC_titleForRow, "@@:@qq");
+#else
+        class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:titleForRow:forComponent:"),
+                        (IMP) setupWorkoutVC_titleForRow, "@@:@ll");
+#endif
+    }
     objc_registerClassPair(SetupWorkoutVCClass);
     SetupWorkoutVCDataRef = class_getInstanceVariable(SetupWorkoutVCClass, dataKey);
 

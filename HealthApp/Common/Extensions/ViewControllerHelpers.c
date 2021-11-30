@@ -4,20 +4,13 @@
 
 #define getNavBar(_navVC) getObject(_navVC, sel_getUid("navigationBar"))
 
-#define setBarTint(_nb) setObject(_nb, sel_getUid("setBarTintColor:"), createColor(ColorTertiaryBGGrouped))
-
 #define getSubviews(_view) getArray(_view, sel_getUid("subviews"))
 
 #define updateKVPair(_o, _k, _v) ((void(*)(id,SEL,id,CFStringRef))objc_msgSend)\
 ((_o), sel_getUid("setValue:forKey:"), (_v), (_k))
 
 Class DMTabVC;
-
-static inline id createAttribString(CFStringRef text, CFDictionaryRef dict) {
-    id _obj = allocClass(objc_getClass("NSAttributedString"));
-    return ((id(*)(id,SEL,CFStringRef,CFDictionaryRef))objc_msgSend)
-    (_obj, sel_getUid("initWithString:attributes:"), text, dict);
-}
+Class DMNavVC;
 
 void setNavButton(id vc, bool left, id button, int totalWidth) {
     id navItem = getNavItem(vc);
@@ -39,6 +32,7 @@ void setVCTitle(id vc, CFStringRef title) {
 
 void dmTabVC_updateColors(id self, SEL _cmd _U_) {
     SEL setter = sel_getUid("setTitleTextAttributes:");
+    SEL barUpdate = sel_getUid("setNeedsStatusBarAppearanceUpdate");
     id tabBar = getObject(self, sel_getUid("tabBar"));
     id tint = createColor(ColorPrimaryBG), unselected = createColor(ColorGray);
     setObject(tabBar, sel_getUid("setBarTintColor:"), tint);
@@ -52,7 +46,12 @@ void dmTabVC_updateColors(id self, SEL _cmd _U_) {
         CFDictionaryRef dict = createTitleTextDict(createColor(ColorLabel), nil);
         ((void(*)(id,SEL,CFDictionaryRef))objc_msgSend)(navBar, setter, dict);
         CFRelease(dict);
+        voidFunc(navVC, barUpdate);
     }
+}
+
+int dmNavVC_getStatusBarStyle(id self _U_, SEL _cmd _U_) {
+    return userData->darkMode ? 2 : 0;
 }
 
 #pragma mark - VC Functions

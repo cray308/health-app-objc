@@ -3,7 +3,7 @@
 
 #define getAnchor(_v, name) getObject(_v, sel_getUid((name)))
 
-#define setPriority(_c, _arg) (((void(*)(id,SEL,float))objc_msgSend)((_c), sel_getUid("setPriority:"), (_arg)))
+#define setPriority(_c, _arg) setFloat(_c, sel_getUid("setPriority:"), _arg)
 
 static struct AnchorNames {
     char const *const top;

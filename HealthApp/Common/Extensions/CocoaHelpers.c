@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include "AppUserData.h"
 
-extern int getOSVersion(void);
-
 static const void *cocoaArrRetain(CFAllocatorRef allocator _U_, const void *value) {
     voidFunc((id) value, sel_getUid("retain"));
     return value;
@@ -39,7 +37,6 @@ static const char *const ColorNames[] = {
 };
 
 void handleIOSVersion(void) {
-    osVersion = getOSVersion();
     if (osVersion < 13) {
         appColors = malloc(14 * sizeof(id*));
         for (int i = 0; i < 14; ++i)
@@ -92,6 +89,12 @@ void getScreenBounds(CGRect *result) {
 
 id createColor(int type) {
     return osVersion > 12 ? getSystemColor(ColorNames[type]) : appColors[type][userData->darkMode];
+}
+
+id createAttribString(CFStringRef text, CFDictionaryRef dict) {
+    id _obj = allocClass(objc_getClass("NSAttributedString"));
+    return ((id(*)(id,SEL,CFStringRef,CFDictionaryRef))objc_msgSend)
+    (_obj, sel_getUid("initWithString:attributes:"), text, dict);
 }
 
 CFStringRef localize(CFStringRef key) {

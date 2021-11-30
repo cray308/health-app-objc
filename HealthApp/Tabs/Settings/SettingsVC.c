@@ -41,6 +41,7 @@ void settingsVC_updateColors(id self) {
     CFArrayRef items = getArray(toolbar, sel_getUid("items"));
     id doneButton = (id) CFArrayGetValueAtIndex(items, 1);
     setTintColor(doneButton, createColor(ColorRed));
+    setBarTint(toolbar);
 }
 
 void settingsVC_viewDidLoad(id self, SEL _cmd) {

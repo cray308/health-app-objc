@@ -106,6 +106,7 @@ typedef struct {
     int colorCode;
 } DMBackgroundView;
 
+id createFont(int style);
 id createCustomFont(int style, int size);
 CFDictionaryRef createTitleTextDict(id color, id font);
 id getLayoutGuide(id view);

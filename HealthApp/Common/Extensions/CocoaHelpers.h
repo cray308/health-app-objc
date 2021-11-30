@@ -33,6 +33,8 @@
 
 #define setCGFloat(_obj, _cmd, _arg) (((void(*)(id,SEL,CGFloat))objc_msgSend)((_obj), (_cmd), (_arg)))
 
+#define setFloat(_obj, _cmd, _arg) (((void(*)(id,SEL,float))objc_msgSend)((_obj), (_cmd), (_arg)))
+
 #define setArray(_obj, _cmd, _arg) (((void(*)(id,SEL,CFArrayRef))objc_msgSend)((_obj), (_cmd), (_arg)))
 
 #define getDict(_obj, _cmd, _arg) (((CFDictionaryRef(*)(id,SEL,CFStringRef))objc_msgSend)((_obj), (_cmd), (_arg)))
@@ -90,6 +92,7 @@ enum {
 void getRect(id view, CGRect *result, char type);
 void getScreenBounds(CGRect *result);
 id createColor(int type);
+id createAttribString(CFStringRef text, CFDictionaryRef dict);
 CFStringRef localize(CFStringRef key);
 void fillStringArray(CFStringRef *arr, CFStringRef format, int count);
 
