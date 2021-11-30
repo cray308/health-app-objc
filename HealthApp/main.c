@@ -108,11 +108,12 @@ int main(int argc, char *argv[]) {
     class_addProtocol(SetupWorkoutVCClass, objc_getProtocol("UIPickerViewDelegate"));
     class_addProtocol(SetupWorkoutVCClass, objc_getProtocol("UIPickerViewDataSource"));
     class_addIvar(SetupWorkoutVCClass, dataKey, sizeof(SetupWorkoutVCData*), 0,
-                  "^{__setupWorkoutVCData=@@@{__workoutParams=cCiiii}}");
+                  "^{__setupWorkoutVCData=@?@@{__workoutParams=cCiiii}}");
     class_addMethod(SetupWorkoutVCClass, deinit, (IMP) setupWorkoutVC_deinit, voidSig);
     class_addMethod(SetupWorkoutVCClass, viewLoad, (IMP) setupWorkoutVC_viewDidLoad, voidSig);
     class_addMethod(SetupWorkoutVCClass, btnTap, (IMP) setupWorkoutVC_tappedButton, tapSig);
 #if defined(__LP64__)
+    char const *titleForRowSig = "@@:@qq";
     class_addMethod(SetupWorkoutVCClass, sel_getUid("numberOfComponentsInPickerView:"),
                     (IMP) setupWorkoutVC_numberOfComponents, "q@:@");
     class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:numberOfRowsInComponent:"),
@@ -120,6 +121,7 @@ int main(int argc, char *argv[]) {
     class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:didSelectRow:inComponent:"),
                     (IMP) setupWorkoutVC_didSelectRow, "v@:@qq");
 #else
+    char const *titleForRowSig = "@@:@ll";
     class_addMethod(SetupWorkoutVCClass, sel_getUid("numberOfComponentsInPickerView:"),
                     (IMP) setupWorkoutVC_numberOfComponents, "l@:@");
     class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:numberOfRowsInComponent:"),
@@ -127,25 +129,14 @@ int main(int argc, char *argv[]) {
     class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:didSelectRow:inComponent:"),
                     (IMP) setupWorkoutVC_didSelectRow, "v@:@ll");
 #endif
+    SEL titleForRow;
     if (osVersion < 13) {
-#if defined(__LP64__)
-        class_addMethod(SetupWorkoutVCClass,
-                        sel_getUid("pickerView:attributedTitleForRow:forComponent:"),
-                        (IMP) setupWorkoutVC_attrTitleForRow, "@@:@qq");
-#else
-        class_addMethod(SetupWorkoutVCClass,
-                        sel_getUid("pickerView:attributedTitleForRow:forComponent:"),
-                        (IMP) setupWorkoutVC_attrTitleForRow, "@@:@ll");
-#endif
+        titleForRow = sel_getUid("pickerView:attributedTitleForRow:forComponent:");
     } else {
-#if defined(__LP64__)
-        class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:titleForRow:forComponent:"),
-                        (IMP) setupWorkoutVC_titleForRow, "@@:@qq");
-#else
-        class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:titleForRow:forComponent:"),
-                        (IMP) setupWorkoutVC_titleForRow, "@@:@ll");
-#endif
+        titleForRow = sel_getUid("pickerView:titleForRow:forComponent:");
     }
+    class_addMethod(SetupWorkoutVCClass, titleForRow,
+                    (IMP) setupWorkoutVC_titleForRow, titleForRowSig);
     objc_registerClassPair(SetupWorkoutVCClass);
     SetupWorkoutVCDataRef = class_getInstanceVariable(SetupWorkoutVCClass, dataKey);
 
