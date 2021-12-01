@@ -26,11 +26,7 @@ int getOSVersion(void) {
     return 10;
 }
 
-#if defined(__LP64__)
-id createChartView(id formatter, long *colors, int count, uint8_t options) {
-#else
-id createChartView(id formatter, int *colors, int count, uint8_t options) {
-#endif
+id createChartView(id formatter, HAInt *colors, int count, uint8_t options) {
     return [[LineChart alloc] initWithColors:colors count:count xFormatter:formatter options:options];
 }
 

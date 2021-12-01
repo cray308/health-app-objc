@@ -9,7 +9,6 @@ extern Ivar SetupWorkoutVCDataRef;
 
 typedef struct __setupWorkoutVCData {
     void *delegate;
-    id (*getTitle)(struct __setupWorkoutVCData *, int);
     CFArrayRef names;
     id workoutTextField;
     WorkoutParams output;
@@ -22,7 +21,8 @@ void setupWorkoutVC_tappedButton(id self, SEL _cmd, id btn);
 
 long setupWorkoutVC_numberOfComponents(id self, SEL _cmd, id picker);
 long setupWorkoutVC_numberOfRows(id self, SEL _cmd, id picker, long section);
-id setupWorkoutVC_titleForRow(id self, SEL _cmd, id picker, long row, long section);
+id setupWorkoutVC_attrTitleForRow(id self, SEL _cmd, id picker, long row, long section);
+CFStringRef setupWorkoutVC_titleForRow(id self, SEL _cmd, id picker, long row, long section);
 void setupWorkoutVC_didSelectRow(id self, SEL _cmd, id picker, long row, long section);
 
 #endif /* SetupWorkoutVC_h */

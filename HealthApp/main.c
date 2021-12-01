@@ -1,3 +1,4 @@
+#include "AppTypes.h"
 #include "CocoaHelpers.h"
 #include "StatusView.h"
 #include "TotalWorkoutsView.h"
@@ -11,6 +12,16 @@
 #include "SetupWorkoutVC.h"
 #include "UpdateMaxesVC.h"
 #include "AppDelegate.h"
+
+#define TF_CHANGED "i@:@{?=" LHASymbol LHASymbol "}@"
+#define TITLE_FOR_ROW "@@:@" LHASymbol LHASymbol
+#define NUM_COMPONENTS LHASymbol "@:@"
+#define NUM_ROWS LHASymbol "@:@" LHASymbol
+#define DID_SELECT_ROW "v@:@" LHASymbol LHASymbol
+
+#define WK_VC_LAYOUT "^{__workoutVCData=@@@[10@][2@][2@]{__savedWorkoutInfo=I{__exerciseInfo=II}}" \
+"[2{__workoutTimer=@{__timerInfo=CCC}{_opaque_pthread_mutex_t=" LHASymbol MUTEX_CHARS "}" \
+"{_opaque_pthread_cond_t=" LHASymbol COND_CHARS "}IIi" LHASymbol "}]}"
 
 extern int UIApplicationMain(int, char *[], CFStringRef, CFStringRef);
 extern Protocol *getValueFormatterType(void);
@@ -87,12 +98,7 @@ int main(int argc, char *argv[]) {
                     (IMP) inputVC_fieldStoppedEditing, tapSig);
     class_addMethod(InputVCClass,
                     sel_getUid("textField:shouldChangeCharactersInRange:replacementString:"),
-                    (IMP) inputVC_fieldChanged,
-#if defined(__LP64__)
-                    "i@:@{?=qq}@");
-#else
-                    "i@:@{?=ll}@");
-#endif
+                    (IMP) inputVC_fieldChanged, TF_CHANGED);
     objc_registerClassPair(InputVCClass);
     InputVCDataRef = class_getInstanceVariable(InputVCClass, validatorKey);
 
@@ -108,35 +114,26 @@ int main(int argc, char *argv[]) {
     class_addProtocol(SetupWorkoutVCClass, objc_getProtocol("UIPickerViewDelegate"));
     class_addProtocol(SetupWorkoutVCClass, objc_getProtocol("UIPickerViewDataSource"));
     class_addIvar(SetupWorkoutVCClass, dataKey, sizeof(SetupWorkoutVCData*), 0,
-                  "^{__setupWorkoutVCData=@?@@{__workoutParams=cCiiii}}");
+                  "^{__setupWorkoutVCData=@@@{__workoutParams=cCiiii}}");
     class_addMethod(SetupWorkoutVCClass, deinit, (IMP) setupWorkoutVC_deinit, voidSig);
     class_addMethod(SetupWorkoutVCClass, viewLoad, (IMP) setupWorkoutVC_viewDidLoad, voidSig);
     class_addMethod(SetupWorkoutVCClass, btnTap, (IMP) setupWorkoutVC_tappedButton, tapSig);
-#if defined(__LP64__)
-    char const *titleForRowSig = "@@:@qq";
     class_addMethod(SetupWorkoutVCClass, sel_getUid("numberOfComponentsInPickerView:"),
-                    (IMP) setupWorkoutVC_numberOfComponents, "q@:@");
+                    (IMP) setupWorkoutVC_numberOfComponents, NUM_COMPONENTS);
     class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:numberOfRowsInComponent:"),
-                    (IMP) setupWorkoutVC_numberOfRows, "q@:@q");
+                    (IMP) setupWorkoutVC_numberOfRows, NUM_ROWS);
     class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:didSelectRow:inComponent:"),
-                    (IMP) setupWorkoutVC_didSelectRow, "v@:@qq");
-#else
-    char const *titleForRowSig = "@@:@ll";
-    class_addMethod(SetupWorkoutVCClass, sel_getUid("numberOfComponentsInPickerView:"),
-                    (IMP) setupWorkoutVC_numberOfComponents, "l@:@");
-    class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:numberOfRowsInComponent:"),
-                    (IMP) setupWorkoutVC_numberOfRows, "l@:@l");
-    class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:didSelectRow:inComponent:"),
-                    (IMP) setupWorkoutVC_didSelectRow, "v@:@ll");
-#endif
+                    (IMP) setupWorkoutVC_didSelectRow, DID_SELECT_ROW);
     SEL titleForRow;
+    IMP titleForRowFunc;
     if (osVersion < 13) {
+        titleForRowFunc = (IMP) setupWorkoutVC_attrTitleForRow;
         titleForRow = sel_getUid("pickerView:attributedTitleForRow:forComponent:");
     } else {
+        titleForRowFunc = (IMP) setupWorkoutVC_titleForRow;
         titleForRow = sel_getUid("pickerView:titleForRow:forComponent:");
     }
-    class_addMethod(SetupWorkoutVCClass, titleForRow,
-                    (IMP) setupWorkoutVC_titleForRow, titleForRowSig);
+    class_addMethod(SetupWorkoutVCClass, titleForRow, titleForRowFunc, TITLE_FOR_ROW);
     objc_registerClassPair(SetupWorkoutVCClass);
     SetupWorkoutVCDataRef = class_getInstanceVariable(SetupWorkoutVCClass, dataKey);
 
@@ -170,19 +167,7 @@ int main(int argc, char *argv[]) {
     HistoryVCDataRef = class_getInstanceVariable(HistoryVCClass, dataKey);
 
     WorkoutVCClass = objc_allocateClassPair(VCClass, "WorkoutVC", 0);
-
-#if defined(__LP64__)
-    char const *layout = "^{__workoutVCData="
-    "@@@[10@][2@][2@]{__savedWorkoutInfo=I{__exerciseInfo=II}}[2{__workoutTimer="
-    "@{__timerInfo=CCC}{_opaque_pthread_mutex_t=q[56c]}{_opaque_pthread_cond_t=q[40c]}IIiq}]}";
-    class_addIvar(WorkoutVCClass, dataKey, sizeof(WorkoutVCData*), 0, layout);
-#else
-    char const *layout = "^{__workoutVCData="
-    "@@@[10@][2@][2@]{__savedWorkoutInfo=I{__exerciseInfo=II}}[2{__workoutTimer="
-    "@{__timerInfo=CCC}{_opaque_pthread_mutex_t=l[40c]}{_opaque_pthread_cond_t=l[24c]}IIil}]}";
-    class_addIvar(WorkoutVCClass, dataKey, sizeof(WorkoutVCData*), 0, layout);
-#endif
-
+    class_addIvar(WorkoutVCClass, dataKey, sizeof(WorkoutVCData*), 0, WK_VC_LAYOUT);
     class_addMethod(WorkoutVCClass, deinit, (IMP) workoutVC_deinit, voidSig);
     class_addMethod(WorkoutVCClass, viewLoad, (IMP) workoutVC_viewDidLoad, voidSig);
     class_addMethod(WorkoutVCClass, sel_getUid("startEndWorkout:"),

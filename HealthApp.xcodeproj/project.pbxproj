@@ -57,6 +57,7 @@
 		61594D652606C7C6000D01A1 /* AppUserData.c in Sources */ = {isa = PBXBuildFile; fileRef = 61594D642606C7C6000D01A1 /* AppUserData.c */; };
 		615A1C4C2608406100858C32 /* PersistenceService.c in Sources */ = {isa = PBXBuildFile; fileRef = 615A1C4B2608406100858C32 /* PersistenceService.c */; };
 		6161838226AC80A0001587B2 /* CocoaHelpers.c in Sources */ = {isa = PBXBuildFile; fileRef = 6161838126AC80A0001587B2 /* CocoaHelpers.c */; };
+		61A048D12755E59300B7A8D2 /* AppTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 61A048D02755E59300B7A8D2 /* AppTypes.h */; };
 		61BC6F56266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m in Sources */ = {isa = PBXBuildFile; fileRef = 61BC6F52266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61C7793626102C19001326A1 /* HistoryTabCoordinator.c in Sources */ = {isa = PBXBuildFile; fileRef = 61C7793526102C19001326A1 /* HistoryTabCoordinator.c */; };
 		61C7797826102D45001326A1 /* HomeViewModel.c in Sources */ = {isa = PBXBuildFile; fileRef = 61C7797726102D45001326A1 /* HomeViewModel.c */; };
@@ -154,6 +155,7 @@
 		615A1C4B2608406100858C32 /* PersistenceService.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = PersistenceService.c; sourceTree = "<group>"; };
 		6161838026AC8089001587B2 /* CocoaHelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CocoaHelpers.h; sourceTree = "<group>"; };
 		6161838126AC80A0001587B2 /* CocoaHelpers.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = CocoaHelpers.c; sourceTree = "<group>"; };
+		61A048D02755E59300B7A8D2 /* AppTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppTypes.h; sourceTree = "<group>"; };
 		61BC6F52266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "WeeklyData+CoreDataClass.m"; sourceTree = "<group>"; };
 		61C77914261028BE001326A1 /* HomeTabCoordinator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HomeTabCoordinator.h; sourceTree = "<group>"; };
 		61C7791A26102960001326A1 /* HomeViewModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HomeViewModel.h; sourceTree = "<group>"; };
@@ -457,6 +459,7 @@
 		61C7790426102663001326A1 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				61A048D02755E59300B7A8D2 /* AppTypes.h */,
 				6161838026AC8089001587B2 /* CocoaHelpers.h */,
 				6161838126AC80A0001587B2 /* CocoaHelpers.c */,
 				615086F026D3223400521269 /* SwiftBridging.h */,
@@ -494,6 +497,7 @@
 				614DA69A270A8D1F00EC90C4 /* ExerciseManager.h in Headers */,
 				611EDDB32743660C0064B254 /* InputVC.h in Headers */,
 				611EDDA32741F8750064B254 /* StatusView.h in Headers */,
+				61A048D12755E59300B7A8D2 /* AppTypes.h in Headers */,
 				610B92CB270A7F4900358DBD /* ContainerView.h in Headers */,
 				61592A84274861B600789264 /* TotalWorkoutsView.h in Headers */,
 			);

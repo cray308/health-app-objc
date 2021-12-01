@@ -6,19 +6,6 @@
 Class SetupWorkoutVCClass;
 Ivar SetupWorkoutVCDataRef;
 
-static id getTitleString(SetupWorkoutVCData *data, int row) {
-    return (id) CFArrayGetValueAtIndex(data->names, row);
-}
-
-static id getAttrTitle(SetupWorkoutVCData *data, int row) {
-    id color = createColor(row == data->output.index ? ColorLabel : ColorSecondaryLabel);
-    CFDictionaryRef dict = createTitleTextDict(color, createFont(TextTitle3));
-    id attrString = createAttribString(CFArrayGetValueAtIndex(data->names, row), dict);
-    voidFunc(attrString, sel_getUid("autorelease"));
-    CFRelease(dict);
-    return attrString;
-}
-
 id setupWorkoutVC_init(void *delegate, unsigned char type, CFArrayRef names) {
     id self = createVC(SetupWorkoutVCClass);
     SetupWorkoutVCData *data = calloc(1, sizeof(SetupWorkoutVCData));
@@ -47,12 +34,6 @@ void setupWorkoutVC_viewDidLoad(id self, SEL _cmd) {
     InputVCData *parent = (InputVCData *) object_getIvar(self, InputVCDataRef);
     id view = getView(self);
     setBackground(view, createColor(ColorSecondaryBG));
-
-    if (osVersion < 13) {
-        data->getTitle = getAttrTitle;
-    } else {
-        data->getTitle = getTitleString;
-    }
 
     CFStringRef pickerTitle = localize(CFSTR("setupWorkoutTitle"));
     id workoutLabel = createLabel(pickerTitle, TextFootnote, 4, false);
@@ -148,10 +129,21 @@ long setupWorkoutVC_numberOfRows(id self, SEL _cmd _U_, id picker _U_, long sect
                             object_getIvar(self, SetupWorkoutVCDataRef))->names);
 }
 
-id setupWorkoutVC_titleForRow(id self, SEL _cmd _U_,
-                                       id picker _U_, long row, long section _U_) {
+id setupWorkoutVC_attrTitleForRow(id self, SEL _cmd _U_,
+                                  id picker _U_, long row, long section _U_) {
     SetupWorkoutVCData *data = (SetupWorkoutVCData *) object_getIvar(self, SetupWorkoutVCDataRef);
-    return data->getTitle(data, (int) row);
+    id color = createColor(row == data->output.index ? ColorLabel : ColorSecondaryLabel);
+    CFDictionaryRef dict = createTitleTextDict(color, createFont(TextTitle3));
+    id attrString = createAttribString(CFArrayGetValueAtIndex(data->names, row), dict);
+    voidFunc(attrString, sel_getUid("autorelease"));
+    CFRelease(dict);
+    return attrString;
+}
+
+CFStringRef setupWorkoutVC_titleForRow(id self, SEL _cmd _U_,
+                                       id picker _U_, long row, long section _U_) {
+    CFArrayRef names = ((SetupWorkoutVCData *) object_getIvar(self, SetupWorkoutVCDataRef))->names;
+    return CFArrayGetValueAtIndex(names, row);
 }
 
 void setupWorkoutVC_didSelectRow(id self, SEL _cmd _U_, id picker, long row, long section _U_) {
