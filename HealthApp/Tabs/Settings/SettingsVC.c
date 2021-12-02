@@ -63,12 +63,12 @@ void settingsVC_viewDidLoad(id self, SEL _cmd) {
     setMargins(parent->vStack, ((HAInsets){20, 0, 20, 0}));
     addArrangedSubview(parent->vStack, planContainer);
 
-    if (osVersion < 13) {
+    if (userData->darkMode >= 0) {
         id spacer = createView(false, -1);
         setHeight(spacer, 20, true);
         id switchContainer = createBackgroundView(ColorSecondaryBGGrouped, 44, true);
         data->switchView = createObjectWithFrame(objc_getClass("UISwitch"), CGRectZero);
-        setBool(data->switchView, sel_getUid("setOn:"), userData->darkMode);
+        setBool(data->switchView, sel_getUid("setOn:"), userData->darkMode ? true : false);
         id label = createLabel(localize(CFSTR("darkMode")), TextBody, 4, true);
         id sv = createStackView((id[]){label,data->switchView}, 2, 0, 5, (Padding){0, 8, 0, 8});
         centerHStack(sv);
@@ -125,9 +125,9 @@ void settingsVC_buttonTapped(id self, SEL _cmd _U_, id btn) {
     }
 
     SettingsVCData *data = (SettingsVCData *) object_getIvar(self, SettingsVCDataRef);
-    bool dark = false;
+    signed char dark = -1;
     if (data->switchView) {
-        dark = getBool(data->switchView, sel_getUid("isOn"));
+        dark = getBool(data->switchView, sel_getUid("isOn")) ? 1 : 0;
     }
     signed char plan = ((signed char) getSelectedSegment(data->picker)) - 1;
 

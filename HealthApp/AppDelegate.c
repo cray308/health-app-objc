@@ -31,11 +31,12 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
 
     persistenceService_init();
     int tzOffset = 0;
+    bool legacy = osVersion < 13;
 
     if (!hasLaunched) {
         ((void(*)(id,SEL,bool,CFStringRef))objc_msgSend)
         (defaults, sel_getUid("setBool:forKey:"), true, hasLaunchedKey);
-        userInfo_create();
+        userInfo_create(legacy);
 #if DEBUG
         persistenceService_create();
 #endif
@@ -54,7 +55,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
     DMTextFieldClass = objc_allocateClassPair(objc_getClass("UITextField"), "DMTextField", 0);
     DMBackgroundViewClass = objc_allocateClassPair(objc_getClass("UIView"), "DMBackgroundView", 0);
 
-    if (osVersion < 13) {
+    if (legacy) {
         char const *colorField = "colorCode", *voidSig = "v@:";
         class_addIvar(DMBackgroundViewClass, colorField, sizeof(int), 0, "i");
         class_addIvar(DMButtonClass, colorField, sizeof(int), 0, "i");

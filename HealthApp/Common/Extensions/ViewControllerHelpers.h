@@ -4,7 +4,6 @@
 #include "CocoaHelpers.h"
 #include "Views.h"
 
-#define _cfstr(x) ((__bridge CFStringRef) x)
 #define _nsstr(x) ((__bridge NSString*) x)
 #define _nsarr(x) ((__bridge NSArray*) x)
 

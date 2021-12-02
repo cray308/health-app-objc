@@ -67,7 +67,7 @@ void appCoordinator_start(id tabVC) {
     CFRelease(array);
 }
 
-void appCoordinator_updateUserInfo(signed char plan, bool darkMode, short *weights) {
+void appCoordinator_updateUserInfo(signed char plan, signed char darkMode, short *weights) {
     if (appUserData_updateUserSettings(plan, darkMode, weights)) {
         id window = appDel_setWindowTint(createColor(ColorRed));
         id tabVC = getObject(window, sel_getUid("rootViewController"));

@@ -129,8 +129,7 @@ CFDictionaryRef createTitleTextDict(id color, id font) {
 }
 
 id getLayoutGuide(id view) {
-    if (osVersion < 11) return view;
-    return getObject(view, sel_getUid("safeAreaLayoutGuide"));
+    return osVersion > 10 ? getObject(view, sel_getUid("safeAreaLayoutGuide")) : view;
 }
 
 #pragma mark - View initializers
@@ -266,7 +265,7 @@ id createTextfield(id delegate, CFStringRef text, CFStringRef hint,
     setDelegate(view, delegate);
     setMinHeight(view, 44, true);
     setAccessibilityLabel(view, hint);
-    if (osVersion < 13 && userData->darkMode) {
+    if (userData->darkMode == 1) {
         setKBColor(view, 1);
     }
     return view;

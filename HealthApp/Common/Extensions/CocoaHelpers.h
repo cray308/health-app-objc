@@ -51,8 +51,6 @@
 (((id(*)(Class,SEL,CGFloat,CGFloat,CGFloat,CGFloat))objc_msgSend) \
 (objc_getClass("UIColor"), sel_getUid("colorWithRed:green:blue:alpha:"), (red), (green), (blue), (alpha)))
 
-#define getSystemColor(_name) staticMethod(objc_getClass("UIColor"), sel_getUid((_name)))
-
 #define createImage(_name) staticMethodWithString(objc_getClass("UIImage"), sel_getUid("imageNamed:"), (_name))
 
 #define getBundle() staticMethod(objc_getClass("NSBundle"), sel_getUid("mainBundle"))

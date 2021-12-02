@@ -88,7 +88,8 @@ void getScreenBounds(CGRect *result) {
 }
 
 id createColor(int type) {
-    return osVersion > 12 ? getSystemColor(ColorNames[type]) : appColors[type][userData->darkMode];
+    return osVersion > 12 ? staticMethod(objc_getClass("UIColor"), sel_getUid(ColorNames[type]))
+    : appColors[type][userData->darkMode];
 }
 
 id createAttribString(CFStringRef text, CFDictionaryRef dict) {

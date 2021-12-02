@@ -4,8 +4,6 @@
 
 #define getNavBar(_navVC) getObject(_navVC, sel_getUid("navigationBar"))
 
-#define getSubviews(_view) getArray(_view, sel_getUid("subviews"))
-
 #define updateKVPair(_o, _k, _v) ((void(*)(id,SEL,id,CFStringRef))objc_msgSend)\
 ((_o), sel_getUid("setValue:forKey:"), (_v), (_k))
 
@@ -111,8 +109,9 @@ id createAlertController(CFStringRef title, CFStringRef message) {
         updateKVPair(vc, CFSTR("attributedMessage"), msgString);
 
         id view = getView(vc);
+        SEL sv = sel_getUid("subviews");
         for (int i = 0; i < 3; ++i) {
-            CFArrayRef subviews = getSubviews(view);
+            CFArrayRef subviews = getArray(view, sv);
             view = (id) CFArrayGetValueAtIndex(subviews, 0);
         }
         setBackground(view, createColor(ColorTertiaryBG));

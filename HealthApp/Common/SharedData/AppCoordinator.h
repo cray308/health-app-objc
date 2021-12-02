@@ -17,7 +17,7 @@ typedef struct {
 extern AppCoordinator *appCoordinator;
 
 void appCoordinator_start(id tabVC);
-void appCoordinator_updateUserInfo(signed char plan, bool darkMode, short *weights);
+void appCoordinator_updateUserInfo(signed char plan, signed char darkMode, short *weights);
 void appCoordinator_deleteAppData(void);
 void appCoordinator_updateMaxWeights(short *weights);
 
