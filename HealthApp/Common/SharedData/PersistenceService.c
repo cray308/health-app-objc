@@ -1,8 +1,4 @@
 #include "PersistenceService.h"
-#if DEBUG
-#include <stdlib.h>
-extern time_t date_calcStartOfWeek(time_t date);
-#endif
 #include "AppUserData.h"
 #include "CocoaHelpers.h"
 
@@ -62,13 +58,35 @@ id fetchRequest(id predicate) {
 }
 
 #if DEBUG
+#include <stdlib.h>
+
+static time_t _psCalcStartOfWeek(time_t date) {
+    struct tm info;
+    localtime_r(&date, &info);
+    int weekday = info.tm_wday;
+
+    if (weekday == 1) {
+        int seconds = (info.tm_hour * 3600) + (info.tm_min * 60) + info.tm_sec;
+        return date - seconds;
+    }
+
+    date -= WeekSeconds;
+    while (weekday != 1) {
+        date += 86400;
+        weekday = weekday == 6 ? 0 : weekday + 1;
+    }
+    localtime_r(&date, &info);
+    int seconds = ((info.tm_hour * 3600) + (info.tm_min * 60) + info.tm_sec);
+    return date - seconds;
+}
+
 void persistenceService_create(void) {
     runInBackground((^{
         int16_t lifts[] = {300, 20, 185, 235};
         int i = 0, r = 0;
         unsigned char plan = 0;
-        time_t start = date_calcStartOfWeek(time(NULL) - 126489600);
-        time_t end = date_calcStartOfWeek(time(NULL) - 2678400);
+        time_t start = _psCalcStartOfWeek(time(NULL) - 126489600);
+        time_t end = _psCalcStartOfWeek(time(NULL) - 2678400);
 
         while (start < end) {
             int16_t totalWorkouts = 0;

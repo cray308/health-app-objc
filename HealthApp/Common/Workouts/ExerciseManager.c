@@ -3,6 +3,12 @@
 #include "AppUserData.h"
 #include "CocoaHelpers.h"
 
+#if DEBUG
+#define WK_DATA_PATH CFSTR("WorkoutData_d")
+#else
+#define WK_DATA_PATH CFSTR("WorkoutData")
+#endif
+
 #define freeExerciseEntry(x) CFRelease((x).name)
 #define freeCircuit(x) array_free(exEntry, (x).exercises)
 
@@ -23,13 +29,8 @@ static struct __WorkoutKeys {
 
 static void createRootAndLibDict(struct DictWrapper *data) {
     id bundle = getBundle();
-#if DEBUG
     CFStringRef path = ((CFStringRef(*)(id,SEL,CFStringRef,CFStringRef))objc_msgSend)
-    (bundle, sel_getUid("pathForResource:ofType:"), CFSTR("WorkoutData_d"), CFSTR("plist"));
-#else
-    CFStringRef path = ((CFStringRef(*)(id,SEL,CFStringRef,CFStringRef))objc_msgSend)
-    (bundle, sel_getUid("pathForResource:ofType:"), CFSTR("WorkoutData"), CFSTR("plist"));
-#endif
+    (bundle, sel_getUid("pathForResource:ofType:"), WK_DATA_PATH, CFSTR("plist"));
     id _dict = allocClass(objc_getClass("NSDictionary"));
     data->root = getDict(_dict, sel_getUid("initWithContentsOfFile:"), path);
     data->lib = CFDictionaryGetValue(data->root, CFSTR("library"));

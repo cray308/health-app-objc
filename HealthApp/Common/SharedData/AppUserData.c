@@ -1,13 +1,11 @@
 #include "AppUserData.h"
 #include <CoreFoundation/CFNumber.h>
 #include <stdlib.h>
-#include <string.h>
 #include "CocoaHelpers.h"
 
 #define DaySeconds 86400
 
 enum {
-    WorkoutPlanNone = -1,
     WorkoutPlanBaseBuilding = 0,
     WorkoutPlanContinuation = 1
 };
@@ -33,10 +31,7 @@ static int date_getOffsetFromGMT(time_t date) {
     return (int) (date - mktime(&gmtInfo));
 }
 
-#ifndef DEBUG
-static
-#endif
-time_t date_calcStartOfWeek(time_t date) {
+static time_t date_calcStartOfWeek(time_t date) {
     struct tm localInfo;
     localtime_r(&date, &localInfo);
     int weekday = localInfo.tm_wday;
@@ -79,15 +74,11 @@ static void saveData(void) {
 
 void userInfo_create(bool darkMode) {
     time_t now = time(NULL);
-    time_t weekStart = date_calcStartOfWeek(now);
-    UserInfo info = {
-        .currentPlan = WorkoutPlanNone,
-        .weekStart = weekStart,
-        .tzOffset = date_getOffsetFromGMT(now),
-        .darkMode = darkMode ? 0 : -1
-    };
-    userData = malloc(sizeof(UserInfo));
-    memcpy(userData, &info, sizeof(UserInfo));
+    userData = calloc(1, sizeof(UserInfo));
+    userData->currentPlan = -1;
+    userData->weekStart = date_calcStartOfWeek(now);
+    userData->tzOffset = date_getOffsetFromGMT(now);
+    userData->darkMode = darkMode ? 0 : -1;
     saveData();
 }
 
@@ -97,27 +88,24 @@ int userInfo_initFromStorage(void) {
     time_t weekStart = date_calcStartOfWeek(now);
     id defaults = getUserDefaults();
     CFDictionaryRef savedInfo = getDict(defaults, sel_getUid("dictionaryForKey:"), dictKey);
-    CFNumberRef value;
+    userData = malloc(sizeof(UserInfo));
 
-    UserInfo *info = malloc(sizeof(UserInfo));
-
-    value = CFDictionaryGetValue(savedInfo, keys[0]);
-    CFNumberGetValue(value, kCFNumberLongType, &info->planStart);
+    CFNumberRef value = CFDictionaryGetValue(savedInfo, keys[0]);
+    CFNumberGetValue(value, kCFNumberLongType, &userData->planStart);
     value = CFDictionaryGetValue(savedInfo, keys[1]);
-    CFNumberGetValue(value, kCFNumberLongType, &info->weekStart);
+    CFNumberGetValue(value, kCFNumberLongType, &userData->weekStart);
     value = CFDictionaryGetValue(savedInfo, keys[2]);
-    CFNumberGetValue(value, kCFNumberIntType, &info->tzOffset);
+    CFNumberGetValue(value, kCFNumberIntType, &userData->tzOffset);
     value = CFDictionaryGetValue(savedInfo, keys[3]);
-    CFNumberGetValue(value, kCFNumberCharType, &info->darkMode);
+    CFNumberGetValue(value, kCFNumberCharType, &userData->darkMode);
     value = CFDictionaryGetValue(savedInfo, keys[4]);
-    CFNumberGetValue(value, kCFNumberCharType, &info->currentPlan);
+    CFNumberGetValue(value, kCFNumberCharType, &userData->currentPlan);
     value = CFDictionaryGetValue(savedInfo, keys[5]);
-    CFNumberGetValue(value, kCFNumberCharType, &info->completedWorkouts);
+    CFNumberGetValue(value, kCFNumberCharType, &userData->completedWorkouts);
     for (int i = 0; i < 4; ++i) {
         value = CFDictionaryGetValue(savedInfo, keys[6 + i]);
-        CFNumberGetValue(value, kCFNumberShortType, &info->liftMaxes[i]);
+        CFNumberGetValue(value, kCFNumberShortType, &userData->liftMaxes[i]);
     }
-    userData = info;
 
     int newOffset = date_getOffsetFromGMT(now);
     int tzDiff = userData->tzOffset - newOffset;
@@ -133,7 +121,7 @@ int userInfo_initFromStorage(void) {
         userData->completedWorkouts = 0;
         userData->weekStart = weekStart;
 
-        if (userData->currentPlan != WorkoutPlanNone) {
+        if (userData->currentPlan != -1) {
             if ((appUserData_getWeekInPlan() / WeekSeconds) >= planLengths[userData->currentPlan]) {
                 if (userData->currentPlan == WorkoutPlanBaseBuilding)
                     userData->currentPlan = WorkoutPlanContinuation;
@@ -185,7 +173,7 @@ bool appUserData_updateWeightMaxes(short *weights) {
 
 bool appUserData_updateUserSettings(signed char plan, signed char darkMode, short *weights) {
     bool madeChanges = plan != userData->currentPlan;
-    if (plan != WorkoutPlanNone && madeChanges) {
+    if (plan != -1 && madeChanges) {
 #if TARGET_OS_SIMULATOR
         userData->planStart = userData->weekStart;
 #else
