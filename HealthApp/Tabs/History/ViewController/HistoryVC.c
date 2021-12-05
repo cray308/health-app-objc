@@ -81,7 +81,7 @@ void historyVC_updateSegment(id self, SEL _cmd _U_, id picker) {
         return;
     }
 
-    int index = getInt(picker, sel_getUid("selectedSegmentIndex"));
+    int index = getSelectedSegment(picker);
     char buf[10];
     CFStringRef label = CFStringCreateWithFormat(NULL, NULL, model->totalWorkouts.legendFormat,
                                                  model->totalWorkouts.avgs[index]);

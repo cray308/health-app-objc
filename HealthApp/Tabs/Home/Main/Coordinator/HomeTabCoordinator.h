@@ -2,15 +2,11 @@
 #define HomeTabCoordinator_h
 
 #include <objc/runtime.h>
-#include "HomeViewModel.h"
 
 typedef struct {
     id navVC;
-    HomeViewModel model;
     void *childCoordinator;
 } HomeTabCoordinator;
-
-void homeCoordinator_start(HomeTabCoordinator *this);
 
 void homeCoordinator_addWorkoutFromPlan(HomeTabCoordinator *this, int index);
 void homeCoordinator_addWorkoutFromCustomButton(HomeTabCoordinator *this, int index);

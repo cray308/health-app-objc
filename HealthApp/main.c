@@ -146,7 +146,7 @@ int main(int argc, char *argv[]) {
     UpdateMaxesVCDataRef = class_getInstanceVariable(UpdateMaxesVCClass, dataKey);
 
     HomeVCClass = objc_allocateClassPair(VCClass, "HomeVC", 0);
-    class_addIvar(HomeVCClass, dataKey, sizeof(HomeVCData*), 0, "^{__homeVCData=@@@@}");
+    class_addIvar(HomeVCClass, dataKey, sizeof(HomeVCData*), 0, "^{__homeVCData=@@@[3@][2@]i}");
     class_addMethod(HomeVCClass, viewLoad, (IMP) homeVC_viewDidLoad, voidSig);
     class_addMethod(HomeVCClass, sel_getUid("viewWillAppear:"),
                     (IMP) homeVC_viewWillAppear, appearSig);

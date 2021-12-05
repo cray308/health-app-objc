@@ -2,24 +2,19 @@
 #include "AppCoordinator.h"
 #include "AppUserData.h"
 #include "ContainerView.h"
+#include "ExerciseManager.h"
 #include "StatusView.h"
 #include "ViewControllerHelpers.h"
 
 Class HomeVCClass;
 Ivar HomeVCDataRef;
 
-static bool hasWorkoutsForThisWeek(HomeViewModel *model) {
-    for (int i = 0; i < 7; ++i) {
-        if (model->workoutNames[i]) return true;
-    }
-    return false;
-}
-
 id homeVC_init(void *delegate) {
     id self = createVC(HomeVCClass);
     HomeVCData *data = malloc(sizeof(HomeVCData));
     data->delegate = delegate;
-    data->model = &((HomeTabCoordinator *) delegate)->model;
+    fillStringArray(data->stateNames, CFSTR("homeState%d"), 2);
+    fillStringArray(data->timeNames, CFSTR("timesOfDay%d"), 3);
     object_setIvar(self, HomeVCDataRef, (id) data);
     return self;
 }
@@ -28,16 +23,16 @@ void homeVC_updateWorkoutsList(id self) {
     HomeVCData *data = (HomeVCData *) object_getIvar(self, HomeVCDataRef);
     ContainerViewData *planData =
     (ContainerViewData *) object_getIvar(data->planContainer, ContainerViewDataRef);
-    if (!(hasWorkoutsForThisWeek(data->model) && planData->views->size)) return;
+    if (!data->numWorkouts) return;
 
-    for (unsigned i = 0; i < planData->views->size; ++i) {
+    for (int i = 0; i < data->numWorkouts; ++i) {
         id v = planData->views->arr[i];
         StatusViewData *ptr = (StatusViewData *) object_getIvar(v, StatusViewDataRef);
         int tag = getTag(v);
         bool enable = !(userData->completedWorkouts & (1 << tag));
         enableButton(ptr->button, enable);
         setBackground(ptr->box, createColor(enable ? ColorGray : ColorGreen));
-        statusView_updateAccessibility(v, data->model->stateNames[enable]);
+        statusView_updateAccessibility(v, data->stateNames[enable]);
     }
 }
 
@@ -46,6 +41,7 @@ void homeVC_createWorkoutsList(id self) {
     ContainerViewData *planData =
     (ContainerViewData *) object_getIvar(data->planContainer, ContainerViewDataRef);
 
+    data->numWorkouts = 0;
     array_clear(object, planData->views);
     CFArrayRef views = getArray(planData->stack, sel_getUid("arrangedSubviews"));
     int count = (int) CFArrayGetCount(views);
@@ -54,21 +50,26 @@ void homeVC_createWorkoutsList(id self) {
         removeView(v);
     }
 
-    if (!hasWorkoutsForThisWeek(data->model)) {
+    if (userData->currentPlan < 0 || userData->planStart > time(NULL)) {
         hideView(data->planContainer, true);
         return;
     }
+
+    CFStringRef workoutNames[7] = {0};
+    exerciseManager_setWeeklyWorkoutNames(userData->currentPlan,
+                                          appUserData_getWeekInPlan(), workoutNames);
 
     SEL btnTap = sel_getUid("buttonTapped:");
     CFStringRef days[7];
     fillStringArray(days, CFSTR("dayNames%d"), 7);
     for (int i = 0; i < 7; ++i) {
-        if (!data->model->workoutNames[i]) continue;
-        id btn = statusView_init(NULL, false, i, self, btnTap);
+        if (!workoutNames[i]) continue;
+        id btn = statusView_init(workoutNames[i], false, i, self, btnTap);
         StatusViewData *ptr = (StatusViewData *) object_getIvar(btn, StatusViewDataRef);
         setLabelText(ptr->headerLabel, days[i]);
-        setButtonTitle(ptr->button, data->model->workoutNames[i], 0);
         containerView_add(data->planContainer, btn);
+        CFRelease(workoutNames[i]);
+        data->numWorkouts += 1;
     }
 
     hideView(data->planContainer, false);
@@ -98,7 +99,6 @@ void homeVC_viewDidLoad(id self, SEL _cmd) {
     id customContainer = containerView_init(headers[1], 0, 4, true);
     id vStack = createStackView((id[]){data->greetingLabel, data->planContainer, customContainer},
                                 3, 1, 20, (Padding){10, 0, 16, 0});
-    hideView(data->planContainer, true);
 
     SEL btnTap = sel_getUid("customButtonTapped:");
     for (int i = 0; i < 5; ++i) {
@@ -117,8 +117,6 @@ void homeVC_viewDidLoad(id self, SEL _cmd) {
     releaseObj(vStack);
     releaseObj(scrollView);
 
-    setLabelText(data->greetingLabel, data->model->timeNames[data->model->timeOfDay]);
-    homeViewModel_fetchData(data->model);
     homeVC_createWorkoutsList(self);
     appCoordinator->loadedViewControllers |= LoadedVC_Home;
 }
@@ -129,9 +127,19 @@ void homeVC_viewWillAppear(id self, SEL _cmd, bool animated) {
 
     HomeVCData *data = (HomeVCData *) object_getIvar(self, HomeVCDataRef);
     homeCoordinator_checkForChildCoordinator(data->delegate);
-    if (homeViewModel_updateTimeOfDay(data->model)) {
-        setLabelText(data->greetingLabel, data->model->timeNames[data->model->timeOfDay]);
+
+    struct tm localInfo;
+    time_t now = time(NULL);
+    localtime_r(&now, &localInfo);
+    int timeOfDay = 0;
+    int hour = localInfo.tm_hour;
+
+    if (hour >= 12 && hour < 17) {
+        timeOfDay = 1;
+    } else if (hour < 5 || hour >= 17) {
+        timeOfDay = 2;
     }
+    setLabelText(data->greetingLabel, data->timeNames[timeOfDay]);
 }
 
 void homeVC_workoutButtonTapped(id self, SEL _cmd _U_, id btn) {

@@ -43,7 +43,7 @@ void appCoordinator_start(id tabVC) {
 
     HomeTabCoordinator *homeCoord = calloc(1, sizeof(HomeTabCoordinator));
     homeCoord->navVC = controllers[0];
-    homeCoordinator_start(homeCoord);
+    setupNavVC(homeCoord->navVC, homeVC_init(homeCoord));
 
     HistoryTabCoordinator *histCoord = calloc(1, sizeof(HistoryTabCoordinator));
     histCoord->navVC = controllers[1];
@@ -68,6 +68,7 @@ void appCoordinator_start(id tabVC) {
 }
 
 void appCoordinator_updateUserInfo(signed char plan, signed char darkMode, short *weights) {
+    bool updateHome = plan != userData->currentPlan;
     if (appUserData_updateUserSettings(plan, darkMode, weights)) {
         id window = appDel_setWindowTint(createColor(ColorRed));
         id tabVC = getObject(window, sel_getUid("rootViewController"));
@@ -79,19 +80,26 @@ void appCoordinator_updateUserInfo(signed char plan, signed char darkMode, short
         if (appCoordinator->loadedViewControllers & LoadedVC_History)
             historyVC_updateColors(getFirstVC((id) CFArrayGetValueAtIndex(ctrls, TabHistory)));
     }
-    HomeTabCoordinator *home = (HomeTabCoordinator *) appCoordinator->children[TabHome];
-    homeViewModel_fetchData(&home->model);
-    homeVC_createWorkoutsList(getFirstVC(home->navVC));
     free(weights);
+    if (updateHome) {
+        HomeTabCoordinator *home = (HomeTabCoordinator *) appCoordinator->children[TabHome];
+        homeVC_createWorkoutsList(getFirstVC(home->navVC));
+    }
 }
 
 void appCoordinator_deleteAppData(void) {
+    bool updateHome = userData->completedWorkouts;
     appUserData_deleteSavedData();
     persistenceService_deleteUserData();
-    HomeTabCoordinator *home = (HomeTabCoordinator *) appCoordinator->children[TabHome];
-    homeVC_updateWorkoutsList(getFirstVC(home->navVC));
-    bool reloadScreen = appCoordinator->loadedViewControllers & LoadedVC_History;
-    historyCoordinator_clearData(appCoordinator->children[TabHistory], reloadScreen);
+    if (updateHome) {
+        HomeTabCoordinator *home = (HomeTabCoordinator *) appCoordinator->children[TabHome];
+        homeVC_updateWorkoutsList(getFirstVC(home->navVC));
+    }
+    HistoryTabCoordinator *hist = (HistoryTabCoordinator *) appCoordinator->children[TabHistory];
+    if (hist->model.nEntries[2] != 0) {
+        bool reloadScreen = appCoordinator->loadedViewControllers & LoadedVC_History;
+        historyCoordinator_clearData(hist, reloadScreen);
+    }
 }
 
 void appCoordinator_updateMaxWeights(short *weights) {

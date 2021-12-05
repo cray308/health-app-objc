@@ -1,16 +1,19 @@
 #ifndef HomeVC_h
 #define HomeVC_h
 
+#include <CoreFoundation/CFBase.h>
 #include "HomeTabCoordinator.h"
 
 extern Class HomeVCClass;
 extern Ivar HomeVCDataRef;
 
 typedef struct __homeVCData {
-    HomeViewModel *model;
     void *delegate;
     id greetingLabel;
     id planContainer;
+    CFStringRef timeNames[3];
+    CFStringRef stateNames[2];
+    int numWorkouts;
 } HomeVCData;
 
 id homeVC_init(void *delegate);

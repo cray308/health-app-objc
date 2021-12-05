@@ -114,32 +114,19 @@ static void showConfetti(id vc) {
     });
 }
 
-void homeCoordinator_start(HomeTabCoordinator *this) {
-    fillStringArray(this->model.stateNames, CFSTR("homeState%d"), 2);
-    fillStringArray(this->model.timeNames, CFSTR("timesOfDay%d"), 3);
-    homeViewModel_updateTimeOfDay(&this->model);
-    setupNavVC(this->navVC, homeVC_init(this));
-}
-
 void homeCoordinator_didFinishAddingWorkout(HomeTabCoordinator *this,
                                             int totalCompleted, bool popStack) {
     id homeVC = getFirstVC(this->navVC);
-    homeVC_updateWorkoutsList(homeVC);
+    HomeVCData *ptr = (HomeVCData *) object_getIvar(homeVC, HomeVCDataRef);
+    if (totalCompleted)
+        homeVC_updateWorkoutsList(homeVC);
 
     if (popStack) {
         setBool(this->navVC, sel_getUid("popViewControllerAnimated:"), true);
         this->childCoordinator = NULL;
     }
 
-    if (!totalCompleted) return;
-
-    int nWorkouts = 0;
-    for (int i = 0; i < 7; ++i) {
-        if (this->model.workoutNames[i])
-            ++nWorkouts;
-    }
-
-    if (nWorkouts == totalCompleted) {
+    if (totalCompleted && ptr->numWorkouts == totalCompleted) {
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 0.75),
                        dispatch_get_main_queue(), ^(void) {
             showConfetti(homeVC);
