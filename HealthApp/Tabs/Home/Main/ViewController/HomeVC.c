@@ -64,7 +64,7 @@ void homeVC_createWorkoutsList(id self) {
     fillStringArray(days, CFSTR("dayNames%d"), 7);
     for (int i = 0; i < 7; ++i) {
         if (!workoutNames[i]) continue;
-        id btn = statusView_init(workoutNames[i], false, i, self, btnTap);
+        id btn = statusView_init(workoutNames[i], i, self, btnTap);
         StatusViewData *ptr = (StatusViewData *) object_getIvar(btn, StatusViewDataRef);
         setLabelText(ptr->headerLabel, days[i]);
         containerView_add(data->planContainer, btn);
@@ -95,14 +95,16 @@ void homeVC_viewDidLoad(id self, SEL _cmd) {
     fillStringArray(headers, CFSTR("homeHeader%d"), 2);
 
     data->greetingLabel = createLabel(NULL, TextTitle1, 1, true);
-    data->planContainer = containerView_init(headers[0], 0, 0, true);
-    id customContainer = containerView_init(headers[1], 0, 4, true);
+    data->planContainer = containerView_init(headers[0], 0, true);
+    id customContainer = containerView_init(headers[1], 4, true);
     id vStack = createStackView((id[]){data->greetingLabel, data->planContainer, customContainer},
                                 3, 1, 20, (Padding){10, 0, 16, 0});
 
     SEL btnTap = sel_getUid("customButtonTapped:");
     for (int i = 0; i < 5; ++i) {
-        id btn = statusView_init(titles[i], true, i, self, btnTap);
+        id btn = statusView_init(titles[i], i, self, btnTap);
+        StatusViewData *ptr = (StatusViewData *) object_getIvar(btn, StatusViewDataRef);
+        hideView(ptr->box, true);
         statusView_updateAccessibility(btn, NULL);
         containerView_add(customContainer, btn);
     }

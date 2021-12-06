@@ -112,7 +112,8 @@ void setupWorkoutVC_tappedButton(id self, SEL _cmd _U_, id btn) {
 
         case WorkoutEndurance:
             output->reps = ((InputViewData *) object_getIvar(fields[0], InputViewDataRef))->result;
-        default: ;
+        default:
+            break;
     }
     homeCoordinator_finishedSettingUpCustomWorkout(data->delegate, output);
 }

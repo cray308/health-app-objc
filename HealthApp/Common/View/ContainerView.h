@@ -10,11 +10,6 @@ gen_array_headers(object, id)
 extern Class ContainerViewClass;
 extern Ivar ContainerViewDataRef;
 
-enum {
-    HideDivider = 0x1,
-    HideLabel = 0x2
-};
-
 typedef struct __containerVData {
     id divider;
     id headerLabel;
@@ -22,7 +17,7 @@ typedef struct __containerVData {
     Array_object *views;
 } ContainerViewData;
 
-id containerView_init(CFStringRef title, int hidden, int spacing, bool margins);
+id containerView_init(CFStringRef title, int spacing, bool margins);
 void containerView_add(id self, id v);
 void containerView_deinit(id self, SEL _cmd);
 

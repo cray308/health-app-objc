@@ -143,6 +143,7 @@ void homeCoordinator_addWorkoutFromPlan(HomeTabCoordinator *this, int index) {
 
 void homeCoordinator_addWorkoutFromCustomButton(HomeTabCoordinator *this, int index) {
     unsigned char type = WorkoutStrength;
+    Workout *w;
     switch (index) {
         case CustomWorkoutIndexSE:
             type = WorkoutSE;
@@ -150,11 +151,11 @@ void homeCoordinator_addWorkoutFromCustomButton(HomeTabCoordinator *this, int in
         case CustomWorkoutIndexHIC:
             type = WorkoutHIC;
             break;
-        case CustomWorkoutIndexTestMax: ;
-            WorkoutParams params = {-1, WorkoutStrength, 2, 1, 1, 100};
-            Workout *w = exerciseManager_getWorkoutFromLibrary(&params);
-            if (w)
-                navigateToAddWorkout(this, false, w);
+        case CustomWorkoutIndexTestMax:
+            w = exerciseManager_getWorkoutFromLibrary(&(WorkoutParams){
+                -1, WorkoutStrength, 2, 1, 1, 100
+            });
+            navigateToAddWorkout(this, false, w);
             return;
         case CustomWorkoutIndexEndurance:
             type = WorkoutEndurance;

@@ -4,6 +4,7 @@
 #include "PersistenceService.h"
 #include "ViewControllerHelpers.h"
 
+extern void initExerciseStrings(void);
 extern void initWorkoutStrings(void);
 extern void initValidatorStrings(void);
 extern void handleIOSVersion(void);
@@ -18,6 +19,7 @@ Class AppDelegateClass;
 bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
                                     id application _U_, id options _U_) {
     initValidatorStrings();
+    initExerciseStrings();
     initWorkoutStrings();
     handleIOSVersion();
     CGRect bounds;

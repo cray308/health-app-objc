@@ -36,15 +36,6 @@ static const unsigned ExerciseTagNA = 255;
 static CFStringRef notificationMessages[2];
 static CFStringRef ExerciseStates[4];
 static CFStringRef notifTitle;
-static CFStringRef circuitHeaderRounds;
-static CFStringRef circuitHeaderAMRAP;
-static CFStringRef exerciseHeader;
-static CFStringRef exerciseTitleRest;
-static CFStringRef exerciseTitleReps;
-static CFStringRef exerciseTitleRepsWithWeight;
-static CFStringRef exerciseTitleDurationMinutes;
-static CFStringRef exerciseTitleDurationSeconds;
-static CFStringRef exerciseTitleDistance;
 static pthread_t *exerciseTimerThread;
 static pthread_mutex_t timerLock;
 
@@ -57,15 +48,6 @@ void initWorkoutStrings(void) {
     notifTitle = localize(CFSTR("workoutNotificationTitle"));
     notificationMessages[0] = localize(CFSTR("notifications0"));
     notificationMessages[1] = localize(CFSTR("notifications1"));
-    circuitHeaderRounds = localize(CFSTR("circuitHeaderRounds"));
-    circuitHeaderAMRAP = localize(CFSTR("circuitHeaderAMRAP"));
-    exerciseHeader = localize(CFSTR("exerciseHeader"));
-    exerciseTitleRest = localize(CFSTR("exerciseTitleRest"));
-    exerciseTitleReps = localize(CFSTR("exerciseTitleReps"));
-    exerciseTitleRepsWithWeight = localize(CFSTR("exerciseTitleRepsWithWeight"));
-    exerciseTitleDurationMinutes = localize(CFSTR("exerciseTitleDurationMinutes"));
-    exerciseTitleDurationSeconds = localize(CFSTR("exerciseTitleDurationSeconds"));
-    exerciseTitleDistance = localize(CFSTR("exerciseTitleDistance"));
 }
 
 static void handle_exercise_timer_interrupt(int n _U_) {}
@@ -166,7 +148,7 @@ static bool cycleExerciseEntry(Workout *w, WorkoutTimer *timers) {
             break;
 
         case ExerciseStateActive:
-            if (e->rest) {
+            if (e->restStr) {
                 e->state = ExerciseStateResting;
                 break;
             }
@@ -178,8 +160,13 @@ static bool cycleExerciseEntry(Workout *w, WorkoutTimer *timers) {
                 completed = true;
             } else {
                 e->state = ExerciseStateActive;
+                CFStringRef sets = CFStringCreateWithFormat(NULL, NULL, CFSTR("%d"),
+                                                            e->completedSets + 1);
+                CFStringReplace(e->headerStr, e->hRange, sets);
+                CFRelease(sets);
             }
-        default: ;
+        default:
+            break;
     }
     return completed;
 }
@@ -205,62 +192,16 @@ static void startGroup(Workout *w, WorkoutTimer *timers, bool startTimer) {
     cycleExerciseEntry(w, timers);
 }
 
-static CFStringRef createCircuitHeader(Circuit *c) {
-    if (c->type == CircuitRounds && c->reps > 1) {
-        int completed = c->completedReps == c->reps ? c->reps : c->completedReps + 1;
-        return CFStringCreateWithFormat(NULL, NULL, circuitHeaderRounds, completed, c->reps);
-    } else if (c->type == CircuitAMRAP) {
-        return CFStringCreateWithFormat(NULL, NULL, circuitHeaderAMRAP, c->reps);
-    }
-    return NULL;
-}
-
 static void exerciseView_configure(id v) {
     StatusViewData *ptr = ((StatusViewData *) object_getIvar(v, StatusViewDataRef));
     ExerciseEntry *e = ptr->entry;
 
-    if (e->sets > 1) {
-        int completed = e->completedSets == e->sets ? e->sets : e->completedSets + 1;
-        CFStringRef label = CFStringCreateWithFormat(NULL, NULL, exerciseHeader,
-                                                     completed, e->sets);
-        setLabelText(ptr->headerLabel, label);
-        CFRelease(label);
-    } else {
-        setLabelText(ptr->headerLabel, NULL);
-    }
-
-    CFStringRef title;
+    setLabelText(ptr->headerLabel, e->headerStr);
     if (e->state == ExerciseStateResting) {
-        title = CFStringCreateWithFormat(NULL, NULL, exerciseTitleRest, e->rest);
+        setButtonTitle(ptr->button, e->restStr, 0);
     } else {
-        switch (e->type) {
-            case ExerciseReps:
-                if (e->weight > 1) {
-                    title = CFStringCreateWithFormat(NULL, NULL, exerciseTitleRepsWithWeight,
-                                                     e->name, e->reps, e->weight);
-                } else {
-                    title = CFStringCreateWithFormat(NULL, NULL, exerciseTitleReps,
-                                                     e->name, e->reps);
-                }
-                break;
-
-            case ExerciseDuration:
-                if (e->reps > 120) {
-                    title = CFStringCreateWithFormat(NULL, NULL, exerciseTitleDurationMinutes,
-                                                     e->name, e->reps / 60.f);
-                } else {
-                    title = CFStringCreateWithFormat(NULL, NULL, exerciseTitleDurationSeconds,
-                                                     e->name, e->reps);
-                }
-                break;
-
-            default:
-                title = CFStringCreateWithFormat(NULL, NULL, exerciseTitleDistance,
-                                                 e->reps, (5 * e->reps) >> 2);
-        }
+        setButtonTitle(ptr->button, e->titleStr, 0);
     }
-    setButtonTitle(ptr->button, title, 0);
-    CFRelease(title);
 
     statusView_updateAccessibility(v, ExerciseStates[e->state]);
 
@@ -360,18 +301,11 @@ void workoutVC_viewDidLoad(id self, SEL _cmd) {
 
     for (unsigned i = 0; i < data->workout->activities->size; ++i) {
         Circuit *c = &data->workout->activities->arr[i];
-        CFStringRef header = createCircuitHeader(c);
-        data->containers[i] = containerView_init(header, false, 0, false);
+        data->containers[i] = containerView_init(c->headerStr, 0, false);
         addArrangedSubview(stack, data->containers[i]);
 
-        ContainerViewData *cvData =
-        (ContainerViewData *) object_getIvar(data->containers[i], ContainerViewDataRef);
-        hideView(cvData->headerLabel, !header);
-        if (header)
-            CFRelease(header);
-
         for (unsigned j = 0; j < c->exercises->size; ++j) {
-            id v = statusView_init(NULL, false, (i << 8) | j, self, btnTap);
+            id v = statusView_init(NULL, (i << 8) | j, self, btnTap);
             StatusViewData *ptr = (StatusViewData *) object_getIvar(v, StatusViewDataRef);
             ptr->entry = &c->exercises->arr[j];
             exerciseView_configure(v);
@@ -442,8 +376,8 @@ void handleEvent(id self, unsigned gIdx, unsigned eIdx, unsigned char event) {
             goto cleanup;
     }
 
-    id v = data->first->views->arr[w->group->index];
-    StatusViewData *ptr = ((StatusViewData *) object_getIvar(v, StatusViewDataRef));
+    id *currView = &data->first->views->arr[w->group->index];
+    StatusViewData *ptr = ((StatusViewData *) object_getIvar(*currView, StatusViewDataRef));
     unsigned char t = 0;
     if (event) {
         t = TransitionFinishedCircuit;
@@ -468,7 +402,7 @@ void handleEvent(id self, unsigned gIdx, unsigned eIdx, unsigned char event) {
     }
 
     bool exerciseDone = cycleExerciseEntry(w, data->timers);
-    exerciseView_configure(v);
+    exerciseView_configure(*currView);
 
     if (exerciseDone) {
         t = TransitionFinishedExercise;
@@ -476,7 +410,7 @@ void handleEvent(id self, unsigned gIdx, unsigned eIdx, unsigned char event) {
         if (++w->group->index == w->group->exercises->size) {
             t = TransitionFinishedCircuit;
             Circuit *c = w->group;
-            bool finishedCircuit = false;
+            bool finishedCircuit = false, changeRange;
             switch (c->type) {
                 case CircuitRounds:
                     if (++c->completedReps == c->reps)
@@ -484,17 +418,23 @@ void handleEvent(id self, unsigned gIdx, unsigned eIdx, unsigned char event) {
                     break;
 
                 case CircuitDecrement:
+                    changeRange = c->completedReps == 10;
                     if (--c->completedReps == 0) {
                         finishedCircuit = true;
                     } else {
+                        CFStringRef reps = CFStringCreateWithFormat(NULL, NULL,
+                                                                    CFSTR("%d"), c->completedReps);
                         ExerciseEntry *e;
                         array_iter(c->exercises, e) {
-                            if (e->type == ExerciseReps)
-                                e->reps -= 1;
+                            if (e->type == ExerciseReps) {
+                                CFStringReplace(e->titleStr, e->tRange, reps);
+                                if (changeRange) e->tRange.length -= 1;
+                            }
                         }
+                        CFRelease(reps);
                     }
-
-                default: ;
+                default:
+                    break;
             }
 
             if (finishedCircuit) {
@@ -512,7 +452,7 @@ void handleEvent(id self, unsigned gIdx, unsigned eIdx, unsigned char event) {
             cycleExerciseEntry(w, data->timers);
         }
     }
-foundTransition: ;
+foundTransition:
 
     switch (t) {
         case TransitionCompletedWorkout:
@@ -527,13 +467,16 @@ foundTransition: ;
             removeView(data->containers[w->index - 1]);
             releaseObj(data->containers[w->index - 1]);
             data->containers[w->index - 1] = nil;
-
-        case TransitionFinishedCircuit: ;
             hideView(data->first->divider, true);
-            CFStringRef header = createCircuitHeader(w->group);
-            setLabelText(data->first->headerLabel, header);
-            if (header)
-                CFRelease(header);
+
+        case TransitionFinishedCircuit:
+            if (w->group->reps > 1 && w->group->type == CircuitRounds) {
+                CFStringRef newNumber = CFStringCreateWithFormat(NULL, NULL, CFSTR("%d"),
+                                                                 w->group->completedReps + 1);
+                CFStringReplace(w->group->headerStr, w->group->numberRange, newNumber);
+                CFRelease(newNumber);
+            }
+            setLabelText(data->first->headerLabel, w->group->headerStr);
 
             for (unsigned i = 0; i < w->group->exercises->size; ++i) {
                 exerciseView_configure(data->first->views->arr[i]);
@@ -541,8 +484,7 @@ foundTransition: ;
             break;
 
         case TransitionFinishedExercise:
-            v = data->first->views->arr[w->group->index];
-            exerciseView_configure(v);
+            exerciseView_configure(*(++currView));
         default:
             break;
     }

@@ -15,7 +15,7 @@ typedef struct __statusVData {
     ExerciseEntry *entry;
 } StatusViewData;
 
-id statusView_init(CFStringRef text, bool hideViews, int tag, id target, SEL action);
+id statusView_init(CFStringRef text, int tag, id target, SEL action);
 void statusView_deinit(id self, SEL _cmd);
 void statusView_updateAccessibility(id self, CFStringRef stateText);
 

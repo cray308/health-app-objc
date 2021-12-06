@@ -5,7 +5,7 @@
 Class StatusViewClass;
 Ivar StatusViewDataRef;
 
-id statusView_init(CFStringRef text, bool hideViews, int tag, id target, SEL action) {
+id statusView_init(CFStringRef text, int tag, id target, SEL action) {
     id self = createObjectWithFrame(StatusViewClass, CGRectZero);
     StatusViewData *data = malloc(sizeof(StatusViewData));
     setTag(self, tag);
@@ -18,10 +18,6 @@ id statusView_init(CFStringRef text, bool hideViews, int tag, id target, SEL act
     id vStack = createStackView((id []){data->headerLabel, hStack}, 2, 1, 4, (Padding){4, 0, 4, 0});
     addSubview(self, vStack);
     pin(vStack, self, (Padding){0}, 0);
-    if (hideViews) {
-        hideView(data->headerLabel, true);
-        hideView(data->box, true);
-    }
     releaseObj(hStack);
     releaseObj(vStack);
     object_setIvar(self, StatusViewDataRef, (id) data);

@@ -7,7 +7,7 @@ gen_array_source(object, id, DSDefault_shallowCopy, releaseObj)
 Class ContainerViewClass;
 Ivar ContainerViewDataRef;
 
-id containerView_init(CFStringRef title, int hidden, int spacing, bool margins) {
+id containerView_init(CFStringRef title, int spacing, bool margins) {
     id self = createObjectWithFrame(ContainerViewClass, CGRectZero);
     disableAutoresizing(self);
 
@@ -29,11 +29,6 @@ id containerView_init(CFStringRef title, int hidden, int spacing, bool margins) 
                                 3, 1, 0, padding);
     addSubview(self, vStack);
     pin(vStack, self, (Padding){0}, 0);
-
-    if (hidden & HideDivider)
-        hideView(data->divider, true);
-    if (hidden & HideLabel)
-        hideView(data->headerLabel, true);
 
     releaseObj(vStack);
     releaseObj(divLine);

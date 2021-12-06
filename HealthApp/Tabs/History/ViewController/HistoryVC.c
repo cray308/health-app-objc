@@ -44,9 +44,12 @@ void historyVC_viewDidLoad(id self, SEL _cmd) {
 
     id containers[3];
     for (int i = 0; i < 3; ++i) {
-        containers[i] = containerView_init(titles[i], !i ? HideDivider : 0, 0, false);
+        containers[i] = containerView_init(titles[i], 0, false);
         containerView_add(containers[i], data->charts[i]);
     }
+    ContainerViewData *firstC = (ContainerViewData *) object_getIvar(containers[0],
+                                                                     ContainerViewDataRef);
+    hideView(firstC->divider, true);
 
     id vStack = createStackView(containers, 3, 1, 5, (Padding){10, 8, 10, 8});
     id scrollView = createScrollView();

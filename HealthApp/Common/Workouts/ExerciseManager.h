@@ -4,6 +4,10 @@
 #include <CoreFoundation/CFArray.h>
 #include "array.h"
 
+extern CFStringRef repsFormat;
+extern CFStringRef setsFormat;
+extern CFStringRef roundsFormat;
+
 enum {
     LiftSquat,
     LiftPullup,
@@ -25,10 +29,8 @@ typedef struct {
         ExerciseDuration,
         ExerciseDistance
     } type;
-    int weight;
     int reps;
     int sets;
-    int rest;
     int completedSets;
     enum {
         ExerciseStateDisabled,
@@ -36,7 +38,11 @@ typedef struct {
         ExerciseStateResting,
         ExerciseStateCompleted
     } state;
-    CFStringRef name;
+    CFRange hRange;
+    CFRange tRange;
+    CFStringRef restStr;
+    CFMutableStringRef titleStr;
+    CFMutableStringRef headerStr;
 } ExerciseEntry;
 
 gen_array_headers(exEntry, ExerciseEntry)
@@ -51,6 +57,8 @@ typedef struct {
     int completedReps;
     unsigned index;
     Array_exEntry *exercises;
+    CFRange numberRange;
+    CFMutableStringRef headerStr;
 } Circuit;
 
 gen_array_headers(circuit, Circuit)
