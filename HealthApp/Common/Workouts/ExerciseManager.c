@@ -11,18 +11,12 @@
 
 #define freeExerciseEntry(x) do { \
     CFRelease((x).titleStr); \
-    if ((x).restStr) { \
-        CFRelease((x).restStr); \
-    } \
-    if ((x).headerStr) { \
-        CFRelease((x).headerStr); \
-    } \
+    if ((x).restStr) CFRelease((x).restStr); \
+    if ((x).headerStr) CFRelease((x).headerStr); \
 } while (0)
 
 #define freeCircuit(x) do { \
-    if ((x).headerStr) { \
-        CFRelease((x).headerStr); \
-    } \
+    if ((x).headerStr) CFRelease((x).headerStr); \
     array_free(exEntry, (x).exercises); \
 } while (0)
 
@@ -107,7 +101,9 @@ static Workout *buildWorkoutFromDict(CFDictionaryRef dict, WorkoutParams *params
                 weights[2] = (int) (multiplier * lifts[LiftDeadlift]);
             }
         } else if (params->index == 2) {
-            for (int i = 1; i < 4; ++i) weights[i] = lifts[i];
+            for (int i = 1; i < 4; ++i) {
+                weights[i] = lifts[i];
+            }
         }
     }
 
@@ -311,7 +307,8 @@ CFArrayRef exerciseManager_createWorkoutNames(unsigned char type) {
     CFArrayRef libArr = getLibraryArrayForType(&info, type);
     if (!(libArr && (len = (int) CFArrayGetCount(libArr)))) goto cleanup;
 
-    if (type == WorkoutStrength) len = 2;
+    if (type == WorkoutStrength)
+        len = 2;
 
     CFArrayCallBacks callbacks = kCFTypeArrayCallBacks;
     callbacks.retain = NULL;

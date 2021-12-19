@@ -57,12 +57,11 @@ int dmNavVC_getStatusBarStyle(id self _U_, SEL _cmd _U_) {
 void setupNavVC(id navVC, id firstVC) {
     CFArrayRef array = CFArrayCreate(NULL, (const void *[]){firstVC}, 1, &(CFArrayCallBacks){0});
     setArray(navVC, sel_getUid("setViewControllers:"), array);
-    releaseObj(firstVC);
     CFRelease(array);
 }
 
 id getFirstVC(id navVC) {
-    CFArrayRef ctrls = getArray(navVC, sel_getUid("viewControllers"));
+    CFArrayRef ctrls = getViewControllers(navVC);
     return (id) CFArrayGetValueAtIndex(ctrls, 0);
 }
 

@@ -139,24 +139,23 @@ id createObjectWithFrame(Class cls, CGRect frame) {
     return ((id(*)(id,SEL,CGRect))objc_msgSend)(_obj, sel_getUid("initWithFrame:"), frame);
 }
 
-id createBackgroundView(int colorCode, int height, bool priority) {
+id createBackgroundView(int colorCode, int height, bool optional) {
     id view = createObjectWithFrame(DMBackgroundViewClass, CGRectZero);
     DMBackgroundView *ptr = (DMBackgroundView *) view;
     ptr->colorCode = colorCode;
     disableAutoresizing(view);
     setBackground(view, createColor(colorCode));
-    setHeight(view, height, priority);
+    setHeight(view, height, optional);
     return view;
 }
 
-id createView(bool rounded, int size) {
+id createView(int size) {
     id view = createObjectWithFrame(objc_getClass("UIView"), CGRectZero);
     disableAutoresizing(view);
-    if (rounded)
-        setCornerRadius(view);
     if (size >= 0) {
-        setWidth(view, size, false);
-        setHeight(view, size, false);
+        setCornerRadius(view);
+        setWidth(view, size);
+        setHeight(view, size, true);
     }
     return view;
 }
@@ -242,7 +241,7 @@ id createSegmentedControl(CFStringRef format, int count, int startIndex,
     if (action)
         addTarget(view, target, action, 4096);
     if (height >= 0)
-        setHeight(view, height, true);
+        setHeight(view, height, false);
     CFRelease(array);
     if (osVersion < 13)
         updateSegmentedControl(view);
@@ -263,11 +262,10 @@ id createTextfield(id delegate, CFStringRef text, CFStringRef hint,
     setInt(view, sel_getUid("setBorderStyle:"), 3);
     setInt(view, sel_getUid("setKeyboardType:"), keyboard);
     setDelegate(view, delegate);
-    setMinHeight(view, 44, true);
+    setMinHeight(view, 44);
     setAccessibilityLabel(view, hint);
-    if (userData->darkMode == 1) {
+    if (userData->darkMode == 1)
         setKBColor(view, 1);
-    }
     return view;
 }
 

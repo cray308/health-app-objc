@@ -2,13 +2,12 @@
 #define HomeVC_h
 
 #include <CoreFoundation/CFBase.h>
-#include "HomeTabCoordinator.h"
+#include <objc/runtime.h>
 
 extern Class HomeVCClass;
 extern Ivar HomeVCDataRef;
 
-typedef struct __homeVCData {
-    void *delegate;
+typedef struct {
     id greetingLabel;
     id planContainer;
     CFStringRef timeNames[3];
@@ -16,10 +15,12 @@ typedef struct __homeVCData {
     int numWorkouts;
 } HomeVCData;
 
-id homeVC_init(void *delegate);
+id homeVC_init(void);
 void homeVC_updateWorkoutsList(id self);
 void homeVC_createWorkoutsList(id self);
 void homeVC_updateColors(id self);
+void homeVC_navigateToAddWorkout(id self, void *workout);
+void homeVC_handleFinishedWorkout(id self, int totalCompleted);
 
 void homeVC_viewDidLoad(id self, SEL _cmd);
 void homeVC_viewWillAppear(id self, SEL _cmd, bool animated);

@@ -19,9 +19,9 @@ enum {
     EdgeRight = 0x8
 };
 
-void setWidth(id v, int width, bool priority);
-void setMinHeight(id v, int height, bool priority);
-void setHeight(id v, int height, bool priority);
+void setWidth(id v, int width);
+void setMinHeight(id v, int height);
+void setHeight(id v, int height, bool optional);
 void setEqualWidths(id v, id container);
 void pin(id v, id container, Padding margins, unsigned excluded);
 

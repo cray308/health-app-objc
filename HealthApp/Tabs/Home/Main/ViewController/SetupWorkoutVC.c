@@ -1,18 +1,17 @@
 #include "SetupWorkoutVC.h"
-#include "HomeTabCoordinator.h"
+#include "HomeVC.h"
 #include "InputVC.h"
 #include "ViewControllerHelpers.h"
 
 Class SetupWorkoutVCClass;
 Ivar SetupWorkoutVCDataRef;
 
-id setupWorkoutVC_init(void *delegate, unsigned char type, CFArrayRef names) {
+id setupWorkoutVC_init(id parent, unsigned char type, CFArrayRef names) {
     id self = createVC(SetupWorkoutVCClass);
     SetupWorkoutVCData *data = calloc(1, sizeof(SetupWorkoutVCData));
-    data->delegate = delegate;
+    data->parent = parent;
     data->names = names;
-    workoutParams_init(&data->output, -1);
-    data->output.type = type;
+    data->type = type;
     object_setIvar(self, SetupWorkoutVCDataRef, (id) data);
     return self;
 }
@@ -63,7 +62,7 @@ void setupWorkoutVC_viewDidLoad(id self, SEL _cmd) {
     short maxes[] = {5, 5, 100};
     CFStringRef rows[] = {CFSTR("setupWorkoutSets"), CFSTR("setupWorkoutReps"), NULL};
 
-    switch (data->output.type) {
+    switch (data->type) {
         case WorkoutStrength:
             rows[2] = CFSTR("setupWorkoutMaxWeight");
             break;
@@ -99,29 +98,32 @@ void setupWorkoutVC_tappedButton(id self, SEL _cmd _U_, id btn) {
     }
 
     SetupWorkoutVCData *data = (SetupWorkoutVCData *) object_getIvar(self, SetupWorkoutVCDataRef);
-    WorkoutParams *output = &data->output;
+    WorkoutParams output = {.day = -1, .type = data->type, .index = data->index};
     id *fields = ((InputVCData *) object_getIvar(self, InputVCDataRef))->children;
-    switch (output->type) {
+    switch (output.type) {
         case WorkoutStrength:
-            output->weight = ((InputViewData *)
-                              object_getIvar(fields[2], InputViewDataRef))->result;
+            output.weight = ((InputViewData *)
+                             object_getIvar(fields[2], InputViewDataRef))->result;
         case WorkoutSE:
-            output->sets = ((InputViewData *) object_getIvar(fields[0], InputViewDataRef))->result;
-            output->reps = ((InputViewData *) object_getIvar(fields[1], InputViewDataRef))->result;
+            output.sets = ((InputViewData *) object_getIvar(fields[0], InputViewDataRef))->result;
+            output.reps = ((InputViewData *) object_getIvar(fields[1], InputViewDataRef))->result;
             break;
 
         case WorkoutEndurance:
-            output->reps = ((InputViewData *) object_getIvar(fields[0], InputViewDataRef))->result;
+            output.reps = ((InputViewData *) object_getIvar(fields[0], InputViewDataRef))->result;
         default:
             break;
     }
-    homeCoordinator_finishedSettingUpCustomWorkout(data->delegate, output);
+    Workout *w = exerciseManager_getWorkoutFromLibrary(&output);
+    id parent = data->parent;
+    dismissPresentedVC(parent, ^{
+        homeVC_navigateToAddWorkout(parent, w);
+    });
 }
 
 long setupWorkoutVC_numberOfComponents(id self _U_, SEL _cmd _U_, id picker) {
-    if (osVersion < 13) {
+    if (osVersion < 13)
         setBackground(picker, createColor(ColorTertiaryBG));
-    }
     return 1;
 }
 
@@ -133,7 +135,7 @@ long setupWorkoutVC_numberOfRows(id self, SEL _cmd _U_, id picker _U_, long sect
 id setupWorkoutVC_attrTitleForRow(id self, SEL _cmd _U_,
                                   id picker _U_, long row, long section _U_) {
     SetupWorkoutVCData *data = (SetupWorkoutVCData *) object_getIvar(self, SetupWorkoutVCDataRef);
-    id color = createColor(row == data->output.index ? ColorLabel : ColorSecondaryLabel);
+    id color = createColor(row == data->index ? ColorLabel : ColorSecondaryLabel);
     CFDictionaryRef dict = createTitleTextDict(color, createFont(TextTitle3));
     id attrString = createAttribString(CFArrayGetValueAtIndex(data->names, row), dict);
     voidFunc(attrString, sel_getUid("autorelease"));
@@ -149,10 +151,9 @@ CFStringRef setupWorkoutVC_titleForRow(id self, SEL _cmd _U_,
 
 void setupWorkoutVC_didSelectRow(id self, SEL _cmd _U_, id picker, long row, long section _U_) {
     SetupWorkoutVCData *data = (SetupWorkoutVCData *) object_getIvar(self, SetupWorkoutVCDataRef);
-    data->output.index = (int) row;
+    data->index = (int) row;
     CFStringRef name = CFArrayGetValueAtIndex(data->names, row);
     setLabelText(data->workoutTextField, name);
-    if (osVersion < 13) {
+    if (osVersion < 13)
         setInt(picker, sel_getUid("reloadComponent:"), 0);
-    }
 }

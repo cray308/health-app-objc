@@ -65,7 +65,7 @@ void settingsVC_viewDidLoad(id self, SEL _cmd) {
     addArrangedSubview(parent->vStack, aboveTF);
 
     if (userData->darkMode >= 0) {
-        id switchContainer = createBackgroundView(ColorSecondaryBGGrouped, 44, true);
+        id switchContainer = createBackgroundView(ColorSecondaryBGGrouped, 44, false);
         data->switchView = createObjectWithFrame(objc_getClass("UISwitch"), CGRectZero);
         setBool(data->switchView, sel_getUid("setOn:"), userData->darkMode ? true : false);
         id label = createLabel(localize(CFSTR("darkMode")), TextBody, 4, true);
@@ -83,8 +83,9 @@ void settingsVC_viewDidLoad(id self, SEL _cmd) {
 
     CFStringRef titles[4];
     fillStringArray(titles, CFSTR("maxWeight%d"), 4);
-    for (int i = 0; i < 4; ++i)
+    for (int i = 0; i < 4; ++i) {
         inputVC_addChild(self, titles[i], 0, 999);
+    }
 
     SEL btnTap = sel_getUid("buttonTapped:");
     parent->button = createButton(localize(CFSTR("settingsSave")), ColorBlue, BtnBackground, 0,
@@ -119,9 +120,8 @@ void settingsVC_buttonTapped(id self, SEL _cmd _U_, id btn) {
 
     SettingsVCData *data = (SettingsVCData *) object_getIvar(self, SettingsVCDataRef);
     signed char dark = -1;
-    if (data->switchView) {
+    if (data->switchView)
         dark = getBool(data->switchView, sel_getUid("isOn")) ? 1 : 0;
-    }
     signed char plan = ((signed char) getSelectedSegment(data->picker)) - 1;
 
     short *results = malloc(sizeof(short) << 2);

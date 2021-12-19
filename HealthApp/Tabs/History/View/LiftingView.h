@@ -1,7 +1,7 @@
 #ifndef LiftingView_h
 #define LiftingView_h
 
-#include "HistoryTabCoordinator.h"
+#include "HistoryVC.h"
 
 extern Class LiftViewClass;
 extern Ivar LiftViewDataRef;

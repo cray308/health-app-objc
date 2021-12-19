@@ -9,27 +9,20 @@
 #include "HistoryVC.h"
 #include "SettingsVC.h"
 #include "WorkoutVC.h"
-#include "SetupWorkoutVC.h"
 #include "UpdateMaxesVC.h"
 #include "AppDelegate.h"
 
 #define TF_CHANGED "i@:@{?=" LHASymbol LHASymbol "}@"
-#define TITLE_FOR_ROW "@@:@" LHASymbol LHASymbol
-#define NUM_COMPONENTS LHASymbol "@:@"
-#define NUM_ROWS LHASymbol "@:@" LHASymbol
-#define DID_SELECT_ROW "v@:@" LHASymbol LHASymbol
 
-#define WK_VC_LAYOUT "^{__workoutVCData=@@@[10@][2@][2@]{__savedWorkoutInfo=I{__exerciseInfo=II}}" \
-"[2{__workoutTimer=@{__timerInfo=CCC}{_opaque_pthread_mutex_t=" LHASymbol MUTEX_CHARS "}" \
-"{_opaque_pthread_cond_t=" LHASymbol COND_CHARS "}IIi" LHASymbol "}]}"
+#define WK_VC_LAYOUT "^{?=@@[10@][2@][2@]{__savedWorkoutInfo=I{__exerciseInfo=II}}" \
+"[2{?=@{__timerInfo=CCC}{_opaque_pthread_mutex_t=" LHASymbol MUTEX_CHARS "}" \
+"{_opaque_pthread_cond_t=" LHASymbol COND_CHARS "}IIi" LHASymbol "}]B}"
 
 extern int UIApplicationMain(int, char *[], CFStringRef, CFStringRef);
 extern Protocol *getValueFormatterType(void);
 extern SEL getValueFormatterAction(void);
-extern int getOSVersion(void);
 
 int main(int argc, char *argv[]) {
-    osVersion = getOSVersion();
     Class viewClass = objc_getClass("UIView");
     Class VCClass = objc_getClass("UIViewController");
     char const *validatorKey = "validatorData", *dataKey = "data";
@@ -86,8 +79,6 @@ int main(int argc, char *argv[]) {
                     (IMP) inputVC_viewDidAppear, appearSig);
     class_addMethod(InputVCClass, sel_getUid("dismissKeyboard"),
                     (IMP) inputVC_dismissKeyboard, voidSig);
-    class_addMethod(InputVCClass, sel_getUid("textFieldShouldReturn:"),
-                    (IMP) inputVC_fieldShouldReturn, "i@:@");
     class_addMethod(InputVCClass, sel_getUid("keyboardShown:"),
                     (IMP) inputVC_keyboardShown, tapSig);
     class_addMethod(InputVCClass, sel_getUid("keyboardWillHide:"),
@@ -110,35 +101,8 @@ int main(int argc, char *argv[]) {
     objc_registerClassPair(SettingsVCClass);
     SettingsVCDataRef = class_getInstanceVariable(SettingsVCClass, dataKey);
 
-    SetupWorkoutVCClass = objc_allocateClassPair(InputVCClass, "SetupWorkoutVC", 0);
-    class_addProtocol(SetupWorkoutVCClass, objc_getProtocol("UIPickerViewDelegate"));
-    class_addProtocol(SetupWorkoutVCClass, objc_getProtocol("UIPickerViewDataSource"));
-    class_addIvar(SetupWorkoutVCClass, dataKey, sizeof(SetupWorkoutVCData*), 0,
-                  "^{__setupWorkoutVCData=@@@{__workoutParams=cCiiii}}");
-    class_addMethod(SetupWorkoutVCClass, deinit, (IMP) setupWorkoutVC_deinit, voidSig);
-    class_addMethod(SetupWorkoutVCClass, viewLoad, (IMP) setupWorkoutVC_viewDidLoad, voidSig);
-    class_addMethod(SetupWorkoutVCClass, btnTap, (IMP) setupWorkoutVC_tappedButton, tapSig);
-    class_addMethod(SetupWorkoutVCClass, sel_getUid("numberOfComponentsInPickerView:"),
-                    (IMP) setupWorkoutVC_numberOfComponents, NUM_COMPONENTS);
-    class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:numberOfRowsInComponent:"),
-                    (IMP) setupWorkoutVC_numberOfRows, NUM_ROWS);
-    class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:didSelectRow:inComponent:"),
-                    (IMP) setupWorkoutVC_didSelectRow, DID_SELECT_ROW);
-    SEL titleForRow;
-    IMP titleForRowFunc;
-    if (osVersion < 13) {
-        titleForRowFunc = (IMP) setupWorkoutVC_attrTitleForRow;
-        titleForRow = sel_getUid("pickerView:attributedTitleForRow:forComponent:");
-    } else {
-        titleForRowFunc = (IMP) setupWorkoutVC_titleForRow;
-        titleForRow = sel_getUid("pickerView:titleForRow:forComponent:");
-    }
-    class_addMethod(SetupWorkoutVCClass, titleForRow, titleForRowFunc, TITLE_FOR_ROW);
-    objc_registerClassPair(SetupWorkoutVCClass);
-    SetupWorkoutVCDataRef = class_getInstanceVariable(SetupWorkoutVCClass, dataKey);
-
     UpdateMaxesVCClass = objc_allocateClassPair(InputVCClass, "UpdateMaxesVC", 0);
-    class_addIvar(UpdateMaxesVCClass, dataKey, sizeof(void*), 0, "@");
+    class_addIvar(UpdateMaxesVCClass, dataKey, sizeof(id), 0, "@");
     class_addMethod(UpdateMaxesVCClass, viewLoad, (IMP) updateMaxesVC_viewDidLoad, voidSig);
     class_addMethod(UpdateMaxesVCClass, sel_getUid("tappedFinish"),
                     (IMP) updateMaxesVC_tappedFinish, voidSig);
@@ -146,7 +110,7 @@ int main(int argc, char *argv[]) {
     UpdateMaxesVCDataRef = class_getInstanceVariable(UpdateMaxesVCClass, dataKey);
 
     HomeVCClass = objc_allocateClassPair(VCClass, "HomeVC", 0);
-    class_addIvar(HomeVCClass, dataKey, sizeof(HomeVCData*), 0, "^{__homeVCData=@@@[3@][2@]i}");
+    class_addIvar(HomeVCClass, dataKey, sizeof(HomeVCData*), 0, "^{?=@@[3@][2@]i}");
     class_addMethod(HomeVCClass, viewLoad, (IMP) homeVC_viewDidLoad, voidSig);
     class_addMethod(HomeVCClass, sel_getUid("viewWillAppear:"),
                     (IMP) homeVC_viewWillAppear, appearSig);
@@ -158,7 +122,12 @@ int main(int argc, char *argv[]) {
 
     HistoryVCClass = objc_allocateClassPair(VCClass, "HistoryVC", 0);
     class_addProtocol(HistoryVCClass, getValueFormatterType());
-    class_addIvar(HistoryVCClass, dataKey, sizeof(HistoryVCData*), 0, "^{__historyVCData=@@[3@]}");
+    class_addIvar(HistoryVCClass, dataKey, sizeof(HistoryVCData*), 0,
+                  "^{__historyVCData={__historyData="
+                  "{__totalWorkoutsChartData=@@@@[3^{CGPoint}][3f][3f]}"
+                  "{__workoutTypeChartData=[5@]@[5@]@[3[5^{CGPoint}]][3[4i]][3f][4@]}"
+                  "{__liftChartData=[4@]@[4@]@[3[4^{CGPoint}]][3[4f]][3f][4@]}"
+                  "{HistFormatter=[12@]@[128{HistTimeData=sss}]}[3i]}@[3@]}");
     class_addMethod(HistoryVCClass, viewLoad, (IMP) historyVC_viewDidLoad, voidSig);
     class_addMethod(HistoryVCClass, btnTap, (IMP) historyVC_updateSegment, tapSig);
     class_addMethod(HistoryVCClass, getValueFormatterAction(),
@@ -172,6 +141,8 @@ int main(int argc, char *argv[]) {
     class_addMethod(WorkoutVCClass, viewLoad, (IMP) workoutVC_viewDidLoad, voidSig);
     class_addMethod(WorkoutVCClass, sel_getUid("startEndWorkout:"),
                     (IMP) workoutVC_startEndWorkout, tapSig);
+    class_addMethod(WorkoutVCClass, sel_getUid("viewWillDisappear:"),
+                    (IMP) workoutVC_willDisappear, appearSig);
     class_addMethod(WorkoutVCClass, btnTap, (IMP) workoutVC_handleTap, tapSig);
     objc_registerClassPair(WorkoutVCClass);
     WorkoutVCDataRef = class_getInstanceVariable(WorkoutVCClass, dataKey);

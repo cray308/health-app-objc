@@ -46,7 +46,6 @@ void inputVC_deinit(id self, SEL _cmd);
 void inputVC_viewDidLoad(id self, SEL _cmd);
 void inputVC_viewDidAppear(id self, SEL _cmd, bool animated);
 void inputVC_dismissKeyboard(id self, SEL _cmd);
-bool inputVC_fieldShouldReturn(id self, SEL _cmd, id field);
 void inputVC_keyboardShown(id self, SEL _cmd, id notif);
 void inputVC_keyboardWillHide(id self, SEL _cmd, id notif);
 void inputVC_fieldBeganEditing(id self, SEL _cmd, id field);

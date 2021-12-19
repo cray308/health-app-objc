@@ -69,7 +69,9 @@ static void saveData(void) {
     ((void(*)(id,SEL,CFDictionaryRef,CFStringRef))objc_msgSend)
     (defaults, sel_getUid("setObject:forKey:"), dict, dictKey);
     CFRelease(dict);
-    for (int i = 0; i < 10; ++i) CFRelease(values[i]);
+    for (int i = 0; i < 10; ++i) {
+        CFRelease(values[i]);
+    }
 }
 
 void userInfo_create(bool darkMode) {
@@ -130,9 +132,8 @@ int userInfo_initFromStorage(void) {
         }
     }
 
-    if (madeChange) {
+    if (madeChange)
         saveData();
-    }
     return tzDiff;
 }
 
@@ -188,8 +189,7 @@ bool appUserData_updateUserSettings(signed char plan, signed char darkMode, shor
         userData->darkMode = darkMode;
     }
 
-    if (!appUserData_updateWeightMaxes(weights) && madeChanges) {
+    if (!appUserData_updateWeightMaxes(weights) && madeChanges)
         saveData();
-    }
     return rv;
 }

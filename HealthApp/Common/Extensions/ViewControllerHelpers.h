@@ -15,6 +15,8 @@
 
 #define allocNavVC() allocClass(objc_getClass("DMNavVC"))
 
+#define getNavVC(_vc) getObject(_vc, sel_getUid("navigationController"))
+
 #define createVC(_cls) (((id(*)(id,SEL,id,id))objc_msgSend)\
 (allocClass((_cls)), sel_getUid("initWithNibName:bundle:"), nil, nil))
 

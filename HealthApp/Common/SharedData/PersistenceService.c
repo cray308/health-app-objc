@@ -18,8 +18,9 @@ static inline id createWeekData(void) {
 
 void weekData_getLiftingLimits(id data, int16_t *output) {
     static char const *getterStrs[] = {"bestSquat", "bestPullup", "bestBench", "bestDeadlift"};
-    for (int i = 0; i < 4; ++i)
+    for (int i = 0; i < 4; ++i) {
         output[i] = getInt16(data, sel_getUid(getterStrs[i]));
+    }
 }
 
 int16_t weekData_getWorkoutTimeForType(id data, unsigned char type) {
@@ -39,8 +40,9 @@ void weekData_setLiftingMaxArray(id data, int16_t *weights) {
     static char const *setterStrs[] = {
         "setBestSquat:", "setBestPullup:", "setBestBench:", "setBestDeadlift:"
     };
-    for (int i = 0; i < 4; ++i)
+    for (int i = 0; i < 4; ++i) {
         setInt16(data, sel_getUid(setterStrs[i]), weights[i]);
+    }
 }
 
 void persistenceService_saveContext(void) {
@@ -268,8 +270,9 @@ void persistenceService_deleteUserData(void) {
 
         id currWeek = persistenceService_getCurrentWeek();
         weekData_setTotalWorkouts(currWeek, 0);
-        for (int i = 0; i < 4; ++i)
-        weekData_setWorkoutTimeForType(currWeek, i, 0);
+        for (int i = 0; i < 4; ++i) {
+            weekData_setWorkoutTimeForType(currWeek, i, 0);
+        }
         persistenceService_saveContext();
     }));
 }

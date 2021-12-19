@@ -7,14 +7,15 @@
 extern Class SetupWorkoutVCClass;
 extern Ivar SetupWorkoutVCDataRef;
 
-typedef struct __setupWorkoutVCData {
-    void *delegate;
+typedef struct {
+    id parent;
     CFArrayRef names;
     id workoutTextField;
-    WorkoutParams output;
+    unsigned char type;
+    int index;
 } SetupWorkoutVCData;
 
-id setupWorkoutVC_init(void *delegate, unsigned char type, CFArrayRef names);
+id setupWorkoutVC_init(id parent, unsigned char type, CFArrayRef names);
 void setupWorkoutVC_deinit(id self, SEL _cmd);
 void setupWorkoutVC_viewDidLoad(id self, SEL _cmd);
 void setupWorkoutVC_tappedButton(id self, SEL _cmd, id btn);

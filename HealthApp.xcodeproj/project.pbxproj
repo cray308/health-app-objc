@@ -57,13 +57,10 @@
 		61594D652606C7C6000D01A1 /* AppUserData.c in Sources */ = {isa = PBXBuildFile; fileRef = 61594D642606C7C6000D01A1 /* AppUserData.c */; };
 		615A1C4C2608406100858C32 /* PersistenceService.c in Sources */ = {isa = PBXBuildFile; fileRef = 615A1C4B2608406100858C32 /* PersistenceService.c */; };
 		6161838226AC80A0001587B2 /* CocoaHelpers.c in Sources */ = {isa = PBXBuildFile; fileRef = 6161838126AC80A0001587B2 /* CocoaHelpers.c */; };
+		6168AA4A276FD9310080A895 /* Charts.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6168AA47276FD9240080A895 /* Charts.xcframework */; };
+		6168AA4B276FD9310080A895 /* Charts.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 6168AA47276FD9240080A895 /* Charts.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		61A048D12755E59300B7A8D2 /* AppTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 61A048D02755E59300B7A8D2 /* AppTypes.h */; };
 		61BC6F56266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m in Sources */ = {isa = PBXBuildFile; fileRef = 61BC6F52266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		61C7793626102C19001326A1 /* HistoryTabCoordinator.c in Sources */ = {isa = PBXBuildFile; fileRef = 61C7793526102C19001326A1 /* HistoryTabCoordinator.c */; };
-		61C7797C26102D5F001326A1 /* HomeTabCoordinator.c in Sources */ = {isa = PBXBuildFile; fileRef = 61C7797B26102D5F001326A1 /* HomeTabCoordinator.c */; };
-		61C779A426102E20001326A1 /* AddWorkoutCoordinator.c in Sources */ = {isa = PBXBuildFile; fileRef = 61C779A326102E20001326A1 /* AddWorkoutCoordinator.c */; };
-		61E3A1B52755883700927728 /* Charts.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61E3A1B22755881F00927728 /* Charts.xcframework */; };
-		61E3A1B62755883700927728 /* Charts.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 61E3A1B22755881F00927728 /* Charts.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		61E8ED6726FD60B400942368 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 61E8ED6926FD60B400942368 /* Localizable.strings */; };
 		61E8ED6C26FD87AB00942368 /* WorkoutData_d.plist in Resources */ = {isa = PBXBuildFile; fileRef = 61E8ED6B26FD87AB00942368 /* WorkoutData_d.plist */; };
 		61FFEEA2272CCCB5002BFFA6 /* AppDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 61FFEEA1272CCCAE002BFFA6 /* AppDelegate.h */; };
@@ -86,7 +83,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				61E3A1B62755883700927728 /* Charts.xcframework in Embed Frameworks */,
+				6168AA4B276FD9310080A895 /* Charts.xcframework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -154,15 +151,9 @@
 		615A1C4B2608406100858C32 /* PersistenceService.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = PersistenceService.c; sourceTree = "<group>"; };
 		6161838026AC8089001587B2 /* CocoaHelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CocoaHelpers.h; sourceTree = "<group>"; };
 		6161838126AC80A0001587B2 /* CocoaHelpers.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = CocoaHelpers.c; sourceTree = "<group>"; };
+		6168AA47276FD9240080A895 /* Charts.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = Charts.xcframework; sourceTree = "<group>"; };
 		61A048D02755E59300B7A8D2 /* AppTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppTypes.h; sourceTree = "<group>"; };
 		61BC6F52266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "WeeklyData+CoreDataClass.m"; sourceTree = "<group>"; };
-		61C77914261028BE001326A1 /* HomeTabCoordinator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HomeTabCoordinator.h; sourceTree = "<group>"; };
-		61C7791D261029C6001326A1 /* AddWorkoutCoordinator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AddWorkoutCoordinator.h; sourceTree = "<group>"; };
-		61C7792626102AAE001326A1 /* HistoryTabCoordinator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HistoryTabCoordinator.h; sourceTree = "<group>"; };
-		61C7793526102C19001326A1 /* HistoryTabCoordinator.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = HistoryTabCoordinator.c; sourceTree = "<group>"; };
-		61C7797B26102D5F001326A1 /* HomeTabCoordinator.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = HomeTabCoordinator.c; sourceTree = "<group>"; };
-		61C779A326102E20001326A1 /* AddWorkoutCoordinator.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = AddWorkoutCoordinator.c; sourceTree = "<group>"; };
-		61E3A1B22755881F00927728 /* Charts.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = Charts.xcframework; sourceTree = "<group>"; };
 		61E8ED6826FD60B400942368 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		61E8ED6B26FD87AB00942368 /* WorkoutData_d.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = WorkoutData_d.plist; sourceTree = "<group>"; };
 		61FFEEA1272CCCAE002BFFA6 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -173,7 +164,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				61E3A1B52755883700927728 /* Charts.xcframework in Frameworks */,
+				6168AA4A276FD9310080A895 /* Charts.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -283,7 +274,7 @@
 		6185D9B926E4263700DB2BF2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				61E3A1B22755881F00927728 /* Charts.xcframework */,
+				6168AA47276FD9240080A895 /* Charts.xcframework */,
 			);
 			path = Frameworks;
 			sourceTree = "<group>";
@@ -310,7 +301,6 @@
 		61C778EB26102458001326A1 /* History */ = {
 			isa = PBXGroup;
 			children = (
-				61C778FD261025AF001326A1 /* Coordinator */,
 				61C778FB2610259F001326A1 /* View */,
 				61C778FA26102598001326A1 /* ViewController */,
 			);
@@ -329,7 +319,6 @@
 		61C778ED26102474001326A1 /* Main */ = {
 			isa = PBXGroup;
 			children = (
-				61C778F32610250C001326A1 /* Coordinator */,
 				61C778F62610254E001326A1 /* ViewController */,
 			);
 			path = Main;
@@ -338,28 +327,9 @@
 		61C778EE2610247D001326A1 /* AddWorkout */ = {
 			isa = PBXGroup;
 			children = (
-				61C778EF261024DC001326A1 /* Coordinator */,
 				61C778F826102580001326A1 /* ViewController */,
 			);
 			path = AddWorkout;
-			sourceTree = "<group>";
-		};
-		61C778EF261024DC001326A1 /* Coordinator */ = {
-			isa = PBXGroup;
-			children = (
-				61C7791D261029C6001326A1 /* AddWorkoutCoordinator.h */,
-				61C779A326102E20001326A1 /* AddWorkoutCoordinator.c */,
-			);
-			path = Coordinator;
-			sourceTree = "<group>";
-		};
-		61C778F32610250C001326A1 /* Coordinator */ = {
-			isa = PBXGroup;
-			children = (
-				61C77914261028BE001326A1 /* HomeTabCoordinator.h */,
-				61C7797B26102D5F001326A1 /* HomeTabCoordinator.c */,
-			);
-			path = Coordinator;
 			sourceTree = "<group>";
 		};
 		61C778F62610254E001326A1 /* ViewController */ = {
@@ -404,15 +374,6 @@
 				61592AAF27488DD000789264 /* LiftingView.c */,
 			);
 			path = View;
-			sourceTree = "<group>";
-		};
-		61C778FD261025AF001326A1 /* Coordinator */ = {
-			isa = PBXGroup;
-			children = (
-				61C7792626102AAE001326A1 /* HistoryTabCoordinator.h */,
-				61C7793526102C19001326A1 /* HistoryTabCoordinator.c */,
-			);
-			path = Coordinator;
 			sourceTree = "<group>";
 		};
 		61C779022610260B001326A1 /* Common */ = {
@@ -608,15 +569,12 @@
 				610B92CC270A7F4900358DBD /* ContainerView.c in Sources */,
 				611EDDB42743660C0064B254 /* InputVC.c in Sources */,
 				611EDDBB274487010064B254 /* SettingsVC.c in Sources */,
-				61C7797C26102D5F001326A1 /* HomeTabCoordinator.c in Sources */,
 				611EDDAA274355F10064B254 /* HomeVC.c in Sources */,
 				611EDDC02744A9F70064B254 /* SetupWorkoutVC.c in Sources */,
-				61C7793626102C19001326A1 /* HistoryTabCoordinator.c in Sources */,
 				61592A85274861B600789264 /* TotalWorkoutsView.c in Sources */,
 				61592A8A2748651500789264 /* WorkoutTypeView.c in Sources */,
 				61592AB127488DD000789264 /* LiftingView.c in Sources */,
 				611EDDE927476ED50064B254 /* HistoryVC.c in Sources */,
-				61C779A426102E20001326A1 /* AddWorkoutCoordinator.c in Sources */,
 				611EDDD12745FEA70064B254 /* WorkoutVC.c in Sources */,
 				611EDDC72744CB2D0064B254 /* UpdateMaxesVC.c in Sources */,
 				61594D5726068C41000D01A1 /* AppCoordinator.c in Sources */,

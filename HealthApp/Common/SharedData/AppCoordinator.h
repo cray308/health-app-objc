@@ -11,12 +11,12 @@ enum {
 
 typedef struct {
     unsigned char loadedViewControllers;
-    void *children[3];
+    id children[3];
 } AppCoordinator;
 
 extern AppCoordinator *appCoordinator;
 
-void appCoordinator_start(id tabVC);
+void *appCoordinator_start(id tabVC, void (**fetchHandler)(void*));
 void appCoordinator_updateUserInfo(signed char plan, signed char darkMode, short *weights);
 void appCoordinator_deleteAppData(void);
 void appCoordinator_updateMaxWeights(short *weights);

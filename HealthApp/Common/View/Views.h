@@ -112,8 +112,8 @@ CFDictionaryRef createTitleTextDict(id color, id font);
 id getLayoutGuide(id view);
 
 id createObjectWithFrame(Class cls, CGRect frame);
-id createBackgroundView(int color, int height, bool priority);
-id createView(bool rounded, int size);
+id createBackgroundView(int color, int height, bool optional);
+id createView(int size);
 id createStackView(id *subviews, int count, int axis, int spacing, Padding margins);
 id createScrollView(void);
 id createLabel(CFStringRef text, int style, int alignment, bool accessible);

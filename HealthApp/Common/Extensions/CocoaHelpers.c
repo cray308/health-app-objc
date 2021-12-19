@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include "AppUserData.h"
 
+extern int getOSVersion(void);
+
 static const void *cocoaArrRetain(CFAllocatorRef allocator _U_, const void *value) {
     voidFunc((id) value, sel_getUid("retain"));
     return value;
@@ -36,11 +38,14 @@ static const char *const ColorNames[] = {
     "tertiarySystemBackgroundColor"
 };
 
-void handleIOSVersion(void) {
-    if (osVersion < 13) {
+bool handleIOSVersion(bool *setWindowTint) {
+    bool result = ((osVersion = getOSVersion()) < 13);
+    *setWindowTint = osVersion < 14;
+    if (result) {
         appColors = malloc(14 * sizeof(id*));
-        for (int i = 0; i < 14; ++i)
+        for (int i = 0; i < 14; ++i) {
             appColors[i] = malloc(sizeof(id) << 1);
+        }
         appColors[ColorSeparator][0] = allocColor(0.24, 0.24, 0.26, 0.29);
         appColors[ColorSeparator][1] = allocColor(0.33, 0.33, 0.35, 0.6);
         appColors[ColorLabel][0] = allocColor(0, 0, 0, 1);
@@ -71,6 +76,7 @@ void handleIOSVersion(void) {
         appColors[ColorTertiaryBGGrouped][0] = appColors[ColorPrimaryBGGrouped][0];
         appColors[ColorTertiaryBGGrouped][1] = appColors[ColorTertiaryBG][1];
     }
+    return result;
 }
 
 void getRect(id view, CGRect *result, char type) {

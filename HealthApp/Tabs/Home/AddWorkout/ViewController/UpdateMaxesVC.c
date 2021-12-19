@@ -1,14 +1,14 @@
 #include "UpdateMaxesVC.h"
-#include "AddWorkoutCoordinator.h"
 #include "InputVC.h"
 #include "ViewControllerHelpers.h"
+#include "WorkoutVC.h"
 
 Class UpdateMaxesVCClass;
 Ivar UpdateMaxesVCDataRef;
 
-id updateMaxesVC_init(void *delegate) {
+id updateMaxesVC_init(id parent) {
     id self = createVC(UpdateMaxesVCClass);
-    object_setIvar(self, UpdateMaxesVCDataRef, (id) delegate);
+    object_setIvar(self, UpdateMaxesVCDataRef, parent);
     return self;
 }
 
@@ -37,12 +37,14 @@ void updateMaxesVC_viewDidLoad(id self, SEL _cmd) {
 }
 
 void updateMaxesVC_tappedFinish(id self, SEL _cmd _U_) {
-    AddWorkoutCoordinator *delegate =
-    (AddWorkoutCoordinator *) object_getIvar(self, UpdateMaxesVCDataRef);
+    id parent = object_getIvar(self, UpdateMaxesVCDataRef);
     short *lifts = malloc(sizeof(short) << 2);
     id *fields = ((InputVCData *) object_getIvar(self, InputVCDataRef))->children;
     for (int i = 0; i < 4; ++i) {
         lifts[i] = ((InputViewData *) object_getIvar(fields[i], InputViewDataRef))->result;
     }
-    addWorkoutCoordinator_completedWorkout(delegate, true, false, lifts);
+
+    dismissPresentedVC(parent, ^{
+        workoutVC_handleFinishedWorkout(parent, lifts);
+    });
 }

@@ -14,7 +14,7 @@ id liftingView_init(LiftChartModel *model, id formatter) {
     disableAutoresizing(data->chart);
     addSubview(self, data->chart);
     pin(data->chart, self, (Padding){0, 8, 0, 8}, 0);
-    setHeight(data->chart, 550, true);
+    setHeight(data->chart, 550, false);
     object_setIvar(self, LiftViewDataRef, (id) data);
     return self;
 }

@@ -1,7 +1,7 @@
 #ifndef TotalWorkoutsView_h
 #define TotalWorkoutsView_h
 
-#include "HistoryTabCoordinator.h"
+#include "HistoryVC.h"
 
 extern Class TotalWorkoutsViewClass;
 extern Ivar TotalWorkoutsViewDataRef;

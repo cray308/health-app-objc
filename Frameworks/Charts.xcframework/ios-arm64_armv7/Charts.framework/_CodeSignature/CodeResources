@@ -26,7 +26,7 @@
 		</data>
 		<key>Modules/Charts.swiftmodule/arm.swiftmodule</key>
 		<data>
-		OFLGvfAnyXlbfy9noofrnPndzsc=
+		Zi7P1CZ5wxhvnwKYU9vuez5kjjY=
 		</data>
 		<key>Modules/Charts.swiftmodule/arm64-apple-ios.swiftdoc</key>
 		<data>
@@ -38,7 +38,7 @@
 		</data>
 		<key>Modules/Charts.swiftmodule/arm64-apple-ios.swiftmodule</key>
 		<data>
-		ch4MjdIg935uCD5AOJCls1xIXpc=
+		P0akoJY66XOa0qoGabTdxnVPNtg=
 		</data>
 		<key>Modules/Charts.swiftmodule/arm64.swiftdoc</key>
 		<data>
@@ -50,7 +50,7 @@
 		</data>
 		<key>Modules/Charts.swiftmodule/arm64.swiftmodule</key>
 		<data>
-		ch4MjdIg935uCD5AOJCls1xIXpc=
+		P0akoJY66XOa0qoGabTdxnVPNtg=
 		</data>
 		<key>Modules/Charts.swiftmodule/armv7-apple-ios.swiftdoc</key>
 		<data>
@@ -62,7 +62,7 @@
 		</data>
 		<key>Modules/Charts.swiftmodule/armv7-apple-ios.swiftmodule</key>
 		<data>
-		OFLGvfAnyXlbfy9noofrnPndzsc=
+		Zi7P1CZ5wxhvnwKYU9vuez5kjjY=
 		</data>
 		<key>Modules/Charts.swiftmodule/armv7.swiftdoc</key>
 		<data>
@@ -74,7 +74,7 @@
 		</data>
 		<key>Modules/Charts.swiftmodule/armv7.swiftmodule</key>
 		<data>
-		OFLGvfAnyXlbfy9noofrnPndzsc=
+		Zi7P1CZ5wxhvnwKYU9vuez5kjjY=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -131,11 +131,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			OFLGvfAnyXlbfy9noofrnPndzsc=
+			Zi7P1CZ5wxhvnwKYU9vuez5kjjY=
 			</data>
 			<key>hash2</key>
 			<data>
-			7KOAK8WJC0tsQhM6Z483bTZG4ggv8200zZknqlGK5cQ=
+			iEG1rj+Ci0byh+Zsza4adFeDFeAe706iFT3Z4muvCPo=
 			</data>
 		</dict>
 		<key>Modules/Charts.swiftmodule/arm64-apple-ios.swiftdoc</key>
@@ -164,11 +164,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			ch4MjdIg935uCD5AOJCls1xIXpc=
+			P0akoJY66XOa0qoGabTdxnVPNtg=
 			</data>
 			<key>hash2</key>
 			<data>
-			sXPZ8dxf638V77xHrF1qJbXq6yNl9HkBO6VA67fX0S4=
+			PjqmMjQSy3AFfE9f6Waoc4CPweu6CbjHjF/UKUAHByU=
 			</data>
 		</dict>
 		<key>Modules/Charts.swiftmodule/arm64.swiftdoc</key>
@@ -197,11 +197,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			ch4MjdIg935uCD5AOJCls1xIXpc=
+			P0akoJY66XOa0qoGabTdxnVPNtg=
 			</data>
 			<key>hash2</key>
 			<data>
-			sXPZ8dxf638V77xHrF1qJbXq6yNl9HkBO6VA67fX0S4=
+			PjqmMjQSy3AFfE9f6Waoc4CPweu6CbjHjF/UKUAHByU=
 			</data>
 		</dict>
 		<key>Modules/Charts.swiftmodule/armv7-apple-ios.swiftdoc</key>
@@ -230,11 +230,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			OFLGvfAnyXlbfy9noofrnPndzsc=
+			Zi7P1CZ5wxhvnwKYU9vuez5kjjY=
 			</data>
 			<key>hash2</key>
 			<data>
-			7KOAK8WJC0tsQhM6Z483bTZG4ggv8200zZknqlGK5cQ=
+			iEG1rj+Ci0byh+Zsza4adFeDFeAe706iFT3Z4muvCPo=
 			</data>
 		</dict>
 		<key>Modules/Charts.swiftmodule/armv7.swiftdoc</key>
@@ -263,11 +263,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			OFLGvfAnyXlbfy9noofrnPndzsc=
+			Zi7P1CZ5wxhvnwKYU9vuez5kjjY=
 			</data>
 			<key>hash2</key>
 			<data>
-			7KOAK8WJC0tsQhM6Z483bTZG4ggv8200zZknqlGK5cQ=
+			iEG1rj+Ci0byh+Zsza4adFeDFeAe706iFT3Z4muvCPo=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>

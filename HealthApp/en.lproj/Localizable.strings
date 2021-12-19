@@ -65,6 +65,9 @@
 "save" = "Save";
 "delete" = "Delete";
 "finish" = "Finish";
+"start" = "Start";
+"end" = "End";
+"done" = "Done";
 
 "homeHeader0" = "Workouts this week";
 "homeHeader1" = "Add Custom Workout";
@@ -110,9 +113,7 @@
 "setupWorkoutMaxWeight" = "Max Weight Percentage";
 "setupWorkoutDuration" = "Duration (minutes)";
 
-"start" = "Start";
-"end" = "End";
-"workoutTitleTestDay" = "test day";
+"workoutTitleTestDay" = "Test Day";
 "exerciseHeader" = "Set %d of %d";
 "exerciseTitleRest" = "Rest: %d s";
 "exerciseTitleReps" = "%@ x %d";

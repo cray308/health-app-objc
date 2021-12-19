@@ -13,12 +13,12 @@ id containerView_init(CFStringRef title, int spacing, bool margins) {
 
     ContainerViewData *data = malloc(sizeof(ContainerViewData));
     data->views = array_new(object);
-    data->divider = createView(false, -1);
+    data->divider = createView(-1);
     data->headerLabel = createLabel(title, TextTitle3, 4, true);
     data->stack = createStackView(NULL, 0, 1, spacing, (Padding){.top = 5});
 
-    setHeight(data->divider, 21, false);
-    id divLine = createBackgroundView(ColorSeparator, 1, false);
+    setHeight(data->divider, 21, true);
+    id divLine = createBackgroundView(ColorSeparator, 1, true);
     addSubview(data->divider, divLine);
     pin(divLine, data->divider, (Padding){0}, EdgeBottom);
 

@@ -16,7 +16,7 @@ id totalWorkoutsView_init(TotalWorkoutsChartModel *model, id formatter) {
     disableAutoresizing(data->chart);
     addSubview(self, data->chart);
     pin(data->chart, self, (Padding){0, 8, 0, 8}, 0);
-    setHeight(data->chart, 390, true);
+    setHeight(data->chart, 390, false);
     object_setIvar(self, TotalWorkoutsViewDataRef, (id) data);
     return self;
 }

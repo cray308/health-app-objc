@@ -12,7 +12,7 @@ id statusView_init(CFStringRef text, int tag, id target, SEL action) {
     int params = BtnLargeFont | BtnBackground | BtnRounded;
     data->button = createButton(text, ColorLabel, params, tag, target, action, 50);
     data->headerLabel = createLabel(NULL, TextSubhead, 4, false);
-    data->box = createView(true, 20);
+    data->box = createView(20);
     id hStack = createStackView((id []){data->button, data->box}, 2, 0, 5, (Padding){0});
     centerHStack(hStack);
     id vStack = createStackView((id []){data->headerLabel, hStack}, 2, 1, 4, (Padding){4, 0, 4, 0});

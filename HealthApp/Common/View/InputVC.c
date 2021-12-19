@@ -84,7 +84,6 @@ void inputView_reset(InputViewData *data, short value) {
 id inputVC_init(id self, SEL _cmd, id nibName, id bundle) {
     struct objc_super super = {self, objc_getClass("UIViewController")};
     self = ((id(*)(struct objc_super *,SEL,id,id))objc_msgSendSuper)(&super, _cmd, nibName, bundle);
-    if (!self) return nil;
 
     InputVCData *data = calloc(1, sizeof(InputVCData));
     object_setIvar(self, InputVCDataRef, (id) data);
@@ -126,9 +125,8 @@ void inputVC_viewDidLoad(id self, SEL _cmd) {
     data->scrollView = createScrollView();
     data->vStack = createStackView(nil, 0, 1, 0, (Padding){0});
     data->toolbar = createObjectWithFrame(objc_getClass("UIToolbar"), ((CGRect){{0}, {width, 50}}));
-    if (osVersion < 13) {
+    if (osVersion < 13)
         setBarTint(data->toolbar);
-    }
     voidFunc(data->toolbar, sel_getUid("sizeToFit"));
 
     Class btnClass = objc_getClass("UIBarButtonItem");
@@ -136,7 +134,7 @@ void inputVC_viewDidLoad(id self, SEL _cmd) {
     (allocClass(btnClass), sel_getUid("initWithBarButtonSystemItem:target:action:"), 5, nil, nil);
     id doneButton = ((id(*)(id,SEL,CFStringRef,int,id,SEL))objc_msgSend)
     (allocClass(btnClass), sel_getUid("initWithTitle:style:target:action:"),
-     CFSTR("Done"), 0, self, sel_getUid("dismissKeyboard"));
+     localize(CFSTR("done")), 0, self, sel_getUid("dismissKeyboard"));
 
     if (osVersion < 14)
         setTintColor(doneButton, createColor(ColorRed));
@@ -187,12 +185,15 @@ void inputVC_viewDidAppear(id self, SEL _cmd, bool animated) {
 }
 
 void inputVC_dismissKeyboard(id self, SEL _cmd _U_) {
-    id view = getView(self);
-    setBool(view, sel_getUid("endEditing:"), true);
-}
-
-bool inputVC_fieldShouldReturn(id self _U_, SEL _cmd _U_, id field) {
-    return getBool(field, sel_getUid("resignFirstResponder"));
+    InputVCData *d = (InputVCData *) object_getIvar(self, InputVCDataRef);
+    int tag = d->activeField ? getTag(d->activeField) : 255;
+    if (tag >= d->count - 1) {
+        id view = getView(self);
+        setBool(view, sel_getUid("endEditing:"), true);
+    } else {
+        InputViewData *next = (InputViewData *) object_getIvar(d->children[tag + 1], InputViewDataRef);
+        getBool(next->field, sel_getUid("becomeFirstResponder"));
+    }
 }
 
 void inputVC_keyboardShown(id self, SEL _cmd _U_, id notif) {

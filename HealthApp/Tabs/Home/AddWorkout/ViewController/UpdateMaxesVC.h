@@ -6,7 +6,7 @@
 extern Class UpdateMaxesVCClass;
 extern Ivar UpdateMaxesVCDataRef;
 
-id updateMaxesVC_init(void *delegate);
+id updateMaxesVC_init(id parent);
 void updateMaxesVC_viewDidLoad(id self, SEL _cmd);
 void updateMaxesVC_tappedFinish(id self, SEL _cmd);
 

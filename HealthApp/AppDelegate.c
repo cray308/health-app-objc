@@ -1,14 +1,21 @@
 #include "AppDelegate.h"
 #include "AppCoordinator.h"
+#include "AppTypes.h"
 #include "AppUserData.h"
+#include "InputVC.h"
 #include "PersistenceService.h"
+#include "SetupWorkoutVC.h"
 #include "ViewControllerHelpers.h"
+
+#define TITLE_FOR_ROW "@@:@" LHASymbol LHASymbol
+#define NUM_COMPONENTS LHASymbol "@:@"
+#define NUM_ROWS LHASymbol "@:@" LHASymbol
+#define DID_SELECT_ROW "v@:@" LHASymbol LHASymbol
 
 extern void initExerciseStrings(void);
 extern void initWorkoutStrings(void);
 extern void initValidatorStrings(void);
-extern void handleIOSVersion(void);
-extern void historyCoordinator_fetchData(void*);
+extern bool handleIOSVersion(bool *setWindowTint);
 
 #if DEBUG
 extern void persistenceService_create(void);
@@ -21,7 +28,8 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
     initValidatorStrings();
     initExerciseStrings();
     initWorkoutStrings();
-    handleIOSVersion();
+    bool setWindowTint;
+    bool legacy = handleIOSVersion(&setWindowTint);
     CGRect bounds;
     getScreenBounds(&bounds);
     self->window = createObjectWithFrame(objc_getClass("UIWindow"), bounds);
@@ -33,7 +41,6 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
 
     persistenceService_init();
     int tzOffset = 0;
-    bool legacy = osVersion < 13;
 
     if (!hasLaunched) {
         ((void(*)(id,SEL,bool,CFStringRef))objc_msgSend)
@@ -50,6 +57,24 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
         tzOffset = userInfo_initFromStorage();
     }
 
+    char const *voidSig = "v@:", *tapSig = "v@:@", *dataKey = "data";
+    SetupWorkoutVCClass = objc_allocateClassPair(InputVCClass, "SetupWorkoutVC", 0);
+    class_addProtocol(SetupWorkoutVCClass, objc_getProtocol("UIPickerViewDelegate"));
+    class_addProtocol(SetupWorkoutVCClass, objc_getProtocol("UIPickerViewDataSource"));
+    class_addIvar(SetupWorkoutVCClass, dataKey, sizeof(SetupWorkoutVCData*), 0, "^{?=@@@Ci}");
+    class_addMethod(SetupWorkoutVCClass, sel_getUid("dealloc"),
+                    (IMP) setupWorkoutVC_deinit, voidSig);
+    class_addMethod(SetupWorkoutVCClass, sel_getUid("viewDidLoad"),
+                    (IMP) setupWorkoutVC_viewDidLoad, voidSig);
+    class_addMethod(SetupWorkoutVCClass, sel_getUid("buttonTapped:"),
+                    (IMP) setupWorkoutVC_tappedButton, tapSig);
+    class_addMethod(SetupWorkoutVCClass, sel_getUid("numberOfComponentsInPickerView:"),
+                    (IMP) setupWorkoutVC_numberOfComponents, NUM_COMPONENTS);
+    class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:numberOfRowsInComponent:"),
+                    (IMP) setupWorkoutVC_numberOfRows, NUM_ROWS);
+    class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:didSelectRow:inComponent:"),
+                    (IMP) setupWorkoutVC_didSelectRow, DID_SELECT_ROW);
+
     DMNavVC = objc_allocateClassPair(objc_getClass("UINavigationController"), "DMNavVC", 0);
     DMTabVC = objc_allocateClassPair(objc_getClass("UITabBarController"), "DMTabVC", 0);
     DMButtonClass = objc_allocateClassPair(objc_getClass("UIButton"), "DMButton", 0);
@@ -58,7 +83,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
     DMBackgroundViewClass = objc_allocateClassPair(objc_getClass("UIView"), "DMBackgroundView", 0);
 
     if (legacy) {
-        char const *colorField = "colorCode", *voidSig = "v@:";
+        char const *colorField = "colorCode";
         class_addIvar(DMBackgroundViewClass, colorField, sizeof(int), 0, "i");
         class_addIvar(DMButtonClass, colorField, sizeof(int), 0, "i");
         class_addIvar(DMButtonClass, "background", sizeof(bool), 0, "c");
@@ -73,6 +98,12 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
                         (IMP) dmTabVC_updateColors, voidSig);
         class_addMethod(DMNavVC, sel_getUid("preferredStatusBarStyle"),
                         (IMP) dmNavVC_getStatusBarStyle, "i@:");
+        class_addMethod(SetupWorkoutVCClass,
+                        sel_getUid("pickerView:attributedTitleForRow:forComponent:"),
+                        (IMP) setupWorkoutVC_attrTitleForRow, TITLE_FOR_ROW);
+    } else {
+        class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:titleForRow:forComponent:"),
+                        (IMP) setupWorkoutVC_titleForRow, TITLE_FOR_ROW);
     }
 
     objc_registerClassPair(DMNavVC);
@@ -81,16 +112,19 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
     objc_registerClassPair(DMButtonClass);
     objc_registerClassPair(DMLabelClass);
     objc_registerClassPair(DMTextFieldClass);
+    objc_registerClassPair(SetupWorkoutVCClass);
+    SetupWorkoutVCDataRef = class_getInstanceVariable(SetupWorkoutVCClass, dataKey);
 
-    if (osVersion < 14)
+    if (setWindowTint)
         setTintColor(self->window, createColor(ColorRed));
     id tabVC = getObject(allocClass(DMTabVC), sel_getUid("init"));
-    appCoordinator_start(tabVC);
+    void (*fetchHandler)(void*);
+    void *arg = appCoordinator_start(tabVC, &fetchHandler);
     setObject(self->window, sel_getUid("setRootViewController:"), tabVC);
     voidFunc(self->window, sel_getUid("makeKeyAndVisible"));
     releaseObj(tabVC);
 
-    persistenceService_start(tzOffset, historyCoordinator_fetchData, appCoordinator->children[1]);
+    persistenceService_start(tzOffset, fetchHandler, arg);
     return true;
 }
 

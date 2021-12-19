@@ -13,13 +13,9 @@ enum {
     TabHome, TabHistory, TabSettings
 };
 
-typedef struct {
-    id navVC;
-} SettingsTabCoordinator;
-
 AppCoordinator *appCoordinator = NULL;
 
-void appCoordinator_start(id tabVC) {
+void *appCoordinator_start(id tabVC, void (**fetchHandler)(void*)) {
     toggleDarkModeForCharts(userData->darkMode);
     appCoordinator = calloc(1, sizeof(AppCoordinator));
     SEL itemInit = sel_getUid("initWithTitle:image:tag:");
@@ -41,20 +37,15 @@ void appCoordinator_start(id tabVC) {
         setObject(controllers[i], setter, items[i]);
     }
 
-    HomeTabCoordinator *homeCoord = calloc(1, sizeof(HomeTabCoordinator));
-    homeCoord->navVC = controllers[0];
-    setupNavVC(homeCoord->navVC, homeVC_init(homeCoord));
+    appCoordinator->children[0] = homeVC_init();
+    setupNavVC(controllers[0], appCoordinator->children[0]);
 
-    HistoryTabCoordinator *histCoord = calloc(1, sizeof(HistoryTabCoordinator));
-    histCoord->navVC = controllers[1];
-    historyCoordinator_start(histCoord);
+    void *result;
+    appCoordinator->children[1] = historyVC_init(&result, fetchHandler);
+    setupNavVC(controllers[1], appCoordinator->children[1]);
 
-    SettingsTabCoordinator *settingsCoord = malloc(sizeof(SettingsTabCoordinator));
-    settingsCoord->navVC = controllers[2];
-    setupNavVC(settingsCoord->navVC, settingsVC_init());
-
-    memcpy(appCoordinator->children,
-           (void *[]){homeCoord, histCoord, settingsCoord}, 3 * sizeof(void *));
+    appCoordinator->children[2] = settingsVC_init();
+    setupNavVC(controllers[2], appCoordinator->children[2]);
 
     CFArrayRef array = CFArrayCreate(NULL, (const void **)controllers, 3, &(CFArrayCallBacks){0});
     ((void(*)(id,SEL,CFArrayRef,bool))objc_msgSend)
@@ -65,6 +56,7 @@ void appCoordinator_start(id tabVC) {
         releaseObj(items[i]);
     }
     CFRelease(array);
+    return result;
 }
 
 void appCoordinator_updateUserInfo(signed char plan, signed char darkMode, short *weights) {
@@ -81,32 +73,22 @@ void appCoordinator_updateUserInfo(signed char plan, signed char darkMode, short
             historyVC_updateColors(getFirstVC((id) CFArrayGetValueAtIndex(ctrls, TabHistory)));
     }
     free(weights);
-    if (updateHome) {
-        HomeTabCoordinator *home = (HomeTabCoordinator *) appCoordinator->children[TabHome];
-        homeVC_createWorkoutsList(getFirstVC(home->navVC));
-    }
+    if (updateHome)
+        homeVC_createWorkoutsList(appCoordinator->children[TabHome]);
 }
 
 void appCoordinator_deleteAppData(void) {
     bool updateHome = userData->completedWorkouts;
     appUserData_deleteSavedData();
     persistenceService_deleteUserData();
-    if (updateHome) {
-        HomeTabCoordinator *home = (HomeTabCoordinator *) appCoordinator->children[TabHome];
-        homeVC_updateWorkoutsList(getFirstVC(home->navVC));
-    }
-    HistoryTabCoordinator *hist = (HistoryTabCoordinator *) appCoordinator->children[TabHistory];
-    if (hist->model.nEntries[2] != 0) {
-        bool reloadScreen = appCoordinator->loadedViewControllers & LoadedVC_History;
-        historyCoordinator_clearData(hist, reloadScreen);
-    }
+    if (updateHome)
+        homeVC_updateWorkoutsList(appCoordinator->children[TabHome]);
+    bool reloadHist = appCoordinator->loadedViewControllers & LoadedVC_History;
+    historyVC_clearData(appCoordinator->children[TabHistory], reloadHist);
 }
 
 void appCoordinator_updateMaxWeights(short *weights) {
     appUserData_updateWeightMaxes(weights);
-    if (appCoordinator->loadedViewControllers & LoadedVC_Settings) {
-        id navVC = ((SettingsTabCoordinator *) appCoordinator->children[TabSettings])->navVC;
-        settingsVC_updateWeightFields(getFirstVC(navVC));
-    }
-    free(weights);
+    if (appCoordinator->loadedViewControllers & LoadedVC_Settings)
+        settingsVC_updateWeightFields(appCoordinator->children[TabSettings]);
 }
