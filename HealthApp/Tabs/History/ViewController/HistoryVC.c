@@ -29,138 +29,74 @@ struct WeekDataModel {
 Class HistoryVCClass;
 Ivar HistoryVCDataRef;
 
+#pragma mark - Load Data
+
 static inline void createNewEntry(Array_pt *arr, int x, int y) {
     CGPoint point = {x, y};
     array_push_back(pt, arr, point);
 }
 
 static void historyData_populate(HistoryViewModel *m, struct WeekDataModel *results, int size) {
-    int refIndices[] = {size - 26, size - 52, 0};
+    int innerLimits[] = {-1, 0, 1};
+    int refIndices[] = {size, size - 26, size - 52, 0};
+    if (refIndices[2] < 0)
+        refIndices[2] = 0;
     if (refIndices[1] < 0)
         refIndices[1] = 0;
-    if (refIndices[0] < 0)
-        refIndices[0] = 0;
 
-    memcpy(m->nEntries, (int[]){size - refIndices[0], size - refIndices[1], size}, 3 * sizeof(int));
+    memcpy(m->nEntries, (int[]){size - refIndices[1], size - refIndices[2], size}, 3 * sizeof(int));
 
     int totalWorkouts[3] = {0}, maxWorkouts[3] = {0}, maxTime[3] = {0}, maxWeight[3] = {0};
     int totalByType[3][4] = {{0},{0},{0}}, totalByExercise[3][4] = {{0},{0},{0}};
 
-    for (int i = 0; i < refIndices[1]; ++i) {
-        struct WeekDataModel *e = &results[i];
+    for (int section = 3; section > 0; --section) {
+        int limit = refIndices[section - 1];
+        int jEnd = innerLimits[section - 1];
+        for (int i = refIndices[section]; i < limit; ++i) {
+            struct WeekDataModel *e = &results[i];
 
-        totalWorkouts[2] += e->totalWorkouts;
-        if (e->totalWorkouts > maxWorkouts[2])
-            maxWorkouts[2] = e->totalWorkouts;
-        createNewEntry(m->totalWorkouts.entries, i, e->totalWorkouts);
+            for (int j = 2; j > jEnd; --j) {
+                totalWorkouts[j] += e->totalWorkouts;
+                if (e->totalWorkouts > maxWorkouts[j])
+                    maxWorkouts[j] = e->totalWorkouts;
+            }
+            createNewEntry(m->totalWorkouts.entries, i, e->totalWorkouts);
 
-        for (int j = 0; j < 4; ++j) {
-            totalByType[2][j] += e->durationByType[j];
+            for (int x = 0; x < 4; ++x) {
+                for (int j = 2; j > jEnd; --j) {
+                    totalByType[j][x] += e->durationByType[x];
+                    totalByExercise[j][x] += e->weightArray[x];
+                    if (e->weightArray[x] > maxWeight[j])
+                        maxWeight[j] = e->weightArray[x];
+                }
+                createNewEntry(m->lifts.entries[x], i, e->weightArray[x]);
+            }
 
-            totalByExercise[2][j] += e->weightArray[j];
-            if (e->weightArray[j] > maxWeight[2])
-                maxWeight[2] = e->weightArray[j];
-            createNewEntry(m->lifts.entries[j], i, e->weightArray[j]);
-        }
-
-        if (e->cumulativeDuration[3] > maxTime[2])
-            maxTime[2] = e->cumulativeDuration[3];
-        createNewEntry(m->workoutTypes.entries[0], i, 0);
-        for (int j = 1; j < 5; ++j) {
-            createNewEntry(m->workoutTypes.entries[j], i, e->cumulativeDuration[j - 1]);
-        }
-    }
-
-    for (int i = refIndices[1]; i < refIndices[0]; ++i) {
-        struct WeekDataModel *e = &results[i];
-
-        totalWorkouts[2] += e->totalWorkouts;
-        totalWorkouts[1] += e->totalWorkouts;
-        if (e->totalWorkouts > maxWorkouts[2])
-            maxWorkouts[2] = e->totalWorkouts;
-        if (e->totalWorkouts > maxWorkouts[1])
-            maxWorkouts[1] = e->totalWorkouts;
-        createNewEntry(m->totalWorkouts.entries, i, e->totalWorkouts);
-
-        for (int j = 0; j < 4; ++j) {
-            totalByType[2][j] += e->durationByType[j];
-            totalByType[1][j] += e->durationByType[j];
-
-            totalByExercise[2][j] += e->weightArray[j];
-            totalByExercise[1][j] += e->weightArray[j];
-            if (e->weightArray[j] > maxWeight[2])
-                maxWeight[2] = e->weightArray[j];
-            if (e->weightArray[j] > maxWeight[1])
-                maxWeight[1] = e->weightArray[j];
-            createNewEntry(m->lifts.entries[j], i, e->weightArray[j]);
-        }
-
-        if (e->cumulativeDuration[3] > maxTime[2])
-            maxTime[2] = e->cumulativeDuration[3];
-        if (e->cumulativeDuration[3] > maxTime[1])
-            maxTime[1] = e->cumulativeDuration[3];
-        createNewEntry(m->workoutTypes.entries[0], i, 0);
-        for (int j = 1; j < 5; ++j) {
-            createNewEntry(m->workoutTypes.entries[j], i, e->cumulativeDuration[j - 1]);
-        }
-    }
-
-    for (int i = refIndices[0]; i < size; ++i) {
-        struct WeekDataModel *e = &results[i];
-
-        totalWorkouts[2] += e->totalWorkouts;
-        totalWorkouts[1] += e->totalWorkouts;
-        totalWorkouts[0] += e->totalWorkouts;
-        if (e->totalWorkouts > maxWorkouts[2])
-            maxWorkouts[2] = e->totalWorkouts;
-        if (e->totalWorkouts > maxWorkouts[1])
-            maxWorkouts[1] = e->totalWorkouts;
-        if (e->totalWorkouts > maxWorkouts[0])
-            maxWorkouts[0] = e->totalWorkouts;
-        createNewEntry(m->totalWorkouts.entries, i, e->totalWorkouts);
-
-        for (int j = 0; j < 4; ++j) {
-            totalByType[2][j] += e->durationByType[j];
-            totalByType[1][j] += e->durationByType[j];
-            totalByType[0][j] += e->durationByType[j];
-
-            totalByExercise[2][j] += e->weightArray[j];
-            totalByExercise[1][j] += e->weightArray[j];
-            totalByExercise[0][j] += e->weightArray[j];
-            if (e->weightArray[j] > maxWeight[2])
-                maxWeight[2] = e->weightArray[j];
-            if (e->weightArray[j] > maxWeight[1])
-                maxWeight[1] = e->weightArray[j];
-            if (e->weightArray[j] > maxWeight[0])
-                maxWeight[0] = e->weightArray[j];
-            createNewEntry(m->lifts.entries[j], i, e->weightArray[j]);
-        }
-
-        if (e->cumulativeDuration[3] > maxTime[2])
-            maxTime[2] = e->cumulativeDuration[3];
-        if (e->cumulativeDuration[3] > maxTime[1])
-            maxTime[1] = e->cumulativeDuration[3];
-        if (e->cumulativeDuration[3] > maxTime[0])
-            maxTime[0] = e->cumulativeDuration[3];
-        createNewEntry(m->workoutTypes.entries[0], i, 0);
-        for (int j = 1; j < 5; ++j) {
-            createNewEntry(m->workoutTypes.entries[j], i, e->cumulativeDuration[j - 1]);
+            for (int j = 2; j > jEnd; --j) {
+                if (e->cumulativeDuration[3] > maxTime[j])
+                    maxTime[j] = e->cumulativeDuration[3];
+            }
+            createNewEntry(m->workoutTypes.entries[0], i, 0);
+            for (int x = 1; x < 5; ++x) {
+                createNewEntry(m->workoutTypes.entries[x], i, e->cumulativeDuration[x - 1]);
+            }
         }
     }
 
     for (int i = 0; i < 3; ++i) {
+        int refIdx = refIndices[i + 1];
         m->totalWorkouts.avgs[i] = (float) totalWorkouts[i] / m->nEntries[i];
         m->totalWorkouts.maxes[i] = maxWorkouts[i] < 7 ? 7 : 1.1 * maxWorkouts[i];
         m->workoutTypes.maxes[i] = 1.1 * maxTime[i];
         m->lifts.maxes[i] = 1.1 * maxWeight[i];
-        m->totalWorkouts.dataArrays[i] = &m->totalWorkouts.entries->arr[refIndices[i]];
-        m->workoutTypes.dataArrays[i][0] = &m->workoutTypes.entries[0]->arr[refIndices[i]];
+        m->totalWorkouts.dataArrays[i] = &m->totalWorkouts.entries->arr[refIdx];
+        m->workoutTypes.dataArrays[i][0] = &m->workoutTypes.entries[0]->arr[refIdx];
 
         for (int j = 0; j < 4; ++j) {
             m->workoutTypes.avgs[i][j] = totalByType[i][j] / m->nEntries[i];
             m->lifts.avgs[i][j] = (float) totalByExercise[i][j] / m->nEntries[i];
-            m->workoutTypes.dataArrays[i][j + 1] = &m->workoutTypes.entries[j + 1]->arr[refIndices[i]];
-            m->lifts.dataArrays[i][j] = &m->lifts.entries[j]->arr[refIndices[i]];
+            m->workoutTypes.dataArrays[i][j + 1] = &m->workoutTypes.entries[j + 1]->arr[refIdx];
+            m->lifts.dataArrays[i][j] = &m->lifts.entries[j]->arr[refIdx];
         }
     }
     free(results);
@@ -203,45 +139,7 @@ static void historyData_fetch(void *_model) {
     }));
 }
 
-void historyVC_clearData(id self, bool updateUI) {
-    HistoryVCData *data = (HistoryVCData *) object_getIvar(self, HistoryVCDataRef);
-    HistoryViewModel *model = &data->model;
-    if (!model->nEntries[2]) return;
-
-    memset(model->nEntries, 0, 3 * sizeof(int));
-    memset(model->totalWorkouts.dataArrays, 0, 3 * sizeof(id*));
-    memset(model->totalWorkouts.avgs, 0, 3 * sizeof(float));
-    memset(model->totalWorkouts.maxes, 0, 3 * sizeof(float));
-    memset(model->lifts.maxes, 0, 3 * sizeof(float));
-    memset(model->workoutTypes.maxes, 0, 3 * sizeof(float));
-
-    for (int i = 0; i < 3; ++i) {
-        memset(model->workoutTypes.dataArrays[i], 0, 5 * sizeof(id*));
-        memset(model->lifts.dataArrays[i], 0, sizeof(id*) << 2);
-        memset(model->workoutTypes.avgs[i], 0, sizeof(int) << 2);
-        memset(model->lifts.avgs[i], 0, sizeof(float) << 2);
-    }
-
-    array_clear(pt, model->totalWorkouts.entries);
-    for (int i = 0; i < 4; ++i) {
-        array_clear(pt, model->workoutTypes.entries[i]);
-        array_clear(pt, model->lifts.entries[i]);
-    }
-    array_clear(pt, model->workoutTypes.entries[4]);
-
-    replaceDataSetEntries(model->totalWorkouts.dataSet, model->totalWorkouts.entries->arr, 0);
-    for (int i = 0; i < 4; ++i) {
-        replaceDataSetEntries(model->workoutTypes.dataSets[i],
-                              model->workoutTypes.entries[0]->arr, 0);
-        replaceDataSetEntries(model->lifts.dataSets[i], model->lifts.entries[0]->arr, 0);
-    }
-    replaceDataSetEntries(model->workoutTypes.dataSets[4], model->workoutTypes.entries[0]->arr, 0);
-
-    if (updateUI) {
-        setInt(data->picker, sel_getUid("setSelectedSegmentIndex:"), 0);
-        setObject(self, sel_getUid("buttonTapped:"), data->picker);
-    }
-}
+#pragma mark - Main Functions
 
 id historyVC_init(void **model, void (**handler)(void*)) {
     id self = createVC(HistoryVCClass);
@@ -305,8 +203,8 @@ void historyVC_viewDidLoad(id self, SEL _cmd) {
     data->charts[1] = workoutTypeView_init(&data->model.workoutTypes, self);
     data->charts[2] = liftingView_init(&data->model.lifts, self);
 
-    SEL btnTap = sel_getUid("buttonTapped:");
-    data->picker = createSegmentedControl(CFSTR("historySegment%d"), 3, 0, self, btnTap, -1);
+    data->picker = createSegmentedControl(CFSTR("historySegment%d"), 3, 0,
+                                          self, sel_getUid("buttonTapped:"), -1);
     id navItem = getNavItem(self);
     setObject(navItem, sel_getUid("setTitleView:"), data->picker);
 
@@ -333,7 +231,7 @@ void historyVC_viewDidLoad(id self, SEL _cmd) {
         releaseObj(containers[i]);
     }
 
-    setObject(self, btnTap, data->picker);
+    historyVC_updateSegment(self, nil, data->picker);
     appCoordinator->loadedViewControllers |= LoadedVC_History;
 }
 
@@ -382,6 +280,46 @@ void historyVC_updateSegment(id self, SEL _cmd _U_, id picker) {
     liftingView_update(data->charts[2], model->nEntries[index], index);
 }
 
+void historyVC_clearData(id self, bool updateUI) {
+    HistoryVCData *data = (HistoryVCData *) object_getIvar(self, HistoryVCDataRef);
+    HistoryViewModel *model = &data->model;
+    if (!model->nEntries[2]) return;
+
+    memset(model->nEntries, 0, 3 * sizeof(int));
+    memset(model->totalWorkouts.dataArrays, 0, 3 * sizeof(id*));
+    memset(model->totalWorkouts.avgs, 0, 3 * sizeof(float));
+    memset(model->totalWorkouts.maxes, 0, 3 * sizeof(float));
+    memset(model->lifts.maxes, 0, 3 * sizeof(float));
+    memset(model->workoutTypes.maxes, 0, 3 * sizeof(float));
+
+    for (int i = 0; i < 3; ++i) {
+        memset(model->workoutTypes.dataArrays[i], 0, 5 * sizeof(id*));
+        memset(model->lifts.dataArrays[i], 0, sizeof(id*) << 2);
+        memset(model->workoutTypes.avgs[i], 0, sizeof(int) << 2);
+        memset(model->lifts.avgs[i], 0, sizeof(float) << 2);
+    }
+
+    array_clear(pt, model->totalWorkouts.entries);
+    for (int i = 0; i < 4; ++i) {
+        array_clear(pt, model->workoutTypes.entries[i]);
+        array_clear(pt, model->lifts.entries[i]);
+    }
+    array_clear(pt, model->workoutTypes.entries[4]);
+
+    replaceDataSetEntries(model->totalWorkouts.dataSet, model->totalWorkouts.entries->arr, 0);
+    for (int i = 0; i < 4; ++i) {
+        replaceDataSetEntries(model->workoutTypes.dataSets[i],
+                              model->workoutTypes.entries[0]->arr, 0);
+        replaceDataSetEntries(model->lifts.dataSets[i], model->lifts.entries[0]->arr, 0);
+    }
+    replaceDataSetEntries(model->workoutTypes.dataSets[4], model->workoutTypes.entries[0]->arr, 0);
+
+    if (updateUI) {
+        setInt(data->picker, sel_getUid("setSelectedSegmentIndex:"), 0);
+        historyVC_updateSegment(self, nil, data->picker);
+    }
+}
+
 CFStringRef historyVC_stringForValue(id self, SEL _cmd _U_, double value) {
     struct HistFormatter *formatter = &((HistoryVCData *)
                                         object_getIvar(self, HistoryVCDataRef))->model.formatter;
@@ -391,12 +329,6 @@ CFStringRef historyVC_stringForValue(id self, SEL _cmd _U_, double value) {
                                                      formatter->months[data->month],
                                                      data->day, data->year);
     return formatter->currString;
-}
-
-void historyVC_refresh(id self) {
-    id picker = ((HistoryVCData *) object_getIvar(self, HistoryVCDataRef))->picker;
-    setInt(picker, sel_getUid("setSelectedSegmentIndex:"), 0);
-    setObject(self, sel_getUid("buttonTapped:"), picker);
 }
 
 void historyVC_updateColors(id self) {

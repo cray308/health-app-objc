@@ -6,7 +6,7 @@
 extern Class LiftViewClass;
 extern Ivar LiftViewDataRef;
 
-typedef struct __liftVData {
+typedef struct {
     id chart;
     LiftChartModel *model;
 } LiftViewData;

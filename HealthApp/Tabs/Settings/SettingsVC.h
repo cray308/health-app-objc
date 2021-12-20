@@ -6,7 +6,7 @@
 extern Class SettingsVCClass;
 extern Ivar SettingsVCDataRef;
 
-typedef struct __settingsVCData {
+typedef struct {
     id picker;
     id switchView;
 } SettingsVCData;

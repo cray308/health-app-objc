@@ -6,16 +6,12 @@
 #include "PersistenceService.h"
 #include "SetupWorkoutVC.h"
 #include "ViewControllerHelpers.h"
+#include "WorkoutVC.h"
 
 #define TITLE_FOR_ROW "@@:@" LHASymbol LHASymbol
 #define NUM_COMPONENTS LHASymbol "@:@"
 #define NUM_ROWS LHASymbol "@:@" LHASymbol
 #define DID_SELECT_ROW "v@:@" LHASymbol LHASymbol
-
-extern void initExerciseStrings(void);
-extern void initWorkoutStrings(void);
-extern void initValidatorStrings(void);
-extern bool handleIOSVersion(bool *setWindowTint);
 
 #if DEBUG
 extern void persistenceService_create(void);

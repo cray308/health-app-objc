@@ -4,10 +4,6 @@
 #include <CoreFoundation/CFArray.h>
 #include "array.h"
 
-extern CFStringRef repsFormat;
-extern CFStringRef setsFormat;
-extern CFStringRef roundsFormat;
-
 enum {
     LiftSquat,
     LiftPullup,
@@ -75,7 +71,7 @@ typedef struct {
     Array_circuit *activities;
 } Workout;
 
-typedef struct __workoutParams {
+typedef struct {
     const signed char day;
     unsigned char type;
     int index;
@@ -84,6 +80,7 @@ typedef struct __workoutParams {
     int weight;
 } WorkoutParams;
 
+void initExerciseStrings(void);
 void workoutParams_init(WorkoutParams *this, signed char day);
 
 void exerciseManager_setWeeklyWorkoutNames(unsigned char plan, int week, CFStringRef *names);

@@ -12,7 +12,7 @@ extern Ivar InputVCDataRef;
 extern Class InputViewClass;
 extern Ivar InputViewDataRef;
 
-typedef struct __inputVData {
+typedef struct {
     short minVal;
     short maxVal;
     short result;
@@ -24,7 +24,7 @@ typedef struct __inputVData {
     id errorLabel;
 } InputViewData;
 
-typedef struct __inputVCData {
+typedef struct {
     int count;
     int scrollHeight;
     short topOffset;
@@ -41,6 +41,7 @@ typedef struct __inputVCData {
 void inputView_reset(InputViewData *data, short value);
 void inputView_deinit(id self, SEL _cmd);
 
+void initValidatorStrings(void);
 id inputVC_init(id self, SEL _cmd, id nibName, id bundle);
 void inputVC_deinit(id self, SEL _cmd);
 void inputVC_viewDidLoad(id self, SEL _cmd);

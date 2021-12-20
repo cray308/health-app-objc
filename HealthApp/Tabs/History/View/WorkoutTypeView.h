@@ -6,7 +6,7 @@
 extern Class WorkoutTypeViewClass;
 extern Ivar WorkoutTypeViewDataRef;
 
-typedef struct __workoutTypeVData {
+typedef struct {
     id chart;
     WorkoutTypeChartModel *model;
 } WorkoutTypeViewData;

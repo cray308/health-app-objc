@@ -41,6 +41,7 @@ typedef struct {
     bool done;
 } WorkoutVCData;
 
+void initWorkoutStrings(void);
 id workoutVC_init(Workout *workout);
 void workoutVC_deinit(id self, SEL _cmd);
 void workoutVC_viewDidLoad(id self, SEL _cmd);

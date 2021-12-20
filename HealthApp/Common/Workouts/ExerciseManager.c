@@ -35,10 +35,9 @@ static struct __WorkoutKeys {
     CFStringRef const title;
 } const Keys = {CFSTR("reps"), CFSTR("type"), CFSTR("index"), CFSTR("title")};
 
-CFStringRef repsFormat;
-CFStringRef setsFormat;
-CFStringRef roundsFormat;
-
+static CFStringRef repsFormat;
+static CFStringRef setsFormat;
+static CFStringRef roundsFormat;
 static CFStringRef restFormat;
 static CFStringRef weightFormat;
 static CFStringRef durationMinsFormat;

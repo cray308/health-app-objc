@@ -10,7 +10,7 @@ gen_array_headers(object, id)
 extern Class ContainerViewClass;
 extern Ivar ContainerViewDataRef;
 
-typedef struct __containerVData {
+typedef struct {
     id divider;
     id headerLabel;
     id stack;

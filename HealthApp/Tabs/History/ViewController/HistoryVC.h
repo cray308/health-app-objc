@@ -16,7 +16,7 @@ struct HistTimeData {
     short day;
 };
 
-typedef struct __totalWorkoutsChartData {
+typedef struct {
     Array_pt *entries;
     CFStringRef legendFormat;
     id dataSet;
@@ -26,7 +26,7 @@ typedef struct __totalWorkoutsChartData {
     float maxes[3];
 } TotalWorkoutsChartModel;
 
-typedef struct __workoutTypeChartData {
+typedef struct {
     Array_pt *entries[5];
     CFStringRef legendFormat;
     id dataSets[5];
@@ -37,7 +37,7 @@ typedef struct __workoutTypeChartData {
     CFStringRef names[4];
 } WorkoutTypeChartModel;
 
-typedef struct __liftChartData {
+typedef struct {
     Array_pt *entries[4];
     CFStringRef legendFormat;
     id dataSets[4];
@@ -48,7 +48,7 @@ typedef struct __liftChartData {
     CFStringRef names[4];
 } LiftChartModel;
 
-typedef struct __historyData {
+typedef struct {
     TotalWorkoutsChartModel totalWorkouts;
     WorkoutTypeChartModel workoutTypes;
     LiftChartModel lifts;
@@ -60,14 +60,13 @@ typedef struct __historyData {
     int nEntries[3];
 } HistoryViewModel;
 
-typedef struct __historyVCData {
+typedef struct {
     HistoryViewModel model;
     id picker;
     id charts[3];
 } HistoryVCData;
 
 id historyVC_init(void **model, void (**handler)(void*));
-void historyVC_refresh(id vc);
 void historyVC_clearData(id self, bool updateUI);
 void historyVC_updateColors(id vc);
 void historyVC_viewDidLoad(id self, SEL _cmd);
