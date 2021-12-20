@@ -181,8 +181,8 @@
 		6107C957266C159B00DDBCCF /* Workouts */ = {
 			isa = PBXGroup;
 			children = (
-				614DA698270A8D1F00EC90C4 /* ExerciseManager.h */,
 				614DA699270A8D1F00EC90C4 /* ExerciseManager.c */,
+				614DA698270A8D1F00EC90C4 /* ExerciseManager.h */,
 			);
 			path = Workouts;
 			sourceTree = "<group>";
@@ -243,16 +243,16 @@
 		617BDE1926FE48CB00BDDB73 /* View */ = {
 			isa = PBXGroup;
 			children = (
-				610B92B2270A67CC00358DBD /* Constraints.h */,
 				610B92B3270A67CC00358DBD /* Constraints.c */,
-				610B92C9270A7F4900358DBD /* ContainerView.h */,
+				610B92B2270A67CC00358DBD /* Constraints.h */,
 				610B92CA270A7F4900358DBD /* ContainerView.c */,
-				610B92B7270A6E9000358DBD /* Views.h */,
-				610B92B8270A6E9000358DBD /* Views.c */,
-				611EDDA12741F8750064B254 /* StatusView.h */,
-				611EDDA22741F8750064B254 /* StatusView.c */,
-				611EDDB12743660C0064B254 /* InputVC.h */,
+				610B92C9270A7F4900358DBD /* ContainerView.h */,
 				611EDDB22743660C0064B254 /* InputVC.c */,
+				611EDDB12743660C0064B254 /* InputVC.h */,
+				611EDDA22741F8750064B254 /* StatusView.c */,
+				611EDDA12741F8750064B254 /* StatusView.h */,
+				610B92B8270A6E9000358DBD /* Views.c */,
+				610B92B7270A6E9000358DBD /* Views.h */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -301,8 +301,14 @@
 		61C778EB26102458001326A1 /* History */ = {
 			isa = PBXGroup;
 			children = (
-				61C778FB2610259F001326A1 /* View */,
-				61C778FA26102598001326A1 /* ViewController */,
+				611EDDE727476ED50064B254 /* HistoryVC.c */,
+				611EDDE627476ED50064B254 /* HistoryVC.h */,
+				61592AAF27488DD000789264 /* LiftingView.c */,
+				61592AAE27488DD000789264 /* LiftingView.h */,
+				61592A83274861B600789264 /* TotalWorkoutsView.c */,
+				61592A82274861B600789264 /* TotalWorkoutsView.h */,
+				61592A882748651500789264 /* WorkoutTypeView.c */,
+				61592A872748651500789264 /* WorkoutTypeView.h */,
 			);
 			path = History;
 			sourceTree = "<group>";
@@ -310,8 +316,8 @@
 		61C778EC26102467001326A1 /* Settings */ = {
 			isa = PBXGroup;
 			children = (
-				611EDDB8274487010064B254 /* SettingsVC.h */,
 				611EDDB9274487010064B254 /* SettingsVC.c */,
+				611EDDB8274487010064B254 /* SettingsVC.h */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -319,7 +325,10 @@
 		61C778ED26102474001326A1 /* Main */ = {
 			isa = PBXGroup;
 			children = (
-				61C778F62610254E001326A1 /* ViewController */,
+				611EDDA8274355F10064B254 /* HomeVC.c */,
+				611EDDA7274355F10064B254 /* HomeVC.h */,
+				611EDDBE2744A9F70064B254 /* SetupWorkoutVC.c */,
+				611EDDBD2744A9F70064B254 /* SetupWorkoutVC.h */,
 			);
 			path = Main;
 			sourceTree = "<group>";
@@ -327,53 +336,12 @@
 		61C778EE2610247D001326A1 /* AddWorkout */ = {
 			isa = PBXGroup;
 			children = (
-				61C778F826102580001326A1 /* ViewController */,
+				611EDDC52744CB2D0064B254 /* UpdateMaxesVC.c */,
+				611EDDC42744CB2D0064B254 /* UpdateMaxesVC.h */,
+				611EDDCF2745FEA70064B254 /* WorkoutVC.c */,
+				611EDDCE2745FEA70064B254 /* WorkoutVC.h */,
 			);
 			path = AddWorkout;
-			sourceTree = "<group>";
-		};
-		61C778F62610254E001326A1 /* ViewController */ = {
-			isa = PBXGroup;
-			children = (
-				611EDDA7274355F10064B254 /* HomeVC.h */,
-				611EDDA8274355F10064B254 /* HomeVC.c */,
-				611EDDBD2744A9F70064B254 /* SetupWorkoutVC.h */,
-				611EDDBE2744A9F70064B254 /* SetupWorkoutVC.c */,
-			);
-			path = ViewController;
-			sourceTree = "<group>";
-		};
-		61C778F826102580001326A1 /* ViewController */ = {
-			isa = PBXGroup;
-			children = (
-				611EDDC42744CB2D0064B254 /* UpdateMaxesVC.h */,
-				611EDDC52744CB2D0064B254 /* UpdateMaxesVC.c */,
-				611EDDCE2745FEA70064B254 /* WorkoutVC.h */,
-				611EDDCF2745FEA70064B254 /* WorkoutVC.c */,
-			);
-			path = ViewController;
-			sourceTree = "<group>";
-		};
-		61C778FA26102598001326A1 /* ViewController */ = {
-			isa = PBXGroup;
-			children = (
-				611EDDE627476ED50064B254 /* HistoryVC.h */,
-				611EDDE727476ED50064B254 /* HistoryVC.c */,
-			);
-			path = ViewController;
-			sourceTree = "<group>";
-		};
-		61C778FB2610259F001326A1 /* View */ = {
-			isa = PBXGroup;
-			children = (
-				61592A82274861B600789264 /* TotalWorkoutsView.h */,
-				61592A83274861B600789264 /* TotalWorkoutsView.c */,
-				61592A872748651500789264 /* WorkoutTypeView.h */,
-				61592A882748651500789264 /* WorkoutTypeView.c */,
-				61592AAE27488DD000789264 /* LiftingView.h */,
-				61592AAF27488DD000789264 /* LiftingView.c */,
-			);
-			path = View;
 			sourceTree = "<group>";
 		};
 		61C779022610260B001326A1 /* Common */ = {
@@ -394,12 +362,12 @@
 		61C7790326102620001326A1 /* SharedData */ = {
 			isa = PBXGroup;
 			children = (
-				61594D5526068BFD000D01A1 /* AppCoordinator.h */,
 				61594D5626068C41000D01A1 /* AppCoordinator.c */,
-				61594D632606C7AE000D01A1 /* AppUserData.h */,
+				61594D5526068BFD000D01A1 /* AppCoordinator.h */,
 				61594D642606C7C6000D01A1 /* AppUserData.c */,
-				615A1C4A2608403900858C32 /* PersistenceService.h */,
+				61594D632606C7AE000D01A1 /* AppUserData.h */,
 				615A1C4B2608406100858C32 /* PersistenceService.c */,
+				615A1C4A2608403900858C32 /* PersistenceService.h */,
 			);
 			path = SharedData;
 			sourceTree = "<group>";
@@ -408,12 +376,12 @@
 			isa = PBXGroup;
 			children = (
 				61A048D02755E59300B7A8D2 /* AppTypes.h */,
-				6161838026AC8089001587B2 /* CocoaHelpers.h */,
 				6161838126AC80A0001587B2 /* CocoaHelpers.c */,
+				6161838026AC8089001587B2 /* CocoaHelpers.h */,
 				615086F026D3223400521269 /* SwiftBridging.h */,
 				615086EC26D3222500521269 /* SwiftBridging.m */,
-				614DC12826081E9E00B9588E /* ViewControllerHelpers.h */,
 				614DC12F26082BBE00B9588E /* ViewControllerHelpers.c */,
+				614DC12826081E9E00B9588E /* ViewControllerHelpers.h */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
