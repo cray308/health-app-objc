@@ -19,7 +19,6 @@ extern id createDataSet(int color, id fillSet);
 extern id createChartData(CFArrayRef dataSets, int lineWidth, uint8_t options);
 
 struct WeekDataModel {
-    struct HistTimeData timeData;
     int totalWorkouts;
     int durationByType[4];
     int cumulativeDuration[4];
@@ -111,15 +110,17 @@ static void historyData_fetch(void *_model) {
         id request = fetchRequest(createPredicate(CFSTR("weekStart < %lld"), userData->weekStart));
         CFArrayRef data = persistenceService_executeFetchRequest(request, &count, true);
         if (data) {
+            CFMutableArrayRef strs = CFArrayCreateMutable(NULL, count, &kCFTypeArrayCallBacks);
             struct WeekDataModel *results = malloc(sizeof(struct WeekDataModel) << 7);
             for (int i = 0; i < count; ++i) {
                 id d = (id) CFArrayGetValueAtIndex(data, i);
                 struct WeekDataModel *r = &results[i];
                 time_t timestamp = (time_t) weekData_getWeekStart(d);
                 localtime_r(&timestamp, &localInfo);
-                r->timeData.year = localInfo.tm_year % 100;
-                r->timeData.month = localInfo.tm_mon;
-                r->timeData.day = localInfo.tm_mday;
+                CFStringRef str = CFStringCreateWithFormat(NULL, NULL, CFSTR("%d/%d/%d"),
+                                                           localInfo.tm_mon + 1, localInfo.tm_mday,
+                                                           localInfo.tm_year % 100);
+                CFArrayAppendValue(strs, str);
                 r->totalWorkouts = weekData_getTotalWorkouts(d);
                 r->durationByType[0] = weekData_getWorkoutTimeForType(d, WorkoutStrength);
                 r->durationByType[1] = weekData_getWorkoutTimeForType(d, WorkoutHIC);
@@ -131,9 +132,9 @@ static void historyData_fetch(void *_model) {
                 for (int j = 1; j < 4; ++j) {
                     r->cumulativeDuration[j] = r->cumulativeDuration[j - 1] + r->durationByType[j];
                 }
-
-                memcpy(&model->formatter.data[i], &r->timeData, sizeof(struct HistTimeData));
+                CFRelease(str);
             }
+            model->axisStrings = strs;
             historyData_populate(model, results, count);
         }
     }));
@@ -155,8 +156,6 @@ id historyVC_init(void **model, void (**handler)(void*)) {
     m->workoutTypes.dataSets[0] = createDataSet(-1, nil);
     fillStringArray(m->workoutTypes.names, CFSTR("workoutTypes%d"), 4);
     fillStringArray(m->lifts.names, CFSTR("liftTypes%d"), 4);
-    fillStringArray(m->formatter.months, CFSTR("months%02d"), 12);
-    m->formatter.currString = CFStringCreateCopy(NULL, CFSTR(""));
     m->totalWorkouts.legendFormat = localize(CFSTR("totalWorkoutsLegend"));
     m->lifts.legendFormat = localize(CFSTR("liftLegend"));
     m->workoutTypes.legendFormat = localize(CFSTR("workoutTypeLegend"));
@@ -285,6 +284,8 @@ void historyVC_clearData(id self, bool updateUI) {
     HistoryViewModel *model = &data->model;
     if (!model->nEntries[2]) return;
 
+    CFRelease(model->axisStrings);
+    model->axisStrings = NULL;
     memset(model->nEntries, 0, 3 * sizeof(int));
     memset(model->totalWorkouts.dataArrays, 0, 3 * sizeof(id*));
     memset(model->totalWorkouts.avgs, 0, 3 * sizeof(float));
@@ -321,14 +322,8 @@ void historyVC_clearData(id self, bool updateUI) {
 }
 
 CFStringRef historyVC_stringForValue(id self, SEL _cmd _U_, double value) {
-    struct HistFormatter *formatter = &((HistoryVCData *)
-                                        object_getIvar(self, HistoryVCDataRef))->model.formatter;
-    struct HistTimeData *data = &formatter->data[(int) value];
-    CFRelease(formatter->currString);
-    formatter->currString = CFStringCreateWithFormat(NULL, NULL, CFSTR("%@/%d/%d"),
-                                                     formatter->months[data->month],
-                                                     data->day, data->year);
-    return formatter->currString;
+    CFArrayRef strs = ((HistoryVCData *) object_getIvar(self, HistoryVCDataRef))->model.axisStrings;
+    return CFArrayGetValueAtIndex(strs, (int) value);
 }
 
 void historyVC_updateColors(id self) {

@@ -1,6 +1,7 @@
 #ifndef HistoryVC_h
 #define HistoryVC_h
 
+#include <CoreFoundation/CFArray.h>
 #include <CoreGraphics/CGGeometry.h>
 #include <objc/runtime.h>
 #include "array.h"
@@ -9,12 +10,6 @@ gen_array_headers(pt, CGPoint)
 
 extern Class HistoryVCClass;
 extern Ivar HistoryVCDataRef;
-
-struct HistTimeData {
-    short year;
-    short month;
-    short day;
-};
 
 typedef struct {
     Array_pt *entries;
@@ -52,11 +47,7 @@ typedef struct {
     TotalWorkoutsChartModel totalWorkouts;
     WorkoutTypeChartModel workoutTypes;
     LiftChartModel lifts;
-    struct HistFormatter {
-        CFStringRef months[12];
-        CFStringRef currString;
-        struct HistTimeData data[128];
-    } formatter;
+    CFArrayRef axisStrings;
     int nEntries[3];
 } HistoryViewModel;
 

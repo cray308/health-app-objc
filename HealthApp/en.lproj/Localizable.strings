@@ -1,11 +1,3 @@
-/* 
-  Localizable.strings
-  HealthApp
-
-  Created by Christopher Ray on 9/23/21.
-  
-*/
-
 "titles0" = "Home";
 "titles1" = "Workout History";
 "titles2" = "App Settings";
@@ -28,19 +20,6 @@
 "dayNames4" = "Friday";
 "dayNames5" = "Saturday";
 "dayNames6" = "Sunday";
-
-"months00" = "1";
-"months01" = "2";
-"months02" = "3";
-"months03" = "4";
-"months04" = "5";
-"months05" = "6";
-"months06" = "7";
-"months07" = "8";
-"months08" = "9";
-"months09" = "10";
-"months10" = "11";
-"months11" = "12";
 
 "workoutTypes0" = "Strength";
 "workoutTypes1" = "HIC";

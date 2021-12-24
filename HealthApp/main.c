@@ -120,8 +120,7 @@ int main(int argc, char *argv[]) {
     class_addIvar(HistoryVCClass, dataKey, sizeof(HistoryVCData*), 0,
                   "^{?={?={?=@@@@[3^{CGPoint}][3f][3f]}"
                   "{?=[5@]@[5@]@[3[5^{CGPoint}]][3[4i]][3f][4@]}"
-                  "{?=[4@]@[4@]@[3[4^{CGPoint}]][3[4f]][3f][4@]}"
-                  "{HistFormatter=[12@]@[128{HistTimeData=sss}]}[3i]}@[3@]}");
+                  "{?=[4@]@[4@]@[3[4^{CGPoint}]][3[4f]][3f][4@]}@[3i]}@[3@]}");
     class_addMethod(HistoryVCClass, viewLoad, (IMP) historyVC_viewDidLoad, voidSig);
     class_addMethod(HistoryVCClass, btnTap, (IMP) historyVC_updateSegment, tapSig);
     class_addMethod(HistoryVCClass, getValueFormatterAction(),
