@@ -2,8 +2,6 @@
 #include "AppDelegate.h"
 #include "AppUserData.h"
 
-#define getNavBar(_navVC) getObject(_navVC, sel_getUid("navigationBar"))
-
 #define updateKVPair(_o, _k, _v) ((void(*)(id,SEL,id,CFStringRef))objc_msgSend)\
 ((_o), sel_getUid("setValue:forKey:"), (_v), (_k))
 

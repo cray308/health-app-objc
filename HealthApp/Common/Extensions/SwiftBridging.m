@@ -19,11 +19,10 @@ void disableLineChartView(LineChart *v) { [v setData:nil axisMax:0]; }
 void updateChart(LineChart *v, ChartData *data, float max) { [v setData:data axisMax:max]; }
 
 int getOSVersion(void) {
-    if (@available(iOS 14, *)) return 14;
+    if (@available(iOS 15, *)) return 15;
+    else if (@available(iOS 14, *)) return 14;
     else if (@available(iOS 13, *)) return 13;
-    else if (@available(iOS 12, *)) return 12;
-    else if (@available(iOS 11, *)) return 11;
-    return 10;
+    return 12;
 }
 
 id createChartView(id formatter, HAInt *colors, int count, uint8_t options) {

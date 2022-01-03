@@ -9,10 +9,6 @@
 "notifications0" = "Finished AMRAP circuit!";
 "notifications1" = "Finished exercise!";
 
-"timesOfDay0" = "Good morning!";
-"timesOfDay1" = "Good afternoon!";
-"timesOfDay2" = "Good evening!";
-
 "dayNames0" = "Monday";
 "dayNames1" = "Tuesday";
 "dayNames2" = "Wednesday";

@@ -24,8 +24,8 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
     initValidatorStrings();
     initExerciseStrings();
     initWorkoutStrings();
-    bool setWindowTint;
-    bool legacy = handleIOSVersion(&setWindowTint);
+    bool setWindowTint, updateNavbar;
+    bool legacy = handleIOSVersion(&setWindowTint, &updateNavbar);
     CGRect bounds;
     getScreenBounds(&bounds);
     self->window = createObjectWithFrame(objc_getClass("UIWindow"), bounds);
@@ -115,7 +115,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
         setTintColor(self->window, createColor(ColorRed));
     id tabVC = getObject(allocClass(DMTabVC), sel_getUid("init"));
     void (*fetchHandler)(void*);
-    void *arg = appCoordinator_start(tabVC, &fetchHandler);
+    void *arg = appCoordinator_start(tabVC, updateNavbar, &fetchHandler);
     setObject(self->window, sel_getUid("setRootViewController:"), tabVC);
     voidFunc(self->window, sel_getUid("makeKeyAndVisible"));
     releaseObj(tabVC);

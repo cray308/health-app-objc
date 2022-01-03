@@ -28,7 +28,6 @@ id homeVC_init(void) {
     id self = createVC(HomeVCClass);
     HomeVCData *data = malloc(sizeof(HomeVCData));
     fillStringArray(data->stateNames, CFSTR("homeState%d"), 2);
-    fillStringArray(data->timeNames, CFSTR("timesOfDay%d"), 3);
     object_setIvar(self, HomeVCDataRef, (id) data);
     return self;
 }
@@ -108,11 +107,10 @@ void homeVC_viewDidLoad(id self, SEL _cmd) {
     fillStringArray(titles, CFSTR("homeWorkoutType%d"), 5);
     fillStringArray(headers, CFSTR("homeHeader%d"), 2);
 
-    data->greetingLabel = createLabel(NULL, TextTitle1, 1, true);
     data->planContainer = containerView_init(headers[0], 0, true);
     id customContainer = containerView_init(headers[1], 4, true);
-    id vStack = createStackView((id[]){data->greetingLabel, data->planContainer, customContainer},
-                                3, 1, 20, (Padding){10, 0, 16, 0});
+    id vStack = createStackView((id[]){data->planContainer, customContainer}, 2, 1, 20,
+                                (Padding){10, 0, 16, 0});
 
     SEL btnTap = sel_getUid("customButtonTapped:");
     for (int i = 0; i < 5; ++i) {
@@ -135,25 +133,6 @@ void homeVC_viewDidLoad(id self, SEL _cmd) {
 
     homeVC_createWorkoutsList(self);
     appCoordinator->loadedViewControllers |= LoadedVC_Home;
-}
-
-void homeVC_viewWillAppear(id self, SEL _cmd, bool animated) {
-    struct objc_super super = {self, objc_getClass("UIViewController")};
-    ((void(*)(struct objc_super *,SEL,bool))objc_msgSendSuper)(&super, _cmd, animated);
-
-    HomeVCData *data = (HomeVCData *) object_getIvar(self, HomeVCDataRef);
-    struct tm localInfo;
-    time_t now = time(NULL);
-    localtime_r(&now, &localInfo);
-    int timeOfDay = 0;
-    int hour = localInfo.tm_hour;
-
-    if (hour >= 12 && hour < 17) {
-        timeOfDay = 1;
-    } else if (hour < 5 || hour >= 17) {
-        timeOfDay = 2;
-    }
-    setLabelText(data->greetingLabel, data->timeNames[timeOfDay]);
 }
 
 void homeVC_workoutButtonTapped(id self, SEL _cmd _U_, id btn) {

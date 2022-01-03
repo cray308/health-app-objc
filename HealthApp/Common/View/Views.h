@@ -20,6 +20,8 @@ setBool(_v, sel_getUid("setTranslatesAutoresizingMaskIntoConstraints:"), false)
 
 #define removeView(_v) voidFunc(_v, sel_getUid("removeFromSuperview"))
 
+#define getLayoutGuide(_v) getObject(_v, sel_getUid("safeAreaLayoutGuide"))
+
 #define getLayer(_v) getObject(_v, sel_getUid("layer"))
 
 #define setTag(_v, _tag) setInt(_v, sel_getUid("setTag:"), _tag)
@@ -109,7 +111,6 @@ typedef struct {
 id createFont(int style);
 id createCustomFont(int style, int size);
 CFDictionaryRef createTitleTextDict(id color, id font);
-id getLayoutGuide(id view);
 
 id createObjectWithFrame(Class cls, CGRect frame);
 id createBackgroundView(int color, int height, bool optional);

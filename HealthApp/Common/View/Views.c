@@ -128,10 +128,6 @@ CFDictionaryRef createTitleTextDict(id color, id font) {
                               &kCFCopyStringDictionaryKeyCallBacks, &valueCallbacks);
 }
 
-id getLayoutGuide(id view) {
-    return osVersion > 10 ? getObject(view, sel_getUid("safeAreaLayoutGuide")) : view;
-}
-
 #pragma mark - View initializers
 
 id createObjectWithFrame(Class cls, CGRect frame) {

@@ -13,6 +13,8 @@
 
 #define getNavItem(_vc) getObject(_vc, sel_getUid("navigationItem"))
 
+#define getNavBar(_navVC) getObject(_navVC, sel_getUid("navigationBar"))
+
 #define allocNavVC() allocClass(objc_getClass("DMNavVC"))
 
 #define getNavVC(_vc) getObject(_vc, sel_getUid("navigationController"))

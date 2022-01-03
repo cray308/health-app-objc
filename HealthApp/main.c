@@ -105,10 +105,8 @@ int main(int argc, char *argv[]) {
     UpdateMaxesVCDataRef = class_getInstanceVariable(UpdateMaxesVCClass, dataKey);
 
     HomeVCClass = objc_allocateClassPair(VCClass, "HomeVC", 0);
-    class_addIvar(HomeVCClass, dataKey, sizeof(HomeVCData*), 0, "^{?=@@[3@][2@]i}");
+    class_addIvar(HomeVCClass, dataKey, sizeof(HomeVCData*), 0, "^{?=@[2@]i}");
     class_addMethod(HomeVCClass, viewLoad, (IMP) homeVC_viewDidLoad, voidSig);
-    class_addMethod(HomeVCClass, sel_getUid("viewWillAppear:"),
-                    (IMP) homeVC_viewWillAppear, appearSig);
     class_addMethod(HomeVCClass, btnTap, (IMP) homeVC_workoutButtonTapped, tapSig);
     class_addMethod(HomeVCClass, sel_getUid("customButtonTapped:"),
                     (IMP) homeVC_customButtonTapped, tapSig);

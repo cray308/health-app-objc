@@ -8,9 +8,7 @@ extern Class HomeVCClass;
 extern Ivar HomeVCDataRef;
 
 typedef struct {
-    id greetingLabel;
     id planContainer;
-    CFStringRef timeNames[3];
     CFStringRef stateNames[2];
     int numWorkouts;
 } HomeVCData;
@@ -23,7 +21,6 @@ void homeVC_navigateToAddWorkout(id self, void *workout);
 void homeVC_handleFinishedWorkout(id self, int totalCompleted);
 
 void homeVC_viewDidLoad(id self, SEL _cmd);
-void homeVC_viewWillAppear(id self, SEL _cmd, bool animated);
 void homeVC_workoutButtonTapped(id self, SEL _cmd, id btn);
 void homeVC_customButtonTapped(id self, SEL _cmd, id btn);
 
