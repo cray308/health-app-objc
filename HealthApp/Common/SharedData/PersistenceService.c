@@ -32,8 +32,7 @@ void weekData_setWorkoutTimeForType(id data, unsigned char type, int16_t duratio
     static char const *setters[] = {
         "setTimeStrength:", "setTimeSE:", "setTimeEndurance:", "setTimeHIC:"
     };
-    int16_t newDuration = weekData_getWorkoutTimeForType(data,type) + duration;
-    setInt16(data, sel_getUid(setters[type]), newDuration);
+    setInt16(data, sel_getUid(setters[type]), duration);
 }
 
 void weekData_setLiftingMaxArray(id data, int16_t *weights) {
