@@ -15,7 +15,7 @@ enum {
 
 AppCoordinator *appCoordinator = NULL;
 
-void *appCoordinator_start(id tabVC, bool updateNavbar, void (**fetchHandler)(void*)) {
+void *appCoordinator_start(id tabVC, void (**fetchHandler)(void*)) {
     toggleDarkModeForCharts(userData->darkMode);
     appCoordinator = calloc(1, sizeof(AppCoordinator));
     SEL itemInit = sel_getUid("initWithTitle:image:tag:");
@@ -37,11 +37,9 @@ void *appCoordinator_start(id tabVC, bool updateNavbar, void (**fetchHandler)(vo
         setObject(controllers[i], setter, items[i]);
     }
 
-    if (updateNavbar) {
-        id navBar = getNavBar(controllers[0]);
-        setBool(navBar, sel_getUid("setPrefersLargeTitles:"), true);
-        setBool(controllers[2], sel_getUid("setNavigationBarHidden:"), true);
-    }
+    id navBar = getNavBar(controllers[0]);
+    setBool(navBar, sel_getUid("setPrefersLargeTitles:"), true);
+    setBool(controllers[2], sel_getUid("setNavigationBarHidden:"), true);
 
     appCoordinator->children[0] = homeVC_init();
     setupNavVC(controllers[0], appCoordinator->children[0]);

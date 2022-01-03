@@ -193,7 +193,6 @@ void historyVC_viewDidLoad(id self, SEL _cmd) {
     HistoryVCData *data = (HistoryVCData *) object_getIvar(self, HistoryVCDataRef);
     id view = getView(self);
     setBackground(view, createColor(ColorPrimaryBG));
-    setVCTitle(self, localize(CFSTR("titles1")));
 
     CFStringRef titles[3];
     fillStringArray(titles, CFSTR("chartHeader%d"), 3);

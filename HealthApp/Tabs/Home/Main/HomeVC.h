@@ -9,6 +9,7 @@ extern Ivar HomeVCDataRef;
 
 typedef struct {
     id planContainer;
+    id customContainer;
     CFStringRef stateNames[2];
     int numWorkouts;
 } HomeVCData;

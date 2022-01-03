@@ -53,6 +53,8 @@ void homeVC_createWorkoutsList(id self) {
     HomeVCData *data = (HomeVCData *) object_getIvar(self, HomeVCDataRef);
     ContainerViewData *planData =
     (ContainerViewData *) object_getIvar(data->planContainer, ContainerViewDataRef);
+    ContainerViewData *customData =
+    (ContainerViewData *) object_getIvar(data->customContainer, ContainerViewDataRef);
 
     data->numWorkouts = 0;
     array_clear(object, planData->views);
@@ -65,6 +67,7 @@ void homeVC_createWorkoutsList(id self) {
 
     if (userData->currentPlan < 0 || userData->planStart > time(NULL)) {
         hideView(data->planContainer, true);
+        hideView(customData->divider, true);
         return;
     }
 
@@ -86,6 +89,7 @@ void homeVC_createWorkoutsList(id self) {
     }
 
     hideView(data->planContainer, false);
+    hideView(customData->divider, false);
     homeVC_updateWorkoutsList(self);
 }
 
@@ -101,15 +105,18 @@ void homeVC_viewDidLoad(id self, SEL _cmd) {
     HomeVCData *data = (HomeVCData *) object_getIvar(self, HomeVCDataRef);
     id view = getView(self);
     setBackground(view, createColor(ColorPrimaryBGGrouped));
-    setVCTitle(self, localize(CFSTR("titles0")));
+    setVCTitle(self, localize(CFSTR("tabs0")));
 
     CFStringRef titles[5], headers[2];
     fillStringArray(titles, CFSTR("homeWorkoutType%d"), 5);
     fillStringArray(headers, CFSTR("homeHeader%d"), 2);
 
     data->planContainer = containerView_init(headers[0], 0, true);
-    id customContainer = containerView_init(headers[1], 4, true);
-    id vStack = createStackView((id[]){data->planContainer, customContainer}, 2, 1, 20,
+    ContainerViewData *planData =
+    (ContainerViewData *) object_getIvar(data->planContainer, ContainerViewDataRef);
+    hideView(planData->divider, true);
+    data->customContainer = containerView_init(headers[1], 4, true);
+    id vStack = createStackView((id[]){data->planContainer, data->customContainer}, 2, 1, 20,
                                 (Padding){10, 0, 16, 0});
 
     SEL btnTap = sel_getUid("customButtonTapped:");
@@ -118,7 +125,7 @@ void homeVC_viewDidLoad(id self, SEL _cmd) {
         StatusViewData *ptr = (StatusViewData *) object_getIvar(btn, StatusViewDataRef);
         hideView(ptr->box, true);
         statusView_updateAccessibility(btn, NULL);
-        containerView_add(customContainer, btn);
+        containerView_add(data->customContainer, btn);
     }
 
     id scrollView = createScrollView();
@@ -127,7 +134,6 @@ void homeVC_viewDidLoad(id self, SEL _cmd) {
     pin(scrollView, guide, (Padding){0}, 0);
     addVStackToScrollView(vStack, scrollView);
 
-    releaseObj(customContainer);
     releaseObj(vStack);
     releaseObj(scrollView);
 
