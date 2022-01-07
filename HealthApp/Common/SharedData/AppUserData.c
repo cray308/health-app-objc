@@ -89,7 +89,8 @@ int userInfo_initFromStorage(void) {
     time_t now = time(NULL);
     time_t weekStart = date_calcStartOfWeek(now);
     id defaults = getUserDefaults();
-    CFDictionaryRef savedInfo = getDict(defaults, sel_getUid("dictionaryForKey:"), dictKey);
+    CFDictionaryRef savedInfo = (((CFDictionaryRef(*)(id,SEL,CFStringRef))objc_msgSend)
+                                 (defaults, sel_getUid("dictionaryForKey:"), dictKey));
     userData = malloc(sizeof(UserInfo));
 
     CFNumberRef value = CFDictionaryGetValue(savedInfo, keys[0]);

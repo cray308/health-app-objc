@@ -47,10 +47,11 @@ static CFStringRef amrapFormat;
 
 static void createRootAndLibDict(struct DictWrapper *data) {
     id bundle = getBundle();
-    CFStringRef path = ((CFStringRef(*)(id,SEL,CFStringRef,CFStringRef))objc_msgSend)
-    (bundle, sel_getUid("pathForResource:ofType:"), WK_DATA_PATH, CFSTR("plist"));
+    id url = (((id(*)(id,SEL,CFStringRef,CFStringRef))objc_msgSend)
+              (bundle, sel_getUid("URLForResource:withExtension:"), WK_DATA_PATH, CFSTR("plist")));
     id _dict = allocClass(objc_getClass("NSDictionary"));
-    data->root = getDict(_dict, sel_getUid("initWithContentsOfFile:"), path);
+    data->root = (((CFDictionaryRef(*)(id,SEL,id,id))objc_msgSend)
+                  (_dict, sel_getUid("initWithContentsOfURL:error:"), url, nil));
     data->lib = CFDictionaryGetValue(data->root, CFSTR("library"));
 }
 

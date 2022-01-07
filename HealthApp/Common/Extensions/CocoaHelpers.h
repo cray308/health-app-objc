@@ -37,8 +37,6 @@
 
 #define setArray(_obj, _cmd, _arg) (((void(*)(id,SEL,CFArrayRef))objc_msgSend)((_obj), (_cmd), (_arg)))
 
-#define getDict(_obj, _cmd, _arg) (((CFDictionaryRef(*)(id,SEL,CFStringRef))objc_msgSend)((_obj), (_cmd), (_arg)))
-
 #define getArray(_obj, _cmd) (((CFArrayRef(*)(id,SEL))objc_msgSend)((_obj), (_cmd)))
 
 #define getObjectWithFloat(_obj, _cmd, _arg) (((id(*)(id,SEL,CGFloat))objc_msgSend)((_obj), (_cmd), (_arg)))
