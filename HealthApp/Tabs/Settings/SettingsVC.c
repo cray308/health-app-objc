@@ -103,7 +103,6 @@ void settingsVC_viewDidLoad(id self, SEL _cmd) {
     releaseObj(belowTF);
 
     settingsVC_updateWeightFields(self);
-    appCoordinator->loadedViewControllers |= LoadedVC_Settings;
 }
 
 void settingsVC_buttonTapped(id self, SEL _cmd _U_, id btn) {

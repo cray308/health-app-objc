@@ -310,14 +310,11 @@ CFArrayRef exerciseManager_createWorkoutNames(unsigned char type) {
     if (type == WorkoutStrength)
         len = 2;
 
-    CFArrayCallBacks callbacks = kCFTypeArrayCallBacks;
-    callbacks.retain = NULL;
-    results = CFArrayCreateMutable(NULL, len, &callbacks);
+    results = CFArrayCreateMutable(NULL, len, &kCFTypeArrayCallBacks);
     for (int i = 0; i < len; ++i) {
         CFDictionaryRef week = CFArrayGetValueAtIndex(libArr, i);
         CFStringRef title = CFDictionaryGetValue(week, Keys.title);
-        CFStringRef titleCopy = CFStringCreateCopy(NULL, title);
-        CFArrayAppendValue(results, titleCopy);
+        CFArrayAppendValue(results, title);
     }
 cleanup:
     CFRelease(info.root);

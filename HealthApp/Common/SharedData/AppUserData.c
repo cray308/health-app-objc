@@ -66,8 +66,8 @@ static void saveData(void) {
                                               &kCFTypeDictionaryValueCallBacks);
 
     id defaults = getUserDefaults();
-    ((void(*)(id,SEL,CFDictionaryRef,CFStringRef))objc_msgSend)
-    (defaults, sel_getUid("setObject:forKey:"), dict, dictKey);
+    (((void(*)(id,SEL,CFDictionaryRef,CFStringRef))objc_msgSend)
+     (defaults, sel_getUid("setObject:forKey:"), dict, dictKey));
     CFRelease(dict);
     for (int i = 0; i < 10; ++i) {
         CFRelease(values[i]);

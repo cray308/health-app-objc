@@ -1,6 +1,5 @@
 #include "HistoryVC.h"
 #include <stdio.h>
-#include "AppCoordinator.h"
 #include "AppUserData.h"
 #include "ContainerView.h"
 #include "ExerciseManager.h"
@@ -111,7 +110,7 @@ static void historyData_fetch(void *_model) {
         CFArrayRef data = persistenceService_executeFetchRequest(request, &count, true);
         if (data) {
             CFMutableArrayRef strs = CFArrayCreateMutable(NULL, count, &kCFTypeArrayCallBacks);
-            struct WeekDataModel *results = malloc(sizeof(struct WeekDataModel) << 7);
+            struct WeekDataModel *results = calloc(128, sizeof(struct WeekDataModel));
             for (int i = 0; i < count; ++i) {
                 id d = (id) CFArrayGetValueAtIndex(data, i);
                 struct WeekDataModel *r = &results[i];
@@ -230,7 +229,6 @@ void historyVC_viewDidLoad(id self, SEL _cmd) {
     }
 
     historyVC_updateSegment(self, nil, data->picker);
-    appCoordinator->loadedViewControllers |= LoadedVC_History;
 }
 
 void historyVC_updateSegment(id self, SEL _cmd _U_, id picker) {
@@ -278,7 +276,7 @@ void historyVC_updateSegment(id self, SEL _cmd _U_, id picker) {
     liftingView_update(data->charts[2], model->nEntries[index], index);
 }
 
-void historyVC_clearData(id self, bool updateUI) {
+void historyVC_clearData(id self) {
     HistoryVCData *data = (HistoryVCData *) object_getIvar(self, HistoryVCDataRef);
     HistoryViewModel *model = &data->model;
     if (!model->nEntries[2]) return;
@@ -314,7 +312,7 @@ void historyVC_clearData(id self, bool updateUI) {
     }
     replaceDataSetEntries(model->workoutTypes.dataSets[4], model->workoutTypes.entries[0]->arr, 0);
 
-    if (updateUI) {
+    if (isViewLoaded(self)) {
         setInt(data->picker, sel_getUid("setSelectedSegmentIndex:"), 0);
         historyVC_updateSegment(self, nil, data->picker);
     }
@@ -326,8 +324,10 @@ CFStringRef historyVC_stringForValue(id self, SEL _cmd _U_, double value) {
 }
 
 void historyVC_updateColors(id self) {
-    id picker = ((HistoryVCData *) object_getIvar(self, HistoryVCDataRef))->picker;
-    id view = getView(self);
-    setBackground(view, createColor(ColorPrimaryBG));
-    updateSegmentedControl(picker);
+    if (isViewLoaded(self)) {
+        id picker = ((HistoryVCData *) object_getIvar(self, HistoryVCDataRef))->picker;
+        id view = getView(self);
+        setBackground(view, createColor(ColorPrimaryBG));
+        updateSegmentedControl(picker);
+    }
 }

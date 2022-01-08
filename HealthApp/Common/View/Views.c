@@ -88,8 +88,8 @@ id createCustomFont(int style, int size) {
         default:
             weight = UIFontWeightRegular;
     }
-    return ((id(*)(Class,SEL,CGFloat,CGFloat))objc_msgSend)
-    (objc_getClass("UIFont"), sel_getUid("systemFontOfSize:weight:"), size, weight);
+    return (((id(*)(Class,SEL,CGFloat,CGFloat))objc_msgSend)
+            (objc_getClass("UIFont"), sel_getUid("systemFontOfSize:weight:"), size, weight));
 }
 
 #pragma mark - Custom View Selectors

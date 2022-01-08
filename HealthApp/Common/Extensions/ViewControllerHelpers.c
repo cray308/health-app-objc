@@ -58,16 +58,11 @@ void setupNavVC(id navVC, id firstVC) {
     CFRelease(array);
 }
 
-id getFirstVC(id navVC) {
-    CFArrayRef ctrls = getViewControllers(navVC);
-    return (id) CFArrayGetValueAtIndex(ctrls, 0);
-}
-
 void presentVC(id presenter, id child) {
     if (osVersion < 14)
         appDel_setWindowTint(nil);
-    ((void(*)(id,SEL,id,bool,id))objc_msgSend)
-    (presenter, sel_getUid("presentViewController:animated:completion:"), child, true, nil);
+    (((void(*)(id,SEL,id,bool,id))objc_msgSend)
+     (presenter, sel_getUid("presentViewController:animated:completion:"), child, true, nil));
 }
 
 void presentModalVC(id presenter, id modal) {
@@ -83,19 +78,19 @@ void presentModalVC(id presenter, id modal) {
 }
 
 void dismissPresentedVC(id presenter, Callback handler) {
-    ((void(*)(id,SEL,bool,Callback))objc_msgSend)
-    (presenter, sel_getUid("dismissViewControllerAnimated:completion:"), true, ^{
+    (((void(*)(id,SEL,bool,Callback))objc_msgSend)
+     (presenter, sel_getUid("dismissViewControllerAnimated:completion:"), true, ^{
         if (handler)
             handler();
         if (osVersion < 14)
             appDel_setWindowTint(createColor(ColorRed));
-    });
+    }));
 }
 
 id createAlertController(CFStringRef title, CFStringRef message) {
-    id vc = ((id(*)(Class,SEL,CFStringRef,CFStringRef,int))objc_msgSend)
-    (objc_getClass("UIAlertController"),
-     sel_getUid("alertControllerWithTitle:message:preferredStyle:"), title, message, 1);
+    id vc = (((id(*)(Class,SEL,CFStringRef,CFStringRef,int))objc_msgSend)
+             (objc_getClass("UIAlertController"),
+              sel_getUid("alertControllerWithTitle:message:preferredStyle:"), title, message, 1));
     if (osVersion < 13) {
         id fg = createColor(ColorLabel);
         CFDictionaryRef titleDict = createTitleTextDict(fg, createCustomFont(WeightSemiBold, 17));
@@ -122,13 +117,13 @@ id createAlertController(CFStringRef title, CFStringRef message) {
 }
 
 void addAlertAction(id ctrl, CFStringRef title, int style, Callback handler) {
-    id action = ((id(*)(Class,SEL,CFStringRef,int,void(^)(id)))objc_msgSend)
-    (objc_getClass("UIAlertAction"), sel_getUid("actionWithTitle:style:handler:"), title, style,
-     ^(id action _U_) {
+    id action = (((id(*)(Class,SEL,CFStringRef,int,void(^)(id)))objc_msgSend)
+                 (objc_getClass("UIAlertAction"), sel_getUid("actionWithTitle:style:handler:"),
+                  title, style, ^(id action _U_) {
         if (handler)
             handler();
         if (osVersion < 14)
             appDel_setWindowTint(createColor(ColorRed));
-    });
+    }));
     setObject(ctrl, sel_getUid("addAction:"), action);
 }

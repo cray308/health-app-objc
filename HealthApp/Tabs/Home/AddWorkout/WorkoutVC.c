@@ -180,18 +180,18 @@ static void scheduleNotification(int secondsFromNow, unsigned char type) {
     id sound = staticMethod(objc_getClass("UNNotificationSound"), sel_getUid("defaultSound"));
     setObject(content, sel_getUid("setSound:"), sound);
 
-    id trigger = ((id(*)(Class,SEL,double,bool))objc_msgSend)
-    (objc_getClass("UNTimeIntervalNotificationTrigger"),
-     sel_getUid("triggerWithTimeInterval:repeats:"), secondsFromNow, false);
-
-    id req = ((id(*)(Class,SEL,CFStringRef,id,id))objc_msgSend)
-    (objc_getClass("UNNotificationRequest"), sel_getUid("requestWithIdentifier:content:trigger:"),
-     idString, content, trigger);
+    id trigger = (((id(*)(Class,SEL,double,bool))objc_msgSend)
+                  (objc_getClass("UNTimeIntervalNotificationTrigger"),
+                   sel_getUid("triggerWithTimeInterval:repeats:"), secondsFromNow, false));
+    id req = (((id(*)(Class,SEL,CFStringRef,id,id))objc_msgSend)
+              (objc_getClass("UNNotificationRequest"),
+               sel_getUid("requestWithIdentifier:content:trigger:"),
+               idString, content, trigger));
 
     id center = getNotificationCenter();
-    ((void(*)(id,SEL,id,void(^)(id)))objc_msgSend)
-    (center, sel_getUid("addNotificationRequest:withCompletionHandler:"),
-     req, ^(id error _U_) {});
+    (((void(*)(id,SEL,id,void(^)(id)))objc_msgSend)
+     (center, sel_getUid("addNotificationRequest:withCompletionHandler:"),
+      req, ^(id error _U_) {}));
     CFRelease(idString);
     releaseObj(content);
 }
@@ -409,7 +409,8 @@ void workoutVC_handleFinishedWorkout(id self, short *lifts) {
 
     id navVC = getNavVC(self);
     if (totalCompleted) {
-        id parent = getFirstVC(navVC);
+        CFArrayRef ctrls = getViewControllers(navVC);
+        id parent = (id) CFArrayGetValueAtIndex(ctrls, 0);
         homeVC_handleFinishedWorkout(parent, totalCompleted);
     }
     popVC(navVC);
@@ -464,12 +465,12 @@ void workoutVC_viewDidLoad(id self, SEL _cmd) {
     id weakSelf = self;
     id main = staticMethod(objc_getClass("NSOperationQueue"), sel_getUid("mainQueue"));
     id center = getDeviceNotificationCenter();
-    data->observers[0] = ((id(*)(id,SEL,CFStringRef,id,id,void(^)(id)))objc_msgSend)
-    (center, obsSig, (CFStringRef) UIApplicationDidBecomeActiveNotification,
-     nil, main, ^(id note _U_){ restartTimers(weakSelf); });
-    data->observers[1] = ((id(*)(id,SEL,CFStringRef,id,id,void(^)(id)))objc_msgSend)
-    (center, obsSig, (CFStringRef) UIApplicationWillResignActiveNotification,
-     nil, main, ^(id note _U_){ stopTimers(weakSelf); });
+    data->observers[0] = (((id(*)(id,SEL,CFStringRef,id,id,void(^)(id)))objc_msgSend)
+                          (center, obsSig, (CFStringRef) UIApplicationDidBecomeActiveNotification,
+                           nil, main, ^(id note _U_){ restartTimers(weakSelf); }));
+    data->observers[1] = (((id(*)(id,SEL,CFStringRef,id,id,void(^)(id)))objc_msgSend)
+                          (center, obsSig, (CFStringRef) UIApplicationWillResignActiveNotification,
+                           nil, main, ^(id note _U_){ stopTimers(weakSelf); }));
 }
 
 void workoutVC_startEndWorkout(id self, SEL _cmd _U_, id btn) {

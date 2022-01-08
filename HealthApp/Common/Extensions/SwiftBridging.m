@@ -5,7 +5,7 @@
 void toggleDarkModeForCharts(bool enabled) { [ChartUtility setDarkModeWithEnabled:enabled]; }
 
 void setLegendLabel(LineChart *v, int index, CFStringRef text) {
-    [v setLegendLabel:index text:_nsstr(text)];
+    [v setLegendLabel:index text:(__bridge NSString*)text];
 }
 
 void setLineLimit(LineChart *v, float limit) { [v setLineLimit:limit]; }
@@ -34,7 +34,7 @@ id createDataSet(int color, DataSet *fillSet) {
 }
 
 id createChartData(CFArrayRef dataSets, int lineWidth, uint8_t options) {
-    return [[ChartData alloc] initWithDataSets:_nsarr(dataSets) lineWidth:lineWidth options:options];
+    return [[ChartData alloc] initWithDataSets:(__bridge NSArray*)dataSets lineWidth:lineWidth options:options];
 }
 
 void replaceDataSetEntries(DataSet *dataSet, CGPoint *entries, int count) {

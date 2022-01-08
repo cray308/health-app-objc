@@ -4,12 +4,11 @@
 #include "CocoaHelpers.h"
 #include "Views.h"
 
-#define _nsstr(x) ((__bridge NSString*) x)
-#define _nsarr(x) ((__bridge NSArray*) x)
-
 #define getViewControllers(_tabVC) getArray(_tabVC, sel_getUid("viewControllers"))
 
 #define getView(_vc) getObject(_vc, sel_getUid("view"))
+
+#define isViewLoaded(_vc) getBool(_vc, sel_getUid("isViewLoaded"))
 
 #define getNavItem(_vc) getObject(_vc, sel_getUid("navigationItem"))
 
@@ -29,8 +28,6 @@ extern Class DMTabVC;
 extern Class DMNavVC;
 
 typedef void (^Callback)(void);
-
-id getFirstVC(id navVC);
 
 void setNavButton(id vc, bool left, id button, int totalWidth);
 void setVCTitle(id vc, CFStringRef title);

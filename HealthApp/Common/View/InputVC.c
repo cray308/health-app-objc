@@ -130,11 +130,12 @@ void inputVC_viewDidLoad(id self, SEL _cmd) {
     voidFunc(data->toolbar, sel_getUid("sizeToFit"));
 
     Class btnClass = objc_getClass("UIBarButtonItem");
-    id flexSpace = ((id(*)(id,SEL,int,id,SEL))objc_msgSend)
-    (allocClass(btnClass), sel_getUid("initWithBarButtonSystemItem:target:action:"), 5, nil, nil);
-    id doneButton = ((id(*)(id,SEL,CFStringRef,int,id,SEL))objc_msgSend)
-    (allocClass(btnClass), sel_getUid("initWithTitle:style:target:action:"),
-     localize(CFSTR("done")), 0, self, sel_getUid("dismissKeyboard"));
+    id flexSpace = (((id(*)(id,SEL,int,id,SEL))objc_msgSend)
+                    (allocClass(btnClass), sel_getUid("initWithBarButtonSystemItem:target:action:"),
+                     5, nil, nil));
+    id doneButton = (((id(*)(id,SEL,CFStringRef,int,id,SEL))objc_msgSend)
+                     (allocClass(btnClass), sel_getUid("initWithTitle:style:target:action:"),
+                      localize(CFSTR("done")), 0, self, sel_getUid("dismissKeyboard")));
 
     if (osVersion < 14)
         setTintColor(doneButton, createColor(ColorRed));
@@ -157,10 +158,10 @@ void inputVC_viewDidLoad(id self, SEL _cmd) {
 
     id center = getDeviceNotificationCenter();
     SEL sig = sel_getUid("addObserver:selector:name:object:");
-    ((void(*)(id,SEL,id,SEL,id,id))objc_msgSend)
-    (center, sig, self, sel_getUid("keyboardShown:"), UIKeyboardDidShowNotification, nil);
-    ((void(*)(id,SEL,id,SEL,id,id))objc_msgSend)
-    (center, sig, self, sel_getUid("keyboardWillHide:"), UIKeyboardWillHideNotification, nil);
+    (((void(*)(id,SEL,id,SEL,id,id))objc_msgSend)
+     (center, sig, self, sel_getUid("keyboardShown:"), UIKeyboardDidShowNotification, nil));
+    (((void(*)(id,SEL,id,SEL,id,id))objc_msgSend)
+     (center, sig, self, sel_getUid("keyboardWillHide:"), UIKeyboardWillHideNotification, nil));
 }
 
 void inputVC_viewDidAppear(id self, SEL _cmd, bool animated) {
@@ -210,12 +211,12 @@ void inputVC_keyboardShown(id self, SEL _cmd _U_, id notif) {
 
 #if defined(__arm64__)
     kbRect = ((CGRect(*)(id,SEL))objc_msgSend)(info, sel_getUid("CGRectValue"));
-    fieldInView = ((CGRect(*)(id,SEL,CGRect,id))objc_msgSend)
-    (view, sel_getUid("convertRect:fromView:"), fieldRect, data->activeField);
+    fieldInView = (((CGRect(*)(id,SEL,CGRect,id))objc_msgSend)
+                   (view, sel_getUid("convertRect:fromView:"), fieldRect, data->activeField));
 #else
     ((void(*)(CGRect*,id,SEL))objc_msgSend_stret)(&kbRect, info, sel_getUid("CGRectValue"));
-    ((void(*)(CGRect*,id,SEL,CGRect,id))objc_msgSend_stret)
-    (&fieldInView, view, sel_getUid("convertRect:fromView:"), fieldRect, data->activeField);
+    (((void(*)(CGRect*,id,SEL,CGRect,id))objc_msgSend_stret)
+     (&fieldInView, view, sel_getUid("convertRect:fromView:"), fieldRect, data->activeField));
 #endif
 
     viewRect.size.height -= kbRect.size.height;
@@ -225,8 +226,8 @@ void inputVC_keyboardShown(id self, SEL _cmd _U_, id notif) {
     upperY.y += fieldInView.size.height;
     if (!(CGRectContainsPoint(viewRect, fieldInView.origin) &&
           CGRectContainsPoint(viewRect, upperY))) {
-        ((void(*)(id,SEL,CGRect,bool))objc_msgSend)
-        (data->scrollView, sel_getUid("scrollRectToVisible:animated:"), fieldRect, true);
+        (((void(*)(id,SEL,CGRect,bool))objc_msgSend)
+         (data->scrollView, sel_getUid("scrollRectToVisible:animated:"), fieldRect, true));
     }
 }
 

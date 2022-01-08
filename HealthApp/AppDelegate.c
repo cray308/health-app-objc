@@ -32,23 +32,23 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
 
     CFStringRef hasLaunchedKey = CFSTR("hasLaunched");
     id defaults = getUserDefaults();
-    bool hasLaunched = ((bool(*)(id,SEL,CFStringRef))objc_msgSend)
-    (defaults, sel_getUid("boolForKey:"), hasLaunchedKey);
+    bool hasLaunched = (((bool(*)(id,SEL,CFStringRef))objc_msgSend)
+                        (defaults, sel_getUid("boolForKey:"), hasLaunchedKey));
 
     persistenceService_init();
     int tzOffset = 0;
 
     if (!hasLaunched) {
-        ((void(*)(id,SEL,bool,CFStringRef))objc_msgSend)
-        (defaults, sel_getUid("setBool:forKey:"), true, hasLaunchedKey);
+        (((void(*)(id,SEL,bool,CFStringRef))objc_msgSend)
+         (defaults, sel_getUid("setBool:forKey:"), true, hasLaunchedKey));
         userInfo_create(legacy);
 #if DEBUG
         persistenceService_create();
 #endif
         id center = getNotificationCenter();
-        ((void(*)(id,SEL,int,void(^)(BOOL,id)))objc_msgSend)
-        (center, sel_getUid("requestAuthorizationWithOptions:completionHandler:"),
-         6, ^(BOOL granted _U_, id error _U_) {});
+        (((void(*)(id,SEL,int,void(^)(BOOL,id)))objc_msgSend)
+         (center, sel_getUid("requestAuthorizationWithOptions:completionHandler:"),
+          6, ^(BOOL granted _U_, id error _U_) {}));
     } else {
         tzOffset = userInfo_initFromStorage();
     }

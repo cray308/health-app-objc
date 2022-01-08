@@ -15,8 +15,8 @@ static void cocoaArrRelease(CFAllocatorRef allocator _U_, const void *value) {
 
 static inline id allocColor(float red, float green, float blue, float alpha) {
     id _obj = allocClass(objc_getClass("UIColor"));
-    return ((id(*)(id,SEL,CGFloat,CGFloat,CGFloat,CGFloat))objc_msgSend)
-    (_obj, sel_getUid("initWithRed:green:blue:alpha:"), red, green, blue, alpha);
+    return (((id(*)(id,SEL,CGFloat,CGFloat,CGFloat,CGFloat))objc_msgSend)
+            (_obj, sel_getUid("initWithRed:green:blue:alpha:"), red, green, blue, alpha));
 }
 
 CFArrayCallBacks retainedArrCallbacks = {0, cocoaArrRetain, cocoaArrRelease, NULL, NULL};
@@ -100,14 +100,14 @@ id createColor(int type) {
 
 id createAttribString(CFStringRef text, CFDictionaryRef dict) {
     id _obj = allocClass(objc_getClass("NSAttributedString"));
-    return ((id(*)(id,SEL,CFStringRef,CFDictionaryRef))objc_msgSend)
-    (_obj, sel_getUid("initWithString:attributes:"), text, dict);
+    return (((id(*)(id,SEL,CFStringRef,CFDictionaryRef))objc_msgSend)
+            (_obj, sel_getUid("initWithString:attributes:"), text, dict));
 }
 
 CFStringRef localize(CFStringRef key) {
     id bundle = getBundle();
-    return ((CFStringRef(*)(id,SEL,CFStringRef,CFStringRef,CFStringRef))objc_msgSend)
-    (bundle, sel_getUid("localizedStringForKey:value:table:"), key, NULL, NULL);
+    return (((CFStringRef(*)(id,SEL,CFStringRef,CFStringRef,CFStringRef))objc_msgSend)
+            (bundle, sel_getUid("localizedStringForKey:value:table:"), key, NULL, NULL));
 }
 
 void fillStringArray(CFStringRef *arr, CFStringRef format, int count) {

@@ -175,11 +175,11 @@ void persistenceService_create(void) {
 
 void persistenceService_init(void) {
     id _container = allocClass(objc_getClass("NSPersistentContainer"));
-    persistenceService = ((id(*)(id,SEL,CFStringRef))objc_msgSend)
-    (_container, sel_getUid("initWithName:"), CFSTR("HealthApp"));
-    ((void(*)(id,SEL,void(^)(id,id)))objc_msgSend)
-    (persistenceService, sel_getUid("loadPersistentStoresWithCompletionHandler:"),
-     ^(id description _U_, id error _U_) {});
+    persistenceService = (((id(*)(id,SEL,CFStringRef))objc_msgSend)
+                          (_container, sel_getUid("initWithName:"), CFSTR("HealthApp")));
+    (((void(*)(id,SEL,void(^)(id,id)))objc_msgSend)
+     (persistenceService, sel_getUid("loadPersistentStoresWithCompletionHandler:"),
+      ^(id description _U_, id error _U_) {}));
     backgroundContext = getObject(persistenceService, sel_getUid("newBackgroundContext"));
     setBool(backgroundContext, sel_getUid("setAutomaticallyMergesChangesFromParent:"), true);
 }
@@ -287,16 +287,16 @@ CFArrayRef persistenceService_executeFetchRequest(id req, int *count, bool sorte
     int len = 0;
     if (sorted) {
         id _obj = allocClass(objc_getClass("NSSortDescriptor"));
-        id descriptor = ((id(*)(id,SEL,CFStringRef,bool))objc_msgSend)
-        (_obj, sel_getUid("initWithKey:ascending:"), CFSTR("weekStart"), true);
+        id descriptor = (((id(*)(id,SEL,CFStringRef,bool))objc_msgSend)
+                         (_obj, sel_getUid("initWithKey:ascending:"), CFSTR("weekStart"), true));
         CFArrayRef descriptorArr = CFArrayCreate(NULL, (const void *[]){descriptor},
                                                  1, &retainedArrCallbacks);
         setArray(req, sel_getUid("setSortDescriptors:"), descriptorArr);
         releaseObj(descriptor);
         CFRelease(descriptorArr);
     }
-    CFArrayRef data = ((CFArrayRef(*)(id,SEL,id,id))objc_msgSend)
-    (backgroundContext, sel_getUid("executeFetchRequest:error:"), req, nil);
+    CFArrayRef data = (((CFArrayRef(*)(id,SEL,id,id))objc_msgSend)
+                       (backgroundContext, sel_getUid("executeFetchRequest:error:"), req, nil));
     if (!(data && (len = (int)(CFArrayGetCount(data)))))
         data = NULL;
     *count = len;

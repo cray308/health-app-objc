@@ -1,4 +1,5 @@
 #include "SetupWorkoutVC.h"
+#include "ExerciseManager.h"
 #include "HomeVC.h"
 #include "InputVC.h"
 #include "ViewControllerHelpers.h"
@@ -6,7 +7,13 @@
 Class SetupWorkoutVCClass;
 Ivar SetupWorkoutVCDataRef;
 
-id setupWorkoutVC_init(id parent, unsigned char type, CFArrayRef names) {
+id setupWorkoutVC_init(id parent, unsigned char type) {
+    CFArrayRef names = exerciseManager_createWorkoutNames(type);
+    if (!names) return nil;
+    else if (!CFArrayGetCount(names)) {
+        CFRelease(names);
+        return nil;
+    }
     id self = createVC(SetupWorkoutVCClass);
     SetupWorkoutVCData *data = calloc(1, sizeof(SetupWorkoutVCData));
     data->parent = parent;

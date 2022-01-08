@@ -3,14 +3,7 @@
 
 #include <objc/objc.h>
 
-enum {
-    LoadedVC_Home = 0x1,
-    LoadedVC_History = 0x2,
-    LoadedVC_Settings = 0x4
-};
-
 typedef struct {
-    unsigned char loadedViewControllers;
     id children[3];
 } AppCoordinator;
 

@@ -2,7 +2,6 @@
 #include <CoreGraphics/CGColor.h>
 #include <dispatch/queue.h>
 #include <math.h>
-#include "AppCoordinator.h"
 #include "AppUserData.h"
 #include "ContainerView.h"
 #include "ExerciseManager.h"
@@ -138,7 +137,6 @@ void homeVC_viewDidLoad(id self, SEL _cmd) {
     releaseObj(scrollView);
 
     homeVC_createWorkoutsList(self);
-    appCoordinator->loadedViewControllers |= LoadedVC_Home;
 }
 
 void homeVC_workoutButtonTapped(id self, SEL _cmd _U_, id btn) {
@@ -172,14 +170,9 @@ void homeVC_customButtonTapped(id self, SEL _cmd _U_, id btn) {
             break;
     }
 
-    CFArrayRef names = exerciseManager_createWorkoutNames(type);
-    if (!names) return;
-    else if (!CFArrayGetCount(names)) {
-        CFRelease(names);
-        return;
-    }
-
-    presentModalVC(self, setupWorkoutVC_init(self, type, names));
+    id modal = setupWorkoutVC_init(self, type);
+    if (modal)
+        presentModalVC(self, modal);
 }
 
 void homeVC_navigateToAddWorkout(id self, void *workout) {

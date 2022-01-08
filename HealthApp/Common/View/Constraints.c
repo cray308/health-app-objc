@@ -33,8 +33,8 @@ static inline void activateConstraints(id *constraints, int count) {
 static id createConstraint(id a1, id a2, int constant) {
     id result;
     if (a2) {
-        result = ((id(*)(id,SEL,id,CGFloat))objc_msgSend)
-        (a1, sel_getUid("constraintEqualToAnchor:constant:"), a2, constant);
+        result = (((id(*)(id,SEL,id,CGFloat))objc_msgSend)
+                  (a1, sel_getUid("constraintEqualToAnchor:constant:"), a2, constant));
     } else {
         result = getObjectWithFloat(a1, sel_getUid("constraintEqualToConstant:"), constant);
     }
