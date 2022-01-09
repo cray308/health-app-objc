@@ -403,6 +403,7 @@ static void workoutVC_handleFinishedWorkout(id self) {
         appCoordinator_updateMaxWeights(data->weights);
         lifts = malloc(sizeof(short) << 2);
         memcpy(lifts, data->weights, sizeof(short) << 2);
+        data->workout->duration = max(data->workout->duration, 15);
     }
 
     if (isLongEnough(data->workout)) {
