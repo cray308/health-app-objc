@@ -38,6 +38,7 @@ typedef struct {
         } exerciseInfo;
     } savedInfo;
     WorkoutTimer timers[2];
+    short weights[4];
     bool done;
 } WorkoutVCData;
 
@@ -49,6 +50,6 @@ void workoutVC_willDisappear(id self, SEL _cmd, bool animated);
 void workoutVC_startEndWorkout(id self, SEL _cmd, id btn);
 void workoutVC_handleTap(id self, SEL _cmd, id btn);
 
-void workoutVC_handleFinishedWorkout(id self, short *lifts);
+void workoutVC_finishedBottomSheet(id self, unsigned index, short weight);
 
 #endif /* WorkoutVC_h */

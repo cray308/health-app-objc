@@ -393,13 +393,17 @@ static void updateStoredData(unsigned char type, int16_t duration, short *lifts)
     }));
 }
 
-void workoutVC_handleFinishedWorkout(id self, short *lifts) {
+static void workoutVC_handleFinishedWorkout(id self) {
     WorkoutVCData *data = (WorkoutVCData *) object_getIvar(self, WorkoutVCDataRef);
     Workout *w = data->workout;
     unsigned char totalCompleted = 0;
+    short *lifts = NULL;
 
-    if (lifts)
-        appCoordinator_updateMaxWeights(lifts);
+    if (data->weights[0]) {
+        appCoordinator_updateMaxWeights(data->weights);
+        lifts = malloc(sizeof(short) << 2);
+        memcpy(lifts, data->weights, sizeof(short) << 2);
+    }
 
     if (isLongEnough(data->workout)) {
         if (w->day >= 0)
@@ -493,7 +497,7 @@ void workoutVC_startEndWorkout(id self, SEL _cmd _U_, id btn) {
             Workout *w = data->workout;
             setDuration(w);
             if (checkEnduranceDuration(w)) {
-                workoutVC_handleFinishedWorkout(self, NULL);
+                workoutVC_handleFinishedWorkout(self);
             } else {
                 if (isLongEnough(w))
                     updateStoredData(w->type, w->duration, NULL);
@@ -516,7 +520,7 @@ void workoutVC_willDisappear(id self, SEL _cmd, bool animated) {
             if (w->startTime) {
                 setDuration(w);
                 if (checkEnduranceDuration(w)) {
-                    workoutVC_handleFinishedWorkout(self, NULL);
+                    workoutVC_handleFinishedWorkout(self);
                 } else if (isLongEnough(w)) {
                     updateStoredData(w->type, w->duration, NULL);
                 }
@@ -532,7 +536,7 @@ void workoutVC_handleTap(id self, SEL _cmd _U_, id btn) {
 }
 
 void handleEvent(id self, unsigned gIdx, unsigned eIdx, unsigned char event) {
-    bool finishedWorkout = false;
+    bool finishedWorkout = false, showModal = false;
     WorkoutVCData *data = (WorkoutVCData *) object_getIvar(self, WorkoutVCDataRef);
     pthread_mutex_lock(&timerLock);
     Workout *w = data->workout;
@@ -651,7 +655,11 @@ foundTransition:
 
         case TransitionFinishedExercise:
             exerciseView_configure(*(++currView));
+            break;
+
         default:
+            if (w->testMax)
+                showModal = true;
             break;
     }
 
@@ -659,13 +667,14 @@ cleanup:
     pthread_mutex_unlock(&timerLock);
     if (finishedWorkout) {
         setDuration(w);
-        if (CFStringCompareWithOptions(w->title, localize(CFSTR("workoutTitleTestDay")),
-                                       (CFRange){0, CFStringGetLength(w->title)}, 0) == 0) {
-            if (!isLongEnough(w))
-                w->duration = 15;
-            presentModalVC(self, updateMaxesVC_init(self));
-        } else {
-            workoutVC_handleFinishedWorkout(self, NULL);
-        }
+        workoutVC_handleFinishedWorkout(self);
+    } else if (showModal) {
+        presentModalVC(self, updateMaxesVC_init(self, eIdx));
     }
+}
+
+void workoutVC_finishedBottomSheet(id self, unsigned index, short weight) {
+    WorkoutVCData *data = (WorkoutVCData *) object_getIvar(self, WorkoutVCDataRef);
+    data->weights[index] = weight;
+    handleEvent(self, 0, index, 0);
 }

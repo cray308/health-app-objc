@@ -50,6 +50,9 @@ setBool(_v, sel_getUid("setTranslatesAutoresizingMaskIntoConstraints:"), false)
 
 #define setTextColor(_v, _color) setObject(_v, sel_getUid("setTextColor:"), _color)
 
+#define addTarget(_v, _target, _action, _event) (((void(*)(id,SEL,id,SEL,int))objc_msgSend)\
+((_v), sel_getUid("addTarget:action:forControlEvents:"), (_target), (_action), (_event)))
+
 #define enableButton(_v, _enabled) setBool(_v, sel_getUid("setEnabled:"), _enabled)
 
 #define toggleInteraction(_v, _enable) setBool(_v, sel_getUid("setUserInteractionEnabled:"), _enable)

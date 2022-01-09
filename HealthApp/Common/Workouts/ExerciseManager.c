@@ -96,7 +96,8 @@ static Workout *buildWorkoutFromDict(CFDictionaryRef dict, WorkoutParams *params
         if (params->index <= 1) {
             weights[1] = (int) (multiplier * lifts[LiftBench]);
             if (params->index == 0) {
-                weights[2] = (int) (multiplier * lifts[LiftPullup]);
+                weights[2] = (int) ((lifts[LiftPullup] + 145) * multiplier) - 145;
+                weights[2] = max(weights[2], 0);
             } else {
                 weights[2] = (int) (multiplier * lifts[LiftDeadlift]);
             }
@@ -215,6 +216,10 @@ static Workout *buildWorkoutFromDict(CFDictionaryRef dict, WorkoutParams *params
         array_push_back(circuit, w->activities, circuit);
     }
 
+    if (CFStringCompareWithOptions(w->title, localize(CFSTR("workoutTitleTestDay")),
+                                   (CFRange){0, CFStringGetLength(w->title)}, 0) == 0) {
+        w->testMax = true;
+    }
     w->group = &w->activities->arr[0];
     w->entry = &w->group->exercises->arr[0];
     return w;

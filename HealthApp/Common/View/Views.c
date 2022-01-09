@@ -8,9 +8,6 @@
 #define adjustFontForSizeCategory(_v) \
 setBool(_v, sel_getUid("setAdjustsFontForContentSizeCategory:"), true)
 
-#define addTarget(_v, _target, _action, _event) (((void(*)(id,SEL,id,SEL,int))objc_msgSend)\
-((_v), sel_getUid("addTarget:action:forControlEvents:"), (_target), (_action), (_event)))
-
 #define setControlTextAttribs(_v, _dict, _state) (((void(*)(id,SEL,CFDictionaryRef,int))objc_msgSend)\
 ((_v), sel_getUid("setTitleTextAttributes:forState:"), (_dict), (_state)))
 

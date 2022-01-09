@@ -63,6 +63,7 @@ typedef struct {
     unsigned char type;
     signed char day;
     unsigned index;
+    bool testMax;
     time_t startTime;
     int16_t duration;
     CFStringRef title;

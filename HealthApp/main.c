@@ -16,7 +16,7 @@
 
 #define WK_VC_LAYOUT "^{?=@@[10@][2@][2@]{__savedWorkoutInfo=I{__exerciseInfo=II}}" \
 "[2{?=@{__timerInfo=CCC}{_opaque_pthread_mutex_t=" LHASymbol MUTEX_CHARS "}" \
-"{_opaque_pthread_cond_t=" LHASymbol COND_CHARS "}IIi" LHASymbol "}]B}"
+"{_opaque_pthread_cond_t=" LHASymbol COND_CHARS "}IIi" LHASymbol "}][4s]B}"
 
 extern int UIApplicationMain(int, char *[], CFStringRef, CFStringRef);
 extern Protocol *getValueFormatterType(void);
@@ -97,8 +97,11 @@ int main(int argc, char *argv[]) {
     SettingsVCDataRef = class_getInstanceVariable(SettingsVCClass, dataKey);
 
     UpdateMaxesVCClass = objc_allocateClassPair(InputVCClass, "UpdateMaxesVC", 0);
-    class_addIvar(UpdateMaxesVCClass, dataKey, sizeof(id), 0, "@");
+    class_addIvar(UpdateMaxesVCClass, dataKey, sizeof(UpdateMaxesVCData*), 0, "^{?=@@@@I}");
+    class_addMethod(UpdateMaxesVCClass, deinit, (IMP) updateMaxesVC_deinit, voidSig);
     class_addMethod(UpdateMaxesVCClass, viewLoad, (IMP) updateMaxesVC_viewDidLoad, voidSig);
+    class_addMethod(UpdateMaxesVCClass, sel_getUid("stepperChanged"),
+                    (IMP) updateMaxesVC_updatedStepper, voidSig);
     class_addMethod(UpdateMaxesVCClass, sel_getUid("tappedFinish"),
                     (IMP) updateMaxesVC_tappedFinish, voidSig);
     objc_registerClassPair(UpdateMaxesVCClass);
