@@ -1,6 +1,7 @@
 "tabs0" = "Home";
 "tabs1" = "History";
 "tabs2" = "Settings";
+"settingsTitle" = "App Settings";
 
 "notifications0" = "Finished AMRAP circuit!";
 "notifications1" = "Finished exercise!";

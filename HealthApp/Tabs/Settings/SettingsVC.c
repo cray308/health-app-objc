@@ -52,6 +52,7 @@ void settingsVC_viewDidLoad(id self, SEL _cmd) {
     InputVCData *parent = (InputVCData *) object_getIvar(self, InputVCDataRef);
     id view = getView(self);
     setBackground(view, createColor(ColorPrimaryBGGrouped));
+    setVCTitle(self, localize(CFSTR("settingsTitle")));
 
     id planLabel = createLabel(localize(CFSTR("planPickerTitle")), TextFootnote, 4, true);
     data->picker = createSegmentedControl(CFSTR("settingsSegment%d"), 3,

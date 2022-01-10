@@ -29,7 +29,7 @@ void setVCTitle(id vc, CFStringRef title) {
 void dmTabVC_updateColors(id self, SEL _cmd _U_) {
     SEL setter = sel_getUid("setTitleTextAttributes:");
     SEL barUpdate = sel_getUid("setNeedsStatusBarAppearanceUpdate");
-    id tabBar = getObject(self, sel_getUid("tabBar"));
+    id tabBar = getTabBar(self);
     setBarTint(tabBar);
     setObject(tabBar, sel_getUid("setUnselectedItemTintColor:"), createColor(ColorGray));
     CFArrayRef ctrls = getViewControllers(self);

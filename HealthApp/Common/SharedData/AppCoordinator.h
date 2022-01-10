@@ -9,7 +9,7 @@ typedef struct {
 
 extern AppCoordinator *appCoordinator;
 
-void *appCoordinator_start(id tabVC, void (**fetchHandler)(void*));
+void *appCoordinator_start(id tabVC, bool legacy, bool scrollEdge, void (**fetchHandler)(void*));
 void appCoordinator_updateUserInfo(signed char plan, signed char darkMode, short *weights);
 void appCoordinator_deleteAppData(void);
 void appCoordinator_updateMaxWeights(short *weights);

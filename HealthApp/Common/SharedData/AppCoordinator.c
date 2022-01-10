@@ -11,7 +11,7 @@ extern void toggleDarkModeForCharts(bool);
 
 AppCoordinator *appCoordinator = NULL;
 
-void *appCoordinator_start(id tabVC, void (**fetchHandler)(void*)) {
+void *appCoordinator_start(id tabVC, bool legacy, bool scrollEdge, void (**fetchHandler)(void*)) {
     toggleDarkModeForCharts(userData->darkMode);
     appCoordinator = calloc(1, sizeof(AppCoordinator));
     SEL itemInit = sel_getUid("initWithTitle:image:tag:"), setter = sel_getUid("setTabBarItem:");
@@ -30,18 +30,37 @@ void *appCoordinator_start(id tabVC, void (**fetchHandler)(void*)) {
         setObject(controllers[i], setter, items[i]);
     }
 
-    if (osVersion == 15) {
-        id appearance = createNew(objc_getClass("UINavigationBarAppearance"));
-        voidFunc(appearance, sel_getUid("configureWithOpaqueBackground"));
+    id tabBar = getTabBar(tabVC);
+    if (!legacy) {
+        id navAppearance = createNew(objc_getClass("UINavigationBarAppearance"));
+        id tabAppearance = createNew(objc_getClass("UITabBarAppearance"));
+        SEL opaqueBG = sel_getUid("configureWithOpaqueBackground");
+        voidFunc(navAppearance, opaqueBG);
+        voidFunc(tabAppearance, opaqueBG);
         id color = staticMethodWithString(objc_getClass("UIColor"),
                                           sel_getUid("colorNamed:"), CFSTR("navBarColor"));
-        setBackground(appearance, color);
-        id navBar = getNavBar(controllers[0]);
-        setObject(navBar, sel_getUid("setStandardAppearance:"), appearance);
-        setObject(navBar, sel_getUid("setScrollEdgeAppearance:"), appearance);
-        releaseObj(appearance);
+        setBackground(navAppearance, color);
+        setBackground(tabAppearance, color);
+        SEL setStandard = sel_getUid("setStandardAppearance:");
+        for (int i = 0; i < 3; ++i) {
+            id navBar = getNavBar(controllers[i]);
+            setObject(navBar, setStandard, navAppearance);
+            if (scrollEdge)
+                setObject(navBar, sel_getUid("setScrollEdgeAppearance:"), navAppearance);
+        }
+        setObject(tabBar, setStandard, tabAppearance);
+        if (scrollEdge)
+            setObject(tabBar, sel_getUid("setScrollEdgeAppearance:"), tabAppearance);
+        releaseObj(navAppearance);
+        releaseObj(tabAppearance);
+    } else {
+        SEL translucent = sel_getUid("setTranslucent:");
+        for (int i = 0; i < 3; ++i) {
+            id navBar = getNavBar(controllers[i]);
+            setBool(navBar, translucent, false);
+        }
+        setBool(tabBar, translucent, false);
     }
-    setBool(controllers[2], sel_getUid("setNavigationBarHidden:"), true);
 
     appCoordinator->children[0] = homeVC_init();
     setupNavVC(controllers[0], appCoordinator->children[0]);

@@ -38,9 +38,10 @@ static const char *const ColorNames[] = {
     "tertiarySystemBackgroundColor"
 };
 
-bool handleIOSVersion(bool *setWindowTint) {
+bool handleIOSVersion(bool *setWindowTint, bool *scrollEdge) {
     bool result = ((osVersion = getOSVersion()) < 13);
     *setWindowTint = osVersion < 14;
+    *scrollEdge = osVersion > 14;
     if (result) {
         appColors = malloc(14 * sizeof(id*));
         for (int i = 0; i < 14; ++i) {

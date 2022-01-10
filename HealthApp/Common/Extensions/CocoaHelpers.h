@@ -87,7 +87,7 @@ enum {
     ColorTertiaryBGGrouped
 };
 
-bool handleIOSVersion(bool *setWindowTint);
+bool handleIOSVersion(bool *setWindowTint, bool *scrollEdge);
 void getRect(id view, CGRect *result, char type);
 void getScreenBounds(CGRect *result);
 id createColor(int type);
