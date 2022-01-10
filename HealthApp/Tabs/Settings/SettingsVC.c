@@ -65,7 +65,7 @@ void settingsVC_viewDidLoad(id self, SEL _cmd) {
 
     if (userData->darkMode >= 0) {
         id switchContainer = createBackgroundView(ColorSecondaryBGGrouped, 44, false);
-        data->switchView = createObjectWithFrame(objc_getClass("UISwitch"), CGRectZero);
+        data->switchView = createNew(objc_getClass("UISwitch"));
         setBool(data->switchView, sel_getUid("setOn:"), userData->darkMode ? true : false);
         id label = createLabel(localize(CFSTR("darkMode")), TextBody, 4, true);
         id sv = createStackView((id[]){label,data->switchView}, 2, 0, 5, (Padding){0, 8, 0, 8});

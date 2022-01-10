@@ -30,9 +30,8 @@ void dmTabVC_updateColors(id self, SEL _cmd _U_) {
     SEL setter = sel_getUid("setTitleTextAttributes:");
     SEL barUpdate = sel_getUid("setNeedsStatusBarAppearanceUpdate");
     id tabBar = getObject(self, sel_getUid("tabBar"));
-    id tint = createColor(ColorPrimaryBG), unselected = createColor(ColorGray);
-    setObject(tabBar, sel_getUid("setBarTintColor:"), tint);
-    setObject(tabBar, sel_getUid("setUnselectedItemTintColor:"), unselected);
+    setBarTint(tabBar);
+    setObject(tabBar, sel_getUid("setUnselectedItemTintColor:"), createColor(ColorGray));
     CFArrayRef ctrls = getViewControllers(self);
     int count = (int) CFArrayGetCount(ctrls);
     for (int i = 0; i < count; ++i) {
@@ -66,7 +65,7 @@ void presentVC(id presenter, id child) {
 }
 
 void presentModalVC(id presenter, id modal) {
-    id _obj = allocNavVC();
+    id _obj = allocClass(DMNavVC);
     id container = getObjectWithObject(_obj, sel_getUid("initWithRootViewController:"), modal);
     if (osVersion < 13) {
         id navBar = getNavBar(container);

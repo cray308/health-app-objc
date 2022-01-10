@@ -6,7 +6,7 @@ Class LiftViewClass;
 Ivar LiftViewDataRef;
 
 id liftingView_init(LiftChartModel *model, id formatter) {
-    id self = createObjectWithFrame(LiftViewClass, CGRectZero);
+    id self = createNew(LiftViewClass);
     LiftViewData *data = malloc(sizeof(LiftViewData));
     data->model = model;
 

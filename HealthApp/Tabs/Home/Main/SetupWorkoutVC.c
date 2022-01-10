@@ -48,8 +48,7 @@ void setupWorkoutVC_viewDidLoad(id self, SEL _cmd) {
     id workoutContainer = createStackView((id []){workoutLabel, data->workoutTextField},
                                           2, 1, 2, (Padding){30, 8, 20, 8});
 
-    id _wkPicker = allocClass(objc_getClass("UIPickerView"));
-    id workoutPicker = getObject(_wkPicker, sel_getUid("init"));
+    id workoutPicker = createNew(objc_getClass("UIPickerView"));
     setDelegate(workoutPicker, self);
     setObject(data->workoutTextField, sel_getUid("setInputView:"), workoutPicker);
     setInputAccessory(data->workoutTextField, parent->toolbar);

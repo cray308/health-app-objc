@@ -113,7 +113,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
 
     if (setWindowTint)
         setTintColor(self->window, createColor(ColorRed));
-    id tabVC = getObject(allocClass(DMTabVC), sel_getUid("init"));
+    id tabVC = createNew(DMTabVC);
     void (*fetchHandler)(void*);
     void *arg = appCoordinator_start(tabVC, &fetchHandler);
     setObject(self->window, sel_getUid("setRootViewController:"), tabVC);

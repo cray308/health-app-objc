@@ -193,7 +193,7 @@ static void showConfetti(id self) {
     setBackground(confettiView, bg);
 
     Class cellClass = objc_getClass("CAEmitterCell");
-    SEL cgImg = sel_getUid("CGImage"), cgCol = sel_getUid("CGColor"), init = sel_getUid("init");
+    SEL cgImg = sel_getUid("CGImage"), cgCol = sel_getUid("CGColor");
     SEL sColor = sel_getUid("setColor:"), sImg = sel_getUid("setContents:");
     SEL sRate = sel_getUid("setBirthRate:"), sLife = sel_getUid("setLifetime:");
     SEL sVel = sel_getUid("setVelocity:"), sELong = sel_getUid("setEmissionLongitude:");
@@ -217,7 +217,7 @@ static void showConfetti(id self) {
 
     id cells[16];
     for (int i = 0; i < 16; ++i) {
-        cells[i] = getObject(allocClass(cellClass), init);
+        cells[i] = createNew(cellClass);
         setFloat(cells[i], sRate, 4);
         setFloat(cells[i], sLife, 14);
         int velocity = velocities[arc4random_uniform(4)];
@@ -232,8 +232,7 @@ static void showConfetti(id self) {
     }
 
     CFArrayRef array = CFArrayCreate(NULL, (const void **)cells, 16, &retainedArrCallbacks);
-    id _layer = allocClass(objc_getClass("CAEmitterLayer"));
-    id particleLayer = getObject(_layer, init);
+    id particleLayer = createNew(objc_getClass("CAEmitterLayer"));
     id viewLayer = getLayer(confettiView);
     setObject(viewLayer, sel_getUid("addSublayer:"), particleLayer);
     ((void(*)(id,SEL,CGPoint))objc_msgSend)(particleLayer, sel_getUid("setEmitterPosition:"),

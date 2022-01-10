@@ -6,7 +6,7 @@ Class StatusViewClass;
 Ivar StatusViewDataRef;
 
 id statusView_init(CFStringRef text, int tag, id target, SEL action) {
-    id self = createObjectWithFrame(StatusViewClass, CGRectZero);
+    id self = createNew(StatusViewClass);
     StatusViewData *data = malloc(sizeof(StatusViewData));
     setTag(self, tag);
     int params = BtnLargeFont | BtnBackground | BtnRounded;

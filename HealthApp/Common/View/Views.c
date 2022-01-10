@@ -133,7 +133,7 @@ id createObjectWithFrame(Class cls, CGRect frame) {
 }
 
 id createBackgroundView(int colorCode, int height, bool optional) {
-    id view = createObjectWithFrame(DMBackgroundViewClass, CGRectZero);
+    id view = createNew(DMBackgroundViewClass);
     DMBackgroundView *ptr = (DMBackgroundView *) view;
     ptr->colorCode = colorCode;
     disableAutoresizing(view);
@@ -143,7 +143,7 @@ id createBackgroundView(int colorCode, int height, bool optional) {
 }
 
 id createView(int size) {
-    id view = createObjectWithFrame(objc_getClass("UIView"), CGRectZero);
+    id view = createNew(objc_getClass("UIView"));
     disableAutoresizing(view);
     if (size >= 0) {
         setCornerRadius(view);
@@ -162,7 +162,7 @@ id createStackView(id *subviews, int count, int axis, int spacing, Padding margi
         view = getObjectWithArr(allocClass(svClass), sel_getUid("initWithArrangedSubviews:"), arr);
         CFRelease(arr);
     } else {
-        view = createObjectWithFrame(svClass, CGRectZero);
+        view = createNew(svClass);
     }
     disableAutoresizing(view);
     setInt(view, sel_getUid("setAxis:"), axis);
@@ -174,7 +174,7 @@ id createStackView(id *subviews, int count, int axis, int spacing, Padding margi
 }
 
 id createScrollView(void) {
-    id view = createObjectWithFrame(objc_getClass("UIScrollView"), CGRectZero);
+    id view = createNew(objc_getClass("UIScrollView"));
     disableAutoresizing(view);
     setInt(view, sel_getUid("setAutoresizingMask:"), 16);
     setBool(view, sel_getUid("setBounces:"), true);
@@ -183,7 +183,7 @@ id createScrollView(void) {
 }
 
 id createLabel(CFStringRef text, int style, int alignment, bool accessible) {
-    id view = createObjectWithFrame(DMLabelClass, CGRectZero);
+    id view = createNew(DMLabelClass);
     DMLabel *ptr = (DMLabel *) view;
     ptr->colorCode = ColorLabel;
     disableAutoresizing(view);
@@ -243,7 +243,7 @@ id createSegmentedControl(CFStringRef format, int count, int startIndex,
 
 id createTextfield(id delegate, CFStringRef text, CFStringRef hint,
                    int alignment, int keyboard, int tag) {
-    id view = createObjectWithFrame(DMTextFieldClass, CGRectZero);
+    id view = createNew(DMTextFieldClass);
     disableAutoresizing(view);
     setBackground(view, createColor(ColorTertiaryBG));
     setLabelText(view, text);

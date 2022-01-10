@@ -6,7 +6,7 @@ Class WorkoutTypeViewClass;
 Ivar WorkoutTypeViewDataRef;
 
 id workoutTypeView_init(WorkoutTypeChartModel *model, id formatter) {
-    id self = createObjectWithFrame(WorkoutTypeViewClass, CGRectZero);
+    id self = createNew(WorkoutTypeViewClass);
     WorkoutTypeViewData *data = malloc(sizeof(WorkoutTypeViewData));
     data->model = model;
 

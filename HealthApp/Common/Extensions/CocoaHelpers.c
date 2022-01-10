@@ -73,8 +73,8 @@ bool handleIOSVersion(bool *setWindowTint) {
         appColors[ColorSecondaryBGGrouped][1] = appColors[ColorSecondaryBG][1];
         appColors[ColorTertiaryBG][0] = appColors[ColorPrimaryBG][0];
         appColors[ColorTertiaryBG][1] = allocColor(0.17, 0.17, 0.18, 1);
-        appColors[ColorTertiaryBGGrouped][0] = appColors[ColorPrimaryBGGrouped][0];
-        appColors[ColorTertiaryBGGrouped][1] = appColors[ColorTertiaryBG][1];
+        appColors[ColorTertiaryBGGrouped][0] = allocColor(0.984, 0.984, 0.992, 1);
+        appColors[ColorTertiaryBGGrouped][1] = allocColor(0.075, 0.075, 0.075, 1);
     }
     return result;
 }

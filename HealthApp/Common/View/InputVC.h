@@ -42,7 +42,7 @@ void inputView_reset(InputViewData *data, short value);
 void inputView_deinit(id self, SEL _cmd);
 
 void initValidatorStrings(void);
-id inputVC_init(id self, SEL _cmd, id nibName, id bundle);
+id inputVC_init(id self, SEL _cmd);
 void inputVC_deinit(id self, SEL _cmd);
 void inputVC_viewDidLoad(id self, SEL _cmd);
 void inputVC_viewDidAppear(id self, SEL _cmd, bool animated);

@@ -8,7 +8,7 @@ Class TotalWorkoutsViewClass;
 Ivar TotalWorkoutsViewDataRef;
 
 id totalWorkoutsView_init(TotalWorkoutsChartModel *model, id formatter) {
-    id self = createObjectWithFrame(TotalWorkoutsViewClass, CGRectZero);
+    id self = createNew(TotalWorkoutsViewClass);
     TotalWorkoutsViewData *data = malloc(sizeof(TotalWorkoutsViewData));
     data->model = model;
 

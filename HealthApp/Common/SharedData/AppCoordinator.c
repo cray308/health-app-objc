@@ -14,8 +14,7 @@ AppCoordinator *appCoordinator = NULL;
 void *appCoordinator_start(id tabVC, void (**fetchHandler)(void*)) {
     toggleDarkModeForCharts(userData->darkMode);
     appCoordinator = calloc(1, sizeof(AppCoordinator));
-    SEL itemInit = sel_getUid("initWithTitle:image:tag:");
-    SEL vcInit = sel_getUid("initWithNibName:bundle:"), setter = sel_getUid("setTabBarItem:");
+    SEL itemInit = sel_getUid("initWithTitle:image:tag:"), setter = sel_getUid("setTabBarItem:");
     id controllers[3];
     id items[3];
     CFStringRef imgNames[] = {CFSTR("ico_house"), CFSTR("ico_chart"), CFSTR("ico_gear")};
@@ -27,14 +26,21 @@ void *appCoordinator_start(id tabVC, void (**fetchHandler)(void*)) {
         items[i] = (((id(*)(id,SEL,CFStringRef,id,int))objc_msgSend)
                     (_item, itemInit, titles[i], image, i));
 
-        id _obj = allocNavVC();
-        controllers[i] = (((id(*)(id,SEL,CFStringRef,id))objc_msgSend)
-                          (_obj, vcInit, NULL, nil));
+        controllers[i] = createNew(DMNavVC);
         setObject(controllers[i], setter, items[i]);
     }
 
-    id navBar = getNavBar(controllers[0]);
-    setBool(navBar, sel_getUid("setPrefersLargeTitles:"), true);
+    if (osVersion == 15) {
+        id appearance = createNew(objc_getClass("UINavigationBarAppearance"));
+        voidFunc(appearance, sel_getUid("configureWithOpaqueBackground"));
+        id color = staticMethodWithString(objc_getClass("UIColor"),
+                                          sel_getUid("colorNamed:"), CFSTR("navBarColor"));
+        setBackground(appearance, color);
+        id navBar = getNavBar(controllers[0]);
+        setObject(navBar, sel_getUid("setStandardAppearance:"), appearance);
+        setObject(navBar, sel_getUid("setScrollEdgeAppearance:"), appearance);
+        releaseObj(appearance);
+    }
     setBool(controllers[2], sel_getUid("setNavigationBarHidden:"), true);
 
     appCoordinator->children[0] = homeVC_init();

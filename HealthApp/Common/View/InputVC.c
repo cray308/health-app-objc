@@ -38,7 +38,7 @@ void inputVC_addChild(id self, CFStringRef hint, short min, short max) {
     InputVCData *d = (InputVCData *) object_getIvar(self, InputVCDataRef);
 
     int index = d->count++;
-    d->children[index] = createObjectWithFrame(InputViewClass, CGRectZero);
+    d->children[index] = createNew(InputViewClass);
     id view = d->children[index];
     InputViewData *ptr = calloc(1, sizeof(InputViewData));
     ptr->minVal = min;
@@ -81,9 +81,9 @@ void inputView_reset(InputViewData *data, short value) {
     setAccessibilityLabel(data->field, data->hintText);
 }
 
-id inputVC_init(id self, SEL _cmd, id nibName, id bundle) {
+id inputVC_init(id self, SEL _cmd) {
     struct objc_super super = {self, objc_getClass("UIViewController")};
-    self = ((id(*)(struct objc_super *,SEL,id,id))objc_msgSendSuper)(&super, _cmd, nibName, bundle);
+    self = ((id(*)(struct objc_super *,SEL))objc_msgSendSuper)(&super, _cmd);
 
     InputVCData *data = calloc(1, sizeof(InputVCData));
     object_setIvar(self, InputVCDataRef, (id) data);

@@ -8,7 +8,7 @@ Class ContainerViewClass;
 Ivar ContainerViewDataRef;
 
 id containerView_init(CFStringRef title, int spacing, bool margins) {
-    id self = createObjectWithFrame(ContainerViewClass, CGRectZero);
+    id self = createNew(ContainerViewClass);
     disableAutoresizing(self);
 
     ContainerViewData *data = malloc(sizeof(ContainerViewData));

@@ -45,7 +45,7 @@ void updateMaxesVC_viewDidLoad(id self, SEL _cmd) {
 
     CFStringRef stepperText = CFStringCreateWithFormat(NULL, NULL, data->stepperFormat, 1);
     data->stepperLabel = createLabel(stepperText, TextBody, 4, true);
-    data->stepper = createObjectWithFrame(objc_getClass("UIStepper"), CGRectZero);
+    data->stepper = createNew(objc_getClass("UIStepper"));
     setDouble(data->stepper, sel_getUid("setValue:"), 1);
     setDouble(data->stepper, sel_getUid("setMinimumValue:"), 1);
     setDouble(data->stepper, sel_getUid("setMaximumValue:"), 10);

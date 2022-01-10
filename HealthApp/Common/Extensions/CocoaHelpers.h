@@ -17,6 +17,8 @@
 
 #define releaseObj(_obj) voidFunc(_obj, sel_getUid("release"))
 
+#define createNew(_cls) staticMethod(_cls, sel_getUid("new"))
+
 #define getObject(_obj, _cmd) (((id(*)(id,SEL))objc_msgSend)((_obj), (_cmd)))
 
 #define setObject(_obj, _cmd, _arg) (((void(*)(id,SEL,id))objc_msgSend)((_obj), (_cmd), (_arg)))

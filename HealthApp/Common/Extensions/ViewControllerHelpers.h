@@ -14,12 +14,9 @@
 
 #define getNavBar(_navVC) getObject(_navVC, sel_getUid("navigationBar"))
 
-#define allocNavVC() allocClass(objc_getClass("DMNavVC"))
-
 #define getNavVC(_vc) getObject(_vc, sel_getUid("navigationController"))
 
-#define createVC(_cls) (((id(*)(id,SEL,id,id))objc_msgSend)\
-(allocClass((_cls)), sel_getUid("initWithNibName:bundle:"), nil, nil))
+#define createVC(_cls) (((id(*)(Class,SEL))objc_msgSend)((_cls), sel_getUid("new")))
 
 #define setBarTint(_v) \
 setObject(_v, sel_getUid("setBarTintColor:"), createColor(ColorTertiaryBGGrouped))

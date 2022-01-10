@@ -173,8 +173,7 @@ static void scheduleNotification(int secondsFromNow, unsigned char type) {
     int currentId = identifier++;
     CFStringRef idString = CFStringCreateWithFormat(NULL, NULL, CFSTR("%d"), currentId);
 
-    id _obj = allocClass(objc_getClass("UNMutableNotificationContent"));
-    id content = getObject(_obj, sel_getUid("init"));
+    id content = createNew(objc_getClass("UNMutableNotificationContent"));
     setString(content, sel_getUid("setTitle:"), notifTitle);
     setString(content, sel_getUid("setBody:"), notificationMessages[type]);
     id sound = staticMethod(objc_getClass("UNNotificationSound"), sel_getUid("defaultSound"));
