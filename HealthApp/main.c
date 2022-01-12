@@ -16,7 +16,7 @@
 
 #define WK_VC_LAYOUT "^{?=@@[10@][2@][2@]{__savedWorkoutInfo=I{__exerciseInfo=II}}" \
 "[2{?=@{__timerInfo=CCC}{_opaque_pthread_mutex_t=" LHASymbol MUTEX_CHARS "}" \
-"{_opaque_pthread_cond_t=" LHASymbol COND_CHARS "}IIi" LHASymbol "}][4s]B}"
+"{_opaque_pthread_cond_t=" LHASymbol COND_CHARS "}III" LHASymbol "}][4s]B}"
 
 extern int UIApplicationMain(int, char *[], CFStringRef, CFStringRef);
 extern Protocol *getValueFormatterType(void);

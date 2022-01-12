@@ -92,7 +92,7 @@ static void *timer_loop(void *arg) {
     return NULL;
 }
 
-static void startWorkoutTimer(WorkoutTimer *t, int duration) {
+static void startWorkoutTimer(WorkoutTimer *t, unsigned duration) {
     pthread_mutex_lock(&t->lock);
     t->refTime = time(NULL);
     t->duration = duration;
@@ -168,7 +168,7 @@ void restartTimers(id self) {
 
 #pragma mark - Notifications
 
-static void scheduleNotification(int secondsFromNow, unsigned char type) {
+static void scheduleNotification(unsigned secondsFromNow, unsigned char type) {
     static int identifier = 0;
     int currentId = identifier++;
     CFStringRef idString = CFStringCreateWithFormat(NULL, NULL, CFSTR("%d"), currentId);

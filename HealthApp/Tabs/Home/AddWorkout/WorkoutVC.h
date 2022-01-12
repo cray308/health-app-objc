@@ -20,7 +20,7 @@ typedef struct {
     pthread_cond_t cond;
     unsigned container;
     unsigned exercise;
-    int duration;
+    unsigned duration;
     time_t refTime;
 } WorkoutTimer;
 

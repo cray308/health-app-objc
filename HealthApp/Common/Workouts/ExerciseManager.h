@@ -25,9 +25,9 @@ typedef struct {
         ExerciseDuration,
         ExerciseDistance
     } type;
-    int reps;
-    int sets;
-    int completedSets;
+    unsigned reps;
+    unsigned sets;
+    unsigned completedSets;
     enum {
         ExerciseStateDisabled,
         ExerciseStateActive,
@@ -49,8 +49,8 @@ typedef struct {
         CircuitAMRAP,
         CircuitDecrement
     } type;
-    int reps;
-    int completedReps;
+    unsigned reps;
+    unsigned completedReps;
     unsigned index;
     Array_exEntry *exercises;
     CFRange numberRange;
@@ -76,8 +76,8 @@ typedef struct {
     const signed char day;
     unsigned char type;
     int index;
-    int sets;
-    int reps;
+    unsigned sets;
+    unsigned reps;
     int weight;
 } WorkoutParams;
 
