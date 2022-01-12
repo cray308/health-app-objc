@@ -118,7 +118,7 @@ id createAlertController(CFStringRef title, CFStringRef message) {
 void addAlertAction(id ctrl, CFStringRef title, int style, Callback handler) {
     id action = (((id(*)(Class,SEL,CFStringRef,int,void(^)(id)))objc_msgSend)
                  (objc_getClass("UIAlertAction"), sel_getUid("actionWithTitle:style:handler:"),
-                  title, style, ^(id action _U_) {
+                  title, style, ^(id hdlr _U_) {
         if (handler)
             handler();
         if (osVersion < 14)

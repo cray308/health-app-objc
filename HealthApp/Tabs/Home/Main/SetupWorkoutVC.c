@@ -61,8 +61,8 @@ void setupWorkoutVC_viewDidLoad(id self, SEL _cmd) {
 
     CGRect frame;
     getRect(view, &frame, 0);
-    setNavButton(self, true, cancelButton, frame.size.width);
-    setNavButton(self, false, parent->button, frame.size.width);
+    setNavButton(self, true, cancelButton, (int) frame.size.width);
+    setNavButton(self, false, parent->button, (int) frame.size.width);
     enableButton(parent->button, false);
 
     short maxes[] = {5, 5, 100};
@@ -111,12 +111,15 @@ void setupWorkoutVC_tappedButton(id self, SEL _cmd _U_, id btn) {
             output.weight = ((InputViewData *)
                              object_getIvar(fields[2], InputViewDataRef))->result;
         case WorkoutSE:
-            output.sets = ((InputViewData *) object_getIvar(fields[0], InputViewDataRef))->result;
-            output.reps = ((InputViewData *) object_getIvar(fields[1], InputViewDataRef))->result;
+            output.sets = (unsigned) ((InputViewData *)
+                                      object_getIvar(fields[0], InputViewDataRef))->result;
+            output.reps = (unsigned) ((InputViewData *)
+                                      object_getIvar(fields[1], InputViewDataRef))->result;
             break;
 
         case WorkoutEndurance:
-            output.reps = ((InputViewData *) object_getIvar(fields[0], InputViewDataRef))->result;
+            output.reps = (unsigned) ((InputViewData *)
+                                      object_getIvar(fields[0], InputViewDataRef))->result;
         default:
             break;
     }

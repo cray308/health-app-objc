@@ -156,7 +156,7 @@ void persistenceService_create(void) {
             }
             weekData_setTotalWorkouts(data, totalWorkouts);
             weekData_setLiftingMaxArray(data, lifts);
-            for (int l = 0; l < 4; ++l) {
+            for (unsigned char l = 0; l < 4; ++l) {
                 weekData_setWorkoutTimeForType(data, l, times[l]);
             }
             releaseObj(data);
@@ -269,7 +269,7 @@ void persistenceService_deleteUserData(void) {
 
         id currWeek = persistenceService_getCurrentWeek();
         weekData_setTotalWorkouts(currWeek, 0);
-        for (int i = 0; i < 4; ++i) {
+        for (unsigned char i = 0; i < 4; ++i) {
             weekData_setWorkoutTimeForType(currWeek, i, 0);
         }
         persistenceService_saveContext();

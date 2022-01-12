@@ -270,10 +270,10 @@ void addVStackToScrollView(id vStack, id scrollView) {
 
 void updateSegmentedControl(id view) {
     id fg = createColor(ColorLabel);
-    float redGreen = 0.78, blue = 0.8;
+    float redGreen = 0.78f, blue = 0.8f;
     if (userData->darkMode) {
-        redGreen = 0.28;
-        blue = 0.29;
+        redGreen = 0.28f;
+        blue = 0.29f;
     }
     setTintColor(view, getColorRef(redGreen, redGreen, blue, 1));
     CFDictionaryRef normalDict = createTitleTextDict(fg, createCustomFont(WeightReg, 13));

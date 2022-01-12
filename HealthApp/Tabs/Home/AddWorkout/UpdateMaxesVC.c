@@ -58,7 +58,7 @@ void updateMaxesVC_viewDidLoad(id self, SEL _cmd) {
     getRect(view, &frame, 0);
     parent->button = createButton(localize(CFSTR("finish")), ColorBlue, 0, 0, self,
                                   sel_getUid("tappedFinish"), -1);
-    setNavButton(self, false, parent->button, frame.size.width);
+    setNavButton(self, false, parent->button, (int) frame.size.width);
     enableButton(parent->button, false);
 
     releaseObj(stepperStack);

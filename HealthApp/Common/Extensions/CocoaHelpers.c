@@ -47,35 +47,35 @@ bool handleIOSVersion(bool *setWindowTint, bool *scrollEdge) {
         for (int i = 0; i < 14; ++i) {
             appColors[i] = malloc(sizeof(id) << 1);
         }
-        appColors[ColorSeparator][0] = allocColor(0.24, 0.24, 0.26, 0.29);
-        appColors[ColorSeparator][1] = allocColor(0.33, 0.33, 0.35, 0.6);
+        appColors[ColorSeparator][0] = allocColor(0.24f, 0.24f, 0.26f, 0.29f);
+        appColors[ColorSeparator][1] = allocColor(0.33f, 0.33f, 0.35f, 0.6f);
         appColors[ColorLabel][0] = allocColor(0, 0, 0, 1);
         appColors[ColorLabel][1] = allocColor(1, 1, 1, 1);
-        appColors[ColorSecondaryLabel][0] = allocColor(0.24, 0.24, 0.26, 0.6);
-        appColors[ColorSecondaryLabel][1] = allocColor(0.92, 0.92, 0.96, 0.6);
-        appColors[ColorGray][0] = allocColor(0.56, 0.56, 0.58, 1);
-        appColors[ColorGray][1] = allocColor(0.56, 0.56, 0.58, 1);
-        appColors[ColorRed][0] = allocColor(1, 0.23, 0.19, 1);
-        appColors[ColorRed][1] = allocColor(1, 0.27, 0.23, 1);
-        appColors[ColorBlue][0] = allocColor(0, 0.48, 1, 1);
-        appColors[ColorBlue][1] = allocColor(0.04, 0.52, 1, 1);
-        appColors[ColorGreen][0] = allocColor(0.2, 0.78, 0.35, 1);
-        appColors[ColorGreen][1] = allocColor(0.19, 0.82, 0.35, 1);
-        appColors[ColorOrange][0] = allocColor(1, 0.58, 0, 1);
-        appColors[ColorOrange][1] = allocColor(1, 0.62, 0.04, 1);
+        appColors[ColorSecondaryLabel][0] = allocColor(0.24f, 0.24f, 0.26f, 0.6f);
+        appColors[ColorSecondaryLabel][1] = allocColor(0.92f, 0.92f, 0.96f, 0.6f);
+        appColors[ColorGray][0] = allocColor(0.56f, 0.56f, 0.58f, 1);
+        appColors[ColorGray][1] = allocColor(0.56f, 0.56f, 0.58f, 1);
+        appColors[ColorRed][0] = allocColor(1, 0.23f, 0.19f, 1);
+        appColors[ColorRed][1] = allocColor(1, 0.27f, 0.23f, 1);
+        appColors[ColorBlue][0] = allocColor(0, 0.48f, 1, 1);
+        appColors[ColorBlue][1] = allocColor(0.04f, 0.52f, 1, 1);
+        appColors[ColorGreen][0] = allocColor(0.2f, 0.78f, 0.35f, 1);
+        appColors[ColorGreen][1] = allocColor(0.19f, 0.82f, 0.35f, 1);
+        appColors[ColorOrange][0] = allocColor(1, 0.58f, 0, 1);
+        appColors[ColorOrange][1] = allocColor(1, 0.62f, 0.04f, 1);
 
         appColors[ColorPrimaryBG][0] = appColors[ColorLabel][1];
         appColors[ColorPrimaryBG][1] = appColors[ColorLabel][0];
-        appColors[ColorPrimaryBGGrouped][0] = allocColor(0.95, 0.95, 0.97, 1);
+        appColors[ColorPrimaryBGGrouped][0] = allocColor(0.95f, 0.95f, 0.97f, 1);
         appColors[ColorPrimaryBGGrouped][1] = appColors[ColorPrimaryBG][1];
         appColors[ColorSecondaryBG][0] = appColors[ColorPrimaryBGGrouped][0];
-        appColors[ColorSecondaryBG][1] = allocColor(0.11, 0.11, 0.12, 1);
+        appColors[ColorSecondaryBG][1] = allocColor(0.11f, 0.11f, 0.12f, 1);
         appColors[ColorSecondaryBGGrouped][0] = appColors[ColorPrimaryBG][0];
         appColors[ColorSecondaryBGGrouped][1] = appColors[ColorSecondaryBG][1];
         appColors[ColorTertiaryBG][0] = appColors[ColorPrimaryBG][0];
-        appColors[ColorTertiaryBG][1] = allocColor(0.17, 0.17, 0.18, 1);
-        appColors[ColorTertiaryBGGrouped][0] = allocColor(0.984, 0.984, 0.992, 1);
-        appColors[ColorTertiaryBGGrouped][1] = allocColor(0.075, 0.075, 0.075, 1);
+        appColors[ColorTertiaryBG][1] = allocColor(0.17f, 0.17f, 0.18f, 1);
+        appColors[ColorTertiaryBGGrouped][0] = allocColor(0.984f, 0.984f, 0.992f, 1);
+        appColors[ColorTertiaryBGGrouped][1] = allocColor(0.075f, 0.075f, 0.075f, 1);
     }
     return result;
 }

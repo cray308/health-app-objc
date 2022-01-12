@@ -71,7 +71,7 @@ void homeVC_createWorkoutsList(id self) {
     }
 
     CFStringRef workoutNames[7] = {0};
-    exerciseManager_setWeeklyWorkoutNames(userData->currentPlan,
+    exerciseManager_setWeeklyWorkoutNames((unsigned char) userData->currentPlan,
                                           appUserData_getWeekInPlan(), workoutNames);
 
     SEL btnTap = sel_getUid("buttonTapped:");
@@ -141,7 +141,7 @@ void homeVC_viewDidLoad(id self, SEL _cmd) {
 
 void homeVC_workoutButtonTapped(id self, SEL _cmd _U_, id btn) {
     int index = getTag(btn);
-    Workout *w = exerciseManager_getWeeklyWorkoutAtIndex(userData->currentPlan,
+    Workout *w = exerciseManager_getWeeklyWorkoutAtIndex((unsigned char) userData->currentPlan,
                                                          appUserData_getWeekInPlan(), index);
     if (w)
         homeVC_navigateToAddWorkout(self, w);
@@ -249,7 +249,7 @@ static void showConfetti(id self) {
     }
     addSubview(view, confettiView);
 
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 5),
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 5000000000),
                    dispatch_get_main_queue(), ^(void) {
         removeView(confettiView);
         releaseObj(confettiView);
@@ -264,7 +264,7 @@ void homeVC_handleFinishedWorkout(id self, int totalCompleted) {
     HomeVCData *data = (HomeVCData *) object_getIvar(self, HomeVCDataRef);
     homeVC_updateWorkoutsList(self);
     if (data->numWorkouts == totalCompleted) {
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 2.5),
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 2500000000),
                        dispatch_get_main_queue(), ^(void) {
             showConfetti(self);
         });

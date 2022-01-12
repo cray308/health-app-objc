@@ -173,15 +173,15 @@ void inputVC_viewDidAppear(id self, SEL _cmd, bool animated) {
         CGRect bounds;
         HAInsets insets;
         getRect(data->scrollView, &bounds, 1);
-        data->scrollHeight = bounds.size.height;
+        data->scrollHeight = (int) bounds.size.height;
 #if defined(__arm64__)
         insets = ((HAInsets(*)(id,SEL))objc_msgSend)(data->scrollView, sel_getUid("contentInset"));
 #else
         ((void(*)(HAInsets*,id,SEL))objc_msgSend_stret)(&insets, data->scrollView,
                                                         sel_getUid("contentInset"));
 #endif
-        data->topOffset = insets.top;
-        data->bottomOffset = insets.bottom;
+        data->topOffset = (short) insets.top;
+        data->bottomOffset = (short) insets.bottom;
     }
 }
 
@@ -274,7 +274,7 @@ bool inputVC_fieldChanged(id self, SEL _cmd _U_, id field, CFRange range, CFStri
         return true;
     }
 
-    short newVal = CFStringGetIntValue(newText);
+    short newVal = (short) CFStringGetIntValue(newText);
     CFRelease(newText);
 
     if (newVal < child->minVal || newVal > child->maxVal) {

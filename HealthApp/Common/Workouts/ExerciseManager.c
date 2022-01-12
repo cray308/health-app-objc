@@ -111,7 +111,7 @@ static Workout *buildWorkoutFromDict(CFDictionaryRef dict, WorkoutParams *params
     for (int i = 0; i < nActivities; ++i) {
         CFDictionaryRef act = CFArrayGetValueAtIndex(foundActivities, i);
         Circuit circuit = {.exercises = array_new(exEntry)};
-        int customReps = 0, customSets = 0;
+        unsigned customReps = 0, customSets = 0;
 
         number = CFDictionaryGetValue(act, Keys.type);
         CFNumberGetValue(number, kCFNumberIntType, &tempInt);
@@ -132,18 +132,18 @@ static Workout *buildWorkoutFromDict(CFDictionaryRef dict, WorkoutParams *params
         CFArrayRef foundExercises = CFDictionaryGetValue(act, CFSTR("exercises"));
         int nExercises = (int) CFArrayGetCount(foundExercises);
         for (int j = 0; j < nExercises; ++j) {
-            CFDictionaryRef dict = CFArrayGetValueAtIndex(foundExercises, j);
+            CFDictionaryRef exDict = CFArrayGetValueAtIndex(foundExercises, j);
             ExerciseEntry e = {.sets = 1};
             int rest = 0;
 
-            number = CFDictionaryGetValue(dict, Keys.type);
+            number = CFDictionaryGetValue(exDict, Keys.type);
             CFNumberGetValue(number, kCFNumberIntType, &tempInt);
             e.type = (unsigned char) tempInt;
-            number = CFDictionaryGetValue(dict, Keys.reps);
+            number = CFDictionaryGetValue(exDict, Keys.reps);
             CFNumberGetValue(number, kCFNumberIntType, &e.reps);
-            number = CFDictionaryGetValue(dict, CFSTR("rest"));
+            number = CFDictionaryGetValue(exDict, CFSTR("rest"));
             CFNumberGetValue(number, kCFNumberIntType, &rest);
-            str = CFDictionaryGetValue(dict, CFSTR("name"));
+            str = CFDictionaryGetValue(exDict, CFSTR("name"));
 
             if (customReps)
                 e.reps = customReps;

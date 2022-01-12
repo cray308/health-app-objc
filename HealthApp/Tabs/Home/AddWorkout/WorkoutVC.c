@@ -64,9 +64,8 @@ static void handle_group_timer_interrupt(int n _U_) {}
 
 static void *timer_loop(void *arg) {
     WorkoutTimer *t = arg;
-    int res = 0, duration = 0;
     unsigned char eventType = 0;
-    unsigned container = ExerciseTagNA, exercise = ExerciseTagNA;
+    unsigned res = 0, duration = 0, container = ExerciseTagNA, exercise = ExerciseTagNA;
     while (!t->info.stop) {
         pthread_mutex_lock(&t->lock);
         while (t->info.active != 1)
@@ -135,7 +134,7 @@ void restartTimers(id self) {
         if (group != ExerciseTagNA && w->index == group && w->group->index == exerciseIdx) {
             ExerciseEntry *e = &w->group->exercises->arr[exerciseIdx];
             if (e->type == ExerciseDuration) {
-                int diff = (int) (now - data->timers[TimerExercise].refTime);
+                unsigned diff = (unsigned) (now - data->timers[TimerExercise].refTime);
                 if (diff >= data->timers[TimerExercise].duration) {
                     endExercise = true;
                     groupIdx = group;
@@ -148,7 +147,7 @@ void restartTimers(id self) {
 
         group = data->savedInfo.groupTag;
         if (group != ExerciseTagNA && w->index == group && w->group->type == CircuitAMRAP) {
-            int diff = (int) (now - data->timers[TimerGroup].refTime);
+            unsigned diff = (unsigned) (now - data->timers[TimerGroup].refTime);
             if (diff >= data->timers[TimerGroup].duration) {
                 endGroup = true;
                 groupIdx = group;
@@ -258,7 +257,7 @@ static void startGroup(Workout *w, WorkoutTimer *timers, bool startTimer) {
     }
 
     if (c->type == CircuitAMRAP && startTimer) {
-        int duration = 60 * c->reps;
+        unsigned duration = 60 * c->reps;
         startWorkoutTimer(&timers[TimerGroup], duration);
         scheduleNotification(duration, TimerGroup);
     }
@@ -305,7 +304,7 @@ id workoutVC_init(Workout *workout) {
     data->workout = workout;
 
     pthread_mutex_init(&timerLock, NULL);
-    for (int i = 0; i < 2; ++i) {
+    for (unsigned char i = 0; i < 2; ++i) {
         memcpy(&data->timers[i], &(WorkoutTimer){.info = {.type = i}}, sizeof(WorkoutTimer));
         pthread_mutex_init(&data->timers[i].lock, NULL);
         pthread_cond_init(&data->timers[i].cond, NULL);
@@ -407,7 +406,7 @@ static void workoutVC_handleFinishedWorkout(id self) {
 
     if (isLongEnough(data->workout)) {
         if (w->day >= 0)
-            totalCompleted = appUserData_addCompletedWorkout(w->day);
+            totalCompleted = appUserData_addCompletedWorkout((unsigned char) w->day);
         updateStoredData(w->type, w->duration, lifts);
     }
 
@@ -438,7 +437,7 @@ void workoutVC_viewDidLoad(id self, SEL _cmd) {
     SEL btnTap = sel_getUid("buttonTapped:");
     CGRect frame;
     getRect(view, &frame, 0);
-    setNavButton(self, false, startBtn, frame.size.width);
+    setNavButton(self, false, startBtn, (int) frame.size.width);
 
     for (unsigned i = 0; i < data->workout->activities->size; ++i) {
         Circuit *c = &data->workout->activities->arr[i];
@@ -446,7 +445,7 @@ void workoutVC_viewDidLoad(id self, SEL _cmd) {
         addArrangedSubview(stack, data->containers[i]);
 
         for (unsigned j = 0; j < c->exercises->size; ++j) {
-            id v = statusView_init(NULL, (i << 8) | j, self, btnTap);
+            id v = statusView_init(NULL, (int) ((i << 8) | j), self, btnTap);
             StatusViewData *ptr = (StatusViewData *) object_getIvar(v, StatusViewDataRef);
             ptr->entry = &c->exercises->arr[j];
             exerciseView_configure(v);

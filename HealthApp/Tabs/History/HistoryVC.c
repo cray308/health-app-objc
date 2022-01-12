@@ -84,9 +84,9 @@ static void historyData_populate(HistoryViewModel *m, struct WeekDataModel *resu
     for (int i = 0; i < 3; ++i) {
         int refIdx = refIndices[i + 1];
         m->totalWorkouts.avgs[i] = (float) totalWorkouts[i] / m->nEntries[i];
-        m->totalWorkouts.maxes[i] = maxWorkouts[i] < 7 ? 7 : 1.1 * maxWorkouts[i];
-        m->workoutTypes.maxes[i] = 1.1 * maxTime[i];
-        m->lifts.maxes[i] = 1.1 * maxWeight[i];
+        m->totalWorkouts.maxes[i] = maxWorkouts[i] < 7 ? 7 : 1.1f * maxWorkouts[i];
+        m->workoutTypes.maxes[i] = 1.1f * maxTime[i];
+        m->lifts.maxes[i] = 1.1f * maxWeight[i];
         m->totalWorkouts.dataArrays[i] = &m->totalWorkouts.entries->arr[refIdx];
         m->workoutTypes.dataArrays[i][0] = &m->workoutTypes.entries[0]->arr[refIdx];
 
