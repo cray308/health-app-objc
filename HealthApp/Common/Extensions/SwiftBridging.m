@@ -25,7 +25,7 @@ int getOSVersion(void) {
     return 12;
 }
 
-id createChartView(id formatter, HAInt *colors, int count, uint8_t options) {
+id createChartView(id formatter, long *colors, int count, uint8_t options) {
     return [[LineChart alloc] initWithColors:colors count:count xFormatter:formatter options:options];
 }
 

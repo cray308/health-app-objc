@@ -1,5 +1,4 @@
 #include "LiftingView.h"
-#include "AppTypes.h"
 #include "SwiftBridging.h"
 
 Class LiftViewClass;
@@ -10,7 +9,7 @@ id liftingView_init(LiftChartModel *model, id formatter) {
     LiftViewData *data = malloc(sizeof(LiftViewData));
     data->model = model;
 
-    data->chart = createChartView(formatter, (HAInt[]){0, 1, 2, 3}, 4, 0);
+    data->chart = createChartView(formatter, (long []){0, 1, 2, 3}, 4, 0);
     disableAutoresizing(data->chart);
     addSubview(self, data->chart);
     pin(data->chart, self, (Padding){0, 8, 0, 8}, 0);

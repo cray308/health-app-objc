@@ -1,5 +1,4 @@
 #include "TotalWorkoutsView.h"
-#include "AppTypes.h"
 #include "SwiftBridging.h"
 
 extern void setLineLimit(id v, float limit);
@@ -12,7 +11,7 @@ id totalWorkoutsView_init(TotalWorkoutsChartModel *model, id formatter) {
     TotalWorkoutsViewData *data = malloc(sizeof(TotalWorkoutsViewData));
     data->model = model;
 
-    data->chart = createChartView(formatter, (HAInt[]){4}, 1, 1);
+    data->chart = createChartView(formatter, (long []){4}, 1, 1);
     disableAutoresizing(data->chart);
     addSubview(self, data->chart);
     pin(data->chart, self, (Padding){0, 8, 0, 8}, 0);

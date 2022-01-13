@@ -1,4 +1,3 @@
-#include "AppTypes.h"
 #include "CocoaHelpers.h"
 #include "StatusView.h"
 #include "TotalWorkoutsView.h"
@@ -11,12 +10,6 @@
 #include "WorkoutVC.h"
 #include "UpdateMaxesVC.h"
 #include "AppDelegate.h"
-
-#define TF_CHANGED "i@:@{?=" LHASymbol LHASymbol "}@"
-
-#define WK_VC_LAYOUT "^{?=@@[10@][2@][2@]{__savedWorkoutInfo=I{__exerciseInfo=II}}" \
-"[2{?=@{__timerInfo=CCC}{_opaque_pthread_mutex_t=" LHASymbol MUTEX_CHARS "}" \
-"{_opaque_pthread_cond_t=" LHASymbol COND_CHARS "}III" LHASymbol "}][4s]B}"
 
 extern int UIApplicationMain(int, char *[], CFStringRef, CFStringRef);
 extern Protocol *getValueFormatterType(void);
@@ -84,7 +77,7 @@ int main(int argc, char *argv[]) {
                     (IMP) inputVC_fieldStoppedEditing, tapSig);
     class_addMethod(InputVCClass,
                     sel_getUid("textField:shouldChangeCharactersInRange:replacementString:"),
-                    (IMP) inputVC_fieldChanged, TF_CHANGED);
+                    (IMP) inputVC_fieldChanged, "i@:@{?=qq}@");
     objc_registerClassPair(InputVCClass);
     InputVCDataRef = class_getInstanceVariable(InputVCClass, validatorKey);
 
@@ -129,7 +122,10 @@ int main(int argc, char *argv[]) {
     HistoryVCDataRef = class_getInstanceVariable(HistoryVCClass, dataKey);
 
     WorkoutVCClass = objc_allocateClassPair(VCClass, "WorkoutVC", 0);
-    class_addIvar(WorkoutVCClass, dataKey, sizeof(WorkoutVCData*), 0, WK_VC_LAYOUT);
+    class_addIvar(WorkoutVCClass, dataKey, sizeof(WorkoutVCData*), 0,
+                  "^{?=@@[10@][2@][2@]{__savedWorkoutInfo=I{__exerciseInfo=II}}"
+                  "[2{?=@{__timerInfo=CCC}{_opaque_pthread_mutex_t=q[56c]}"
+                  "{_opaque_pthread_cond_t=q[40c]}IIIq}][4s]B}");
     class_addMethod(WorkoutVCClass, deinit, (IMP) workoutVC_deinit, voidSig);
     class_addMethod(WorkoutVCClass, viewLoad, (IMP) workoutVC_viewDidLoad, voidSig);
     class_addMethod(WorkoutVCClass, sel_getUid("startEndWorkout:"),

@@ -1,17 +1,11 @@
 #include "AppDelegate.h"
 #include "AppCoordinator.h"
-#include "AppTypes.h"
 #include "AppUserData.h"
 #include "InputVC.h"
 #include "PersistenceService.h"
 #include "SetupWorkoutVC.h"
 #include "ViewControllerHelpers.h"
 #include "WorkoutVC.h"
-
-#define TITLE_FOR_ROW "@@:@" LHASymbol LHASymbol
-#define NUM_COMPONENTS LHASymbol "@:@"
-#define NUM_ROWS LHASymbol "@:@" LHASymbol
-#define DID_SELECT_ROW "v@:@" LHASymbol LHASymbol
 
 #if DEBUG
 extern void persistenceService_create(void);
@@ -53,7 +47,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
         tzOffset = userInfo_initFromStorage();
     }
 
-    char const *voidSig = "v@:", *tapSig = "v@:@", *dataKey = "data";
+    char const *voidSig = "v@:", *tapSig = "v@:@", *dataKey = "data", *titleForRow = "@@:@qq";
     SetupWorkoutVCClass = objc_allocateClassPair(InputVCClass, "SetupWorkoutVC", 0);
     class_addProtocol(SetupWorkoutVCClass, objc_getProtocol("UIPickerViewDelegate"));
     class_addProtocol(SetupWorkoutVCClass, objc_getProtocol("UIPickerViewDataSource"));
@@ -65,11 +59,11 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
     class_addMethod(SetupWorkoutVCClass, sel_getUid("buttonTapped:"),
                     (IMP) setupWorkoutVC_tappedButton, tapSig);
     class_addMethod(SetupWorkoutVCClass, sel_getUid("numberOfComponentsInPickerView:"),
-                    (IMP) setupWorkoutVC_numberOfComponents, NUM_COMPONENTS);
+                    (IMP) setupWorkoutVC_numberOfComponents, "q@:@");
     class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:numberOfRowsInComponent:"),
-                    (IMP) setupWorkoutVC_numberOfRows, NUM_ROWS);
+                    (IMP) setupWorkoutVC_numberOfRows, "q@:@q");
     class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:didSelectRow:inComponent:"),
-                    (IMP) setupWorkoutVC_didSelectRow, DID_SELECT_ROW);
+                    (IMP) setupWorkoutVC_didSelectRow, "v@:@qq");
 
     DMNavVC = objc_allocateClassPair(objc_getClass("UINavigationController"), "DMNavVC", 0);
     DMTabVC = objc_allocateClassPair(objc_getClass("UITabBarController"), "DMTabVC", 0);
@@ -96,10 +90,10 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
                         (IMP) dmNavVC_getStatusBarStyle, "i@:");
         class_addMethod(SetupWorkoutVCClass,
                         sel_getUid("pickerView:attributedTitleForRow:forComponent:"),
-                        (IMP) setupWorkoutVC_attrTitleForRow, TITLE_FOR_ROW);
+                        (IMP) setupWorkoutVC_attrTitleForRow, titleForRow);
     } else {
         class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:titleForRow:forComponent:"),
-                        (IMP) setupWorkoutVC_titleForRow, TITLE_FOR_ROW);
+                        (IMP) setupWorkoutVC_titleForRow, titleForRow);
     }
 
     objc_registerClassPair(DMNavVC);

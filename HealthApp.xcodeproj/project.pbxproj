@@ -59,7 +59,6 @@
 		6161838226AC80A0001587B2 /* CocoaHelpers.c in Sources */ = {isa = PBXBuildFile; fileRef = 6161838126AC80A0001587B2 /* CocoaHelpers.c */; };
 		619919ED27824DBE00418A57 /* Charts.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 619919EB27824DB500418A57 /* Charts.xcframework */; };
 		619919EE27824DBE00418A57 /* Charts.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 619919EB27824DB500418A57 /* Charts.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		61A048D12755E59300B7A8D2 /* AppTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 61A048D02755E59300B7A8D2 /* AppTypes.h */; };
 		61BC6F56266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m in Sources */ = {isa = PBXBuildFile; fileRef = 61BC6F52266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61E8ED6726FD60B400942368 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 61E8ED6926FD60B400942368 /* Localizable.strings */; };
 		61E8ED6C26FD87AB00942368 /* WorkoutData_d.plist in Resources */ = {isa = PBXBuildFile; fileRef = 61E8ED6B26FD87AB00942368 /* WorkoutData_d.plist */; };
@@ -152,7 +151,6 @@
 		6161838026AC8089001587B2 /* CocoaHelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CocoaHelpers.h; sourceTree = "<group>"; };
 		6161838126AC80A0001587B2 /* CocoaHelpers.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = CocoaHelpers.c; sourceTree = "<group>"; };
 		619919EB27824DB500418A57 /* Charts.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = Charts.xcframework; sourceTree = "<group>"; };
-		61A048D02755E59300B7A8D2 /* AppTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppTypes.h; sourceTree = "<group>"; };
 		61BC6F52266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "WeeklyData+CoreDataClass.m"; sourceTree = "<group>"; };
 		61E8ED6826FD60B400942368 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		61E8ED6B26FD87AB00942368 /* WorkoutData_d.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = WorkoutData_d.plist; sourceTree = "<group>"; };
@@ -375,7 +373,6 @@
 		61C7790426102663001326A1 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
-				61A048D02755E59300B7A8D2 /* AppTypes.h */,
 				6161838126AC80A0001587B2 /* CocoaHelpers.c */,
 				6161838026AC8089001587B2 /* CocoaHelpers.h */,
 				615086F026D3223400521269 /* SwiftBridging.h */,
@@ -413,7 +410,6 @@
 				614DA69A270A8D1F00EC90C4 /* ExerciseManager.h in Headers */,
 				611EDDB32743660C0064B254 /* InputVC.h in Headers */,
 				611EDDA32741F8750064B254 /* StatusView.h in Headers */,
-				61A048D12755E59300B7A8D2 /* AppTypes.h in Headers */,
 				610B92CB270A7F4900358DBD /* ContainerView.h in Headers */,
 				61592A84274861B600789264 /* TotalWorkoutsView.h in Headers */,
 			);

@@ -1,5 +1,4 @@
 #include "WorkoutTypeView.h"
-#include "AppTypes.h"
 #include "SwiftBridging.h"
 
 Class WorkoutTypeViewClass;
@@ -10,7 +9,7 @@ id workoutTypeView_init(WorkoutTypeChartModel *model, id formatter) {
     WorkoutTypeViewData *data = malloc(sizeof(WorkoutTypeViewData));
     data->model = model;
 
-    data->chart = createChartView(formatter, (HAInt[]){0, 1, 2, 3}, 4, 6);
+    data->chart = createChartView(formatter, (long []){0, 1, 2, 3}, 4, 6);
     disableAutoresizing(data->chart);
     addSubview(self, data->chart);
     pin(data->chart, self, (Padding){0, 8, 0, 8}, 0);
