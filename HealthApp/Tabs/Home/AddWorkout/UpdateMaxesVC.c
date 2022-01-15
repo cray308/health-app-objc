@@ -1,5 +1,6 @@
 #include "UpdateMaxesVC.h"
 #include <CoreFoundation/CFString.h>
+#include "AppUserData.h"
 #include "InputVC.h"
 #include "ViewControllerHelpers.h"
 #include "WorkoutVC.h"
@@ -77,7 +78,7 @@ void updateMaxesVC_updatedStepper(id self, SEL _cmd _U_) {
 void updateMaxesVC_tappedFinish(id self, SEL _cmd _U_) {
     UpdateMaxesVCData *data = (UpdateMaxesVCData *) object_getIvar(self, UpdateMaxesVCDataRef);
     id field = ((InputVCData *) object_getIvar(self, InputVCDataRef))->children[0];
-    short extra = data->index == LiftPullup ? 145 : 0;
+    short extra = data->index == LiftPullup ? getBodyWeight() : 0;
     int initWeight = ((InputViewData *) object_getIvar(field, InputViewDataRef))->result + extra;
     initWeight *= 36;
     float reps = 37.f - ((float) getStepperValue(data->stepper));

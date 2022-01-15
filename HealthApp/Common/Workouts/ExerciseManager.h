@@ -4,6 +4,8 @@
 #include <CoreFoundation/CFArray.h>
 #include "array.h"
 
+#define getBodyWeight() (userData->bodyweight < 0 ? 145 : userData->bodyweight)
+
 enum {
     LiftSquat,
     LiftPullup,

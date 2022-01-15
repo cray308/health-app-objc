@@ -14,6 +14,7 @@ typedef struct {
     signed char currentPlan;
     unsigned char completedWorkouts;
     short liftMaxes[4];
+    short bodyweight;
 } UserInfo;
 
 extern UserInfo *userData;

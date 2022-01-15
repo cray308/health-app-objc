@@ -96,7 +96,8 @@ static Workout *buildWorkoutFromDict(CFDictionaryRef dict, WorkoutParams *params
         if (params->index <= 1) {
             weights[1] = (int) (multiplier * lifts[LiftBench]);
             if (params->index == 0) {
-                weights[2] = (int) ((lifts[LiftPullup] + 145) * multiplier) - 145;
+                short bodyWeight = getBodyWeight();
+                weights[2] = (int) ((lifts[LiftPullup] + bodyWeight) * multiplier) - bodyWeight;
                 weights[2] = max(weights[2], 0);
             } else {
                 weights[2] = (int) (multiplier * lifts[LiftDeadlift]);

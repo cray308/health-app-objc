@@ -286,13 +286,8 @@ id persistenceService_getCurrentWeek(void) {
 CFArrayRef persistenceService_executeFetchRequest(id req, int *count, bool sorted) {
     int len = 0;
     if (sorted) {
-        id _obj = allocClass(objc_getClass("NSSortDescriptor"));
-        id descriptor = (((id(*)(id,SEL,CFStringRef,bool))objc_msgSend)
-                         (_obj, sel_getUid("initWithKey:ascending:"), CFSTR("weekStart"), true));
-        CFArrayRef descriptorArr = CFArrayCreate(NULL, (const void *[]){descriptor},
-                                                 1, &retainedArrCallbacks);
+        CFArrayRef descriptorArr = createSortDescriptorArr(CFSTR("weekStart"), true);
         setArray(req, sel_getUid("setSortDescriptors:"), descriptorArr);
-        releaseObj(descriptor);
         CFRelease(descriptorArr);
     }
     CFArrayRef data = (((CFArrayRef(*)(id,SEL,id,id))objc_msgSend)

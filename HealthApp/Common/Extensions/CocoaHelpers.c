@@ -118,3 +118,13 @@ void fillStringArray(CFStringRef *arr, CFStringRef format, int count) {
         CFRelease(key);
     }
 }
+
+CFArrayRef createSortDescriptorArr(CFStringRef key, bool ascending) {
+    id _obj = allocClass(objc_getClass("NSSortDescriptor"));
+    id descriptor = (((id(*)(id,SEL,CFStringRef,bool))objc_msgSend)
+                     (_obj, sel_getUid("initWithKey:ascending:"), key, ascending));
+    CFArrayRef descriptorArr = CFArrayCreate(NULL, (const void *[]){descriptor},
+                                             1, &retainedArrCallbacks);
+    releaseObj(descriptor);
+    return descriptorArr;
+}

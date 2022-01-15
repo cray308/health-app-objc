@@ -24,6 +24,8 @@
 	<string>LaunchScreen</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>Your body weight is requested in order to calculate appropriate weights to use for calisthenics exercises, such as weighted pull-ups.</string>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
 	<key>UIRequiredDeviceCapabilities</key>

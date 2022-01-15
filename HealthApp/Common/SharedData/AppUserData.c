@@ -1,9 +1,13 @@
 #include "AppUserData.h"
 #include <CoreFoundation/CFNumber.h>
+#include <CoreFoundation/CFSet.h>
 #include <stdlib.h>
 #include "CocoaHelpers.h"
 
 #define DaySeconds 86400
+
+extern id HKQuantityTypeIdentifierBodyMass;
+extern id HKSampleSortIdentifierStartDate;
 
 enum {
     WorkoutPlanBaseBuilding = 0,
@@ -74,6 +78,51 @@ static void saveData(void) {
     }
 }
 
+static void getCurrentWeight(id store, id weightType) {
+    CFArrayRef descriptorArr = createSortDescriptorArr((CFStringRef) HKSampleSortIdentifierStartDate,
+                                                       false);
+    id _obj = allocClass(objc_getClass("HKSampleQuery"));
+    id req = (((id(*)(id,SEL,id,id,unsigned long,CFArrayRef,void(^)(id,CFArrayRef,id)))objc_msgSend)
+              (_obj, sel_getUid("initWithSampleType:predicate:limit:sortDescriptors:resultsHandler:"),
+               weightType, nil, 1, descriptorArr, ^(id query _U_, CFArrayRef data, id error _U_) {
+        int count = 0;
+        if (data && (count = (int)(CFArrayGetCount(data)))) {
+            id unit = staticMethod(objc_getClass("HKUnit"), sel_getUid("poundUnit"));
+            id sample = (id) CFArrayGetValueAtIndex(data, 0);
+            id quantity = getObject(sample, sel_getUid("quantity"));
+            userData->bodyweight = (short) (((double(*)(id,SEL,id))objc_msgSend)
+                                            (quantity, sel_getUid("doubleValueForUnit:"), unit));
+        }
+        releaseObj(store);
+    }));
+    setObject(store, sel_getUid("executeQuery:"), req);
+    CFRelease(descriptorArr);
+    releaseObj(req);
+}
+
+static void getHealthData(void) {
+    userData->bodyweight = -1;
+    Class storeClass = objc_getClass("HKHealthStore");
+    if (!((bool(*)(Class,SEL))objc_msgSend)(storeClass, sel_getUid("isHealthDataAvailable"))) return;
+
+    id store = createNew(storeClass);
+    id weightType = staticMethodWithString(objc_getClass("HKSampleType"),
+                                           sel_getUid("quantityTypeForIdentifier:"),
+                                           (CFStringRef) HKQuantityTypeIdentifierBodyMass);
+    CFSetRef set = CFSetCreate(NULL, (const void *[]){weightType}, 1, &(CFSetCallBacks){0});
+
+    (((void(*)(id,SEL,CFSetRef,CFSetRef,void(^)(bool,id)))objc_msgSend)
+     (store, sel_getUid("requestAuthorizationToShareTypes:readTypes:completion:"),
+      NULL, set, ^(bool granted, id error _U_) {
+        if (granted) {
+            getCurrentWeight(store, weightType);
+        } else {
+            releaseObj(store);
+        }
+    }));
+    CFRelease(set);
+}
+
 void userInfo_create(bool darkMode) {
     time_t now = time(NULL);
     userData = calloc(1, sizeof(UserInfo));
@@ -82,6 +131,7 @@ void userInfo_create(bool darkMode) {
     userData->tzOffset = date_getOffsetFromGMT(now);
     userData->darkMode = darkMode ? 0 : -1;
     saveData();
+    getHealthData();
 }
 
 int userInfo_initFromStorage(void) {
@@ -135,6 +185,7 @@ int userInfo_initFromStorage(void) {
 
     if (madeChange)
         saveData();
+    getHealthData();
     return tzDiff;
 }
 
