@@ -39,6 +39,7 @@ void inputVC_addChild(id self, CFStringRef hint, short min, short max) {
 
     int index = d->count++;
     d->children[index] = createNew(InputViewClass);
+#ifndef __clang_analyzer__
     id view = d->children[index];
     InputViewData *ptr = calloc(1, sizeof(InputViewData));
     ptr->minVal = min;
@@ -61,6 +62,7 @@ void inputVC_addChild(id self, CFStringRef hint, short min, short max) {
     hideView(ptr->errorLabel, true);
     setInputAccessory(ptr->field, d->toolbar);
     object_setIvar(view, InputViewDataRef, (id) ptr);
+#endif
 }
 
 void inputView_deinit(id self, SEL _cmd) {
@@ -84,9 +86,10 @@ void inputView_reset(InputViewData *data, short value) {
 id inputVC_init(id self, SEL _cmd) {
     struct objc_super super = {self, objc_getClass("UIViewController")};
     self = ((id(*)(struct objc_super *,SEL))objc_msgSendSuper)(&super, _cmd);
-
+#ifndef __clang_analyzer__
     InputVCData *data = calloc(1, sizeof(InputVCData));
     object_setIvar(self, InputVCDataRef, (id) data);
+#endif
     return self;
 }
 

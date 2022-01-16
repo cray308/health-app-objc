@@ -8,15 +8,16 @@ Ivar TotalWorkoutsViewDataRef;
 
 id totalWorkoutsView_init(TotalWorkoutsChartModel *model, id formatter) {
     id self = createNew(TotalWorkoutsViewClass);
+#ifndef __clang_analyzer__
     TotalWorkoutsViewData *data = malloc(sizeof(TotalWorkoutsViewData));
     data->model = model;
-
     data->chart = createChartView(formatter, (long []){4}, 1, 1);
     disableAutoresizing(data->chart);
     addSubview(self, data->chart);
     pin(data->chart, self, (Padding){0, 8, 0, 8}, 0);
     setHeight(data->chart, 390, false);
     object_setIvar(self, TotalWorkoutsViewDataRef, (id) data);
+#endif
     return self;
 }
 

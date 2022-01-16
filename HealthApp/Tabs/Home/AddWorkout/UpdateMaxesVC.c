@@ -14,11 +14,13 @@ Ivar UpdateMaxesVCDataRef;
 
 id updateMaxesVC_init(id parent, unsigned index) {
     id self = createVC(UpdateMaxesVCClass);
+#ifndef __clang_analyzer__
     UpdateMaxesVCData *data = malloc(sizeof(UpdateMaxesVCData));
     data->parent = parent;
     data->index = index;
     data->stepperFormat = localize(CFSTR("stepperLabelFormat"));
     object_setIvar(self, UpdateMaxesVCDataRef, (id) data);
+#endif
     return self;
 }
 

@@ -7,19 +7,15 @@
 Class SetupWorkoutVCClass;
 Ivar SetupWorkoutVCDataRef;
 
-id setupWorkoutVC_init(id parent, unsigned char type) {
-    CFArrayRef names = exerciseManager_createWorkoutNames(type);
-    if (!names) return nil;
-    else if (!CFArrayGetCount(names)) {
-        CFRelease(names);
-        return nil;
-    }
+id setupWorkoutVC_init(id parent, unsigned char type, CFArrayRef names) {
     id self = createVC(SetupWorkoutVCClass);
+#ifndef __clang_analyzer__
     SetupWorkoutVCData *data = calloc(1, sizeof(SetupWorkoutVCData));
     data->parent = parent;
     data->names = names;
     data->type = type;
     object_setIvar(self, SetupWorkoutVCDataRef, (id) data);
+#endif
     return self;
 }
 

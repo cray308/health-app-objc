@@ -85,8 +85,7 @@ static void getCurrentWeight(id store, id weightType) {
     id req = (((id(*)(id,SEL,id,id,unsigned long,CFArrayRef,void(^)(id,CFArrayRef,id)))objc_msgSend)
               (_obj, sel_getUid("initWithSampleType:predicate:limit:sortDescriptors:resultsHandler:"),
                weightType, nil, 1, descriptorArr, ^(id query _U_, CFArrayRef data, id error _U_) {
-        int count = 0;
-        if (data && (count = (int)(CFArrayGetCount(data)))) {
+        if (data && CFArrayGetCount(data)) {
             id unit = staticMethod(objc_getClass("HKUnit"), sel_getUid("poundUnit"));
             id sample = (id) CFArrayGetValueAtIndex(data, 0);
             id quantity = getObject(sample, sel_getUid("quantity"));

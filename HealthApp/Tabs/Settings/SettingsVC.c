@@ -13,8 +13,10 @@ static inline void addCancelAction(id ctrl, Callback handler) {
 
 id settingsVC_init(void) {
     id self = createVC(SettingsVCClass);
+#ifndef __clang_analyzer__
     SettingsVCData *data = calloc(1, sizeof(SettingsVCData));
     object_setIvar(self, SettingsVCDataRef, (id) data);
+#endif
     return self;
 }
 

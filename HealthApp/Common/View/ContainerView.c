@@ -10,7 +10,7 @@ Ivar ContainerViewDataRef;
 id containerView_init(CFStringRef title, int spacing, bool margins) {
     id self = createNew(ContainerViewClass);
     disableAutoresizing(self);
-
+#ifndef __clang_analyzer__
     ContainerViewData *data = malloc(sizeof(ContainerViewData));
     data->views = array_new(object);
     data->divider = createView(-1);
@@ -33,6 +33,7 @@ id containerView_init(CFStringRef title, int spacing, bool margins) {
     releaseObj(vStack);
     releaseObj(divLine);
     object_setIvar(self, ContainerViewDataRef, (id) data);
+#endif
     return self;
 }
 

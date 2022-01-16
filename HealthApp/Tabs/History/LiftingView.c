@@ -6,15 +6,16 @@ Ivar LiftViewDataRef;
 
 id liftingView_init(LiftChartModel *model, id formatter) {
     id self = createNew(LiftViewClass);
+#ifndef __clang_analyzer__
     LiftViewData *data = malloc(sizeof(LiftViewData));
     data->model = model;
-
     data->chart = createChartView(formatter, (long []){0, 1, 2, 3}, 4, 0);
     disableAutoresizing(data->chart);
     addSubview(self, data->chart);
     pin(data->chart, self, (Padding){0, 8, 0, 8}, 0);
     setHeight(data->chart, 550, false);
     object_setIvar(self, LiftViewDataRef, (id) data);
+#endif
     return self;
 }
 

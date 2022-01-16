@@ -300,6 +300,7 @@ static void exerciseView_configure(id v) {
 
 id workoutVC_init(Workout *workout) {
     id self = createVC(WorkoutVCClass);
+#ifndef __clang_analyzer__
     WorkoutVCData *data = calloc(1, sizeof(WorkoutVCData));
     data->workout = workout;
 
@@ -322,6 +323,7 @@ id workoutVC_init(Workout *workout) {
     pthread_create(&data->threads[0], NULL, timer_loop, &data->timers[0]);
 
     object_setIvar(self, WorkoutVCDataRef, (id) data);
+#endif
     return self;
 }
 

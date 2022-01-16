@@ -1,8 +1,8 @@
 #ifndef SetupWorkoutVC_h
 #define SetupWorkoutVC_h
 
+#include <CoreFoundation/CFArray.h>
 #include <objc/runtime.h>
-#include "ExerciseManager.h"
 
 extern Class SetupWorkoutVCClass;
 extern Ivar SetupWorkoutVCDataRef;
@@ -15,7 +15,7 @@ typedef struct {
     int index;
 } SetupWorkoutVCData;
 
-id setupWorkoutVC_init(id parent, unsigned char type);
+id setupWorkoutVC_init(id parent, unsigned char type, CFArrayRef names CF_CONSUMED);
 void setupWorkoutVC_deinit(id self, SEL _cmd);
 void setupWorkoutVC_viewDidLoad(id self, SEL _cmd);
 void setupWorkoutVC_tappedButton(id self, SEL _cmd, id btn);

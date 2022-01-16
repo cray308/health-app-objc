@@ -110,7 +110,8 @@ static void historyData_fetch(void *_model) {
         CFArrayRef data = persistenceService_executeFetchRequest(request, &count, true);
         if (data) {
             CFMutableArrayRef strs = CFArrayCreateMutable(NULL, count, &kCFTypeArrayCallBacks);
-            struct WeekDataModel *results = calloc(128, sizeof(struct WeekDataModel));
+            struct WeekDataModel *results = malloc(sizeof(struct WeekDataModel) << 7);
+            customAssert(count > 0)
             for (int i = 0; i < count; ++i) {
                 id d = (id) CFArrayGetValueAtIndex(data, i);
                 struct WeekDataModel *r = &results[i];
@@ -143,6 +144,7 @@ static void historyData_fetch(void *_model) {
 
 id historyVC_init(void **model, void (**handler)(void*)) {
     id self = createVC(HistoryVCClass);
+#ifndef __clang_analyzer__
     HistoryVCData *data = calloc(1, sizeof(HistoryVCData));
     *model = &data->model;
     *handler = &historyData_fetch;
@@ -182,6 +184,7 @@ id historyVC_init(void **model, void (**handler)(void*)) {
     m->lifts.chartData = createChartData(dataArr, 3, 0);
     CFRelease(dataArr);
     object_setIvar(self, HistoryVCDataRef, (id) data);
+#endif
     return self;
 }
 

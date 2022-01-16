@@ -7,6 +7,7 @@ Ivar StatusViewDataRef;
 
 id statusView_init(CFStringRef text, int tag, id target, SEL action) {
     id self = createNew(StatusViewClass);
+#ifndef __clang_analyzer__
     StatusViewData *data = malloc(sizeof(StatusViewData));
     setTag(self, tag);
     int params = BtnLargeFont | BtnBackground | BtnRounded;
@@ -21,6 +22,7 @@ id statusView_init(CFStringRef text, int tag, id target, SEL action) {
     releaseObj(hStack);
     releaseObj(vStack);
     object_setIvar(self, StatusViewDataRef, (id) data);
+#endif
     return self;
 }
 

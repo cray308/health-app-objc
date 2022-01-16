@@ -25,9 +25,11 @@ Ivar HomeVCDataRef;
 
 id homeVC_init(void) {
     id self = createVC(HomeVCClass);
+#ifndef __clang_analyzer__
     HomeVCData *data = malloc(sizeof(HomeVCData));
     fillStringArray(data->stateNames, CFSTR("homeState%d"), 2);
     object_setIvar(self, HomeVCDataRef, (id) data);
+#endif
     return self;
 }
 
@@ -170,9 +172,14 @@ void homeVC_customButtonTapped(id self, SEL _cmd _U_, id btn) {
             break;
     }
 
-    id modal = setupWorkoutVC_init(self, type);
-    if (modal)
-        presentModalVC(self, modal);
+    CFArrayRef names = exerciseManager_createWorkoutNames(type);
+    if (!names) return;
+    else if (!CFArrayGetCount(names)) {
+        CFRelease(names);
+        return;
+    }
+
+    presentModalVC(self, setupWorkoutVC_init(self, type, names));
 }
 
 void homeVC_navigateToAddWorkout(id self, void *workout) {

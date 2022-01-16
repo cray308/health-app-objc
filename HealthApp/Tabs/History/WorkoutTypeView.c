@@ -6,15 +6,16 @@ Ivar WorkoutTypeViewDataRef;
 
 id workoutTypeView_init(WorkoutTypeChartModel *model, id formatter) {
     id self = createNew(WorkoutTypeViewClass);
+#ifndef __clang_analyzer__
     WorkoutTypeViewData *data = malloc(sizeof(WorkoutTypeViewData));
     data->model = model;
-
     data->chart = createChartView(formatter, (long []){0, 1, 2, 3}, 4, 6);
     disableAutoresizing(data->chart);
     addSubview(self, data->chart);
     pin(data->chart, self, (Padding){0, 8, 0, 8}, 0);
     setHeight(data->chart, 425, false);
     object_setIvar(self, WorkoutTypeViewDataRef, (id) data);
+#endif
     return self;
 }
 
