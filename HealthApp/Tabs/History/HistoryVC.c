@@ -213,8 +213,8 @@ void historyVC_viewDidLoad(id self, SEL _cmd) {
         containers[i] = containerView_init(titles[i], 0, false);
         containerView_add(containers[i], data->charts[i]);
     }
-    ContainerViewData *firstC = (ContainerViewData *) object_getIvar(containers[0],
-                                                                     ContainerViewDataRef);
+    ContainerViewData *firstC = ((ContainerViewData *)
+                                 object_getIvar(containers[0], ContainerViewDataRef));
     hideView(firstC->divider, true);
 
     id vStack = createStackView(containers, 3, 1, 5, (Padding){10, 8, 10, 8});
@@ -237,15 +237,15 @@ void historyVC_viewDidLoad(id self, SEL _cmd) {
 void historyVC_updateSegment(id self, SEL _cmd _U_, id picker) {
     HistoryVCData *data = (HistoryVCData *) object_getIvar(self, HistoryVCDataRef);
     HistoryViewModel *model = &data->model;
-    TotalWorkoutsViewData *twData =
-    (TotalWorkoutsViewData *) object_getIvar(data->charts[0], TotalWorkoutsViewDataRef);
-    WorkoutTypeViewData *aData =
-    (WorkoutTypeViewData *) object_getIvar(data->charts[1], WorkoutTypeViewDataRef);
-    LiftViewData *lData = (LiftViewData *) object_getIvar(data->charts[2], LiftViewDataRef);
+    TotalWorkoutsViewData *totalsData = ((TotalWorkoutsViewData *)
+                                         object_getIvar(data->charts[0], TotalWorkoutsViewDataRef));
+    WorkoutTypeViewData *typeData = ((WorkoutTypeViewData *)
+                                     object_getIvar(data->charts[1], WorkoutTypeViewDataRef));
+    LiftViewData *liftData = (LiftViewData *) object_getIvar(data->charts[2], LiftViewDataRef);
     if (!model->nEntries[2]) {
-        disableLineChartView(twData->chart);
-        disableLineChartView(aData->chart);
-        disableLineChartView(lData->chart);
+        disableLineChartView(totalsData->chart);
+        disableLineChartView(typeData->chart);
+        disableLineChartView(liftData->chart);
         return;
     }
 
@@ -253,7 +253,7 @@ void historyVC_updateSegment(id self, SEL _cmd _U_, id picker) {
     char buf[16];
     CFStringRef label = CFStringCreateWithFormat(NULL, NULL, model->totalWorkouts.legendFormat,
                                                  model->totalWorkouts.avgs[index]);
-    setLegendLabel(twData->chart, 0, label);
+    setLegendLabel(totalsData->chart, 0, label);
     CFRelease(label);
 
     for (int i = 0; i < 4; ++i) {
@@ -265,12 +265,12 @@ void historyVC_updateSegment(id self, SEL _cmd _U_, id picker) {
         }
         label = CFStringCreateWithFormat(NULL, NULL, model->workoutTypes.legendFormat,
                                          model->workoutTypes.names[i], buf);
-        setLegendLabel(aData->chart, i, label);
+        setLegendLabel(typeData->chart, i, label);
         CFRelease(label);
 
         label = CFStringCreateWithFormat(NULL, NULL, model->lifts.legendFormat,
                                          model->lifts.names[i], model->lifts.avgs[index][i]);
-        setLegendLabel(lData->chart, i, label);
+        setLegendLabel(liftData->chart, i, label);
         CFRelease(label);
     }
 

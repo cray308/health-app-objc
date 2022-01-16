@@ -65,7 +65,6 @@ static CFArrayRef getCurrentWeekForPlan(struct DictWrapper *data, unsigned char 
     static CFStringRef const planKeys[] = {CFSTR("bb"), CFSTR("cc")};
     CFDictionaryRef plans = CFDictionaryGetValue(data->root, CFSTR("plans"));
     CFArrayRef weeks = CFDictionaryGetValue(plans, planKeys[plan]);
-    if (week >= CFArrayGetCount(weeks)) return NULL;
     return CFArrayGetValueAtIndex(weeks, week);
 }
 
@@ -76,7 +75,7 @@ static Workout *buildWorkoutFromDict(CFDictionaryRef dict, WorkoutParams *params
     unsigned int tempInt = 0;
 
     int nActivities = (int) CFArrayGetCount(foundActivities);
-    if (nActivities <= 0) return NULL;
+    customAssert(nActivities > 0)
 
     Workout *w = calloc(1, sizeof(Workout));
     w->day = params->day;
@@ -135,7 +134,6 @@ static Workout *buildWorkoutFromDict(CFDictionaryRef dict, WorkoutParams *params
         for (int j = 0; j < nExercises; ++j) {
             CFDictionaryRef exDict = CFArrayGetValueAtIndex(foundExercises, j);
             ExerciseEntry e = {.sets = 1};
-            int rest = 0;
 
             number = CFDictionaryGetValue(exDict, Keys.type);
             CFNumberGetValue(number, kCFNumberIntType, &tempInt);
@@ -143,15 +141,15 @@ static Workout *buildWorkoutFromDict(CFDictionaryRef dict, WorkoutParams *params
             number = CFDictionaryGetValue(exDict, Keys.reps);
             CFNumberGetValue(number, kCFNumberIntType, &e.reps);
             number = CFDictionaryGetValue(exDict, CFSTR("rest"));
-            CFNumberGetValue(number, kCFNumberIntType, &rest);
+            CFNumberGetValue(number, kCFNumberIntType, &tempInt);
             str = CFDictionaryGetValue(exDict, CFSTR("name"));
 
             if (customReps)
                 e.reps = customReps;
             if (customSets)
                 e.sets = customSets;
-            if (rest)
-                e.restStr = CFStringCreateWithFormat(NULL, NULL, restFormat, rest);
+            if (tempInt)
+                e.restStr = CFStringCreateWithFormat(NULL, NULL, restFormat, tempInt);
 
             if (e.sets > 1) {
                 e.headerStr = CFStringCreateMutable(NULL, 16);
@@ -238,17 +236,12 @@ void initExerciseStrings(void) {
     amrapFormat = localize(CFSTR("circuitHeaderAMRAP"));
 }
 
-void workoutParams_init(WorkoutParams *this, signed char day) {
-    memcpy(this, &(WorkoutParams){day, 0, 0, 1, 1, 1}, sizeof(WorkoutParams));
-}
-
 void exerciseManager_setWeeklyWorkoutNames(unsigned char plan, int week, CFStringRef *names) {
     struct DictWrapper info;
     createRootAndLibDict(&info);
 
     CFArrayRef currWeek = getCurrentWeekForPlan(&info, plan, week);
-    if (!currWeek) goto cleanup;
-    int index = 0, tempInt = 0;
+    int tempInt = 0;
 
     for (int i = 0; i < 7; ++i) {
         CFDictionaryRef day = CFArrayGetValueAtIndex(currWeek, i);
@@ -257,28 +250,24 @@ void exerciseManager_setWeeklyWorkoutNames(unsigned char plan, int week, CFStrin
         CFNumberGetValue(number, kCFNumberIntType, &tempInt);
         unsigned char type = (unsigned char) tempInt;
         number = CFDictionaryGetValue(day, Keys.index);
-        CFNumberGetValue(number, kCFNumberIntType, &index);
+        CFNumberGetValue(number, kCFNumberIntType, &tempInt);
 
         CFArrayRef libArr = getLibraryArrayForType(&info, type);
         if (!libArr) continue;
 
-        CFDictionaryRef foundWorkout = CFArrayGetValueAtIndex(libArr, index);
+        CFDictionaryRef foundWorkout = CFArrayGetValueAtIndex(libArr, tempInt);
         CFStringRef str = CFDictionaryGetValue(foundWorkout, Keys.title);
         names[i] = CFStringCreateCopy(NULL, str);
     }
-cleanup:
     CFRelease(info.root);
 }
 
-Workout *exerciseManager_getWeeklyWorkoutAtIndex(unsigned char plan, int week, int index) {
-    Workout *w = NULL;
-    WorkoutParams params;
-    workoutParams_init(&params, (signed char) index);
+Workout *exerciseManager_getWeeklyWorkout(unsigned char plan, int week, int index) {
+    WorkoutParams params = {(signed char) index, 0, 0, 1, 1, 1};
     struct DictWrapper info;
     createRootAndLibDict(&info);
 
     CFArrayRef currWeek = getCurrentWeekForPlan(&info, plan, week);
-    if (!currWeek) goto cleanup;
     CFDictionaryRef day = CFArrayGetValueAtIndex(currWeek, index);
 
     CFNumberRef number = CFDictionaryGetValue(day, Keys.type);
@@ -286,7 +275,6 @@ Workout *exerciseManager_getWeeklyWorkoutAtIndex(unsigned char plan, int week, i
     params.type = (unsigned char) params.index;
 
     CFArrayRef libArr = getLibraryArrayForType(&info, params.type);
-    if (!libArr) goto cleanup;
 
     number = CFDictionaryGetValue(day, Keys.index);
     CFNumberGetValue(number, kCFNumberIntType, &params.index);
@@ -298,44 +286,36 @@ Workout *exerciseManager_getWeeklyWorkoutAtIndex(unsigned char plan, int week, i
     CFNumberGetValue(number, kCFNumberIntType, &params.weight);
 
     CFDictionaryRef foundWorkout = CFArrayGetValueAtIndex(libArr, params.index);
-    w = buildWorkoutFromDict(foundWorkout, &params);
-cleanup:
+    Workout *w = buildWorkoutFromDict(foundWorkout, &params);
     CFRelease(info.root);
     return w;
 }
 
 CFArrayRef exerciseManager_createWorkoutNames(unsigned char type) {
-    CFMutableArrayRef results = NULL;
     struct DictWrapper info;
     createRootAndLibDict(&info);
 
-    int len = 0;
     CFArrayRef libArr = getLibraryArrayForType(&info, type);
-    if (!(libArr && (len = (int) CFArrayGetCount(libArr)))) goto cleanup;
-
+    int len = (int) CFArrayGetCount(libArr);
     if (type == WorkoutStrength)
         len = 2;
 
-    results = CFArrayCreateMutable(NULL, len, &kCFTypeArrayCallBacks);
+    CFMutableArrayRef results = CFArrayCreateMutable(NULL, len, &kCFTypeArrayCallBacks);
     for (int i = 0; i < len; ++i) {
         CFDictionaryRef week = CFArrayGetValueAtIndex(libArr, i);
         CFStringRef title = CFDictionaryGetValue(week, Keys.title);
         CFArrayAppendValue(results, title);
     }
-cleanup:
     CFRelease(info.root);
     return results;
 }
 
 Workout *exerciseManager_getWorkoutFromLibrary(WorkoutParams *params) {
-    Workout *w = NULL;
     struct DictWrapper info;
     createRootAndLibDict(&info);
     CFArrayRef libArr = getLibraryArrayForType(&info, params->type);
-    if (!libArr) goto cleanup;
     CFDictionaryRef foundWorkout = CFArrayGetValueAtIndex(libArr, params->index);
-    w = buildWorkoutFromDict(foundWorkout, params);
-cleanup:
+    Workout *w = buildWorkoutFromDict(foundWorkout, params);
     CFRelease(info.root);
     return w;
 }

@@ -35,9 +35,8 @@ id homeVC_init(void) {
 
 void homeVC_updateWorkoutsList(id self) {
     HomeVCData *data = (HomeVCData *) object_getIvar(self, HomeVCDataRef);
-    ContainerViewData *planData =
-    (ContainerViewData *) object_getIvar(data->planContainer, ContainerViewDataRef);
-    if (!data->numWorkouts) return;
+    ContainerViewData *planData = ((ContainerViewData *)
+                                   object_getIvar(data->planContainer, ContainerViewDataRef));
 
     for (int i = 0; i < data->numWorkouts; ++i) {
         id v = planData->views->arr[i];
@@ -52,10 +51,10 @@ void homeVC_updateWorkoutsList(id self) {
 
 void homeVC_createWorkoutsList(id self) {
     HomeVCData *data = (HomeVCData *) object_getIvar(self, HomeVCDataRef);
-    ContainerViewData *planData =
-    (ContainerViewData *) object_getIvar(data->planContainer, ContainerViewDataRef);
-    ContainerViewData *customData =
-    (ContainerViewData *) object_getIvar(data->customContainer, ContainerViewDataRef);
+    ContainerViewData *planData = ((ContainerViewData *)
+                                   object_getIvar(data->planContainer, ContainerViewDataRef));
+    ContainerViewData *customData = ((ContainerViewData *)
+                                     object_getIvar(data->customContainer, ContainerViewDataRef));
 
     data->numWorkouts = 0;
     array_clear(object, planData->views);
@@ -113,8 +112,8 @@ void homeVC_viewDidLoad(id self, SEL _cmd) {
     fillStringArray(headers, CFSTR("homeHeader%d"), 2);
 
     data->planContainer = containerView_init(headers[0], 0, true);
-    ContainerViewData *planData =
-    (ContainerViewData *) object_getIvar(data->planContainer, ContainerViewDataRef);
+    ContainerViewData *planData = ((ContainerViewData *)
+                                   object_getIvar(data->planContainer, ContainerViewDataRef));
     hideView(planData->divider, true);
     data->customContainer = containerView_init(headers[1], 4, true);
     id vStack = createStackView((id[]){data->planContainer, data->customContainer}, 2, 1, 20,
@@ -143,10 +142,9 @@ void homeVC_viewDidLoad(id self, SEL _cmd) {
 
 void homeVC_workoutButtonTapped(id self, SEL _cmd _U_, id btn) {
     int index = getTag(btn);
-    Workout *w = exerciseManager_getWeeklyWorkoutAtIndex((unsigned char) userData->currentPlan,
-                                                         appUserData_getWeekInPlan(), index);
-    if (w)
-        homeVC_navigateToAddWorkout(self, w);
+    Workout *w = exerciseManager_getWeeklyWorkout((unsigned char) userData->currentPlan,
+                                                  appUserData_getWeekInPlan(), index);
+    homeVC_navigateToAddWorkout(self, w);
 }
 
 void homeVC_customButtonTapped(id self, SEL _cmd _U_, id btn) {
@@ -173,12 +171,6 @@ void homeVC_customButtonTapped(id self, SEL _cmd _U_, id btn) {
     }
 
     CFArrayRef names = exerciseManager_createWorkoutNames(type);
-    if (!names) return;
-    else if (!CFArrayGetCount(names)) {
-        CFRelease(names);
-        return;
-    }
-
     presentModalVC(self, setupWorkoutVC_init(self, type, names));
 }
 

@@ -24,8 +24,8 @@ void settingsVC_updateWeightFields(id self) {
     InputVCData *parent = (InputVCData *) object_getIvar(self, InputVCDataRef);
     for (int i = 0; i < 4; ++i) {
         short value = userData->liftMaxes[i];
-        InputViewData *child =
-        (InputViewData *) object_getIvar(parent->children[i], InputViewDataRef);
+        InputViewData *child = ((InputViewData *)
+                                object_getIvar(parent->children[i], InputViewDataRef));
         CFStringRef str = CFStringCreateWithFormat(NULL, NULL, CFSTR("%d"), value);
         setLabelText(child->field, str);
         inputView_reset(child, value);

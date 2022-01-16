@@ -66,7 +66,7 @@ id createFont(int style) {
             fStyle = UIFontTextStyleTitle3;
     }
     return staticMethodWithString(objc_getClass("UIFont"),
-                                  sel_getUid("preferredFontForTextStyle:"), (CFStringRef)fStyle);
+                                  sel_getUid("preferredFontForTextStyle:"), (CFStringRef) fStyle);
 }
 
 static void setLabelFont(id view, int style) {
@@ -92,13 +92,11 @@ id createCustomFont(int style, int size) {
 #pragma mark - Custom View Selectors
 
 void dmBackgroundView_updateColors(DMBackgroundView *self, SEL _cmd _U_) {
-    id object = (id) self;
-    setBackground(object, createColor(self->colorCode));
+    setBackground((id) self, createColor(self->colorCode));
 }
 
 void dmLabel_updateColors(DMLabel *self, SEL _cmd _U_) {
-    id object = (id) self;
-    setTextColor(object, createColor(self->colorCode));
+    setTextColor((id) self, createColor(self->colorCode));
 }
 
 void dmButton_updateColors(DMButton *self, SEL _cmd _U_) {

@@ -633,8 +633,8 @@ foundTransition:
             break;
 
         case TransitionFinishedCircuitDeleteFirst:
-            data->first =
-            (ContainerViewData *) object_getIvar(data->containers[w->index], ContainerViewDataRef);
+            data->first = ((ContainerViewData *)
+                           object_getIvar(data->containers[w->index], ContainerViewDataRef));
             removeView(data->containers[w->index - 1]);
             releaseObj(data->containers[w->index - 1]);
             data->containers[w->index - 1] = nil;

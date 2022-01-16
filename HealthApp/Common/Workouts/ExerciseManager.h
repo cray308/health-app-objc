@@ -84,10 +84,9 @@ typedef struct {
 } WorkoutParams;
 
 void initExerciseStrings(void);
-void workoutParams_init(WorkoutParams *this, signed char day);
 
 void exerciseManager_setWeeklyWorkoutNames(unsigned char plan, int week, CFStringRef *names);
-Workout *exerciseManager_getWeeklyWorkoutAtIndex(unsigned char plan, int week, int index);
+Workout *exerciseManager_getWeeklyWorkout(unsigned char plan, int week, int index);
 CFArrayRef exerciseManager_createWorkoutNames(unsigned char type);
 Workout *exerciseManager_getWorkoutFromLibrary(WorkoutParams *params);
 

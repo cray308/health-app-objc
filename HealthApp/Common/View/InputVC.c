@@ -195,7 +195,8 @@ void inputVC_dismissKeyboard(id self, SEL _cmd _U_) {
         id view = getView(self);
         setBool(view, sel_getUid("endEditing:"), true);
     } else {
-        InputViewData *next = (InputViewData *) object_getIvar(d->children[tag + 1], InputViewDataRef);
+        InputViewData *next = ((InputViewData *)
+                               object_getIvar(d->children[tag + 1], InputViewDataRef));
         getBool(next->field, sel_getUid("becomeFirstResponder"));
     }
 }

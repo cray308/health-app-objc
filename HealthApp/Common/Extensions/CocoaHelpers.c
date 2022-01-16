@@ -95,8 +95,8 @@ void getScreenBounds(CGRect *result) {
 }
 
 id createColor(int type) {
-    return osVersion > 12 ? staticMethod(objc_getClass("UIColor"), sel_getUid(ColorNames[type]))
-    : appColors[type][userData->darkMode];
+    return (osVersion > 12 ? staticMethod(objc_getClass("UIColor"), sel_getUid(ColorNames[type]))
+            : appColors[type][userData->darkMode]);
 }
 
 id createAttribString(CFStringRef text, CFDictionaryRef dict) {
@@ -123,8 +123,7 @@ CFArrayRef createSortDescriptors(CFStringRef key, bool ascending) {
     id _obj = allocClass(objc_getClass("NSSortDescriptor"));
     id descriptor = (((id(*)(id,SEL,CFStringRef,bool))objc_msgSend)
                      (_obj, sel_getUid("initWithKey:ascending:"), key, ascending));
-    CFArrayRef descriptorArr = CFArrayCreate(NULL, (const void *[]){descriptor},
-                                             1, &retainedArrCallbacks);
+    CFArrayRef arr = CFArrayCreate(NULL, (const void *[]){descriptor}, 1, &retainedArrCallbacks);
     releaseObj(descriptor);
-    return descriptorArr;
+    return arr;
 }

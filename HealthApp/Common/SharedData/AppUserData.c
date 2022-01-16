@@ -101,7 +101,8 @@ static void getCurrentWeight(id store, id weightType) {
 static void getHealthData(void) {
     userData->bodyweight = -1;
     Class storeClass = objc_getClass("HKHealthStore");
-    if (!((bool(*)(Class,SEL))objc_msgSend)(storeClass, sel_getUid("isHealthDataAvailable"))) return;
+    if (!((bool(*)(Class,SEL))objc_msgSend)(storeClass, sel_getUid("isHealthDataAvailable")))
+        return;
 
     id store = createNew(storeClass);
     id weightType = staticMethodWithString(objc_getClass("HKSampleType"),
