@@ -119,7 +119,7 @@ void fillStringArray(CFStringRef *arr, CFStringRef format, int count) {
     }
 }
 
-CFArrayRef createSortDescriptorArr(CFStringRef key, bool ascending) {
+CFArrayRef createSortDescriptors(CFStringRef key, bool ascending) {
     id _obj = allocClass(objc_getClass("NSSortDescriptor"));
     id descriptor = (((id(*)(id,SEL,CFStringRef,bool))objc_msgSend)
                      (_obj, sel_getUid("initWithKey:ascending:"), key, ascending));

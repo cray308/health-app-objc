@@ -116,13 +116,12 @@ void dmField_updateColors(id self, SEL _cmd _U_) {
 }
 
 CFDictionaryRef createTitleTextDict(id color, id font) {
-    CFDictionaryValueCallBacks valueCallbacks = {0};
     const void *keys[] = {
         (CFStringRef) NSForegroundColorAttributeName, (CFStringRef) NSFontAttributeName
     };
     const void *vals[] = {color, font};
     return CFDictionaryCreate(NULL, keys, vals, font ? 2 : 1,
-                              &kCFCopyStringDictionaryKeyCallBacks, &valueCallbacks);
+                              &kCFCopyStringDictionaryKeyCallBacks, NULL);
 }
 
 #pragma mark - View initializers
@@ -157,8 +156,7 @@ id createStackView(id *subviews, int count, int axis, int spacing, Padding margi
     id view;
     Class svClass = objc_getClass("UIStackView");
     if (count) {
-        CFArrayRef arr = CFArrayCreate(NULL, (const void **)subviews, count,
-                                       &(CFArrayCallBacks){0});
+        CFArrayRef arr = CFArrayCreate(NULL, (const void **)subviews, count, NULL);
         view = getObjectWithArr(allocClass(svClass), sel_getUid("initWithArrangedSubviews:"), arr);
         CFRelease(arr);
     } else {
@@ -226,7 +224,7 @@ id createSegmentedControl(CFStringRef format, int count, int startIndex,
                           id target, SEL action, int height) {
     CFStringRef segments[count];
     fillStringArray(segments, format, count);
-    CFArrayRef array = CFArrayCreate(NULL, (const void **)segments, count, &(CFArrayCallBacks){0});
+    CFArrayRef array = CFArrayCreate(NULL, (const void **)segments, count, NULL);
     id _obj = allocClass(objc_getClass("UISegmentedControl"));
     id view = getObjectWithArr(_obj, sel_getUid("initWithItems:"), array);
     disableAutoresizing(view);

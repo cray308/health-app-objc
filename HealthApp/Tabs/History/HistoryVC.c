@@ -172,15 +172,15 @@ id historyVC_init(void **model, void (**handler)(void*)) {
     m->workoutTypes.entries[4] = array_new(pt);
 
     CFArrayRef dataArr = CFArrayCreate(NULL, (const void **)(id []){m->totalWorkouts.dataSet},
-                                       1, &(CFArrayCallBacks){0});
+                                       1, NULL);
     m->totalWorkouts.chartData = createChartData(dataArr, 1, 3);
     CFRelease(dataArr);
     dataArr = CFArrayCreate(NULL, (const void **)(id []){
         areaDataSets[4], areaDataSets[3], areaDataSets[2], areaDataSets[1]
-    }, 4, &(CFArrayCallBacks){0});
+    }, 4, NULL);
     m->workoutTypes.chartData = createChartData(dataArr, 1, 5);
     CFRelease(dataArr);
-    dataArr = CFArrayCreate(NULL, (const void **)m->lifts.dataSets, 4, &(CFArrayCallBacks){0});
+    dataArr = CFArrayCreate(NULL, (const void **)m->lifts.dataSets, 4, NULL);
     m->lifts.chartData = createChartData(dataArr, 3, 0);
     CFRelease(dataArr);
     object_setIvar(self, HistoryVCDataRef, (id) data);

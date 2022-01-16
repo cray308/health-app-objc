@@ -72,7 +72,7 @@ void *appCoordinator_start(id tabVC, bool legacy, bool scrollEdge, void (**fetch
     appCoordinator->children[2] = settingsVC_init();
     setupNavVC(controllers[2], appCoordinator->children[2]);
 
-    CFArrayRef array = CFArrayCreate(NULL, (const void **)controllers, 3, &(CFArrayCallBacks){0});
+    CFArrayRef array = CFArrayCreate(NULL, (const void **)controllers, 3, NULL);
     (((void(*)(id,SEL,CFArrayRef,bool))objc_msgSend)
      (tabVC, sel_getUid("setViewControllers:animated:"), array, false));
 

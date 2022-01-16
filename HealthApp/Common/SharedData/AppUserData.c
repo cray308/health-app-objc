@@ -79,12 +79,11 @@ static void saveData(void) {
 }
 
 static void getCurrentWeight(id store, id weightType) {
-    CFArrayRef descriptorArr = createSortDescriptorArr((CFStringRef) HKSampleSortIdentifierStartDate,
-                                                       false);
+    CFArrayRef sortArr = createSortDescriptors((CFStringRef)HKSampleSortIdentifierStartDate, false);
     id _obj = allocClass(objc_getClass("HKSampleQuery"));
     id req = (((id(*)(id,SEL,id,id,unsigned long,CFArrayRef,void(^)(id,CFArrayRef,id)))objc_msgSend)
               (_obj, sel_getUid("initWithSampleType:predicate:limit:sortDescriptors:resultsHandler:"),
-               weightType, nil, 1, descriptorArr, ^(id query _U_, CFArrayRef data, id error _U_) {
+               weightType, nil, 1, sortArr, ^(id query _U_, CFArrayRef data, id error _U_) {
         if (data && CFArrayGetCount(data)) {
             id unit = staticMethod(objc_getClass("HKUnit"), sel_getUid("poundUnit"));
             id sample = (id) CFArrayGetValueAtIndex(data, 0);
@@ -95,7 +94,7 @@ static void getCurrentWeight(id store, id weightType) {
         releaseObj(store);
     }));
     setObject(store, sel_getUid("executeQuery:"), req);
-    CFRelease(descriptorArr);
+    CFRelease(sortArr);
     releaseObj(req);
 }
 
@@ -108,7 +107,7 @@ static void getHealthData(void) {
     id weightType = staticMethodWithString(objc_getClass("HKSampleType"),
                                            sel_getUid("quantityTypeForIdentifier:"),
                                            (CFStringRef) HKQuantityTypeIdentifierBodyMass);
-    CFSetRef set = CFSetCreate(NULL, (const void *[]){weightType}, 1, &(CFSetCallBacks){0});
+    CFSetRef set = CFSetCreate(NULL, (const void *[]){weightType}, 1, NULL);
 
     (((void(*)(id,SEL,CFSetRef,CFSetRef,void(^)(bool,id)))objc_msgSend)
      (store, sel_getUid("requestAuthorizationToShareTypes:readTypes:completion:"),

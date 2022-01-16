@@ -286,7 +286,7 @@ id persistenceService_getCurrentWeek(void) {
 CFArrayRef persistenceService_executeFetchRequest(id req, int *count, bool sorted) {
     int len = 0;
     if (sorted) {
-        CFArrayRef descriptorArr = createSortDescriptorArr(CFSTR("weekStart"), true);
+        CFArrayRef descriptorArr = createSortDescriptors(CFSTR("weekStart"), true);
         setArray(req, sel_getUid("setSortDescriptors:"), descriptorArr);
         CFRelease(descriptorArr);
     }

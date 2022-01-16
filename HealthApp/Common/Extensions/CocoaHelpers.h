@@ -101,6 +101,6 @@ id createColor(int type);
 id createAttribString(CFStringRef text, CFDictionaryRef dict);
 CFStringRef localize(CFStringRef key);
 void fillStringArray(CFStringRef *arr, CFStringRef format, int count);
-CFArrayRef createSortDescriptorArr(CFStringRef key, bool ascending);
+CFArrayRef createSortDescriptors(CFStringRef key, bool ascending);
 
 #endif /* CocoaBridging_h */
