@@ -101,7 +101,7 @@ static Workout *buildWorkoutFromDict(CFDictionaryRef dict, WorkoutParams *params
             } else {
                 weights[2] = (int) (multiplier * lifts[LiftDeadlift]);
             }
-        } else if (params->index == 2) {
+        } else {
             for (int i = 1; i < 4; ++i) {
                 weights[i] = lifts[i];
             }

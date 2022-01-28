@@ -350,22 +350,29 @@
 typedef struct {                                                                         \
     unsigned size;                                                                       \
     unsigned capacity;                                                                   \
-    t *arr;                                                                              \
+    t* arr;                                                                              \
 } Array_##id;                                                                            \
                                                                                          \
-unsigned char array_reserve_##id(Array_##id *this, unsigned n);                          \
-unsigned array_erase_##id(Array_##id *this, unsigned first, unsigned nelem);             \
+unsigned char array_reserve_##id(Array_##id *this, unsigned n)                           \
+  __attribute__((nonnull));                                                              \
+unsigned array_erase_##id(Array_##id *this, unsigned first, unsigned nelem)              \
+  __attribute__((nonnull));                                                              \
 unsigned array_insert_repeatingValue_##id(Array_##id *this, unsigned index,              \
-                                          unsigned n, t const value);                    \
+                                          unsigned n, t const value)                     \
+  __attribute__((nonnull (1)));                                                          \
 unsigned char array_resize_usingValue_##id(Array_##id *this,                             \
-                                           unsigned n, t const value);                   \
+                                           unsigned n, t const value)                    \
+  __attribute__((nonnull (1)));                                                          \
 unsigned array_insert_fromArray_##id(Array_##id *this, unsigned index,                   \
-                                     t const *arr, unsigned n);                          \
+                                     t const *arr, unsigned n)                           \
+  __attribute__((nonnull));                                                              \
 Array_##id *array_new_fromArray_##id(t const *arr, unsigned size);                       \
-Array_##id *array_new_repeatingValue_##id(unsigned n, t const value);                    \
-void array_shrink_to_fit_##id(Array_##id *this);                                         \
+Array_##id *array_new_repeatingValue_##id(unsigned n, t const value)                     \
+  __attribute__((nonnull));                                                              \
+void array_shrink_to_fit_##id(Array_##id *this) __attribute__((nonnull));                \
 Array_##id *array_subarr_##id(Array_##id *this, unsigned start,                          \
-                              unsigned n, int step_size);                                \
+                              unsigned n, int step_size)                                 \
+  __attribute__((nonnull));                                                              \
 
 
 /**
@@ -391,13 +398,13 @@ Array_##id *array_subarr_##id(Array_##id *this, unsigned start,                 
                                                                                          \
 unsigned char array_reserve_##id(Array_##id *this, unsigned n) {                         \
     unsigned ncap = this->capacity;                                                      \
-    t *tmp;                                                                              \
+    t* tmp;                                                                              \
     if (n <= ncap) return 1;                                                             \
-    else if (ncap == DS_ARRAY_MAX_SIZE) return 0;                                        \
                                                                                          \
     if (n < DS_ARRAY_SHIFT_THRESHOLD) {                                                  \
         while (ncap < n) ncap <<= 1;                                                     \
     } else {                                                                             \
+        if (n == UINT_MAX) return 0;                                                     \
         ncap = DS_ARRAY_MAX_SIZE;                                                        \
     }                                                                                    \
                                                                                          \
@@ -428,24 +435,35 @@ unsigned array_erase_##id(Array_##id *this, unsigned first, unsigned nelem) {   
     return res;                                                                          \
 }                                                                                        \
                                                                                          \
-unsigned array_insert_repeatingValue_##id(Array_##id *this, unsigned index,              \
-                                          unsigned n, t const value) {                   \
-    t* i; t* end;                                                                        \
+static unsigned array_check_insert_##id(Array_##id *this, t** end,                       \
+                                        unsigned index, unsigned n) {                    \
     unsigned res = this->size;                                                           \
-    if (!n || index > res || !array_reserve_##id(this, res + n))                         \
+    unsigned newSize = res + n;                                                          \
+    if (newSize <= res || index > res || !array_reserve_##id(this, newSize))             \
         return ARRAY_ERROR;                                                              \
                                                                                          \
     if (index != res) { /* insert in the middle of a */                                  \
-        memmove(&this->arr[index + n], &this->arr[index],                                \
+        unsigned after = index + n;                                                      \
+        memmove(&this->arr[after], &this->arr[index],                                    \
                 (res - index) * sizeof(t));                                              \
         res = index;                                                                     \
+        *end = &this->arr[after];                                                        \
+    } else {                                                                             \
+        *end = &this->arr[newSize];                                                      \
     }                                                                                    \
-    end = &this->arr[res + n];                                                           \
+    this->size = newSize;                                                                \
+    return res;                                                                          \
+}                                                                                        \
                                                                                          \
-    for (i = &this->arr[res]; i != end; ++i) {                                           \
-        copyValue(*i, value);                                                            \
+unsigned array_insert_repeatingValue_##id(Array_##id *this, unsigned index,              \
+                                          unsigned n, t const value) {                   \
+    t* i; t* end;                                                                        \
+    unsigned res = array_check_insert_##id(this, &end, index, n);                        \
+    if (res != ARRAY_ERROR) {                                                            \
+        for (i = &this->arr[res]; i != end; ++i) {                                       \
+            copyValue(*i, value);                                                        \
+        }                                                                                \
     }                                                                                    \
-    this->size += n;                                                                     \
     return res;                                                                          \
 }                                                                                        \
                                                                                          \
@@ -463,45 +481,39 @@ unsigned char array_resize_usingValue_##id(Array_##id *this,                    
 unsigned array_insert_fromArray_##id(Array_##id *this, unsigned index,                   \
                                      t const *arr, unsigned n) {                         \
     t* i; t* end;                                                                        \
-    unsigned res = this->size;                                                           \
-    if (!(arr && n) || index > res || !array_reserve_##id(this, res + n))                \
-        return ARRAY_ERROR;                                                              \
-                                                                                         \
-    if (index != res) { /* insert in the middle of a */                                  \
-        memmove(&this->arr[index + n], &this->arr[index],                                \
-                (res - index) * sizeof(t));                                              \
-        res = index;                                                                     \
+    unsigned res = array_check_insert_##id(this, &end, index, n);                        \
+    if (res != ARRAY_ERROR) {                                                            \
+        for (i = &this->arr[res]; i != end; ++i, ++arr) {                                \
+            copyValue(*i, *arr);                                                         \
+        }                                                                                \
     }                                                                                    \
-    end = &this->arr[res + n];                                                           \
-                                                                                         \
-    for (i = &this->arr[res]; i != end; ++i, ++arr) {                                    \
-        copyValue(*i, *arr);                                                             \
-    }                                                                                    \
-    this->size += n;                                                                     \
     return res;                                                                          \
 }                                                                                        \
                                                                                          \
 Array_##id *array_new_fromArray_##id(t const *arr, unsigned size) {                      \
     Array_##id *a = malloc(sizeof(Array_##id));                                          \
+    customAssert(a)                                                                      \
     if (!a) return NULL;                                                                 \
-    else if (!(a->arr = malloc(8 * sizeof(t)))) {                                        \
+    a->arr = malloc(8 * sizeof(t));                                                      \
+    customAssert(a->arr)                                                                 \
+    if (!a->arr) {                                                                       \
         free(a);                                                                         \
         return NULL;                                                                     \
     }                                                                                    \
     a->size = 0;                                                                         \
     a->capacity = 8;                                                                     \
-    array_insert_fromArray_##id(a, 0, arr, size);                                        \
+    if (arr && size) array_insert_fromArray_##id(a, 0, arr, size);                       \
     return a;                                                                            \
 }                                                                                        \
                                                                                          \
 Array_##id *array_new_repeatingValue_##id(unsigned n, t const value) {                   \
     Array_##id *a = array_new(id);                                                       \
-    if (a) array_insert_repeatingValue_##id(a, 0, n, value);                             \
+    if (a && n) array_insert_repeatingValue_##id(a, 0, n, value);                        \
     return a;                                                                            \
 }                                                                                        \
                                                                                          \
 void array_shrink_to_fit_##id(Array_##id *this) {                                        \
-    t *tmp;                                                                              \
+    t* tmp;                                                                              \
     if (this->capacity == 8 || this->size == this->capacity || !this->size ||            \
             !(tmp = realloc(this->arr, this->size * sizeof(t)))) return;                 \
     this->capacity = this->size;                                                         \
@@ -675,17 +687,23 @@ gen_array_headers(id, t)                                                        
 gen_alg_headers(id, t)                                                                   \
                                                                                          \
 Array_##id *array_union_##id(t const *first1, t const *last1,                            \
-                             t const *first2, t const *last2);                           \
+                             t const *first2, t const *last2)                            \
+  __attribute__((nonnull (2,4)));                                                        \
 Array_##id *array_intersection_##id(t const *first1, t const *last1,                     \
-                                    t const *first2, t const *last2);                    \
+                                    t const *first2, t const *last2)                     \
+  __attribute__((nonnull (2,4)));                                                        \
 Array_##id *array_difference_##id(t const *first1, t const *last1,                       \
-                                  t const *first2, t const *last2);                      \
+                                  t const *first2, t const *last2)                       \
+__attribute__((nonnull (2,4)));                                                          \
 Array_##id *array_symmetric_difference_##id(t const *first1, t const *last1,             \
-                                            t const *first2, t const *last2);            \
+                                            t const *first2, t const *last2)             \
+  __attribute__((nonnull (2,4)));                                                        \
 unsigned char array_includes_##id(t const *first1, t const *last1,                       \
-                                  t const *first2, t const *last2);                      \
+                                  t const *first2, t const *last2)                       \
+  __attribute__((nonnull (2,4)));                                                        \
 Array_##id *merge_array_##id(t const *first1, t const *last1,                            \
-                             t const *first2, t const *last2);                           \
+                             t const *first2, t const *last2)                            \
+  __attribute__((nonnull (2,4)));                                                        \
 
 
 /**
