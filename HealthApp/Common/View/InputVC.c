@@ -1,13 +1,11 @@
 #include "InputVC.h"
+#include <stdlib.h>
 #include "ViewControllerHelpers.h"
 
 #define toggleScrolling(_v, _enable) setBool(_v, sel_getUid("setScrollEnabled:"), _enable)
 
 #define setScrollInsets(_v, _mg) (((void(*)(id,SEL,HAInsets))objc_msgSend)\
 ((_v), sel_getUid("setContentInset:"), (_mg)))
-
-gen_uset_source(char, unsigned short, ds_cmp_num_eq, DSDefault_addrOfVal, DSDefault_sizeOfVal,
-                DSDefault_shallowCopy, DSDefault_shallowDelete)
 
 extern id UIKeyboardDidShowNotification;
 extern id UIKeyboardWillHideNotification;
@@ -97,7 +95,7 @@ void inputVC_deinit(id self, SEL _cmd) {
     InputVCData *data = (InputVCData *) object_getIvar(self, InputVCDataRef);
     struct objc_super super = {self, objc_getClass("UIViewController")};
 
-    uset_free(char, data->set);
+    CFRelease(data->set);
     for (int i = 0; i < 4; ++i) {
         if (data->children[i])
             releaseObj(data->children[i]);
@@ -118,13 +116,12 @@ void inputVC_viewDidLoad(id self, SEL _cmd) {
     struct objc_super super = {self, objc_getClass("UIViewController")};
     ((void(*)(struct objc_super *,SEL))objc_msgSendSuper)(&super, _cmd);
 
-    unsigned short nums[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
     CGRect bounds;
     getScreenBounds(&bounds);
     CGFloat width = bounds.size.width;
 
     InputVCData *data = (InputVCData *) object_getIvar(self, InputVCDataRef);
-    data->set = uset_new_fromArray(char, nums, 10);
+    data->set = CFCharacterSetCreateWithCharactersInRange(NULL, (CFRange){'0', 10});
     data->scrollView = createScrollView();
     data->vStack = createStackView(nil, 0, 1, 0, (Padding){0});
     data->toolbar = createObjectWithFrame(objc_getClass("UIToolbar"), ((CGRect){{0}, {width, 50}}));
@@ -259,8 +256,8 @@ bool inputVC_fieldChanged(id self, SEL _cmd _U_, id field, CFRange range, CFStri
         CFStringInlineBuffer buf;
         CFStringInitInlineBuffer(replacement, &buf, CFRangeMake(0, len));
         for (int i = 0; i < len; ++i) {
-            if (!uset_contains(char, d->set, CFStringGetCharacterFromInlineBuffer(&buf, i)))
-                return false;
+            UniChar val = CFStringGetCharacterFromInlineBuffer(&buf, i);
+            if (!CFCharacterSetIsCharacterMember(d->set, val)) return false;
         }
     }
 

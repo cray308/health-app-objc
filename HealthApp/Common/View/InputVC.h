@@ -1,11 +1,8 @@
 #ifndef InputVC_h
 #define InputVC_h
 
-#include <CoreFoundation/CFBase.h>
+#include <CoreFoundation/CFCharacterSet.h>
 #include <objc/runtime.h>
-#include "unordered_set.h"
-
-gen_uset_headers(char, unsigned short)
 
 extern Class InputVCClass;
 extern Ivar InputVCDataRef;
@@ -30,7 +27,7 @@ typedef struct {
     short topOffset;
     short bottomOffset;
     id children[4];
-    USet_char *set;
+    CFCharacterSetRef set;
     id button;
     id activeField;
     id scrollView;

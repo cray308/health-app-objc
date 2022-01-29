@@ -14,10 +14,8 @@
 		610B92CB270A7F4900358DBD /* ContainerView.h in Headers */ = {isa = PBXBuildFile; fileRef = 610B92C9270A7F4900358DBD /* ContainerView.h */; };
 		610B92CC270A7F4900358DBD /* ContainerView.c in Sources */ = {isa = PBXBuildFile; fileRef = 610B92CA270A7F4900358DBD /* ContainerView.c */; };
 		611B591326C5F6830082F6CA /* alg_helper.h in Headers */ = {isa = PBXBuildFile; fileRef = 611B590E26C5F6830082F6CA /* alg_helper.h */; };
-		611B591426C5F6830082F6CA /* unordered_set.h in Headers */ = {isa = PBXBuildFile; fileRef = 611B590F26C5F6830082F6CA /* unordered_set.h */; };
 		611B591526C5F6830082F6CA /* ds.h in Headers */ = {isa = PBXBuildFile; fileRef = 611B591026C5F6830082F6CA /* ds.h */; };
 		611B591626C5F6830082F6CA /* array.h in Headers */ = {isa = PBXBuildFile; fileRef = 611B591126C5F6830082F6CA /* array.h */; };
-		611B591726C5F6830082F6CA /* hash_table.h in Headers */ = {isa = PBXBuildFile; fileRef = 611B591226C5F6830082F6CA /* hash_table.h */; };
 		611EDDA32741F8750064B254 /* StatusView.h in Headers */ = {isa = PBXBuildFile; fileRef = 611EDDA12741F8750064B254 /* StatusView.h */; };
 		611EDDA42741F8750064B254 /* StatusView.c in Sources */ = {isa = PBXBuildFile; fileRef = 611EDDA22741F8750064B254 /* StatusView.c */; };
 		611EDDA9274355F10064B254 /* HomeVC.h in Headers */ = {isa = PBXBuildFile; fileRef = 611EDDA7274355F10064B254 /* HomeVC.h */; };
@@ -40,8 +38,6 @@
 		614DA69B270A8D1F00EC90C4 /* ExerciseManager.c in Sources */ = {isa = PBXBuildFile; fileRef = 614DA699270A8D1F00EC90C4 /* ExerciseManager.c */; };
 		614DC13026082BBE00B9588E /* ViewControllerHelpers.c in Sources */ = {isa = PBXBuildFile; fileRef = 614DC12F26082BBE00B9588E /* ViewControllerHelpers.c */; };
 		615086ED26D3222500521269 /* SwiftBridging.m in Sources */ = {isa = PBXBuildFile; fileRef = 615086EC26D3222500521269 /* SwiftBridging.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		6151C91126C4B23200C95A93 /* hash.h in Headers */ = {isa = PBXBuildFile; fileRef = 6151C90226C4B23100C95A93 /* hash.h */; };
-		6151C92226C4B24200C95A93 /* hash.c in Sources */ = {isa = PBXBuildFile; fileRef = 6151C92026C4B24200C95A93 /* hash.c */; };
 		61592A84274861B600789264 /* TotalWorkoutsView.h in Headers */ = {isa = PBXBuildFile; fileRef = 61592A82274861B600789264 /* TotalWorkoutsView.h */; };
 		61592A85274861B600789264 /* TotalWorkoutsView.c in Sources */ = {isa = PBXBuildFile; fileRef = 61592A83274861B600789264 /* TotalWorkoutsView.c */; };
 		61592A892748651500789264 /* WorkoutTypeView.h in Headers */ = {isa = PBXBuildFile; fileRef = 61592A872748651500789264 /* WorkoutTypeView.h */; };
@@ -98,10 +94,8 @@
 		610B92C9270A7F4900358DBD /* ContainerView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ContainerView.h; sourceTree = "<group>"; };
 		610B92CA270A7F4900358DBD /* ContainerView.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = ContainerView.c; sourceTree = "<group>"; };
 		611B590E26C5F6830082F6CA /* alg_helper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alg_helper.h; sourceTree = "<group>"; };
-		611B590F26C5F6830082F6CA /* unordered_set.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = unordered_set.h; sourceTree = "<group>"; };
 		611B591026C5F6830082F6CA /* ds.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ds.h; sourceTree = "<group>"; };
 		611B591126C5F6830082F6CA /* array.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = array.h; sourceTree = "<group>"; };
-		611B591226C5F6830082F6CA /* hash_table.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hash_table.h; sourceTree = "<group>"; };
 		611EDDA12741F8750064B254 /* StatusView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StatusView.h; sourceTree = "<group>"; };
 		611EDDA22741F8750064B254 /* StatusView.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = StatusView.c; sourceTree = "<group>"; };
 		611EDDA7274355F10064B254 /* HomeVC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HomeVC.h; sourceTree = "<group>"; };
@@ -127,8 +121,6 @@
 		614DC12F26082BBE00B9588E /* ViewControllerHelpers.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = ViewControllerHelpers.c; sourceTree = "<group>"; };
 		615086EC26D3222500521269 /* SwiftBridging.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SwiftBridging.m; sourceTree = "<group>"; };
 		615086F026D3223400521269 /* SwiftBridging.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SwiftBridging.h; sourceTree = "<group>"; };
-		6151C90226C4B23100C95A93 /* hash.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hash.h; sourceTree = "<group>"; };
-		6151C92026C4B24200C95A93 /* hash.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = hash.c; sourceTree = "<group>"; };
 		61592A82274861B600789264 /* TotalWorkoutsView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TotalWorkoutsView.h; sourceTree = "<group>"; };
 		61592A83274861B600789264 /* TotalWorkoutsView.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = TotalWorkoutsView.c; sourceTree = "<group>"; };
 		61592A872748651500789264 /* WorkoutTypeView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WorkoutTypeView.h; sourceTree = "<group>"; };
@@ -266,10 +258,6 @@
 				611B590E26C5F6830082F6CA /* alg_helper.h */,
 				611B591126C5F6830082F6CA /* array.h */,
 				611B591026C5F6830082F6CA /* ds.h */,
-				611B591226C5F6830082F6CA /* hash_table.h */,
-				6151C92026C4B24200C95A93 /* hash.c */,
-				6151C90226C4B23100C95A93 /* hash.h */,
-				611B590F26C5F6830082F6CA /* unordered_set.h */,
 			);
 			path = DataStructures;
 			sourceTree = "<group>";
@@ -398,7 +386,6 @@
 			files = (
 				611EDDBA274487010064B254 /* SettingsVC.h in Headers */,
 				611EDDC62744CB2D0064B254 /* UpdateMaxesVC.h in Headers */,
-				6151C91126C4B23200C95A93 /* hash.h in Headers */,
 				61FFEEA2272CCCB5002BFFA6 /* AppDelegate.h in Headers */,
 				611EDDE827476ED50064B254 /* HistoryVC.h in Headers */,
 				61592A892748651500789264 /* WorkoutTypeView.h in Headers */,
@@ -409,8 +396,6 @@
 				610B92B9270A6E9000358DBD /* Views.h in Headers */,
 				611EDDD02745FEA70064B254 /* WorkoutVC.h in Headers */,
 				610B92B4270A67CC00358DBD /* Constraints.h in Headers */,
-				611B591426C5F6830082F6CA /* unordered_set.h in Headers */,
-				611B591726C5F6830082F6CA /* hash_table.h in Headers */,
 				611B591526C5F6830082F6CA /* ds.h in Headers */,
 				611B591626C5F6830082F6CA /* array.h in Headers */,
 				614DA69A270A8D1F00EC90C4 /* ExerciseManager.h in Headers */,
@@ -526,7 +511,6 @@
 			files = (
 				61594D1826068105000D01A1 /* HealthApp.xcdatamodeld in Sources */,
 				61BC6F56266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m in Sources */,
-				6151C92226C4B24200C95A93 /* hash.c in Sources */,
 				6161838226AC80A0001587B2 /* CocoaHelpers.c in Sources */,
 				61594D652606C7C6000D01A1 /* AppUserData.c in Sources */,
 				615A1C4C2608406100858C32 /* PersistenceService.c in Sources */,

@@ -1,4 +1,5 @@
 #include "SettingsVC.h"
+#include <stdlib.h>
 #include "AppCoordinator.h"
 #include "AppUserData.h"
 #include "InputVC.h"
