@@ -1,5 +1,7 @@
 #include "ExerciseManager.h"
 #include <CoreFoundation/CFNumber.h>
+#include <stdlib.h>
+#include <string.h>
 #include "AppUserData.h"
 #include "CocoaHelpers.h"
 
@@ -8,20 +10,6 @@
 #else
 #define WK_DATA_PATH CFSTR("WorkoutData")
 #endif
-
-#define freeExerciseEntry(x) do { \
-    CFRelease((x).titleStr); \
-    if ((x).restStr) CFRelease((x).restStr); \
-    if ((x).headerStr) CFRelease((x).headerStr); \
-} while (0)
-
-#define freeCircuit(x) do { \
-    if ((x).headerStr) CFRelease((x).headerStr); \
-    array_free(exEntry, (x).exercises); \
-} while (0)
-
-gen_array_source(exEntry, ExerciseEntry, DSDefault_shallowCopy, freeExerciseEntry)
-gen_array_source(circuit, Circuit, DSDefault_shallowCopy, freeCircuit)
 
 struct DictWrapper {
     CFDictionaryRef root;
@@ -74,13 +62,14 @@ static Workout *buildWorkoutFromDict(CFDictionaryRef dict, WorkoutParams *params
     CFStringRef str;
     unsigned int tempInt = 0;
 
-    int nActivities = (int) CFArrayGetCount(foundActivities);
+    unsigned nActivities = (unsigned) CFArrayGetCount(foundActivities);
     customAssert(nActivities > 0)
 
     Workout *w = calloc(1, sizeof(Workout));
     w->day = params->day;
     w->type = params->type;
-    w->activities = array_new(circuit);
+    w->activities = calloc(nActivities, sizeof(Circuit));
+    w->size = nActivities;
     str = CFDictionaryGetValue(dict, Keys.title);
     w->title = CFStringCreateCopy(NULL, str);
 
@@ -108,9 +97,9 @@ static Workout *buildWorkoutFromDict(CFDictionaryRef dict, WorkoutParams *params
         }
     }
 
-    for (int i = 0; i < nActivities; ++i) {
+    for (unsigned i = 0; i < nActivities; ++i) {
         CFDictionaryRef act = CFArrayGetValueAtIndex(foundActivities, i);
-        Circuit circuit = {.exercises = array_new(exEntry)};
+        Circuit circuit = {0};
         unsigned customReps = 0, customSets = 0;
 
         number = CFDictionaryGetValue(act, Keys.type);
@@ -130,8 +119,11 @@ static Workout *buildWorkoutFromDict(CFDictionaryRef dict, WorkoutParams *params
         }
 
         CFArrayRef foundExercises = CFDictionaryGetValue(act, CFSTR("exercises"));
-        int nExercises = (int) CFArrayGetCount(foundExercises);
-        for (int j = 0; j < nExercises; ++j) {
+        unsigned nExercises = (unsigned) CFArrayGetCount(foundExercises);
+        circuit.exercises = calloc(nExercises, sizeof(ExerciseEntry));
+        circuit.size = nExercises;
+
+        for (unsigned j = 0; j < nExercises; ++j) {
             CFDictionaryRef exDict = CFArrayGetValueAtIndex(foundExercises, j);
             ExerciseEntry e = {.sets = 1};
 
@@ -193,12 +185,12 @@ static Workout *buildWorkoutFromDict(CFDictionaryRef dict, WorkoutParams *params
             if (circuit.type == CircuitDecrement && e.type == ExerciseReps)
                 e.tRange = CFStringFind(e.titleStr, CFSTR("10"), 0);
 
-            array_push_back(exEntry, circuit.exercises, e);
+            memcpy(&circuit.exercises[j], &e, sizeof(ExerciseEntry));
         }
 
         CFStringRef headerStr = NULL;
         if (circuit.type == CircuitDecrement) {
-            circuit.completedReps = circuit.exercises->arr[0].reps;
+            circuit.completedReps = circuit.exercises[0].reps;
         } else if (circuit.type == CircuitAMRAP) {
             headerStr = CFStringCreateWithFormat(NULL, NULL, amrapFormat, circuit.reps);
         } else if (circuit.reps > 1) {
@@ -212,15 +204,15 @@ static Workout *buildWorkoutFromDict(CFDictionaryRef dict, WorkoutParams *params
             CFRelease(headerStr);
         }
 
-        array_push_back(circuit, w->activities, circuit);
+        memcpy(&w->activities[i], &circuit, sizeof(Circuit));
     }
 
     if (CFStringCompareWithOptions(w->title, localize(CFSTR("workoutTitleTestDay")),
                                    (CFRange){0, CFStringGetLength(w->title)}, 0) == 0) {
         w->testMax = true;
     }
-    w->group = &w->activities->arr[0];
-    w->entry = &w->group->exercises->arr[0];
+    w->group = &w->activities[0];
+    w->entry = &w->group->exercises[0];
     return w;
 }
 

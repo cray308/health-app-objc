@@ -2,7 +2,6 @@
 #define ExerciseManager_h
 
 #include <CoreFoundation/CFArray.h>
-#include "array.h"
 
 #define getBodyWeight() (userData->bodyweight < 0 ? 145 : userData->bodyweight)
 
@@ -43,8 +42,6 @@ typedef struct {
     CFMutableStringRef headerStr;
 } ExerciseEntry;
 
-gen_array_headers(exEntry, ExerciseEntry)
-
 typedef struct {
     enum {
         CircuitRounds,
@@ -54,24 +51,24 @@ typedef struct {
     unsigned reps;
     unsigned completedReps;
     unsigned index;
-    Array_exEntry *exercises;
+    unsigned size;
+    ExerciseEntry *exercises;
     CFRange numberRange;
     CFMutableStringRef headerStr;
 } Circuit;
 
-gen_array_headers(circuit, Circuit)
-
 typedef struct {
     unsigned char type;
     signed char day;
-    unsigned index;
     bool testMax;
+    unsigned index;
+    unsigned size;
     time_t startTime;
     int16_t duration;
     CFStringRef title;
     Circuit *group;
     ExerciseEntry *entry;
-    Array_circuit *activities;
+    Circuit *activities;
 } Workout;
 
 typedef struct {

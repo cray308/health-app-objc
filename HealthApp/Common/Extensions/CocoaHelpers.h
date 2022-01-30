@@ -6,6 +6,15 @@
 #include <CoreGraphics/CGGeometry.h>
 #include <objc/message.h>
 
+#if DEBUG
+#include <assert.h>
+#define customAssert(x) assert(x);
+#else
+#define customAssert(x)
+#endif
+
+#define max(a,b) ((a) >= (b) ? (a) : (b))
+
 #define _U_ __attribute__((__unused__))
 
 #define staticMethod(_cls, _cmd) (((id(*)(Class,SEL))objc_msgSend)((_cls), (_cmd)))

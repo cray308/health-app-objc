@@ -1,5 +1,7 @@
 #include "HistoryVC.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "AppUserData.h"
 #include "ContainerView.h"
 #include "ExerciseManager.h"
@@ -9,8 +11,6 @@
 #include "SwiftBridging.h"
 #include "TotalWorkoutsView.h"
 #include "WorkoutTypeView.h"
-
-gen_array_source(pt, CGPoint, DSDefault_shallowCopy, DSDefault_shallowDelete)
 
 extern void setLegendLabel(id v, int index, CFStringRef text);
 extern void disableLineChartView(id v);
@@ -29,11 +29,6 @@ Ivar HistoryVCDataRef;
 
 #pragma mark - Load Data
 
-static inline void createNewEntry(Array_pt *arr, int x, int y) {
-    CGPoint point = {x, y};
-    array_push_back(pt, arr, point);
-}
-
 static void historyData_populate(HistoryViewModel *m, struct WeekDataModel *results, int size) {
     int innerLimits[] = {-1, 0, 1};
     int refIndices[] = {size, size - 26, size - 52, 0};
@@ -46,11 +41,21 @@ static void historyData_populate(HistoryViewModel *m, struct WeekDataModel *resu
 
     int totalWorkouts[3] = {0}, maxWorkouts[3] = {0}, maxTime[3] = {0}, maxWeight[3] = {0};
     int totalByType[3][4] = {{0},{0},{0}}, totalByExercise[3][4] = {{0},{0},{0}};
+    m->totalWorkouts.entries = malloc((unsigned) size * sizeof(CGPoint));
+    m->lifts.entries[0] = malloc((unsigned) size * sizeof(CGPoint));
+    m->lifts.entries[1] = malloc((unsigned) size * sizeof(CGPoint));
+    m->lifts.entries[2] = malloc((unsigned) size * sizeof(CGPoint));
+    m->lifts.entries[3] = malloc((unsigned) size * sizeof(CGPoint));
+    m->workoutTypes.entries[0] = malloc((unsigned) size * sizeof(CGPoint));
+    m->workoutTypes.entries[1] = malloc((unsigned) size * sizeof(CGPoint));
+    m->workoutTypes.entries[2] = malloc((unsigned) size * sizeof(CGPoint));
+    m->workoutTypes.entries[3] = malloc((unsigned) size * sizeof(CGPoint));
+    m->workoutTypes.entries[4] = malloc((unsigned) size * sizeof(CGPoint));
 
-    for (int section = 3; section > 0; --section) {
+    for (int section = 3, index = 0; section > 0; --section) {
         int limit = refIndices[section - 1];
         int jEnd = innerLimits[section - 1];
-        for (int i = refIndices[section]; i < limit; ++i) {
+        for (int i = refIndices[section]; i < limit; ++i, ++index) {
             struct WeekDataModel *e = &results[i];
 
             for (int j = 2; j > jEnd; --j) {
@@ -58,7 +63,7 @@ static void historyData_populate(HistoryViewModel *m, struct WeekDataModel *resu
                 if (e->totalWorkouts > maxWorkouts[j])
                     maxWorkouts[j] = e->totalWorkouts;
             }
-            createNewEntry(m->totalWorkouts.entries, i, e->totalWorkouts);
+            m->totalWorkouts.entries[index] = (CGPoint){i, e->totalWorkouts};
 
             for (int x = 0; x < 4; ++x) {
                 for (int j = 2; j > jEnd; --j) {
@@ -67,16 +72,16 @@ static void historyData_populate(HistoryViewModel *m, struct WeekDataModel *resu
                     if (e->weightArray[x] > maxWeight[j])
                         maxWeight[j] = e->weightArray[x];
                 }
-                createNewEntry(m->lifts.entries[x], i, e->weightArray[x]);
+                m->lifts.entries[x][index] = (CGPoint){i, e->weightArray[x]};
             }
 
             for (int j = 2; j > jEnd; --j) {
                 if (e->cumulativeDuration[3] > maxTime[j])
                     maxTime[j] = e->cumulativeDuration[3];
             }
-            createNewEntry(m->workoutTypes.entries[0], i, 0);
+            m->workoutTypes.entries[0][index] = (CGPoint){i, 0};
             for (int x = 1; x < 5; ++x) {
-                createNewEntry(m->workoutTypes.entries[x], i, e->cumulativeDuration[x - 1]);
+                m->workoutTypes.entries[x][index] = (CGPoint){i, e->cumulativeDuration[x - 1]};
             }
         }
     }
@@ -87,14 +92,14 @@ static void historyData_populate(HistoryViewModel *m, struct WeekDataModel *resu
         m->totalWorkouts.maxes[i] = maxWorkouts[i] < 7 ? 7 : 1.1f * maxWorkouts[i];
         m->workoutTypes.maxes[i] = 1.1f * maxTime[i];
         m->lifts.maxes[i] = 1.1f * maxWeight[i];
-        m->totalWorkouts.dataArrays[i] = &m->totalWorkouts.entries->arr[refIdx];
-        m->workoutTypes.dataArrays[i][0] = &m->workoutTypes.entries[0]->arr[refIdx];
+        m->totalWorkouts.dataArrays[i] = &m->totalWorkouts.entries[refIdx];
+        m->workoutTypes.dataArrays[i][0] = &m->workoutTypes.entries[0][refIdx];
 
         for (int j = 0; j < 4; ++j) {
             m->workoutTypes.avgs[i][j] = totalByType[i][j] / m->nEntries[i];
             m->lifts.avgs[i][j] = (float) totalByExercise[i][j] / m->nEntries[i];
-            m->workoutTypes.dataArrays[i][j + 1] = &m->workoutTypes.entries[j + 1]->arr[refIdx];
-            m->lifts.dataArrays[i][j] = &m->lifts.entries[j]->arr[refIdx];
+            m->workoutTypes.dataArrays[i][j + 1] = &m->workoutTypes.entries[j + 1][refIdx];
+            m->lifts.dataArrays[i][j] = &m->lifts.entries[j][refIdx];
         }
     }
     free(results);
@@ -110,7 +115,7 @@ static void historyData_fetch(void *_model) {
         CFArrayRef data = persistenceService_executeFetchRequest(request, &count, true);
         if (data) {
             CFMutableArrayRef strs = CFArrayCreateMutable(NULL, count, &kCFTypeArrayCallBacks);
-            struct WeekDataModel *results = malloc(sizeof(struct WeekDataModel) << 7);
+            struct WeekDataModel *results = malloc((unsigned) count * sizeof(struct WeekDataModel));
             customAssert(count > 0)
             for (int i = 0; i < count; ++i) {
                 id d = (id) CFArrayGetValueAtIndex(data, i);
@@ -152,7 +157,6 @@ id historyVC_init(void **model, void (**handler)(void*)) {
     int chartColors[] = {0, 1, 2, 3};
     id *areaDataSets = m->workoutTypes.dataSets;
 
-    m->totalWorkouts.entries = array_new(pt);
     m->totalWorkouts.dataSet = createDataSet(5, nil);
     m->workoutTypes.dataSets[0] = createDataSet(-1, nil);
     fillStringArray(m->workoutTypes.names, CFSTR("workoutTypes%d"), 4);
@@ -162,14 +166,10 @@ id historyVC_init(void **model, void (**handler)(void*)) {
     m->workoutTypes.legendFormat = localize(CFSTR("workoutTypeLegend"));
 
     for (int i = 0; i < 4; ++i) {
-        m->workoutTypes.entries[i] = array_new(pt);
-        m->lifts.entries[i] = array_new(pt);
-
         id boundary = m->workoutTypes.dataSets[i];
         m->workoutTypes.dataSets[i + 1] = createDataSet(chartColors[i], boundary);
         m->lifts.dataSets[i] = createDataSet(chartColors[i], nil);
     }
-    m->workoutTypes.entries[4] = array_new(pt);
 
     CFArrayRef dataArr = CFArrayCreate(NULL, (const void **)(id []){m->totalWorkouts.dataSet},
                                        1, NULL);
@@ -300,20 +300,23 @@ void historyVC_clearData(id self) {
         memset(model->lifts.avgs[i], 0, sizeof(float) << 2);
     }
 
-    array_clear(pt, model->totalWorkouts.entries);
+    free(model->totalWorkouts.entries);
+    model->totalWorkouts.entries = NULL;
     for (int i = 0; i < 4; ++i) {
-        array_clear(pt, model->workoutTypes.entries[i]);
-        array_clear(pt, model->lifts.entries[i]);
+        free(model->workoutTypes.entries[i]);
+        model->workoutTypes.entries[i] = NULL;
+        free(model->lifts.entries[i]);
+        model->lifts.entries[i] = NULL;
     }
-    array_clear(pt, model->workoutTypes.entries[4]);
+    free(model->workoutTypes.entries[4]);
+    model->workoutTypes.entries[4] = NULL;
 
-    replaceDataSetEntries(model->totalWorkouts.dataSet, model->totalWorkouts.entries->arr, 0);
+    replaceDataSetEntries(model->totalWorkouts.dataSet, NULL, 0);
     for (int i = 0; i < 4; ++i) {
-        replaceDataSetEntries(model->workoutTypes.dataSets[i],
-                              model->workoutTypes.entries[0]->arr, 0);
-        replaceDataSetEntries(model->lifts.dataSets[i], model->lifts.entries[0]->arr, 0);
+        replaceDataSetEntries(model->workoutTypes.dataSets[i], NULL, 0);
+        replaceDataSetEntries(model->lifts.dataSets[i], NULL, 0);
     }
-    replaceDataSetEntries(model->workoutTypes.dataSets[4], model->workoutTypes.entries[0]->arr, 0);
+    replaceDataSetEntries(model->workoutTypes.dataSets[4], NULL, 0);
 
     if (isViewLoaded(self)) {
         setInt(data->picker, sel_getUid("setSelectedSegmentIndex:"), 0);

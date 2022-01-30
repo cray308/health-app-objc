@@ -132,7 +132,7 @@ void restartTimers(id self) {
         unsigned group = data->savedInfo.exerciseInfo.group;
         exerciseIdx = data->savedInfo.exerciseInfo.tag;
         if (group != ExerciseTagNA && w->index == group && w->group->index == exerciseIdx) {
-            ExerciseEntry *e = &w->group->exercises->arr[exerciseIdx];
+            ExerciseEntry *e = &w->group->exercises[exerciseIdx];
             if (e->type == ExerciseDuration) {
                 unsigned diff = (unsigned) (now - data->timers[TimerExercise].refTime);
                 if (diff >= data->timers[TimerExercise].duration) {
@@ -247,11 +247,10 @@ static bool cycleExerciseEntry(Workout *w, WorkoutTimer *timers) {
 static void startGroup(Workout *w, WorkoutTimer *timers, bool startTimer) {
     timers[TimerGroup].container = timers[TimerExercise].container = w->index;
     timers[TimerExercise].exercise = w->group->index = 0;
-    w->entry = &w->group->exercises->arr[0];
+    w->entry = &w->group->exercises[0];
 
     Circuit *c = w->group;
-    ExerciseEntry *e;
-    array_iter(c->exercises, e) {
+    for (ExerciseEntry *e = &c->exercises[0]; e < &c->exercises[c->size]; ++e) {
         e->state = ExerciseStateDisabled;
         e->completedSets = 0;
     }
@@ -349,7 +348,17 @@ void workoutVC_deinit(id self, SEL _cmd) {
     pthread_mutex_destroy(&timerLock);
     exerciseTimerThread = NULL;
     CFRelease(data->workout->title);
-    array_free(circuit, data->workout->activities);
+    Circuit *cEnd = &data->workout->activities[data->workout->size];
+    for (Circuit *c = &data->workout->activities[0]; c < cEnd; ++c) {
+        if (c->headerStr) CFRelease(c->headerStr);
+        for (ExerciseEntry *e = &c->exercises[0]; e < &c->exercises[c->size]; ++e) {
+            CFRelease(e->titleStr);
+            if (e->restStr) CFRelease(e->restStr);
+            if (e->headerStr) CFRelease(e->headerStr);
+        }
+        free(c->exercises);
+    }
+    free(data->workout->activities);
     free(data->workout);
 
     for (int i = 0; i < 10; ++i) {
@@ -362,7 +371,7 @@ void workoutVC_deinit(id self, SEL _cmd) {
 
 static bool checkEnduranceDuration(Workout *w) {
     if (w->type != WorkoutEndurance) return false;
-    int planDuration = w->activities->arr[0].exercises->arr[0].reps / 60;
+    int planDuration = w->activities[0].exercises[0].reps / 60;
     return w->duration >= planDuration;
 }
 
@@ -441,17 +450,18 @@ void workoutVC_viewDidLoad(id self, SEL _cmd) {
     getRect(view, &frame, 0);
     setNavButton(self, false, startBtn, (int) frame.size.width);
 
-    for (unsigned i = 0; i < data->workout->activities->size; ++i) {
-        Circuit *c = &data->workout->activities->arr[i];
+    for (unsigned i = 0; i < data->workout->size; ++i) {
+        Circuit *c = &data->workout->activities[i];
         data->containers[i] = containerView_init(c->headerStr, 0, false);
         addArrangedSubview(stack, data->containers[i]);
 
-        for (unsigned j = 0; j < c->exercises->size; ++j) {
+        for (unsigned j = 0; j < c->size; ++j) {
             id v = statusView_init(NULL, (int) ((i << 8) | j), self, btnTap);
             StatusViewData *ptr = (StatusViewData *) object_getIvar(v, StatusViewDataRef);
-            ptr->entry = &c->exercises->arr[j];
+            ptr->entry = &c->exercises[j];
             exerciseView_configure(v);
             containerView_add(data->containers[i], v);
+            releaseObj(v);
         }
     }
 
@@ -548,13 +558,14 @@ void handleEvent(id self, unsigned gIdx, unsigned eIdx, unsigned char event) {
             goto cleanup;
     }
 
-    id *currView = &data->first->views->arr[w->group->index];
-    StatusViewData *ptr = ((StatusViewData *) object_getIvar(*currView, StatusViewDataRef));
+    CFArrayRef views = getArrangedSubviews(data->first->stack);
+    id currView = (id) CFArrayGetValueAtIndex(views, w->group->index);
+    StatusViewData *ptr = ((StatusViewData *) object_getIvar(currView, StatusViewDataRef));
     unsigned char t = 0;
     if (event) {
         t = TransitionFinishedCircuit;
         if (event == EventFinishGroup) {
-            if (++w->index == w->activities->size) {
+            if (++w->index == w->size) {
                 t = TransitionCompletedWorkout;
                 goto foundTransition;
             }
@@ -573,12 +584,12 @@ void handleEvent(id self, unsigned gIdx, unsigned eIdx, unsigned char event) {
     }
 
     bool exerciseDone = cycleExerciseEntry(w, data->timers);
-    exerciseView_configure(*currView);
+    exerciseView_configure(currView);
 
     if (exerciseDone) {
         t = TransitionFinishedExercise;
         ++w->entry;
-        if (++w->group->index == w->group->exercises->size) {
+        if (++w->group->index == w->group->size) {
             t = TransitionFinishedCircuit;
             Circuit *c = w->group;
             bool finishedCircuit = false, changeRange;
@@ -596,7 +607,7 @@ void handleEvent(id self, unsigned gIdx, unsigned eIdx, unsigned char event) {
                         CFStringRef reps = CFStringCreateWithFormat(NULL, NULL,
                                                                     CFSTR("%d"), c->completedReps);
                         ExerciseEntry *e;
-                        array_iter(c->exercises, e) {
+                        for (e = &c->exercises[0]; e < &c->exercises[c->size]; ++e) {
                             if (e->type == ExerciseReps) {
                                 CFStringReplace(e->titleStr, e->tRange, reps);
                                 if (changeRange)
@@ -610,7 +621,7 @@ void handleEvent(id self, unsigned gIdx, unsigned eIdx, unsigned char event) {
             }
 
             if (finishedCircuit) {
-                if (++w->index == w->activities->size) {
+                if (++w->index == w->size) {
                     t = TransitionCompletedWorkout;
                 } else {
                     t = TransitionFinishedCircuitDeleteFirst;
@@ -635,6 +646,7 @@ foundTransition:
         case TransitionFinishedCircuitDeleteFirst:
             data->first = ((ContainerViewData *)
                            object_getIvar(data->containers[w->index], ContainerViewDataRef));
+            views = getArrangedSubviews(data->first->stack);
             removeView(data->containers[w->index - 1]);
             releaseObj(data->containers[w->index - 1]);
             data->containers[w->index - 1] = nil;
@@ -649,13 +661,13 @@ foundTransition:
             }
             setLabelText(data->first->headerLabel, w->group->headerStr);
 
-            for (unsigned i = 0; i < w->group->exercises->size; ++i) {
-                exerciseView_configure(data->first->views->arr[i]);
+            for (unsigned i = 0; i < w->group->size; ++i) {
+                exerciseView_configure((id) CFArrayGetValueAtIndex(views, i));
             }
             break;
 
         case TransitionFinishedExercise:
-            exerciseView_configure(*(++currView));
+            exerciseView_configure((id) CFArrayGetValueAtIndex(views, w->group->index));
             break;
 
         default:

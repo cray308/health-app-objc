@@ -1,4 +1,5 @@
 #include "LiftingView.h"
+#include <stdlib.h>
 #include "SwiftBridging.h"
 
 Class LiftViewClass;

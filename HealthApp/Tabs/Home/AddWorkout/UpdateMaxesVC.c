@@ -1,5 +1,6 @@
 #include "UpdateMaxesVC.h"
 #include <CoreFoundation/CFString.h>
+#include <stdlib.h>
 #include "AppUserData.h"
 #include "InputVC.h"
 #include "ViewControllerHelpers.h"

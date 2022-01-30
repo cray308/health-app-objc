@@ -1,4 +1,5 @@
 #include "StatusView.h"
+#include <stdlib.h>
 #include "CocoaHelpers.h"
 #include "Views.h"
 

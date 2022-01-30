@@ -18,6 +18,8 @@ setBool(_v, sel_getUid("setTranslatesAutoresizingMaskIntoConstraints:"), false)
 #define setMargins(_sv, _val) (((void(*)(id,SEL,HAInsets))objc_msgSend)\
 ((_sv), sel_getUid("setLayoutMargins:"), (_val)))
 
+#define getArrangedSubviews(_sv) getArray(_sv, sel_getUid("arrangedSubviews"))
+
 #define removeView(_v) voidFunc(_v, sel_getUid("removeFromSuperview"))
 
 #define getLayoutGuide(_v) getObject(_v, sel_getUid("safeAreaLayoutGuide"))

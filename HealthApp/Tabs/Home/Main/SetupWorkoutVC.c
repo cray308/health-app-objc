@@ -1,4 +1,5 @@
 #include "SetupWorkoutVC.h"
+#include <stdlib.h>
 #include "ExerciseManager.h"
 #include "HomeVC.h"
 #include "InputVC.h"

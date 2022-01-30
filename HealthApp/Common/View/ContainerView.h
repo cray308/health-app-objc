@@ -3,9 +3,6 @@
 
 #include <CoreFoundation/CFBase.h>
 #include <objc/runtime.h>
-#include "array.h"
-
-gen_array_headers(object, id)
 
 extern Class ContainerViewClass;
 extern Ivar ContainerViewDataRef;
@@ -14,7 +11,6 @@ typedef struct {
     id divider;
     id headerLabel;
     id stack;
-    Array_object *views;
 } ContainerViewData;
 
 id containerView_init(CFStringRef title, int spacing, bool margins);

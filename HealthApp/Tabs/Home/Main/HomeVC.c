@@ -38,8 +38,9 @@ void homeVC_updateWorkoutsList(id self) {
     ContainerViewData *planData = ((ContainerViewData *)
                                    object_getIvar(data->planContainer, ContainerViewDataRef));
 
+    CFArrayRef views = getArrangedSubviews(planData->stack);
     for (int i = 0; i < data->numWorkouts; ++i) {
-        id v = planData->views->arr[i];
+        id v = (id) CFArrayGetValueAtIndex(views, i);
         StatusViewData *ptr = (StatusViewData *) object_getIvar(v, StatusViewDataRef);
         int tag = getTag(v);
         bool enable = !(userData->completedWorkouts & (1 << tag));
@@ -57,8 +58,7 @@ void homeVC_createWorkoutsList(id self) {
                                      object_getIvar(data->customContainer, ContainerViewDataRef));
 
     data->numWorkouts = 0;
-    array_clear(object, planData->views);
-    CFArrayRef views = getArray(planData->stack, sel_getUid("arrangedSubviews"));
+    CFArrayRef views = getArrangedSubviews(planData->stack);
     int count = (int) CFArrayGetCount(views);
     for (int i = 0; i < count; ++i) {
         id v = (id) CFArrayGetValueAtIndex(views, i);
@@ -85,6 +85,7 @@ void homeVC_createWorkoutsList(id self) {
         setLabelText(ptr->headerLabel, days[i]);
         containerView_add(data->planContainer, btn);
         CFRelease(workoutNames[i]);
+        releaseObj(btn);
         data->numWorkouts += 1;
     }
 
@@ -126,6 +127,7 @@ void homeVC_viewDidLoad(id self, SEL _cmd) {
         hideView(ptr->box, true);
         statusView_updateAccessibility(btn, NULL);
         containerView_add(data->customContainer, btn);
+        releaseObj(btn);
     }
 
     id scrollView = createScrollView();

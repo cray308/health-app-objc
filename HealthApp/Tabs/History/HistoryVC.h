@@ -4,15 +4,12 @@
 #include <CoreFoundation/CFArray.h>
 #include <CoreGraphics/CGGeometry.h>
 #include <objc/runtime.h>
-#include "array.h"
-
-gen_array_headers(pt, CGPoint)
 
 extern Class HistoryVCClass;
 extern Ivar HistoryVCDataRef;
 
 typedef struct {
-    Array_pt *entries;
+    CGPoint *entries;
     CFStringRef legendFormat;
     id dataSet;
     id chartData;
@@ -22,7 +19,7 @@ typedef struct {
 } TotalWorkoutsChartModel;
 
 typedef struct {
-    Array_pt *entries[5];
+    CGPoint *entries[5];
     CFStringRef legendFormat;
     id dataSets[5];
     id chartData;
@@ -33,7 +30,7 @@ typedef struct {
 } WorkoutTypeChartModel;
 
 typedef struct {
-    Array_pt *entries[4];
+    CGPoint *entries[4];
     CFStringRef legendFormat;
     id dataSets[4];
     id chartData;

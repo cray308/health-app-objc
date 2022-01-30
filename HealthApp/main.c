@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
     StatusViewDataRef = class_getInstanceVariable(StatusViewClass, dataKey);
 
     ContainerViewClass = objc_allocateClassPair(viewClass, "ContainerView", 0);
-    class_addIvar(ContainerViewClass, dataKey, sizeof(ContainerViewData*), 0, "^{?=@@@@}");
+    class_addIvar(ContainerViewClass, dataKey, sizeof(ContainerViewData*), 0, "^{?=@@@}");
     class_addMethod(ContainerViewClass, deinit, (IMP) containerView_deinit, voidSig);
     objc_registerClassPair(ContainerViewClass);
     ContainerViewDataRef = class_getInstanceVariable(ContainerViewClass, dataKey);

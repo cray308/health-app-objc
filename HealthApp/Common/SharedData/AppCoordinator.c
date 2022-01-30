@@ -1,4 +1,5 @@
 #include "AppCoordinator.h"
+#include <stdlib.h>
 #include "AppDelegate.h"
 #include "AppUserData.h"
 #include "HomeVC.h"
