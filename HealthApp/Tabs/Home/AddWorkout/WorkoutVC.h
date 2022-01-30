@@ -27,7 +27,7 @@ typedef struct {
 typedef struct {
     Workout *workout;
     ContainerViewData *first;
-    id containers[10];
+    id *containers;
     id observers[2];
     pthread_t threads[2];
     struct __savedWorkoutInfo {

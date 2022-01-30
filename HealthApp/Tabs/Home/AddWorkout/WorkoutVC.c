@@ -302,6 +302,7 @@ id workoutVC_init(Workout *workout) {
 #ifndef __clang_analyzer__
     WorkoutVCData *data = calloc(1, sizeof(WorkoutVCData));
     data->workout = workout;
+    data->containers = malloc(workout->size * sizeof(id));
 
     pthread_mutex_init(&timerLock, NULL);
     for (unsigned char i = 0; i < 2; ++i) {
@@ -348,7 +349,8 @@ void workoutVC_deinit(id self, SEL _cmd) {
     pthread_mutex_destroy(&timerLock);
     exerciseTimerThread = NULL;
     CFRelease(data->workout->title);
-    Circuit *cEnd = &data->workout->activities[data->workout->size];
+    unsigned size = data->workout->size;
+    Circuit *cEnd = &data->workout->activities[size];
     for (Circuit *c = &data->workout->activities[0]; c < cEnd; ++c) {
         if (c->headerStr) CFRelease(c->headerStr);
         for (ExerciseEntry *e = &c->exercises[0]; e < &c->exercises[c->size]; ++e) {
@@ -361,10 +363,10 @@ void workoutVC_deinit(id self, SEL _cmd) {
     free(data->workout->activities);
     free(data->workout);
 
-    for (int i = 0; i < 10; ++i) {
-        if (data->containers[i])
-            releaseObj(data->containers[i]);
+    for (unsigned i = 0; i < size; ++i) {
+        releaseObj(data->containers[i]);
     }
+    free(data->containers);
     free(data);
     ((void(*)(struct objc_super *,SEL))objc_msgSendSuper)(&super, _cmd);
 }

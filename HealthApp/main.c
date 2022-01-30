@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
 
     InputVCClass = objc_allocateClassPair(VCClass, "InputVC", 0);
     class_addProtocol(InputVCClass, objc_getProtocol("UITextFieldDelegate"));
-    class_addIvar(InputVCClass, validatorKey, sizeof(InputVCData*), 0, "^{?=iiss[4@]@@@@@@}");
+    class_addIvar(InputVCClass, validatorKey, sizeof(InputVCData*), 0, "^{?=iiss[4@]@@@@@}");
     class_addMethod(InputVCClass, sel_getUid("init"), (IMP) inputVC_init, "@@:");
     class_addMethod(InputVCClass, deinit, (IMP) inputVC_deinit, voidSig);
     class_addMethod(InputVCClass, viewLoad, (IMP) inputVC_viewDidLoad, voidSig);
@@ -123,7 +123,7 @@ int main(int argc, char *argv[]) {
 
     WorkoutVCClass = objc_allocateClassPair(VCClass, "WorkoutVC", 0);
     class_addIvar(WorkoutVCClass, dataKey, sizeof(WorkoutVCData*), 0,
-                  "^{?=@@[10@][2@][2@]{__savedWorkoutInfo=I{__exerciseInfo=II}}"
+                  "^{?=@@@[2@][2@]{__savedWorkoutInfo=I{__exerciseInfo=II}}"
                   "[2{?=@{__timerInfo=CCC}{_opaque_pthread_mutex_t=q[56c]}"
                   "{_opaque_pthread_cond_t=q[40c]}IIIq}][4s]B}");
     class_addMethod(WorkoutVCClass, deinit, (IMP) workoutVC_deinit, voidSig);

@@ -1,7 +1,7 @@
 #ifndef InputVC_h
 #define InputVC_h
 
-#include <CoreFoundation/CFCharacterSet.h>
+#include <CoreFoundation/CFBase.h>
 #include <objc/runtime.h>
 
 extern Class InputVCClass;
@@ -27,7 +27,6 @@ typedef struct {
     short topOffset;
     short bottomOffset;
     id children[4];
-    CFCharacterSetRef set;
     id button;
     id activeField;
     id scrollView;

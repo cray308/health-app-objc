@@ -95,7 +95,6 @@ void inputVC_deinit(id self, SEL _cmd) {
     InputVCData *data = (InputVCData *) object_getIvar(self, InputVCDataRef);
     struct objc_super super = {self, objc_getClass("UIViewController")};
 
-    CFRelease(data->set);
     for (int i = 0; i < 4; ++i) {
         if (data->children[i])
             releaseObj(data->children[i]);
@@ -121,7 +120,6 @@ void inputVC_viewDidLoad(id self, SEL _cmd) {
     CGFloat width = bounds.size.width;
 
     InputVCData *data = (InputVCData *) object_getIvar(self, InputVCDataRef);
-    data->set = CFCharacterSetCreateWithCharactersInRange(NULL, (CFRange){'0', 10});
     data->scrollView = createScrollView();
     data->vStack = createStackView(nil, 0, 1, 0, (Padding){0});
     data->toolbar = createObjectWithFrame(objc_getClass("UIToolbar"), ((CGRect){{0}, {width, 50}}));
@@ -257,7 +255,7 @@ bool inputVC_fieldChanged(id self, SEL _cmd _U_, id field, CFRange range, CFStri
         CFStringInitInlineBuffer(replacement, &buf, CFRangeMake(0, len));
         for (int i = 0; i < len; ++i) {
             UniChar val = CFStringGetCharacterFromInlineBuffer(&buf, i);
-            if (!CFCharacterSetIsCharacterMember(d->set, val)) return false;
+            if (val < 48 || val > 57) return false;
         }
     }
 
