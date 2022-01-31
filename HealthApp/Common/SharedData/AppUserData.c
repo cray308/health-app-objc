@@ -174,7 +174,7 @@ int userInfo_initFromStorage(void) {
         userData->weekStart = weekStart;
 
         if (userData->currentPlan != -1) {
-            if ((appUserData_getWeekInPlan() / WeekSeconds) >= planLengths[userData->currentPlan]) {
+            if (appUserData_getWeekInPlan() >= planLengths[userData->currentPlan]) {
                 if (userData->currentPlan == WorkoutPlanBaseBuilding)
                     userData->currentPlan = WorkoutPlanContinuation;
                 userData->planStart = weekStart;
