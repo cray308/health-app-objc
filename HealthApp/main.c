@@ -82,7 +82,7 @@ int main(int argc, char *argv[]) {
     InputVCDataRef = class_getInstanceVariable(InputVCClass, validatorKey);
 
     SettingsVCClass = objc_allocateClassPair(InputVCClass, "SettingsVC", 0);
-    class_addIvar(SettingsVCClass, dataKey, sizeof(SettingsVCData*), 0, "^{?=@@}");
+    class_addIvar(SettingsVCClass, dataKey, sizeof(SettingsVCData*), 0, "^{?=@@[4s]}");
     class_addMethod(SettingsVCClass, viewLoad, (IMP) settingsVC_viewDidLoad, voidSig);
     class_addMethod(SettingsVCClass, btnTap, (IMP) settingsVC_buttonTapped, tapSig);
     objc_registerClassPair(SettingsVCClass);
@@ -111,9 +111,9 @@ int main(int argc, char *argv[]) {
     HistoryVCClass = objc_allocateClassPair(VCClass, "HistoryVC", 0);
     class_addProtocol(HistoryVCClass, getValueFormatterType());
     class_addIvar(HistoryVCClass, dataKey, sizeof(HistoryVCData*), 0,
-                  "^{?={?={?=@@@@[3^{CGPoint}][3f][3f]}"
-                  "{?=[5@]@[5@]@[3[5^{CGPoint}]][3[4i]][3f][4@]}"
-                  "{?=[4@]@[4@]@[3[4^{CGPoint}]][3[4f]][3f][4@]}@[3i]}@[3@]}");
+                  "^{?={?={?=@@@@[3@][3f][3f]}"
+                  "{?=[5@]@[5@]@[3[5@]][3[4i]][3f][4@]}"
+                  "{?=[4@]@[4@]@[3[4@]][3[4f]][3f][4@]}@[3i]}@[3@]}");
     class_addMethod(HistoryVCClass, viewLoad, (IMP) historyVC_viewDidLoad, voidSig);
     class_addMethod(HistoryVCClass, btnTap, (IMP) historyVC_updateSegment, tapSig);
     class_addMethod(HistoryVCClass, getValueFormatterAction(),

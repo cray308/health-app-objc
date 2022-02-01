@@ -212,7 +212,6 @@ static Workout *buildWorkoutFromDict(CFDictionaryRef dict, WorkoutParams *params
         w->testMax = true;
     }
     w->group = &w->activities[0];
-    w->entry = &w->group->exercises[0];
     return w;
 }
 

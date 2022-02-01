@@ -31,6 +31,7 @@ enum {
 enum {
     EventStartGroup = 1,
     EventFinishGroup,
+    EventFinishExercise
 };
 
 enum {
@@ -73,7 +74,7 @@ static void *timer_loop(void *arg) {
         duration = t->duration;
         container = t->container;
         exercise = t->exercise;
-        eventType = t->info.type ? 0 : EventFinishGroup;
+        eventType = t->info.type ? EventFinishExercise : EventFinishGroup;
         pthread_mutex_unlock(&t->lock);
 
         if (!duration) continue;
@@ -126,41 +127,39 @@ void restartTimers(id self) {
     unsigned groupIdx = 0, exerciseIdx = 0;
     WorkoutVCData *data = (WorkoutVCData *) object_getIvar(self, WorkoutVCDataRef);
     pthread_mutex_lock(&timerLock);
+    if (data->done) {
+        pthread_mutex_unlock(&timerLock);
+        return;
+    }
     Workout *w = data->workout;
-    if (!data->done) {
-        time_t now = time(NULL);
-        unsigned group = data->savedInfo.exerciseInfo.group;
-        exerciseIdx = data->savedInfo.exerciseInfo.tag;
-        if (group != ExerciseTagNA && w->index == group && w->group->index == exerciseIdx) {
-            ExerciseEntry *e = &w->group->exercises[exerciseIdx];
-            if (e->type == ExerciseDuration) {
-                unsigned diff = (unsigned) (now - data->timers[TimerExercise].refTime);
-                if (diff >= data->timers[TimerExercise].duration) {
-                    endExercise = true;
-                    groupIdx = group;
-                } else {
-                    startWorkoutTimer(&data->timers[TimerExercise],
-                                      data->timers[TimerExercise].duration - diff);
-                }
-            }
+    time_t now = time(NULL);
+    unsigned group = data->savedInfo.exerciseInfo.group;
+    exerciseIdx = data->savedInfo.exerciseInfo.tag;
+    if (w->index == group && w->group->index == exerciseIdx) {
+        unsigned diff = (unsigned) (now - data->timers[TimerExercise].refTime);
+        if (diff >= data->timers[TimerExercise].duration) {
+            endExercise = true;
+            groupIdx = group;
+        } else {
+            startWorkoutTimer(&data->timers[TimerExercise],
+                              data->timers[TimerExercise].duration - diff);
         }
+    }
 
-        group = data->savedInfo.groupTag;
-        if (group != ExerciseTagNA && w->index == group && w->group->type == CircuitAMRAP) {
-            unsigned diff = (unsigned) (now - data->timers[TimerGroup].refTime);
-            if (diff >= data->timers[TimerGroup].duration) {
-                endGroup = true;
-                groupIdx = group;
-            } else {
-                startWorkoutTimer(&data->timers[TimerGroup],
-                                  data->timers[TimerGroup].duration - diff);
-            }
+    group = data->savedInfo.groupTag;
+    if (w->index == group) {
+        unsigned diff = (unsigned) (now - data->timers[TimerGroup].refTime);
+        if (diff >= data->timers[TimerGroup].duration) {
+            endGroup = true;
+            groupIdx = group;
+        } else {
+            startWorkoutTimer(&data->timers[TimerGroup], data->timers[TimerGroup].duration - diff);
         }
     }
     pthread_mutex_unlock(&timerLock);
 
     if (endExercise)
-        handleEvent(self, groupIdx, exerciseIdx, 0);
+        handleEvent(self, groupIdx, exerciseIdx, EventFinishExercise);
     if (endGroup)
         handleEvent(self, groupIdx, 0, EventFinishGroup);
 }
@@ -208,9 +207,8 @@ static void cleanupWorkoutNotifications(id *observers) {
 
 #pragma mark - View Configuration
 
-static bool cycleExerciseEntry(Workout *w, WorkoutTimer *timers) {
+static bool cycleExerciseEntry(ExerciseEntry *e, WorkoutTimer *timers) {
     bool completed = false;
-    ExerciseEntry *e = w->entry;
     switch (e->state) {
         case ExerciseStateDisabled:
             e->state = ExerciseStateActive;
@@ -244,13 +242,10 @@ static bool cycleExerciseEntry(Workout *w, WorkoutTimer *timers) {
     return completed;
 }
 
-static void startGroup(Workout *w, WorkoutTimer *timers, bool startTimer) {
-    timers[TimerGroup].container = timers[TimerExercise].container = w->index;
-    timers[TimerExercise].exercise = w->group->index = 0;
-    w->entry = &w->group->exercises[0];
+static void startGroup(Circuit *c, WorkoutTimer *timers, bool startTimer) {
+    timers[TimerExercise].exercise = c->index = 0;
 
-    Circuit *c = w->group;
-    for (ExerciseEntry *e = &c->exercises[0]; e < &c->exercises[c->size]; ++e) {
+    for (ExerciseEntry *e = c->exercises; e < &c->exercises[c->size]; ++e) {
         e->state = ExerciseStateDisabled;
         e->completedSets = 0;
     }
@@ -261,7 +256,7 @@ static void startGroup(Workout *w, WorkoutTimer *timers, bool startTimer) {
         scheduleNotification(duration, TimerGroup);
     }
 
-    cycleExerciseEntry(w, timers);
+    cycleExerciseEntry(c->exercises, timers);
 }
 
 static void exerciseView_configure(id v) {
@@ -310,7 +305,6 @@ id workoutVC_init(Workout *workout) {
         pthread_mutex_init(&data->timers[i].lock, NULL);
         pthread_cond_init(&data->timers[i].cond, NULL);
     }
-    data->timers[TimerGroup].exercise = ExerciseTagNA;
 
     struct sigaction sa = {.sa_flags = 0, .sa_handler = handle_exercise_timer_interrupt};
     sigemptyset(&sa.sa_mask);
@@ -549,48 +543,51 @@ void workoutVC_handleTap(id self, SEL _cmd _U_, id btn) {
 }
 
 void handleEvent(id self, unsigned gIdx, unsigned eIdx, unsigned char event) {
-    bool finishedWorkout = false, showModal = false;
     WorkoutVCData *data = (WorkoutVCData *) object_getIvar(self, WorkoutVCDataRef);
     pthread_mutex_lock(&timerLock);
     Workout *w = data->workout;
-    if (data->done) {
-        goto cleanup;
-    } else if (gIdx != w->index || eIdx != w->group->index) {
-        if (event != EventFinishGroup || gIdx != w->index)
-            goto cleanup;
+    if (data->done || gIdx != w->index || (eIdx != w->group->index && event != EventFinishGroup)) {
+        pthread_mutex_unlock(&timerLock);
+        return;
     }
 
     CFArrayRef views = getArrangedSubviews(data->first->stack);
-    id currView = (id) CFArrayGetValueAtIndex(views, w->group->index);
+    id currView = (id) CFArrayGetValueAtIndex(views, eIdx);
+    ExerciseEntry *entry = &w->group->exercises[eIdx];
     StatusViewData *ptr = ((StatusViewData *) object_getIvar(currView, StatusViewDataRef));
     unsigned char t = 0;
-    if (event) {
-        t = TransitionFinishedCircuit;
-        if (event == EventFinishGroup) {
+    switch (event) {
+        case EventFinishExercise:
+            toggleInteraction(ptr->button, true);
+            if (w->type == WorkoutEndurance)
+                goto foundTransition;
+            break;
+
+        case EventStartGroup:
+            t = TransitionFinishedCircuit;
+            startGroup(w->group, data->timers, true);
+            goto foundTransition;
+
+        case EventFinishGroup:
+            t = TransitionFinishedCircuitDeleteFirst;
             if (++w->index == w->size) {
                 t = TransitionCompletedWorkout;
                 goto foundTransition;
             }
             ++w->group;
-            t = TransitionFinishedCircuitDeleteFirst;
-        }
-        startGroup(w, data->timers, true);
-        goto foundTransition;
-    }
-
-    if (w->entry->type == ExerciseDuration && w->entry->state == ExerciseStateActive &&
-        !getBool(ptr->button, sel_getUid("isUserInteractionEnabled"))) {
-        toggleInteraction(ptr->button, true);
-        if (w->type == WorkoutEndurance)
+            data->timers[0].container = data->timers[1].container = w->index;
+            startGroup(w->group, data->timers, true);
             goto foundTransition;
+
+        default:
+            break;
     }
 
-    bool exerciseDone = cycleExerciseEntry(w, data->timers);
+    bool exerciseDone = cycleExerciseEntry(entry, data->timers);
     exerciseView_configure(currView);
 
     if (exerciseDone) {
         t = TransitionFinishedExercise;
-        ++w->entry;
         if (++w->group->index == w->group->size) {
             t = TransitionFinishedCircuit;
             Circuit *c = w->group;
@@ -627,31 +624,32 @@ void handleEvent(id self, unsigned gIdx, unsigned eIdx, unsigned char event) {
                     t = TransitionCompletedWorkout;
                 } else {
                     t = TransitionFinishedCircuitDeleteFirst;
-                    ++w->group;
-                    startGroup(w, data->timers, true);
+                    data->timers[0].container = data->timers[1].container = w->index;
+                    startGroup(++w->group, data->timers, true);
                 }
             } else {
-                startGroup(w, data->timers, false);
+                startGroup(w->group, data->timers, false);
             }
         } else {
-            cycleExerciseEntry(w, data->timers);
+            cycleExerciseEntry(entry + 1, data->timers);
         }
     }
 foundTransition:
 
     switch (t) {
         case TransitionCompletedWorkout:
-            data->done = finishedWorkout = true;
+            data->done = true;
             cleanupWorkoutNotifications(data->observers);
-            break;
+            setDuration(w);
+            pthread_mutex_unlock(&timerLock);
+            workoutVC_handleFinishedWorkout(self);
+            return;
 
         case TransitionFinishedCircuitDeleteFirst:
             data->first = ((ContainerViewData *)
                            object_getIvar(data->containers[w->index], ContainerViewDataRef));
             views = getArrangedSubviews(data->first->stack);
             removeView(data->containers[w->index - 1]);
-            releaseObj(data->containers[w->index - 1]);
-            data->containers[w->index - 1] = nil;
             hideView(data->first->divider, true);
 
         case TransitionFinishedCircuit:
@@ -673,19 +671,14 @@ foundTransition:
             break;
 
         default:
-            if (w->testMax)
-                showModal = true;
+            if (w->testMax) {
+                pthread_mutex_unlock(&timerLock);
+                presentModalVC(self, updateMaxesVC_init(self, eIdx));
+                return;
+            }
             break;
     }
-
-cleanup:
     pthread_mutex_unlock(&timerLock);
-    if (finishedWorkout) {
-        setDuration(w);
-        workoutVC_handleFinishedWorkout(self);
-    } else if (showModal) {
-        presentModalVC(self, updateMaxesVC_init(self, eIdx));
-    }
 }
 
 void workoutVC_finishedBottomSheet(id self, unsigned index, short weight) {

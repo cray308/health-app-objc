@@ -67,7 +67,6 @@ typedef struct {
     int16_t duration;
     CFStringRef title;
     Circuit *group;
-    ExerciseEntry *entry;
     Circuit *activities;
 } Workout;
 
