@@ -8,10 +8,6 @@
 Class SettingsVCClass;
 Ivar SettingsVCDataRef;
 
-static inline void addCancelAction(id ctrl, Callback handler) {
-    addAlertAction(ctrl, localize(CFSTR("cancel")), 1, handler);
-}
-
 id settingsVC_init(void) {
     id self = createVC(SettingsVCClass);
 #ifndef __clang_analyzer__
@@ -113,9 +109,9 @@ void settingsVC_buttonTapped(id self, SEL _cmd _U_, id btn) {
     int tag = getTag(btn);
     CFStringRef message = localize(tag ? CFSTR("alertMsgDelete") : CFSTR("alertMsgSave"));
     id ctrl = createAlertController(localize(CFSTR("settingsAlertTitle")), message);
+    addAlertAction(ctrl, localize(CFSTR("cancel")), 1, NULL);
     if (tag) {
         addAlertAction(ctrl, localize(CFSTR("delete")), 2, ^{ appCoordinator_deleteAppData(); });
-        addCancelAction(ctrl, NULL);
         presentVC(self, ctrl);
         return;
     }
@@ -126,7 +122,7 @@ void settingsVC_buttonTapped(id self, SEL _cmd _U_, id btn) {
         dark = getBool(data->switchView, sel_getUid("isOn")) ? 1 : 0;
     signed char plan = ((signed char) getSelectedSegment(data->picker)) - 1;
 
-    short *results = malloc(sizeof(short) << 2);
+    short *results = data->results;
     id *fields = ((InputVCData *) object_getIvar(self, InputVCDataRef))->children;
     for (int i = 0; i < 4; ++i) {
         results[i] = ((InputViewData *) object_getIvar(fields[i], InputViewDataRef))->result;
@@ -134,6 +130,5 @@ void settingsVC_buttonTapped(id self, SEL _cmd _U_, id btn) {
     addAlertAction(ctrl, localize(CFSTR("save")), 0, ^{
         appCoordinator_updateUserInfo(plan, dark, results);
     });
-    addCancelAction(ctrl, ^{ free(results); });
     presentVC(self, ctrl);
 }

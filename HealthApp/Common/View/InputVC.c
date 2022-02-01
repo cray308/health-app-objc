@@ -260,10 +260,10 @@ bool inputVC_fieldChanged(id self, SEL _cmd _U_, id field, CFRange range, CFStri
     }
 
     int i = getTag(field);
-    if (i == d->count) return true;
     InputViewData *child = (InputViewData *) object_getIvar(d->children[i], InputViewDataRef);
 
     CFStringRef text = getText(field);
+    if (range.location + range.length > CFStringGetLength(text)) return false;
     CFMutableStringRef newText = CFStringCreateMutableCopy(NULL, 0, text ? text : CFSTR(""));
     CFStringReplace(newText, range, replacement);
 

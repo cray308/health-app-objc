@@ -96,7 +96,6 @@ void appCoordinator_updateUserInfo(signed char plan, signed char darkMode, short
         historyVC_updateColors(appCoordinator->children[1]);
         settingsVC_updateColors(appCoordinator->children[2]);
     }
-    free(weights);
     if (updateHome)
         homeVC_createWorkoutsList(appCoordinator->children[0]);
 }

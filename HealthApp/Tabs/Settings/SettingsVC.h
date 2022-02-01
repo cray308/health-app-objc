@@ -9,6 +9,7 @@ extern Ivar SettingsVCDataRef;
 typedef struct {
     id picker;
     id switchView;
+    short results[4];
 } SettingsVCData;
 
 id settingsVC_init(void);
