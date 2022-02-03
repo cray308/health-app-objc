@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
     LiftViewDataRef = class_getInstanceVariable(LiftViewClass, dataKey);
 
     InputViewClass = objc_allocateClassPair(viewClass, "InputView", 0);
-    class_addIvar(InputViewClass, dataKey, sizeof(InputViewData*), 0, "^{?=sssB@@@@@}");
+    class_addIvar(InputViewClass, dataKey, sizeof(InputViewData*), 0, "^{?=sssB@@@}");
     class_addMethod(InputViewClass, deinit, (IMP) inputView_deinit, voidSig);
     objc_registerClassPair(InputViewClass);
     InputViewDataRef = class_getInstanceVariable(InputViewClass, dataKey);
@@ -111,9 +111,8 @@ int main(int argc, char *argv[]) {
     HistoryVCClass = objc_allocateClassPair(VCClass, "HistoryVC", 0);
     class_addProtocol(HistoryVCClass, getValueFormatterType());
     class_addIvar(HistoryVCClass, dataKey, sizeof(HistoryVCData*), 0,
-                  "^{?={?={?=@@@@[3@][3f][3f]}"
-                  "{?=[5@]@[5@]@[3[5@]][3[4i]][3f][4@]}"
-                  "{?=[4@]@[4@]@[3[4@]][3[4f]][3f][4@]}@[3i]}@[3@]}");
+                  "^{?={?={?=@@@@[3f][3f]}{?=[5@]@[5@]@[3[4i]][3f][4@]}"
+                  "{?=[4@]@[4@]@[3[4f]][3f][4@]}@[3i][3i]}@[3@]}");
     class_addMethod(HistoryVCClass, viewLoad, (IMP) historyVC_viewDidLoad, voidSig);
     class_addMethod(HistoryVCClass, btnTap, (IMP) historyVC_updateSegment, tapSig);
     class_addMethod(HistoryVCClass, getValueFormatterAction(),

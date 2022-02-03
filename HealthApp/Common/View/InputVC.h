@@ -14,8 +14,6 @@ typedef struct {
     short maxVal;
     short result;
     bool valid;
-    CFStringRef hintText;
-    CFStringRef errorText;
     id hintLabel;
     id field;
     id errorLabel;

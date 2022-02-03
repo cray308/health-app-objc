@@ -26,8 +26,9 @@ static void showInputError(InputVCData *data, InputViewData *child) {
     enableButton(data->button, false);
     child->valid = false;
     hideView(child->errorLabel, false);
-    CFStringRef text = CFStringCreateWithFormat(NULL, NULL, CFSTR("%@. %@"),
-                                                child->hintText, child->errorText);
+    CFStringRef hintText = getText(child->hintLabel);
+    CFStringRef errorText = getText(child->errorLabel);
+    CFStringRef text = CFStringCreateWithFormat(NULL, NULL, CFSTR("%@. %@"), hintText, errorText);
     setAccessibilityLabel(child->field, text);
     CFRelease(text);
 }
@@ -42,11 +43,10 @@ void inputVC_addChild(id self, CFStringRef hint, short min, short max) {
     InputViewData *ptr = calloc(1, sizeof(InputViewData));
     ptr->minVal = min;
     ptr->maxVal = max;
-    ptr->hintText = hint;
-    ptr->errorText = CFStringCreateWithFormat(NULL, NULL, inputFieldError, min, max);
+    CFStringRef errorText = CFStringCreateWithFormat(NULL, NULL, inputFieldError, min, max);
     ptr->hintLabel = createLabel(hint, TextFootnote, 4, false);
-    ptr->field = createTextfield(self, NULL, hint, 4, 4, index);
-    ptr->errorLabel = createLabel(ptr->errorText, TextFootnote, 4, false);
+    ptr->field = createTextfield(self, CFSTR(""), hint, 4, 4, index);
+    ptr->errorLabel = createLabel(errorText, TextFootnote, 4, false);
     DMLabel *errorPtr = (DMLabel *) ptr->errorLabel;
     errorPtr->colorCode = ColorRed;
     setTextColor(ptr->errorLabel, createColor(ColorRed));
@@ -57,6 +57,7 @@ void inputVC_addChild(id self, CFStringRef hint, short min, short max) {
     pin(vStack, view, (Padding){0}, 0);
     addArrangedSubview(d->vStack, view);
     releaseObj(vStack);
+    CFRelease(errorText);
     hideView(ptr->errorLabel, true);
     setInputAccessory(ptr->field, d->toolbar);
     object_setIvar(view, InputViewDataRef, (id) ptr);
@@ -66,7 +67,6 @@ void inputVC_addChild(id self, CFStringRef hint, short min, short max) {
 void inputView_deinit(id self, SEL _cmd) {
     InputViewData *ptr = (InputViewData *) object_getIvar(self, InputViewDataRef);
     struct objc_super super = {self, objc_getClass("UIView")};
-    CFRelease(ptr->errorText);
     releaseObj(ptr->hintLabel);
     releaseObj(ptr->field);
     releaseObj(ptr->errorLabel);
@@ -78,7 +78,7 @@ void inputView_reset(InputViewData *data, short value) {
     data->valid = true;
     data->result = value;
     hideView(data->errorLabel, true);
-    setAccessibilityLabel(data->field, data->hintText);
+    setAccessibilityLabel(data->field, getText(data->hintLabel));
 }
 
 id inputVC_init(id self, SEL _cmd) {
@@ -264,7 +264,7 @@ bool inputVC_fieldChanged(id self, SEL _cmd _U_, id field, CFRange range, CFStri
 
     CFStringRef text = getText(field);
     if (range.location + range.length > CFStringGetLength(text)) return false;
-    CFMutableStringRef newText = CFStringCreateMutableCopy(NULL, 0, text ? text : CFSTR(""));
+    CFMutableStringRef newText = CFStringCreateMutableCopy(NULL, 0, text);
     CFStringReplace(newText, range, replacement);
 
     if (!CFStringGetLength(newText)) {

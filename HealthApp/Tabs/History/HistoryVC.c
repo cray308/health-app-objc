@@ -38,6 +38,7 @@ static void historyData_populate(HistoryViewModel *m, struct WeekDataModel *resu
         refIndices[1] = 0;
 
     memcpy(m->nEntries, (int[]){size - refIndices[1], size - refIndices[2], size}, 3 * sizeof(int));
+    memcpy(m->refIndices, &refIndices[1], 3 * sizeof(int));
 
     int totalWorkouts[3] = {0}, maxWorkouts[3] = {0}, maxTime[3] = {0}, maxWeight[3] = {0};
     int totalByType[3][4] = {{0},{0},{0}}, totalByExercise[3][4] = {{0},{0},{0}};
@@ -87,19 +88,14 @@ static void historyData_populate(HistoryViewModel *m, struct WeekDataModel *resu
     }
 
     for (int i = 0; i < 3; ++i) {
-        int refIdx = refIndices[i + 1];
         m->totalWorkouts.avgs[i] = (float) totalWorkouts[i] / m->nEntries[i];
         m->totalWorkouts.maxes[i] = maxWorkouts[i] < 7 ? 7 : 1.1f * maxWorkouts[i];
         m->workoutTypes.maxes[i] = 1.1f * maxTime[i];
         m->lifts.maxes[i] = 1.1f * maxWeight[i];
-        m->totalWorkouts.dataArrays[i] = &m->totalWorkouts.entries[refIdx];
-        m->workoutTypes.dataArrays[i][0] = &m->workoutTypes.entries[0][refIdx];
 
         for (int j = 0; j < 4; ++j) {
             m->workoutTypes.avgs[i][j] = totalByType[i][j] / m->nEntries[i];
             m->lifts.avgs[i][j] = (float) totalByExercise[i][j] / m->nEntries[i];
-            m->workoutTypes.dataArrays[i][j + 1] = &m->workoutTypes.entries[j + 1][refIdx];
-            m->lifts.dataArrays[i][j] = &m->lifts.entries[j][refIdx];
         }
     }
     free(results);
@@ -211,7 +207,9 @@ void historyVC_viewDidLoad(id self, SEL _cmd) {
     id containers[3];
     for (int i = 0; i < 3; ++i) {
         containers[i] = containerView_init(titles[i], 0, false);
-        containerView_add(containers[i], data->charts[i]);
+        ContainerViewData *container = ((ContainerViewData *)
+                                        object_getIvar(containers[i], ContainerViewDataRef));
+        addArrangedSubview(container->stack, data->charts[i]);
     }
     ContainerViewData *firstC = ((ContainerViewData *)
                                  object_getIvar(containers[0], ContainerViewDataRef));
@@ -242,14 +240,18 @@ void historyVC_updateSegment(id self, SEL _cmd _U_, id picker) {
     WorkoutTypeViewData *typeData = ((WorkoutTypeViewData *)
                                      object_getIvar(data->charts[1], WorkoutTypeViewDataRef));
     LiftViewData *liftData = (LiftViewData *) object_getIvar(data->charts[2], LiftViewDataRef);
-    if (!model->nEntries[2]) {
+    int index = getSelectedSegment(picker);
+    int count = model->nEntries[index];
+    int ref = model->refIndices[index];
+    if (!count) {
         disableLineChartView(totalsData->chart);
         disableLineChartView(typeData->chart);
         disableLineChartView(liftData->chart);
+        (((void(*)(id,SEL,id,SEL,int))objc_msgSend)
+         (data->picker, sel_getUid("removeTarget:action:forControlEvents:"), nil, nil, 4096));
         return;
     }
 
-    int index = getSelectedSegment(picker);
     char buf[16];
     CFStringRef label = CFStringCreateWithFormat(NULL, NULL, model->totalWorkouts.legendFormat,
                                                  model->totalWorkouts.avgs[index]);
@@ -274,9 +276,9 @@ void historyVC_updateSegment(id self, SEL _cmd _U_, id picker) {
         CFRelease(label);
     }
 
-    totalWorkoutsView_update(data->charts[0], model->nEntries[index], index);
-    workoutTypeView_update(data->charts[1], model->nEntries[index], index);
-    liftingView_update(data->charts[2], model->nEntries[index], index);
+    totalWorkoutsView_update(data->charts[0], count, index, ref);
+    workoutTypeView_update(data->charts[1], count, index, ref);
+    liftingView_update(data->charts[2], count, index, ref);
 }
 
 void historyVC_clearData(id self) {
@@ -285,37 +287,16 @@ void historyVC_clearData(id self) {
     if (!model->nEntries[2]) return;
 
     CFRelease(model->axisStrings);
-    model->axisStrings = NULL;
     memset(model->nEntries, 0, 3 * sizeof(int));
-    memset(model->totalWorkouts.dataArrays, 0, 3 * sizeof(id*));
-    memset(model->totalWorkouts.avgs, 0, 3 * sizeof(float));
-    memset(model->totalWorkouts.maxes, 0, 3 * sizeof(float));
-    memset(model->lifts.maxes, 0, 3 * sizeof(float));
-    memset(model->workoutTypes.maxes, 0, 3 * sizeof(float));
-
-    for (int i = 0; i < 3; ++i) {
-        memset(model->workoutTypes.dataArrays[i], 0, 5 * sizeof(id*));
-        memset(model->lifts.dataArrays[i], 0, sizeof(id*) << 2);
-        memset(model->workoutTypes.avgs[i], 0, sizeof(int) << 2);
-        memset(model->lifts.avgs[i], 0, sizeof(float) << 2);
-    }
-
     free(model->totalWorkouts.entries);
-    model->totalWorkouts.entries = NULL;
-    for (int i = 0; i < 4; ++i) {
-        free(model->workoutTypes.entries[i]);
-        model->workoutTypes.entries[i] = NULL;
-        free(model->lifts.entries[i]);
-        model->lifts.entries[i] = NULL;
-    }
-    free(model->workoutTypes.entries[4]);
-    model->workoutTypes.entries[4] = NULL;
-
     replaceDataSetEntries(model->totalWorkouts.dataSet, NULL, 0);
     for (int i = 0; i < 4; ++i) {
+        free(model->workoutTypes.entries[i]);
+        free(model->lifts.entries[i]);
         replaceDataSetEntries(model->workoutTypes.dataSets[i], NULL, 0);
         replaceDataSetEntries(model->lifts.dataSets[i], NULL, 0);
     }
+    free(model->workoutTypes.entries[4]);
     replaceDataSetEntries(model->workoutTypes.dataSets[4], NULL, 0);
 
     if (isViewLoaded(self)) {

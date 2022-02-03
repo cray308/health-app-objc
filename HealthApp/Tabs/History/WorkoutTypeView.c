@@ -20,11 +20,11 @@ id workoutTypeView_init(WorkoutTypeChartModel *model, id formatter) {
     return self;
 }
 
-void workoutTypeView_update(id self, int count, int index) {
+void workoutTypeView_update(id self, int count, int index, int ref) {
     WorkoutTypeViewData *ptr = (WorkoutTypeViewData *) object_getIvar(self, WorkoutTypeViewDataRef);
-    replaceDataSetEntries(ptr->model->dataSets[0], ptr->model->dataArrays[index][0], count);
+    replaceDataSetEntries(ptr->model->dataSets[0], &ptr->model->entries[0][ref], count);
     for (int i = 1; i < 5; ++i) {
-        replaceDataSetEntries(ptr->model->dataSets[i], ptr->model->dataArrays[index][i], count);
+        replaceDataSetEntries(ptr->model->dataSets[i], &ptr->model->entries[i][ref], count);
     }
     updateChart(ptr->chart, ptr->model->chartData, ptr->model->maxes[index]);
 }

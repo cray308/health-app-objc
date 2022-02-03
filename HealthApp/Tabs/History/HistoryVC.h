@@ -13,7 +13,6 @@ typedef struct {
     CFStringRef legendFormat;
     id dataSet;
     id chartData;
-    CGPoint *dataArrays[3];
     float avgs[3];
     float maxes[3];
 } TotalWorkoutsChartModel;
@@ -23,7 +22,6 @@ typedef struct {
     CFStringRef legendFormat;
     id dataSets[5];
     id chartData;
-    CGPoint *dataArrays[3][5];
     int avgs[3][4];
     float maxes[3];
     CFStringRef names[4];
@@ -34,7 +32,6 @@ typedef struct {
     CFStringRef legendFormat;
     id dataSets[4];
     id chartData;
-    CGPoint *dataArrays[3][4];
     float avgs[3][4];
     float maxes[3];
     CFStringRef names[4];
@@ -46,6 +43,7 @@ typedef struct {
     LiftChartModel lifts;
     CFArrayRef axisStrings;
     int nEntries[3];
+    int refIndices[3];
 } HistoryViewModel;
 
 typedef struct {

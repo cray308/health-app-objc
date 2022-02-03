@@ -12,6 +12,6 @@ typedef struct {
 } LiftViewData;
 
 id liftingView_init(LiftChartModel *model, id formatter);
-void liftingView_update(id self, int count, int index);
+void liftingView_update(id self, int count, int index, int ref);
 
 #endif /* LiftingView_h */

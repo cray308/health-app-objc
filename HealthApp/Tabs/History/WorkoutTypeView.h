@@ -12,6 +12,6 @@ typedef struct {
 } WorkoutTypeViewData;
 
 id workoutTypeView_init(WorkoutTypeChartModel *model, id formatter);
-void workoutTypeView_update(id self, int count, int index);
+void workoutTypeView_update(id self, int count, int index, int ref);
 
 #endif /* WorkoutTypeView_h */

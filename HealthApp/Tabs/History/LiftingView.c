@@ -20,10 +20,10 @@ id liftingView_init(LiftChartModel *model, id formatter) {
     return self;
 }
 
-void liftingView_update(id self, int count, int index) {
+void liftingView_update(id self, int count, int index, int ref) {
     LiftViewData *ptr = (LiftViewData *) object_getIvar(self, LiftViewDataRef);
     for (int i = 0; i < 4; ++i) {
-        replaceDataSetEntries(ptr->model->dataSets[i], ptr->model->dataArrays[index][i], count);
+        replaceDataSetEntries(ptr->model->dataSets[i], &ptr->model->entries[i][ref], count);
     }
     updateChart(ptr->chart, ptr->model->chartData, ptr->model->maxes[index]);
 }

@@ -22,10 +22,10 @@ id totalWorkoutsView_init(TotalWorkoutsChartModel *model, id formatter) {
     return self;
 }
 
-void totalWorkoutsView_update(id self, int count, int index) {
+void totalWorkoutsView_update(id self, int count, int index, int ref) {
     TotalWorkoutsViewData *ptr = ((TotalWorkoutsViewData *)
                                   object_getIvar(self, TotalWorkoutsViewDataRef));
     setLineLimit(ptr->chart, ptr->model->avgs[index]);
-    replaceDataSetEntries(ptr->model->dataSet, ptr->model->dataArrays[index], count);
+    replaceDataSetEntries(ptr->model->dataSet, &ptr->model->entries[ref], count);
     updateChart(ptr->chart, ptr->model->chartData, ptr->model->maxes[index]);
 }
