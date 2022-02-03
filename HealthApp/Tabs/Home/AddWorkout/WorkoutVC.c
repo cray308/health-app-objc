@@ -12,6 +12,8 @@
 #define popVC(_navVC) ((id(*)(id,SEL,bool))objc_msgSend)\
 ((_navVC), sel_getUid("popViewControllerAnimated:"), true)
 
+#define isWorkoutLongEnough(w) (w)->duration >= 15
+
 extern id UIApplicationDidBecomeActiveNotification;
 extern id UIApplicationWillResignActiveNotification;
 
@@ -117,7 +119,7 @@ void stopTimers(id self) {
         data->savedInfo.exerciseInfo.tag = data->timers[TimerExercise].exercise;
         pthread_kill(data->threads[TimerExercise], SignalExercise);
     } else {
-        data->savedInfo.exerciseInfo.group = data->savedInfo.exerciseInfo.tag = ExerciseTagNA;
+        data->savedInfo.exerciseInfo.group = ExerciseTagNA;
     }
     pthread_mutex_unlock(&timerLock);
 }
@@ -131,11 +133,10 @@ void restartTimers(id self) {
         pthread_mutex_unlock(&timerLock);
         return;
     }
-    Workout *w = data->workout;
     time_t now = time(NULL);
     unsigned group = data->savedInfo.exerciseInfo.group;
     exerciseIdx = data->savedInfo.exerciseInfo.tag;
-    if (w->index == group && w->group->index == exerciseIdx) {
+    if (group != ExerciseTagNA) {
         unsigned diff = (unsigned) (now - data->timers[TimerExercise].refTime);
         if (diff >= data->timers[TimerExercise].duration) {
             endExercise = true;
@@ -147,7 +148,7 @@ void restartTimers(id self) {
     }
 
     group = data->savedInfo.groupTag;
-    if (w->index == group) {
+    if (group != ExerciseTagNA) {
         unsigned diff = (unsigned) (now - data->timers[TimerGroup].refTime);
         if (diff >= data->timers[TimerGroup].duration) {
             endGroup = true;
@@ -325,7 +326,6 @@ void workoutVC_deinit(id self, SEL _cmd) {
     WorkoutVCData *data = (WorkoutVCData *) object_getIvar(self, WorkoutVCDataRef);
     struct objc_super super = {self, objc_getClass("UIViewController")};
 
-    cleanupWorkoutNotifications(data->observers);
     if (data->timers[TimerGroup].info.active == 1)
         pthread_kill(data->threads[TimerGroup], SignalGroup);
     if (data->timers[TimerExercise].info.active == 1)
@@ -378,17 +378,12 @@ static inline void setDuration(Workout *w) {
 #endif
 }
 
-static inline bool isLongEnough(Workout *w) {
-    return w->duration >= 15;
-}
-
 static void updateStoredData(unsigned char type, int16_t duration, short *lifts) {
     runInBackground((^{
         id data = persistenceService_getCurrentWeek();
         int16_t newDuration = duration + weekData_getWorkoutTimeForType(data, type);
         weekData_setWorkoutTimeForType(data, type, newDuration);
-        int16_t totalWorkouts = weekData_getTotalWorkouts(data);
-        totalWorkouts += 1;
+        int16_t totalWorkouts = weekData_getTotalWorkouts(data) + 1;
         weekData_setTotalWorkouts(data, totalWorkouts);
         if (lifts) {
             weekData_setLiftingMaxArray(data, lifts);
@@ -408,10 +403,11 @@ static void workoutVC_handleFinishedWorkout(id self) {
         appCoordinator_updateMaxWeights(data->weights);
         lifts = malloc(sizeof(short) << 2);
         memcpy(lifts, data->weights, sizeof(short) << 2);
-        data->workout->duration = max(data->workout->duration, 15);
+        if (data->workout->duration < 15)
+            data->workout->duration = 15;
     }
 
-    if (isLongEnough(data->workout)) {
+    if (isWorkoutLongEnough(data->workout)) {
         if (w->day >= 0)
             totalCompleted = appUserData_addCompletedWorkout((unsigned char) w->day);
         updateStoredData(w->type, w->duration, lifts);
@@ -449,6 +445,8 @@ void workoutVC_viewDidLoad(id self, SEL _cmd) {
     for (unsigned i = 0; i < data->workout->size; ++i) {
         Circuit *c = &data->workout->activities[i];
         data->containers[i] = containerView_init(c->headerStr, 0, false);
+        ContainerViewData *container = ((ContainerViewData *)
+                                        object_getIvar(data->containers[i], ContainerViewDataRef));
         addArrangedSubview(stack, data->containers[i]);
 
         for (unsigned j = 0; j < c->size; ++j) {
@@ -456,7 +454,7 @@ void workoutVC_viewDidLoad(id self, SEL _cmd) {
             StatusViewData *ptr = (StatusViewData *) object_getIvar(v, StatusViewDataRef);
             ptr->entry = &c->exercises[j];
             exerciseView_configure(v);
-            containerView_add(data->containers[i], v);
+            addArrangedSubview(container->stack, v);
             releaseObj(v);
         }
     }
@@ -506,7 +504,7 @@ void workoutVC_startEndWorkout(id self, SEL _cmd _U_, id btn) {
             if (checkEnduranceDuration(w)) {
                 workoutVC_handleFinishedWorkout(self);
             } else {
-                if (isLongEnough(w))
+                if (isWorkoutLongEnough(w))
                     updateStoredData(w->type, w->duration, NULL);
                 id navVC = getNavVC(self);
                 popVC(navVC);
@@ -528,7 +526,7 @@ void workoutVC_willDisappear(id self, SEL _cmd, bool animated) {
                 setDuration(w);
                 if (checkEnduranceDuration(w)) {
                     workoutVC_handleFinishedWorkout(self);
-                } else if (isLongEnough(w)) {
+                } else if (isWorkoutLongEnough(w)) {
                     updateStoredData(w->type, w->duration, NULL);
                 }
             }
