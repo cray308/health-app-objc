@@ -15,6 +15,7 @@ typedef struct {
     unsigned char completedWorkouts;
     short liftMaxes[4];
     short bodyweight;
+    short week;
 } UserInfo;
 
 extern UserInfo *userData;
@@ -22,7 +23,6 @@ extern UserInfo *userData;
 void userInfo_create(bool darkMode);
 int userInfo_initFromStorage(void);
 
-int appUserData_getWeekInPlan(void);
 bool appUserData_updateUserSettings(signed char plan, signed char darkMode, short *weights);
 void appUserData_deleteSavedData(void);
 unsigned char appUserData_addCompletedWorkout(unsigned char day);

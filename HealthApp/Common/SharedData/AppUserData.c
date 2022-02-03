@@ -127,6 +127,7 @@ void userInfo_create(bool darkMode) {
     userData = calloc(1, sizeof(UserInfo));
     userData->currentPlan = -1;
     userData->weekStart = date_calcStartOfWeek(now);
+    userData->planStart = userData->weekStart;
     userData->tzOffset = date_getOffsetFromGMT(now);
     userData->darkMode = darkMode ? 0 : -1;
     saveData();
@@ -165,20 +166,21 @@ int userInfo_initFromStorage(void) {
     if (tzDiff) {
         madeChange = true;
         userData->weekStart += tzDiff;
+        userData->planStart += tzDiff;
         userData->tzOffset = newOffset;
     }
 
+    userData->week = (short) ((weekStart - userData->planStart) / WeekSeconds);
     if (weekStart != userData->weekStart) {
         madeChange = true;
         userData->completedWorkouts = 0;
         userData->weekStart = weekStart;
 
-        if (userData->currentPlan != -1) {
-            if (appUserData_getWeekInPlan() >= planLengths[userData->currentPlan]) {
-                if (userData->currentPlan == WorkoutPlanBaseBuilding)
-                    userData->currentPlan = WorkoutPlanContinuation;
-                userData->planStart = weekStart;
-            }
+        if (userData->currentPlan != -1 && userData->week >= planLengths[userData->currentPlan]) {
+            if (userData->currentPlan == WorkoutPlanBaseBuilding)
+                userData->currentPlan = WorkoutPlanContinuation;
+            userData->planStart = weekStart;
+            userData->week = 0;
         }
     }
 
@@ -206,10 +208,6 @@ unsigned char appUserData_addCompletedWorkout(unsigned char day) {
     return total;
 }
 
-int appUserData_getWeekInPlan(void) {
-    return ((int) (userData->weekStart - userData->planStart)) / WeekSeconds;
-}
-
 bool appUserData_updateWeightMaxes(short *weights) {
     bool madeChanges = false;
     for (int i = 0; i < 4; ++i) {
@@ -228,6 +226,7 @@ bool appUserData_updateUserSettings(signed char plan, signed char darkMode, shor
     if (plan != -1 && madeChanges) {
 #if TARGET_OS_SIMULATOR
         userData->planStart = userData->weekStart;
+        userData->week = 0;
 #else
         userData->planStart = userData->weekStart + WeekSeconds;
 #endif

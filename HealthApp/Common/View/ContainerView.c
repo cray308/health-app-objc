@@ -35,11 +35,6 @@ id containerView_init(CFStringRef title, int spacing, bool margins) {
     return self;
 }
 
-void containerView_add(id self, id v) {
-    ContainerViewData *data = (ContainerViewData *) object_getIvar(self, ContainerViewDataRef);
-    addArrangedSubview(data->stack, v);
-}
-
 void containerView_deinit(id self, SEL _cmd) {
     ContainerViewData *ptr = (ContainerViewData *) object_getIvar(self, ContainerViewDataRef);
     struct objc_super super = {self, objc_getClass("UIView")};

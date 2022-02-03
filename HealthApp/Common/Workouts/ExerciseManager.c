@@ -45,15 +45,14 @@ static void createRootAndLibDict(struct DictWrapper *data) {
 
 static CFArrayRef getLibraryArrayForType(struct DictWrapper *data, unsigned char type) {
     static CFStringRef const keys[] = {CFSTR("st"), CFSTR("se"), CFSTR("en"), CFSTR("hi")};
-    if (type > 3) return NULL;
     return CFDictionaryGetValue(data->lib, keys[type]);
 }
 
-static CFArrayRef getCurrentWeekForPlan(struct DictWrapper *data, unsigned char plan, int week) {
+static CFArrayRef getCurrentWeekForPlan(struct DictWrapper *data) {
     static CFStringRef const planKeys[] = {CFSTR("bb"), CFSTR("cc")};
     CFDictionaryRef plans = CFDictionaryGetValue(data->root, CFSTR("plans"));
-    CFArrayRef weeks = CFDictionaryGetValue(plans, planKeys[plan]);
-    return CFArrayGetValueAtIndex(weeks, week);
+    CFArrayRef weeks = CFDictionaryGetValue(plans, planKeys[userData->currentPlan]);
+    return CFArrayGetValueAtIndex(weeks, userData->week);
 }
 
 static Workout *buildWorkoutFromDict(CFDictionaryRef dict, WorkoutParams *params) {
@@ -74,26 +73,24 @@ static Workout *buildWorkoutFromDict(CFDictionaryRef dict, WorkoutParams *params
     w->title = CFStringCreateCopy(NULL, str);
 
     bool addWeights = false;
-    int weights[4];
+    short weights[4];
     if (params->type == WorkoutStrength) {
         short *lifts = userData->liftMaxes;
         float multiplier = params->weight / 100.f;
         addWeights = true;
 
-        weights[0] = (int) (multiplier * lifts[0]);
+        weights[0] = (short) (multiplier * lifts[0]);
         if (params->index <= 1) {
-            weights[1] = (int) (multiplier * lifts[LiftBench]);
+            weights[1] = (short) (multiplier * lifts[LiftBench]);
             if (params->index == 0) {
                 short bodyWeight = getBodyWeight();
-                weights[2] = (int) ((lifts[LiftPullup] + bodyWeight) * multiplier) - bodyWeight;
+                weights[2] = (short) ((lifts[LiftPullup] + bodyWeight) * multiplier) - bodyWeight;
                 weights[2] = max(weights[2], 0);
             } else {
-                weights[2] = (int) (multiplier * lifts[LiftDeadlift]);
+                weights[2] = (short) (multiplier * lifts[LiftDeadlift]);
             }
         } else {
-            for (int i = 1; i < 4; ++i) {
-                weights[i] = lifts[i];
-            }
+            memcpy(&weights[1], &lifts[1], 3 * sizeof(short));
         }
     }
 
@@ -227,39 +224,32 @@ void initExerciseStrings(void) {
     amrapFormat = localize(CFSTR("circuitHeaderAMRAP"));
 }
 
-void exerciseManager_setWeeklyWorkoutNames(unsigned char plan, int week, CFStringRef *names) {
+void exerciseManager_setWeeklyWorkoutNames(CFStringRef *names) {
     struct DictWrapper info;
     createRootAndLibDict(&info);
-
-    CFArrayRef currWeek = getCurrentWeekForPlan(&info, plan, week);
+    CFArrayRef currWeek = getCurrentWeekForPlan(&info);
     int tempInt = 0;
 
     for (int i = 0; i < 7; ++i) {
         CFDictionaryRef day = CFArrayGetValueAtIndex(currWeek, i);
-
         CFNumberRef number = CFDictionaryGetValue(day, Keys.type);
         CFNumberGetValue(number, kCFNumberIntType, &tempInt);
-        unsigned char type = (unsigned char) tempInt;
+        if (tempInt > 3) continue;
+
+        CFArrayRef libArr = getLibraryArrayForType(&info, (unsigned char) tempInt);
         number = CFDictionaryGetValue(day, Keys.index);
         CFNumberGetValue(number, kCFNumberIntType, &tempInt);
-
-        CFArrayRef libArr = getLibraryArrayForType(&info, type);
-        if (!libArr) continue;
-
-        CFDictionaryRef foundWorkout = CFArrayGetValueAtIndex(libArr, tempInt);
-        CFStringRef str = CFDictionaryGetValue(foundWorkout, Keys.title);
+        CFStringRef str = CFDictionaryGetValue(CFArrayGetValueAtIndex(libArr, tempInt), Keys.title);
         names[i] = CFStringCreateCopy(NULL, str);
     }
     CFRelease(info.root);
 }
 
-Workout *exerciseManager_getWeeklyWorkout(unsigned char plan, int week, int index) {
+Workout *exerciseManager_getWeeklyWorkout(int index) {
     WorkoutParams params = {(signed char) index, 0, 0, 1, 1, 1};
     struct DictWrapper info;
     createRootAndLibDict(&info);
-
-    CFArrayRef currWeek = getCurrentWeekForPlan(&info, plan, week);
-    CFDictionaryRef day = CFArrayGetValueAtIndex(currWeek, index);
+    CFDictionaryRef day = CFArrayGetValueAtIndex(getCurrentWeekForPlan(&info), index);
 
     CFNumberRef number = CFDictionaryGetValue(day, Keys.type);
     CFNumberGetValue(number, kCFNumberIntType, &params.index);
@@ -276,8 +266,7 @@ Workout *exerciseManager_getWeeklyWorkout(unsigned char plan, int week, int inde
     number = CFDictionaryGetValue(day, CFSTR("weight"));
     CFNumberGetValue(number, kCFNumberIntType, &params.weight);
 
-    CFDictionaryRef foundWorkout = CFArrayGetValueAtIndex(libArr, params.index);
-    Workout *w = buildWorkoutFromDict(foundWorkout, &params);
+    Workout *w = buildWorkoutFromDict(CFArrayGetValueAtIndex(libArr, params.index), &params);
     CFRelease(info.root);
     return w;
 }
@@ -293,8 +282,7 @@ CFArrayRef exerciseManager_createWorkoutNames(unsigned char type) {
 
     CFMutableArrayRef results = CFArrayCreateMutable(NULL, len, &kCFTypeArrayCallBacks);
     for (int i = 0; i < len; ++i) {
-        CFDictionaryRef week = CFArrayGetValueAtIndex(libArr, i);
-        CFStringRef title = CFDictionaryGetValue(week, Keys.title);
+        CFStringRef title = CFDictionaryGetValue(CFArrayGetValueAtIndex(libArr, i), Keys.title);
         CFArrayAppendValue(results, title);
     }
     CFRelease(info.root);
@@ -305,8 +293,7 @@ Workout *exerciseManager_getWorkoutFromLibrary(WorkoutParams *params) {
     struct DictWrapper info;
     createRootAndLibDict(&info);
     CFArrayRef libArr = getLibraryArrayForType(&info, params->type);
-    CFDictionaryRef foundWorkout = CFArrayGetValueAtIndex(libArr, params->index);
-    Workout *w = buildWorkoutFromDict(foundWorkout, params);
+    Workout *w = buildWorkoutFromDict(CFArrayGetValueAtIndex(libArr, params->index), params);
     CFRelease(info.root);
     return w;
 }

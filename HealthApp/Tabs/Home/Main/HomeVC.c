@@ -72,8 +72,7 @@ void homeVC_createWorkoutsList(id self) {
     }
 
     CFStringRef workoutNames[7] = {0};
-    exerciseManager_setWeeklyWorkoutNames((unsigned char) userData->currentPlan,
-                                          appUserData_getWeekInPlan(), workoutNames);
+    exerciseManager_setWeeklyWorkoutNames(workoutNames);
 
     SEL btnTap = sel_getUid("buttonTapped:");
     CFStringRef days[7];
@@ -83,7 +82,7 @@ void homeVC_createWorkoutsList(id self) {
         id btn = statusView_init(workoutNames[i], i, self, btnTap);
         StatusViewData *ptr = (StatusViewData *) object_getIvar(btn, StatusViewDataRef);
         setLabelText(ptr->headerLabel, days[i]);
-        containerView_add(data->planContainer, btn);
+        addArrangedSubview(planData->stack, btn);
         CFRelease(workoutNames[i]);
         releaseObj(btn);
         data->numWorkouts += 1;
@@ -117,6 +116,8 @@ void homeVC_viewDidLoad(id self, SEL _cmd) {
                                    object_getIvar(data->planContainer, ContainerViewDataRef));
     hideView(planData->divider, true);
     data->customContainer = containerView_init(headers[1], 4, true);
+    ContainerViewData *customData = ((ContainerViewData *)
+                                     object_getIvar(data->customContainer, ContainerViewDataRef));
     id vStack = createStackView((id[]){data->planContainer, data->customContainer}, 2, 1, 20,
                                 (Padding){10, 0, 16, 0});
 
@@ -126,7 +127,7 @@ void homeVC_viewDidLoad(id self, SEL _cmd) {
         StatusViewData *ptr = (StatusViewData *) object_getIvar(btn, StatusViewDataRef);
         hideView(ptr->box, true);
         statusView_updateAccessibility(btn, NULL);
-        containerView_add(data->customContainer, btn);
+        addArrangedSubview(customData->stack, btn);
         releaseObj(btn);
     }
 
@@ -144,9 +145,7 @@ void homeVC_viewDidLoad(id self, SEL _cmd) {
 
 void homeVC_workoutButtonTapped(id self, SEL _cmd _U_, id btn) {
     int index = getTag(btn);
-    Workout *w = exerciseManager_getWeeklyWorkout((unsigned char) userData->currentPlan,
-                                                  appUserData_getWeekInPlan(), index);
-    homeVC_navigateToAddWorkout(self, w);
+    homeVC_navigateToAddWorkout(self, exerciseManager_getWeeklyWorkout(index));
 }
 
 void homeVC_customButtonTapped(id self, SEL _cmd _U_, id btn) {
