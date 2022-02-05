@@ -1,5 +1,6 @@
 #include "CocoaHelpers.h"
 #include <stdlib.h>
+#include <string.h>
 #include "AppUserData.h"
 
 extern int getOSVersion(void);
@@ -21,6 +22,7 @@ static inline id allocColor(float red, float green, float blue, float alpha) {
 
 CFArrayCallBacks retainedArrCallbacks = {0, cocoaArrRetain, cocoaArrRelease, NULL, NULL};
 static id **appColors = NULL;
+static id **barColors = NULL;
 int osVersion;
 static const char *const ColorNames[] = {
     "separatorColor",
@@ -37,14 +39,21 @@ static const char *const ColorNames[] = {
     "secondarySystemGroupedBackgroundColor",
     "tertiarySystemBackgroundColor"
 };
+static CFStringRef const BarColorNames[] = {CFSTR("navBarColor"), CFSTR("modalColor")};
 
-bool handleIOSVersion(bool *setWindowTint, bool *scrollEdge) {
+bool handleIOSVersion(void) {
     bool result = ((osVersion = getOSVersion()) < 13);
-    *setWindowTint = osVersion < 14;
-    *scrollEdge = osVersion > 14;
     if (result) {
-        appColors = malloc(14 * sizeof(id*));
-        for (int i = 0; i < 14; ++i) {
+        barColors = malloc(sizeof(id*) << 1);
+        barColors[0] = malloc(sizeof(id) << 1);
+        barColors[1] = malloc(sizeof(id) << 1);
+        barColors[0][0] = allocColor(0.984f, 0.984f, 0.992f, 1);
+        barColors[0][1] = allocColor(0.075f, 0.075f, 0.075f, 1);
+        barColors[1][0] = allocColor(0.988f, 0.988f, 0.988f, 1);
+        barColors[1][1] = allocColor(0.196f, 0.196f, 0.196f, 1);
+
+        appColors = malloc(13 * sizeof(id*));
+        for (int i = 0; i < 13; ++i) {
             appColors[i] = malloc(sizeof(id) << 1);
         }
         appColors[ColorSeparator][0] = allocColor(0.24f, 0.24f, 0.26f, 0.29f);
@@ -74,8 +83,6 @@ bool handleIOSVersion(bool *setWindowTint, bool *scrollEdge) {
         appColors[ColorSecondaryBGGrouped][1] = appColors[ColorSecondaryBG][1];
         appColors[ColorTertiaryBG][0] = appColors[ColorPrimaryBG][0];
         appColors[ColorTertiaryBG][1] = allocColor(0.17f, 0.17f, 0.18f, 1);
-        appColors[ColorTertiaryBGGrouped][0] = allocColor(0.984f, 0.984f, 0.992f, 1);
-        appColors[ColorTertiaryBGGrouped][1] = allocColor(0.075f, 0.075f, 0.075f, 1);
     }
     return result;
 }
@@ -97,6 +104,14 @@ void getScreenBounds(CGRect *result) {
 id createColor(int type) {
     return (osVersion > 12 ? staticMethod(objc_getClass("UIColor"), sel_getUid(ColorNames[type]))
             : appColors[type][userData->darkMode]);
+}
+
+id getBarColor(int type) {
+    if (osVersion > 12) {
+        return staticMethodWithString(objc_getClass("UIColor"),
+                                      sel_getUid("colorNamed:"), BarColorNames[type]);
+    }
+    return barColors[type][userData->darkMode];
 }
 
 id createAttribString(CFStringRef text, CFDictionaryRef dict) {

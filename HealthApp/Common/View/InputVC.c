@@ -124,7 +124,7 @@ void inputVC_viewDidLoad(id self, SEL _cmd) {
     data->vStack = createStackView(nil, 0, 1, 0, (Padding){0});
     data->toolbar = createObjectWithFrame(objc_getClass("UIToolbar"), ((CGRect){{0}, {width, 50}}));
     if (osVersion < 13)
-        setBarTint(data->toolbar);
+        setBarTint(data->toolbar, getBarColor(ColorBarModal));
     voidFunc(data->toolbar, sel_getUid("sizeToFit"));
 
     Class btnClass = objc_getClass("UIBarButtonItem");
@@ -135,8 +135,7 @@ void inputVC_viewDidLoad(id self, SEL _cmd) {
                      (allocClass(btnClass), sel_getUid("initWithTitle:style:target:action:"),
                       localize(CFSTR("done")), 0, self, sel_getUid("dismissKeyboard")));
 
-    if (osVersion < 14)
-        setTintColor(doneButton, createColor(ColorRed));
+    setTintColor(doneButton, createColor(ColorRed));
 
     CFArrayRef array = CFArrayCreate(NULL, (const void *[]){flexSpace, doneButton},
                                      2, &retainedArrCallbacks);

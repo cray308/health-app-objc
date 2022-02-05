@@ -20,20 +20,19 @@
 
 #define createVC(_cls) (((id(*)(Class,SEL))objc_msgSend)((_cls), sel_getUid("new")))
 
-#define setBarTint(_v) \
-setObject(_v, sel_getUid("setBarTintColor:"), createColor(ColorTertiaryBGGrouped))
+#define setBarTint(_v, _c) setObject(_v, sel_getUid("setBarTintColor:"), _c)
 
-extern Class DMTabVC;
 extern Class DMNavVC;
 
 typedef void (^Callback)(void);
 
 void setNavButton(id vc, bool left, id button, int totalWidth);
+void setupTabVC(id vc);
+void setupNavBar(id vc, bool modal);
 void setVCTitle(id vc, CFStringRef title);
 int dmNavVC_getStatusBarStyle(id self, SEL _cmd);
-void dmTabVC_updateColors(id self, SEL _cmd);
 
-void setupNavVC(id navVC, id firstVC);
+id createNavVC(id child);
 void presentVC(id presenter, id child);
 void presentModalVC(id presenter, id modal);
 void dismissPresentedVC(id presenter, Callback handler);

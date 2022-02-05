@@ -12,7 +12,7 @@ extern void toggleDarkModeForCharts(bool);
 
 AppCoordinator *appCoordinator = NULL;
 
-void *appCoordinator_start(id tabVC, bool legacy, bool scrollEdge, void (**fetchHandler)(void*)) {
+void *appCoordinator_start(id tabVC, void (**fetchHandler)(void*)) {
     toggleDarkModeForCharts(userData->darkMode);
     appCoordinator = calloc(1, sizeof(AppCoordinator));
     SEL itemInit = sel_getUid("initWithTitle:image:tag:"), setter = sel_getUid("setTabBarItem:");
@@ -21,65 +21,28 @@ void *appCoordinator_start(id tabVC, bool legacy, bool scrollEdge, void (**fetch
     CFStringRef imgNames[] = {CFSTR("ico_house"), CFSTR("ico_chart"), CFSTR("ico_gear")};
     CFStringRef titles[3]; fillStringArray(titles, CFSTR("tabs%d"), 3);
 
+    appCoordinator->children[0] = homeVC_init();
+    void *result;
+    appCoordinator->children[1] = historyVC_init(&result, fetchHandler);
+    appCoordinator->children[2] = settingsVC_init();
+
     for (int i = 0; i < 3; ++i) {
         id image = createImage(imgNames[i]);
         id _item = allocClass(objc_getClass("UITabBarItem"));
         items[i] = (((id(*)(id,SEL,CFStringRef,id,int))objc_msgSend)
                     (_item, itemInit, titles[i], image, i));
-
-        controllers[i] = createNew(DMNavVC);
+        controllers[i] = createNavVC(appCoordinator->children[i]);
         setObject(controllers[i], setter, items[i]);
+        releaseObj(items[i]);
     }
-
-    id tabBar = getTabBar(tabVC);
-    if (!legacy) {
-        id navAppearance = createNew(objc_getClass("UINavigationBarAppearance"));
-        id tabAppearance = createNew(objc_getClass("UITabBarAppearance"));
-        SEL opaqueBG = sel_getUid("configureWithOpaqueBackground");
-        voidFunc(navAppearance, opaqueBG);
-        voidFunc(tabAppearance, opaqueBG);
-        id color = staticMethodWithString(objc_getClass("UIColor"),
-                                          sel_getUid("colorNamed:"), CFSTR("navBarColor"));
-        setBackground(navAppearance, color);
-        setBackground(tabAppearance, color);
-        SEL setStandard = sel_getUid("setStandardAppearance:");
-        for (int i = 0; i < 3; ++i) {
-            id navBar = getNavBar(controllers[i]);
-            setObject(navBar, setStandard, navAppearance);
-            if (scrollEdge)
-                setObject(navBar, sel_getUid("setScrollEdgeAppearance:"), navAppearance);
-        }
-        setObject(tabBar, setStandard, tabAppearance);
-        if (scrollEdge)
-            setObject(tabBar, sel_getUid("setScrollEdgeAppearance:"), tabAppearance);
-        releaseObj(navAppearance);
-        releaseObj(tabAppearance);
-    } else {
-        SEL translucent = sel_getUid("setTranslucent:");
-        for (int i = 0; i < 3; ++i) {
-            id navBar = getNavBar(controllers[i]);
-            setBool(navBar, translucent, false);
-        }
-        setBool(tabBar, translucent, false);
-    }
-
-    appCoordinator->children[0] = homeVC_init();
-    setupNavVC(controllers[0], appCoordinator->children[0]);
-
-    void *result;
-    appCoordinator->children[1] = historyVC_init(&result, fetchHandler);
-    setupNavVC(controllers[1], appCoordinator->children[1]);
-
-    appCoordinator->children[2] = settingsVC_init();
-    setupNavVC(controllers[2], appCoordinator->children[2]);
 
     CFArrayRef array = CFArrayCreate(NULL, (const void **)controllers, 3, NULL);
     (((void(*)(id,SEL,CFArrayRef,bool))objc_msgSend)
      (tabVC, sel_getUid("setViewControllers:animated:"), array, false));
+    setupTabVC(tabVC);
 
     for (int i = 0; i < 3; ++i) {
         releaseObj(controllers[i]);
-        releaseObj(items[i]);
     }
     CFRelease(array);
     return result;
@@ -90,7 +53,7 @@ void appCoordinator_updateUserInfo(signed char plan, signed char darkMode, short
     if (appUserData_updateUserSettings(plan, darkMode, weights)) {
         id window = appDel_setWindowTint(createColor(ColorRed));
         id tabVC = getObject(window, sel_getUid("rootViewController"));
-        voidFunc(tabVC, sel_getUid("viewDidLayoutSubviews"));
+        setupTabVC(tabVC);
         toggleDarkModeForCharts(userData->darkMode);
         homeVC_updateColors(appCoordinator->children[0]);
         historyVC_updateColors(appCoordinator->children[1]);

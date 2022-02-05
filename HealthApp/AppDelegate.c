@@ -18,8 +18,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
     initValidatorStrings();
     initExerciseStrings();
     initWorkoutStrings();
-    bool setWindowTint, scrollEdge;
-    bool legacy = handleIOSVersion(&setWindowTint, &scrollEdge);
+    bool legacy = handleIOSVersion();
     CGRect bounds;
     getScreenBounds(&bounds);
     self->window = createObjectWithFrame(objc_getClass("UIWindow"), bounds);
@@ -47,45 +46,13 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
         tzOffset = userInfo_initFromStorage();
     }
 
-    char const *voidSig = "v@:", *tapSig = "v@:@", *dataKey = "data", *titleForRow = "@@:@qq";
-    SetupWorkoutVCClass = objc_allocateClassPair(InputVCClass, "SetupWorkoutVC", 0);
-    class_addProtocol(SetupWorkoutVCClass, objc_getProtocol("UIPickerViewDelegate"));
-    class_addProtocol(SetupWorkoutVCClass, objc_getProtocol("UIPickerViewDataSource"));
-    class_addIvar(SetupWorkoutVCClass, dataKey, sizeof(SetupWorkoutVCData*), 0, "^{?=@@@Ci}");
-    class_addMethod(SetupWorkoutVCClass, sel_getUid("dealloc"),
-                    (IMP) setupWorkoutVC_deinit, voidSig);
-    class_addMethod(SetupWorkoutVCClass, sel_getUid("viewDidLoad"),
-                    (IMP) setupWorkoutVC_viewDidLoad, voidSig);
-    class_addMethod(SetupWorkoutVCClass, sel_getUid("buttonTapped:"),
-                    (IMP) setupWorkoutVC_tappedButton, tapSig);
-    class_addMethod(SetupWorkoutVCClass, sel_getUid("numberOfComponentsInPickerView:"),
-                    (IMP) setupWorkoutVC_numberOfComponents, "q@:@");
-    class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:numberOfRowsInComponent:"),
-                    (IMP) setupWorkoutVC_numberOfRows, "q@:@q");
-    class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:didSelectRow:inComponent:"),
-                    (IMP) setupWorkoutVC_didSelectRow, "v@:@qq");
-
-    DMNavVC = objc_allocateClassPair(objc_getClass("UINavigationController"), "DMNavVC", 0);
-    DMTabVC = objc_allocateClassPair(objc_getClass("UITabBarController"), "DMTabVC", 0);
-    DMButtonClass = objc_allocateClassPair(objc_getClass("UIButton"), "DMButton", 0);
-    DMLabelClass = objc_allocateClassPair(objc_getClass("UILabel"), "DMLabel", 0);
-    DMTextFieldClass = objc_allocateClassPair(objc_getClass("UITextField"), "DMTextField", 0);
-    DMBackgroundViewClass = objc_allocateClassPair(objc_getClass("UIView"), "DMBackgroundView", 0);
-
+    char const *voidSig = "v@:", *titleForRow = "@@:@qq";
     if (legacy) {
-        char const *colorField = "colorCode";
-        class_addIvar(DMBackgroundViewClass, colorField, sizeof(int), 0, "i");
-        class_addIvar(DMButtonClass, colorField, sizeof(int), 0, "i");
-        class_addIvar(DMButtonClass, "background", sizeof(bool), 0, "c");
-        class_addIvar(DMLabelClass, colorField, sizeof(int), 0, "i");
-
         SEL tint = sel_getUid("tintColorDidChange");
         class_addMethod(DMBackgroundViewClass, tint, (IMP) dmBackgroundView_updateColors, voidSig);
         class_addMethod(DMButtonClass, tint, (IMP) dmButton_updateColors, voidSig);
         class_addMethod(DMLabelClass, tint, (IMP) dmLabel_updateColors, voidSig);
         class_addMethod(DMTextFieldClass, tint, (IMP) dmField_updateColors, voidSig);
-        class_addMethod(DMTabVC, sel_getUid("viewDidLayoutSubviews"),
-                        (IMP) dmTabVC_updateColors, voidSig);
         class_addMethod(DMNavVC, sel_getUid("preferredStatusBarStyle"),
                         (IMP) dmNavVC_getStatusBarStyle, "i@:");
         class_addMethod(SetupWorkoutVCClass,
@@ -97,19 +64,17 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
     }
 
     objc_registerClassPair(DMNavVC);
-    objc_registerClassPair(DMTabVC);
     objc_registerClassPair(DMBackgroundViewClass);
     objc_registerClassPair(DMButtonClass);
     objc_registerClassPair(DMLabelClass);
     objc_registerClassPair(DMTextFieldClass);
     objc_registerClassPair(SetupWorkoutVCClass);
-    SetupWorkoutVCDataRef = class_getInstanceVariable(SetupWorkoutVCClass, dataKey);
+    SetupWorkoutVCDataRef = class_getInstanceVariable(SetupWorkoutVCClass, "data");
 
-    if (setWindowTint)
-        setTintColor(self->window, createColor(ColorRed));
-    id tabVC = createNew(DMTabVC);
+    setTintColor(self->window, createColor(ColorRed));
+    id tabVC = createNew(objc_getClass("UITabBarController"));
     void (*fetchHandler)(void*);
-    void *arg = appCoordinator_start(tabVC, legacy, scrollEdge, &fetchHandler);
+    void *arg = appCoordinator_start(tabVC, &fetchHandler);
     setObject(self->window, sel_getUid("setRootViewController:"), tabVC);
     voidFunc(self->window, sel_getUid("makeKeyAndVisible"));
     releaseObj(tabVC);

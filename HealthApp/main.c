@@ -1,4 +1,5 @@
 #include "CocoaHelpers.h"
+#include "SetupWorkoutVC.h"
 #include "StatusView.h"
 #include "TotalWorkoutsView.h"
 #include "WorkoutTypeView.h"
@@ -10,6 +11,7 @@
 #include "WorkoutVC.h"
 #include "UpdateMaxesVC.h"
 #include "AppDelegate.h"
+#include "ViewControllerHelpers.h"
 
 extern int UIApplicationMain(int, char *[], CFStringRef, CFStringRef);
 extern Protocol *getValueFormatterType(void);
@@ -18,11 +20,21 @@ extern SEL getValueFormatterAction(void);
 int main(int argc, char *argv[]) {
     Class viewClass = objc_getClass("UIView");
     Class VCClass = objc_getClass("UIViewController");
-    char const *validatorKey = "validatorData", *dataKey = "data";
+    char const *validatorKey = "validatorData", *dataKey = "data", *colorField = "colorCode";
     char const *voidSig = "v@:", *tapSig = "v@:@", *appearSig = "v@:i", *appSig = "i@:@@";
     SEL deinit = sel_getUid("dealloc");
     SEL viewLoad = sel_getUid("viewDidLoad");
     SEL btnTap = sel_getUid("buttonTapped:");
+
+    DMNavVC = objc_allocateClassPair(objc_getClass("UINavigationController"), "DMNavVC", 0);
+    DMButtonClass = objc_allocateClassPair(objc_getClass("UIButton"), "DMButton", 0);
+    class_addIvar(DMButtonClass, colorField, sizeof(int), 0, "i");
+    class_addIvar(DMButtonClass, "background", sizeof(bool), 0, "c");
+    DMLabelClass = objc_allocateClassPair(objc_getClass("UILabel"), "DMLabel", 0);
+    class_addIvar(DMLabelClass, colorField, sizeof(int), 0, "i");
+    DMTextFieldClass = objc_allocateClassPair(objc_getClass("UITextField"), "DMTextField", 0);
+    DMBackgroundViewClass = objc_allocateClassPair(objc_getClass("UIView"), "DMBackgroundView", 0);
+    class_addIvar(DMBackgroundViewClass, colorField, sizeof(int), 0, "i");
 
     StatusViewClass = objc_allocateClassPair(viewClass, "StatusView", 0);
     class_addIvar(StatusViewClass, dataKey, sizeof(StatusViewData*), 0, "^{?=@@@@}");
@@ -88,6 +100,23 @@ int main(int argc, char *argv[]) {
     objc_registerClassPair(SettingsVCClass);
     SettingsVCDataRef = class_getInstanceVariable(SettingsVCClass, dataKey);
 
+    SetupWorkoutVCClass = objc_allocateClassPair(InputVCClass, "SetupWorkoutVC", 0);
+    class_addProtocol(SetupWorkoutVCClass, objc_getProtocol("UIPickerViewDelegate"));
+    class_addProtocol(SetupWorkoutVCClass, objc_getProtocol("UIPickerViewDataSource"));
+    class_addIvar(SetupWorkoutVCClass, dataKey, sizeof(SetupWorkoutVCData*), 0, "^{?=@@@Ci}");
+    class_addMethod(SetupWorkoutVCClass, sel_getUid("dealloc"),
+                    (IMP) setupWorkoutVC_deinit, voidSig);
+    class_addMethod(SetupWorkoutVCClass, sel_getUid("viewDidLoad"),
+                    (IMP) setupWorkoutVC_viewDidLoad, voidSig);
+    class_addMethod(SetupWorkoutVCClass, sel_getUid("buttonTapped:"),
+                    (IMP) setupWorkoutVC_tappedButton, tapSig);
+    class_addMethod(SetupWorkoutVCClass, sel_getUid("numberOfComponentsInPickerView:"),
+                    (IMP) setupWorkoutVC_numberOfComponents, "q@:@");
+    class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:numberOfRowsInComponent:"),
+                    (IMP) setupWorkoutVC_numberOfRows, "q@:@q");
+    class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:didSelectRow:inComponent:"),
+                    (IMP) setupWorkoutVC_didSelectRow, "v@:@qq");
+
     UpdateMaxesVCClass = objc_allocateClassPair(InputVCClass, "UpdateMaxesVC", 0);
     class_addIvar(UpdateMaxesVCClass, dataKey, sizeof(UpdateMaxesVCData*), 0, "^{?=@@@@I}");
     class_addMethod(UpdateMaxesVCClass, deinit, (IMP) updateMaxesVC_deinit, voidSig);
@@ -137,6 +166,7 @@ int main(int argc, char *argv[]) {
 
     AppDelegateClass = objc_allocateClassPair(objc_getClass("UIResponder"), "AppDelegate", 0);
     class_addIvar(AppDelegateClass, "window", sizeof(id), 0, "@");
+    class_addIvar(AppDelegateClass, "children", 3 * sizeof(id), 0, "[3@]");
     class_addMethod(AppDelegateClass, sel_getUid("application:didFinishLaunchingWithOptions:"),
                     (IMP) appDelegate_didFinishLaunching, appSig);
     class_addMethod(AppDelegateClass,

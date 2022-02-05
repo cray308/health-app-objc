@@ -5,6 +5,7 @@ extern Class AppDelegateClass;
 typedef struct {
     Class isa;
     id window;
+    id children[3];
 } AppDelegate;
 
 bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd, id application, id options);

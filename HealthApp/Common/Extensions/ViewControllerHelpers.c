@@ -5,7 +5,6 @@
 #define updateKVPair(_o, _k, _v) ((void(*)(id,SEL,id,CFStringRef))objc_msgSend)\
 ((_o), sel_getUid("setValue:forKey:"), (_v), (_k))
 
-Class DMTabVC;
 Class DMNavVC;
 
 void setNavButton(id vc, bool left, id button, int totalWidth) {
@@ -21,28 +20,51 @@ void setNavButton(id vc, bool left, id button, int totalWidth) {
     releaseObj(item);
 }
 
+static bool setupBarGeneric(id bar, Class appearanceClass, bool modal) {
+    id color = getBarColor(modal);
+    if (osVersion > 12) {
+        id appearance = createNew(appearanceClass);
+        voidFunc(appearance, sel_getUid("configureWithOpaqueBackground"));
+        setBackground(appearance, color);
+        setObject(bar, sel_getUid("setStandardAppearance:"), appearance);
+        if (osVersion == 15)
+            setObject(bar, sel_getUid("setScrollEdgeAppearance:"), appearance);
+        releaseObj(appearance);
+        return false;
+    } else {
+        setBool(bar, sel_getUid("setTranslucent:"), false);
+        setBarTint(bar, color);
+        return true;
+    }
+}
+
+void setupTabVC(id vc) {
+    CFDictionaryRef dict = createTitleTextDict(createColor(ColorLabel), nil);
+    id tabBar = getTabBar(vc);
+    bool extra = setupBarGeneric(tabBar, objc_getClass("UITabBarAppearance"), false);
+    if (extra)
+        setObject(tabBar, sel_getUid("setUnselectedItemTintColor:"), createColor(ColorGray));
+    CFArrayRef ctrls = getViewControllers(vc);
+    for (int i = 0; i < 3; ++i) {
+        id navVC = (id) CFArrayGetValueAtIndex(ctrls, i);
+        id navBar = getNavBar(navVC);
+        setupBarGeneric(navBar, objc_getClass("UINavigationBarAppearance"), false);
+        if (extra) {
+            (((void(*)(id,SEL,CFDictionaryRef))objc_msgSend)
+             (navBar, sel_getUid("setTitleTextAttributes:"), dict));
+            voidFunc(navVC, sel_getUid("setNeedsStatusBarAppearanceUpdate"));
+        }
+    }
+    CFRelease(dict);
+}
+
+void setupNavBar(id vc, bool modal) {
+    setupBarGeneric(getNavBar(vc), objc_getClass("UINavigationBarAppearance"), modal);
+}
+
 void setVCTitle(id vc, CFStringRef title) {
     id navItem = getNavItem(vc);
     setString(navItem, sel_getUid("setTitle:"), title);
-}
-
-void dmTabVC_updateColors(id self, SEL _cmd _U_) {
-    SEL setter = sel_getUid("setTitleTextAttributes:");
-    SEL barUpdate = sel_getUid("setNeedsStatusBarAppearanceUpdate");
-    id tabBar = getTabBar(self);
-    setBarTint(tabBar);
-    setObject(tabBar, sel_getUid("setUnselectedItemTintColor:"), createColor(ColorGray));
-    CFArrayRef ctrls = getViewControllers(self);
-    int count = (int) CFArrayGetCount(ctrls);
-    for (int i = 0; i < count; ++i) {
-        id navVC = (id) CFArrayGetValueAtIndex(ctrls, i);
-        id navBar = getNavBar(navVC);
-        setBarTint(navBar);
-        CFDictionaryRef dict = createTitleTextDict(createColor(ColorLabel), nil);
-        ((void(*)(id,SEL,CFDictionaryRef))objc_msgSend)(navBar, setter, dict);
-        CFRelease(dict);
-        voidFunc(navVC, barUpdate);
-    }
 }
 
 int dmNavVC_getStatusBarStyle(id self _U_, SEL _cmd _U_) {
@@ -51,26 +73,20 @@ int dmNavVC_getStatusBarStyle(id self _U_, SEL _cmd _U_) {
 
 #pragma mark - VC Functions
 
-void setupNavVC(id navVC, id firstVC) {
-    CFArrayRef array = CFArrayCreate(NULL, (const void *[]){firstVC}, 1, NULL);
-    setArray(navVC, sel_getUid("setViewControllers:"), array);
-    CFRelease(array);
+id createNavVC(id child) {
+    id _obj = allocClass(DMNavVC);
+    return getObjectWithObject(_obj, sel_getUid("initWithRootViewController:"), child);
 }
 
 void presentVC(id presenter, id child) {
-    if (osVersion < 14)
-        appDel_setWindowTint(nil);
+    appDel_setWindowTint(nil);
     (((void(*)(id,SEL,id,bool,id))objc_msgSend)
      (presenter, sel_getUid("presentViewController:animated:completion:"), child, true, nil));
 }
 
 void presentModalVC(id presenter, id modal) {
-    id _obj = allocClass(DMNavVC);
-    id container = getObjectWithObject(_obj, sel_getUid("initWithRootViewController:"), modal);
-    if (osVersion < 13) {
-        id navBar = getNavBar(container);
-        setBarTint(navBar);
-    }
+    id container = createNavVC(modal);
+    setupNavBar(container, true);
     presentVC(presenter, container);
     releaseObj(container);
     releaseObj(modal);
@@ -81,8 +97,7 @@ void dismissPresentedVC(id presenter, Callback handler) {
      (presenter, sel_getUid("dismissViewControllerAnimated:completion:"), true, ^{
         if (handler)
             handler();
-        if (osVersion < 14)
-            appDel_setWindowTint(createColor(ColorRed));
+        appDel_setWindowTint(createColor(ColorRed));
     }));
 }
 
@@ -121,8 +136,7 @@ void addAlertAction(id ctrl, CFStringRef title, int style, Callback handler) {
                   title, style, ^(id hdlr _U_) {
         if (handler)
             handler();
-        if (osVersion < 14)
-            appDel_setWindowTint(createColor(ColorRed));
+        appDel_setWindowTint(createColor(ColorRed));
     }));
     setObject(ctrl, sel_getUid("addAction:"), action);
 }

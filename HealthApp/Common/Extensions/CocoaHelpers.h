@@ -74,12 +74,6 @@ extern CFArrayCallBacks retainedArrCallbacks;
 extern int osVersion;
 
 enum {
-    PrimaryBG,
-    SecondaryBG,
-    TertiaryBG
-};
-
-enum {
     ColorSeparator,
     ColorLabel,
     ColorSecondaryLabel,
@@ -93,13 +87,14 @@ enum {
     ColorSecondaryBG,
     ColorSecondaryBGGrouped,
     ColorTertiaryBG,
-    ColorTertiaryBGGrouped
+    ColorBarModal = ColorLabel
 };
 
-bool handleIOSVersion(bool *setWindowTint, bool *scrollEdge);
+bool handleIOSVersion(void);
 void getRect(id view, CGRect *result, char type);
 void getScreenBounds(CGRect *result);
 id createColor(int type);
+id getBarColor(int type);
 id createAttribString(CFStringRef text, CFDictionaryRef dict);
 CFStringRef localize(CFStringRef key);
 void fillStringArray(CFStringRef *arr, CFStringRef format, int count);
