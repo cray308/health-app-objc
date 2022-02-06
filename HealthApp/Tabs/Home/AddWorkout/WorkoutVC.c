@@ -1,7 +1,7 @@
 #include "WorkoutVC.h"
 #include <dispatch/queue.h>
 #include <signal.h>
-#include "AppCoordinator.h"
+#include "AppDelegate.h"
 #include "AppUserData.h"
 #include "HomeVC.h"
 #include "PersistenceService.h"
@@ -400,7 +400,7 @@ static void workoutVC_handleFinishedWorkout(id self) {
     short *lifts = NULL;
 
     if (data->weights[0]) {
-        appCoordinator_updateMaxWeights(data->weights);
+        appDel_updateMaxWeights(data->weights);
         lifts = malloc(sizeof(short) << 2);
         memcpy(lifts, data->weights, sizeof(short) << 2);
         if (data->workout->duration < 15)

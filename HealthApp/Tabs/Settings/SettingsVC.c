@@ -1,6 +1,6 @@
 #include "SettingsVC.h"
 #include <stdlib.h>
-#include "AppCoordinator.h"
+#include "AppDelegate.h"
 #include "AppUserData.h"
 #include "InputVC.h"
 #include "ViewControllerHelpers.h"
@@ -120,7 +120,7 @@ void settingsVC_buttonTapped(id self, SEL _cmd _U_, id btn) {
     id ctrl = createAlertController(localize(CFSTR("settingsAlertTitle")), message);
     addAlertAction(ctrl, localize(CFSTR("cancel")), 1, NULL);
     if (tag) {
-        addAlertAction(ctrl, localize(CFSTR("delete")), 2, ^{ appCoordinator_deleteAppData(); });
+        addAlertAction(ctrl, localize(CFSTR("delete")), 2, ^{ appDel_deleteAppData(); });
         presentVC(self, ctrl);
         return;
     }
@@ -135,13 +135,11 @@ void settingsVC_buttonTapped(id self, SEL _cmd _U_, id btn) {
     id picker = (id) CFArrayGetValueAtIndex(getArrangedSubviews(data->planContainer), 1);
     signed char plan = ((signed char) getSelectedSegment(picker)) - 1;
 
-    short *results = data->results;
+    short *arr = data->results;
     id *fields = ((InputVCData *) object_getIvar(self, InputVCDataRef))->children;
     for (int i = 0; i < 4; ++i) {
-        results[i] = ((InputViewData *) object_getIvar(fields[i], InputViewDataRef))->result;
+        arr[i] = ((InputViewData *) object_getIvar(fields[i], InputViewDataRef))->result;
     }
-    addAlertAction(ctrl, localize(CFSTR("save")), 0, ^{
-        appCoordinator_updateUserInfo(plan, dark, results);
-    });
+    addAlertAction(ctrl, localize(CFSTR("save")), 0, ^{ appDel_updateUserInfo(plan, dark, arr); });
     presentVC(self, ctrl);
 }

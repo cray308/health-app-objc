@@ -47,7 +47,6 @@
 		61594D1D26068106000D01A1 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 61594D1B26068106000D01A1 /* LaunchScreen.storyboard */; };
 		61594D2026068106000D01A1 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 61594D1F26068106000D01A1 /* main.c */; };
 		61594D2A26068106000D01A1 /* HealthAppTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 61594D2926068106000D01A1 /* HealthAppTests.m */; };
-		61594D5726068C41000D01A1 /* AppCoordinator.c in Sources */ = {isa = PBXBuildFile; fileRef = 61594D5626068C41000D01A1 /* AppCoordinator.c */; };
 		61594D652606C7C6000D01A1 /* AppUserData.c in Sources */ = {isa = PBXBuildFile; fileRef = 61594D642606C7C6000D01A1 /* AppUserData.c */; };
 		615A1C4C2608406100858C32 /* PersistenceService.c in Sources */ = {isa = PBXBuildFile; fileRef = 615A1C4B2608406100858C32 /* PersistenceService.c */; };
 		6161838226AC80A0001587B2 /* CocoaHelpers.c in Sources */ = {isa = PBXBuildFile; fileRef = 6161838126AC80A0001587B2 /* CocoaHelpers.c */; };
@@ -131,8 +130,6 @@
 		61594D2526068106000D01A1 /* HealthAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HealthAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		61594D2926068106000D01A1 /* HealthAppTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HealthAppTests.m; sourceTree = "<group>"; };
 		61594D2B26068106000D01A1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		61594D5526068BFD000D01A1 /* AppCoordinator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppCoordinator.h; sourceTree = "<group>"; };
-		61594D5626068C41000D01A1 /* AppCoordinator.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = AppCoordinator.c; sourceTree = "<group>"; };
 		61594D632606C7AE000D01A1 /* AppUserData.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppUserData.h; sourceTree = "<group>"; };
 		61594D642606C7C6000D01A1 /* AppUserData.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = AppUserData.c; sourceTree = "<group>"; };
 		615A1C4A2608403900858C32 /* PersistenceService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PersistenceService.h; sourceTree = "<group>"; };
@@ -337,8 +334,6 @@
 		61C7790326102620001326A1 /* SharedData */ = {
 			isa = PBXGroup;
 			children = (
-				61594D5626068C41000D01A1 /* AppCoordinator.c */,
-				61594D5526068BFD000D01A1 /* AppCoordinator.h */,
 				61594D642606C7C6000D01A1 /* AppUserData.c */,
 				61594D632606C7AE000D01A1 /* AppUserData.h */,
 				615A1C4B2608406100858C32 /* PersistenceService.c */,
@@ -511,7 +506,6 @@
 				611EDDE927476ED50064B254 /* HistoryVC.c in Sources */,
 				611EDDD12745FEA70064B254 /* WorkoutVC.c in Sources */,
 				611EDDC72744CB2D0064B254 /* UpdateMaxesVC.c in Sources */,
-				61594D5726068C41000D01A1 /* AppCoordinator.c in Sources */,
 				61594D0C26068105000D01A1 /* AppDelegate.c in Sources */,
 				61594D2026068106000D01A1 /* main.c in Sources */,
 			);
