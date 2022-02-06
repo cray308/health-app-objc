@@ -18,7 +18,6 @@ extern id UIApplicationDidBecomeActiveNotification;
 extern id UIApplicationWillResignActiveNotification;
 
 Class WorkoutVCClass;
-Ivar WorkoutVCDataRef;
 
 enum {
     SignalGroup = SIGUSR2,
@@ -105,7 +104,7 @@ static void startWorkoutTimer(WorkoutTimer *t, unsigned duration) {
 }
 
 void stopTimers(id self) {
-    WorkoutVCData *data = (WorkoutVCData *) object_getIvar(self, WorkoutVCDataRef);
+    WorkoutVC *data = (WorkoutVC *) ((char *)self + VCSize);
     pthread_mutex_lock(&timerLock);
     if (data->timers[TimerGroup].info.active == 1) {
         data->savedInfo.groupTag = data->timers[TimerGroup].container;
@@ -127,7 +126,7 @@ void stopTimers(id self) {
 void restartTimers(id self) {
     bool endExercise = false, endGroup = false;
     unsigned groupIdx = 0, exerciseIdx = 0;
-    WorkoutVCData *data = (WorkoutVCData *) object_getIvar(self, WorkoutVCDataRef);
+    WorkoutVC *data = (WorkoutVC *) ((char *)self + VCSize);
     pthread_mutex_lock(&timerLock);
     if (data->done) {
         pthread_mutex_unlock(&timerLock);
@@ -261,7 +260,7 @@ static void startGroup(Circuit *c, WorkoutTimer *timers, bool startTimer) {
 }
 
 static void exerciseView_configure(id v) {
-    StatusViewData *ptr = ((StatusViewData *) object_getIvar(v, StatusViewDataRef));
+    StatusView *ptr = (StatusView *) ((char *)v + ViewSize);
     ExerciseEntry *e = ptr->entry;
 
     setLabelText(ptr->headerLabel, e->headerStr);
@@ -271,7 +270,7 @@ static void exerciseView_configure(id v) {
         setButtonTitle(ptr->button, e->titleStr, 0);
     }
 
-    statusView_updateAccessibility(v, ExerciseStates[e->state]);
+    statusView_updateAccessibility(ptr, ExerciseStates[e->state]);
 
     switch (e->state) {
         case ExerciseStateDisabled:
@@ -294,9 +293,8 @@ static void exerciseView_configure(id v) {
 #pragma mark - VC init/free
 
 id workoutVC_init(Workout *workout) {
-    id self = createVC(WorkoutVCClass);
-#ifndef __clang_analyzer__
-    WorkoutVCData *data = calloc(1, sizeof(WorkoutVCData));
+    id self = createNew(WorkoutVCClass);
+    WorkoutVC *data = (WorkoutVC *) ((char *)self + VCSize);
     data->workout = workout;
     data->containers = malloc(workout->size * sizeof(id));
 
@@ -316,15 +314,12 @@ id workoutVC_init(Workout *workout) {
     data->timers[0].parent = data->timers[1].parent = self;
     pthread_create(&data->threads[1], NULL, timer_loop, &data->timers[1]);
     pthread_create(&data->threads[0], NULL, timer_loop, &data->timers[0]);
-
-    object_setIvar(self, WorkoutVCDataRef, (id) data);
-#endif
     return self;
 }
 
 void workoutVC_deinit(id self, SEL _cmd) {
-    WorkoutVCData *data = (WorkoutVCData *) object_getIvar(self, WorkoutVCDataRef);
-    struct objc_super super = {self, objc_getClass("UIViewController")};
+    WorkoutVC *data = (WorkoutVC *) ((char *)self + VCSize);
+    struct objc_super super = {self, VCClass};
 
     if (data->timers[TimerGroup].info.active == 1)
         pthread_kill(data->threads[TimerGroup], SignalGroup);
@@ -361,7 +356,6 @@ void workoutVC_deinit(id self, SEL _cmd) {
         releaseObj(data->containers[i]);
     }
     free(data->containers);
-    free(data);
     ((void(*)(struct objc_super *,SEL))objc_msgSendSuper)(&super, _cmd);
 }
 
@@ -394,7 +388,7 @@ static void updateStoredData(unsigned char type, int16_t duration, short *lifts)
 }
 
 static void workoutVC_handleFinishedWorkout(id self) {
-    WorkoutVCData *data = (WorkoutVCData *) object_getIvar(self, WorkoutVCDataRef);
+    WorkoutVC *data = (WorkoutVC *) ((char *)self + VCSize);
     Workout *w = data->workout;
     unsigned char totalCompleted = 0;
     short *lifts = NULL;
@@ -425,10 +419,10 @@ static void workoutVC_handleFinishedWorkout(id self) {
 #pragma mark - Main VC Functions
 
 void workoutVC_viewDidLoad(id self, SEL _cmd) {
-    struct objc_super super = {self, objc_getClass("UIViewController")};
+    struct objc_super super = {self, VCClass};
     ((void(*)(struct objc_super *,SEL))objc_msgSendSuper)(&super, _cmd);
 
-    WorkoutVCData *data = (WorkoutVCData *) object_getIvar(self, WorkoutVCDataRef);
+    WorkoutVC *data = (WorkoutVC *) ((char *)self + VCSize);
     id view = getView(self);
     setBackground(view, createColor(ColorPrimaryBGGrouped));
     setVCTitle(self, data->workout->title);
@@ -445,13 +439,12 @@ void workoutVC_viewDidLoad(id self, SEL _cmd) {
     for (unsigned i = 0; i < data->workout->size; ++i) {
         Circuit *c = &data->workout->activities[i];
         data->containers[i] = containerView_init(c->headerStr, 0, false);
-        ContainerViewData *container = ((ContainerViewData *)
-                                        object_getIvar(data->containers[i], ContainerViewDataRef));
+        ContainerView *container = (ContainerView*) ((char *)data->containers[i] + ViewSize);
         addArrangedSubview(stack, data->containers[i]);
 
         for (unsigned j = 0; j < c->size; ++j) {
             id v = statusView_init(NULL, (int) ((i << 8) | j), self, btnTap);
-            StatusViewData *ptr = (StatusViewData *) object_getIvar(v, StatusViewDataRef);
+            StatusView *ptr = (StatusView *) ((char *)v + ViewSize);
             ptr->entry = &c->exercises[j];
             exerciseView_configure(v);
             addArrangedSubview(container->stack, v);
@@ -468,7 +461,7 @@ void workoutVC_viewDidLoad(id self, SEL _cmd) {
     releaseObj(scrollView);
     releaseObj(stack);
 
-    data->first = (ContainerViewData *) object_getIvar(data->containers[0], ContainerViewDataRef);
+    data->first = (ContainerView *) ((char *)data->containers[0] + ViewSize);
     hideView(data->first->divider, true);
     SEL obsSig = sel_getUid("addObserverForName:object:queue:usingBlock:");
     id weakSelf = self;
@@ -483,7 +476,7 @@ void workoutVC_viewDidLoad(id self, SEL _cmd) {
 }
 
 void workoutVC_startEndWorkout(id self, SEL _cmd _U_, id btn) {
-    WorkoutVCData *data = (WorkoutVCData *) object_getIvar(self, WorkoutVCDataRef);
+    WorkoutVC *data = (WorkoutVC *) ((char *)self + VCSize);
     if (!getTag(btn)) {
         setButtonTitle(btn, localize(CFSTR("end")), 0);
         setButtonColor(btn, createColor(ColorRed), 0);
@@ -514,11 +507,11 @@ void workoutVC_startEndWorkout(id self, SEL _cmd _U_, id btn) {
 }
 
 void workoutVC_willDisappear(id self, SEL _cmd, bool animated) {
-    struct objc_super super = {self, objc_getClass("UIViewController")};
+    struct objc_super super = {self, VCClass};
     ((void(*)(struct objc_super *,SEL,bool))objc_msgSendSuper)(&super, _cmd, animated);
 
     if (getBool(self, sel_getUid("isMovingFromParentViewController"))) {
-        WorkoutVCData *data = (WorkoutVCData *) object_getIvar(self, WorkoutVCDataRef);
+        WorkoutVC *data = (WorkoutVC *) ((char *)self + VCSize);
         if (!data->done) {
             cleanupWorkoutNotifications(data->observers);
             Workout *w = data->workout;
@@ -541,7 +534,7 @@ void workoutVC_handleTap(id self, SEL _cmd _U_, id btn) {
 }
 
 void handleEvent(id self, unsigned gIdx, unsigned eIdx, unsigned char event) {
-    WorkoutVCData *data = (WorkoutVCData *) object_getIvar(self, WorkoutVCDataRef);
+    WorkoutVC *data = (WorkoutVC *) ((char *)self + VCSize);
     pthread_mutex_lock(&timerLock);
     Workout *w = data->workout;
     if (data->done || gIdx != w->index || (eIdx != w->group->index && event != EventFinishGroup)) {
@@ -552,7 +545,7 @@ void handleEvent(id self, unsigned gIdx, unsigned eIdx, unsigned char event) {
     CFArrayRef views = getArrangedSubviews(data->first->stack);
     id currView = (id) CFArrayGetValueAtIndex(views, eIdx);
     ExerciseEntry *entry = &w->group->exercises[eIdx];
-    StatusViewData *ptr = ((StatusViewData *) object_getIvar(currView, StatusViewDataRef));
+    StatusView *ptr = (StatusView *) ((char *)currView + ViewSize);
     unsigned char t = 0;
     switch (event) {
         case EventFinishExercise:
@@ -644,8 +637,7 @@ foundTransition:
             return;
 
         case TransitionFinishedCircuitDeleteFirst:
-            data->first = ((ContainerViewData *)
-                           object_getIvar(data->containers[w->index], ContainerViewDataRef));
+            data->first = (ContainerView *) ((char *)data->containers[w->index] + ViewSize);
             views = getArrangedSubviews(data->first->stack);
             removeView(data->containers[w->index - 1]);
             hideView(data->first->divider, true);
@@ -680,7 +672,7 @@ foundTransition:
 }
 
 void workoutVC_finishedBottomSheet(id self, unsigned index, short weight) {
-    WorkoutVCData *data = (WorkoutVCData *) object_getIvar(self, WorkoutVCDataRef);
+    WorkoutVC *data = (WorkoutVC *) ((char *)self + VCSize);
     data->weights[index] = weight;
     handleEvent(self, 0, index, 0);
 }

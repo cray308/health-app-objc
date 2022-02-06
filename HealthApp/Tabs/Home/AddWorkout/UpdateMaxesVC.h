@@ -5,7 +5,6 @@
 #include <CoreFoundation/CFBase.h>
 
 extern Class UpdateMaxesVCClass;
-extern Ivar UpdateMaxesVCDataRef;
 
 typedef struct {
     id parent;
@@ -13,7 +12,7 @@ typedef struct {
     id stepperLabel;
     CFStringRef stepperFormat;
     unsigned index;
-} UpdateMaxesVCData;
+} UpdateMaxesVC;
 
 id updateMaxesVC_init(id parent, unsigned index);
 void updateMaxesVC_deinit(id self, SEL _cmd);

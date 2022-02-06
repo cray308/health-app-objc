@@ -75,6 +75,9 @@ setBool(_v, sel_getUid("setTranslatesAutoresizingMaskIntoConstraints:"), false)
 #define setButtonColor(_v, _color, _state) (((void(*)(id,SEL,id,int))objc_msgSend)\
 ((_v), sel_getUid("setTitleColor:forState:"), (_color), (_state)))
 
+extern size_t ViewSize;
+extern Class ViewClass;
+
 enum {
     TextFootnote = 1,
     TextSubhead,

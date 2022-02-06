@@ -4,12 +4,11 @@
 #include "HistoryVC.h"
 
 extern Class TotalWorkoutsViewClass;
-extern Ivar TotalWorkoutsViewDataRef;
 
 typedef struct {
     id chart;
     TotalWorkoutsChartModel *model;
-} TotalWorkoutsViewData;
+} TotalWorkoutsView;
 
 id totalWorkoutsView_init(TotalWorkoutsChartModel *model, id formatter);
 void totalWorkoutsView_update(id self, int count, int index, int ref);

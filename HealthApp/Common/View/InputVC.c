@@ -1,5 +1,4 @@
 #include "InputVC.h"
-#include <stdlib.h>
 #include "ViewControllerHelpers.h"
 
 #define toggleScrolling(_v, _enable) setBool(_v, sel_getUid("setScrollEnabled:"), _enable)
@@ -12,9 +11,8 @@ extern id UIKeyboardWillHideNotification;
 extern id UIKeyboardFrameEndUserInfoKey;
 
 Class InputVCClass;
-Ivar InputVCDataRef;
 Class InputViewClass;
-Ivar InputViewDataRef;
+size_t InputVCSize;
 
 static CFStringRef inputFieldError;
 
@@ -22,7 +20,7 @@ void initValidatorStrings(void) {
     inputFieldError = localize(CFSTR("inputFieldError"));
 }
 
-static void showInputError(InputVCData *data, InputViewData *child) {
+static void showInputError(InputVC *data, InputView *child) {
     enableButton(data->button, false);
     child->valid = false;
     hideView(child->errorLabel, false);
@@ -34,13 +32,12 @@ static void showInputError(InputVCData *data, InputViewData *child) {
 }
 
 void inputVC_addChild(id self, CFStringRef hint, short min, short max) {
-    InputVCData *d = (InputVCData *) object_getIvar(self, InputVCDataRef);
+    InputVC *d = (InputVC *) ((char *)self + VCSize);
 
     int index = d->count++;
     d->children[index] = createNew(InputViewClass);
-#ifndef __clang_analyzer__
     id view = d->children[index];
-    InputViewData *ptr = calloc(1, sizeof(InputViewData));
+    InputView *ptr = (InputView *) ((char *)view + ViewSize);
     ptr->minVal = min;
     ptr->maxVal = max;
     CFStringRef errorText = CFStringCreateWithFormat(NULL, NULL, inputFieldError, min, max);
@@ -58,21 +55,18 @@ void inputVC_addChild(id self, CFStringRef hint, short min, short max) {
     CFRelease(errorText);
     hideView(ptr->errorLabel, true);
     setInputAccessory(ptr->field, d->toolbar);
-    object_setIvar(view, InputViewDataRef, (id) ptr);
-#endif
 }
 
 void inputView_deinit(id self, SEL _cmd) {
-    InputViewData *ptr = (InputViewData *) object_getIvar(self, InputViewDataRef);
-    struct objc_super super = {self, objc_getClass("UIView")};
+    InputView *ptr = (InputView *) ((char *)self + ViewSize);
+    struct objc_super super = {self, ViewClass};
     releaseObj(ptr->hintLabel);
     releaseObj(ptr->field);
     releaseObj(ptr->errorLabel);
-    free(ptr);
     ((void(*)(struct objc_super *,SEL))objc_msgSendSuper)(&super, _cmd);
 }
 
-void inputView_reset(InputViewData *data, short value) {
+void inputView_reset(InputView *data, short value) {
     data->valid = true;
     data->result = value;
     hideView(data->errorLabel, true);
@@ -80,18 +74,13 @@ void inputView_reset(InputViewData *data, short value) {
 }
 
 id inputVC_init(id self, SEL _cmd) {
-    struct objc_super super = {self, objc_getClass("UIViewController")};
-    self = ((id(*)(struct objc_super *,SEL))objc_msgSendSuper)(&super, _cmd);
-#ifndef __clang_analyzer__
-    InputVCData *data = calloc(1, sizeof(InputVCData));
-    object_setIvar(self, InputVCDataRef, (id) data);
-#endif
-    return self;
+    struct objc_super super = {self, VCClass};
+    return ((id(*)(struct objc_super *,SEL))objc_msgSendSuper)(&super, _cmd);
 }
 
 void inputVC_deinit(id self, SEL _cmd) {
-    InputVCData *data = (InputVCData *) object_getIvar(self, InputVCDataRef);
-    struct objc_super super = {self, objc_getClass("UIViewController")};
+    InputVC *data = (InputVC *) ((char *)self + VCSize);
+    struct objc_super super = {self, VCClass};
 
     for (int i = 0; i < 4; ++i) {
         if (data->children[i])
@@ -105,19 +94,18 @@ void inputVC_deinit(id self, SEL _cmd) {
     ((void(*)(id,SEL,id,id,id))objc_msgSend)(center, sig, self, UIKeyboardDidShowNotification, nil);
     ((void(*)(id,SEL,id,id,id))objc_msgSend)(center, sig,
                                              self, UIKeyboardWillHideNotification, nil);
-    free(data);
     ((void(*)(struct objc_super *,SEL))objc_msgSendSuper)(&super, _cmd);
 }
 
 void inputVC_viewDidLoad(id self, SEL _cmd) {
-    struct objc_super super = {self, objc_getClass("UIViewController")};
+    struct objc_super super = {self, VCClass};
     ((void(*)(struct objc_super *,SEL))objc_msgSendSuper)(&super, _cmd);
 
     CGRect bounds;
     getScreenBounds(&bounds);
     CGFloat width = bounds.size.width;
 
-    InputVCData *data = (InputVCData *) object_getIvar(self, InputVCDataRef);
+    InputVC *data = (InputVC *) ((char *)self + VCSize);
     data->scrollView = createScrollView();
     data->vStack = createStackView(nil, 0, 1, 0, (Padding){0});
     data->toolbar = createObjectWithFrame(objc_getClass("UIToolbar"), ((CGRect){{0}, {width, 50}}));
@@ -160,10 +148,10 @@ void inputVC_viewDidLoad(id self, SEL _cmd) {
 }
 
 void inputVC_viewDidAppear(id self, SEL _cmd, bool animated) {
-    struct objc_super super = {self, objc_getClass("UIViewController")};
+    struct objc_super super = {self, VCClass};
     ((void(*)(struct objc_super *,SEL,bool))objc_msgSendSuper)(&super, _cmd, animated);
 
-    InputVCData *data = (InputVCData *) object_getIvar(self, InputVCDataRef);
+    InputVC *data = (InputVC *) ((char *)self + VCSize);
     if (!data->scrollHeight) {
         CGRect bounds;
         HAInsets insets;
@@ -181,20 +169,19 @@ void inputVC_viewDidAppear(id self, SEL _cmd, bool animated) {
 }
 
 void inputVC_dismissKeyboard(id self, SEL _cmd _U_) {
-    InputVCData *d = (InputVCData *) object_getIvar(self, InputVCDataRef);
+    InputVC *d = (InputVC *) ((char *)self + VCSize);
     int tag = d->activeField ? getTag(d->activeField) : 255;
     if (tag >= d->count - 1) {
         id view = getView(self);
         setBool(view, sel_getUid("endEditing:"), true);
     } else {
-        InputViewData *next = ((InputViewData *)
-                               object_getIvar(d->children[tag + 1], InputViewDataRef));
+        InputView *next = (InputView *) ((char *)d->children[tag + 1] + ViewSize);
         getBool(next->field, sel_getUid("becomeFirstResponder"));
     }
 }
 
 void inputVC_keyboardShown(id self, SEL _cmd _U_, id notif) {
-    InputVCData *data = (InputVCData *) object_getIvar(self, InputVCDataRef);
+    InputVC *data = (InputVC *) ((char *)self + VCSize);
     toggleScrolling(data->scrollView, true);
     id userInfo = getObject(notif, sel_getUid("userInfo"));
     id info = getObjectWithObject(userInfo,
@@ -228,7 +215,7 @@ void inputVC_keyboardShown(id self, SEL _cmd _U_, id notif) {
 }
 
 void inputVC_keyboardWillHide(id self, SEL _cmd _U_, id notif _U_) {
-    InputVCData *data = (InputVCData *) object_getIvar(self, InputVCDataRef);
+    InputVC *data = (InputVC *) ((char *)self + VCSize);
     setScrollInsets(data->scrollView, ((HAInsets){data->topOffset, 0, data->bottomOffset, 0}));
     CGRect bounds;
     getRect(data->vStack, &bounds, 1);
@@ -236,15 +223,15 @@ void inputVC_keyboardWillHide(id self, SEL _cmd _U_, id notif _U_) {
 }
 
 void inputVC_fieldBeganEditing(id self, SEL _cmd _U_, id field) {
-    ((InputVCData *) object_getIvar(self, InputVCDataRef))->activeField = field;
+    ((InputVC *) ((char *)self + VCSize))->activeField = field;
 }
 
 void inputVC_fieldStoppedEditing(id self, SEL _cmd _U_, id field _U_) {
-    ((InputVCData *) object_getIvar(self, InputVCDataRef))->activeField = nil;
+    ((InputVC *) ((char *)self + VCSize))->activeField = nil;
 }
 
 bool inputVC_fieldChanged(id self, SEL _cmd _U_, id field, CFRange range, CFStringRef replacement) {
-    InputVCData *d = (InputVCData *) object_getIvar(self, InputVCDataRef);
+    InputVC *d = (InputVC *) ((char *)self + VCSize);
 
     int len = (int) CFStringGetLength(replacement);
     if (len) {
@@ -257,7 +244,7 @@ bool inputVC_fieldChanged(id self, SEL _cmd _U_, id field, CFRange range, CFStri
     }
 
     int i = getTag(field);
-    InputViewData *child = (InputViewData *) object_getIvar(d->children[i], InputViewDataRef);
+    InputView *child = (InputView *) ((char *)d->children[i] + ViewSize);
 
     CFStringRef text = getText(field);
     if (range.location + range.length > CFStringGetLength(text)) return false;
@@ -280,7 +267,7 @@ bool inputVC_fieldChanged(id self, SEL _cmd _U_, id field, CFRange range, CFStri
 
     inputView_reset(child, newVal);
     for (i = 0; i < d->count; ++i) {
-        child = (InputViewData *) object_getIvar(d->children[i], InputViewDataRef);
+        child = (InputView *) ((char *)d->children[i] + ViewSize);
         if (!child->valid) return true;
     }
 

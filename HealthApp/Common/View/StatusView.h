@@ -6,17 +6,16 @@
 #include "ExerciseManager.h"
 
 extern Class StatusViewClass;
-extern Ivar StatusViewDataRef;
 
 typedef struct {
     id button;
     id headerLabel;
     id box;
     ExerciseEntry *entry;
-} StatusViewData;
+} StatusView;
 
 id statusView_init(CFStringRef text, int tag, id target, SEL action);
 void statusView_deinit(id self, SEL _cmd);
-void statusView_updateAccessibility(id self, CFStringRef stateText);
+void statusView_updateAccessibility(StatusView *ptr, CFStringRef stateText);
 
 #endif /* StatusView_h */

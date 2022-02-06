@@ -18,11 +18,11 @@
 
 #define getNavVC(_vc) getObject(_vc, sel_getUid("navigationController"))
 
-#define createVC(_cls) (((id(*)(Class,SEL))objc_msgSend)((_cls), sel_getUid("new")))
-
 #define setBarTint(_v, _c) setObject(_v, sel_getUid("setBarTintColor:"), _c)
 
 extern Class DMNavVC;
+extern Class VCClass;
+extern size_t VCSize;
 
 typedef void (^Callback)(void);
 

@@ -1,6 +1,5 @@
 #include "UpdateMaxesVC.h"
 #include <CoreFoundation/CFString.h>
-#include <stdlib.h>
 #include "AppUserData.h"
 #include "InputVC.h"
 #include "ViewControllerHelpers.h"
@@ -11,26 +10,21 @@
 #define getStepperValue(_v) (((double(*)(id,SEL))objc_msgSend)((_v), sel_getUid("value")))
 
 Class UpdateMaxesVCClass;
-Ivar UpdateMaxesVCDataRef;
 
 id updateMaxesVC_init(id parent, unsigned index) {
-    id self = createVC(UpdateMaxesVCClass);
-#ifndef __clang_analyzer__
-    UpdateMaxesVCData *data = malloc(sizeof(UpdateMaxesVCData));
+    id self = createNew(UpdateMaxesVCClass);
+    UpdateMaxesVC *data = (UpdateMaxesVC *) ((char *)self + InputVCSize);
     data->parent = parent;
     data->index = index;
     data->stepperFormat = localize(CFSTR("stepperLabelFormat"));
-    object_setIvar(self, UpdateMaxesVCDataRef, (id) data);
-#endif
     return self;
 }
 
 void updateMaxesVC_deinit(id self, SEL _cmd) {
-    UpdateMaxesVCData *data = (UpdateMaxesVCData *) object_getIvar(self, UpdateMaxesVCDataRef);
+    UpdateMaxesVC *data = (UpdateMaxesVC *) ((char *)self + InputVCSize);
     struct objc_super super = {self, InputVCClass};
     releaseObj(data->stepper);
     releaseObj(data->stepperLabel);
-    free(data);
     ((void(*)(struct objc_super *,SEL))objc_msgSendSuper)(&super, _cmd);
 }
 
@@ -38,8 +32,8 @@ void updateMaxesVC_viewDidLoad(id self, SEL _cmd) {
     struct objc_super super = {self, InputVCClass};
     ((void(*)(struct objc_super *,SEL))objc_msgSendSuper)(&super, _cmd);
 
-    InputVCData *parent = (InputVCData *) object_getIvar(self, InputVCDataRef);
-    UpdateMaxesVCData *data = (UpdateMaxesVCData *) object_getIvar(self, UpdateMaxesVCDataRef);
+    InputVC *parent = (InputVC *) ((char *)self + VCSize);
+    UpdateMaxesVC *data = (UpdateMaxesVC *) ((char *)self + InputVCSize);
     id view = getView(self);
     setBackground(view, createColor(ColorSecondaryBG));
 
@@ -71,7 +65,7 @@ void updateMaxesVC_viewDidLoad(id self, SEL _cmd) {
 }
 
 void updateMaxesVC_updatedStepper(id self, SEL _cmd _U_) {
-    UpdateMaxesVCData *data = (UpdateMaxesVCData *) object_getIvar(self, UpdateMaxesVCDataRef);
+    UpdateMaxesVC *data = (UpdateMaxesVC *) ((char *)self + InputVCSize);
     int value = (int) getStepperValue(data->stepper);
     CFStringRef stepperText = CFStringCreateWithFormat(NULL, NULL, data->stepperFormat, value);
     setLabelText(data->stepperLabel, stepperText);
@@ -79,11 +73,10 @@ void updateMaxesVC_updatedStepper(id self, SEL _cmd _U_) {
 }
 
 void updateMaxesVC_tappedFinish(id self, SEL _cmd _U_) {
-    UpdateMaxesVCData *data = (UpdateMaxesVCData *) object_getIvar(self, UpdateMaxesVCDataRef);
-    id field = ((InputVCData *) object_getIvar(self, InputVCDataRef))->children[0];
+    UpdateMaxesVC *data = (UpdateMaxesVC *) ((char *)self + InputVCSize);
+    id field = ((InputVC *) ((char *)self + VCSize))->children[0];
     short extra = data->index == LiftPullup ? getBodyWeight() : 0;
-    int initWeight = ((InputViewData *) object_getIvar(field, InputViewDataRef))->result + extra;
-    initWeight *= 36;
+    int initWeight = (((InputView *) ((char *)field + ViewSize))->result + extra) * 36;
     float reps = 37.f - ((float) getStepperValue(data->stepper));
     short weight = (short) ((initWeight / reps) + 0.5f) - extra;
     id parent = data->parent;

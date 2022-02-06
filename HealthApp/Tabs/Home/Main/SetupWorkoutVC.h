@@ -5,7 +5,6 @@
 #include <objc/runtime.h>
 
 extern Class SetupWorkoutVCClass;
-extern Ivar SetupWorkoutVCDataRef;
 
 typedef struct {
     id parent;
@@ -13,7 +12,7 @@ typedef struct {
     id workoutTextField;
     unsigned char type;
     int index;
-} SetupWorkoutVCData;
+} SetupWorkoutVC;
 
 id setupWorkoutVC_init(id parent, unsigned char type, CFArrayRef names CF_CONSUMED);
 void setupWorkoutVC_deinit(id self, SEL _cmd);

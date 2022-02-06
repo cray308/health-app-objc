@@ -5,9 +5,8 @@
 #include <objc/runtime.h>
 
 extern Class InputVCClass;
-extern Ivar InputVCDataRef;
 extern Class InputViewClass;
-extern Ivar InputViewDataRef;
+extern size_t InputVCSize;
 
 typedef struct {
     short minVal;
@@ -17,7 +16,7 @@ typedef struct {
     id hintLabel;
     id field;
     id errorLabel;
-} InputViewData;
+} InputView;
 
 typedef struct {
     int count;
@@ -30,9 +29,9 @@ typedef struct {
     id scrollView;
     id vStack;
     id toolbar;
-} InputVCData;
+} InputVC;
 
-void inputView_reset(InputViewData *data, short value);
+void inputView_reset(InputView *data, short value);
 void inputView_deinit(id self, SEL _cmd);
 
 void initValidatorStrings(void);

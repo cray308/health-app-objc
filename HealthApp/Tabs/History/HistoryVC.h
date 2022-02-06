@@ -6,7 +6,6 @@
 #include <objc/runtime.h>
 
 extern Class HistoryVCClass;
-extern Ivar HistoryVCDataRef;
 
 typedef struct {
     CGPoint *entries;
@@ -50,7 +49,7 @@ typedef struct {
     HistoryViewModel model;
     id picker;
     id charts[3];
-} HistoryVCData;
+} HistoryVC;
 
 id historyVC_init(void **model, void (**handler)(void*));
 void historyVC_clearData(id self);

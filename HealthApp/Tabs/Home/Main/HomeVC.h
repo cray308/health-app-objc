@@ -5,14 +5,13 @@
 #include <objc/runtime.h>
 
 extern Class HomeVCClass;
-extern Ivar HomeVCDataRef;
 
 typedef struct {
     id planContainer;
     id customContainer;
     CFStringRef stateNames[2];
     int numWorkouts;
-} HomeVCData;
+} HomeVC;
 
 id homeVC_init(void);
 void homeVC_updateWorkoutsList(id self);

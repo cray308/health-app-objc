@@ -5,13 +5,12 @@
 #include <objc/runtime.h>
 
 extern Class ContainerViewClass;
-extern Ivar ContainerViewDataRef;
 
 typedef struct {
     id divider;
     id headerLabel;
     id stack;
-} ContainerViewData;
+} ContainerView;
 
 id containerView_init(CFStringRef title, int spacing, bool margins);
 void containerView_deinit(id self, SEL _cmd);

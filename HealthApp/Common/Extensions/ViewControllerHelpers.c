@@ -6,6 +6,8 @@
 ((_o), sel_getUid("setValue:forKey:"), (_v), (_k))
 
 Class DMNavVC;
+Class VCClass;
+size_t VCSize;
 
 void setNavButton(id vc, bool left, id button, int totalWidth) {
     id navItem = getNavItem(vc);

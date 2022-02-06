@@ -63,7 +63,6 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
 
     objc_registerClassPair(DMNavVC);
     objc_registerClassPair(SetupWorkoutVCClass);
-    SetupWorkoutVCDataRef = class_getInstanceVariable(SetupWorkoutVCClass, "data");
 
     setTintColor(self->window, createColor(ColorRed));
     id tabVC = createNew(objc_getClass("UITabBarController"));

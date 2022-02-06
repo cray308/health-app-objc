@@ -1,28 +1,20 @@
 #include "SettingsVC.h"
-#include <stdlib.h>
 #include "AppDelegate.h"
 #include "AppUserData.h"
 #include "InputVC.h"
 #include "ViewControllerHelpers.h"
 
 Class SettingsVCClass;
-Ivar SettingsVCDataRef;
 
 id settingsVC_init(void) {
-    id self = createVC(SettingsVCClass);
-#ifndef __clang_analyzer__
-    SettingsVCData *data = calloc(1, sizeof(SettingsVCData));
-    object_setIvar(self, SettingsVCDataRef, (id) data);
-#endif
-    return self;
+    return createNew(SettingsVCClass);
 }
 
 void settingsVC_updateWeightFields(id self) {
-    InputVCData *parent = (InputVCData *) object_getIvar(self, InputVCDataRef);
+    InputVC *parent = (InputVC *) ((char *)self + VCSize);
     for (int i = 0; i < 4; ++i) {
         short value = userData->liftMaxes[i];
-        InputViewData *child = ((InputViewData *)
-                                object_getIvar(parent->children[i], InputViewDataRef));
+        InputView *child = (InputView *) ((char *)parent->children[i] + ViewSize);
         CFStringRef str = CFStringCreateWithFormat(NULL, NULL, CFSTR("%d"), value);
         setLabelText(child->field, str);
         inputView_reset(child, value);
@@ -32,8 +24,8 @@ void settingsVC_updateWeightFields(id self) {
 }
 
 void settingsVC_updateColors(id self) {
-    InputVCData *par = (InputVCData *) object_getIvar(self, InputVCDataRef);
-    SettingsVCData *data = (SettingsVCData *) object_getIvar(self, SettingsVCDataRef);
+    InputVC *par = (InputVC *) ((char *)self + VCSize);
+    SettingsVC *data = (SettingsVC *) ((char *)self + InputVCSize);
     setBackground(getView(self), createColor(ColorPrimaryBGGrouped));
     CFArrayRef views = getArrangedSubviews(data->planContainer);
     setTextColor((id) CFArrayGetValueAtIndex(views, 0), createColor(ColorLabel));
@@ -47,7 +39,7 @@ void settingsVC_updateColors(id self) {
     view = (id) CFArrayGetValueAtIndex(getArray(par->toolbar, sel_getUid("items")), 1);
     setTintColor(view, createColor(ColorRed));
     for (int i = 0; i < 4; ++i) {
-        InputViewData *ptr = ((InputViewData *) object_getIvar(par->children[i], InputViewDataRef));
+        InputView *ptr = (InputView *) ((char *)par->children[i] + ViewSize);
         setTextColor(ptr->errorLabel, createColor(ColorRed));
         setTextColor(ptr->hintLabel, createColor(ColorLabel));
         setTextColor(ptr->field, createColor(ColorLabel));
@@ -60,8 +52,8 @@ void settingsVC_viewDidLoad(id self, SEL _cmd) {
     struct objc_super super = {self, InputVCClass};
     ((void(*)(struct objc_super *,SEL))objc_msgSendSuper)(&super, _cmd);
 
-    SettingsVCData *data = (SettingsVCData *) object_getIvar(self, SettingsVCDataRef);
-    InputVCData *parent = (InputVCData *) object_getIvar(self, InputVCDataRef);
+    InputVC *parent = (InputVC *) ((char *)self + VCSize);
+    SettingsVC *data = (SettingsVC *) ((char *)self + InputVCSize);
     setBackground(getView(self), createColor(ColorPrimaryBGGrouped));
     setVCTitle(self, localize(CFSTR("settingsTitle")));
 
@@ -125,7 +117,7 @@ void settingsVC_buttonTapped(id self, SEL _cmd _U_, id btn) {
         return;
     }
 
-    SettingsVCData *data = (SettingsVCData *) object_getIvar(self, SettingsVCDataRef);
+    SettingsVC *data = (SettingsVC *) ((char *)self + InputVCSize);
     signed char dark = -1;
     if (data->switchContainer) {
         id sv = (id) CFArrayGetValueAtIndex(getSubviews(data->switchContainer), 0);
@@ -136,9 +128,9 @@ void settingsVC_buttonTapped(id self, SEL _cmd _U_, id btn) {
     signed char plan = ((signed char) getSelectedSegment(picker)) - 1;
 
     short *arr = data->results;
-    id *fields = ((InputVCData *) object_getIvar(self, InputVCDataRef))->children;
+    id *fields = ((InputVC *) ((char *)self + VCSize))->children;
     for (int i = 0; i < 4; ++i) {
-        arr[i] = ((InputViewData *) object_getIvar(fields[i], InputViewDataRef))->result;
+        arr[i] = ((InputView *) ((char *)fields[i] + ViewSize))->result;
     }
     addAlertAction(ctrl, localize(CFSTR("save")), 0, ^{ appDel_updateUserInfo(plan, dark, arr); });
     presentVC(self, ctrl);

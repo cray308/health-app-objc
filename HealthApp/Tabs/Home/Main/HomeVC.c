@@ -21,41 +21,34 @@ enum {
 };
 
 Class HomeVCClass;
-Ivar HomeVCDataRef;
 
 id homeVC_init(void) {
-    id self = createVC(HomeVCClass);
-#ifndef __clang_analyzer__
-    HomeVCData *data = malloc(sizeof(HomeVCData));
+    id self = createNew(HomeVCClass);
+    HomeVC *data = (HomeVC *) ((char *)self + VCSize);
     fillStringArray(data->stateNames, CFSTR("homeState%d"), 2);
-    object_setIvar(self, HomeVCDataRef, (id) data);
-#endif
     return self;
 }
 
 void homeVC_updateWorkoutsList(id self) {
-    HomeVCData *data = (HomeVCData *) object_getIvar(self, HomeVCDataRef);
-    ContainerViewData *planData = ((ContainerViewData *)
-                                   object_getIvar(data->planContainer, ContainerViewDataRef));
+    HomeVC *data = (HomeVC *) ((char *)self + VCSize);
+    ContainerView *planData = (ContainerView *) ((char *)data->planContainer + ViewSize);
 
     CFArrayRef views = getArrangedSubviews(planData->stack);
     for (int i = 0; i < data->numWorkouts; ++i) {
         id v = (id) CFArrayGetValueAtIndex(views, i);
-        StatusViewData *ptr = (StatusViewData *) object_getIvar(v, StatusViewDataRef);
+        StatusView *ptr = (StatusView *) ((char *)v + ViewSize);
         int tag = getTag(v);
         bool enable = !(userData->completedWorkouts & (1 << tag));
         enableButton(ptr->button, enable);
         setBackground(ptr->box, createColor(enable ? ColorGray : ColorGreen));
-        statusView_updateAccessibility(v, data->stateNames[enable]);
+        statusView_updateAccessibility(ptr, data->stateNames[enable]);
     }
 }
 
 void homeVC_createWorkoutsList(id self) {
-    HomeVCData *data = (HomeVCData *) object_getIvar(self, HomeVCDataRef);
-    ContainerViewData *planData = ((ContainerViewData *)
-                                   object_getIvar(data->planContainer, ContainerViewDataRef));
-    ContainerViewData *customData = ((ContainerViewData *)
-                                     object_getIvar(data->customContainer, ContainerViewDataRef));
+    HomeVC *data = (HomeVC *) ((char *)self + VCSize);
+    ContainerView *planData = (ContainerView *) ((char *)data->planContainer + ViewSize);
+    ContainerView *customData = (ContainerView *) ((char *)data->customContainer + ViewSize);
 
     data->numWorkouts = 0;
     CFArrayRef views = getArrangedSubviews(planData->stack);
@@ -80,7 +73,7 @@ void homeVC_createWorkoutsList(id self) {
     for (int i = 0; i < 7; ++i) {
         if (!workoutNames[i]) continue;
         id btn = statusView_init(workoutNames[i], i, self, btnTap);
-        StatusViewData *ptr = (StatusViewData *) object_getIvar(btn, StatusViewDataRef);
+        StatusView *ptr = (StatusView *) ((char *)btn + ViewSize);
         setLabelText(ptr->headerLabel, days[i]);
         addArrangedSubview(planData->stack, btn);
         CFRelease(workoutNames[i]);
@@ -94,7 +87,7 @@ void homeVC_createWorkoutsList(id self) {
 }
 
 static void statusView_updateColors(id self) {
-    StatusViewData *ptr = (StatusViewData *) object_getIvar(self, StatusViewDataRef);
+    StatusView *ptr = (StatusView *) ((char *)self + ViewSize);
     setTextColor(ptr->headerLabel, createColor(ColorLabel));
     updateButtonColors(ptr->button, ColorLabel);
     int color = getBool(ptr->button, sel_getUid("isEnabled")) ? ColorGray : ColorGreen;
@@ -102,11 +95,9 @@ static void statusView_updateColors(id self) {
 }
 
 void homeVC_updateColors(id self) {
-    HomeVCData *data = (HomeVCData *) object_getIvar(self, HomeVCDataRef);
-    ContainerViewData *planData = ((ContainerViewData *)
-                                   object_getIvar(data->planContainer, ContainerViewDataRef));
-    ContainerViewData *customData = ((ContainerViewData *)
-                                     object_getIvar(data->customContainer, ContainerViewDataRef));
+    HomeVC *data = (HomeVC *) ((char *)self + VCSize);
+    ContainerView *planData = (ContainerView *) ((char *)data->planContainer + ViewSize);
+    ContainerView *customData = (ContainerView *) ((char *)data->customContainer + ViewSize);
     setBackground(getView(self), createColor(ColorPrimaryBGGrouped));
     containerView_updateColors(data->planContainer);
     containerView_updateColors(data->customContainer);
@@ -121,10 +112,10 @@ void homeVC_updateColors(id self) {
 }
 
 void homeVC_viewDidLoad(id self, SEL _cmd) {
-    struct objc_super super = {self, objc_getClass("UIViewController")};
+    struct objc_super super = {self, VCClass};
     ((void(*)(struct objc_super *,SEL))objc_msgSendSuper)(&super, _cmd);
 
-    HomeVCData *data = (HomeVCData *) object_getIvar(self, HomeVCDataRef);
+    HomeVC *data = (HomeVC *) ((char *)self + VCSize);
     id view = getView(self);
     setBackground(view, createColor(ColorPrimaryBGGrouped));
     setVCTitle(self, localize(CFSTR("tabs0")));
@@ -134,21 +125,19 @@ void homeVC_viewDidLoad(id self, SEL _cmd) {
     fillStringArray(headers, CFSTR("homeHeader%d"), 2);
 
     data->planContainer = containerView_init(headers[0], 0, true);
-    ContainerViewData *planData = ((ContainerViewData *)
-                                   object_getIvar(data->planContainer, ContainerViewDataRef));
+    ContainerView *planData = (ContainerView *) ((char *)data->planContainer + ViewSize);
     hideView(planData->divider, true);
     data->customContainer = containerView_init(headers[1], 4, true);
-    ContainerViewData *customData = ((ContainerViewData *)
-                                     object_getIvar(data->customContainer, ContainerViewDataRef));
+    ContainerView *customData = (ContainerView *) ((char *)data->customContainer + ViewSize);
     id vStack = createStackView((id[]){data->planContainer, data->customContainer}, 2, 1, 20,
                                 (Padding){10, 0, 16, 0});
 
     SEL btnTap = sel_getUid("customButtonTapped:");
     for (int i = 0; i < 5; ++i) {
         id btn = statusView_init(titles[i], i, self, btnTap);
-        StatusViewData *ptr = (StatusViewData *) object_getIvar(btn, StatusViewDataRef);
+        StatusView *ptr = (StatusView *) ((char *)btn + ViewSize);
         hideView(ptr->box, true);
-        statusView_updateAccessibility(btn, NULL);
+        statusView_updateAccessibility(ptr, NULL);
         addArrangedSubview(customData->stack, btn);
         releaseObj(btn);
     }
@@ -209,7 +198,7 @@ static void showConfetti(id self) {
     id view = getView(self);
     CGRect frame;
     getRect(view, &frame, 0);
-    id confettiView = createObjectWithFrame(objc_getClass("UIView"), frame);
+    id confettiView = createObjectWithFrame(ViewClass, frame);
     id grayColor = createColor(ColorGray);
     id bg = getObjectWithFloat(grayColor, sel_getUid("colorWithAlphaComponent:"), 0.8);
     setBackground(confettiView, bg);
@@ -283,7 +272,7 @@ static void showConfetti(id self) {
 }
 
 void homeVC_handleFinishedWorkout(id self, int totalCompleted) {
-    HomeVCData *data = (HomeVCData *) object_getIvar(self, HomeVCDataRef);
+    HomeVC *data = (HomeVC *) ((char *)self + VCSize);
     homeVC_updateWorkoutsList(self);
     if (data->numWorkouts == totalCompleted) {
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 2500000000),

@@ -4,12 +4,11 @@
 #include "HistoryVC.h"
 
 extern Class LiftViewClass;
-extern Ivar LiftViewDataRef;
 
 typedef struct {
     id chart;
     LiftChartModel *model;
-} LiftViewData;
+} LiftView;
 
 id liftingView_init(LiftChartModel *model, id formatter);
 void liftingView_update(id self, int count, int index, int ref);

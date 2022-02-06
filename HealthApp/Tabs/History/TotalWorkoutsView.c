@@ -1,30 +1,24 @@
 #include "TotalWorkoutsView.h"
-#include <stdlib.h>
 #include "SwiftBridging.h"
 
 extern void setLineLimit(id v, float limit);
 
 Class TotalWorkoutsViewClass;
-Ivar TotalWorkoutsViewDataRef;
 
 id totalWorkoutsView_init(TotalWorkoutsChartModel *model, id formatter) {
     id self = createNew(TotalWorkoutsViewClass);
-#ifndef __clang_analyzer__
-    TotalWorkoutsViewData *data = malloc(sizeof(TotalWorkoutsViewData));
+    TotalWorkoutsView *data = (TotalWorkoutsView *) ((char *)self + ViewSize);
     data->model = model;
     data->chart = createChartView(formatter, (long []){4}, 1, 1);
     disableAutoresizing(data->chart);
     addSubview(self, data->chart);
     pin(data->chart, self, (Padding){0, 8, 0, 8}, 0);
     setHeight(data->chart, 390, false);
-    object_setIvar(self, TotalWorkoutsViewDataRef, (id) data);
-#endif
     return self;
 }
 
 void totalWorkoutsView_update(id self, int count, int index, int ref) {
-    TotalWorkoutsViewData *ptr = ((TotalWorkoutsViewData *)
-                                  object_getIvar(self, TotalWorkoutsViewDataRef));
+    TotalWorkoutsView *ptr = (TotalWorkoutsView *) ((char *)self + ViewSize);
     setLineLimit(ptr->chart, ptr->model->avgs[index]);
     replaceDataSetEntries(ptr->model->dataSet, &ptr->model->entries[ref], count);
     updateChart(ptr->chart, ptr->model->chartData, ptr->model->maxes[index]);

@@ -4,14 +4,13 @@
 #include <objc/runtime.h>
 
 extern Class SettingsVCClass;
-extern Ivar SettingsVCDataRef;
 
 typedef struct {
     id planContainer;
     id switchContainer;
     id deleteButton;
     short results[4];
-} SettingsVCData;
+} SettingsVC;
 
 id settingsVC_init(void);
 void settingsVC_updateWeightFields(id self);

@@ -26,6 +26,9 @@ extern CGFloat UIFontWeightSemibold;
 extern id NSForegroundColorAttributeName;
 extern id NSFontAttributeName;
 
+size_t ViewSize;
+Class ViewClass;
+
 static void setDynamicFont(id view) {
     setBool(view, sel_getUid("setAdjustsFontSizeToFitWidth:"), true);
     adjustFontForSizeCategory(view);
@@ -99,7 +102,7 @@ id createObjectWithFrame(Class cls, CGRect frame) {
 }
 
 id createBackgroundView(int colorCode, int height, bool optional) {
-    id view = createNew(objc_getClass("UIView"));
+    id view = createNew(ViewClass);
     disableAutoresizing(view);
     setBackground(view, createColor(colorCode));
     setHeight(view, height, optional);
@@ -107,7 +110,7 @@ id createBackgroundView(int colorCode, int height, bool optional) {
 }
 
 id createView(int size) {
-    id view = createNew(objc_getClass("UIView"));
+    id view = createNew(ViewClass);
     disableAutoresizing(view);
     if (size >= 0) {
         setCornerRadius(view);

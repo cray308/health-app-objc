@@ -7,7 +7,6 @@
 #include "ExerciseManager.h"
 
 extern Class WorkoutVCClass;
-extern Ivar WorkoutVCDataRef;
 
 typedef struct {
     id parent;
@@ -26,7 +25,7 @@ typedef struct {
 
 typedef struct {
     Workout *workout;
-    ContainerViewData *first;
+    ContainerView *first;
     id *containers;
     id observers[2];
     pthread_t threads[2];
@@ -40,7 +39,7 @@ typedef struct {
     WorkoutTimer timers[2];
     short weights[4];
     bool done;
-} WorkoutVCData;
+} WorkoutVC;
 
 void initWorkoutStrings(void);
 id workoutVC_init(Workout *workout);

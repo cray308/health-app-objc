@@ -25,7 +25,6 @@ struct WeekDataModel {
 };
 
 Class HistoryVCClass;
-Ivar HistoryVCDataRef;
 
 #pragma mark - Load Data
 
@@ -144,9 +143,8 @@ static void historyData_fetch(void *_model) {
 #pragma mark - Main Functions
 
 id historyVC_init(void **model, void (**handler)(void*)) {
-    id self = createVC(HistoryVCClass);
-#ifndef __clang_analyzer__
-    HistoryVCData *data = calloc(1, sizeof(HistoryVCData));
+    id self = createNew(HistoryVCClass);
+    HistoryVC *data = (HistoryVC *) ((char *)self + VCSize);
     *model = &data->model;
     *handler = &historyData_fetch;
     HistoryViewModel *m = &data->model;
@@ -179,16 +177,14 @@ id historyVC_init(void **model, void (**handler)(void*)) {
     dataArr = CFArrayCreate(NULL, (const void **)m->lifts.dataSets, 4, NULL);
     m->lifts.chartData = createChartData(dataArr, 3, 0);
     CFRelease(dataArr);
-    object_setIvar(self, HistoryVCDataRef, (id) data);
-#endif
     return self;
 }
 
 void historyVC_viewDidLoad(id self, SEL _cmd) {
-    struct objc_super super = {self, objc_getClass("UIViewController")};
+    struct objc_super super = {self, VCClass};
     ((void(*)(struct objc_super *,SEL))objc_msgSendSuper)(&super, _cmd);
 
-    HistoryVCData *data = (HistoryVCData *) object_getIvar(self, HistoryVCDataRef);
+    HistoryVC *data = (HistoryVC *) ((char *)self + VCSize);
     id view = getView(self);
     setBackground(view, createColor(ColorPrimaryBG));
 
@@ -207,12 +203,10 @@ void historyVC_viewDidLoad(id self, SEL _cmd) {
     id containers[3];
     for (int i = 0; i < 3; ++i) {
         containers[i] = containerView_init(titles[i], 0, false);
-        ContainerViewData *container = ((ContainerViewData *)
-                                        object_getIvar(containers[i], ContainerViewDataRef));
+        ContainerView *container = (ContainerView *) ((char *)containers[i] + ViewSize);
         addArrangedSubview(container->stack, data->charts[i]);
     }
-    ContainerViewData *firstC = ((ContainerViewData *)
-                                 object_getIvar(containers[0], ContainerViewDataRef));
+    ContainerView *firstC = (ContainerView *) ((char *)containers[0] + ViewSize);
     hideView(firstC->divider, true);
 
     id vStack = createStackView(containers, 3, 1, 5, (Padding){10, 8, 10, 8});
@@ -233,13 +227,11 @@ void historyVC_viewDidLoad(id self, SEL _cmd) {
 }
 
 void historyVC_updateSegment(id self, SEL _cmd _U_, id picker) {
-    HistoryVCData *data = (HistoryVCData *) object_getIvar(self, HistoryVCDataRef);
+    HistoryVC *data = (HistoryVC *) ((char *)self + VCSize);
     HistoryViewModel *model = &data->model;
-    TotalWorkoutsViewData *totalsData = ((TotalWorkoutsViewData *)
-                                         object_getIvar(data->charts[0], TotalWorkoutsViewDataRef));
-    WorkoutTypeViewData *typeData = ((WorkoutTypeViewData *)
-                                     object_getIvar(data->charts[1], WorkoutTypeViewDataRef));
-    LiftViewData *liftData = (LiftViewData *) object_getIvar(data->charts[2], LiftViewDataRef);
+    TotalWorkoutsView *totalsData = (TotalWorkoutsView *) ((char*)data->charts[0] + ViewSize);
+    WorkoutTypeView *typeData = (WorkoutTypeView *) ((char *)data->charts[1] + ViewSize);
+    LiftView *liftData = (LiftView *) ((char *)data->charts[2] + ViewSize);
     int index = getSelectedSegment(picker);
     int count = model->nEntries[index];
     int ref = model->refIndices[index];
@@ -282,7 +274,7 @@ void historyVC_updateSegment(id self, SEL _cmd _U_, id picker) {
 }
 
 void historyVC_clearData(id self) {
-    HistoryVCData *data = (HistoryVCData *) object_getIvar(self, HistoryVCDataRef);
+    HistoryVC *data = (HistoryVC *) ((char *)self + VCSize);
     HistoryViewModel *model = &data->model;
     if (!model->nEntries[2]) return;
 
@@ -306,13 +298,13 @@ void historyVC_clearData(id self) {
 }
 
 CFStringRef historyVC_stringForValue(id self, SEL _cmd _U_, double value) {
-    CFArrayRef strs = ((HistoryVCData *) object_getIvar(self, HistoryVCDataRef))->model.axisStrings;
+    CFArrayRef strs = ((HistoryVC *) ((char *)self + VCSize))->model.axisStrings;
     return CFArrayGetValueAtIndex(strs, (int) value);
 }
 
 void historyVC_updateColors(id self) {
     if (isViewLoaded(self)) {
-        id picker = ((HistoryVCData *) object_getIvar(self, HistoryVCDataRef))->picker;
+        id picker = ((HistoryVC *) ((char *)self + VCSize))->picker;
         id view = getView(self);
         setBackground(view, createColor(ColorPrimaryBG));
         updateSegmentedControl(picker);
