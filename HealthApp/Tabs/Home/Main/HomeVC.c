@@ -93,9 +93,31 @@ void homeVC_createWorkoutsList(id self) {
     homeVC_updateWorkoutsList(self);
 }
 
+static void statusView_updateColors(id self) {
+    StatusViewData *ptr = (StatusViewData *) object_getIvar(self, StatusViewDataRef);
+    setTextColor(ptr->headerLabel, createColor(ColorLabel));
+    updateButtonColors(ptr->button, ColorLabel);
+    int color = getBool(ptr->button, sel_getUid("isEnabled")) ? ColorGray : ColorGreen;
+    setBackground(ptr->box, createColor(color));
+}
+
 void homeVC_updateColors(id self) {
-    id view = getView(self);
-    setBackground(view, createColor(ColorPrimaryBGGrouped));
+    HomeVCData *data = (HomeVCData *) object_getIvar(self, HomeVCDataRef);
+    ContainerViewData *planData = ((ContainerViewData *)
+                                   object_getIvar(data->planContainer, ContainerViewDataRef));
+    ContainerViewData *customData = ((ContainerViewData *)
+                                     object_getIvar(data->customContainer, ContainerViewDataRef));
+    setBackground(getView(self), createColor(ColorPrimaryBGGrouped));
+    containerView_updateColors(data->planContainer);
+    containerView_updateColors(data->customContainer);
+    CFArrayRef views = getArrangedSubviews(planData->stack);
+    for (int i = 0; i < data->numWorkouts; ++i) {
+        statusView_updateColors((id) CFArrayGetValueAtIndex(views, i));
+    }
+    views = getArrangedSubviews(customData->stack);
+    for (int i = 0; i < 5; ++i) {
+        statusView_updateColors((id) CFArrayGetValueAtIndex(views, i));
+    }
 }
 
 void homeVC_viewDidLoad(id self, SEL _cmd) {

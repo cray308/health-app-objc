@@ -316,5 +316,11 @@ void historyVC_updateColors(id self) {
         id view = getView(self);
         setBackground(view, createColor(ColorPrimaryBG));
         updateSegmentedControl(picker);
+        view = (id) CFArrayGetValueAtIndex(getSubviews(view), 0);
+        view = (id) CFArrayGetValueAtIndex(getSubviews(view), 0);
+        CFArrayRef views = getArrangedSubviews(view);
+        for (int i = 0; i < 3; ++i) {
+            containerView_updateColors((id) CFArrayGetValueAtIndex(views, i));
+        }
     }
 }

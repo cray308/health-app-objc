@@ -18,6 +18,8 @@ setBool(_v, sel_getUid("setTranslatesAutoresizingMaskIntoConstraints:"), false)
 #define setMargins(_sv, _val) (((void(*)(id,SEL,HAInsets))objc_msgSend)\
 ((_sv), sel_getUid("setLayoutMargins:"), (_val)))
 
+#define getSubviews(_v) getArray(_v, sel_getUid("subviews"))
+
 #define getArrangedSubviews(_sv) getArray(_sv, sel_getUid("arrangedSubviews"))
 
 #define removeView(_v) voidFunc(_v, sel_getUid("removeFromSuperview"))
@@ -52,6 +54,8 @@ setBool(_v, sel_getUid("setTranslatesAutoresizingMaskIntoConstraints:"), false)
 
 #define setTextColor(_v, _color) setObject(_v, sel_getUid("setTextColor:"), _color)
 
+#define setKBColor(_v, _a) setInt(_v, sel_getUid("setKeyboardAppearance:"), _a)
+
 #define addTarget(_v, _target, _action, _event) (((void(*)(id,SEL,id,SEL,int))objc_msgSend)\
 ((_v), sel_getUid("addTarget:action:forControlEvents:"), (_target), (_action), (_event)))
 
@@ -70,11 +74,6 @@ setBool(_v, sel_getUid("setTranslatesAutoresizingMaskIntoConstraints:"), false)
 
 #define setButtonColor(_v, _color, _state) (((void(*)(id,SEL,id,int))objc_msgSend)\
 ((_v), sel_getUid("setTitleColor:forState:"), (_color), (_state)))
-
-extern Class DMButtonClass;
-extern Class DMLabelClass;
-extern Class DMTextFieldClass;
-extern Class DMBackgroundViewClass;
 
 enum {
     TextFootnote = 1,
@@ -97,22 +96,6 @@ enum {
     BtnRounded = 0x4
 };
 
-typedef struct {
-    Class isa;
-    int colorCode;
-    bool background;
-} DMButton;
-
-typedef struct {
-    Class isa;
-    int colorCode;
-} DMLabel;
-
-typedef struct {
-    Class isa;
-    int colorCode;
-} DMBackgroundView;
-
 id createFont(int style);
 id createCustomFont(int style, int size);
 CFDictionaryRef createTitleTextDict(id color, id font);
@@ -132,9 +115,6 @@ id createSegmentedControl(CFStringRef format, int count, int startIndex,
 void addVStackToScrollView(id vStack, id scrollView);
 
 void updateSegmentedControl(id view);
-void dmButton_updateColors(DMButton* self, SEL _cmd);
-void dmLabel_updateColors(DMLabel *self, SEL _cmd);
-void dmField_updateColors(id self, SEL _cmd);
-void dmBackgroundView_updateColors(DMBackgroundView *self, SEL _cmd);
+void updateButtonColors(id view, int color);
 
 #endif /* Views_h */

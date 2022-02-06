@@ -7,8 +7,9 @@ extern Class SettingsVCClass;
 extern Ivar SettingsVCDataRef;
 
 typedef struct {
-    id picker;
-    id switchView;
+    id planContainer;
+    id switchContainer;
+    id deleteButton;
     short results[4];
 } SettingsVCData;
 

@@ -15,5 +15,6 @@ typedef struct {
 
 id containerView_init(CFStringRef title, int spacing, bool margins);
 void containerView_deinit(id self, SEL _cmd);
+void containerView_updateColors(id self);
 
 #endif /* ContainerView_h */

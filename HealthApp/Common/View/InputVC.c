@@ -47,8 +47,6 @@ void inputVC_addChild(id self, CFStringRef hint, short min, short max) {
     ptr->hintLabel = createLabel(hint, TextFootnote, 4, false);
     ptr->field = createTextfield(self, CFSTR(""), hint, 4, 4, index);
     ptr->errorLabel = createLabel(errorText, TextFootnote, 4, false);
-    DMLabel *errorPtr = (DMLabel *) ptr->errorLabel;
-    errorPtr->colorCode = ColorRed;
     setTextColor(ptr->errorLabel, createColor(ColorRed));
 
     id vStack = createStackView((id []){ptr->hintLabel, ptr->field, ptr->errorLabel},

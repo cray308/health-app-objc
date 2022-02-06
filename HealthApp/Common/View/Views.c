@@ -11,8 +11,6 @@ setBool(_v, sel_getUid("setAdjustsFontForContentSizeCategory:"), true)
 #define setControlTextAttribs(_v, _dict, _state) (((void(*)(id,SEL,CFDictionaryRef,int))objc_msgSend)\
 ((_v), sel_getUid("setTitleTextAttributes:forState:"), (_dict), (_state)))
 
-#define setKBColor(_v, _a) setInt(_v, sel_getUid("setKeyboardAppearance:"), _a);
-
 extern id UIFontTextStyleTitle1;
 extern id UIFontTextStyleTitle2;
 extern id UIFontTextStyleTitle3;
@@ -27,11 +25,6 @@ extern CGFloat UIFontWeightSemibold;
 
 extern id NSForegroundColorAttributeName;
 extern id NSFontAttributeName;
-
-Class DMButtonClass;
-Class DMLabelClass;
-Class DMTextFieldClass;
-Class DMBackgroundViewClass;
 
 static void setDynamicFont(id view) {
     setBool(view, sel_getUid("setAdjustsFontSizeToFitWidth:"), true);
@@ -89,30 +82,6 @@ id createCustomFont(int style, int size) {
             (objc_getClass("UIFont"), sel_getUid("systemFontOfSize:weight:"), size, weight));
 }
 
-#pragma mark - Custom View Selectors
-
-void dmBackgroundView_updateColors(DMBackgroundView *self, SEL _cmd _U_) {
-    setBackground((id) self, createColor(self->colorCode));
-}
-
-void dmLabel_updateColors(DMLabel *self, SEL _cmd _U_) {
-    setTextColor((id) self, createColor(self->colorCode));
-}
-
-void dmButton_updateColors(DMButton *self, SEL _cmd _U_) {
-    id object = (id) self;
-    setButtonColor(object, createColor(self->colorCode), 0);
-    setButtonColor(object, createColor(ColorSecondaryLabel), 2);
-    if (self->background)
-        setBackground(object, createColor(ColorSecondaryBGGrouped));
-}
-
-void dmField_updateColors(id self, SEL _cmd _U_) {
-    setBackground(self, createColor(ColorTertiaryBG));
-    setTextColor(self, createColor(ColorLabel));
-    setKBColor(self, userData->darkMode ? 1 : 0);
-}
-
 CFDictionaryRef createTitleTextDict(id color, id font) {
     const void *keys[] = {
         (CFStringRef) NSForegroundColorAttributeName, (CFStringRef) NSFontAttributeName
@@ -130,9 +99,7 @@ id createObjectWithFrame(Class cls, CGRect frame) {
 }
 
 id createBackgroundView(int colorCode, int height, bool optional) {
-    id view = createNew(DMBackgroundViewClass);
-    DMBackgroundView *ptr = (DMBackgroundView *) view;
-    ptr->colorCode = colorCode;
+    id view = createNew(objc_getClass("UIView"));
     disableAutoresizing(view);
     setBackground(view, createColor(colorCode));
     setHeight(view, height, optional);
@@ -179,9 +146,7 @@ id createScrollView(void) {
 }
 
 id createLabel(CFStringRef text, int style, int alignment, bool accessible) {
-    id view = createNew(DMLabelClass);
-    DMLabel *ptr = (DMLabel *) view;
-    ptr->colorCode = ColorLabel;
+    id view = createNew(objc_getClass("UILabel"));
     disableAutoresizing(view);
     setLabelText(view, text);
     setLabelFont(view, style);
@@ -194,12 +159,8 @@ id createLabel(CFStringRef text, int style, int alignment, bool accessible) {
 
 id createButton(CFStringRef title, int color, int params,
                 int tag, id target, SEL action, int height) {
-    id view = ((id(*)(Class,SEL,int))objc_msgSend)(DMButtonClass,
+    id view = ((id(*)(Class,SEL,int))objc_msgSend)(objc_getClass("UIButton"),
                                                    sel_getUid("buttonWithType:"), 1);
-    DMButton *ptr = (DMButton *) view;
-    ptr->colorCode = color;
-    bool hasBG = params & BtnBackground;
-    ptr->background = hasBG;
     disableAutoresizing(view);
     setButtonTitle(view, title, 0);
     setButtonColor(view, createColor(color), 0);
@@ -207,7 +168,7 @@ id createButton(CFStringRef title, int color, int params,
     id label = getTitleLabel(view);
     setLabelFont(label, (params & BtnLargeFont) ? TextHead : TextBody);
     setDynamicFont(label);
-    if (hasBG)
+    if (params & BtnBackground)
         setBackground(view, createColor(ColorSecondaryBGGrouped));
     if (params & BtnRounded)
         setCornerRadius(view);
@@ -239,7 +200,7 @@ id createSegmentedControl(CFStringRef format, int count, int startIndex,
 
 id createTextfield(id delegate, CFStringRef text, CFStringRef hint,
                    int alignment, int keyboard, int tag) {
-    id view = createNew(DMTextFieldClass);
+    id view = createNew(objc_getClass("UITextField"));
     disableAutoresizing(view);
     setBackground(view, createColor(ColorTertiaryBG));
     setLabelText(view, text);
@@ -278,4 +239,10 @@ void updateSegmentedControl(id view) {
     setControlTextAttribs(view, selectedDict, 4);
     CFRelease(normalDict);
     CFRelease(selectedDict);
+}
+
+void updateButtonColors(id view, int color) {
+    setButtonColor(view, createColor(color), 0);
+    setButtonColor(view, createColor(ColorSecondaryLabel), 2);
+    setBackground(view, createColor(ColorSecondaryBGGrouped));
 }

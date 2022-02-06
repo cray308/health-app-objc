@@ -46,13 +46,8 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
         tzOffset = userInfo_initFromStorage();
     }
 
-    char const *voidSig = "v@:", *titleForRow = "@@:@qq";
+    char const *titleForRow = "@@:@qq";
     if (legacy) {
-        SEL tint = sel_getUid("tintColorDidChange");
-        class_addMethod(DMBackgroundViewClass, tint, (IMP) dmBackgroundView_updateColors, voidSig);
-        class_addMethod(DMButtonClass, tint, (IMP) dmButton_updateColors, voidSig);
-        class_addMethod(DMLabelClass, tint, (IMP) dmLabel_updateColors, voidSig);
-        class_addMethod(DMTextFieldClass, tint, (IMP) dmField_updateColors, voidSig);
         class_addMethod(DMNavVC, sel_getUid("preferredStatusBarStyle"),
                         (IMP) dmNavVC_getStatusBarStyle, "i@:");
         class_addMethod(SetupWorkoutVCClass,
@@ -64,10 +59,6 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
     }
 
     objc_registerClassPair(DMNavVC);
-    objc_registerClassPair(DMBackgroundViewClass);
-    objc_registerClassPair(DMButtonClass);
-    objc_registerClassPair(DMLabelClass);
-    objc_registerClassPair(DMTextFieldClass);
     objc_registerClassPair(SetupWorkoutVCClass);
     SetupWorkoutVCDataRef = class_getInstanceVariable(SetupWorkoutVCClass, "data");
 

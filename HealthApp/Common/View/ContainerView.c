@@ -44,3 +44,10 @@ void containerView_deinit(id self, SEL _cmd) {
     free(ptr);
     ((void(*)(struct objc_super *,SEL))objc_msgSendSuper)(&super, _cmd);
 }
+
+void containerView_updateColors(id self) {
+    ContainerViewData *data = (ContainerViewData *) object_getIvar(self, ContainerViewDataRef);
+    setTextColor(data->headerLabel, createColor(ColorLabel));
+    id divLine = (id) CFArrayGetValueAtIndex(getSubviews(data->divider), 0);
+    setBackground(divLine, createColor(ColorSeparator));
+}

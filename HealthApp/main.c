@@ -20,21 +20,13 @@ extern SEL getValueFormatterAction(void);
 int main(int argc, char *argv[]) {
     Class viewClass = objc_getClass("UIView");
     Class VCClass = objc_getClass("UIViewController");
-    char const *validatorKey = "validatorData", *dataKey = "data", *colorField = "colorCode";
+    char const *validatorKey = "validatorData", *dataKey = "data";
     char const *voidSig = "v@:", *tapSig = "v@:@", *appearSig = "v@:i", *appSig = "i@:@@";
     SEL deinit = sel_getUid("dealloc");
     SEL viewLoad = sel_getUid("viewDidLoad");
     SEL btnTap = sel_getUid("buttonTapped:");
 
     DMNavVC = objc_allocateClassPair(objc_getClass("UINavigationController"), "DMNavVC", 0);
-    DMButtonClass = objc_allocateClassPair(objc_getClass("UIButton"), "DMButton", 0);
-    class_addIvar(DMButtonClass, colorField, sizeof(int), 0, "i");
-    class_addIvar(DMButtonClass, "background", sizeof(bool), 0, "c");
-    DMLabelClass = objc_allocateClassPair(objc_getClass("UILabel"), "DMLabel", 0);
-    class_addIvar(DMLabelClass, colorField, sizeof(int), 0, "i");
-    DMTextFieldClass = objc_allocateClassPair(objc_getClass("UITextField"), "DMTextField", 0);
-    DMBackgroundViewClass = objc_allocateClassPair(objc_getClass("UIView"), "DMBackgroundView", 0);
-    class_addIvar(DMBackgroundViewClass, colorField, sizeof(int), 0, "i");
 
     StatusViewClass = objc_allocateClassPair(viewClass, "StatusView", 0);
     class_addIvar(StatusViewClass, dataKey, sizeof(StatusViewData*), 0, "^{?=@@@@}");
@@ -94,7 +86,7 @@ int main(int argc, char *argv[]) {
     InputVCDataRef = class_getInstanceVariable(InputVCClass, validatorKey);
 
     SettingsVCClass = objc_allocateClassPair(InputVCClass, "SettingsVC", 0);
-    class_addIvar(SettingsVCClass, dataKey, sizeof(SettingsVCData*), 0, "^{?=@@[4s]}");
+    class_addIvar(SettingsVCClass, dataKey, sizeof(SettingsVCData*), 0, "^{?=@@@[4s]}");
     class_addMethod(SettingsVCClass, viewLoad, (IMP) settingsVC_viewDidLoad, voidSig);
     class_addMethod(SettingsVCClass, btnTap, (IMP) settingsVC_buttonTapped, tapSig);
     objc_registerClassPair(SettingsVCClass);

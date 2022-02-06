@@ -32,15 +32,28 @@ void settingsVC_updateWeightFields(id self) {
 }
 
 void settingsVC_updateColors(id self) {
+    InputVCData *par = (InputVCData *) object_getIvar(self, InputVCDataRef);
     SettingsVCData *data = (SettingsVCData *) object_getIvar(self, SettingsVCDataRef);
-    id view = getView(self);
-    setBackground(view, createColor(ColorPrimaryBGGrouped));
-    updateSegmentedControl(data->picker);
-    id toolbar = ((InputVCData *) object_getIvar(self, InputVCDataRef))->toolbar;
-    CFArrayRef items = getArray(toolbar, sel_getUid("items"));
-    id doneButton = (id) CFArrayGetValueAtIndex(items, 1);
-    setTintColor(doneButton, createColor(ColorRed));
-    setBarTint(toolbar, getBarColor(ColorBarModal));
+    setBackground(getView(self), createColor(ColorPrimaryBGGrouped));
+    CFArrayRef views = getArrangedSubviews(data->planContainer);
+    setTextColor((id) CFArrayGetValueAtIndex(views, 0), createColor(ColorLabel));
+    updateSegmentedControl((id) CFArrayGetValueAtIndex(views, 1));
+    setBackground(data->switchContainer, createColor(ColorSecondaryBGGrouped));
+    id view = (id) CFArrayGetValueAtIndex(getSubviews(data->switchContainer), 0);
+    setTextColor((id)CFArrayGetValueAtIndex(getArrangedSubviews(view), 0), createColor(ColorLabel));
+    updateButtonColors(data->deleteButton, ColorRed);
+    updateButtonColors(par->button, ColorBlue);
+    setBarTint(par->toolbar, getBarColor(ColorBarModal));
+    view = (id) CFArrayGetValueAtIndex(getArray(par->toolbar, sel_getUid("items")), 1);
+    setTintColor(view, createColor(ColorRed));
+    for (int i = 0; i < 4; ++i) {
+        InputViewData *ptr = ((InputViewData *) object_getIvar(par->children[i], InputViewDataRef));
+        setTextColor(ptr->errorLabel, createColor(ColorRed));
+        setTextColor(ptr->hintLabel, createColor(ColorLabel));
+        setTextColor(ptr->field, createColor(ColorLabel));
+        setBackground(ptr->field, createColor(ColorTertiaryBG));
+        setKBColor(ptr->field, userData->darkMode ? 1 : 0);
+    }
 }
 
 void settingsVC_viewDidLoad(id self, SEL _cmd) {
@@ -49,35 +62,31 @@ void settingsVC_viewDidLoad(id self, SEL _cmd) {
 
     SettingsVCData *data = (SettingsVCData *) object_getIvar(self, SettingsVCDataRef);
     InputVCData *parent = (InputVCData *) object_getIvar(self, InputVCDataRef);
-    id view = getView(self);
-    setBackground(view, createColor(ColorPrimaryBGGrouped));
+    setBackground(getView(self), createColor(ColorPrimaryBGGrouped));
     setVCTitle(self, localize(CFSTR("settingsTitle")));
 
     id planLabel = createLabel(localize(CFSTR("planPickerTitle")), TextFootnote, 4, true);
-    data->picker = createSegmentedControl(CFSTR("settingsSegment%d"), 3,
-                                          userData->currentPlan + 1, nil, nil, 44);
-    id planContainer = createStackView((id []){planLabel, data->picker}, 2, 1, 2,
-                                       (Padding){0, 8, 0, 8});
-    id aboveTF = createStackView((id[]){planContainer}, 1, 1, 20, (Padding){0, 0, 20, 0});
+    id picker = createSegmentedControl(CFSTR("settingsSegment%d"), 3,
+                                       userData->currentPlan + 1, nil, nil, 44);
+    data->planContainer = createStackView((id []){planLabel,picker}, 2, 1, 2,(Padding){0, 8, 0, 8});
+    id aboveTF = createStackView((id[]){data->planContainer}, 1, 1, 20, (Padding){0, 0, 20, 0});
 
     setMargins(parent->vStack, ((HAInsets){20, 0, 20, 0}));
     addArrangedSubview(parent->vStack, aboveTF);
 
     if (userData->darkMode >= 0) {
-        id switchContainer = createBackgroundView(ColorSecondaryBGGrouped, 44, false);
-        data->switchView = createNew(objc_getClass("UISwitch"));
-        setBool(data->switchView, sel_getUid("setOn:"), userData->darkMode ? true : false);
+        data->switchContainer = createBackgroundView(ColorSecondaryBGGrouped, 44, false);
+        id switchView = createNew(objc_getClass("UISwitch"));
+        setBool(switchView, sel_getUid("setOn:"), userData->darkMode ? true : false);
         id label = createLabel(localize(CFSTR("darkMode")), TextBody, 4, true);
-        id sv = createStackView((id[]){label,data->switchView}, 2, 0, 5, (Padding){0, 8, 0, 8});
+        id sv = createStackView((id[]){label, switchView}, 2, 0, 5, (Padding){0, 8, 0, 8});
         centerHStack(sv);
-        addSubview(switchContainer, sv);
-        pin(sv, switchContainer, (Padding){0}, 0);
-
-        addArrangedSubview(aboveTF, switchContainer);
-
-        releaseObj(switchContainer);
+        addSubview(data->switchContainer, sv);
+        pin(sv, data->switchContainer, (Padding){0}, 0);
+        addArrangedSubview(aboveTF, data->switchContainer);
         releaseObj(sv);
         releaseObj(label);
+        releaseObj(switchView);
     }
 
     CFStringRef titles[4];
@@ -90,17 +99,17 @@ void settingsVC_viewDidLoad(id self, SEL _cmd) {
     parent->button = createButton(localize(CFSTR("settingsSave")), ColorBlue, BtnBackground, 0,
                                   self, btnTap, 44);
 
-    id deleteButton = createButton(localize(CFSTR("settingsDelete")), ColorRed, BtnBackground, 1,
-                                   self, btnTap, 44);
+    data->deleteButton = createButton(localize(CFSTR("settingsDelete")), ColorRed, BtnBackground, 1,
+                                      self, btnTap, 44);
 
-    id belowTF = createStackView((id[]){parent->button, deleteButton}, 2, 1, 20,
+    id belowTF = createStackView((id[]){parent->button, data->deleteButton}, 2, 1, 20,
                                  (Padding){20, 0, 0, 0});
     addArrangedSubview(parent->vStack, belowTF);
 
     releaseObj(aboveTF);
-    releaseObj(planContainer);
     releaseObj(planLabel);
     releaseObj(belowTF);
+    releaseObj(picker);
 
     settingsVC_updateWeightFields(self);
 }
@@ -118,9 +127,13 @@ void settingsVC_buttonTapped(id self, SEL _cmd _U_, id btn) {
 
     SettingsVCData *data = (SettingsVCData *) object_getIvar(self, SettingsVCDataRef);
     signed char dark = -1;
-    if (data->switchView)
-        dark = getBool(data->switchView, sel_getUid("isOn")) ? 1 : 0;
-    signed char plan = ((signed char) getSelectedSegment(data->picker)) - 1;
+    if (data->switchContainer) {
+        id sv = (id) CFArrayGetValueAtIndex(getSubviews(data->switchContainer), 0);
+        id switchView = (id) CFArrayGetValueAtIndex(getArrangedSubviews(sv), 1);
+        dark = getBool(switchView, sel_getUid("isOn")) ? 1 : 0;
+    }
+    id picker = (id) CFArrayGetValueAtIndex(getArrangedSubviews(data->planContainer), 1);
+    signed char plan = ((signed char) getSelectedSegment(picker)) - 1;
 
     short *results = data->results;
     id *fields = ((InputVCData *) object_getIvar(self, InputVCDataRef))->children;
