@@ -38,9 +38,9 @@
 
 #define setString(_obj, _cmd, _arg) (((void(*)(id,SEL,CFStringRef))objc_msgSend)((_obj), (_cmd), (_arg)))
 
-#define getInt(_obj, _cmd) (((int(*)(id,SEL))objc_msgSend)((_obj), (_cmd)))
+#define getInt(_obj, _cmd) (((long(*)(id,SEL))objc_msgSend)((_obj), (_cmd)))
 
-#define setInt(_obj, _cmd, _arg) (((void(*)(id,SEL,int))objc_msgSend)((_obj), (_cmd), (_arg)))
+#define setInt(_obj, _cmd, _arg) (((void(*)(id,SEL,long))objc_msgSend)((_obj), (_cmd), (_arg)))
 
 #define setCGFloat(_obj, _cmd, _arg) (((void(*)(id,SEL,CGFloat))objc_msgSend)((_obj), (_cmd), (_arg)))
 

@@ -8,7 +8,7 @@
 #define adjustFontForSizeCategory(_v) \
 setBool(_v, sel_getUid("setAdjustsFontForContentSizeCategory:"), true)
 
-#define setControlTextAttribs(_v, _dict, _state) (((void(*)(id,SEL,CFDictionaryRef,int))objc_msgSend)\
+#define setControlTextAttribs(_v, _dict, _state) (((void(*)(id,SEL,CFDictionaryRef,unsigned long))objc_msgSend)\
 ((_v), sel_getUid("setTitleTextAttributes:forState:"), (_dict), (_state)))
 
 extern id UIFontTextStyleTitle1;
@@ -162,8 +162,8 @@ id createLabel(CFStringRef text, int style, int alignment, bool accessible) {
 
 id createButton(CFStringRef title, int color, int params,
                 int tag, id target, SEL action, int height) {
-    id view = ((id(*)(Class,SEL,int))objc_msgSend)(objc_getClass("UIButton"),
-                                                   sel_getUid("buttonWithType:"), 1);
+    id view = ((id(*)(Class,SEL,long))objc_msgSend)(objc_getClass("UIButton"),
+                                                    sel_getUid("buttonWithType:"), 1);
     disableAutoresizing(view);
     setButtonTitle(view, title, 0);
     setButtonColor(view, createColor(color), 0);

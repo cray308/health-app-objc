@@ -28,14 +28,14 @@ static inline time_t getStartOfDay(time_t date, struct tm *info) {
     return date - seconds;
 }
 
-static int date_getOffsetFromGMT(time_t date) {
+static int getOffsetFromGMT(time_t date) {
     struct tm gmtInfo;
     gmtime_r(&date, &gmtInfo);
     gmtInfo.tm_isdst = -1;
     return (int) (date - mktime(&gmtInfo));
 }
 
-static time_t date_calcStartOfWeek(time_t date) {
+static time_t calcStartOfWeek(time_t date) {
     struct tm localInfo;
     localtime_r(&date, &localInfo);
     int weekday = localInfo.tm_wday;
@@ -126,9 +126,9 @@ void userInfo_create(bool darkMode) {
     time_t now = time(NULL);
     userData = calloc(1, sizeof(UserInfo));
     userData->currentPlan = -1;
-    userData->weekStart = date_calcStartOfWeek(now);
+    userData->weekStart = calcStartOfWeek(now);
     userData->planStart = userData->weekStart;
-    userData->tzOffset = date_getOffsetFromGMT(now);
+    userData->tzOffset = getOffsetFromGMT(now);
     userData->darkMode = darkMode ? 0 : -1;
     saveData();
     getHealthData();
@@ -137,7 +137,7 @@ void userInfo_create(bool darkMode) {
 int userInfo_initFromStorage(void) {
     const int planLengths[] = {8, 13};
     time_t now = time(NULL);
-    time_t weekStart = date_calcStartOfWeek(now);
+    time_t weekStart = calcStartOfWeek(now);
     id defaults = getUserDefaults();
     CFDictionaryRef savedInfo = (((CFDictionaryRef(*)(id,SEL,CFStringRef))objc_msgSend)
                                  (defaults, sel_getUid("dictionaryForKey:"), dictKey));
@@ -160,7 +160,7 @@ int userInfo_initFromStorage(void) {
         CFNumberGetValue(value, kCFNumberShortType, &userData->liftMaxes[i]);
     }
 
-    int newOffset = date_getOffsetFromGMT(now);
+    int newOffset = getOffsetFromGMT(now);
     int tzDiff = userData->tzOffset - newOffset;
     bool madeChange = false;
     if (tzDiff) {

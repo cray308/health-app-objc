@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
     objc_registerClassPair(TotalWorkoutsViewClass);
 
     WorkoutTypeViewClass = objc_allocateClassPair(ViewClass, "WorkoutTypeView", 0);
-    class_addIvar(WorkoutTypeViewClass, dataKey, sizeof(WorkoutTypeView*), 0, "{?=@@}");
+    class_addIvar(WorkoutTypeViewClass, dataKey, sizeof(WorkoutTypeView), 0, "{?=@@}");
     objc_registerClassPair(WorkoutTypeViewClass);
 
     LiftViewClass = objc_allocateClassPair(ViewClass, "LiftView", 0);

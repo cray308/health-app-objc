@@ -232,14 +232,14 @@ void historyVC_updateSegment(id self, SEL _cmd _U_, id picker) {
     TotalWorkoutsView *totalsData = (TotalWorkoutsView *) ((char*)data->charts[0] + ViewSize);
     WorkoutTypeView *typeData = (WorkoutTypeView *) ((char *)data->charts[1] + ViewSize);
     LiftView *liftData = (LiftView *) ((char *)data->charts[2] + ViewSize);
-    int index = getSelectedSegment(picker);
+    int index = (int) getSelectedSegment(picker);
     int count = model->nEntries[index];
     int ref = model->refIndices[index];
     if (!count) {
         disableLineChartView(totalsData->chart);
         disableLineChartView(typeData->chart);
         disableLineChartView(liftData->chart);
-        (((void(*)(id,SEL,id,SEL,int))objc_msgSend)
+        (((void(*)(id,SEL,id,SEL,unsigned long))objc_msgSend)
          (data->picker, sel_getUid("removeTarget:action:forControlEvents:"), nil, nil, 4096));
         return;
     }

@@ -8,13 +8,9 @@
 
 #define getInt16(_obj, _cmd) (((int16_t(*)(id,SEL))objc_msgSend)((_obj), (_cmd)))
 
-#define setInt64(_obj, _cmd, _arg) (((void(*)(id,SEL,int64_t))objc_msgSend)((_obj), (_cmd), (_arg)))
-
-#define getInt64(_obj, _cmd) (((int64_t(*)(id,SEL))objc_msgSend)((_obj), (_cmd)))
-
 #define weekData_getTotalWorkouts(_d) getInt16(_d, sel_getUid("totalWorkouts"))
 
-#define weekData_getWeekStart(_d) getInt64(_d, sel_getUid("weekStart"))
+#define weekData_getWeekStart(_d) getInt(_d, sel_getUid("weekStart"))
 
 #define weekData_setTotalWorkouts(_d, _val) setInt16(_d, sel_getUid("setTotalWorkouts:"), _val)
 

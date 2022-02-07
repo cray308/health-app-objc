@@ -42,7 +42,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
         persistenceService_create();
 #endif
         id center = getNotificationCenter();
-        (((void(*)(id,SEL,int,void(^)(BOOL,id)))objc_msgSend)
+        (((void(*)(id,SEL,unsigned long,void(^)(BOOL,id)))objc_msgSend)
          (center, sel_getUid("requestAuthorizationWithOptions:completionHandler:"),
           6, ^(BOOL granted _U_, id error _U_) {}));
     } else {
@@ -81,7 +81,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
     for (int i = 0; i < 3; ++i) {
         id image = createImage(imgNames[i]);
         id _item = allocClass(objc_getClass("UITabBarItem"));
-        items[i] = (((id(*)(id,SEL,CFStringRef,id,int))objc_msgSend)
+        items[i] = (((id(*)(id,SEL,CFStringRef,id,long))objc_msgSend)
                     (_item, itemInit, titles[i], image, i));
         controllers[i] = createNavVC(self->children[i]);
         setObject(controllers[i], setItem, items[i]);
@@ -108,8 +108,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
 int appDelegate_supportedOrientations(AppDelegate *self _U_, SEL _cmd _U_,
                                       id application _U_, id window _U_) {
     id device = staticMethod(objc_getClass("UIDevice"), sel_getUid("currentDevice"));
-    int idiom = getInt(device, sel_getUid("userInterfaceIdiom"));
-    return idiom == 1 ? 26 : 2;
+    return getInt(device, sel_getUid("userInterfaceIdiom")) == 1 ? 26 : 2;
 }
 
 static AppDelegate *getAppDel(void) {

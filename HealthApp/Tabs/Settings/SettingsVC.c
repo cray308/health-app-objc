@@ -107,7 +107,7 @@ void settingsVC_viewDidLoad(id self, SEL _cmd) {
 }
 
 void settingsVC_buttonTapped(id self, SEL _cmd _U_, id btn) {
-    int tag = getTag(btn);
+    int tag = (int) getTag(btn);
     CFStringRef message = localize(tag ? CFSTR("alertMsgDelete") : CFSTR("alertMsgSave"));
     id ctrl = createAlertController(localize(CFSTR("settingsAlertTitle")), message);
     addAlertAction(ctrl, localize(CFSTR("cancel")), 1, NULL);

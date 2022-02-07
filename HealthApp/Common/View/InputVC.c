@@ -114,10 +114,10 @@ void inputVC_viewDidLoad(id self, SEL _cmd) {
     voidFunc(data->toolbar, sel_getUid("sizeToFit"));
 
     Class btnClass = objc_getClass("UIBarButtonItem");
-    id flexSpace = (((id(*)(id,SEL,int,id,SEL))objc_msgSend)
+    id flexSpace = (((id(*)(id,SEL,long,id,SEL))objc_msgSend)
                     (allocClass(btnClass), sel_getUid("initWithBarButtonSystemItem:target:action:"),
                      5, nil, nil));
-    id doneButton = (((id(*)(id,SEL,CFStringRef,int,id,SEL))objc_msgSend)
+    id doneButton = (((id(*)(id,SEL,CFStringRef,long,id,SEL))objc_msgSend)
                      (allocClass(btnClass), sel_getUid("initWithTitle:style:target:action:"),
                       localize(CFSTR("done")), 0, self, sel_getUid("dismissKeyboard")));
 
@@ -170,7 +170,7 @@ void inputVC_viewDidAppear(id self, SEL _cmd, bool animated) {
 
 void inputVC_dismissKeyboard(id self, SEL _cmd _U_) {
     InputVC *d = (InputVC *) ((char *)self + VCSize);
-    int tag = d->activeField ? getTag(d->activeField) : 255;
+    int tag = d->activeField ? ((int) getTag(d->activeField)) : 255;
     if (tag >= d->count - 1) {
         id view = getView(self);
         setBool(view, sel_getUid("endEditing:"), true);
@@ -243,7 +243,7 @@ bool inputVC_fieldChanged(id self, SEL _cmd _U_, id field, CFRange range, CFStri
         }
     }
 
-    int i = getTag(field);
+    int i = (int) getTag(field);
     InputView *child = (InputView *) ((char *)d->children[i] + ViewSize);
 
     CFStringRef text = getText(field);

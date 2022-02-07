@@ -104,7 +104,7 @@ void dismissPresentedVC(id presenter, Callback handler) {
 }
 
 id createAlertController(CFStringRef title, CFStringRef message) {
-    id vc = (((id(*)(Class,SEL,CFStringRef,CFStringRef,int))objc_msgSend)
+    id vc = (((id(*)(Class,SEL,CFStringRef,CFStringRef,long))objc_msgSend)
              (objc_getClass("UIAlertController"),
               sel_getUid("alertControllerWithTitle:message:preferredStyle:"), title, message, 1));
     if (osVersion < 13) {
@@ -133,7 +133,7 @@ id createAlertController(CFStringRef title, CFStringRef message) {
 }
 
 void addAlertAction(id ctrl, CFStringRef title, int style, Callback handler) {
-    id action = (((id(*)(Class,SEL,CFStringRef,int,void(^)(id)))objc_msgSend)
+    id action = (((id(*)(Class,SEL,CFStringRef,long,void(^)(id)))objc_msgSend)
                  (objc_getClass("UIAlertAction"), sel_getUid("actionWithTitle:style:handler:"),
                   title, style, ^(id hdlr _U_) {
         if (handler)

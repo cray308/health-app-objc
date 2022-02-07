@@ -37,8 +37,7 @@ void homeVC_updateWorkoutsList(id self) {
     for (int i = 0; i < data->numWorkouts; ++i) {
         id v = (id) CFArrayGetValueAtIndex(views, i);
         StatusView *ptr = (StatusView *) ((char *)v + ViewSize);
-        int tag = getTag(v);
-        bool enable = !(userData->completedWorkouts & (1 << tag));
+        bool enable = !(userData->completedWorkouts & (1 << getTag(v)));
         enableButton(ptr->button, enable);
         setBackground(ptr->box, createColor(enable ? ColorGray : ColorGreen));
         statusView_updateAccessibility(ptr, data->stateNames[enable]);
@@ -155,15 +154,13 @@ void homeVC_viewDidLoad(id self, SEL _cmd) {
 }
 
 void homeVC_workoutButtonTapped(id self, SEL _cmd _U_, id btn) {
-    int index = getTag(btn);
-    homeVC_navigateToAddWorkout(self, exerciseManager_getWeeklyWorkout(index));
+    homeVC_navigateToAddWorkout(self, exerciseManager_getWeeklyWorkout((int) getTag(btn)));
 }
 
 void homeVC_customButtonTapped(id self, SEL _cmd _U_, id btn) {
-    int index = getTag(btn);
     unsigned char type = WorkoutStrength;
     Workout *w;
-    switch (index) {
+    switch (getTag(btn)) {
         case CustomWorkoutSE:
             type = WorkoutSE;
             break;

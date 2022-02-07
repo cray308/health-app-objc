@@ -6,7 +6,7 @@
 
 #define setPredicate(_req, _pred) setObject(_req, sel_getUid("setPredicate:"), _pred)
 
-#define weekData_setWeekStart(_d, _val) setInt64(_d, sel_getUid("setWeekStart:"), _val)
+#define weekData_setWeekStart(_d, _val) setInt(_d, sel_getUid("setWeekStart:"), _val)
 
 static id persistenceService = nil;
 id backgroundContext = nil;

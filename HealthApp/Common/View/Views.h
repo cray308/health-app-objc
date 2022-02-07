@@ -56,7 +56,7 @@ setBool(_v, sel_getUid("setTranslatesAutoresizingMaskIntoConstraints:"), false)
 
 #define setKBColor(_v, _a) setInt(_v, sel_getUid("setKeyboardAppearance:"), _a)
 
-#define addTarget(_v, _target, _action, _event) (((void(*)(id,SEL,id,SEL,int))objc_msgSend)\
+#define addTarget(_v, _target, _action, _event) (((void(*)(id,SEL,id,SEL,unsigned long))objc_msgSend)\
 ((_v), sel_getUid("addTarget:action:forControlEvents:"), (_target), (_action), (_event)))
 
 #define enableButton(_v, _enabled) setBool(_v, sel_getUid("setEnabled:"), _enabled)
@@ -69,10 +69,10 @@ setBool(_v, sel_getUid("setTranslatesAutoresizingMaskIntoConstraints:"), false)
 
 #define enableInteraction(_v, _enabled) setBool(_v, sel_getUid("setUserInteractionEnabled:"), _enabled)
 
-#define setButtonTitle(_v, _title, _state) (((void(*)(id,SEL,CFStringRef,int))objc_msgSend)\
+#define setButtonTitle(_v, _title, _state) (((void(*)(id,SEL,CFStringRef,unsigned long))objc_msgSend)\
 ((_v), sel_getUid("setTitle:forState:"), (_title), (_state)))
 
-#define setButtonColor(_v, _color, _state) (((void(*)(id,SEL,id,int))objc_msgSend)\
+#define setButtonColor(_v, _color, _state) (((void(*)(id,SEL,id,unsigned long))objc_msgSend)\
 ((_v), sel_getUid("setTitleColor:forState:"), (_color), (_state)))
 
 extern size_t ViewSize;
