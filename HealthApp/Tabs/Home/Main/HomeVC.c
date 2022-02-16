@@ -34,10 +34,11 @@ void homeVC_updateWorkoutsList(id self) {
     ContainerView *planData = (ContainerView *) ((char *)data->planContainer + ViewSize);
 
     CFArrayRef views = getArrangedSubviews(planData->stack);
+    const unsigned char completed = userData->completedWorkouts;
     for (int i = 0; i < data->numWorkouts; ++i) {
         id v = (id) CFArrayGetValueAtIndex(views, i);
         StatusView *ptr = (StatusView *) ((char *)v + ViewSize);
-        bool enable = !(userData->completedWorkouts & (1 << getTag(v)));
+        bool enable = !(completed & (1 << getTag(v)));
         enableButton(ptr->button, enable);
         setBackground(ptr->box, createColor(enable ? ColorGray : ColorGreen));
         statusView_updateAccessibility(ptr, data->stateNames[enable]);
@@ -57,7 +58,7 @@ void homeVC_createWorkoutsList(id self) {
         removeView(v);
     }
 
-    if (userData->currentPlan < 0 || userData->planStart > time(NULL)) {
+    if (userData->currentPlan == 0xff || userData->planStart > time(NULL)) {
         hideView(data->planContainer, true);
         hideView(customData->divider, true);
         return;
@@ -158,7 +159,7 @@ void homeVC_workoutButtonTapped(id self, SEL _cmd _U_, id btn) {
 }
 
 void homeVC_customButtonTapped(id self, SEL _cmd _U_, id btn) {
-    unsigned char type = WorkoutStrength;
+    int type = WorkoutStrength;
     Workout *w;
     switch (getTag(btn)) {
         case CustomWorkoutSE:
@@ -169,7 +170,7 @@ void homeVC_customButtonTapped(id self, SEL _cmd _U_, id btn) {
             break;
         case CustomWorkoutTestMax:
             w = exerciseManager_getWorkoutFromLibrary(&(WorkoutParams){
-                -1, WorkoutStrength, 2, 1, 1, 100
+                WorkoutStrength, 2, 1, 1, 100, 0xff
             });
             homeVC_navigateToAddWorkout(self, w);
             return;

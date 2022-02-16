@@ -54,13 +54,13 @@ int main(int argc, char *argv[]) {
     objc_registerClassPair(LiftViewClass);
 
     InputViewClass = objc_allocateClassPair(ViewClass, "InputView", 0);
-    class_addIvar(InputViewClass, dataKey, sizeof(InputView), 0, "{?=sssB@@@}");
+    class_addIvar(InputViewClass, dataKey, sizeof(InputView), 0, "{?=@@@iisB}");
     class_addMethod(InputViewClass, deinit, (IMP) inputView_deinit, voidSig);
     objc_registerClassPair(InputViewClass);
 
     InputVCClass = objc_allocateClassPair(VCClass, "InputVC", 0);
     class_addProtocol(InputVCClass, objc_getProtocol("UITextFieldDelegate"));
-    class_addIvar(InputVCClass, "validatorData", sizeof(InputVC), 0, "{=iiss[4@]@@@@@}");
+    class_addIvar(InputVCClass, "validatorData", sizeof(InputVC), 0, "{=[4@]@@@@@iiii}");
     class_addMethod(InputVCClass, sel_getUid("init"), (IMP) inputVC_init, "@@:");
     class_addMethod(InputVCClass, deinit, (IMP) inputVC_deinit, voidSig);
     class_addMethod(InputVCClass, viewLoad, (IMP) inputVC_viewDidLoad, voidSig);
@@ -90,7 +90,7 @@ int main(int argc, char *argv[]) {
     SetupWorkoutVCClass = objc_allocateClassPair(InputVCClass, "SetupWorkoutVC", 0);
     class_addProtocol(SetupWorkoutVCClass, objc_getProtocol("UIPickerViewDelegate"));
     class_addProtocol(SetupWorkoutVCClass, objc_getProtocol("UIPickerViewDataSource"));
-    class_addIvar(SetupWorkoutVCClass, dataKey, sizeof(SetupWorkoutVC), 0, "{?=@@@Ci}");
+    class_addIvar(SetupWorkoutVCClass, dataKey, sizeof(SetupWorkoutVC), 0, "{?=@@@ii}");
     class_addMethod(SetupWorkoutVCClass, sel_getUid("dealloc"),
                     (IMP) setupWorkoutVC_deinit, voidSig);
     class_addMethod(SetupWorkoutVCClass, sel_getUid("viewDidLoad"),
@@ -105,7 +105,7 @@ int main(int argc, char *argv[]) {
                     (IMP) setupWorkoutVC_didSelectRow, "v@:@qq");
 
     UpdateMaxesVCClass = objc_allocateClassPair(InputVCClass, "UpdateMaxesVC", 0);
-    class_addIvar(UpdateMaxesVCClass, dataKey, sizeof(UpdateMaxesVC), 0, "{?=@@@@I}");
+    class_addIvar(UpdateMaxesVCClass, dataKey, sizeof(UpdateMaxesVC), 0, "{?=@@@@is}");
     class_addMethod(UpdateMaxesVCClass, deinit, (IMP) updateMaxesVC_deinit, voidSig);
     class_addMethod(UpdateMaxesVCClass, viewLoad, (IMP) updateMaxesVC_viewDidLoad, voidSig);
     class_addMethod(UpdateMaxesVCClass, sel_getUid("stepperChanged"),
@@ -125,8 +125,8 @@ int main(int argc, char *argv[]) {
     HistoryVCClass = objc_allocateClassPair(VCClass, "HistoryVC", 0);
     class_addProtocol(HistoryVCClass, getValueFormatterType());
     class_addIvar(HistoryVCClass, dataKey, sizeof(HistoryVC), 0,
-                  "{?={?={?=@@@@[3f][3f]}{?=[5@]@[5@]@[3[4i]][3f][4@]}"
-                  "{?=[4@]@[4@]@[3[4f]][3f][4@]}@[3i][3i]}@[3@]}");
+                  "{?={?={?=@@@@[3f][3f]}{?=[5@][4@]@[5@]@[3[4i]][3f]}"
+                  "{?=[4@][4@]@[4@]@[3[4f]][3f]}@[3i][3i]}@[3@]}");
     class_addMethod(HistoryVCClass, viewLoad, (IMP) historyVC_viewDidLoad, voidSig);
     class_addMethod(HistoryVCClass, btnTap, (IMP) historyVC_updateSegment, tapSig);
     class_addMethod(HistoryVCClass, getValueFormatterAction(),
@@ -135,9 +135,8 @@ int main(int argc, char *argv[]) {
 
     WorkoutVCClass = objc_allocateClassPair(VCClass, "WorkoutVC", 0);
     class_addIvar(WorkoutVCClass, dataKey, sizeof(WorkoutVC), 0,
-                  "{?=@@@[2@][2@]{__savedWorkoutInfo=I{__exerciseInfo=II}}"
-                  "[2{?=@{__timerInfo=CCC}{_opaque_pthread_mutex_t=q[56c]}"
-                  "{_opaque_pthread_cond_t=q[40c]}IIIq}][4s]B}");
+                  "{?=[2{?={_opaque_pthread_mutex_t=q[56c]}{_opaque_pthread_cond_t=q[40c]}@qiiI"
+                  "{?=CCC}}][2^{_opaque_pthread_t}]@@@[2@]{?=i{?=ii}}[4s]B}");
     class_addMethod(WorkoutVCClass, deinit, (IMP) workoutVC_deinit, voidSig);
     class_addMethod(WorkoutVCClass, viewLoad, (IMP) workoutVC_viewDidLoad, voidSig);
     class_addMethod(WorkoutVCClass, sel_getUid("startEndWorkout:"),

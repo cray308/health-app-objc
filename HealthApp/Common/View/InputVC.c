@@ -163,8 +163,8 @@ void inputVC_viewDidAppear(id self, SEL _cmd, bool animated) {
         ((void(*)(HAInsets*,id,SEL))objc_msgSend_stret)(&insets, data->scrollView,
                                                         sel_getUid("contentInset"));
 #endif
-        data->topOffset = (short) insets.top;
-        data->bottomOffset = (short) insets.bottom;
+        data->topOffset = (int) insets.top;
+        data->bottomOffset = (int) insets.bottom;
     }
 }
 
@@ -257,7 +257,7 @@ bool inputVC_fieldChanged(id self, SEL _cmd _U_, id field, CFRange range, CFStri
         return true;
     }
 
-    short newVal = (short) CFStringGetIntValue(newText);
+    int newVal = (int) CFStringGetIntValue(newText);
     CFRelease(newText);
 
     if (newVal < child->minVal || newVal > child->maxVal) {
@@ -265,7 +265,7 @@ bool inputVC_fieldChanged(id self, SEL _cmd _U_, id field, CFRange range, CFStri
         return true;
     }
 
-    inputView_reset(child, newVal);
+    inputView_reset(child, (short) newVal);
     for (i = 0; i < d->count; ++i) {
         child = (InputView *) ((char *)d->children[i] + ViewSize);
         if (!child->valid) return true;

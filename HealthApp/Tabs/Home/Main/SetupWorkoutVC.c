@@ -6,7 +6,7 @@
 
 Class SetupWorkoutVCClass;
 
-id setupWorkoutVC_init(id parent, unsigned char type, CFArrayRef names) {
+id setupWorkoutVC_init(id parent, int type, CFArrayRef names) {
     id self = createNew(SetupWorkoutVCClass);
     SetupWorkoutVC *data = (SetupWorkoutVC *) ((char *)self + InputVCSize);
     data->parent = parent;
@@ -95,18 +95,18 @@ void setupWorkoutVC_tappedButton(id self, SEL _cmd _U_, id btn) {
     }
 
     SetupWorkoutVC *data = (SetupWorkoutVC *) ((char *)self + InputVCSize);
-    WorkoutParams output = {.day = -1, .type = data->type, .index = data->index};
+    WorkoutParams output = {.day = 0xff, .type = data->type, .index = data->index};
     id *fields = ((InputVC *) ((char *)self + VCSize))->children;
     switch (output.type) {
         case WorkoutStrength:
             output.weight = ((InputView *) ((char *)fields[2] + ViewSize))->result;
         case WorkoutSE:
-            output.sets = (unsigned) ((InputView *) ((char *)fields[0] + ViewSize))->result;
-            output.reps = (unsigned) ((InputView *) ((char *)fields[1] + ViewSize))->result;
+            output.sets = ((InputView *) ((char *)fields[0] + ViewSize))->result;
+            output.reps = ((InputView *) ((char *)fields[1] + ViewSize))->result;
             break;
 
         case WorkoutEndurance:
-            output.reps = (unsigned) ((InputView *) ((char *)fields[0] + ViewSize))->result;
+            output.reps = ((InputView *) ((char *)fields[0] + ViewSize))->result;
         default:
             break;
     }

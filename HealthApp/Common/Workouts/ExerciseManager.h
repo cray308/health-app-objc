@@ -3,8 +3,6 @@
 
 #include <CoreFoundation/CFArray.h>
 
-#define getBodyWeight() (userData->bodyweight < 0 ? 145 : userData->bodyweight)
-
 enum {
     LiftSquat,
     LiftPullup,
@@ -20,70 +18,77 @@ enum {
     WorkoutRest
 };
 
+enum {
+    CircuitRounds,
+    CircuitAMRAP,
+    CircuitDecrement
+};
+
+enum {
+    ExerciseReps,
+    ExerciseDuration,
+    ExerciseDistance
+};
+
+enum {
+    ExerciseStateDisabled,
+    ExerciseStateActive,
+    ExerciseStateResting,
+    ExerciseStateCompleted
+};
+
 typedef struct {
-    enum {
-        ExerciseReps,
-        ExerciseDuration,
-        ExerciseDistance
-    } type;
-    unsigned reps;
-    unsigned sets;
-    unsigned completedSets;
-    enum {
-        ExerciseStateDisabled,
-        ExerciseStateActive,
-        ExerciseStateResting,
-        ExerciseStateCompleted
-    } state;
-    CFRange hRange;
-    CFRange tRange;
-    CFStringRef restStr;
     CFMutableStringRef titleStr;
     CFMutableStringRef headerStr;
+    CFStringRef restStr;
+    CFRange tRange;
+    CFRange hRange;
+    int type;
+    int reps;
+    int sets;
+    int completedSets;
+    int state;
 } ExerciseEntry;
 
 typedef struct {
-    enum {
-        CircuitRounds,
-        CircuitAMRAP,
-        CircuitDecrement
-    } type;
-    unsigned reps;
-    unsigned completedReps;
-    unsigned index;
-    unsigned size;
     ExerciseEntry *exercises;
-    CFRange numberRange;
     CFMutableStringRef headerStr;
+    CFRange numberRange;
+    int type;
+    int index;
+    int size;
+    int reps;
+    int completedReps;
 } Circuit;
 
 typedef struct {
-    unsigned char type;
-    signed char day;
-    bool testMax;
-    unsigned index;
-    unsigned size;
-    time_t startTime;
-    int16_t duration;
-    CFStringRef title;
-    Circuit *group;
     Circuit *activities;
+    Circuit *group;
+    CFStringRef title;
+    time_t startTime;
+    int index;
+    int size;
+    int type;
+    int16_t duration;
+    short bodyweight;
+    unsigned char day;
+    bool testMax;
 } Workout;
 
 typedef struct {
-    const signed char day;
-    unsigned char type;
+    int type;
     int index;
-    unsigned sets;
-    unsigned reps;
+    int sets;
+    int reps;
     int weight;
+    const unsigned char day;
 } WorkoutParams;
 
 void initExerciseStrings(void);
 
 void exerciseManager_setWeeklyWorkoutNames(CFStringRef *names);
 Workout *exerciseManager_getWeeklyWorkout(int index);
-CFArrayRef exerciseManager_createWorkoutNames(unsigned char type);
+CFArrayRef exerciseManager_createWorkoutNames(int type);
 Workout *exerciseManager_getWorkoutFromLibrary(WorkoutParams *params);
 
 #endif /* ExerciseManager_h */

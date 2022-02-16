@@ -18,22 +18,22 @@ typedef struct {
 
 typedef struct {
     CGPoint *entries[5];
+    CFStringRef names[4];
     CFStringRef legendFormat;
     id dataSets[5];
     id chartData;
     int avgs[3][4];
     float maxes[3];
-    CFStringRef names[4];
 } WorkoutTypeChartModel;
 
 typedef struct {
     CGPoint *entries[4];
+    CFStringRef names[4];
     CFStringRef legendFormat;
     id dataSets[4];
     id chartData;
     float avgs[3][4];
     float maxes[3];
-    CFStringRef names[4];
 } LiftChartModel;
 
 typedef struct {

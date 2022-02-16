@@ -42,14 +42,13 @@ enum {
     TransitionFinishedExercise,
 };
 
-static const unsigned ExerciseTagNA = 255;
 static CFStringRef notificationMessages[2];
 static CFStringRef ExerciseStates[4];
 static CFStringRef notifTitle;
 static pthread_t *exerciseTimerThread;
 static pthread_mutex_t timerLock;
 
-static void handleEvent(id self, unsigned gIdx, unsigned eIdx, unsigned char event);
+static void handleEvent(id self, int gIdx, int eIdx, int event);
 
 void initWorkoutStrings(void) {
     fillStringArray(ExerciseStates, CFSTR("exerciseState%d"), 4);
@@ -66,8 +65,8 @@ static void handle_group_timer_interrupt(int n _U_) {}
 
 static void *timer_loop(void *arg) {
     WorkoutTimer *t = arg;
-    unsigned char eventType = 0;
-    unsigned res = 0, duration = 0, container = ExerciseTagNA, exercise = ExerciseTagNA;
+    unsigned res = 0, duration = 0;
+    int container = -1, exercise = -1, eventType = 0;
     while (!t->info.stop) {
         pthread_mutex_lock(&t->lock);
         while (t->info.active != 1)
@@ -110,7 +109,7 @@ void stopTimers(id self) {
         data->savedInfo.groupTag = data->timers[TimerGroup].container;
         pthread_kill(data->threads[TimerGroup], SignalGroup);
     } else {
-        data->savedInfo.groupTag = ExerciseTagNA;
+        data->savedInfo.groupTag = -1;
     }
 
     if (data->timers[TimerExercise].info.active == 1) {
@@ -118,14 +117,14 @@ void stopTimers(id self) {
         data->savedInfo.exerciseInfo.tag = data->timers[TimerExercise].exercise;
         pthread_kill(data->threads[TimerExercise], SignalExercise);
     } else {
-        data->savedInfo.exerciseInfo.group = ExerciseTagNA;
+        data->savedInfo.exerciseInfo.group = -1;
     }
     pthread_mutex_unlock(&timerLock);
 }
 
 void restartTimers(id self) {
     bool endExercise = false, endGroup = false;
-    unsigned groupIdx = 0, exerciseIdx = 0;
+    int groupIdx = 0, exerciseIdx = 0;
     WorkoutVC *data = (WorkoutVC *) ((char *)self + VCSize);
     pthread_mutex_lock(&timerLock);
     if (data->done) {
@@ -133,9 +132,9 @@ void restartTimers(id self) {
         return;
     }
     time_t now = time(NULL);
-    unsigned group = data->savedInfo.exerciseInfo.group;
+    int group = data->savedInfo.exerciseInfo.group;
     exerciseIdx = data->savedInfo.exerciseInfo.tag;
-    if (group != ExerciseTagNA) {
+    if (group >= 0) {
         unsigned diff = (unsigned) (now - data->timers[TimerExercise].refTime);
         if (diff >= data->timers[TimerExercise].duration) {
             endExercise = true;
@@ -147,7 +146,7 @@ void restartTimers(id self) {
     }
 
     group = data->savedInfo.groupTag;
-    if (group != ExerciseTagNA) {
+    if (group >= 0) {
         unsigned diff = (unsigned) (now - data->timers[TimerGroup].refTime);
         if (diff >= data->timers[TimerGroup].duration) {
             endGroup = true;
@@ -166,7 +165,7 @@ void restartTimers(id self) {
 
 #pragma mark - Notifications
 
-static void scheduleNotification(unsigned secondsFromNow, unsigned char type) {
+static void scheduleNotification(unsigned secondsFromNow, int type) {
     static int identifier = 0;
     int currentId = identifier++;
     CFStringRef idString = CFStringCreateWithFormat(NULL, NULL, CFSTR("%d"), currentId);
@@ -213,8 +212,8 @@ static bool cycleExerciseEntry(ExerciseEntry *e, WorkoutTimer *timers) {
         case ExerciseStateDisabled:
             e->state = ExerciseStateActive;
             if (e->type == ExerciseDuration) {
-                startWorkoutTimer(&timers[TimerExercise], e->reps);
-                scheduleNotification(e->reps, TimerExercise);
+                startWorkoutTimer(&timers[TimerExercise], (unsigned) e->reps);
+                scheduleNotification((unsigned) e->reps, TimerExercise);
             }
             break;
 
@@ -251,7 +250,7 @@ static void startGroup(Circuit *c, WorkoutTimer *timers, bool startTimer) {
     }
 
     if (c->type == CircuitAMRAP && startTimer) {
-        unsigned duration = 60 * c->reps;
+        unsigned duration = (unsigned) (60 * c->reps);
         startWorkoutTimer(&timers[TimerGroup], duration);
         scheduleNotification(duration, TimerGroup);
     }
@@ -296,7 +295,7 @@ id workoutVC_init(Workout *workout) {
     id self = createNew(WorkoutVCClass);
     WorkoutVC *data = (WorkoutVC *) ((char *)self + VCSize);
     data->workout = workout;
-    data->containers = malloc(workout->size * sizeof(id));
+    data->containers = malloc((unsigned) workout->size * sizeof(id));
 
     pthread_mutex_init(&timerLock, NULL);
     for (unsigned char i = 0; i < 2; ++i) {
@@ -338,7 +337,7 @@ void workoutVC_deinit(id self, SEL _cmd) {
     pthread_mutex_destroy(&timerLock);
     exerciseTimerThread = NULL;
     CFRelease(data->workout->title);
-    unsigned size = data->workout->size;
+    int size = data->workout->size;
     Circuit *cEnd = &data->workout->activities[size];
     for (Circuit *c = &data->workout->activities[0]; c < cEnd; ++c) {
         if (c->headerStr) CFRelease(c->headerStr);
@@ -352,7 +351,7 @@ void workoutVC_deinit(id self, SEL _cmd) {
     free(data->workout->activities);
     free(data->workout);
 
-    for (unsigned i = 0; i < size; ++i) {
+    for (int i = 0; i < size; ++i) {
         releaseObj(data->containers[i]);
     }
     free(data->containers);
@@ -372,7 +371,7 @@ static inline void setDuration(Workout *w) {
 #endif
 }
 
-static void updateStoredData(unsigned char type, int16_t duration, short *lifts) {
+static void updateStoredData(int type, int16_t duration, short *lifts) {
     runInBackground((^{
         id data = persistenceService_getCurrentWeek();
         int16_t newDuration = duration + weekData_getWorkoutTimeForType(data, type);
@@ -390,7 +389,7 @@ static void updateStoredData(unsigned char type, int16_t duration, short *lifts)
 static void workoutVC_handleFinishedWorkout(id self) {
     WorkoutVC *data = (WorkoutVC *) ((char *)self + VCSize);
     Workout *w = data->workout;
-    unsigned char totalCompleted = 0;
+    int totalCompleted = 0;
     short *lifts = NULL;
 
     if (data->weights[0]) {
@@ -402,8 +401,8 @@ static void workoutVC_handleFinishedWorkout(id self) {
     }
 
     if (isWorkoutLongEnough(data->workout)) {
-        if (w->day >= 0)
-            totalCompleted = appUserData_addCompletedWorkout((unsigned char) w->day);
+        if (w->day != 0xff)
+            totalCompleted = appUserData_addCompletedWorkout(w->day);
         updateStoredData(w->type, w->duration, lifts);
     }
 
@@ -436,13 +435,13 @@ void workoutVC_viewDidLoad(id self, SEL _cmd) {
     getRect(view, &frame, 0);
     setNavButton(self, false, startBtn, (int) frame.size.width);
 
-    for (unsigned i = 0; i < data->workout->size; ++i) {
+    for (int i = 0; i < data->workout->size; ++i) {
         Circuit *c = &data->workout->activities[i];
         data->containers[i] = containerView_init(c->headerStr, 0, false);
         ContainerView *container = (ContainerView*) ((char *)data->containers[i] + ViewSize);
         addArrangedSubview(stack, data->containers[i]);
 
-        for (unsigned j = 0; j < c->size; ++j) {
+        for (int j = 0; j < c->size; ++j) {
             id v = statusView_init(NULL, (int) ((i << 8) | j), self, btnTap);
             StatusView *ptr = (StatusView *) ((char *)v + ViewSize);
             ptr->entry = &c->exercises[j];
@@ -528,12 +527,12 @@ void workoutVC_willDisappear(id self, SEL _cmd, bool animated) {
 }
 
 void workoutVC_handleTap(id self, SEL _cmd _U_, id btn) {
-    unsigned tag = (unsigned) getTag(btn);
-    unsigned groupIdx = (tag & 0xff00) >> 8, exerciseIdx = tag & 0xff;
+    int tag = (int) getTag(btn);
+    int groupIdx = (tag & 0xff00) >> 8, exerciseIdx = tag & 0xff;
     handleEvent(self, groupIdx, exerciseIdx, 0);
 }
 
-void handleEvent(id self, unsigned gIdx, unsigned eIdx, unsigned char event) {
+void handleEvent(id self, int gIdx, int eIdx, int event) {
     WorkoutVC *data = (WorkoutVC *) ((char *)self + VCSize);
     pthread_mutex_lock(&timerLock);
     Workout *w = data->workout;
@@ -544,9 +543,8 @@ void handleEvent(id self, unsigned gIdx, unsigned eIdx, unsigned char event) {
 
     CFArrayRef views = getArrangedSubviews(data->first->stack);
     id currView = (id) CFArrayGetValueAtIndex(views, eIdx);
-    ExerciseEntry *entry = &w->group->exercises[eIdx];
     StatusView *ptr = (StatusView *) ((char *)currView + ViewSize);
-    unsigned char t = 0;
+    int t = 0;
     switch (event) {
         case EventFinishExercise:
             toggleInteraction(ptr->button, true);
@@ -574,7 +572,7 @@ void handleEvent(id self, unsigned gIdx, unsigned eIdx, unsigned char event) {
             break;
     }
 
-    bool exerciseDone = cycleExerciseEntry(entry, data->timers);
+    bool exerciseDone = cycleExerciseEntry(ptr->entry, data->timers);
     exerciseView_configure(currView);
 
     if (exerciseDone) {
@@ -622,7 +620,7 @@ void handleEvent(id self, unsigned gIdx, unsigned eIdx, unsigned char event) {
                 startGroup(w->group, data->timers, false);
             }
         } else {
-            cycleExerciseEntry(entry + 1, data->timers);
+            cycleExerciseEntry(ptr->entry + 1, data->timers);
         }
     }
 foundTransition:
@@ -651,7 +649,7 @@ foundTransition:
             }
             setLabelText(data->first->headerLabel, w->group->headerStr);
 
-            for (unsigned i = 0; i < w->group->size; ++i) {
+            for (int i = 0; i < w->group->size; ++i) {
                 exerciseView_configure((id) CFArrayGetValueAtIndex(views, i));
             }
             break;
@@ -663,7 +661,7 @@ foundTransition:
         default:
             if (w->testMax) {
                 pthread_mutex_unlock(&timerLock);
-                presentModalVC(self, updateMaxesVC_init(self, eIdx));
+                presentModalVC(self, updateMaxesVC_init(self, eIdx, w->bodyweight));
                 return;
             }
             break;
@@ -671,7 +669,7 @@ foundTransition:
     pthread_mutex_unlock(&timerLock);
 }
 
-void workoutVC_finishedBottomSheet(id self, unsigned index, short weight) {
+void workoutVC_finishedBottomSheet(id self, int index, short weight) {
     WorkoutVC *data = (WorkoutVC *) ((char *)self + VCSize);
     data->weights[index] = weight;
     handleEvent(self, 0, index, 0);

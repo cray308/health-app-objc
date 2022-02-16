@@ -12,6 +12,6 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd, id application,
 int appDelegate_supportedOrientations(AppDelegate *self, SEL _cmd, id application, id window);
 
 void appDel_setWindowTint(id color);
-void appDel_updateUserInfo(signed char plan, signed char darkMode, short *weights);
+void appDel_updateUserInfo(unsigned char plan, unsigned char darkMode, short *weights);
 void appDel_deleteAppData(void);
 void appDel_updateMaxWeights(short *weights);

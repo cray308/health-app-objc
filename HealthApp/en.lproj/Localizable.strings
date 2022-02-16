@@ -85,7 +85,6 @@
 "setupWorkoutMaxWeight" = "Max Weight Percentage";
 "setupWorkoutDuration" = "Duration (minutes)";
 
-"workoutTitleTestDay" = "Test Day";
 "stepperLabelFormat" = "Reps: %d";
 "exerciseHeader" = "Set %d of %d";
 "exerciseTitleRest" = "Rest: %d s";

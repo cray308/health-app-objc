@@ -5,7 +5,7 @@
 
 #define setPriority(_c, _arg) setFloat(_c, sel_getUid("setPriority:"), _arg)
 
-static struct AnchorNames {
+static struct {
     char const *const top;
     char const *const bottom;
     char const *const left;

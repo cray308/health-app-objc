@@ -22,6 +22,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
     initExerciseStrings();
     initWorkoutStrings();
     bool legacy = handleIOSVersion();
+    time_t weekStart = 0;
     CGRect bounds;
     getScreenBounds(&bounds);
     self->window = createObjectWithFrame(objc_getClass("UIWindow"), bounds);
@@ -37,7 +38,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
     if (!hasLaunched) {
         (((void(*)(id,SEL,bool,CFStringRef))objc_msgSend)
          (defaults, sel_getUid("setBool:forKey:"), true, hasLaunchedKey));
-        userInfo_create(legacy);
+        userInfo_create(legacy, &weekStart);
 #if DEBUG
         persistenceService_create();
 #endif
@@ -46,7 +47,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
          (center, sel_getUid("requestAuthorizationWithOptions:completionHandler:"),
           6, ^(BOOL granted _U_, id error _U_) {}));
     } else {
-        tzOffset = userInfo_initFromStorage();
+        tzOffset = userInfo_initFromStorage(&weekStart);
     }
 
     char const *titleForRow = "@@:@qq";
@@ -101,7 +102,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
 
     voidFunc(self->window, sel_getUid("makeKeyAndVisible"));
     toggleDarkModeForCharts(userData->darkMode);
-    persistenceService_start(tzOffset, fetchHandler, fetchArg);
+    persistenceService_start(tzOffset, weekStart, fetchHandler, fetchArg);
     return true;
 }
 
@@ -120,7 +121,7 @@ void appDel_setWindowTint(id color) {
     setTintColor(getAppDel()->window, color);
 }
 
-void appDel_updateUserInfo(signed char plan, signed char darkMode, short *weights) {
+void appDel_updateUserInfo(unsigned char plan, unsigned char darkMode, short *weights) {
     AppDelegate *self = getAppDel();
     bool updateHome = plan != userData->currentPlan;
     if (appUserData_updateUserSettings(plan, darkMode, weights)) {
@@ -138,8 +139,7 @@ void appDel_updateUserInfo(signed char plan, signed char darkMode, short *weight
 
 void appDel_deleteAppData(void) {
     AppDelegate *self = getAppDel();
-    bool updateHome = userData->completedWorkouts;
-    appUserData_deleteSavedData();
+    bool updateHome = appUserData_deleteSavedData();
     persistenceService_deleteUserData();
     if (updateHome)
         homeVC_updateWorkoutsList(self->children[0]);
@@ -148,7 +148,6 @@ void appDel_deleteAppData(void) {
 
 void appDel_updateMaxWeights(short *weights) {
     AppDelegate *self = getAppDel();
-    appUserData_updateWeightMaxes(weights);
-    if (isViewLoaded(self->children[2]))
+    if (appUserData_updateWeightMaxes(weights) && isViewLoaded(self->children[2]))
         settingsVC_updateWeightFields(self->children[2]);
 }

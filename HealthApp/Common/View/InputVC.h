@@ -9,26 +9,26 @@ extern Class InputViewClass;
 extern size_t InputVCSize;
 
 typedef struct {
-    short minVal;
-    short maxVal;
-    short result;
-    bool valid;
     id hintLabel;
     id field;
     id errorLabel;
+    int minVal;
+    int maxVal;
+    short result;
+    bool valid;
 } InputView;
 
 typedef struct {
-    int count;
-    int scrollHeight;
-    short topOffset;
-    short bottomOffset;
     id children[4];
     id button;
     id activeField;
     id scrollView;
     id vStack;
     id toolbar;
+    int count;
+    int scrollHeight;
+    int topOffset;
+    int bottomOffset;
 } InputVC;
 
 void inputView_reset(InputView *data, short value);

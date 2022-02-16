@@ -11,11 +11,12 @@
 
 Class UpdateMaxesVCClass;
 
-id updateMaxesVC_init(id parent, unsigned index) {
+id updateMaxesVC_init(id parent, int index, short bodyweight) {
     id self = createNew(UpdateMaxesVCClass);
     UpdateMaxesVC *data = (UpdateMaxesVC *) ((char *)self + InputVCSize);
     data->parent = parent;
     data->index = index;
+    data->bodyweight = bodyweight;
     data->stepperFormat = localize(CFSTR("stepperLabelFormat"));
     return self;
 }
@@ -75,12 +76,12 @@ void updateMaxesVC_updatedStepper(id self, SEL _cmd _U_) {
 void updateMaxesVC_tappedFinish(id self, SEL _cmd _U_) {
     UpdateMaxesVC *data = (UpdateMaxesVC *) ((char *)self + InputVCSize);
     id field = ((InputVC *) ((char *)self + VCSize))->children[0];
-    short extra = data->index == LiftPullup ? getBodyWeight() : 0;
+    short extra = data->index == LiftPullup ? data->bodyweight : 0;
     int initWeight = (((InputView *) ((char *)field + ViewSize))->result + extra) * 36;
     float reps = 37.f - ((float) getStepperValue(data->stepper));
     short weight = (short) ((initWeight / reps) + 0.5f) - extra;
     id parent = data->parent;
-    unsigned index = data->index;
+    int index = data->index;
     dismissPresentedVC(parent, ^{
         workoutVC_finishedBottomSheet(parent, index, weight);
     });

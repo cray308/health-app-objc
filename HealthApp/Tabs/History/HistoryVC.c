@@ -106,9 +106,10 @@ static void historyData_fetch(void *_model) {
         struct tm localInfo;
         int count = 0;
 
-        id request = fetchRequest(createPredicate(CFSTR("weekStart < %lld"), userData->weekStart));
-        CFArrayRef data = persistenceService_executeFetchRequest(request, &count, true);
-        if (data) {
+        id request = fetchRequest();
+        CFArrayRef data = persistenceService_executeFetchRequest(request, &count, true, true);
+        if (data && count > 1) {
+            count -= 1;
             CFMutableArrayRef strs = CFArrayCreateMutable(NULL, count, &kCFTypeArrayCallBacks);
             struct WeekDataModel *results = malloc((unsigned) count * sizeof(struct WeekDataModel));
             customAssert(count > 0)

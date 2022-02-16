@@ -11,10 +11,11 @@ typedef struct {
     id stepper;
     id stepperLabel;
     CFStringRef stepperFormat;
-    unsigned index;
+    int index;
+    short bodyweight;
 } UpdateMaxesVC;
 
-id updateMaxesVC_init(id parent, unsigned index);
+id updateMaxesVC_init(id parent, int index, short bodyweight);
 void updateMaxesVC_deinit(id self, SEL _cmd);
 void updateMaxesVC_viewDidLoad(id self, SEL _cmd);
 void updateMaxesVC_updatedStepper(id self, SEL _cmd);

@@ -57,19 +57,20 @@ void settingsVC_viewDidLoad(id self, SEL _cmd) {
     setBackground(getView(self), createColor(ColorPrimaryBGGrouped));
     setVCTitle(self, localize(CFSTR("settingsTitle")));
 
+    unsigned char segment = userData->currentPlan + 1;
     id planLabel = createLabel(localize(CFSTR("planPickerTitle")), TextFootnote, 4, true);
-    id picker = createSegmentedControl(CFSTR("settingsSegment%d"), 3,
-                                       userData->currentPlan + 1, nil, nil, 44);
+    id picker = createSegmentedControl(CFSTR("settingsSegment%d"), 3, segment, nil, nil, 44);
     data->planContainer = createStackView((id []){planLabel,picker}, 2, 1, 2,(Padding){0, 8, 0, 8});
     id aboveTF = createStackView((id[]){data->planContainer}, 1, 1, 20, (Padding){0, 0, 20, 0});
 
     setMargins(parent->vStack, ((HAInsets){20, 0, 20, 0}));
     addArrangedSubview(parent->vStack, aboveTF);
 
-    if (userData->darkMode >= 0) {
+    const unsigned char darkMode = userData->darkMode;
+    if (darkMode != 0xff) {
         data->switchContainer = createBackgroundView(ColorSecondaryBGGrouped, 44, false);
         id switchView = createNew(objc_getClass("UISwitch"));
-        setBool(switchView, sel_getUid("setOn:"), userData->darkMode ? true : false);
+        setBool(switchView, sel_getUid("setOn:"), darkMode);
         id label = createLabel(localize(CFSTR("darkMode")), TextBody, 4, true);
         id sv = createStackView((id[]){label, switchView}, 2, 0, 5, (Padding){0, 8, 0, 8});
         centerHStack(sv);
@@ -118,14 +119,14 @@ void settingsVC_buttonTapped(id self, SEL _cmd _U_, id btn) {
     }
 
     SettingsVC *data = (SettingsVC *) ((char *)self + InputVCSize);
-    signed char dark = -1;
+    unsigned char dark = 0xff;
     if (data->switchContainer) {
         id sv = (id) CFArrayGetValueAtIndex(getSubviews(data->switchContainer), 0);
         id switchView = (id) CFArrayGetValueAtIndex(getArrangedSubviews(sv), 1);
         dark = getBool(switchView, sel_getUid("isOn")) ? 1 : 0;
     }
     id picker = (id) CFArrayGetValueAtIndex(getArrangedSubviews(data->planContainer), 1);
-    signed char plan = ((signed char) getSelectedSegment(picker)) - 1;
+    unsigned char plan = (unsigned char) (getSelectedSegment(picker) - 1);
 
     short *arr = data->results;
     id *fields = ((InputVC *) ((char *)self + VCSize))->children;

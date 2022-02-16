@@ -10,22 +10,21 @@ typedef struct {
     time_t planStart;
     time_t weekStart;
     int tzOffset;
-    signed char darkMode;
-    signed char currentPlan;
-    unsigned char completedWorkouts;
+    int week;
     short liftMaxes[4];
-    short bodyweight;
-    short week;
+    unsigned char darkMode;
+    unsigned char currentPlan;
+    unsigned char completedWorkouts;
 } UserInfo;
 
 extern UserInfo *userData;
 
-void userInfo_create(bool darkMode);
-int userInfo_initFromStorage(void);
+void userInfo_create(bool darkMode, time_t *startOfWeek);
+int userInfo_initFromStorage(time_t *startOfWeek);
 
-bool appUserData_updateUserSettings(signed char plan, signed char darkMode, short *weights);
-void appUserData_deleteSavedData(void);
-unsigned char appUserData_addCompletedWorkout(unsigned char day);
+bool appUserData_updateUserSettings(unsigned char plan, unsigned char darkMode, short *weights);
+bool appUserData_deleteSavedData(void);
+int appUserData_addCompletedWorkout(unsigned char day);
 bool appUserData_updateWeightMaxes(short *weights);
 
 #endif /* AppUserData_h */
