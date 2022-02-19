@@ -1,6 +1,5 @@
 #include "UpdateMaxesVC.h"
 #include <CoreFoundation/CFString.h>
-#include "AppUserData.h"
 #include "InputVC.h"
 #include "ViewControllerHelpers.h"
 #include "WorkoutVC.h"
@@ -43,7 +42,7 @@ void updateMaxesVC_viewDidLoad(id self, SEL _cmd) {
     inputVC_addChild(self, localize(fieldKey), 1, 999);
 
     CFStringRef stepperText = CFStringCreateWithFormat(NULL, NULL, data->stepperFormat, 1);
-    data->stepperLabel = createLabel(stepperText, TextBody, 4, true);
+    data->stepperLabel = createLabel(stepperText, TextBody, true);
     data->stepper = createNew(objc_getClass("UIStepper"));
     setDouble(data->stepper, sel_getUid("setValue:"), 1);
     setDouble(data->stepper, sel_getUid("setMinimumValue:"), 1);
@@ -56,7 +55,7 @@ void updateMaxesVC_viewDidLoad(id self, SEL _cmd) {
     CGRect frame;
     getRect(view, &frame, 0);
     parent->button = createButton(localize(CFSTR("finish")), ColorBlue, 0, 0, self,
-                                  sel_getUid("tappedFinish"), -1);
+                                  sel_getUid("tappedFinish"));
     setNavButton(self, false, parent->button, (int) frame.size.width);
     enableButton(parent->button, false);
 

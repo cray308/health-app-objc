@@ -185,6 +185,7 @@ void historyVC_viewDidLoad(id self, SEL _cmd) {
     struct objc_super super = {self, VCClass};
     ((void(*)(struct objc_super *,SEL))objc_msgSendSuper)(&super, _cmd);
 
+    const unsigned char darkMode = userData->darkMode;
     HistoryVC *data = (HistoryVC *) ((char *)self + VCSize);
     id view = getView(self);
     setBackground(view, createColor(ColorPrimaryBG));
@@ -196,8 +197,10 @@ void historyVC_viewDidLoad(id self, SEL _cmd) {
     data->charts[1] = workoutTypeView_init(&data->model.workoutTypes, self);
     data->charts[2] = liftingView_init(&data->model.lifts, self);
 
-    data->picker = createSegmentedControl(CFSTR("historySegment%d"), 3, 0,
-                                          self, sel_getUid("buttonTapped:"), -1);
+    data->picker = createSegmentedControl(CFSTR("historySegment%d"), 0);
+    addTarget(data->picker, self, sel_getUid("buttonTapped:"), 4096);
+    if (!(darkMode & 128))
+        updateSegmentedControl(data->picker, createColor(ColorLabel), darkMode);
     id navItem = getNavItem(self);
     setObject(navItem, sel_getUid("setTitleView:"), data->picker);
 
@@ -293,7 +296,7 @@ void historyVC_clearData(id self) {
     replaceDataSetEntries(model->workoutTypes.dataSets[4], NULL, 0);
 
     if (isViewLoaded(self)) {
-        setInt(data->picker, sel_getUid("setSelectedSegmentIndex:"), 0);
+        setSelectedSegment(data->picker, 0);
         historyVC_updateSegment(self, nil, data->picker);
     }
 }
@@ -303,17 +306,16 @@ CFStringRef historyVC_stringForValue(id self, SEL _cmd _U_, double value) {
     return CFArrayGetValueAtIndex(strs, (int) value);
 }
 
-void historyVC_updateColors(id self) {
-    if (isViewLoaded(self)) {
-        id picker = ((HistoryVC *) ((char *)self + VCSize))->picker;
-        id view = getView(self);
-        setBackground(view, createColor(ColorPrimaryBG));
-        updateSegmentedControl(picker);
-        view = (id) CFArrayGetValueAtIndex(getSubviews(view), 0);
-        view = (id) CFArrayGetValueAtIndex(getSubviews(view), 0);
-        CFArrayRef views = getArrangedSubviews(view);
-        for (int i = 0; i < 3; ++i) {
-            containerView_updateColors((id) CFArrayGetValueAtIndex(views, i));
-        }
+void historyVC_updateColors(id self, unsigned char darkMode) {
+    id picker = ((HistoryVC *) ((char *)self + VCSize))->picker;
+    id view = getView(self);
+    setBackground(view, createColor(ColorPrimaryBG));
+    id label = createColor(ColorLabel), divColor = createColor(ColorSeparator);
+    updateSegmentedControl(picker, label, darkMode);
+    view = (id) CFArrayGetValueAtIndex(getSubviews(view), 0);
+    view = (id) CFArrayGetValueAtIndex(getSubviews(view), 0);
+    CFArrayRef views = getArrangedSubviews(view);
+    for (int i = 0; i < 3; ++i) {
+        containerView_updateColors((id) CFArrayGetValueAtIndex(views, i), label, divColor);
     }
 }

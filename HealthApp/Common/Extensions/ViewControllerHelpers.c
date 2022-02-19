@@ -1,6 +1,5 @@
 #include "ViewControllerHelpers.h"
 #include "AppDelegate.h"
-#include "AppUserData.h"
 
 #define updateKVPair(_o, _k, _v) ((void(*)(id,SEL,id,CFStringRef))objc_msgSend)\
 ((_o), sel_getUid("setValue:forKey:"), (_v), (_k))
@@ -24,13 +23,14 @@ void setNavButton(id vc, bool left, id button, int totalWidth) {
 
 static bool setupBarGeneric(id bar, Class appearanceClass, bool modal) {
     id color = getBarColor(modal);
-    if (osVersion > 12) {
+    if (appearanceClass) {
+        SEL scrollEdge = sel_getUid("setScrollEdgeAppearance:");
         id appearance = createNew(appearanceClass);
         voidFunc(appearance, sel_getUid("configureWithOpaqueBackground"));
         setBackground(appearance, color);
         setObject(bar, sel_getUid("setStandardAppearance:"), appearance);
-        if (osVersion == 15)
-            setObject(bar, sel_getUid("setScrollEdgeAppearance:"), appearance);
+        if (((bool(*)(id,SEL,SEL))objc_msgSend)(bar, sel_getUid("respondsToSelector:"), scrollEdge))
+            setObject(bar, scrollEdge, appearance);
         releaseObj(appearance);
         return false;
     } else {
@@ -42,6 +42,7 @@ static bool setupBarGeneric(id bar, Class appearanceClass, bool modal) {
 
 void setupTabVC(id vc) {
     CFDictionaryRef dict = createTitleTextDict(createColor(ColorLabel), nil);
+    Class navBarAppearance = objc_getClass("UINavigationBarAppearance");
     id tabBar = getTabBar(vc);
     bool extra = setupBarGeneric(tabBar, objc_getClass("UITabBarAppearance"), false);
     if (extra)
@@ -50,7 +51,7 @@ void setupTabVC(id vc) {
     for (int i = 0; i < 3; ++i) {
         id navVC = (id) CFArrayGetValueAtIndex(ctrls, i);
         id navBar = getNavBar(navVC);
-        setupBarGeneric(navBar, objc_getClass("UINavigationBarAppearance"), false);
+        setupBarGeneric(navBar, navBarAppearance, false);
         if (extra) {
             (((void(*)(id,SEL,CFDictionaryRef))objc_msgSend)
              (navBar, sel_getUid("setTitleTextAttributes:"), dict));
@@ -69,9 +70,9 @@ void setVCTitle(id vc, CFStringRef title) {
     setString(navItem, sel_getUid("setTitle:"), title);
 }
 
-int dmNavVC_getStatusBarStyle(id self _U_, SEL _cmd _U_) {
-    return userData->darkMode ? 2 : 0;
-}
+int dmNavVC_getStatusBarStyle(id self _U_, SEL _cmd _U_) { return 0; }
+
+int dmNavVC_getStatusBarStyleDark(id self _U_, SEL _cmd _U_) { return 2; }
 
 #pragma mark - VC Functions
 
@@ -103,32 +104,34 @@ void dismissPresentedVC(id presenter, Callback handler) {
     }));
 }
 
-id createAlertController(CFStringRef title, CFStringRef message) {
-    id vc = (((id(*)(Class,SEL,CFStringRef,CFStringRef,long))objc_msgSend)
-             (objc_getClass("UIAlertController"),
-              sel_getUid("alertControllerWithTitle:message:preferredStyle:"), title, message, 1));
-    if (osVersion < 13) {
-        id fg = createColor(ColorLabel);
-        CFDictionaryRef titleDict = createTitleTextDict(fg, createCustomFont(WeightSemiBold, 17));
-        CFDictionaryRef msgDict = createTitleTextDict(fg, createCustomFont(WeightReg, 13));
-        id titleString = createAttribString(title, titleDict);
-        id msgString = createAttribString(message, msgDict);
-        updateKVPair(vc, CFSTR("attributedTitle"), titleString);
-        updateKVPair(vc, CFSTR("attributedMessage"), msgString);
+id alertCtrlCreate(id self _U_, SEL _cmd _U_, CFStringRef title, CFStringRef message) {
+    return (((id(*)(Class,SEL,CFStringRef,CFStringRef,long))objc_msgSend)
+            (objc_getClass("UIAlertController"),
+             sel_getUid("alertControllerWithTitle:message:preferredStyle:"), title, message, 1));
+}
 
-        id view = getView(vc);
-        SEL sv = sel_getUid("subviews");
-        for (int i = 0; i < 3; ++i) {
-            CFArrayRef subviews = getArray(view, sv);
-            view = (id) CFArrayGetValueAtIndex(subviews, 0);
-        }
-        setBackground(view, createColor(ColorTertiaryBG));
+id alertCtrlCreateLegacy(id self, SEL _cmd _U_, CFStringRef title, CFStringRef message) {
+    id vc = alertCtrlCreate(self, nil, title, message);
+    id fg = createColor(ColorLabel);
+    CFDictionaryRef titleDict = createTitleTextDict(fg, createCustomFont(WeightSemiBold, 17));
+    CFDictionaryRef msgDict = createTitleTextDict(fg, createCustomFont(WeightReg, 13));
+    id titleString = createAttribString(title, titleDict);
+    id msgString = createAttribString(message, msgDict);
+    updateKVPair(vc, CFSTR("attributedTitle"), titleString);
+    updateKVPair(vc, CFSTR("attributedMessage"), msgString);
 
-        CFRelease(titleDict);
-        CFRelease(msgDict);
-        releaseObj(titleString);
-        releaseObj(msgString);
+    id view = getView(vc);
+    SEL sv = sel_getUid("subviews");
+    for (int i = 0; i < 3; ++i) {
+        CFArrayRef subviews = getArray(view, sv);
+        view = (id) CFArrayGetValueAtIndex(subviews, 0);
     }
+    setBackground(view, createColor(ColorTertiaryBG));
+
+    CFRelease(titleDict);
+    CFRelease(msgDict);
+    releaseObj(titleString);
+    releaseObj(msgString);
     return vc;
 }
 

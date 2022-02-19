@@ -1,5 +1,4 @@
 #include "Views.h"
-#include "AppUserData.h"
 #include "CocoaHelpers.h"
 
 #define getObjectWithArr(_obj, _cmd, _arg) \
@@ -33,11 +32,6 @@ static void setDynamicFont(id view) {
     setBool(view, sel_getUid("setAdjustsFontSizeToFitWidth:"), true);
     adjustFontForSizeCategory(view);
     setCGFloat(view, sel_getUid("setMinimumScaleFactor:"), 0.85);
-}
-
-static inline void setCornerRadius(id view) {
-    id layer = getLayer(view);
-    setCGFloat(layer, sel_getUid("setCornerRadius:"), 5);
 }
 
 id createFont(int style) {
@@ -101,22 +95,9 @@ id createObjectWithFrame(Class cls, CGRect frame) {
     return ((id(*)(id,SEL,CGRect))objc_msgSend)(_obj, sel_getUid("initWithFrame:"), frame);
 }
 
-id createBackgroundView(int colorCode, int height, bool optional) {
+id createView(void) {
     id view = createNew(ViewClass);
     disableAutoresizing(view);
-    setBackground(view, createColor(colorCode));
-    setHeight(view, height, optional);
-    return view;
-}
-
-id createView(int size) {
-    id view = createNew(ViewClass);
-    disableAutoresizing(view);
-    if (size >= 0) {
-        setCornerRadius(view);
-        setWidth(view, size);
-        setHeight(view, size, true);
-    }
     return view;
 }
 
@@ -148,20 +129,19 @@ id createScrollView(void) {
     return view;
 }
 
-id createLabel(CFStringRef text, int style, int alignment, bool accessible) {
+id createLabel(CFStringRef text, int style, bool accessible) {
     id view = createNew(objc_getClass("UILabel"));
     disableAutoresizing(view);
     setLabelText(view, text);
     setLabelFont(view, style);
     setDynamicFont(view);
     setTextColor(view, createColor(ColorLabel));
-    setTextAlignment(view, alignment);
+    setTextAlignment(view, 4);
     setBool(view, sel_getUid("setIsAccessibilityElement:"), accessible);
     return view;
 }
 
-id createButton(CFStringRef title, int color, int params,
-                int tag, id target, SEL action, int height) {
+id createButton(CFStringRef title, int color, int params, int tag, id target, SEL action) {
     id view = ((id(*)(Class,SEL,long))objc_msgSend)(objc_getClass("UIButton"),
                                                     sel_getUid("buttonWithType:"), 1);
     disableAutoresizing(view);
@@ -174,30 +154,21 @@ id createButton(CFStringRef title, int color, int params,
     if (params & BtnBackground)
         setBackground(view, createColor(ColorSecondaryBGGrouped));
     if (params & BtnRounded)
-        setCornerRadius(view);
+        setCGFloat(getLayer(view), sel_getUid("setCornerRadius:"), 5);
     setTag(view, tag);
     addTarget(view, target, action, 64);
-    if (height >= 0)
-        setHeight(view, height, true);
     return view;
 }
 
-id createSegmentedControl(CFStringRef format, int count, int startIndex,
-                          id target, SEL action, int height) {
-    CFStringRef segments[count];
-    fillStringArray(segments, format, count);
-    CFArrayRef array = CFArrayCreate(NULL, (const void **)segments, count, NULL);
+id createSegmentedControl(CFStringRef format, int startIndex) {
+    CFStringRef segments[3];
+    fillStringArray(segments, format, 3);
+    CFArrayRef array = CFArrayCreate(NULL, (const void **)segments, 3, NULL);
     id _obj = allocClass(objc_getClass("UISegmentedControl"));
     id view = getObjectWithArr(_obj, sel_getUid("initWithItems:"), array);
     disableAutoresizing(view);
-    setInt(view, sel_getUid("setSelectedSegmentIndex:"), startIndex);
-    if (action)
-        addTarget(view, target, action, 4096);
-    if (height >= 0)
-        setHeight(view, height, false);
+    setSelectedSegment(view, startIndex);
     CFRelease(array);
-    if (osVersion < 13)
-        updateSegmentedControl(view);
     return view;
 }
 
@@ -217,8 +188,6 @@ id createTextfield(id delegate, CFStringRef text, CFStringRef hint,
     setDelegate(view, delegate);
     setMinHeight(view, 44);
     setAccessibilityLabel(view, hint);
-    if (userData->darkMode == 1)
-        setKBColor(view, 1);
     return view;
 }
 
@@ -228,24 +197,17 @@ void addVStackToScrollView(id vStack, id scrollView) {
     setEqualWidths(vStack, scrollView);
 }
 
-void updateSegmentedControl(id view) {
-    id fg = createColor(ColorLabel);
+void updateSegmentedControl(id view, id foreground, unsigned char darkMode) {
     float redGreen = 0.78f, blue = 0.8f;
-    if (userData->darkMode) {
+    if (darkMode) {
         redGreen = 0.28f;
         blue = 0.29f;
     }
     setTintColor(view, getColorRef(redGreen, redGreen, blue, 1));
-    CFDictionaryRef normalDict = createTitleTextDict(fg, createCustomFont(WeightReg, 13));
-    CFDictionaryRef selectedDict = createTitleTextDict(fg, createCustomFont(WeightMed, 13));
+    CFDictionaryRef normalDict = createTitleTextDict(foreground, createCustomFont(WeightReg, 13));
+    CFDictionaryRef selectedDict = createTitleTextDict(foreground, createCustomFont(WeightMed, 13));
     setControlTextAttribs(view, normalDict, 0);
     setControlTextAttribs(view, selectedDict, 4);
     CFRelease(normalDict);
     CFRelease(selectedDict);
-}
-
-void updateButtonColors(id view, int color) {
-    setButtonColor(view, createColor(color), 0);
-    setButtonColor(view, createColor(ColorSecondaryLabel), 2);
-    setBackground(view, createColor(ColorSecondaryBGGrouped));
 }

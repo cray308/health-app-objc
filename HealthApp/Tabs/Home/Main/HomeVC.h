@@ -14,11 +14,11 @@ typedef struct {
 } HomeVC;
 
 id homeVC_init(void);
-void homeVC_updateWorkoutsList(id self);
-void homeVC_createWorkoutsList(id self);
+void homeVC_updateWorkoutsList(id self, unsigned char completed);
+void homeVC_createWorkoutsList(id self, unsigned char plan);
 void homeVC_updateColors(id self);
 void homeVC_navigateToAddWorkout(id self, void *workout);
-void homeVC_handleFinishedWorkout(id self, int totalCompleted);
+void homeVC_handleFinishedWorkout(id self, unsigned char completed);
 
 void homeVC_viewDidLoad(id self, SEL _cmd);
 void homeVC_workoutButtonTapped(id self, SEL _cmd, id btn);

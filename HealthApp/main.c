@@ -20,6 +20,7 @@ extern SEL getValueFormatterAction(void);
 int main(int argc, char *argv[]) {
     ViewClass = objc_getClass("UIView");
     VCClass = objc_getClass("UIViewController");
+    ColorClass = objc_getClass("UIColor");
     ViewSize = class_getInstanceSize(ViewClass);
     VCSize = class_getInstanceSize(VCClass);
     InputVCSize = VCSize + sizeof(InputVC);
@@ -60,7 +61,7 @@ int main(int argc, char *argv[]) {
 
     InputVCClass = objc_allocateClassPair(VCClass, "InputVC", 0);
     class_addProtocol(InputVCClass, objc_getProtocol("UITextFieldDelegate"));
-    class_addIvar(InputVCClass, "validatorData", sizeof(InputVC), 0, "{=[4@]@@@@@iiii}");
+    class_addIvar(InputVCClass, "validatorData", sizeof(InputVC), 0, "{=[4@]@@@@@iissB}");
     class_addMethod(InputVCClass, sel_getUid("init"), (IMP) inputVC_init, "@@:");
     class_addMethod(InputVCClass, deinit, (IMP) inputVC_deinit, voidSig);
     class_addMethod(InputVCClass, viewLoad, (IMP) inputVC_viewDidLoad, voidSig);
@@ -93,16 +94,11 @@ int main(int argc, char *argv[]) {
     class_addIvar(SetupWorkoutVCClass, dataKey, sizeof(SetupWorkoutVC), 0, "{?=@@@ii}");
     class_addMethod(SetupWorkoutVCClass, sel_getUid("dealloc"),
                     (IMP) setupWorkoutVC_deinit, voidSig);
-    class_addMethod(SetupWorkoutVCClass, sel_getUid("viewDidLoad"),
-                    (IMP) setupWorkoutVC_viewDidLoad, voidSig);
+    class_addMethod(SetupWorkoutVCClass, viewLoad, (IMP) setupWorkoutVC_viewDidLoad, voidSig);
     class_addMethod(SetupWorkoutVCClass, sel_getUid("buttonTapped:"),
                     (IMP) setupWorkoutVC_tappedButton, tapSig);
-    class_addMethod(SetupWorkoutVCClass, sel_getUid("numberOfComponentsInPickerView:"),
-                    (IMP) setupWorkoutVC_numberOfComponents, "q@:@");
     class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:numberOfRowsInComponent:"),
                     (IMP) setupWorkoutVC_numberOfRows, "q@:@q");
-    class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:didSelectRow:inComponent:"),
-                    (IMP) setupWorkoutVC_didSelectRow, "v@:@qq");
 
     UpdateMaxesVCClass = objc_allocateClassPair(InputVCClass, "UpdateMaxesVC", 0);
     class_addIvar(UpdateMaxesVCClass, dataKey, sizeof(UpdateMaxesVC), 0, "{?=@@@@is}");

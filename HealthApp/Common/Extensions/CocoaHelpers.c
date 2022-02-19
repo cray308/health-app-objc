@@ -1,9 +1,6 @@
 #include "CocoaHelpers.h"
 #include <stdlib.h>
 #include <string.h>
-#include "AppUserData.h"
-
-extern int getOSVersion(void);
 
 static const void *cocoaArrRetain(CFAllocatorRef allocator _U_, const void *value) {
     voidFunc((id) value, sel_getUid("retain"));
@@ -15,15 +12,16 @@ static void cocoaArrRelease(CFAllocatorRef allocator _U_, const void *value) {
 }
 
 static inline id allocColor(float red, float green, float blue, float alpha) {
-    id _obj = allocClass(objc_getClass("UIColor"));
+    id _obj = allocClass(ColorClass);
     return (((id(*)(id,SEL,CGFloat,CGFloat,CGFloat,CGFloat))objc_msgSend)
             (_obj, sel_getUid("initWithRed:green:blue:alpha:"), red, green, blue, alpha));
 }
 
-CFArrayCallBacks retainedArrCallbacks = {0, cocoaArrRetain, cocoaArrRelease, NULL, NULL};
-static id **appColors = NULL;
-static id **barColors = NULL;
-int osVersion;
+const CFArrayCallBacks retainedArrCallbacks = {0, cocoaArrRetain, cocoaArrRelease, NULL, NULL};
+Class ColorClass;
+static id appColors[13];
+static id barColors[2];
+
 static const char *const ColorNames[] = {
     "separatorColor",
     "labelColor",
@@ -41,50 +39,63 @@ static const char *const ColorNames[] = {
 };
 static CFStringRef const BarColorNames[] = {CFSTR("navBarColor"), CFSTR("modalColor")};
 
-bool handleIOSVersion(void) {
-    bool result = ((osVersion = getOSVersion()) < 13);
-    if (result) {
-        barColors = malloc(sizeof(id*) << 1);
-        barColors[0] = malloc(sizeof(id) << 1);
-        barColors[1] = malloc(sizeof(id) << 1);
-        barColors[0][0] = allocColor(0.984f, 0.984f, 0.992f, 1);
-        barColors[0][1] = allocColor(0.075f, 0.075f, 0.075f, 1);
-        barColors[1][0] = allocColor(0.988f, 0.988f, 0.988f, 1);
-        barColors[1][1] = allocColor(0.196f, 0.196f, 0.196f, 1);
-
-        appColors = malloc(13 * sizeof(id*));
+void setupAppColors(unsigned char darkMode, bool deleteOld) {
+    if (deleteOld) {
         for (int i = 0; i < 13; ++i) {
-            appColors[i] = malloc(sizeof(id) << 1);
+            releaseObj(appColors[i]);
         }
-        appColors[ColorSeparator][0] = allocColor(0.24f, 0.24f, 0.26f, 0.29f);
-        appColors[ColorSeparator][1] = allocColor(0.33f, 0.33f, 0.35f, 0.6f);
-        appColors[ColorLabel][0] = allocColor(0, 0, 0, 1);
-        appColors[ColorLabel][1] = allocColor(1, 1, 1, 1);
-        appColors[ColorSecondaryLabel][0] = allocColor(0.24f, 0.24f, 0.26f, 0.6f);
-        appColors[ColorSecondaryLabel][1] = allocColor(0.92f, 0.92f, 0.96f, 0.6f);
-        appColors[ColorGray][0] = allocColor(0.56f, 0.56f, 0.58f, 1);
-        appColors[ColorGray][1] = allocColor(0.56f, 0.56f, 0.58f, 1);
-        appColors[ColorRed][0] = allocColor(1, 0.23f, 0.19f, 1);
-        appColors[ColorRed][1] = allocColor(1, 0.27f, 0.23f, 1);
-        appColors[ColorBlue][0] = allocColor(0, 0.48f, 1, 1);
-        appColors[ColorBlue][1] = allocColor(0.04f, 0.52f, 1, 1);
-        appColors[ColorGreen][0] = allocColor(0.2f, 0.78f, 0.35f, 1);
-        appColors[ColorGreen][1] = allocColor(0.19f, 0.82f, 0.35f, 1);
-        appColors[ColorOrange][0] = allocColor(1, 0.58f, 0, 1);
-        appColors[ColorOrange][1] = allocColor(1, 0.62f, 0.04f, 1);
-
-        appColors[ColorPrimaryBG][0] = appColors[ColorLabel][1];
-        appColors[ColorPrimaryBG][1] = appColors[ColorLabel][0];
-        appColors[ColorPrimaryBGGrouped][0] = allocColor(0.95f, 0.95f, 0.97f, 1);
-        appColors[ColorPrimaryBGGrouped][1] = appColors[ColorPrimaryBG][1];
-        appColors[ColorSecondaryBG][0] = appColors[ColorPrimaryBGGrouped][0];
-        appColors[ColorSecondaryBG][1] = allocColor(0.11f, 0.11f, 0.12f, 1);
-        appColors[ColorSecondaryBGGrouped][0] = appColors[ColorPrimaryBG][0];
-        appColors[ColorSecondaryBGGrouped][1] = appColors[ColorSecondaryBG][1];
-        appColors[ColorTertiaryBG][0] = appColors[ColorPrimaryBG][0];
-        appColors[ColorTertiaryBG][1] = allocColor(0.17f, 0.17f, 0.18f, 1);
+        releaseObj(barColors[0]);
+        releaseObj(barColors[1]);
     }
-    return result;
+
+    if (!darkMode) {
+        barColors[0] = allocColor(0.984f, 0.984f, 0.992f, 1);
+        barColors[1] = allocColor(0.988f, 0.988f, 0.988f, 1);
+
+        appColors[ColorSeparator] = allocColor(0.24f, 0.24f, 0.26f, 0.29f);
+        appColors[ColorLabel] = allocColor(0, 0, 0, 1);
+        appColors[ColorSecondaryLabel] = allocColor(0.24f, 0.24f, 0.26f, 0.6f);
+        appColors[ColorGray] = allocColor(0.56f, 0.56f, 0.58f, 1);
+        appColors[ColorRed] = allocColor(1, 0.23f, 0.19f, 1);
+        appColors[ColorBlue] = allocColor(0, 0.48f, 1, 1);
+        appColors[ColorGreen] = allocColor(0.2f, 0.78f, 0.35f, 1);
+        appColors[ColorOrange] = allocColor(1, 0.58f, 0, 1);
+
+        appColors[ColorPrimaryBG] = allocColor(1, 1, 1, 1);
+        appColors[ColorPrimaryBGGrouped] = allocColor(0.95f, 0.95f, 0.97f, 1);
+        appColors[ColorSecondaryBG] = allocColor(0.95f, 0.95f, 0.97f, 1);
+        appColors[ColorSecondaryBGGrouped] = allocColor(1, 1, 1, 1);
+        appColors[ColorTertiaryBG] = allocColor(1, 1, 1, 1);
+    } else {
+        barColors[0] = allocColor(0.075f, 0.075f, 0.075f, 1);
+        barColors[1] = allocColor(0.196f, 0.196f, 0.196f, 1);
+
+        appColors[ColorSeparator] = allocColor(0.33f, 0.33f, 0.35f, 0.6f);
+        appColors[ColorLabel] = allocColor(1, 1, 1, 1);
+        appColors[ColorSecondaryLabel] = allocColor(0.92f, 0.92f, 0.96f, 0.6f);
+        appColors[ColorGray] = allocColor(0.56f, 0.56f, 0.58f, 1);
+        appColors[ColorRed] = allocColor(1, 0.27f, 0.23f, 1);
+        appColors[ColorBlue] = allocColor(0.04f, 0.52f, 1, 1);
+        appColors[ColorGreen] = allocColor(0.19f, 0.82f, 0.35f, 1);
+        appColors[ColorOrange] = allocColor(1, 0.62f, 0.04f, 1);
+
+        appColors[ColorPrimaryBG] = allocColor(0, 0, 0, 1);
+        appColors[ColorPrimaryBGGrouped] = allocColor(0, 0, 0, 1);
+        appColors[ColorSecondaryBG] = allocColor(0.11f, 0.11f, 0.12f, 1);
+        appColors[ColorSecondaryBGGrouped] = allocColor(0.11f, 0.11f, 0.12f, 1);
+        appColors[ColorTertiaryBG] = allocColor(0.17f, 0.17f, 0.18f, 1);
+    }
+}
+
+id colorCreateLegacy(id self _U_, SEL _cmd _U_, int type) { return appColors[type]; }
+id barColorCreateLegacy(id self _U_, SEL _cmd _U_, int type) { return barColors[type]; }
+
+id colorCreate(id self _U_, SEL _cmd _U_, int type) {
+    return staticMethod(ColorClass, sel_getUid(ColorNames[type]));
+}
+
+id barColorCreate(id self _U_, SEL _cmd _U_, int type) {
+    return staticMethodWithString(ColorClass, sel_getUid("colorNamed:"), BarColorNames[type]);
 }
 
 void getRect(id view, CGRect *result, char type) {
@@ -99,19 +110,6 @@ void getRect(id view, CGRect *result, char type) {
 void getScreenBounds(CGRect *result) {
     id screen = staticMethod(objc_getClass("UIScreen"), sel_getUid("mainScreen"));
     getRect(screen, result, 1);
-}
-
-id createColor(int type) {
-    return (osVersion > 12 ? staticMethod(objc_getClass("UIColor"), sel_getUid(ColorNames[type]))
-            : appColors[type][userData->darkMode]);
-}
-
-id getBarColor(int type) {
-    if (osVersion > 12) {
-        return staticMethodWithString(objc_getClass("UIColor"),
-                                      sel_getUid("colorNamed:"), BarColorNames[type]);
-    }
-    return barColors[type][userData->darkMode];
 }
 
 id createAttribString(CFStringRef text, CFDictionaryRef dict) {

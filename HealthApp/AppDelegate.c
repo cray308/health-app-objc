@@ -18,11 +18,8 @@ Class AppDelegateClass;
 
 bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
                                     id application _U_, id options _U_) {
-    initValidatorStrings();
-    initExerciseStrings();
-    initWorkoutStrings();
-    bool legacy = handleIOSVersion();
-    time_t weekStart = 0;
+    bool legacy = !objc_getClass("UITabBarAppearance");
+    UserInfo const *info;
     CGRect bounds;
     getScreenBounds(&bounds);
     self->window = createObjectWithFrame(objc_getClass("UIWindow"), bounds);
@@ -33,12 +30,12 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
                         (defaults, sel_getUid("boolForKey:"), hasLaunchedKey));
 
     persistenceService_init();
-    int tzOffset = 0;
+    int tzOffset = 0, week = 0;
 
     if (!hasLaunched) {
         (((void(*)(id,SEL,bool,CFStringRef))objc_msgSend)
          (defaults, sel_getUid("setBool:forKey:"), true, hasLaunchedKey));
-        userInfo_create(legacy, &weekStart);
+        userInfo_create(legacy, &info);
 #if DEBUG
         persistenceService_create();
 #endif
@@ -47,19 +44,47 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
          (center, sel_getUid("requestAuthorizationWithOptions:completionHandler:"),
           6, ^(BOOL granted _U_, id error _U_) {}));
     } else {
-        tzOffset = userInfo_initFromStorage(&weekStart);
+        tzOffset = userInfo_initFromStorage(legacy, &week, &info);
     }
 
-    char const *titleForRow = "@@:@qq";
+    initValidatorStrings();
+    initExerciseData(week);
+    initWorkoutStrings();
+    char const *colorCreateSig = "@@:i";
+    Class colorMeta = objc_getMetaClass("UIColor");
+    Class alertMeta = objc_getMetaClass("UIAlertController");
     if (legacy) {
-        class_addMethod(DMNavVC, sel_getUid("preferredStatusBarStyle"),
-                        (IMP) dmNavVC_getStatusBarStyle, "i@:");
+        const unsigned char darkMode = info->darkMode;
+        IMP imp = (IMP) (darkMode ? dmNavVC_getStatusBarStyleDark : dmNavVC_getStatusBarStyle);
+        class_addMethod(DMNavVC, sel_getUid("preferredStatusBarStyle"), imp, "i@:");
+        class_addMethod(SetupWorkoutVCClass, sel_getUid("numberOfComponentsInPickerView:"),
+                        (IMP) setupWorkoutVC_numberOfComponentsLegacy, "q@:@");
+        class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:didSelectRow:inComponent:"),
+                        (IMP) setupWorkoutVC_didSelectRowLegacy, "v@:@qq");
         class_addMethod(SetupWorkoutVCClass,
                         sel_getUid("pickerView:attributedTitleForRow:forComponent:"),
-                        (IMP) setupWorkoutVC_attrTitleForRow, titleForRow);
+                        (IMP) setupWorkoutVC_attrTitleForRow, "@@:@qq");
+        class_addMethod(colorMeta, sel_getUid("getColorWithType:"),
+                        (IMP) colorCreateLegacy, colorCreateSig);
+        class_addMethod(colorMeta, sel_getUid("getBarColorWithType:"),
+                        (IMP) barColorCreateLegacy, colorCreateSig);
+        class_addMethod(alertMeta, sel_getUid("getCtrlWithTitle:message:"),
+                        (IMP) alertCtrlCreateLegacy, "@@:@@");
+        setupAppColors(darkMode, false);
+        toggleDarkModeForCharts(darkMode);
     } else {
+        class_addMethod(SetupWorkoutVCClass, sel_getUid("numberOfComponentsInPickerView:"),
+                        (IMP) setupWorkoutVC_numberOfComponents, "q@:@");
+        class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:didSelectRow:inComponent:"),
+                        (IMP) setupWorkoutVC_didSelectRow, "v@:@qq");
         class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:titleForRow:forComponent:"),
-                        (IMP) setupWorkoutVC_titleForRow, titleForRow);
+                        (IMP) setupWorkoutVC_titleForRow, "@@:@qq");
+        class_addMethod(colorMeta, sel_getUid("getColorWithType:"),
+                        (IMP) colorCreate, colorCreateSig);
+        class_addMethod(colorMeta, sel_getUid("getBarColorWithType:"),
+                        (IMP) barColorCreate, colorCreateSig);
+        class_addMethod(alertMeta, sel_getUid("getCtrlWithTitle:message:"),
+                        (IMP) alertCtrlCreate, "@@:@@");
     }
 
     objc_registerClassPair(DMNavVC);
@@ -101,8 +126,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
     releaseObj(tabVC);
 
     voidFunc(self->window, sel_getUid("makeKeyAndVisible"));
-    toggleDarkModeForCharts(userData->darkMode);
-    persistenceService_start(tzOffset, weekStart, fetchHandler, fetchArg);
+    persistenceService_start(tzOffset, info->weekStart, fetchHandler, fetchArg);
     return true;
 }
 
@@ -123,18 +147,23 @@ void appDel_setWindowTint(id color) {
 
 void appDel_updateUserInfo(unsigned char plan, unsigned char darkMode, short *weights) {
     AppDelegate *self = getAppDel();
-    bool updateHome = plan != userData->currentPlan;
-    if (appUserData_updateUserSettings(plan, darkMode, weights)) {
+    unsigned char changes = appUserData_updateUserSettings(plan, darkMode, weights);
+    if (changes & 2) {
+        Method method = class_getInstanceMethod(DMNavVC, sel_getUid("preferredStatusBarStyle"));
+        IMP newImp = (IMP) (darkMode ? dmNavVC_getStatusBarStyleDark : dmNavVC_getStatusBarStyle);
+        method_setImplementation(method, newImp);
+        setupAppColors(darkMode, true);
         setTintColor(self->window, createColor(ColorRed));
         id tabVC = getObject(self->window, sel_getUid("rootViewController"));
         setupTabVC(tabVC);
-        toggleDarkModeForCharts(userData->darkMode);
+        toggleDarkModeForCharts(darkMode);
         homeVC_updateColors(self->children[0]);
-        historyVC_updateColors(self->children[1]);
-        settingsVC_updateColors(self->children[2]);
+        if (isViewLoaded(self->children[1]))
+            historyVC_updateColors(self->children[1], darkMode);
+        settingsVC_updateColors(self->children[2], darkMode);
     }
-    if (updateHome)
-        homeVC_createWorkoutsList(self->children[0]);
+    if (changes & 1)
+        homeVC_createWorkoutsList(self->children[0], plan);
 }
 
 void appDel_deleteAppData(void) {
@@ -142,12 +171,13 @@ void appDel_deleteAppData(void) {
     bool updateHome = appUserData_deleteSavedData();
     persistenceService_deleteUserData();
     if (updateHome)
-        homeVC_updateWorkoutsList(self->children[0]);
+        homeVC_updateWorkoutsList(self->children[0], 0);
     historyVC_clearData(self->children[1]);
 }
 
 void appDel_updateMaxWeights(short *weights) {
     AppDelegate *self = getAppDel();
-    if (appUserData_updateWeightMaxes(weights) && isViewLoaded(self->children[2]))
-        settingsVC_updateWeightFields(self->children[2]);
+    short results[4];
+    if (appUserData_updateWeightMaxes(weights, results) && isViewLoaded(self->children[2]))
+        settingsVC_updateWeightFields(self->children[2], results);
 }

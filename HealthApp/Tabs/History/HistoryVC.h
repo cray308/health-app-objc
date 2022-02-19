@@ -53,7 +53,7 @@ typedef struct {
 
 id historyVC_init(void **model, void (**handler)(void*));
 void historyVC_clearData(id self);
-void historyVC_updateColors(id vc);
+void historyVC_updateColors(id vc, unsigned char darkMode);
 void historyVC_viewDidLoad(id self, SEL _cmd);
 void historyVC_updateSegment(id self, SEL _cmd, id picker);
 CFStringRef historyVC_stringForValue(id self, SEL _cmd, double value);

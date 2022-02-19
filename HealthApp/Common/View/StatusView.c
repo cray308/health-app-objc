@@ -9,9 +9,13 @@ id statusView_init(CFStringRef text, int tag, id target, SEL action) {
     StatusView *data = (StatusView *) ((char *)self + ViewSize);
     setTag(self, tag);
     int params = BtnLargeFont | BtnBackground | BtnRounded;
-    data->button = createButton(text, ColorLabel, params, tag, target, action, 50);
-    data->headerLabel = createLabel(NULL, TextSubhead, 4, false);
-    data->box = createView(20);
+    data->button = createButton(text, ColorLabel, params, tag, target, action);
+    setHeight(data->button, 50, true);
+    data->headerLabel = createLabel(NULL, TextSubhead, false);
+    data->box = createView();
+    setCGFloat(getLayer(data->box), sel_getUid("setCornerRadius:"), 5);
+    setWidth(data->box, 20);
+    setHeight(data->box, 20, true);
     id hStack = createStackView((id []){data->button, data->box}, 2, 0, 5, (Padding){0});
     centerHStack(hStack);
     id vStack = createStackView((id []){data->headerLabel, hStack}, 2, 1, 4, (Padding){4, 0, 4, 0});

@@ -1,4 +1,5 @@
 #include "InputVC.h"
+#include "AppUserData.h"
 #include "ViewControllerHelpers.h"
 
 #define toggleScrolling(_v, _enable) setBool(_v, sel_getUid("setScrollEnabled:"), _enable)
@@ -41,9 +42,11 @@ void inputVC_addChild(id self, CFStringRef hint, short min, short max) {
     ptr->minVal = min;
     ptr->maxVal = max;
     CFStringRef errorText = CFStringCreateWithFormat(NULL, NULL, inputFieldError, min, max);
-    ptr->hintLabel = createLabel(hint, TextFootnote, 4, false);
+    ptr->hintLabel = createLabel(hint, TextFootnote, false);
     ptr->field = createTextfield(self, CFSTR(""), hint, 4, 4, index);
-    ptr->errorLabel = createLabel(errorText, TextFootnote, 4, false);
+    if (d->setKB)
+        setKBColor(ptr->field, 1);
+    ptr->errorLabel = createLabel(errorText, TextFootnote, false);
     setTextColor(ptr->errorLabel, createColor(ColorRed));
 
     id vStack = createStackView((id []){ptr->hintLabel, ptr->field, ptr->errorLabel},
@@ -104,13 +107,16 @@ void inputVC_viewDidLoad(id self, SEL _cmd) {
     CGRect bounds;
     getScreenBounds(&bounds);
     CGFloat width = bounds.size.width;
+    unsigned char dark = userData->darkMode;
 
     InputVC *data = (InputVC *) ((char *)self + VCSize);
     data->scrollView = createScrollView();
     data->vStack = createStackView(nil, 0, 1, 0, (Padding){0});
     data->toolbar = createObjectWithFrame(objc_getClass("UIToolbar"), ((CGRect){{0}, {width, 50}}));
-    if (osVersion < 13)
+    if (!(dark & 128)) {
         setBarTint(data->toolbar, getBarColor(ColorBarModal));
+        data->setKB = dark == 1;
+    }
     voidFunc(data->toolbar, sel_getUid("sizeToFit"));
 
     Class btnClass = objc_getClass("UIBarButtonItem");
@@ -163,8 +169,8 @@ void inputVC_viewDidAppear(id self, SEL _cmd, bool animated) {
         ((void(*)(HAInsets*,id,SEL))objc_msgSend_stret)(&insets, data->scrollView,
                                                         sel_getUid("contentInset"));
 #endif
-        data->topOffset = (int) insets.top;
-        data->bottomOffset = (int) insets.bottom;
+        data->topOffset = (short) insets.top;
+        data->bottomOffset = (short) insets.bottom;
     }
 }
 

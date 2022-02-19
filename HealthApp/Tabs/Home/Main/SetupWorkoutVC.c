@@ -33,7 +33,7 @@ void setupWorkoutVC_viewDidLoad(id self, SEL _cmd) {
     setBackground(view, createColor(ColorSecondaryBG));
 
     CFStringRef pickerTitle = localize(CFSTR("setupWorkoutTitle"));
-    id workoutLabel = createLabel(pickerTitle, TextFootnote, 4, false);
+    id workoutLabel = createLabel(pickerTitle, TextFootnote, false);
     CFStringRef defaultTitle = CFArrayGetValueAtIndex(data->names, 0);
     data->workoutTextField = createTextfield(nil, defaultTitle, pickerTitle, 1, 0, 0);
     id workoutContainer = createStackView((id []){workoutLabel, data->workoutTextField},
@@ -47,8 +47,8 @@ void setupWorkoutVC_viewDidLoad(id self, SEL _cmd) {
     addArrangedSubview(parent->vStack, workoutContainer);
 
     SEL tapSel = sel_getUid("buttonTapped:");
-    id cancelButton = createButton(localize(CFSTR("cancel")), ColorBlue, 0, 0, self, tapSel, -1);
-    parent->button = createButton(localize(CFSTR("go")), ColorBlue, 0, 1, self, tapSel, -1);
+    id cancelButton = createButton(localize(CFSTR("cancel")), ColorBlue, 0, 0, self, tapSel);
+    parent->button = createButton(localize(CFSTR("go")), ColorBlue, 0, 1, self, tapSel);
 
     CGRect frame;
     getRect(view, &frame, 0);
@@ -117,9 +117,10 @@ void setupWorkoutVC_tappedButton(id self, SEL _cmd _U_, id btn) {
     });
 }
 
-long setupWorkoutVC_numberOfComponents(id self _U_, SEL _cmd _U_, id picker) {
-    if (osVersion < 13)
-        setBackground(picker, createColor(ColorTertiaryBG));
+long setupWorkoutVC_numberOfComponents(id self _U_, SEL _cmd _U_, id picker _U_) { return 1; }
+
+long setupWorkoutVC_numberOfComponentsLegacy(id self _U_, SEL _cmd _U_, id picker) {
+    setBackground(picker, createColor(ColorTertiaryBG));
     return 1;
 }
 
@@ -144,11 +145,15 @@ CFStringRef setupWorkoutVC_titleForRow(id self, SEL _cmd _U_,
     return CFArrayGetValueAtIndex(names, row);
 }
 
-void setupWorkoutVC_didSelectRow(id self, SEL _cmd _U_, id picker, long row, long section _U_) {
+void setupWorkoutVC_didSelectRow(id self, SEL _cmd _U_, id picker _U_, long row, long section _U_) {
     SetupWorkoutVC *data = (SetupWorkoutVC *) ((char *)self + InputVCSize);
     data->index = (int) row;
     CFStringRef name = CFArrayGetValueAtIndex(data->names, row);
     setLabelText(data->workoutTextField, name);
-    if (osVersion < 13)
-        setInt(picker, sel_getUid("reloadComponent:"), 0);
+}
+
+void setupWorkoutVC_didSelectRowLegacy(id self, SEL _cmd _U_,
+                                       id picker, long row, long section _U_) {
+    setupWorkoutVC_didSelectRow(self, nil, picker, row, 0);
+    setInt(picker, sel_getUid("reloadComponent:"), 0);
 }

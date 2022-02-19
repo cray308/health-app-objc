@@ -58,7 +58,13 @@
 
 #define getColorRef(red, green, blue, alpha) \
 (((id(*)(Class,SEL,CGFloat,CGFloat,CGFloat,CGFloat))objc_msgSend) \
-(objc_getClass("UIColor"), sel_getUid("colorWithRed:green:blue:alpha:"), (red), (green), (blue), (alpha)))
+(ColorClass, sel_getUid("colorWithRed:green:blue:alpha:"), (red), (green), (blue), (alpha)))
+
+#define createColor(_t) \
+(((id(*)(Class,SEL,int))objc_msgSend)(ColorClass, sel_getUid("getColorWithType:"), (_t)))
+
+#define getBarColor(_t) \
+(((id(*)(Class,SEL,int))objc_msgSend)(ColorClass, sel_getUid("getBarColorWithType:"), (_t)))
 
 #define createImage(_name) staticMethodWithString(objc_getClass("UIImage"), sel_getUid("imageNamed:"), (_name))
 
@@ -70,8 +76,8 @@
 
 #define getNotificationCenter() staticMethod(objc_getClass("UNUserNotificationCenter"), sel_getUid("currentNotificationCenter"))
 
-extern CFArrayCallBacks retainedArrCallbacks;
-extern int osVersion;
+extern const CFArrayCallBacks retainedArrCallbacks;
+extern Class ColorClass;
 
 enum {
     ColorSeparator,
@@ -90,11 +96,14 @@ enum {
     ColorBarModal = ColorLabel
 };
 
-bool handleIOSVersion(void);
+id colorCreateLegacy(id self, SEL _cmd, int type);
+id colorCreate(id self, SEL _cmd, int type);
+id barColorCreateLegacy(id self, SEL _cmd, int type);
+id barColorCreate(id self, SEL _cmd, int type);
+
+void setupAppColors(unsigned char darkMode, bool deleteOld);
 void getRect(id view, CGRect *result, char type);
 void getScreenBounds(CGRect *result);
-id createColor(int type);
-id getBarColor(int type);
 id createAttribString(CFStringRef text, CFDictionaryRef dict);
 CFStringRef localize(CFStringRef key);
 void fillStringArray(CFStringRef *arr, CFStringRef format, int count);

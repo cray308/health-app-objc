@@ -34,6 +34,8 @@ setBool(_v, sel_getUid("setTranslatesAutoresizingMaskIntoConstraints:"), false)
 
 #define getSelectedSegment(_v) getInt(_v, sel_getUid("selectedSegmentIndex"))
 
+#define setSelectedSegment(_v, _i) setInt(_v, sel_getUid("setSelectedSegmentIndex:"), _i)
+
 #define centerHStack(_v) setInt(_v, sel_getUid("setAlignment:"), 3)
 
 #define setTextAlignment(_v, _a) setInt(_v, sel_getUid("setTextAlignment:"), _a)
@@ -104,20 +106,16 @@ id createCustomFont(int style, int size);
 CFDictionaryRef createTitleTextDict(id color, id font);
 
 id createObjectWithFrame(Class cls, CGRect frame);
-id createBackgroundView(int color, int height, bool optional);
-id createView(int size);
+id createView(void);
 id createStackView(id *subviews, int count, int axis, int spacing, Padding margins);
 id createScrollView(void);
-id createLabel(CFStringRef text, int style, int alignment, bool accessible);
+id createLabel(CFStringRef text, int style, bool accessible);
 id createTextfield(id delegate, CFStringRef text, CFStringRef hint,
                    int alignment, int keyboard, int tag);
-id createButton(CFStringRef title, int color, int params,
-                int tag, id target, SEL action, int height);
-id createSegmentedControl(CFStringRef format, int count, int startIndex,
-                          id target, SEL action, int height);
+id createButton(CFStringRef title, int color, int params, int tag, id target, SEL action);
+id createSegmentedControl(CFStringRef format, int startIndex);
 void addVStackToScrollView(id vStack, id scrollView);
 
-void updateSegmentedControl(id view);
-void updateButtonColors(id view, int color);
+void updateSegmentedControl(id view, id foreground, unsigned char darkMode);
 
 #endif /* Views_h */

@@ -27,8 +27,9 @@ typedef struct {
     id toolbar;
     int count;
     int scrollHeight;
-    int topOffset;
-    int bottomOffset;
+    short topOffset;
+    short bottomOffset;
+    bool setKB;
 } InputVC;
 
 void inputView_reset(InputView *data, short value);

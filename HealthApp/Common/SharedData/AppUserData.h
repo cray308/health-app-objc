@@ -8,9 +8,7 @@
 
 typedef struct {
     time_t planStart;
-    time_t weekStart;
-    int tzOffset;
-    int week;
+    const time_t weekStart;
     short liftMaxes[4];
     unsigned char darkMode;
     unsigned char currentPlan;
@@ -19,12 +17,13 @@ typedef struct {
 
 extern UserInfo *userData;
 
-void userInfo_create(bool darkMode, time_t *startOfWeek);
-int userInfo_initFromStorage(time_t *startOfWeek);
+void userInfo_create(bool legacy, UserInfo const **data);
+int userInfo_initFromStorage(bool legacy, int *weekInPlan, UserInfo const **data);
 
-bool appUserData_updateUserSettings(unsigned char plan, unsigned char darkMode, short *weights);
+unsigned char appUserData_updateUserSettings(unsigned char plan,
+                                             unsigned char darkMode, short *weights);
 bool appUserData_deleteSavedData(void);
-int appUserData_addCompletedWorkout(unsigned char day);
-bool appUserData_updateWeightMaxes(short *weights);
+unsigned char appUserData_addCompletedWorkout(unsigned char day);
+bool appUserData_updateWeightMaxes(short *weights, short *output);
 
 #endif /* AppUserData_h */

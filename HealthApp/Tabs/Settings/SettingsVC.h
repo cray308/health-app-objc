@@ -13,8 +13,8 @@ typedef struct {
 } SettingsVC;
 
 id settingsVC_init(void);
-void settingsVC_updateWeightFields(id self);
-void settingsVC_updateColors(id self);
+void settingsVC_updateWeightFields(id self, short *weights);
+void settingsVC_updateColors(id self, unsigned char darkMode);
 void settingsVC_viewDidLoad(id self, SEL _cmd);
 void settingsVC_buttonTapped(id self, SEL _cmd, id btn);
 

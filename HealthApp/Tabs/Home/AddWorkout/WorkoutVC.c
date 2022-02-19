@@ -389,7 +389,7 @@ static void updateStoredData(int type, int16_t duration, short *lifts) {
 static void workoutVC_handleFinishedWorkout(id self) {
     WorkoutVC *data = (WorkoutVC *) ((char *)self + VCSize);
     Workout *w = data->workout;
-    int totalCompleted = 0;
+    unsigned char totalCompleted = 0;
     short *lifts = NULL;
 
     if (data->weights[0]) {
@@ -428,7 +428,7 @@ void workoutVC_viewDidLoad(id self, SEL _cmd) {
 
     id stack = createStackView(NULL, 0, 1, 20, (Padding){20, 8, 20, 8});
     id startBtn = createButton(localize(CFSTR("start")), ColorGreen, 0, 0,
-                                      self, sel_getUid("startEndWorkout:"), -1);
+                               self, sel_getUid("startEndWorkout:"));
 
     SEL btnTap = sel_getUid("buttonTapped:");
     CGRect frame;

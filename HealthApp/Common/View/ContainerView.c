@@ -9,12 +9,14 @@ id containerView_init(CFStringRef title, int spacing, bool margins) {
     id self = getObject(_self, sel_getUid("init"));
     disableAutoresizing(self);
     ContainerView *data = (ContainerView *) ((char *)self + ViewSize);
-    data->divider = createView(-1);
-    data->headerLabel = createLabel(title, TextTitle3, 4, true);
+    data->divider = createView();
+    data->headerLabel = createLabel(title, TextTitle3, true);
     data->stack = createStackView(NULL, 0, 1, spacing, (Padding){.top = 5});
 
     setHeight(data->divider, 21, true);
-    id divLine = createBackgroundView(ColorSeparator, 1, true);
+    id divLine = createView();
+    setBackground(divLine, createColor(ColorSeparator));
+    setHeight(divLine, 1, true);
     addSubview(data->divider, divLine);
     pin(divLine, data->divider, (Padding){0}, EdgeBottom);
 
@@ -40,9 +42,9 @@ void containerView_deinit(id self, SEL _cmd) {
     ((void(*)(struct objc_super *,SEL))objc_msgSendSuper)(&super, _cmd);
 }
 
-void containerView_updateColors(id self) {
+void containerView_updateColors(id self, id labelColor, id divColor) {
     ContainerView *data = (ContainerView *) ((char *)self + ViewSize);
-    setTextColor(data->headerLabel, createColor(ColorLabel));
+    setTextColor(data->headerLabel, labelColor);
     id divLine = (id) CFArrayGetValueAtIndex(getSubviews(data->divider), 0);
-    setBackground(divLine, createColor(ColorSeparator));
+    setBackground(divLine, divColor);
 }

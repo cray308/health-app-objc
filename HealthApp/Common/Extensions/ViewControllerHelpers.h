@@ -20,6 +20,9 @@
 
 #define setBarTint(_v, _c) setObject(_v, sel_getUid("setBarTintColor:"), _c)
 
+#define createAlertController(title, msg) (((id(*)(Class,SEL,CFStringRef,CFStringRef))objc_msgSend)\
+(objc_getClass("UIAlertController"), sel_getUid("getCtrlWithTitle:message:"), (title), (msg)))
+
 extern Class DMNavVC;
 extern Class VCClass;
 extern size_t VCSize;
@@ -31,13 +34,15 @@ void setupTabVC(id vc);
 void setupNavBar(id vc, bool modal);
 void setVCTitle(id vc, CFStringRef title);
 int dmNavVC_getStatusBarStyle(id self, SEL _cmd);
+int dmNavVC_getStatusBarStyleDark(id self, SEL _cmd);
+id alertCtrlCreate(id self, SEL _cmd, CFStringRef title, CFStringRef message);
+id alertCtrlCreateLegacy(id self, SEL _cmd, CFStringRef title, CFStringRef message);
 
 id createNavVC(id child);
 void presentVC(id presenter, id child);
 void presentModalVC(id presenter, id modal);
 void dismissPresentedVC(id presenter, Callback handler);
 
-id createAlertController(CFStringRef title, CFStringRef message);
 void addAlertAction(id ctrl, CFStringRef title, int style, Callback handler);
 
 #endif /* ViewControllerHelpers_h */

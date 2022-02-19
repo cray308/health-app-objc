@@ -20,7 +20,8 @@ struct DictWrapper {
     CFDictionaryRef lib;
 };
 
-static short bodyweight;
+static int weekInPlan;
+static short bodyweight = 145;
 
 static struct {
     CFStringRef const reps;
@@ -39,51 +40,6 @@ static CFStringRef durationSecsFormat;
 static CFStringRef distanceFormat;
 static CFStringRef amrapFormat;
 
-static void getCurrentWeight(void (^completion)(short)) {
-    Class storeClass = objc_getClass("HKHealthStore");
-    if (!((bool(*)(Class,SEL))objc_msgSend)(storeClass, sel_getUid("isHealthDataAvailable"))) {
-        completion(145);
-        return;
-    }
-
-    id store = createNew(storeClass);
-    id weightType = staticMethodWithString(objc_getClass("HKSampleType"),
-                                           sel_getUid("quantityTypeForIdentifier:"),
-                                           (CFStringRef) HKQuantityTypeIdentifierBodyMass);
-    CFSetRef set = CFSetCreate(NULL, (const void *[]){weightType}, 1, NULL);
-
-    (((void(*)(id,SEL,CFSetRef,CFSetRef,void(^)(bool,id)))objc_msgSend)
-     (store, sel_getUid("requestAuthorizationToShareTypes:readTypes:completion:"),
-      NULL, set, ^(bool granted, id error1 _U_) {
-        if (!granted) {
-            completion(145);
-            releaseObj(store);
-            return;
-        }
-
-        CFArrayRef arr = createSortDescriptors((CFStringRef)HKSampleSortIdentifierStartDate, false);
-        id _req = allocClass(objc_getClass("HKSampleQuery"));
-        id req = (((id(*)(id,SEL,id,id,unsigned long,CFArrayRef,void(^)(id,CFArrayRef,id)))objc_msgSend)
-                  (_req, sel_getUid("initWithSampleType:predicate:limit:sortDescriptors:resultsHandler:"),
-                   weightType, nil, 1, arr, ^(id query _U_, CFArrayRef data, id error2 _U_) {
-            short weight = 145;
-            if (data && CFArrayGetCount(data)) {
-                id unit = staticMethod(objc_getClass("HKUnit"), sel_getUid("poundUnit"));
-                id sample = (id) CFArrayGetValueAtIndex(data, 0);
-                id quantity = getObject(sample, sel_getUid("quantity"));
-                weight = (short) (((double(*)(id,SEL,id))objc_msgSend)
-                                  (quantity, sel_getUid("doubleValueForUnit:"), unit));
-            }
-            completion(weight);
-            releaseObj(store);
-        }));
-        setObject(store, sel_getUid("executeQuery:"), req);
-        CFRelease(arr);
-        releaseObj(req);
-    }));
-    CFRelease(set);
-}
-
 static void createRootAndLibDict(struct DictWrapper *data) {
     id bundle = getBundle();
     id url = (((id(*)(id,SEL,CFStringRef,CFStringRef))objc_msgSend)
@@ -99,14 +55,14 @@ static CFArrayRef getLibraryArrayForType(struct DictWrapper *data, int type) {
     return CFDictionaryGetValue(data->lib, keys[type]);
 }
 
-static CFArrayRef getCurrentWeekForPlan(struct DictWrapper *data) {
+static CFArrayRef getCurrentWeekForPlan(struct DictWrapper *data, unsigned char plan) {
     static CFStringRef const planKeys[] = {CFSTR("bb"), CFSTR("cc")};
     CFDictionaryRef plans = CFDictionaryGetValue(data->root, CFSTR("plans"));
-    CFArrayRef weeks = CFDictionaryGetValue(plans, planKeys[userData->currentPlan]);
-    return CFArrayGetValueAtIndex(weeks, userData->week);
+    CFArrayRef weeks = CFDictionaryGetValue(plans, planKeys[plan]);
+    return CFArrayGetValueAtIndex(weeks, weekInPlan);
 }
 
-static Workout *buildWorkoutFromDict(CFDictionaryRef dict, WorkoutParams *params) {
+static Workout *buildWorkout(CFDictionaryRef dict, WorkoutParams *params) {
     CFArrayRef foundActivities = CFDictionaryGetValue(dict, CFSTR("activities"));
     CFStringRef str = CFDictionaryGetValue(dict, Keys.title);
     CFNumberRef number;
@@ -258,7 +214,7 @@ static Workout *buildWorkoutFromDict(CFDictionaryRef dict, WorkoutParams *params
     return w;
 }
 
-void initExerciseStrings(void) {
+void initExerciseData(int week) {
     restFormat = localize(CFSTR("exerciseTitleRest"));
     repsFormat = localize(CFSTR("exerciseTitleReps"));
     setsFormat = localize(CFSTR("exerciseHeader"));
@@ -268,13 +224,58 @@ void initExerciseStrings(void) {
     distanceFormat = localize(CFSTR("exerciseTitleDistance"));
     roundsFormat = localize(CFSTR("circuitHeaderRounds"));
     amrapFormat = localize(CFSTR("circuitHeaderAMRAP"));
-    getCurrentWeight(^(short weight) { bodyweight = weight; });
+    weekInPlan = week;
+
+    Class storeClass = objc_getClass("HKHealthStore");
+    if (!((bool(*)(Class,SEL))objc_msgSend)(storeClass, sel_getUid("isHealthDataAvailable"))) {
+        return;
+    }
+
+    id store = createNew(storeClass);
+    id weightType = staticMethodWithString(objc_getClass("HKSampleType"),
+                                           sel_getUid("quantityTypeForIdentifier:"),
+                                           (CFStringRef) HKQuantityTypeIdentifierBodyMass);
+    CFSetRef set = CFSetCreate(NULL, (const void *[]){weightType}, 1, NULL);
+
+    (((void(*)(id,SEL,CFSetRef,CFSetRef,void(^)(bool,id)))objc_msgSend)
+     (store, sel_getUid("requestAuthorizationToShareTypes:readTypes:completion:"),
+      NULL, set, ^(bool granted, id error1 _U_) {
+        if (!granted) {
+            releaseObj(store);
+            return;
+        }
+
+        CFArrayRef arr = createSortDescriptors((CFStringRef)HKSampleSortIdentifierStartDate, false);
+        id _req = allocClass(objc_getClass("HKSampleQuery"));
+        id req = (((id(*)(id,SEL,id,id,unsigned long,CFArrayRef,void(^)(id,CFArrayRef,id)))objc_msgSend)
+                  (_req, sel_getUid("initWithSampleType:predicate:limit:sortDescriptors:resultsHandler:"),
+                   weightType, nil, 1, arr, ^(id query _U_, CFArrayRef data, id error2 _U_) {
+            short weight = 145;
+            if (data && CFArrayGetCount(data)) {
+                id unit = staticMethod(objc_getClass("HKUnit"), sel_getUid("poundUnit"));
+                id sample = (id) CFArrayGetValueAtIndex(data, 0);
+                id quantity = getObject(sample, sel_getUid("quantity"));
+                weight = (short) (((double(*)(id,SEL,id))objc_msgSend)
+                                  (quantity, sel_getUid("doubleValueForUnit:"), unit));
+            }
+            bodyweight = weight;
+            releaseObj(store);
+        }));
+        setObject(store, sel_getUid("executeQuery:"), req);
+        CFRelease(arr);
+        releaseObj(req);
+    }));
+    CFRelease(set);
 }
 
-void exerciseManager_setWeeklyWorkoutNames(CFStringRef *names) {
+#if TARGET_OS_SIMULATOR
+void exerciseManager_setCurrentWeek(int newValue) { weekInPlan = newValue; }
+#endif
+
+void exerciseManager_setWeeklyWorkoutNames(unsigned char plan, CFStringRef *names) {
     struct DictWrapper info;
     createRootAndLibDict(&info);
-    CFArrayRef currWeek = getCurrentWeekForPlan(&info);
+    CFArrayRef currWeek = getCurrentWeekForPlan(&info, plan);
     int tempInt = 0;
 
     for (int i = 0; i < 7; ++i) {
@@ -292,11 +293,11 @@ void exerciseManager_setWeeklyWorkoutNames(CFStringRef *names) {
     CFRelease(info.root);
 }
 
-Workout *exerciseManager_getWeeklyWorkout(int index) {
+Workout *exerciseManager_getWeeklyWorkout(unsigned char plan, int index) {
     WorkoutParams params = {.day = (unsigned char) index};
     struct DictWrapper info;
     createRootAndLibDict(&info);
-    CFDictionaryRef day = CFArrayGetValueAtIndex(getCurrentWeekForPlan(&info), index);
+    CFDictionaryRef day = CFArrayGetValueAtIndex(getCurrentWeekForPlan(&info, plan), index);
 
     CFNumberRef number = CFDictionaryGetValue(day, Keys.type);
     CFNumberGetValue(number, kCFNumberIntType, &params.type);
@@ -312,7 +313,7 @@ Workout *exerciseManager_getWeeklyWorkout(int index) {
     number = CFDictionaryGetValue(day, CFSTR("weight"));
     CFNumberGetValue(number, kCFNumberIntType, &params.weight);
 
-    Workout *w = buildWorkoutFromDict(CFArrayGetValueAtIndex(libArr, params.index), &params);
+    Workout *w = buildWorkout(CFArrayGetValueAtIndex(libArr, params.index), &params);
     CFRelease(info.root);
     return w;
 }
@@ -339,7 +340,7 @@ Workout *exerciseManager_getWorkoutFromLibrary(WorkoutParams *params) {
     struct DictWrapper info;
     createRootAndLibDict(&info);
     CFArrayRef libArr = getLibraryArrayForType(&info, params->type);
-    Workout *w = buildWorkoutFromDict(CFArrayGetValueAtIndex(libArr, params->index), params);
+    Workout *w = buildWorkout(CFArrayGetValueAtIndex(libArr, params->index), params);
     CFRelease(info.root);
     return w;
 }
