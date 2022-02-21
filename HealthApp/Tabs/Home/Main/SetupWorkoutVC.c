@@ -6,11 +6,11 @@
 
 Class SetupWorkoutVCClass;
 
-id setupWorkoutVC_init(id parent, int type, CFArrayRef names) {
+id setupWorkoutVC_init(id parent, unsigned char type) {
     id self = createNew(SetupWorkoutVCClass);
     SetupWorkoutVC *data = (SetupWorkoutVC *) ((char *)self + InputVCSize);
     data->parent = parent;
-    data->names = names;
+    data->names = exerciseManager_createWorkoutNames(type);
     data->type = type;
     return self;
 }
@@ -56,7 +56,7 @@ void setupWorkoutVC_viewDidLoad(id self, SEL _cmd) {
     setNavButton(self, false, parent->button, (int) frame.size.width);
     enableButton(parent->button, false);
 
-    short maxes[] = {5, 5, 100};
+    short maxes[] = {5, 5, 100}, mins[] = {1, 1, 1};
     CFStringRef rows[] = {CFSTR("setupWorkoutSets"), CFSTR("setupWorkoutReps"), NULL};
 
     switch (data->type) {
@@ -71,6 +71,7 @@ void setupWorkoutVC_viewDidLoad(id self, SEL _cmd) {
             rows[0] = NULL;
             rows[1] = CFSTR("setupWorkoutDuration");
             maxes[1] = 180;
+            mins[1] = 15;
             break;
         default:
             rows[0] = rows[1] = NULL;
@@ -78,8 +79,8 @@ void setupWorkoutVC_viewDidLoad(id self, SEL _cmd) {
     }
 
     for (int i = 0; i < 3; ++i) {
-        if (!rows[i]) continue;
-        inputVC_addChild(self, localize(rows[i]), 1, maxes[i]);
+        if (rows[i])
+            inputVC_addChild(self, localize(rows[i]), mins[i], maxes[i]);
     }
 
     releaseObj(workoutLabel);

@@ -260,7 +260,6 @@ id persistenceService_getCurrentWeek(void) {
     id request = fetchRequest();
     (((void(*)(id,SEL,unsigned long))objc_msgSend)(request, sel_getUid("setFetchLimit:"), 1));
     CFArrayRef currentWeeks = persistenceService_executeFetchRequest(request, &(int){0}, true, false);
-    if (!currentWeeks) return nil;
     return (id) CFArrayGetValueAtIndex(currentWeeks, 0);
 }
 

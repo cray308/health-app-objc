@@ -12,8 +12,6 @@
 #define popVC(_navVC) ((id(*)(id,SEL,bool))objc_msgSend)\
 ((_navVC), sel_getUid("popViewControllerAnimated:"), true)
 
-#define isWorkoutLongEnough(w) (w)->duration >= 15
-
 extern id UIApplicationDidBecomeActiveNotification;
 extern id UIApplicationWillResignActiveNotification;
 
@@ -30,8 +28,7 @@ enum {
 };
 
 enum {
-    EventStartGroup = 1,
-    EventFinishGroup,
+    EventFinishGroup = 1,
     EventFinishExercise
 };
 
@@ -192,12 +189,17 @@ static void scheduleNotification(unsigned secondsFromNow, int type) {
     releaseObj(content);
 }
 
-static void cleanupWorkoutNotifications(id *observers) {
+static void cleanupWorkoutNotifications(WorkoutVC *data) {
+    data->done = true;
+    if (data->timers[TimerGroup].info.active == 1)
+        pthread_kill(data->threads[TimerGroup], SignalGroup);
+    if (data->timers[TimerExercise].info.active == 1)
+        pthread_kill(data->threads[TimerExercise], SignalExercise);
     SEL remove = sel_getUid("removeObserver:");
     id center = getDeviceNotificationCenter();
     for (int i = 0; i < 2; ++i) {
-        setObject(center, remove, observers[i]);
-        observers[i] = nil;
+        setObject(center, remove, data->observers[i]);
+        data->observers[i] = nil;
     }
     center = getNotificationCenter();
     voidFunc(center, sel_getUid("removeAllPendingNotificationRequests"));
@@ -207,7 +209,6 @@ static void cleanupWorkoutNotifications(id *observers) {
 #pragma mark - View Configuration
 
 static bool cycleExerciseEntry(ExerciseEntry *e, WorkoutTimer *timers) {
-    bool completed = false;
     switch (e->state) {
         case ExerciseStateDisabled:
             e->state = ExerciseStateActive;
@@ -227,7 +228,7 @@ static bool cycleExerciseEntry(ExerciseEntry *e, WorkoutTimer *timers) {
             if (++e->completedSets == e->sets) {
                 e->state = ExerciseStateCompleted;
                 ++timers[TimerExercise].exercise;
-                completed = true;
+                return true;
             } else {
                 e->state = ExerciseStateActive;
                 CFStringRef sets = CFStringCreateWithFormat(NULL, NULL, CFSTR("%d"),
@@ -238,7 +239,7 @@ static bool cycleExerciseEntry(ExerciseEntry *e, WorkoutTimer *timers) {
         default:
             break;
     }
-    return completed;
+    return false;
 }
 
 static void startGroup(Circuit *c, WorkoutTimer *timers, bool startTimer) {
@@ -289,6 +290,49 @@ static void exerciseView_configure(id v) {
     }
 }
 
+static bool didFinishCircuit(Circuit *c) {
+    if (c->type == CircuitRounds) {
+        return ++c->completedReps == c->reps;
+    } else if (c->type == CircuitDecrement) {
+        bool changeRange = c->completedReps-- == 10;
+        if (c->completedReps == 0) return true;
+
+        CFStringRef reps = CFStringCreateWithFormat(NULL, NULL,
+                                                    CFSTR("%d"), c->completedReps);
+        ExerciseEntry *end = &c->exercises[c->size];
+        for (ExerciseEntry *e = c->exercises; e < end; ++e) {
+            if (e->type == ExerciseReps) {
+                CFStringReplace(e->titleStr, e->tRange, reps);
+                if (changeRange)
+                    e->tRange.length -= 1;
+            }
+        }
+        CFRelease(reps);
+    }
+    return false;
+}
+
+static int findTransition(WorkoutVC *data, Workout *w, StatusView *view) {
+    int t = TransitionFinishedExercise;
+    if (++w->group->index == w->group->size) {
+        t = TransitionFinishedCircuit;
+        if (didFinishCircuit(w->group)) {
+            if (++w->index == w->size) {
+                t = TransitionCompletedWorkout;
+            } else {
+                t = TransitionFinishedCircuitDeleteFirst;
+                data->timers[0].container = data->timers[1].container = w->index;
+                startGroup(++w->group, data->timers, true);
+            }
+        } else {
+            startGroup(w->group, data->timers, false);
+        }
+    } else {
+        cycleExerciseEntry(view->entry + 1, data->timers);
+    }
+    return t;
+}
+
 #pragma mark - VC init/free
 
 id workoutVC_init(Workout *workout) {
@@ -320,10 +364,6 @@ void workoutVC_deinit(id self, SEL _cmd) {
     WorkoutVC *data = (WorkoutVC *) ((char *)self + VCSize);
     struct objc_super super = {self, VCClass};
 
-    if (data->timers[TimerGroup].info.active == 1)
-        pthread_kill(data->threads[TimerGroup], SignalGroup);
-    if (data->timers[TimerExercise].info.active == 1)
-        pthread_kill(data->threads[TimerExercise], SignalExercise);
     startWorkoutTimer(&data->timers[TimerGroup], 0);
     startWorkoutTimer(&data->timers[TimerExercise], 0);
     pthread_join(data->threads[1], NULL);
@@ -358,17 +398,26 @@ void workoutVC_deinit(id self, SEL _cmd) {
     ((void(*)(struct objc_super *,SEL))objc_msgSendSuper)(&super, _cmd);
 }
 
-static bool checkEnduranceDuration(Workout *w) {
-    if (w->type != WorkoutEndurance) return false;
-    int planDuration = w->activities[0].exercises[0].reps / 60;
-    return w->duration >= planDuration;
+static bool isCompleted(Workout *w) {
+    Circuit *group = w->group;
+    int groupIndex = group->index;
+    if (w->index != w->size - 1 || groupIndex != group->size - 1) return false;
+    if (w->type == WorkoutEndurance)
+        return w->duration >= (int16_t) (group->exercises[0].reps / 60);
+
+    if (group->type == CircuitRounds && group->completedReps == group->reps - 1) {
+        ExerciseEntry *e = &group->exercises[groupIndex];
+        return e->state == ExerciseStateResting && e->completedSets == e->sets - 1;
+    }
+    return false;
 }
 
-static inline void setDuration(Workout *w) {
+static inline bool setDuration(Workout *w) {
     w->duration = ((int16_t) ((time(NULL) - w->startTime) / 60.f)) + 1;
 #if TARGET_OS_SIMULATOR
     w->duration *= 10;
 #endif
+    return w->duration >= 15;
 }
 
 static void updateStoredData(int type, int16_t duration, short *lifts) {
@@ -386,9 +435,7 @@ static void updateStoredData(int type, int16_t duration, short *lifts) {
     }));
 }
 
-static void workoutVC_handleFinishedWorkout(id self) {
-    WorkoutVC *data = (WorkoutVC *) ((char *)self + VCSize);
-    Workout *w = data->workout;
+static void workoutVC_handleFinishedWorkout(id self, WorkoutVC *data, Workout *w, bool longEnough) {
     unsigned char totalCompleted = 0;
     short *lifts = NULL;
 
@@ -396,11 +443,13 @@ static void workoutVC_handleFinishedWorkout(id self) {
         appDel_updateMaxWeights(data->weights);
         lifts = malloc(sizeof(short) << 2);
         memcpy(lifts, data->weights, sizeof(short) << 2);
-        if (data->workout->duration < 15)
+        if (!longEnough) {
             data->workout->duration = 15;
+            longEnough = true;
+        }
     }
 
-    if (isWorkoutLongEnough(data->workout)) {
+    if (longEnough) {
         if (w->day != 0xff)
             totalCompleted = appUserData_addCompletedWorkout(w->day);
         updateStoredData(w->type, w->duration, lifts);
@@ -480,27 +529,30 @@ void workoutVC_startEndWorkout(id self, SEL _cmd _U_, id btn) {
         setButtonTitle(btn, localize(CFSTR("end")), 0);
         setButtonColor(btn, createColor(ColorRed), 0);
         setTag(btn, 1);
-        data->workout->startTime = time(NULL);
-        handleEvent(self, 0, 0, EventStartGroup);
-    } else {
-        bool valid = false;
-        pthread_mutex_lock(&timerLock);
-        if (!data->done) {
-            data->done = valid = true;
-            cleanupWorkoutNotifications(data->observers);
+        Workout *w = data->workout;
+        w->startTime = time(NULL);
+        startGroup(w->group, data->timers, true);
+        CFArrayRef views = getArrangedSubviews(data->first->stack);
+        for (int i = 0; i < w->group->size; ++i) {
+            exerciseView_configure((id) CFArrayGetValueAtIndex(views, i));
         }
+    } else {
+        pthread_mutex_lock(&timerLock);
+        if (data->done) {
+            pthread_mutex_unlock(&timerLock);
+            return;
+        }
+        cleanupWorkoutNotifications(data);
         pthread_mutex_unlock(&timerLock);
-        if (valid) {
-            Workout *w = data->workout;
-            setDuration(w);
-            if (checkEnduranceDuration(w)) {
-                workoutVC_handleFinishedWorkout(self);
-            } else {
-                if (isWorkoutLongEnough(w))
-                    updateStoredData(w->type, w->duration, NULL);
-                id navVC = getNavVC(self);
-                popVC(navVC);
-            }
+        Workout *w = data->workout;
+        bool longEnough = setDuration(w);
+        if (isCompleted(w)) {
+            workoutVC_handleFinishedWorkout(self, data, w, longEnough);
+        } else {
+            if (longEnough)
+                updateStoredData(w->type, w->duration, NULL);
+            id navVC = getNavVC(self);
+            popVC(navVC);
         }
     }
 }
@@ -512,13 +564,13 @@ void workoutVC_willDisappear(id self, SEL _cmd, bool animated) {
     if (getBool(self, sel_getUid("isMovingFromParentViewController"))) {
         WorkoutVC *data = (WorkoutVC *) ((char *)self + VCSize);
         if (!data->done) {
-            cleanupWorkoutNotifications(data->observers);
+            cleanupWorkoutNotifications(data);
             Workout *w = data->workout;
             if (w->startTime) {
-                setDuration(w);
-                if (checkEnduranceDuration(w)) {
-                    workoutVC_handleFinishedWorkout(self);
-                } else if (isWorkoutLongEnough(w)) {
+                bool longEnough = setDuration(w);
+                if (isCompleted(w)) {
+                    workoutVC_handleFinishedWorkout(self, data, w, longEnough);
+                } else if (longEnough) {
                     updateStoredData(w->type, w->duration, NULL);
                 }
             }
@@ -544,19 +596,9 @@ void handleEvent(id self, int gIdx, int eIdx, int event) {
     CFArrayRef views = getArrangedSubviews(data->first->stack);
     id currView = (id) CFArrayGetValueAtIndex(views, eIdx);
     StatusView *ptr = (StatusView *) ((char *)currView + ViewSize);
+    bool longEnough, exerciseDone;
     int t = 0;
     switch (event) {
-        case EventFinishExercise:
-            toggleInteraction(ptr->button, true);
-            if (w->type == WorkoutEndurance)
-                goto foundTransition;
-            break;
-
-        case EventStartGroup:
-            t = TransitionFinishedCircuit;
-            startGroup(w->group, data->timers, true);
-            goto foundTransition;
-
         case EventFinishGroup:
             t = TransitionFinishedCircuitDeleteFirst;
             if (++w->index == w->size) {
@@ -568,70 +610,24 @@ void handleEvent(id self, int gIdx, int eIdx, int event) {
             startGroup(w->group, data->timers, true);
             goto foundTransition;
 
+        case EventFinishExercise:
+            toggleInteraction(ptr->button, true);
+            if (w->type == WorkoutEndurance)
+                goto foundTransition;
         default:
-            break;
-    }
-
-    bool exerciseDone = cycleExerciseEntry(ptr->entry, data->timers);
-    exerciseView_configure(currView);
-
-    if (exerciseDone) {
-        t = TransitionFinishedExercise;
-        if (++w->group->index == w->group->size) {
-            t = TransitionFinishedCircuit;
-            Circuit *c = w->group;
-            bool finishedCircuit = false, changeRange;
-            switch (c->type) {
-                case CircuitRounds:
-                    if (++c->completedReps == c->reps)
-                        finishedCircuit = true;
-                    break;
-
-                case CircuitDecrement:
-                    changeRange = c->completedReps == 10;
-                    if (--c->completedReps == 0) {
-                        finishedCircuit = true;
-                    } else {
-                        CFStringRef reps = CFStringCreateWithFormat(NULL, NULL,
-                                                                    CFSTR("%d"), c->completedReps);
-                        ExerciseEntry *e;
-                        for (e = &c->exercises[0]; e < &c->exercises[c->size]; ++e) {
-                            if (e->type == ExerciseReps) {
-                                CFStringReplace(e->titleStr, e->tRange, reps);
-                                if (changeRange)
-                                    e->tRange.length -= 1;
-                            }
-                        }
-                        CFRelease(reps);
-                    }
-                default:
-                    break;
-            }
-
-            if (finishedCircuit) {
-                if (++w->index == w->size) {
-                    t = TransitionCompletedWorkout;
-                } else {
-                    t = TransitionFinishedCircuitDeleteFirst;
-                    data->timers[0].container = data->timers[1].container = w->index;
-                    startGroup(++w->group, data->timers, true);
-                }
-            } else {
-                startGroup(w->group, data->timers, false);
-            }
-        } else {
-            cycleExerciseEntry(ptr->entry + 1, data->timers);
-        }
+            exerciseDone = cycleExerciseEntry(ptr->entry, data->timers);
+            exerciseView_configure(currView);
+            if (exerciseDone)
+                t = findTransition(data, w, ptr);
     }
 foundTransition:
 
     switch (t) {
         case TransitionCompletedWorkout:
-            data->done = true;
-            cleanupWorkoutNotifications(data->observers);
-            setDuration(w);
+            cleanupWorkoutNotifications(data);
+            longEnough = setDuration(w);
             pthread_mutex_unlock(&timerLock);
-            workoutVC_handleFinishedWorkout(self);
+            workoutVC_handleFinishedWorkout(self, data, w, longEnough);
             return;
 
         case TransitionFinishedCircuitDeleteFirst:
@@ -646,8 +642,8 @@ foundTransition:
                                                                  w->group->completedReps + 1);
                 CFStringReplace(w->group->headerStr, w->group->numberRange, newNumber);
                 CFRelease(newNumber);
+                setLabelText(data->first->headerLabel, w->group->headerStr);
             }
-            setLabelText(data->first->headerLabel, w->group->headerStr);
 
             for (int i = 0; i < w->group->size; ++i) {
                 exerciseView_configure((id) CFArrayGetValueAtIndex(views, i));

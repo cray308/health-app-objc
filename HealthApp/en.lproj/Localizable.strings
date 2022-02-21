@@ -46,9 +46,9 @@
 "homeState0" = "Completed";
 "homeState1" = "Not completed";
 "homeWorkoutType0" = "Test Max";
-"homeWorkoutType1" = "Endurance";
-"homeWorkoutType2" = "Strength";
-"homeWorkoutType3" = "SE";
+"homeWorkoutType1" = "Strength";
+"homeWorkoutType2" = "SE";
+"homeWorkoutType3" = "Endurance";
 "homeWorkoutType4" = "HIC";
 "homeAlertTitle" = "Nicely done!";
 "homeAlertMessage" = "Great job meeting your workout goal this week.";

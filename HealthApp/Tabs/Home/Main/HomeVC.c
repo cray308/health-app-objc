@@ -12,14 +12,6 @@
 
 extern id kCAEmitterLayerLine;
 
-enum {
-    CustomWorkoutTestMax,
-    CustomWorkoutEndurance,
-    CustomWorkoutStrength,
-    CustomWorkoutSE,
-    CustomWorkoutHIC
-};
-
 Class HomeVCClass;
 
 id homeVC_init(void) {
@@ -165,29 +157,16 @@ void homeVC_workoutButtonTapped(id self, SEL _cmd _U_, id btn) {
 }
 
 void homeVC_customButtonTapped(id self, SEL _cmd _U_, id btn) {
-    int type = WorkoutStrength;
-    Workout *w;
-    switch (getTag(btn)) {
-        case CustomWorkoutSE:
-            type = WorkoutSE;
-            break;
-        case CustomWorkoutHIC:
-            type = WorkoutHIC;
-            break;
-        case CustomWorkoutTestMax:
-            w = exerciseManager_getWorkoutFromLibrary(&(WorkoutParams){
-                WorkoutStrength, 2, 1, 1, 100, 0xff
-            });
-            homeVC_navigateToAddWorkout(self, w);
-            return;
-        case CustomWorkoutEndurance:
-            type = WorkoutEndurance;
-        default:
-            break;
+    unsigned char index = (unsigned char) getTag(btn);
+    if (!index) {
+        Workout *w = exerciseManager_getWorkoutFromLibrary(&(WorkoutParams){
+            2, 1, 1, 100, WorkoutStrength, 0xff
+        });
+        homeVC_navigateToAddWorkout(self, w);
+        return;
     }
 
-    CFArrayRef names = exerciseManager_createWorkoutNames(type);
-    presentModalVC(self, setupWorkoutVC_init(self, type, names));
+    presentModalVC(self, setupWorkoutVC_init(self, --index));
 }
 
 void homeVC_navigateToAddWorkout(id self, void *workout) {

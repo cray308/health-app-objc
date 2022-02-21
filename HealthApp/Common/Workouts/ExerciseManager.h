@@ -43,22 +43,22 @@ typedef struct {
     CFStringRef restStr;
     CFRange tRange;
     CFRange hRange;
-    int type;
-    int reps;
-    int sets;
-    int completedSets;
-    int state;
+    short reps;
+    short sets;
+    short completedSets;
+    unsigned char type;
+    unsigned char state;
 } ExerciseEntry;
 
 typedef struct {
     ExerciseEntry *exercises;
     CFMutableStringRef headerStr;
     CFRange numberRange;
-    int type;
     int index;
     int size;
-    int reps;
-    int completedReps;
+    short reps;
+    short completedReps;
+    unsigned char type;
 } Circuit;
 
 typedef struct {
@@ -68,19 +68,19 @@ typedef struct {
     time_t startTime;
     int index;
     int size;
-    int type;
     int16_t duration;
     short bodyweight;
+    unsigned char type;
     unsigned char day;
     bool testMax;
 } Workout;
 
 typedef struct {
-    int type;
     int index;
-    int sets;
-    int reps;
-    int weight;
+    short sets;
+    short reps;
+    short weight;
+    unsigned char type;
     const unsigned char day;
 } WorkoutParams;
 
@@ -88,7 +88,7 @@ void initExerciseData(int week);
 
 void exerciseManager_setWeeklyWorkoutNames(unsigned char plan, CFStringRef *names);
 Workout *exerciseManager_getWeeklyWorkout(unsigned char plan, int index);
-CFArrayRef exerciseManager_createWorkoutNames(int type);
+CFArrayRef exerciseManager_createWorkoutNames(unsigned char type);
 Workout *exerciseManager_getWorkoutFromLibrary(WorkoutParams *params);
 
 #endif /* ExerciseManager_h */

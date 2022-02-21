@@ -10,11 +10,11 @@ typedef struct {
     id parent;
     CFArrayRef names;
     id workoutTextField;
-    int type;
     int index;
+    unsigned char type;
 } SetupWorkoutVC;
 
-id setupWorkoutVC_init(id parent, int type, CFArrayRef names CF_CONSUMED);
+id setupWorkoutVC_init(id parent, unsigned char type);
 void setupWorkoutVC_deinit(id self, SEL _cmd);
 void setupWorkoutVC_viewDidLoad(id self, SEL _cmd);
 void setupWorkoutVC_tappedButton(id self, SEL _cmd, id btn);
