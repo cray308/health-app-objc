@@ -14,8 +14,7 @@ enum {
     WorkoutStrength,
     WorkoutSE,
     WorkoutEndurance,
-    WorkoutHIC,
-    WorkoutRest
+    WorkoutHIC
 };
 
 enum {
@@ -42,23 +41,23 @@ typedef struct {
     CFMutableStringRef headerStr;
     CFStringRef restStr;
     CFRange tRange;
-    CFRange hRange;
-    short reps;
-    short sets;
+    const CFRange hRange;
+    const short reps;
+    const short sets;
     short completedSets;
-    unsigned char type;
+    const unsigned char type;
     unsigned char state;
 } ExerciseEntry;
 
 typedef struct {
     ExerciseEntry *exercises;
     CFMutableStringRef headerStr;
-    CFRange numberRange;
+    const CFRange numberRange;
     int index;
-    int size;
-    short reps;
+    const int size;
+    const short reps;
     short completedReps;
-    unsigned char type;
+    const unsigned char type;
 } Circuit;
 
 typedef struct {
@@ -67,20 +66,20 @@ typedef struct {
     CFStringRef title;
     time_t startTime;
     int index;
-    int size;
+    const int size;
     int16_t duration;
-    short bodyweight;
-    unsigned char type;
-    unsigned char day;
-    bool testMax;
+    const short bodyweight;
+    const unsigned char type;
+    const unsigned char day;
+    const bool testMax;
 } Workout;
 
 typedef struct {
-    int index;
-    short sets;
-    short reps;
-    short weight;
-    unsigned char type;
+    const int index;
+    const short sets;
+    const short reps;
+    const short weight;
+    const unsigned char type;
     const unsigned char day;
 } WorkoutParams;
 

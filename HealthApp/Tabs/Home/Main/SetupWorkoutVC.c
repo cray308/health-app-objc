@@ -96,22 +96,24 @@ void setupWorkoutVC_tappedButton(id self, SEL _cmd _U_, id btn) {
     }
 
     SetupWorkoutVC *data = (SetupWorkoutVC *) ((char *)self + InputVCSize);
-    WorkoutParams output = {.day = 0xff, .type = data->type, .index = data->index};
     id *fields = ((InputVC *) ((char *)self + VCSize))->children;
-    switch (output.type) {
+    short weight = 0, sets = 0, reps = 0;
+    switch (data->type) {
         case WorkoutStrength:
-            output.weight = ((InputView *) ((char *)fields[2] + ViewSize))->result;
+            weight = ((InputView *) ((char *)fields[2] + ViewSize))->result;
         case WorkoutSE:
-            output.sets = ((InputView *) ((char *)fields[0] + ViewSize))->result;
-            output.reps = ((InputView *) ((char *)fields[1] + ViewSize))->result;
+            sets = ((InputView *) ((char *)fields[0] + ViewSize))->result;
+            reps = ((InputView *) ((char *)fields[1] + ViewSize))->result;
             break;
 
         case WorkoutEndurance:
-            output.reps = ((InputView *) ((char *)fields[0] + ViewSize))->result;
+            reps = ((InputView *) ((char *)fields[0] + ViewSize))->result;
         default:
             break;
     }
-    Workout *w = exerciseManager_getWorkoutFromLibrary(&output);
+    Workout *w = exerciseManager_getWorkoutFromLibrary(&(WorkoutParams){
+        data->index, sets, reps, weight, data->type, 0xff
+    });
     id parent = data->parent;
     dismissPresentedVC(parent, ^{
         homeVC_navigateToAddWorkout(parent, w);
