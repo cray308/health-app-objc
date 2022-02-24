@@ -1,5 +1,6 @@
 #include "ExerciseManager.h"
 #include <CoreFoundation/CFNumber.h>
+#include <CoreFoundation/CFPropertyList.h>
 #include <CoreFoundation/CFSet.h>
 #include <stdlib.h>
 #include <string.h>
@@ -35,14 +36,21 @@ static CFStringRef distanceFormat;
 static CFStringRef amrapFormat;
 
 static void createRootAndLibDict(struct DictWrapper *data) {
-    id bundle = getBundle();
-    id url = (((id(*)(id,SEL,CFStringRef,CFStringRef))objc_msgSend)
-              (bundle,
-               sel_getUid("URLForResource:withExtension:"), CFSTR("WorkoutData"), CFSTR("plist")));
-    id _dict = allocClass(objc_getClass("NSDictionary"));
-    data->root = (((CFDictionaryRef(*)(id,SEL,id,id))objc_msgSend)
-                  (_dict, sel_getUid("initWithContentsOfURL:error:"), url, nil));
+    CFBundleRef bundle = CFBundleGetMainBundle();
+    CFURLRef url = CFBundleCopyResourceURL(bundle, CFSTR("WorkoutData"), CFSTR("plist"), NULL);
+    CFReadStreamRef stream = CFReadStreamCreateWithFile(NULL, url);
+    CFRelease(url);
+    CFReadStreamOpen(stream);
+    unsigned char *buf = malloc(12000);
+    long nBytes = CFReadStreamRead(stream, buf, 12000);
+    CFDataRef plistData = CFDataCreate(NULL, buf, nBytes);
+    free(buf);
+    CFReadStreamClose(stream);
+    CFRelease(stream);
+    CFPropertyListFormat format = kCFPropertyListXMLFormat_v1_0;
+    data->root = CFPropertyListCreateWithData(NULL, plistData, 0, &format, NULL);
     data->lib = CFDictionaryGetValue(data->root, CFSTR("library"));
+    CFRelease(plistData);
 }
 
 static CFArrayRef getLibraryArrayForType(struct DictWrapper *data, unsigned char type) {
@@ -70,8 +78,10 @@ static Workout *buildWorkout(CFDictionaryRef dict, WorkoutParams *params) {
         if (params->index <= 1) {
             weights[1] = (short) (multiplier * lifts[LiftBench]);
             if (params->index == 0) {
-                weights[2] = (short) ((lifts[LiftPullup] + bodyweight) * multiplier) - bodyweight;
-                weights[2] = max(weights[2], 0);
+                short weight = (short) ((lifts[LiftPullup] + bodyweight) * multiplier) - bodyweight;
+                if (weight < 0)
+                    weight = 0;
+                weights[2] = weight;
             } else {
                 weights[2] = (short) (multiplier * lifts[LiftDeadlift]);
             }
@@ -219,16 +229,20 @@ static Workout *buildWorkout(CFDictionaryRef dict, WorkoutParams *params) {
     return w;
 }
 
-void initExerciseData(int week) {
-    restFormat = localize(CFSTR("exerciseTitleRest"));
-    repsFormat = localize(CFSTR("exerciseTitleReps"));
-    setsFormat = localize(CFSTR("exerciseHeader"));
-    weightFormat = localize(CFSTR("exerciseTitleRepsWithWeight"));
-    durationMinsFormat = localize(CFSTR("exerciseTitleDurationMinutes"));
-    durationSecsFormat = localize(CFSTR("exerciseTitleDurationSeconds"));
-    distanceFormat = localize(CFSTR("exerciseTitleDistance"));
-    roundsFormat = localize(CFSTR("circuitHeaderRounds"));
-    amrapFormat = localize(CFSTR("circuitHeaderAMRAP"));
+void initExerciseData(int week, CFBundleRef bundle) {
+    restFormat = CFBundleCopyLocalizedString(bundle, CFSTR("exerciseTitleRest"), NULL, NULL);
+    repsFormat = CFBundleCopyLocalizedString(bundle, CFSTR("exerciseTitleReps"), NULL, NULL);
+    setsFormat = CFBundleCopyLocalizedString(bundle, CFSTR("exerciseHeader"), NULL, NULL);
+    weightFormat = CFBundleCopyLocalizedString(bundle,
+                                               CFSTR("exerciseTitleRepsWithWeight"), NULL, NULL);
+    durationMinsFormat = CFBundleCopyLocalizedString(bundle, CFSTR("exerciseTitleDurationMinutes"),
+                                                     NULL, NULL);
+    durationSecsFormat = CFBundleCopyLocalizedString(bundle, CFSTR("exerciseTitleDurationSeconds"),
+                                                     NULL, NULL);
+    distanceFormat = CFBundleCopyLocalizedString(bundle,
+                                                 CFSTR("exerciseTitleDistance"), NULL, NULL);
+    roundsFormat = CFBundleCopyLocalizedString(bundle, CFSTR("circuitHeaderRounds"), NULL, NULL);
+    amrapFormat = CFBundleCopyLocalizedString(bundle, CFSTR("circuitHeaderAMRAP"), NULL, NULL);
     weekInPlan = week;
 
     Class storeClass = objc_getClass("HKHealthStore");

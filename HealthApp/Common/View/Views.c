@@ -85,7 +85,8 @@ CFDictionaryRef createTitleTextDict(id color, id font) {
     };
     const void *vals[] = {color, font};
     return CFDictionaryCreate(NULL, keys, vals, font ? 2 : 1,
-                              &kCFCopyStringDictionaryKeyCallBacks, NULL);
+                              &kCFCopyStringDictionaryKeyCallBacks,
+                              &kCFTypeDictionaryValueCallBacks);
 }
 
 #pragma mark - View initializers
@@ -133,6 +134,8 @@ id createLabel(CFStringRef text, int style, bool accessible) {
     id view = createNew(objc_getClass("UILabel"));
     disableAutoresizing(view);
     setLabelText(view, text);
+    if (text)
+        CFRelease(text);
     setLabelFont(view, style);
     setDynamicFont(view);
     setTextColor(view, createColor(ColorLabel));
@@ -146,6 +149,8 @@ id createButton(CFStringRef title, int color, int params, int tag, id target, SE
                                                     sel_getUid("buttonWithType:"), 1);
     disableAutoresizing(view);
     setButtonTitle(view, title, 0);
+    if (title)
+        CFRelease(title);
     setButtonColor(view, createColor(color), 0);
     setButtonColor(view, createColor(ColorSecondaryLabel), 2);
     id label = getTitleLabel(view);
@@ -160,15 +165,18 @@ id createButton(CFStringRef title, int color, int params, int tag, id target, SE
     return view;
 }
 
-id createSegmentedControl(CFStringRef format, int startIndex) {
+id createSegmentedControl(CFBundleRef bundle, CFStringRef format, int startIndex) {
     CFStringRef segments[3];
-    fillStringArray(segments, format, 3);
+    fillStringArray(bundle, segments, format, 3);
     CFArrayRef array = CFArrayCreate(NULL, (const void **)segments, 3, NULL);
     id _obj = allocClass(objc_getClass("UISegmentedControl"));
     id view = getObjectWithArr(_obj, sel_getUid("initWithItems:"), array);
     disableAutoresizing(view);
     setSelectedSegment(view, startIndex);
     CFRelease(array);
+    CFRelease(segments[0]);
+    CFRelease(segments[1]);
+    CFRelease(segments[2]);
     return view;
 }
 
@@ -188,6 +196,7 @@ id createTextfield(id delegate, CFStringRef text, CFStringRef hint,
     setDelegate(view, delegate);
     setMinHeight(view, 44);
     setAccessibilityLabel(view, hint);
+    CFRelease(hint);
     return view;
 }
 

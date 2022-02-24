@@ -2,6 +2,7 @@
 #define Views_h
 
 #include "Constraints.h"
+#include <CoreFoundation/CFBundle.h>
 
 #define disableAutoresizing(_v) \
 setBool(_v, sel_getUid("setTranslatesAutoresizingMaskIntoConstraints:"), false)
@@ -109,11 +110,12 @@ id createObjectWithFrame(Class cls, CGRect frame);
 id createView(void);
 id createStackView(id *subviews, int count, int axis, int spacing, Padding margins);
 id createScrollView(void);
-id createLabel(CFStringRef text, int style, bool accessible);
-id createTextfield(id delegate, CFStringRef text, CFStringRef hint,
-                   int alignment, int keyboard, int tag);
-id createButton(CFStringRef title, int color, int params, int tag, id target, SEL action);
-id createSegmentedControl(CFStringRef format, int startIndex);
+id createLabel(CFStringRef text CF_CONSUMED, int style, bool accessible);
+id createTextfield(id delegate, CFStringRef text,
+                   CFStringRef hint CF_CONSUMED, int alignment, int keyboard, int tag);
+id createButton(CFStringRef title CF_CONSUMED,
+                int color, int params, int tag, id target, SEL action);
+id createSegmentedControl(CFBundleRef bundle, CFStringRef format, int startIndex);
 void addVStackToScrollView(id vStack, id scrollView);
 
 void updateSegmentedControl(id view, id foreground, unsigned char darkMode);

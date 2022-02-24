@@ -6,25 +6,29 @@
 #include "ContainerView.h"
 #include "ExerciseManager.h"
 #include "ViewControllerHelpers.h"
-#include "LiftingView.h"
 #include "PersistenceService.h"
 #include "SwiftBridging.h"
-#include "TotalWorkoutsView.h"
-#include "WorkoutTypeView.h"
 
 extern void setLegendLabel(id v, int index, CFStringRef text);
+extern void setLineLimit(id v, float limit);
 extern void disableLineChartView(id v);
 extern id createDataSet(int color, id fillSet);
 extern id createChartData(CFArrayRef dataSets, int lineWidth, uint8_t options);
 
 struct WeekDataModel {
-    int totalWorkouts;
-    int durationByType[4];
-    int cumulativeDuration[4];
+    short totalWorkouts;
+    short durationByType[4];
+    short cumulativeDuration[4];
     short weightArray[4];
 };
 
 Class HistoryVCClass;
+
+static CFStringRef totalWorkoutsFormat;
+static CFStringRef workoutTypeFormat;
+static CFStringRef liftFormat;
+static CFStringRef workoutTypeNames[4];
+static CFStringRef liftNames[4];
 
 #pragma mark - Load Data
 
@@ -39,8 +43,9 @@ static void historyData_populate(HistoryViewModel *m, struct WeekDataModel *resu
     memcpy(m->nEntries, (int[]){size - refIndices[1], size - refIndices[2], size}, 3 * sizeof(int));
     memcpy(m->refIndices, &refIndices[1], 3 * sizeof(int));
 
-    int totalWorkouts[3] = {0}, maxWorkouts[3] = {0}, maxTime[3] = {0}, maxWeight[3] = {0};
+    int totalWorkouts[3] = {0};
     int totalByType[3][4] = {{0},{0},{0}}, totalByExercise[3][4] = {{0},{0},{0}};
+    short maxWorkouts[3] = {0}, maxTime[3] = {0}, maxWeight[3] = {0};
     m->totalWorkouts.entries = malloc((unsigned) size * sizeof(CGPoint));
     m->lifts.entries[0] = malloc((unsigned) size * sizeof(CGPoint));
     m->lifts.entries[1] = malloc((unsigned) size * sizeof(CGPoint));
@@ -143,7 +148,7 @@ static void historyData_fetch(void *_model) {
 
 #pragma mark - Main Functions
 
-id historyVC_init(void **model, void (**handler)(void*)) {
+id historyVC_init(CFBundleRef bundle, void **model, void (**handler)(void*)) {
     id self = createNew(HistoryVCClass);
     HistoryVC *data = (HistoryVC *) ((char *)self + VCSize);
     *model = &data->model;
@@ -154,11 +159,12 @@ id historyVC_init(void **model, void (**handler)(void*)) {
 
     m->totalWorkouts.dataSet = createDataSet(5, nil);
     m->workoutTypes.dataSets[0] = createDataSet(-1, nil);
-    fillStringArray(m->workoutTypes.names, CFSTR("workoutTypes%d"), 4);
-    fillStringArray(m->lifts.names, CFSTR("liftTypes%d"), 4);
-    m->totalWorkouts.legendFormat = localize(CFSTR("totalWorkoutsLegend"));
-    m->lifts.legendFormat = localize(CFSTR("liftLegend"));
-    m->workoutTypes.legendFormat = localize(CFSTR("workoutTypeLegend"));
+    fillStringArray(bundle, workoutTypeNames, CFSTR("workoutTypes%d"), 4);
+    fillStringArray(bundle, liftNames, CFSTR("liftTypes%d"), 4);
+    totalWorkoutsFormat = CFBundleCopyLocalizedString(bundle, CFSTR("totalWorkoutsLegend"),
+                                                      NULL, NULL);
+    liftFormat = CFBundleCopyLocalizedString(bundle, CFSTR("liftLegend"), NULL, NULL);
+    workoutTypeFormat = CFBundleCopyLocalizedString(bundle, CFSTR("workoutTypeLegend"), NULL, NULL);
 
     for (int i = 0; i < 4; ++i) {
         id boundary = m->workoutTypes.dataSets[i];
@@ -185,19 +191,23 @@ void historyVC_viewDidLoad(id self, SEL _cmd) {
     struct objc_super super = {self, VCClass};
     ((void(*)(struct objc_super *,SEL))objc_msgSendSuper)(&super, _cmd);
 
+    CFBundleRef bundle = CFBundleGetMainBundle();
     const unsigned char darkMode = userData->darkMode;
     HistoryVC *data = (HistoryVC *) ((char *)self + VCSize);
     id view = getView(self);
     setBackground(view, createColor(ColorPrimaryBG));
 
     CFStringRef titles[3];
-    fillStringArray(titles, CFSTR("chartHeader%d"), 3);
+    fillStringArray(bundle, titles, CFSTR("chartHeader%d"), 3);
 
-    data->charts[0] = totalWorkoutsView_init(&data->model.totalWorkouts, self);
-    data->charts[1] = workoutTypeView_init(&data->model.workoutTypes, self);
-    data->charts[2] = liftingView_init(&data->model.lifts, self);
+    data->charts[0] = createChartView(self, (long []){4}, 1, 1);
+    setHeight(data->charts[0], 390, false);
+    data->charts[1] = createChartView(self, (long []){0, 1, 2, 3}, 4, 6);
+    setHeight(data->charts[1], 425, false);
+    data->charts[2] = createChartView(self, (long []){0, 1, 2, 3}, 4, 0);
+    setHeight(data->charts[2], 550, false);
 
-    data->picker = createSegmentedControl(CFSTR("historySegment%d"), 0);
+    data->picker = createSegmentedControl(bundle, CFSTR("historySegment%d"), 0);
     addTarget(data->picker, self, sel_getUid("buttonTapped:"), 4096);
     if (!(darkMode & 128))
         updateSegmentedControl(data->picker, createColor(ColorLabel), darkMode);
@@ -232,49 +242,59 @@ void historyVC_viewDidLoad(id self, SEL _cmd) {
 
 void historyVC_updateSegment(id self, SEL _cmd _U_, id picker) {
     HistoryVC *data = (HistoryVC *) ((char *)self + VCSize);
+    id totalsChart = data->charts[0], typesChart = data->charts[1], liftsChart = data->charts[2];
     HistoryViewModel *model = &data->model;
-    TotalWorkoutsView *totalsData = (TotalWorkoutsView *) ((char*)data->charts[0] + ViewSize);
-    WorkoutTypeView *typeData = (WorkoutTypeView *) ((char *)data->charts[1] + ViewSize);
-    LiftView *liftData = (LiftView *) ((char *)data->charts[2] + ViewSize);
+    TotalWorkoutsChartModel *m1 = &model->totalWorkouts;
+    WorkoutTypeChartModel *m2 = &model->workoutTypes;
+    LiftChartModel *m3 = &model->lifts;
+
     int index = (int) getSelectedSegment(picker);
     int count = model->nEntries[index];
     int ref = model->refIndices[index];
     if (!count) {
-        disableLineChartView(totalsData->chart);
-        disableLineChartView(typeData->chart);
-        disableLineChartView(liftData->chart);
+        disableLineChartView(totalsChart);
+        disableLineChartView(typesChart);
+        disableLineChartView(liftsChart);
         (((void(*)(id,SEL,id,SEL,unsigned long))objc_msgSend)
          (data->picker, sel_getUid("removeTarget:action:forControlEvents:"), nil, nil, 4096));
         return;
     }
 
     char buf[16];
-    CFStringRef label = CFStringCreateWithFormat(NULL, NULL, model->totalWorkouts.legendFormat,
-                                                 model->totalWorkouts.avgs[index]);
-    setLegendLabel(totalsData->chart, 0, label);
+    CFStringRef label = CFStringCreateWithFormat(NULL, NULL, totalWorkoutsFormat, m1->avgs[index]);
+    setLegendLabel(totalsChart, 0, label);
     CFRelease(label);
 
     for (int i = 0; i < 4; ++i) {
-        int typeAverage = model->workoutTypes.avgs[index][i];
+        int typeAverage = m2->avgs[index][i];
         if (typeAverage > 59) {
             sprintf(buf, "%d h %d m", typeAverage / 60, typeAverage % 60);
         } else {
             sprintf(buf, "%d m", typeAverage);
         }
-        label = CFStringCreateWithFormat(NULL, NULL, model->workoutTypes.legendFormat,
-                                         model->workoutTypes.names[i], buf);
-        setLegendLabel(typeData->chart, i, label);
+        label = CFStringCreateWithFormat(NULL, NULL, workoutTypeFormat, workoutTypeNames[i], buf);
+        setLegendLabel(typesChart, i, label);
         CFRelease(label);
 
-        label = CFStringCreateWithFormat(NULL, NULL, model->lifts.legendFormat,
-                                         model->lifts.names[i], model->lifts.avgs[index][i]);
-        setLegendLabel(liftData->chart, i, label);
+        label = CFStringCreateWithFormat(NULL, NULL, liftFormat, liftNames[i], m3->avgs[index][i]);
+        setLegendLabel(liftsChart, i, label);
         CFRelease(label);
     }
 
-    totalWorkoutsView_update(data->charts[0], count, index, ref);
-    workoutTypeView_update(data->charts[1], count, index, ref);
-    liftingView_update(data->charts[2], count, index, ref);
+    setLineLimit(totalsChart, m1->avgs[index]);
+    replaceDataSetEntries(m1->dataSet, &m1->entries[ref], count);
+    updateChart(totalsChart, m1->chartData, m1->maxes[index]);
+
+    replaceDataSetEntries(m2->dataSets[0], &m2->entries[0][ref], count);
+    for (int i = 1; i < 5; ++i) {
+        replaceDataSetEntries(m2->dataSets[i], &m2->entries[i][ref], count);
+    }
+    updateChart(typesChart, m2->chartData, m2->maxes[index]);
+
+    for (int i = 0; i < 4; ++i) {
+        replaceDataSetEntries(m3->dataSets[i], &m3->entries[i][ref], count);
+    }
+    updateChart(liftsChart, m3->chartData, m3->maxes[index]);
 }
 
 void historyVC_clearData(id self) {
@@ -316,6 +336,7 @@ void historyVC_updateColors(id self, unsigned char darkMode) {
     view = (id) CFArrayGetValueAtIndex(getSubviews(view), 0);
     CFArrayRef views = getArrangedSubviews(view);
     for (int i = 0; i < 3; ++i) {
-        containerView_updateColors((id) CFArrayGetValueAtIndex(views, i), label, divColor);
+        id c = (id) CFArrayGetValueAtIndex(views, i);
+        containerView_updateColors((ContainerView *) ((char *)c + ViewSize), label, divColor);
     }
 }

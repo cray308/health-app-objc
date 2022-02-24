@@ -1,7 +1,7 @@
 #ifndef HistoryVC_h
 #define HistoryVC_h
 
-#include <CoreFoundation/CFArray.h>
+#include <CoreFoundation/CFBundle.h>
 #include <CoreGraphics/CGGeometry.h>
 #include <objc/runtime.h>
 
@@ -9,7 +9,6 @@ extern Class HistoryVCClass;
 
 typedef struct {
     CGPoint *entries;
-    CFStringRef legendFormat;
     id dataSet;
     id chartData;
     float avgs[3];
@@ -18,8 +17,6 @@ typedef struct {
 
 typedef struct {
     CGPoint *entries[5];
-    CFStringRef names[4];
-    CFStringRef legendFormat;
     id dataSets[5];
     id chartData;
     int avgs[3][4];
@@ -28,8 +25,6 @@ typedef struct {
 
 typedef struct {
     CGPoint *entries[4];
-    CFStringRef names[4];
-    CFStringRef legendFormat;
     id dataSets[4];
     id chartData;
     float avgs[3][4];
@@ -51,7 +46,7 @@ typedef struct {
     id charts[3];
 } HistoryVC;
 
-id historyVC_init(void **model, void (**handler)(void*));
+id historyVC_init(CFBundleRef bundle, void **model, void (**handler)(void*));
 void historyVC_clearData(id self);
 void historyVC_updateColors(id vc, unsigned char darkMode);
 void historyVC_viewDidLoad(id self, SEL _cmd);

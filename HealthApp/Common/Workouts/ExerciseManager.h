@@ -1,7 +1,7 @@
 #ifndef ExerciseManager_h
 #define ExerciseManager_h
 
-#include <CoreFoundation/CFArray.h>
+#include <CoreFoundation/CFBundle.h>
 
 enum {
     LiftSquat,
@@ -83,7 +83,7 @@ typedef struct {
     const unsigned char day;
 } WorkoutParams;
 
-void initExerciseData(int week);
+void initExerciseData(int week, CFBundleRef bundle);
 
 void exerciseManager_setWeeklyWorkoutNames(unsigned char plan, CFStringRef *names);
 Workout *exerciseManager_getWeeklyWorkout(unsigned char plan, int index);

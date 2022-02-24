@@ -1,4 +1,5 @@
 #include "InputVC.h"
+#include <CoreFoundation/CFNotificationCenter.h>
 #include "AppUserData.h"
 #include "ViewControllerHelpers.h"
 
@@ -17,12 +18,60 @@ size_t InputVCSize;
 
 static CFStringRef inputFieldError;
 
-void initValidatorStrings(void) {
-    inputFieldError = localize(CFSTR("inputFieldError"));
+static void keyboardShown(CFNotificationCenterRef center _U_,
+                          void *observer, CFNotificationName name _U_,
+                          const void *object _U_, CFDictionaryRef userinfo) {
+    InputVC *data = (InputVC *) ((char *)observer + VCSize);
+    toggleScrolling(data->scrollView, true);
+    id value = (id) CFDictionaryGetValue(userinfo, (CFStringRef) UIKeyboardFrameEndUserInfoKey);
+    CGRect kbRect, viewRect, fieldRect, fieldInView;
+    id view = getView((id) observer);
+    getRect(data->activeField, &fieldRect, 1);
+    getRect(view, &viewRect, 0);
+
+#if defined(__arm64__)
+    kbRect = ((CGRect(*)(id,SEL))objc_msgSend)(value, sel_getUid("CGRectValue"));
+    fieldInView = (((CGRect(*)(id,SEL,CGRect,id))objc_msgSend)
+                   (view, sel_getUid("convertRect:fromView:"), fieldRect, data->activeField));
+#else
+    ((void(*)(CGRect*,id,SEL))objc_msgSend_stret)(&kbRect, value, sel_getUid("CGRectValue"));
+    (((void(*)(CGRect*,id,SEL,CGRect,id))objc_msgSend_stret)
+     (&fieldInView, view, sel_getUid("convertRect:fromView:"), fieldRect, data->activeField));
+#endif
+
+    viewRect.size.height -= kbRect.size.height;
+    setScrollInsets(data->scrollView, ((HAInsets){data->topOffset, 0, kbRect.size.height, 0}));
+
+    CGPoint upperY = {fieldInView.origin.x, fieldInView.origin.y + fieldInView.size.height};
+    if (!(CGRectContainsPoint(viewRect, fieldInView.origin) &&
+          CGRectContainsPoint(viewRect, upperY))) {
+        (((void(*)(id,SEL,CGRect,bool))objc_msgSend)
+         (data->scrollView, sel_getUid("scrollRectToVisible:animated:"), fieldRect, true));
+    }
 }
 
-static void showInputError(InputVC *data, InputView *child) {
-    enableButton(data->button, false);
+static void keyboardWillHide(CFNotificationCenterRef center _U_,
+                             void *observer, CFNotificationName name _U_,
+                             const void *object _U_, CFDictionaryRef userinfo _U_) {
+    InputVC *data = (InputVC *) ((char *)observer + VCSize);
+    setScrollInsets(data->scrollView, ((HAInsets){data->topOffset, 0, data->bottomOffset, 0}));
+    CGRect bounds;
+    getRect(data->vStack, &bounds, 1);
+    toggleScrolling(data->scrollView, (int) bounds.size.height >= data->scrollHeight);
+}
+
+void initValidatorStrings(CFBundleRef bundle) {
+    inputFieldError = CFBundleCopyLocalizedString(bundle, CFSTR("inputFieldError"), NULL, NULL);
+}
+
+static void inputView_reset(InputView *data, short value) {
+    data->valid = true;
+    data->result = value;
+    hideView(data->errorLabel, true);
+    setAccessibilityLabel(data->field, getText(data->hintLabel));
+}
+
+static void showInputError(InputView *child) {
     child->valid = false;
     hideView(child->errorLabel, false);
     CFStringRef hintText = getText(child->hintLabel);
@@ -36,12 +85,13 @@ void inputVC_addChild(id self, CFStringRef hint, short min, short max) {
     InputVC *d = (InputVC *) ((char *)self + VCSize);
 
     int index = d->count++;
-    d->children[index] = createNew(InputViewClass);
-    id view = d->children[index];
-    InputView *ptr = (InputView *) ((char *)view + ViewSize);
+    id view = createNew(InputViewClass);
+    d->children[index] = (InputView *) ((char *)view + ViewSize);
+    InputView *ptr = d->children[index];
     ptr->minVal = min;
     ptr->maxVal = max;
     CFStringRef errorText = CFStringCreateWithFormat(NULL, NULL, inputFieldError, min, max);
+    CFRetain(hint);
     ptr->hintLabel = createLabel(hint, TextFootnote, false);
     ptr->field = createTextfield(self, CFSTR(""), hint, 4, 4, index);
     if (d->setKB)
@@ -55,9 +105,21 @@ void inputVC_addChild(id self, CFStringRef hint, short min, short max) {
     pin(vStack, view, (Padding){0}, 0);
     addArrangedSubview(d->vStack, view);
     releaseObj(vStack);
-    CFRelease(errorText);
     hideView(ptr->errorLabel, true);
     setInputAccessory(ptr->field, d->toolbar);
+}
+
+void inputVC_updateFields(InputVC *self, short *vals) {
+    int count = self->count;
+    for (int i = 0; i < count; ++i) {
+        short value = vals[i];
+        InputView *child = self->children[i];
+        CFStringRef str = CFStringCreateWithFormat(NULL, NULL, CFSTR("%d"), value);
+        setLabelText(child->field, str);
+        inputView_reset(child, value);
+        CFRelease(str);
+    }
+    enableButton(self->button, true);
 }
 
 void inputView_deinit(id self, SEL _cmd) {
@@ -67,13 +129,6 @@ void inputView_deinit(id self, SEL _cmd) {
     releaseObj(ptr->field);
     releaseObj(ptr->errorLabel);
     ((void(*)(struct objc_super *,SEL))objc_msgSendSuper)(&super, _cmd);
-}
-
-void inputView_reset(InputView *data, short value) {
-    data->valid = true;
-    data->result = value;
-    hideView(data->errorLabel, true);
-    setAccessibilityLabel(data->field, getText(data->hintLabel));
 }
 
 id inputVC_init(id self, SEL _cmd) {
@@ -86,17 +141,14 @@ void inputVC_deinit(id self, SEL _cmd) {
     struct objc_super super = {self, VCClass};
 
     for (int i = 0; i < 4; ++i) {
-        if (data->children[i])
-            releaseObj(data->children[i]);
+        InputView *child = data->children[i];
+        if (child)
+            releaseObj((id) ((char *)child - ViewSize));
     }
     releaseObj(data->toolbar);
     releaseObj(data->scrollView);
     releaseObj(data->vStack);
-    id center = getDeviceNotificationCenter();
-    SEL sig = sel_getUid("removeObserver:name:object:");
-    ((void(*)(id,SEL,id,id,id))objc_msgSend)(center, sig, self, UIKeyboardDidShowNotification, nil);
-    ((void(*)(id,SEL,id,id,id))objc_msgSend)(center, sig,
-                                             self, UIKeyboardWillHideNotification, nil);
+    CFNotificationCenterRemoveEveryObserver(CFNotificationCenterGetLocalCenter(), self);
     ((void(*)(struct objc_super *,SEL))objc_msgSendSuper)(&super, _cmd);
 }
 
@@ -119,15 +171,17 @@ void inputVC_viewDidLoad(id self, SEL _cmd) {
     }
     voidFunc(data->toolbar, sel_getUid("sizeToFit"));
 
+    CFStringRef doneLabel = CFBundleCopyLocalizedString(CFBundleGetMainBundle(),
+                                                        CFSTR("done"), NULL, NULL);
     Class btnClass = objc_getClass("UIBarButtonItem");
     id flexSpace = (((id(*)(id,SEL,long,id,SEL))objc_msgSend)
                     (allocClass(btnClass), sel_getUid("initWithBarButtonSystemItem:target:action:"),
                      5, nil, nil));
     id doneButton = (((id(*)(id,SEL,CFStringRef,long,id,SEL))objc_msgSend)
                      (allocClass(btnClass), sel_getUid("initWithTitle:style:target:action:"),
-                      localize(CFSTR("done")), 0, self, sel_getUid("dismissKeyboard")));
-
+                      doneLabel, 0, self, sel_getUid("dismissKeyboard")));
     setTintColor(doneButton, createColor(ColorRed));
+    CFRelease(doneLabel);
 
     CFArrayRef array = CFArrayCreate(NULL, (const void *[]){flexSpace, doneButton},
                                      2, &retainedArrCallbacks);
@@ -145,12 +199,13 @@ void inputVC_viewDidLoad(id self, SEL _cmd) {
     releaseObj(flexSpace);
     releaseObj(doneButton);
 
-    id center = getDeviceNotificationCenter();
-    SEL sig = sel_getUid("addObserver:selector:name:object:");
-    (((void(*)(id,SEL,id,SEL,id,id))objc_msgSend)
-     (center, sig, self, sel_getUid("keyboardShown:"), UIKeyboardDidShowNotification, nil));
-    (((void(*)(id,SEL,id,SEL,id,id))objc_msgSend)
-     (center, sig, self, sel_getUid("keyboardWillHide:"), UIKeyboardWillHideNotification, nil));
+    CFNotificationCenterRef center = CFNotificationCenterGetLocalCenter();
+    CFNotificationCenterAddObserver(center, self, keyboardShown,
+                                    (CFStringRef) UIKeyboardDidShowNotification, NULL,
+                                    CFNotificationSuspensionBehaviorDrop);
+    CFNotificationCenterAddObserver(center, self, keyboardWillHide,
+                                    (CFStringRef) UIKeyboardWillHideNotification, NULL,
+                                    CFNotificationSuspensionBehaviorDrop);
 }
 
 void inputVC_viewDidAppear(id self, SEL _cmd, bool animated) {
@@ -181,51 +236,8 @@ void inputVC_dismissKeyboard(id self, SEL _cmd _U_) {
         id view = getView(self);
         setBool(view, sel_getUid("endEditing:"), true);
     } else {
-        InputView *next = (InputView *) ((char *)d->children[tag + 1] + ViewSize);
-        getBool(next->field, sel_getUid("becomeFirstResponder"));
+        getBool(d->children[tag + 1]->field, sel_getUid("becomeFirstResponder"));
     }
-}
-
-void inputVC_keyboardShown(id self, SEL _cmd _U_, id notif) {
-    InputVC *data = (InputVC *) ((char *)self + VCSize);
-    toggleScrolling(data->scrollView, true);
-    id userInfo = getObject(notif, sel_getUid("userInfo"));
-    id info = getObjectWithObject(userInfo,
-                                  sel_getUid("objectForKey:"), UIKeyboardFrameEndUserInfoKey);
-
-    CGRect kbRect, viewRect, fieldRect, fieldInView;
-    id view = getView(self);
-    getRect(data->activeField, &fieldRect, 1);
-    getRect(view, &viewRect, 0);
-
-#if defined(__arm64__)
-    kbRect = ((CGRect(*)(id,SEL))objc_msgSend)(info, sel_getUid("CGRectValue"));
-    fieldInView = (((CGRect(*)(id,SEL,CGRect,id))objc_msgSend)
-                   (view, sel_getUid("convertRect:fromView:"), fieldRect, data->activeField));
-#else
-    ((void(*)(CGRect*,id,SEL))objc_msgSend_stret)(&kbRect, info, sel_getUid("CGRectValue"));
-    (((void(*)(CGRect*,id,SEL,CGRect,id))objc_msgSend_stret)
-     (&fieldInView, view, sel_getUid("convertRect:fromView:"), fieldRect, data->activeField));
-#endif
-
-    viewRect.size.height -= kbRect.size.height;
-    setScrollInsets(data->scrollView, ((HAInsets){data->topOffset, 0, kbRect.size.height, 0}));
-
-    CGPoint upperY = fieldInView.origin;
-    upperY.y += fieldInView.size.height;
-    if (!(CGRectContainsPoint(viewRect, fieldInView.origin) &&
-          CGRectContainsPoint(viewRect, upperY))) {
-        (((void(*)(id,SEL,CGRect,bool))objc_msgSend)
-         (data->scrollView, sel_getUid("scrollRectToVisible:animated:"), fieldRect, true));
-    }
-}
-
-void inputVC_keyboardWillHide(id self, SEL _cmd _U_, id notif _U_) {
-    InputVC *data = (InputVC *) ((char *)self + VCSize);
-    setScrollInsets(data->scrollView, ((HAInsets){data->topOffset, 0, data->bottomOffset, 0}));
-    CGRect bounds;
-    getRect(data->vStack, &bounds, 1);
-    toggleScrolling(data->scrollView, (int) bounds.size.height >= data->scrollHeight);
 }
 
 void inputVC_fieldBeganEditing(id self, SEL _cmd _U_, id field) {
@@ -250,7 +262,7 @@ bool inputVC_fieldChanged(id self, SEL _cmd _U_, id field, CFRange range, CFStri
     }
 
     int i = (int) getTag(field);
-    InputView *child = (InputView *) ((char *)d->children[i] + ViewSize);
+    InputView *child = d->children[i];
 
     CFStringRef text = getText(field);
     if (range.location + range.length > CFStringGetLength(text)) return false;
@@ -259,7 +271,8 @@ bool inputVC_fieldChanged(id self, SEL _cmd _U_, id field, CFRange range, CFStri
 
     if (!CFStringGetLength(newText)) {
         CFRelease(newText);
-        showInputError(d, child);
+        enableButton(d->button, false);
+        showInputError(child);
         return true;
     }
 
@@ -267,14 +280,14 @@ bool inputVC_fieldChanged(id self, SEL _cmd _U_, id field, CFRange range, CFStri
     CFRelease(newText);
 
     if (newVal < child->minVal || newVal > child->maxVal) {
-        showInputError(d, child);
+        enableButton(d->button, false);
+        showInputError(child);
         return true;
     }
 
     inputView_reset(child, (short) newVal);
     for (i = 0; i < d->count; ++i) {
-        child = (InputView *) ((char *)d->children[i] + ViewSize);
-        if (!child->valid) return true;
+        if (!d->children[i]->valid) return true;
     }
 
     enableButton(d->button, true);

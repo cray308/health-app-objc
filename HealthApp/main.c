@@ -1,9 +1,6 @@
 #include "CocoaHelpers.h"
 #include "SetupWorkoutVC.h"
 #include "StatusView.h"
-#include "TotalWorkoutsView.h"
-#include "WorkoutTypeView.h"
-#include "LiftingView.h"
 #include "InputVC.h"
 #include "HomeVC.h"
 #include "HistoryVC.h"
@@ -42,18 +39,6 @@ int main(int argc, char *argv[]) {
     class_addMethod(ContainerViewClass, deinit, (IMP) containerView_deinit, voidSig);
     objc_registerClassPair(ContainerViewClass);
 
-    TotalWorkoutsViewClass = objc_allocateClassPair(ViewClass, "TotalWorkoutsView", 0);
-    class_addIvar(TotalWorkoutsViewClass, dataKey, sizeof(TotalWorkoutsView), 0, "{?=@@}");
-    objc_registerClassPair(TotalWorkoutsViewClass);
-
-    WorkoutTypeViewClass = objc_allocateClassPair(ViewClass, "WorkoutTypeView", 0);
-    class_addIvar(WorkoutTypeViewClass, dataKey, sizeof(WorkoutTypeView), 0, "{?=@@}");
-    objc_registerClassPair(WorkoutTypeViewClass);
-
-    LiftViewClass = objc_allocateClassPair(ViewClass, "LiftView", 0);
-    class_addIvar(LiftViewClass, dataKey, sizeof(LiftView), 0, "{?=@@}");
-    objc_registerClassPair(LiftViewClass);
-
     InputViewClass = objc_allocateClassPair(ViewClass, "InputView", 0);
     class_addIvar(InputViewClass, dataKey, sizeof(InputView), 0, "{?=@@@iisB}");
     class_addMethod(InputViewClass, deinit, (IMP) inputView_deinit, voidSig);
@@ -69,10 +54,6 @@ int main(int argc, char *argv[]) {
                     (IMP) inputVC_viewDidAppear, appearSig);
     class_addMethod(InputVCClass, sel_getUid("dismissKeyboard"),
                     (IMP) inputVC_dismissKeyboard, voidSig);
-    class_addMethod(InputVCClass, sel_getUid("keyboardShown:"),
-                    (IMP) inputVC_keyboardShown, tapSig);
-    class_addMethod(InputVCClass, sel_getUid("keyboardWillHide:"),
-                    (IMP) inputVC_keyboardWillHide, tapSig);
     class_addMethod(InputVCClass, sel_getUid("textFieldDidBeginEditing:"),
                     (IMP) inputVC_fieldBeganEditing, tapSig);
     class_addMethod(InputVCClass, sel_getUid("textFieldDidEndEditing:"),
@@ -111,7 +92,7 @@ int main(int argc, char *argv[]) {
     objc_registerClassPair(UpdateMaxesVCClass);
 
     HomeVCClass = objc_allocateClassPair(VCClass, "HomeVC", 0);
-    class_addIvar(HomeVCClass, dataKey, sizeof(HomeVC), 0, "{?=@@[2@]i}");
+    class_addIvar(HomeVCClass, dataKey, sizeof(HomeVC), 0, "{?=@@i}");
     class_addMethod(HomeVCClass, viewLoad, (IMP) homeVC_viewDidLoad, voidSig);
     class_addMethod(HomeVCClass, btnTap, (IMP) homeVC_workoutButtonTapped, tapSig);
     class_addMethod(HomeVCClass, sel_getUid("customButtonTapped:"),
@@ -121,8 +102,8 @@ int main(int argc, char *argv[]) {
     HistoryVCClass = objc_allocateClassPair(VCClass, "HistoryVC", 0);
     class_addProtocol(HistoryVCClass, getValueFormatterType());
     class_addIvar(HistoryVCClass, dataKey, sizeof(HistoryVC), 0,
-                  "{?={?={?=@@@@[3f][3f]}{?=[5@][4@]@[5@]@[3[4i]][3f]}"
-                  "{?=[4@][4@]@[4@]@[3[4f]][3f]}@[3i][3i]}@[3@]}");
+                  "{?={?={?=@@@[3f][3f]}{?=[5@][5@]@[3[4i]][3f]}"
+                  "{?=[4@][4@]@[3[4f]][3f]}@[3i][3i]}@[3@]}");
     class_addMethod(HistoryVCClass, viewLoad, (IMP) historyVC_viewDidLoad, voidSig);
     class_addMethod(HistoryVCClass, btnTap, (IMP) historyVC_updateSegment, tapSig);
     class_addMethod(HistoryVCClass, getValueFormatterAction(),
@@ -132,7 +113,7 @@ int main(int argc, char *argv[]) {
     WorkoutVCClass = objc_allocateClassPair(VCClass, "WorkoutVC", 0);
     class_addIvar(WorkoutVCClass, dataKey, sizeof(WorkoutVC), 0,
                   "{?=[2{?={_opaque_pthread_mutex_t=q[56c]}{_opaque_pthread_cond_t=q[40c]}@qiiI"
-                  "{?=CCC}}][2^{_opaque_pthread_t}]@@@[2@]{?=i{?=ii}}[4s]B}");
+                  "{?=CCC}}][2^{_opaque_pthread_t}]@@@{?=i{?=ii}}[4s]B}");
     class_addMethod(WorkoutVCClass, deinit, (IMP) workoutVC_deinit, voidSig);
     class_addMethod(WorkoutVCClass, viewLoad, (IMP) workoutVC_viewDidLoad, voidSig);
     class_addMethod(WorkoutVCClass, sel_getUid("startEndWorkout:"),

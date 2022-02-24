@@ -112,22 +112,10 @@ void getScreenBounds(CGRect *result) {
     getRect(screen, result, 1);
 }
 
-id createAttribString(CFStringRef text, CFDictionaryRef dict) {
-    id _obj = allocClass(objc_getClass("NSAttributedString"));
-    return (((id(*)(id,SEL,CFStringRef,CFDictionaryRef))objc_msgSend)
-            (_obj, sel_getUid("initWithString:attributes:"), text, dict));
-}
-
-CFStringRef localize(CFStringRef key) {
-    id bundle = getBundle();
-    return (((CFStringRef(*)(id,SEL,CFStringRef,CFStringRef,CFStringRef))objc_msgSend)
-            (bundle, sel_getUid("localizedStringForKey:value:table:"), key, NULL, NULL));
-}
-
-void fillStringArray(CFStringRef *arr, CFStringRef format, int count) {
+void fillStringArray(CFBundleRef bundle, CFStringRef *arr, CFStringRef format, int count) {
     for (int i = 0; i < count; ++i) {
         CFStringRef key = CFStringCreateWithFormat(NULL, NULL, format, i);
-        arr[i] = localize(key);
+        arr[i] = CFBundleCopyLocalizedString(bundle, key, NULL, NULL);
         CFRelease(key);
     }
 }

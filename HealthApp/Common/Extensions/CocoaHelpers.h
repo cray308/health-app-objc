@@ -1,8 +1,7 @@
 #ifndef CocoaBridging_h
 #define CocoaBridging_h
 
-#include <CoreFoundation/CFArray.h>
-#include <CoreFoundation/CFString.h>
+#include <CoreFoundation/CFBundle.h>
 #include <CoreGraphics/CGGeometry.h>
 #include <objc/message.h>
 
@@ -12,8 +11,6 @@
 #else
 #define customAssert(x)
 #endif
-
-#define max(a,b) ((a) >= (b) ? (a) : (b))
 
 #define _U_ __attribute__((__unused__))
 
@@ -68,13 +65,7 @@
 
 #define createImage(_name) staticMethodWithString(objc_getClass("UIImage"), sel_getUid("imageNamed:"), (_name))
 
-#define getBundle() staticMethod(objc_getClass("NSBundle"), sel_getUid("mainBundle"))
-
-#define getUserDefaults() staticMethod(objc_getClass("NSUserDefaults"), sel_getUid("standardUserDefaults"))
-
-#define getDeviceNotificationCenter() staticMethod(objc_getClass("NSNotificationCenter"), sel_getUid("defaultCenter"))
-
-#define getNotificationCenter() staticMethod(objc_getClass("UNUserNotificationCenter"), sel_getUid("currentNotificationCenter"))
+#define getUserNotificationCenter() staticMethod(objc_getClass("UNUserNotificationCenter"), sel_getUid("currentNotificationCenter"))
 
 extern const CFArrayCallBacks retainedArrCallbacks;
 extern Class ColorClass;
@@ -104,9 +95,7 @@ id barColorCreate(id self, SEL _cmd, int type);
 void setupAppColors(unsigned char darkMode, bool deleteOld);
 void getRect(id view, CGRect *result, char type);
 void getScreenBounds(CGRect *result);
-id createAttribString(CFStringRef text, CFDictionaryRef dict);
-CFStringRef localize(CFStringRef key);
-void fillStringArray(CFStringRef *arr, CFStringRef format, int count);
+void fillStringArray(CFBundleRef bundle, CFStringRef *arr, CFStringRef format, int count);
 CFArrayRef createSortDescriptors(CFStringRef key, bool ascending);
 
 #endif /* CocoaBridging_h */

@@ -3,7 +3,6 @@
 #include <dispatch/queue.h>
 #include <math.h>
 #include "AppUserData.h"
-#include "ContainerView.h"
 #include "ExerciseManager.h"
 #include "SetupWorkoutVC.h"
 #include "StatusView.h"
@@ -14,36 +13,33 @@ extern id kCAEmitterLayerLine;
 
 Class HomeVCClass;
 
-id homeVC_init(void) {
+static CFStringRef stateNames[2];
+
+id homeVC_init(CFBundleRef bundle) {
     id self = createNew(HomeVCClass);
-    HomeVC *data = (HomeVC *) ((char *)self + VCSize);
-    fillStringArray(data->stateNames, CFSTR("homeState%d"), 2);
+    fillStringArray(bundle, stateNames, CFSTR("homeState%d"), 2);
     return self;
 }
 
-void homeVC_updateWorkoutsList(id self, unsigned char completed) {
-    HomeVC *data = (HomeVC *) ((char *)self + VCSize);
-    ContainerView *planData = (ContainerView *) ((char *)data->planContainer + ViewSize);
-
+void homeVC_updateWorkoutsList(HomeVC *self, unsigned char completed) {
     id gray = createColor(ColorGray), green = createColor(ColorGreen);
-    CFArrayRef views = getArrangedSubviews(planData->stack);
-    for (int i = 0; i < data->numWorkouts; ++i) {
+    CFArrayRef views = getArrangedSubviews(self->planContainer->stack);
+    for (int i = 0; i < self->numWorkouts; ++i) {
         id v = (id) CFArrayGetValueAtIndex(views, i);
         StatusView *ptr = (StatusView *) ((char *)v + ViewSize);
         bool enable = !(completed & (1 << getTag(v)));
         enableButton(ptr->button, enable);
         setBackground(ptr->box, enable ? gray : green);
-        statusView_updateAccessibility(ptr, data->stateNames[enable]);
+        statusView_updateAccessibility(ptr, stateNames[enable]);
     }
 }
 
 void homeVC_createWorkoutsList(id self, unsigned char plan) {
     HomeVC *data = (HomeVC *) ((char *)self + VCSize);
-    ContainerView *planData = (ContainerView *) ((char *)data->planContainer + ViewSize);
-    ContainerView *customData = (ContainerView *) ((char *)data->customContainer + ViewSize);
+    id planContainer = (id) ((char *)data->planContainer - ViewSize);
 
     data->numWorkouts = 0;
-    CFArrayRef views = getArrangedSubviews(planData->stack);
+    CFArrayRef views = getArrangedSubviews(data->planContainer->stack);
     int count = (int) CFArrayGetCount(views);
     for (int i = 0; i < count; ++i) {
         id v = (id) CFArrayGetValueAtIndex(views, i);
@@ -51,8 +47,8 @@ void homeVC_createWorkoutsList(id self, unsigned char plan) {
     }
 
     if ((plan & 128) || userData->planStart > time(NULL)) {
-        hideView(data->planContainer, true);
-        hideView(customData->divider, true);
+        hideView(planContainer, true);
+        hideView(data->customContainer->divider, true);
         return;
     }
 
@@ -61,27 +57,25 @@ void homeVC_createWorkoutsList(id self, unsigned char plan) {
 
     SEL btnTap = sel_getUid("buttonTapped:");
     CFStringRef days[7];
-    fillStringArray(days, CFSTR("dayNames%d"), 7);
+    fillStringArray(CFBundleGetMainBundle(), days, CFSTR("dayNames%d"), 7);
     for (int i = 0; i < 7; ++i) {
         if (!workoutNames[i]) continue;
         id btn = statusView_init(workoutNames[i], i, self, btnTap);
         StatusView *ptr = (StatusView *) ((char *)btn + ViewSize);
         setLabelText(ptr->headerLabel, days[i]);
-        addArrangedSubview(planData->stack, btn);
-        CFRelease(workoutNames[i]);
+        addArrangedSubview(data->planContainer->stack, btn);
+        CFRelease(days[i]);
         releaseObj(btn);
         data->numWorkouts += 1;
     }
 
-    hideView(data->planContainer, false);
-    hideView(customData->divider, false);
-    homeVC_updateWorkoutsList(self, userData->completedWorkouts);
+    hideView(planContainer, false);
+    hideView(data->customContainer->divider, false);
+    homeVC_updateWorkoutsList(data, userData->completedWorkouts);
 }
 
 void homeVC_updateColors(id self) {
     HomeVC *data = (HomeVC *) ((char *)self + VCSize);
-    ContainerView *planData = (ContainerView *) ((char *)data->planContainer + ViewSize);
-    ContainerView *customData = (ContainerView *) ((char *)data->customContainer + ViewSize);
     setBackground(getView(self), createColor(ColorPrimaryBGGrouped));
     SEL enabled = sel_getUid("isEnabled");
     id bg = createColor(ColorSecondaryBGGrouped), divColor = createColor(ColorSeparator);
@@ -89,7 +83,7 @@ void homeVC_updateColors(id self) {
     id gray = createColor(ColorGray), green = createColor(ColorGreen);
     containerView_updateColors(data->planContainer, label, divColor);
     containerView_updateColors(data->customContainer, label, divColor);
-    CFArrayRef views = getArrangedSubviews(planData->stack);
+    CFArrayRef views = getArrangedSubviews(data->planContainer->stack);
     for (int i = 0; i < data->numWorkouts; ++i) {
         id v = (id) CFArrayGetValueAtIndex(views, i);
         StatusView *ptr = (StatusView *) ((char *)v + ViewSize);
@@ -99,7 +93,7 @@ void homeVC_updateColors(id self) {
         setBackground(ptr->button, bg);
         setBackground(ptr->box, getBool(ptr->button, enabled) ? gray : green);
     }
-    views = getArrangedSubviews(customData->stack);
+    views = getArrangedSubviews(data->customContainer->stack);
     for (int i = 0; i < 5; ++i) {
         id v = (id) CFArrayGetValueAtIndex(views, i);
         StatusView *ptr = (StatusView *) ((char *)v + ViewSize);
@@ -112,21 +106,22 @@ void homeVC_viewDidLoad(id self, SEL _cmd) {
     struct objc_super super = {self, VCClass};
     ((void(*)(struct objc_super *,SEL))objc_msgSendSuper)(&super, _cmd);
 
+    CFBundleRef bundle = CFBundleGetMainBundle();
     HomeVC *data = (HomeVC *) ((char *)self + VCSize);
     id view = getView(self);
     setBackground(view, createColor(ColorPrimaryBGGrouped));
-    setVCTitle(self, localize(CFSTR("tabs0")));
+    setVCTitle(self, CFBundleCopyLocalizedString(bundle, CFSTR("tabs0"), NULL, NULL));
 
     CFStringRef titles[5], headers[2];
-    fillStringArray(titles, CFSTR("homeWorkoutType%d"), 5);
-    fillStringArray(headers, CFSTR("homeHeader%d"), 2);
+    fillStringArray(bundle, titles, CFSTR("homeWorkoutType%d"), 5);
+    fillStringArray(bundle, headers, CFSTR("homeHeader%d"), 2);
 
-    data->planContainer = containerView_init(headers[0], 0, true);
-    ContainerView *planData = (ContainerView *) ((char *)data->planContainer + ViewSize);
-    hideView(planData->divider, true);
-    data->customContainer = containerView_init(headers[1], 4, true);
-    ContainerView *customData = (ContainerView *) ((char *)data->customContainer + ViewSize);
-    id vStack = createStackView((id[]){data->planContainer, data->customContainer}, 2, 1, 20,
+    id planContainer = containerView_init(headers[0], 0, true);
+    data->planContainer = (ContainerView *) ((char *)planContainer + ViewSize);
+    hideView(data->planContainer->divider, true);
+    id customContainer = containerView_init(headers[1], 4, true);
+    data->customContainer = (ContainerView *) ((char *)customContainer + ViewSize);
+    id vStack = createStackView((id[]){planContainer, customContainer}, 2, 1, 20,
                                 (Padding){10, 0, 16, 0});
 
     SEL btnTap = sel_getUid("customButtonTapped:");
@@ -135,7 +130,7 @@ void homeVC_viewDidLoad(id self, SEL _cmd) {
         StatusView *ptr = (StatusView *) ((char *)btn + ViewSize);
         hideView(ptr->box, true);
         statusView_updateAccessibility(ptr, NULL);
-        addArrangedSubview(customData->stack, btn);
+        addArrangedSubview(data->customContainer->stack, btn);
         releaseObj(btn);
     }
 
@@ -246,9 +241,12 @@ static void showConfetti(id self) {
                    dispatch_get_main_queue(), ^(void) {
         removeView(confettiView);
         releaseObj(confettiView);
-        id ctrl = createAlertController(localize(CFSTR("homeAlertTitle")),
-                                        localize(CFSTR("homeAlertMessage")));
-        addAlertAction(ctrl, localize(CFSTR("ok")), 0, NULL);
+        CFBundleRef bundle = CFBundleGetMainBundle();
+        id ctrl = createAlertController(CFBundleCopyLocalizedString(bundle, CFSTR("homeAlertTitle"),
+                                                                    NULL, NULL),
+                                        CFBundleCopyLocalizedString(bundle, CFSTR("homeAlertMessage"),
+                                                                    NULL, NULL));
+        addAlertAction(ctrl, CFBundleCopyLocalizedString(bundle, CFSTR("ok"), NULL, NULL), 0, NULL);
         presentVC(self, ctrl);
     });
 }
@@ -260,7 +258,7 @@ void homeVC_handleFinishedWorkout(id self, unsigned char completed) {
         if ((1 << i) & completed)
             ++total;
     }
-    homeVC_updateWorkoutsList(self, completed);
+    homeVC_updateWorkoutsList(data, completed);
     if (data->numWorkouts == total) {
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 2500000000),
                        dispatch_get_main_queue(), ^(void) {

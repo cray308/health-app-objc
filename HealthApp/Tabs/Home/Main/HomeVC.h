@@ -1,20 +1,19 @@
 #ifndef HomeVC_h
 #define HomeVC_h
 
-#include <CoreFoundation/CFBase.h>
-#include <objc/runtime.h>
+#include <CoreFoundation/CFBundle.h>
+#include "ContainerView.h"
 
 extern Class HomeVCClass;
 
 typedef struct {
-    id planContainer;
-    id customContainer;
-    CFStringRef stateNames[2];
+    ContainerView *planContainer;
+    ContainerView *customContainer;
     int numWorkouts;
 } HomeVC;
 
-id homeVC_init(void);
-void homeVC_updateWorkoutsList(id self, unsigned char completed);
+id homeVC_init(CFBundleRef bundle);
+void homeVC_updateWorkoutsList(HomeVC *self, unsigned char completed);
 void homeVC_createWorkoutsList(id self, unsigned char plan);
 void homeVC_updateColors(id self);
 void homeVC_navigateToAddWorkout(id self, void *workout);

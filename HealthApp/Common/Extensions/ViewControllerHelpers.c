@@ -1,4 +1,5 @@
 #include "ViewControllerHelpers.h"
+#include <CoreFoundation/CFAttributedString.h>
 #include "AppDelegate.h"
 
 #define updateKVPair(_o, _k, _v) ((void(*)(id,SEL,id,CFStringRef))objc_msgSend)\
@@ -68,6 +69,7 @@ void setupNavBar(id vc, bool modal) {
 void setVCTitle(id vc, CFStringRef title) {
     id navItem = getNavItem(vc);
     setString(navItem, sel_getUid("setTitle:"), title);
+    CFRelease(title);
 }
 
 int dmNavVC_getStatusBarStyle(id self _U_, SEL _cmd _U_) { return 0; }
@@ -104,6 +106,15 @@ void dismissPresentedVC(id presenter, Callback handler) {
     }));
 }
 
+id createAlertController(CFStringRef title, CFStringRef message) {
+    id ctrl = (((id(*)(Class,SEL,CFStringRef,CFStringRef))objc_msgSend)
+               (objc_getClass("UIAlertController"),
+                sel_getUid("getCtrlWithTitle:message:"), title, message));
+    CFRelease(title);
+    CFRelease(message);
+    return ctrl;
+}
+
 id alertCtrlCreate(id self _U_, SEL _cmd _U_, CFStringRef title, CFStringRef message) {
     return (((id(*)(Class,SEL,CFStringRef,CFStringRef,long))objc_msgSend)
             (objc_getClass("UIAlertController"),
@@ -115,10 +126,10 @@ id alertCtrlCreateLegacy(id self, SEL _cmd _U_, CFStringRef title, CFStringRef m
     id fg = createColor(ColorLabel);
     CFDictionaryRef titleDict = createTitleTextDict(fg, createCustomFont(WeightSemiBold, 17));
     CFDictionaryRef msgDict = createTitleTextDict(fg, createCustomFont(WeightReg, 13));
-    id titleString = createAttribString(title, titleDict);
-    id msgString = createAttribString(message, msgDict);
-    updateKVPair(vc, CFSTR("attributedTitle"), titleString);
-    updateKVPair(vc, CFSTR("attributedMessage"), msgString);
+    CFAttributedStringRef titleString = CFAttributedStringCreate(NULL, title, titleDict);
+    CFAttributedStringRef msgString = CFAttributedStringCreate(NULL, message, msgDict);
+    updateKVPair(vc, CFSTR("attributedTitle"), (id) titleString);
+    updateKVPair(vc, CFSTR("attributedMessage"), (id) msgString);
 
     id view = getView(vc);
     SEL sv = sel_getUid("subviews");
@@ -130,8 +141,8 @@ id alertCtrlCreateLegacy(id self, SEL _cmd _U_, CFStringRef title, CFStringRef m
 
     CFRelease(titleDict);
     CFRelease(msgDict);
-    releaseObj(titleString);
-    releaseObj(msgString);
+    CFRelease(titleString);
+    CFRelease(msgString);
     return vc;
 }
 
@@ -144,4 +155,5 @@ void addAlertAction(id ctrl, CFStringRef title, int style, Callback handler) {
         appDel_setWindowTint(createColor(ColorRed));
     }));
     setObject(ctrl, sel_getUid("addAction:"), action);
+    CFRelease(title);
 }

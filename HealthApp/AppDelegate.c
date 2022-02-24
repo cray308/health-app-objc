@@ -1,4 +1,6 @@
 #include "AppDelegate.h"
+#include <CoreFoundation/CFNumber.h>
+#include <CoreFoundation/CFPreferences.h>
 #include "AppUserData.h"
 #include "HomeVC.h"
 #include "HistoryVC.h"
@@ -25,31 +27,33 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
     self->window = createObjectWithFrame(objc_getClass("UIWindow"), bounds);
 
     CFStringRef hasLaunchedKey = CFSTR("hasLaunched");
-    id defaults = getUserDefaults();
-    bool hasLaunched = (((bool(*)(id,SEL,CFStringRef))objc_msgSend)
-                        (defaults, sel_getUid("boolForKey:"), hasLaunchedKey));
+    CFBooleanRef value = CFPreferencesCopyAppValue(hasLaunchedKey, kCFPreferencesCurrentApplication);
 
     persistenceService_init();
     int tzOffset = 0, week = 0;
 
-    if (!hasLaunched) {
-        (((void(*)(id,SEL,bool,CFStringRef))objc_msgSend)
-         (defaults, sel_getUid("setBool:forKey:"), true, hasLaunchedKey));
+    if (value == NULL) {
+        CFNumberRef newValue = CFNumberCreate(NULL, kCFNumberCharType, &(bool){true});
+        CFPreferencesSetAppValue(hasLaunchedKey, newValue, kCFPreferencesCurrentApplication);
+        CFPreferencesAppSynchronize(kCFPreferencesCurrentApplication);
+        CFRelease(newValue);
         userInfo_create(legacy, &info);
 #if DEBUG
         persistenceService_create();
 #endif
-        id center = getNotificationCenter();
+        id center = getUserNotificationCenter();
         (((void(*)(id,SEL,unsigned long,void(^)(BOOL,id)))objc_msgSend)
          (center, sel_getUid("requestAuthorizationWithOptions:completionHandler:"),
           6, ^(BOOL granted _U_, id error _U_) {}));
     } else {
         tzOffset = userInfo_initFromStorage(legacy, &week, &info);
+        CFRelease(value);
     }
 
-    initValidatorStrings();
-    initExerciseData(week);
-    initWorkoutStrings();
+    CFBundleRef bundle = CFBundleGetMainBundle();
+    initValidatorStrings(bundle);
+    initExerciseData(week, bundle);
+    initWorkoutStrings(bundle);
     char const *colorCreateSig = "@@:i";
     Class colorMeta = objc_getMetaClass("UIColor");
     Class alertMeta = objc_getMetaClass("UIAlertController");
@@ -99,9 +103,9 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
     id controllers[3], items[3];
     CFStringRef imgNames[] = {CFSTR("ico_house"), CFSTR("ico_chart"), CFSTR("ico_gear")};
     CFStringRef titles[3];
-    fillStringArray(titles, CFSTR("tabs%d"), 3);
-    self->children[0] = homeVC_init();
-    self->children[1] = historyVC_init(&fetchArg, &fetchHandler);
+    fillStringArray(bundle, titles, CFSTR("tabs%d"), 3);
+    self->children[0] = homeVC_init(bundle);
+    self->children[1] = historyVC_init(bundle, &fetchArg, &fetchHandler);
     self->children[2] = settingsVC_init();
 
     for (int i = 0; i < 3; ++i) {
@@ -112,6 +116,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
         controllers[i] = createNavVC(self->children[i]);
         setObject(controllers[i], setItem, items[i]);
         releaseObj(items[i]);
+        CFRelease(titles[i]);
     }
 
     CFArrayRef array = CFArrayCreate(NULL, (const void **)controllers, 3, NULL);
@@ -171,13 +176,13 @@ void appDel_deleteAppData(void) {
     bool updateHome = appUserData_deleteSavedData();
     persistenceService_deleteUserData();
     if (updateHome)
-        homeVC_updateWorkoutsList(self->children[0], 0);
+        homeVC_updateWorkoutsList((HomeVC *) ((char *)self->children[0] + VCSize), 0);
     historyVC_clearData(self->children[1]);
 }
 
 void appDel_updateMaxWeights(short *weights) {
-    AppDelegate *self = getAppDel();
+    id vc = getAppDel()->children[2];
     short results[4];
-    if (appUserData_updateWeightMaxes(weights, results) && isViewLoaded(self->children[2]))
-        settingsVC_updateWeightFields(self->children[2], results);
+    if (appUserData_updateWeightMaxes(weights, results) && isViewLoaded(vc))
+        inputVC_updateFields((InputVC *) ((char *)vc + VCSize), results);
 }

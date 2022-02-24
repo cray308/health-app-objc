@@ -1,5 +1,6 @@
 #include "AppUserData.h"
 #include <CoreFoundation/CFNumber.h>
+#include <CoreFoundation/CFPreferences.h>
 #include <stdlib.h>
 #include <string.h>
 #include "CocoaHelpers.h"
@@ -55,22 +56,20 @@ static time_t calcStartOfWeek(time_t date) {
     return getStartOfDay(date, &localInfo);
 }
 
-static CFDictionaryRef getSavedInfo(id defaults) {
-    return (((CFDictionaryRef(*)(id,SEL,CFStringRef))objc_msgSend)
-            (defaults, sel_getUid("dictionaryForKey:"), dictKey));
+static CFMutableDictionaryRef createMutableDict(void) {
+    CFDictionaryRef saved = CFPreferencesCopyAppValue(dictKey, kCFPreferencesCurrentApplication);
+    CFMutableDictionaryRef newDict = CFDictionaryCreateMutableCopy(NULL, 10, saved);
+    CFRelease(saved);
+    return newDict;
 }
 
-static CFMutableDictionaryRef createMutableDict(id defaults) {
-    return CFDictionaryCreateMutableCopy(NULL, 10, getSavedInfo(defaults));
-}
-
-static void saveChanges(id defaults, CFMutableDictionaryRef dict CF_CONSUMED,
+static void saveChanges(CFMutableDictionaryRef dict CF_CONSUMED,
                         CFStringRef *keys, CFNumberRef *values, int count) {
     for (int i = 0; i < count; ++i) {
         CFDictionaryReplaceValue(dict, keys[i], values[i]);
     }
-    (((void(*)(id,SEL,CFDictionaryRef,CFStringRef))objc_msgSend)
-     (defaults, sel_getUid("setObject:forKey:"), dict, dictKey));
+    CFPreferencesSetAppValue(dictKey, dict, kCFPreferencesCurrentApplication);
+    CFPreferencesAppSynchronize(kCFPreferencesCurrentApplication);
     CFRelease(dict);
     for (int i = 0; i < count; ++i) {
         CFRelease(values[i]);
@@ -98,8 +97,8 @@ void userInfo_create(bool legacy, UserInfo const **dataOut) {
     CFDictionaryRef dict = CFDictionaryCreate(NULL, DictKeys, (const void **)values, 10,
                                               &kCFCopyStringDictionaryKeyCallBacks,
                                               &kCFTypeDictionaryValueCallBacks);
-    (((void(*)(id,SEL,CFDictionaryRef,CFStringRef))objc_msgSend)
-     (getUserDefaults(), sel_getUid("setObject:forKey:"), dict, dictKey));
+    CFPreferencesSetAppValue(dictKey, dict, kCFPreferencesCurrentApplication);
+    CFPreferencesAppSynchronize(kCFPreferencesCurrentApplication);
     CFRelease(dict);
     for (int i = 0; i < 10; ++i) {
         CFRelease(values[i]);
@@ -116,8 +115,7 @@ int userInfo_initFromStorage(bool legacy, int *weekInPlan, UserInfo const **data
     time_t now = time(NULL);
     time_t weekStart = calcStartOfWeek(now), savedWeekStart, planStart;
     unsigned char changes = 0, plan, completed, savedDM;
-    id defaults = getUserDefaults();
-    CFDictionaryRef savedInfo = getSavedInfo(defaults);
+    CFDictionaryRef savedInfo = CFPreferencesCopyAppValue(dictKey, kCFPreferencesCurrentApplication);
 
     CFNumberRef value = CFDictionaryGetValue(savedInfo, DictKeys[0]);
     CFNumberGetValue(value, kCFNumberLongType, &savedWeekStart);
@@ -193,7 +191,7 @@ int userInfo_initFromStorage(bool legacy, int *weekInPlan, UserInfo const **data
             values[nChanges++] = CFNumberCreate(NULL, kCFNumberCharType, &savedDM);
         }
         CFMutableDictionaryRef dict = CFDictionaryCreateMutableCopy(NULL, 10, savedInfo);
-        saveChanges(defaults, dict, keys, values, nChanges);
+        saveChanges(dict, keys, values, nChanges);
     }
 
     UserInfo data = {planStart, weekStart, {0}, savedDM, plan, completed};
@@ -206,16 +204,16 @@ int userInfo_initFromStorage(bool legacy, int *weekInPlan, UserInfo const **data
     memcpy(userData, &data, sizeof(UserInfo));
     *dataOut = userData;
     *weekInPlan = week;
+    CFRelease(savedInfo);
     return tzDiff;
 }
 
 bool appUserData_deleteSavedData(void) {
     if (userData->completedWorkouts) {
         userData->completedWorkouts = 0;
-        id defaults = getUserDefaults();
         CFStringRef keys[] = {DictKeys[ICompletedWorkouts]};
         CFNumberRef values[] = {CFNumberCreate(NULL, kCFNumberCharType, &(unsigned char){0})};
-        saveChanges(defaults, createMutableDict(defaults), keys, values, 1);
+        saveChanges(createMutableDict(), keys, values, 1);
         return true;
     }
     return false;
@@ -225,10 +223,9 @@ unsigned char appUserData_addCompletedWorkout(unsigned char day) {
     unsigned char completed = userData->completedWorkouts;
     completed |= (1 << day);
     userData->completedWorkouts = completed;
-    id defaults = getUserDefaults();
     CFStringRef keys[] = {DictKeys[ICompletedWorkouts]};
     CFNumberRef values[] = {CFNumberCreate(NULL, kCFNumberCharType, &completed)};
-    saveChanges(defaults, createMutableDict(defaults), keys, values, 1);
+    saveChanges(createMutableDict(), keys, values, 1);
     return completed;
 }
 
@@ -254,10 +251,8 @@ bool appUserData_updateWeightMaxes(short *weights, short *output) {
     CFStringRef keys[4];
     CFNumberRef values[4];
     int nChanges = updateWeight(weights, output, keys, values);
-    if (nChanges) {
-        id defaults = getUserDefaults();
-        saveChanges(defaults, createMutableDict(defaults), keys, values, nChanges);
-    }
+    if (nChanges)
+        saveChanges(createMutableDict(), keys, values, nChanges);
     return nChanges;
 }
 
@@ -292,9 +287,7 @@ unsigned char appUserData_updateUserSettings(unsigned char plan,
     }
 
     nChanges += updateWeight(weights, (short[]){0,0,0,0}, &keys[nChanges], &values[nChanges]);
-    if (nChanges) {
-        id defaults = getUserDefaults();
-        saveChanges(defaults, createMutableDict(defaults), keys, values, nChanges);
-    }
+    if (nChanges)
+        saveChanges(createMutableDict(), keys, values, nChanges);
     return changes;
 }

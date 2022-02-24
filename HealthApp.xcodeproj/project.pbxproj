@@ -35,12 +35,6 @@
 		614DA69B270A8D1F00EC90C4 /* ExerciseManager.c in Sources */ = {isa = PBXBuildFile; fileRef = 614DA699270A8D1F00EC90C4 /* ExerciseManager.c */; };
 		614DC13026082BBE00B9588E /* ViewControllerHelpers.c in Sources */ = {isa = PBXBuildFile; fileRef = 614DC12F26082BBE00B9588E /* ViewControllerHelpers.c */; };
 		615086ED26D3222500521269 /* SwiftBridging.m in Sources */ = {isa = PBXBuildFile; fileRef = 615086EC26D3222500521269 /* SwiftBridging.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		61592A84274861B600789264 /* TotalWorkoutsView.h in Headers */ = {isa = PBXBuildFile; fileRef = 61592A82274861B600789264 /* TotalWorkoutsView.h */; };
-		61592A85274861B600789264 /* TotalWorkoutsView.c in Sources */ = {isa = PBXBuildFile; fileRef = 61592A83274861B600789264 /* TotalWorkoutsView.c */; };
-		61592A892748651500789264 /* WorkoutTypeView.h in Headers */ = {isa = PBXBuildFile; fileRef = 61592A872748651500789264 /* WorkoutTypeView.h */; };
-		61592A8A2748651500789264 /* WorkoutTypeView.c in Sources */ = {isa = PBXBuildFile; fileRef = 61592A882748651500789264 /* WorkoutTypeView.c */; };
-		61592AB027488DD000789264 /* LiftingView.h in Headers */ = {isa = PBXBuildFile; fileRef = 61592AAE27488DD000789264 /* LiftingView.h */; };
-		61592AB127488DD000789264 /* LiftingView.c in Sources */ = {isa = PBXBuildFile; fileRef = 61592AAF27488DD000789264 /* LiftingView.c */; };
 		61594D0C26068105000D01A1 /* AppDelegate.c in Sources */ = {isa = PBXBuildFile; fileRef = 61594D0B26068105000D01A1 /* AppDelegate.c */; };
 		61594D1826068105000D01A1 /* HealthApp.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 61594D1626068105000D01A1 /* HealthApp.xcdatamodeld */; };
 		61594D1A26068106000D01A1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 61594D1926068106000D01A1 /* Assets.xcassets */; };
@@ -113,12 +107,6 @@
 		614DC12F26082BBE00B9588E /* ViewControllerHelpers.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = ViewControllerHelpers.c; sourceTree = "<group>"; };
 		615086EC26D3222500521269 /* SwiftBridging.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SwiftBridging.m; sourceTree = "<group>"; };
 		615086F026D3223400521269 /* SwiftBridging.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SwiftBridging.h; sourceTree = "<group>"; };
-		61592A82274861B600789264 /* TotalWorkoutsView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TotalWorkoutsView.h; sourceTree = "<group>"; };
-		61592A83274861B600789264 /* TotalWorkoutsView.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = TotalWorkoutsView.c; sourceTree = "<group>"; };
-		61592A872748651500789264 /* WorkoutTypeView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WorkoutTypeView.h; sourceTree = "<group>"; };
-		61592A882748651500789264 /* WorkoutTypeView.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = WorkoutTypeView.c; sourceTree = "<group>"; };
-		61592AAE27488DD000789264 /* LiftingView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LiftingView.h; sourceTree = "<group>"; };
-		61592AAF27488DD000789264 /* LiftingView.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = LiftingView.c; sourceTree = "<group>"; };
 		61594D0726068105000D01A1 /* HealthApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HealthApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		61594D0B26068105000D01A1 /* AppDelegate.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = AppDelegate.c; sourceTree = "<group>"; };
 		61594D1726068105000D01A1 /* HealthApp.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = HealthApp.xcdatamodel; sourceTree = "<group>"; };
@@ -274,12 +262,6 @@
 			children = (
 				611EDDE727476ED50064B254 /* HistoryVC.c */,
 				611EDDE627476ED50064B254 /* HistoryVC.h */,
-				61592AAF27488DD000789264 /* LiftingView.c */,
-				61592AAE27488DD000789264 /* LiftingView.h */,
-				61592A83274861B600789264 /* TotalWorkoutsView.c */,
-				61592A82274861B600789264 /* TotalWorkoutsView.h */,
-				61592A882748651500789264 /* WorkoutTypeView.c */,
-				61592A872748651500789264 /* WorkoutTypeView.h */,
 			);
 			path = History;
 			sourceTree = "<group>";
@@ -363,8 +345,6 @@
 				611EDDC62744CB2D0064B254 /* UpdateMaxesVC.h in Headers */,
 				61FFEEA2272CCCB5002BFFA6 /* AppDelegate.h in Headers */,
 				611EDDE827476ED50064B254 /* HistoryVC.h in Headers */,
-				61592A892748651500789264 /* WorkoutTypeView.h in Headers */,
-				61592AB027488DD000789264 /* LiftingView.h in Headers */,
 				611EDDA9274355F10064B254 /* HomeVC.h in Headers */,
 				611EDDBF2744A9F70064B254 /* SetupWorkoutVC.h in Headers */,
 				610B92B9270A6E9000358DBD /* Views.h in Headers */,
@@ -374,7 +354,6 @@
 				611EDDB32743660C0064B254 /* InputVC.h in Headers */,
 				611EDDA32741F8750064B254 /* StatusView.h in Headers */,
 				610B92CB270A7F4900358DBD /* ContainerView.h in Headers */,
-				61592A84274861B600789264 /* TotalWorkoutsView.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -496,9 +475,6 @@
 				611EDDBB274487010064B254 /* SettingsVC.c in Sources */,
 				611EDDAA274355F10064B254 /* HomeVC.c in Sources */,
 				611EDDC02744A9F70064B254 /* SetupWorkoutVC.c in Sources */,
-				61592A85274861B600789264 /* TotalWorkoutsView.c in Sources */,
-				61592A8A2748651500789264 /* WorkoutTypeView.c in Sources */,
-				61592AB127488DD000789264 /* LiftingView.c in Sources */,
 				611EDDE927476ED50064B254 /* HistoryVC.c in Sources */,
 				611EDDD12745FEA70064B254 /* WorkoutVC.c in Sources */,
 				611EDDC72744CB2D0064B254 /* UpdateMaxesVC.c in Sources */,

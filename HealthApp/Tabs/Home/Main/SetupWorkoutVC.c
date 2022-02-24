@@ -27,12 +27,15 @@ void setupWorkoutVC_viewDidLoad(id self, SEL _cmd) {
     struct objc_super super = {self, InputVCClass};
     ((void(*)(struct objc_super *,SEL))objc_msgSendSuper)(&super, _cmd);
 
+    CFBundleRef bundle = CFBundleGetMainBundle();
     InputVC *parent = (InputVC *) ((char *)self + VCSize);
     SetupWorkoutVC *data = (SetupWorkoutVC *) ((char *)self + InputVCSize);
     id view = getView(self);
     setBackground(view, createColor(ColorSecondaryBG));
 
-    CFStringRef pickerTitle = localize(CFSTR("setupWorkoutTitle"));
+    CFStringRef pickerTitle = CFBundleCopyLocalizedString(bundle, CFSTR("setupWorkoutTitle"),
+                                                          NULL, NULL);
+    CFRetain(pickerTitle);
     id workoutLabel = createLabel(pickerTitle, TextFootnote, false);
     CFStringRef defaultTitle = CFArrayGetValueAtIndex(data->names, 0);
     data->workoutTextField = createTextfield(nil, defaultTitle, pickerTitle, 1, 0, 0);
@@ -47,8 +50,10 @@ void setupWorkoutVC_viewDidLoad(id self, SEL _cmd) {
     addArrangedSubview(parent->vStack, workoutContainer);
 
     SEL tapSel = sel_getUid("buttonTapped:");
-    id cancelButton = createButton(localize(CFSTR("cancel")), ColorBlue, 0, 0, self, tapSel);
-    parent->button = createButton(localize(CFSTR("go")), ColorBlue, 0, 1, self, tapSel);
+    id cancelButton = createButton(CFBundleCopyLocalizedString(bundle, CFSTR("cancel"), NULL, NULL),
+                                   ColorBlue, 0, 0, self, tapSel);
+    parent->button = createButton(CFBundleCopyLocalizedString(bundle, CFSTR("go"), NULL, NULL),
+                                  ColorBlue, 0, 1, self, tapSel);
 
     CGRect frame;
     getRect(view, &frame, 0);
@@ -59,28 +64,26 @@ void setupWorkoutVC_viewDidLoad(id self, SEL _cmd) {
     short maxes[] = {5, 5, 100}, mins[] = {1, 1, 1};
     CFStringRef rows[] = {CFSTR("setupWorkoutSets"), CFSTR("setupWorkoutReps"), NULL};
 
-    switch (data->type) {
-        case WorkoutStrength:
-            rows[2] = CFSTR("setupWorkoutMaxWeight");
-            break;
-        case WorkoutSE:
-            maxes[0] = 3;
-            maxes[1] = 50;
-            break;
-        case WorkoutEndurance:
-            rows[0] = NULL;
-            rows[1] = CFSTR("setupWorkoutDuration");
-            maxes[1] = 180;
-            mins[1] = 15;
-            break;
-        default:
-            rows[0] = rows[1] = NULL;
-            enableButton(parent->button, true);
+    if (data->type == WorkoutStrength) {
+        rows[2] = CFSTR("setupWorkoutMaxWeight");
+    } else if (data->type == WorkoutSE) {
+        maxes[0] = 3;
+        maxes[1] = 50;
+    } else if (data->type == WorkoutEndurance) {
+        rows[0] = NULL;
+        rows[1] = CFSTR("setupWorkoutDuration");
+        maxes[1] = 180;
+        mins[1] = 15;
+    } else {
+        rows[0] = rows[1] = NULL;
+        enableButton(parent->button, true);
     }
 
     for (int i = 0; i < 3; ++i) {
-        if (rows[i])
-            inputVC_addChild(self, localize(rows[i]), mins[i], maxes[i]);
+        if (rows[i]) {
+            inputVC_addChild(self, CFBundleCopyLocalizedString(bundle, rows[i], NULL, NULL),
+                             mins[i], maxes[i]);
+        }
     }
 
     releaseObj(workoutLabel);
@@ -96,18 +99,18 @@ void setupWorkoutVC_tappedButton(id self, SEL _cmd _U_, id btn) {
     }
 
     SetupWorkoutVC *data = (SetupWorkoutVC *) ((char *)self + InputVCSize);
-    id *fields = ((InputVC *) ((char *)self + VCSize))->children;
+    InputView **fields = ((InputVC *) ((char *)self + VCSize))->children;
     short weight = 0, sets = 0, reps = 0;
     switch (data->type) {
         case WorkoutStrength:
-            weight = ((InputView *) ((char *)fields[2] + ViewSize))->result;
+            weight = fields[2]->result;
         case WorkoutSE:
-            sets = ((InputView *) ((char *)fields[0] + ViewSize))->result;
-            reps = ((InputView *) ((char *)fields[1] + ViewSize))->result;
+            sets = fields[0]->result;
+            reps = fields[1]->result;
             break;
 
         case WorkoutEndurance:
-            reps = ((InputView *) ((char *)fields[0] + ViewSize))->result;
+            reps = fields[0]->result;
         default:
             break;
     }
@@ -131,13 +134,14 @@ long setupWorkoutVC_numberOfRows(id self, SEL _cmd _U_, id picker _U_, long sect
     return CFArrayGetCount(((SetupWorkoutVC *) ((char *)self + InputVCSize))->names);
 }
 
-id setupWorkoutVC_attrTitleForRow(id self, SEL _cmd _U_,
-                                  id picker _U_, long row, long section _U_) {
+CFAttributedStringRef setupWorkoutVC_attrTitleForRow(id self, SEL _cmd _U_,
+                                                     id picker _U_, long row, long section _U_) {
     SetupWorkoutVC *data = (SetupWorkoutVC *) ((char *)self + InputVCSize);
     id color = createColor(row == data->index ? ColorLabel : ColorSecondaryLabel);
     CFDictionaryRef dict = createTitleTextDict(color, createFont(TextTitle3));
-    id attrString = createAttribString(CFArrayGetValueAtIndex(data->names, row), dict);
-    voidFunc(attrString, sel_getUid("autorelease"));
+    CFStringRef str = CFArrayGetValueAtIndex(data->names, row);
+    CFAttributedStringRef attrString = CFAttributedStringCreate(NULL, str, dict);
+    CFAutorelease(attrString);
     CFRelease(dict);
     return attrString;
 }

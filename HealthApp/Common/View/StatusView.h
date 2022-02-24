@@ -14,7 +14,7 @@ typedef struct {
     ExerciseEntry *entry;
 } StatusView;
 
-id statusView_init(CFStringRef text, int tag, id target, SEL action);
+id statusView_init(CFStringRef text CF_CONSUMED, int tag, id target, SEL action);
 void statusView_deinit(id self, SEL _cmd);
 void statusView_updateAccessibility(StatusView *ptr, CFStringRef stateText);
 

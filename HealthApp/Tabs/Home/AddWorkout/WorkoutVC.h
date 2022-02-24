@@ -1,7 +1,6 @@
 #ifndef WorkoutVC_h
 #define WorkoutVC_h
 
-#include <objc/runtime.h>
 #include <pthread.h>
 #include "ContainerView.h"
 #include "ExerciseManager.h"
@@ -29,7 +28,6 @@ typedef struct {
     Workout *workout;
     ContainerView *first;
     id *containers;
-    id observers[2];
     struct {
         int groupTag;
         struct {
@@ -41,7 +39,7 @@ typedef struct {
     bool done;
 } WorkoutVC;
 
-void initWorkoutStrings(void);
+void initWorkoutStrings(CFBundleRef bundle);
 id workoutVC_init(Workout *workout);
 void workoutVC_deinit(id self, SEL _cmd);
 void workoutVC_viewDidLoad(id self, SEL _cmd);
