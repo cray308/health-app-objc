@@ -3,9 +3,7 @@
 #include "ViewControllerHelpers.h"
 #include "WorkoutVC.h"
 
-#define setDouble(_obj, _cmd, _arg) (((void(*)(id,SEL,double))objc_msgSend)((_obj), (_cmd), (_arg)))
-
-#define getStepperValue(_v) (((double(*)(id,SEL))objc_msgSend)((_v), sel_getUid("value")))
+#define getStepperValue(_v) msg0(double, _v, sel_getUid("value"))
 
 Class UpdateMaxesVCClass;
 
@@ -45,22 +43,20 @@ void updateMaxesVC_viewDidLoad(id self, SEL _cmd) {
     CFRelease(fieldKey);
 
     data->stepperLabel = createLabel(CFStringCreateWithFormat(NULL, NULL, data->stepperFormat, 1),
-                                     TextBody, true);
+                                     UIFontTextStyleBody, true);
     data->stepper = createNew(objc_getClass("UIStepper"));
-    setDouble(data->stepper, sel_getUid("setValue:"), 1);
-    setDouble(data->stepper, sel_getUid("setMinimumValue:"), 1);
-    setDouble(data->stepper, sel_getUid("setMaximumValue:"), 10);
+    msg1(void, double, data->stepper, sel_getUid("setValue:"), 1);
+    msg1(void, double, data->stepper, sel_getUid("setMinimumValue:"), 1);
+    msg1(void, double, data->stepper, sel_getUid("setMaximumValue:"), 10);
     addTarget(data->stepper, self, sel_getUid("stepperChanged"), 4096);
     id stepperStack = createStackView((id []){data->stepperLabel, data->stepper}, 2, 0, 8,
                                       (Padding){20, 8, 0, 8});
     addArrangedSubview(parent->vStack, stepperStack);
     releaseObj(stepperStack);
 
-    CGRect frame;
-    getRect(view, &frame, 0);
     parent->button = createButton(CFBundleCopyLocalizedString(bundle, CFSTR("finish"), NULL, NULL),
-                                  ColorBlue, 0, 0, self, sel_getUid("tappedFinish"));
-    setNavButton(self, false, parent->button, (int) frame.size.width);
+                                  ColorBlue, 0, self, sel_getUid("tappedFinish"));
+    setNavButtons(self, (id []){nil, parent->button});
     enableButton(parent->button, false);
 }
 
@@ -80,7 +76,5 @@ void updateMaxesVC_tappedFinish(id self, SEL _cmd _U_) {
     short weight = (short) ((initWeight / reps) + 0.5f) - extra;
     id parent = data->parent;
     int index = data->index;
-    dismissPresentedVC(parent, ^{
-        workoutVC_finishedBottomSheet(parent, index, weight);
-    });
+    dismissPresentedVC(^{ workoutVC_finishedBottomSheet(parent, index, weight); });
 }

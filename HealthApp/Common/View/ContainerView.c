@@ -4,32 +4,40 @@
 
 Class ContainerViewClass;
 
-id containerView_init(CFStringRef title, int spacing, bool margins) {
-    id _self = createNew(ContainerViewClass);
-    id self = getObject(_self, sel_getUid("init"));
-    disableAutoresizing(self);
+id containerView_init(CFStringRef title, ContainerView **ref, int spacing, bool margins) {
+    id self = createNew(ContainerViewClass);
     ContainerView *data = (ContainerView *) ((char *)self + ViewSize);
-    data->divider = createView();
-    data->headerLabel = createLabel(title, TextTitle3, true);
+    data->divider = createNew(ViewClass);
+    data->headerLabel = createLabel(title, UIFontTextStyleTitle3, true);
     data->stack = createStackView(NULL, 0, 1, spacing, (Padding){.top = 5});
 
     setHeight(data->divider, 21, true);
-    id divLine = createView();
+    id divLine = createNew(ViewClass);
+    setUsesAutolayout(divLine);
     setBackground(divLine, createColor(ColorSeparator));
     setHeight(divLine, 1, true);
     addSubview(data->divider, divLine);
-    pin(divLine, data->divider, (Padding){0}, EdgeBottom);
+    id constraints[] = {
+        createConstraint(divLine, 3, 0, data->divider, 3, 0),
+        createConstraint(divLine, 5, 0, data->divider, 5, 0),
+        createConstraint(divLine, 6, 0, data->divider, 6, 0)
+    };
+    CFArrayRef divArray = CFArrayCreate(NULL, (const void **)constraints, 3, NULL);
+    activateConstraintsArray(divArray);
+    CFRelease(divArray);
 
     Padding padding = {0};
     if (margins)
         padding.left = padding.right = 8;
     id vStack = createStackView((id []){data->divider, data->headerLabel, data->stack},
                                 3, 1, 0, padding);
+    setUsesAutolayout(vStack);
     addSubview(self, vStack);
-    pin(vStack, self, (Padding){0}, 0);
+    pin(vStack, self);
 
     releaseObj(vStack);
     releaseObj(divLine);
+    *ref = data;
     return self;
 }
 

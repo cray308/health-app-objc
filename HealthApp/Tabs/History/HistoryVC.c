@@ -5,15 +5,10 @@
 #include "AppUserData.h"
 #include "ContainerView.h"
 #include "ExerciseManager.h"
-#include "ViewControllerHelpers.h"
 #include "PersistenceService.h"
 #include "SwiftBridging.h"
 
-extern void setLegendLabel(id v, int index, CFStringRef text);
-extern void setLineLimit(id v, float limit);
-extern void disableLineChartView(id v);
-extern id createDataSet(int color, id fillSet);
-extern id createChartData(CFArrayRef dataSets, int lineWidth, uint8_t options);
+void setLineLimit(id v, float limit);
 
 struct WeekDataModel {
     short totalWorkouts;
@@ -107,12 +102,12 @@ static void historyData_populate(HistoryViewModel *m, struct WeekDataModel *resu
 
 static void historyData_fetch(void *_model) {
     HistoryViewModel *model = _model;
-    runInBackground((^{
+    id context = backgroundContext;
+    msg1(void, void(^)(void), context, sel_getUid("performBlock:"), ^{
         struct tm localInfo;
         int count = 0;
 
-        id request = fetchRequest();
-        CFArrayRef data = persistenceService_executeFetchRequest(request, &count, true, true);
+        CFArrayRef data = persistenceService_fetchData(context, 1, &count);
         if (data && count > 1) {
             count -= 1;
             CFMutableArrayRef strs = CFArrayCreateMutable(NULL, count, &kCFTypeArrayCallBacks);
@@ -143,7 +138,7 @@ static void historyData_fetch(void *_model) {
             model->axisStrings = strs;
             historyData_populate(model, results, count);
         }
-    }));
+    });
 }
 
 #pragma mark - Main Functions
@@ -211,26 +206,19 @@ void historyVC_viewDidLoad(id self, SEL _cmd) {
     addTarget(data->picker, self, sel_getUid("buttonTapped:"), 4096);
     if (!(darkMode & 128))
         updateSegmentedControl(data->picker, createColor(ColorLabel), darkMode);
-    id navItem = getNavItem(self);
-    setObject(navItem, sel_getUid("setTitleView:"), data->picker);
+    msg1(void, id, getNavItem(self), sel_getUid("setTitleView:"), data->picker);
 
     id containers[3];
+    ContainerView *c;
     for (int i = 0; i < 3; ++i) {
-        containers[i] = containerView_init(titles[i], 0, false);
-        ContainerView *container = (ContainerView *) ((char *)containers[i] + ViewSize);
-        addArrangedSubview(container->stack, data->charts[i]);
+        containers[i] = containerView_init(titles[i], &c, 0, false);
+        addArrangedSubview(c->stack, data->charts[i]);
+        hideView(c->divider, !i);
     }
-    ContainerView *firstC = (ContainerView *) ((char *)containers[0] + ViewSize);
-    hideView(firstC->divider, true);
 
     id vStack = createStackView(containers, 3, 1, 5, (Padding){10, 8, 10, 8});
     id scrollView = createScrollView();
-
-    addSubview(view, scrollView);
-    id guide = getLayoutGuide(view);
-    pin(scrollView, guide, (Padding){0}, 0);
-    addVStackToScrollView(vStack, scrollView);
-
+    addVStackToScrollView(view, vStack, scrollView);
     releaseObj(vStack);
     releaseObj(scrollView);
     for (int i = 0; i < 3; ++i) {
@@ -255,8 +243,8 @@ void historyVC_updateSegment(id self, SEL _cmd _U_, id picker) {
         disableLineChartView(totalsChart);
         disableLineChartView(typesChart);
         disableLineChartView(liftsChart);
-        (((void(*)(id,SEL,id,SEL,unsigned long))objc_msgSend)
-         (data->picker, sel_getUid("removeTarget:action:forControlEvents:"), nil, nil, 4096));
+        msg3(void, id, SEL, unsigned long, data->picker,
+             sel_getUid("removeTarget:action:forControlEvents:"), nil, nil, 4096);
         return;
     }
 

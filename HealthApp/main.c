@@ -18,6 +18,8 @@ int main(int argc, char *argv[]) {
     ViewClass = objc_getClass("UIView");
     VCClass = objc_getClass("UIViewController");
     ColorClass = objc_getClass("UIColor");
+    FontClass = objc_getClass("UIFont");
+    ConstraintCls = objc_getClass("NSLayoutConstraint");
     ViewSize = class_getInstanceSize(ViewClass);
     VCSize = class_getInstanceSize(VCClass);
     InputVCSize = VCSize + sizeof(InputVC);
@@ -72,7 +74,7 @@ int main(int argc, char *argv[]) {
     SetupWorkoutVCClass = objc_allocateClassPair(InputVCClass, "SetupWorkoutVC", 0);
     class_addProtocol(SetupWorkoutVCClass, objc_getProtocol("UIPickerViewDelegate"));
     class_addProtocol(SetupWorkoutVCClass, objc_getProtocol("UIPickerViewDataSource"));
-    class_addIvar(SetupWorkoutVCClass, dataKey, sizeof(SetupWorkoutVC), 0, "{?=@@@ii}");
+    class_addIvar(SetupWorkoutVCClass, dataKey, sizeof(SetupWorkoutVC), 0, "{?=@@@@@ii}");
     class_addMethod(SetupWorkoutVCClass, sel_getUid("dealloc"),
                     (IMP) setupWorkoutVC_deinit, voidSig);
     class_addMethod(SetupWorkoutVCClass, viewLoad, (IMP) setupWorkoutVC_viewDidLoad, voidSig);

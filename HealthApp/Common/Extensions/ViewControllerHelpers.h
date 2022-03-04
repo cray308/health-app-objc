@@ -4,21 +4,16 @@
 #include "CocoaHelpers.h"
 #include "Views.h"
 
-#define getViewControllers(_tabVC) getArray(_tabVC, sel_getUid("viewControllers"))
+#define getRootVC(w) msg0(id,w,sel_getUid("rootViewController"))
+#define getViewControllers(v) msg0(CFArrayRef,v,sel_getUid("viewControllers"))
 
-#define getView(_vc) getObject(_vc, sel_getUid("view"))
+#define createNavVC(c) msg1(id,id,allocClass(DMNavVC),sel_getUid("initWithRootViewController:"),c)
+#define getView(v) msg0(id,v,sel_getUid("view"))
+#define getNavItem(v) msg0(id,v,sel_getUid("navigationItem"))
+#define getNavVC(v) msg0(id,v,sel_getUid("navigationController"))
+#define isViewLoaded(v) msg0(bool,v,sel_getUid("isViewLoaded"))
 
-#define isViewLoaded(_vc) getBool(_vc, sel_getUid("isViewLoaded"))
-
-#define getNavItem(_vc) getObject(_vc, sel_getUid("navigationItem"))
-
-#define getNavBar(_navVC) getObject(_navVC, sel_getUid("navigationBar"))
-
-#define getTabBar(_tabVC) getObject(_tabVC, sel_getUid("tabBar"))
-
-#define getNavVC(_vc) getObject(_vc, sel_getUid("navigationController"))
-
-#define setBarTint(_v, _c) setObject(_v, sel_getUid("setBarTintColor:"), _c)
+#define setBarTint(v, c) msg1(void,id,v,sel_getUid("setBarTintColor:"),c)
 
 extern Class DMNavVC;
 extern Class VCClass;
@@ -26,21 +21,15 @@ extern size_t VCSize;
 
 typedef void (^Callback)(void);
 
-void setNavButton(id vc, bool left, id button, int totalWidth);
+void setNavButtons(id vc, id *buttons);
 void setupTabVC(id vc);
-void setupNavBar(id vc, bool modal);
 void setVCTitle(id vc, CFStringRef title CF_CONSUMED);
-int dmNavVC_getStatusBarStyle(id self, SEL _cmd);
-int dmNavVC_getStatusBarStyleDark(id self, SEL _cmd);
+
+void presentVC(id child);
+void presentModalVC(id modal);
+void dismissPresentedVC(Callback handler);
+
 id createAlertController(CFStringRef title CF_CONSUMED, CFStringRef message CF_CONSUMED);
-id alertCtrlCreate(id self, SEL _cmd, CFStringRef title, CFStringRef message);
-id alertCtrlCreateLegacy(id self, SEL _cmd, CFStringRef title, CFStringRef message);
-
-id createNavVC(id child);
-void presentVC(id presenter, id child);
-void presentModalVC(id presenter, id modal);
-void dismissPresentedVC(id presenter, Callback handler);
-
 void addAlertAction(id ctrl, CFStringRef title CF_CONSUMED, int style, Callback handler);
 
 #endif /* ViewControllerHelpers_h */

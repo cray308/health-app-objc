@@ -12,9 +12,18 @@
 #include "WorkoutVC.h"
 
 #if DEBUG
-extern void persistenceService_create(void);
+void persistenceService_create(void);
 #endif
-extern void toggleDarkModeForCharts(bool);
+void setupAppColors(unsigned char darkMode, bool deleteOld);
+void toggleDarkModeForCharts(bool);
+id colorCreateLegacy(id self, SEL _cmd, int type);
+id colorCreate(id self, SEL _cmd, int type);
+id barColorCreateLegacy(id self, SEL _cmd, int type);
+id barColorCreate(id self, SEL _cmd, int type);
+int dmNavVC_getStatusBarStyle(id self, SEL _cmd);
+int dmNavVC_getStatusBarStyleDark(id self, SEL _cmd);
+id alertCtrlCreate(id self, SEL _cmd, CFStringRef title, CFStringRef message);
+id alertCtrlCreateLegacy(id self, SEL _cmd, CFStringRef title, CFStringRef message);
 
 Class AppDelegateClass;
 
@@ -41,10 +50,9 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
 #if DEBUG
         persistenceService_create();
 #endif
-        id center = getUserNotificationCenter();
-        (((void(*)(id,SEL,unsigned long,void(^)(BOOL,id)))objc_msgSend)
-         (center, sel_getUid("requestAuthorizationWithOptions:completionHandler:"),
-          6, ^(BOOL granted _U_, id error _U_) {}));
+        msg2(void, unsigned long, void(^)(bool,id), getUserNotificationCenter(),
+             sel_getUid("requestAuthorizationWithOptions:completionHandler:"),
+             6, ^(bool granted _U_, id error _U_) {});
     } else {
         tzOffset = userInfo_initFromStorage(legacy, &week, &info);
         CFRelease(value);
@@ -96,11 +104,12 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
 
     setTintColor(self->window, createColor(ColorRed));
     id tabVC = createNew(objc_getClass("UITabBarController"));
-    setObject(self->window, sel_getUid("setRootViewController:"), tabVC);
+    msg1(void, id, self->window, sel_getUid("setRootViewController:"), tabVC);
     void (*fetchHandler)(void*);
     void *fetchArg;
+    Class itemClass = objc_getClass("UITabBarItem");
     SEL itemInit = sel_getUid("initWithTitle:image:tag:"), setItem = sel_getUid("setTabBarItem:");
-    id controllers[3], items[3];
+    id controllers[3];
     CFStringRef imgNames[] = {CFSTR("ico_house"), CFSTR("ico_chart"), CFSTR("ico_gear")};
     CFStringRef titles[3];
     fillStringArray(bundle, titles, CFSTR("tabs%d"), 3);
@@ -109,19 +118,16 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
     self->children[2] = settingsVC_init();
 
     for (int i = 0; i < 3; ++i) {
-        id image = createImage(imgNames[i]);
-        id _item = allocClass(objc_getClass("UITabBarItem"));
-        items[i] = (((id(*)(id,SEL,CFStringRef,id,long))objc_msgSend)
-                    (_item, itemInit, titles[i], image, i));
+        id img = createImage(imgNames[i]);
+        id item = msg3(id, CFStringRef,id,long, allocClass(itemClass), itemInit, titles[i], img, i);
         controllers[i] = createNavVC(self->children[i]);
-        setObject(controllers[i], setItem, items[i]);
-        releaseObj(items[i]);
+        msg1(void, id, controllers[i], setItem, item);
+        releaseObj(item);
         CFRelease(titles[i]);
     }
 
     CFArrayRef array = CFArrayCreate(NULL, (const void **)controllers, 3, NULL);
-    (((void(*)(id,SEL,CFArrayRef,bool))objc_msgSend)
-     (tabVC, sel_getUid("setViewControllers:animated:"), array, false));
+    msg2(void, CFArrayRef, bool, tabVC, sel_getUid("setViewControllers:animated:"), array, false);
     setupTabVC(tabVC);
 
     for (int i = 0; i < 3; ++i) {
@@ -130,25 +136,23 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
     CFRelease(array);
     releaseObj(tabVC);
 
-    voidFunc(self->window, sel_getUid("makeKeyAndVisible"));
+    msg0(void, self->window, sel_getUid("makeKeyAndVisible"));
     persistenceService_start(tzOffset, info->weekStart, fetchHandler, fetchArg);
     return true;
 }
 
 int appDelegate_supportedOrientations(AppDelegate *self _U_, SEL _cmd _U_,
                                       id application _U_, id window _U_) {
-    id device = staticMethod(objc_getClass("UIDevice"), sel_getUid("currentDevice"));
-    return getInt(device, sel_getUid("userInterfaceIdiom")) == 1 ? 26 : 2;
+    id device = clsF0(id, objc_getClass("UIDevice"), sel_getUid("currentDevice"));
+    return msg0(long, device, sel_getUid("userInterfaceIdiom")) == 1 ? 26 : 2;
 }
 
 static AppDelegate *getAppDel(void) {
-    id app = staticMethod(objc_getClass("UIApplication"), sel_getUid("sharedApplication"));
-    return (AppDelegate *) getObject(app, sel_getUid("delegate"));
+    id app = clsF0(id, objc_getClass("UIApplication"), sel_getUid("sharedApplication"));
+    return (AppDelegate *) msg0(id, app, sel_getUid("delegate"));
 }
 
-void appDel_setWindowTint(id color) {
-    setTintColor(getAppDel()->window, color);
-}
+id appDel_getWindow(void) { return getAppDel()->window; }
 
 void appDel_updateUserInfo(unsigned char plan, unsigned char darkMode, short *weights) {
     AppDelegate *self = getAppDel();
@@ -159,8 +163,7 @@ void appDel_updateUserInfo(unsigned char plan, unsigned char darkMode, short *we
         method_setImplementation(method, newImp);
         setupAppColors(darkMode, true);
         setTintColor(self->window, createColor(ColorRed));
-        id tabVC = getObject(self->window, sel_getUid("rootViewController"));
-        setupTabVC(tabVC);
+        setupTabVC(getRootVC(self->window));
         toggleDarkModeForCharts(darkMode);
         homeVC_updateColors(self->children[0]);
         if (isViewLoaded(self->children[1]))
@@ -172,12 +175,12 @@ void appDel_updateUserInfo(unsigned char plan, unsigned char darkMode, short *we
 }
 
 void appDel_deleteAppData(void) {
-    AppDelegate *self = getAppDel();
+    id *arr = getAppDel()->children;
     bool updateHome = appUserData_deleteSavedData();
     persistenceService_deleteUserData();
     if (updateHome)
-        homeVC_updateWorkoutsList((HomeVC *) ((char *)self->children[0] + VCSize), 0);
-    historyVC_clearData(self->children[1]);
+        homeVC_updateWorkoutsList((HomeVC *) ((char *)arr[0] + VCSize), 0);
+    historyVC_clearData(arr[1]);
 }
 
 void appDel_updateMaxWeights(short *weights) {

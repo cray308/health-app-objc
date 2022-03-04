@@ -2,51 +2,46 @@
 #include "AppUserData.h"
 #include "CocoaHelpers.h"
 
-#define deleteWeekData(_d) setObject(backgroundContext, sel_getUid("deleteObject:"), _d)
+#define deleteWeekData(c, d) msg1(void, id, c, sel_getUid("deleteObject:"), d)
 
-#define setPredicate(_req, _pred) setObject(_req, sel_getUid("setPredicate:"), _pred)
+#define weekData_setWeekStart(_d, _val) msg1(void, int64_t, _d, sel_getUid("setWeekStart:"), _val)
 
-#define weekData_setWeekStart(_d, _val) setInt(_d, sel_getUid("setWeekStart:"), _val)
+#define createWeekData(c)\
+ msg1(id,id,allocClass(objc_getClass("WeeklyData")),sel_getUid("initWithContext:"),c)
 
-static id persistenceService = nil;
 id backgroundContext = nil;
 
-static inline id createWeekData(void) {
-    id _obj = allocClass(objc_getClass("WeeklyData"));
-    return getObjectWithObject(_obj, sel_getUid("initWithContext:"), backgroundContext);
-}
-
 void weekData_getLiftingLimits(id data, int16_t *output) {
-    static char const *const getterStrs[] = {"bestSquat", "bestPullup", "bestBench", "bestDeadlift"};
+    static char const *const getters[] = {"bestSquat", "bestPullup", "bestBench", "bestDeadlift"};
     for (int i = 0; i < 4; ++i) {
-        output[i] = getInt16(data, sel_getUid(getterStrs[i]));
+        output[i] = msg0(int16_t, data, sel_getUid(getters[i]));
     }
 }
 
 int16_t weekData_getWorkoutTimeForType(id data, int type) {
-    static char const *const getterStrs[] = {"timeStrength", "timeSE", "timeEndurance", "timeHIC"};
-    return getInt16(data, sel_getUid(getterStrs[type]));
+    static char const *const getters[] = {"timeStrength", "timeSE", "timeEndurance", "timeHIC"};
+    return msg0(int16_t, data, sel_getUid(getters[type]));
 }
 
 void weekData_setWorkoutTimeForType(id data, int type, int16_t duration) {
     static char const *const setters[] = {
         "setTimeStrength:", "setTimeSE:", "setTimeEndurance:", "setTimeHIC:"
     };
-    setInt16(data, sel_getUid(setters[type]), duration);
+    msg1(void, int16_t, data, sel_getUid(setters[type]), duration);
 }
 
 void weekData_setLiftingMaxArray(id data, int16_t *weights) {
-    static char const *const setterStrs[] = {
+    static char const *const setters[] = {
         "setBestSquat:", "setBestPullup:", "setBestBench:", "setBestDeadlift:"
     };
     for (int i = 0; i < 4; ++i) {
-        setInt16(data, sel_getUid(setterStrs[i]), weights[i]);
+        msg1(void, int16_t, data, sel_getUid(setters[i]), weights[i]);
     }
 }
 
-void persistenceService_saveContext(void) {
-    if (getBool(backgroundContext, sel_getUid("hasChanges")))
-        setObject(backgroundContext, sel_getUid("save:"), nil);
+void persistenceService_saveContext(id context) {
+    if (msg0(bool, context, sel_getUid("hasChanges")))
+        msg1(void, id, context, sel_getUid("save:"), nil);
 }
 
 #if DEBUG
@@ -73,7 +68,8 @@ static time_t _psCalcStartOfWeek(time_t date) {
 }
 
 void persistenceService_create(void) {
-    runInBackground((^{
+    id context = backgroundContext;
+    msg1(void, void(^)(void), context, sel_getUid("performBlock:"), (^{
         int16_t lifts[] = {300, 20, 185, 235};
         int i = 0, r = 0;
         unsigned char plan = 0;
@@ -83,7 +79,7 @@ void persistenceService_create(void) {
         while (start < end) {
             int16_t totalWorkouts = 0;
             int16_t times[4] = {0};
-            id data = createWeekData();
+            id data = createWeekData(context);
             int addnlTime = 0, addnlWk = 1;
             if (r == 0 || (i < 24)) {
                 addnlTime = rand() % 40;
@@ -159,33 +155,34 @@ void persistenceService_create(void) {
             }
             start += WeekSeconds;
         }
-        persistenceService_saveContext();
+        persistenceService_saveContext(context);
     }));
 }
 #endif
 
 void persistenceService_init(void) {
     id _container = allocClass(objc_getClass("NSPersistentContainer"));
-    persistenceService = (((id(*)(id,SEL,CFStringRef))objc_msgSend)
-                          (_container, sel_getUid("initWithName:"), CFSTR("HealthApp")));
-    (((void(*)(id,SEL,void(^)(id,id)))objc_msgSend)
-     (persistenceService, sel_getUid("loadPersistentStoresWithCompletionHandler:"),
-      ^(id description _U_, id error _U_) {}));
-    backgroundContext = getObject(persistenceService, sel_getUid("newBackgroundContext"));
-    setBool(backgroundContext, sel_getUid("setAutomaticallyMergesChangesFromParent:"), true);
+    id svc = msg1(id, CFStringRef, _container, sel_getUid("initWithName:"), CFSTR("HealthApp"));
+    msg1(void, void(^)(id,id), svc,
+         sel_getUid("loadPersistentStoresWithCompletionHandler:"), ^(id desc _U_, id err _U_){});
+    id context = msg0(id, svc, sel_getUid("newBackgroundContext"));
+    msg1(void, bool, context, sel_getUid("setAutomaticallyMergesChangesFromParent:"), true);
+    backgroundContext = context;
 }
 
-void persistenceService_start(int tzOffset, time_t weekStart, void (*completion)(void*), void *receiver) {
-    runInBackground((^{
+void persistenceService_start(int tzOffset, time_t weekStart,
+                              void (*completion)(void*), void *receiver) {
+    id context = backgroundContext;
+    msg1(void, void(^)(void), context, sel_getUid("performBlock:"), ^{
         const time_t endPt = weekStart - 63244800;
         time_t start;
         int count = 0;
-        CFArrayRef data = persistenceService_executeFetchRequest(fetchRequest(), &count, true, true);
+        CFArrayRef data = persistenceService_fetchData(context, 1, &count);
         if (!data) {
-            id first = createWeekData();
+            id first = createWeekData(context);
             weekData_setWeekStart(first, weekStart);
             releaseObj(first);
-            persistenceService_saveContext();
+            persistenceService_saveContext(context);
             goto cleanup;
         }
 
@@ -197,53 +194,50 @@ void persistenceService_start(int tzOffset, time_t weekStart, void (*completion)
             }
         }
 
-        id currWeek;
         int16_t lastLifts[4];
         id last = (id) CFArrayGetValueAtIndex(data, count - 1);
         weekData_getLiftingLimits(last, lastLifts);
         start = weekData_getWeekStart(last);
-        if (start == weekStart) {
-            currWeek = last;
-        } else {
-            currWeek = createWeekData();
+        if (start != weekStart) {
+            id currWeek = createWeekData(context);
             weekData_setWeekStart(currWeek, weekStart);
             weekData_setLiftingMaxArray(currWeek, lastLifts);
+            releaseObj(currWeek);
         }
 
         for (int i = 0; i < count; ++i) {
             id d = (id) CFArrayGetValueAtIndex(data, i);
             start = weekData_getWeekStart(d);
             if (start < endPt)
-                deleteWeekData(d);
+                deleteWeekData(context, d);
         }
 
         start = weekData_getWeekStart(last) + WeekSeconds;
         for (; start < weekStart; start += WeekSeconds) {
-            id curr = createWeekData();
+            id curr = createWeekData(context);
             weekData_setWeekStart(curr, start);
             weekData_setLiftingMaxArray(curr, lastLifts);
             releaseObj(curr);
         }
 
-        if (currWeek != last)
-            releaseObj(currWeek);
-        persistenceService_saveContext();
+        persistenceService_saveContext(context);
 
     cleanup:
         completion(receiver);
-    }));
+    });
 }
 
 void persistenceService_deleteUserData(void) {
-    runInBackground((^{
+    id context = backgroundContext;
+    msg1(void, void(^)(void), context, sel_getUid("performBlock:"), ^{
         int count = 0;
-        CFArrayRef data = persistenceService_executeFetchRequest(fetchRequest(), &count, true, true);
+        CFArrayRef data = persistenceService_fetchData(context, 1, &count);
 
         if (data) {
             int end = count - 1;
             for (int i = 0; i < end; ++i) {
                 id d = (id) CFArrayGetValueAtIndex(data, i);
-                deleteWeekData(d);
+                deleteWeekData(context, d);
             }
 
             id currWeek = (id) CFArrayGetValueAtIndex(data, end);
@@ -251,27 +245,23 @@ void persistenceService_deleteUserData(void) {
             for (int i = 0; i < 4; ++i) {
                 weekData_setWorkoutTimeForType(currWeek, i, 0);
             }
-            persistenceService_saveContext();
+            persistenceService_saveContext(context);
         }
-    }));
+    });
 }
 
-id persistenceService_getCurrentWeek(void) {
-    id request = fetchRequest();
-    (((void(*)(id,SEL,unsigned long))objc_msgSend)(request, sel_getUid("setFetchLimit:"), 1));
-    CFArrayRef currentWeeks = persistenceService_executeFetchRequest(request, &(int){0}, true, false);
-    return (id) CFArrayGetValueAtIndex(currentWeeks, 0);
-}
+CFArrayRef persistenceService_fetchData(id context, int options, int *count) {
+    id req = clsF1(id, CFStringRef, objc_getClass("NSFetchRequest"),
+                   sel_getUid("fetchRequestWithEntityName:"), CFSTR("WeeklyData"));
+    if (options & 0x2)
+        msg1(void, unsigned long, req, sel_getUid("setFetchLimit:"), 1);
+    CFArrayRef descriptorArr = createSortDescriptors(CFSTR("weekStart"), options & 0x1);
+    msg1(void, CFArrayRef, req, sel_getUid("setSortDescriptors:"), descriptorArr);
+    CFRelease(descriptorArr);
 
-CFArrayRef persistenceService_executeFetchRequest(id req, int *count, bool sorted, bool ascending) {
     int len = 0;
-    if (sorted) {
-        CFArrayRef descriptorArr = createSortDescriptors(CFSTR("weekStart"), ascending);
-        setArray(req, sel_getUid("setSortDescriptors:"), descriptorArr);
-        CFRelease(descriptorArr);
-    }
-    CFArrayRef data = (((CFArrayRef(*)(id,SEL,id,id))objc_msgSend)
-                       (backgroundContext, sel_getUid("executeFetchRequest:error:"), req, nil));
+    CFArrayRef data = msg2(CFArrayRef, id, id, context,
+                           sel_getUid("executeFetchRequest:error:"), req, nil);
     if (!(data && (len = (int)(CFArrayGetCount(data)))))
         data = NULL;
     *count = len;

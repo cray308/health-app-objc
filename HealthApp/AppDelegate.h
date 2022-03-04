@@ -11,7 +11,7 @@ typedef struct {
 bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd, id application, id options);
 int appDelegate_supportedOrientations(AppDelegate *self, SEL _cmd, id application, id window);
 
-void appDel_setWindowTint(id color);
+id appDel_getWindow(void);
 void appDel_updateUserInfo(unsigned char plan, unsigned char darkMode, short *weights);
 void appDel_deleteAppData(void);
 void appDel_updateMaxWeights(short *weights);

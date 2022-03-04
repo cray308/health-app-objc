@@ -11,7 +11,7 @@ id settingsVC_init(void) {
 }
 
 void settingsVC_updateColors(id self, unsigned char darkMode) {
-    InputVC *par = (InputVC *) ((char *)self + VCSize);
+    InputVC *parent = (InputVC *) ((char *)self + VCSize);
     SettingsVC *data = (SettingsVC *) ((char *)self + InputVCSize);
     setBackground(getView(self), createColor(ColorPrimaryBGGrouped));
     id red = createColor(ColorRed), label = createColor(ColorLabel);
@@ -24,19 +24,19 @@ void settingsVC_updateColors(id self, unsigned char darkMode) {
     setTextColor((id)CFArrayGetValueAtIndex(getArrangedSubviews(view), 0), label);
     setButtonColor(data->deleteButton, red, 0);
     setBackground(data->deleteButton, btnBg);
-    setButtonColor(par->button, createColor(ColorBlue), 0);
-    setButtonColor(par->button, createColor(ColorSecondaryLabel), 2);
-    setBackground(par->button, btnBg);
-    setBarTint(par->toolbar, getBarColor(ColorBarModal));
-    view = (id) CFArrayGetValueAtIndex(getArray(par->toolbar, sel_getUid("items")), 1);
+    setButtonColor(parent->button, createColor(ColorBlue), 0);
+    setButtonColor(parent->button, createColor(ColorSecondaryLabel), 2);
+    setBackground(parent->button, btnBg);
+    setBarTint(parent->toolbar, getBarColor(ColorBarModal));
+    view = (id) CFArrayGetValueAtIndex(msg0(CFArrayRef, parent->toolbar, sel_getUid("items")), 1);
     setTintColor(view, red);
     for (int i = 0; i < 4; ++i) {
-        InputView *ptr = par->children[i];
+        InputView *ptr = parent->children[i];
         setTextColor(ptr->errorLabel, red);
         setTextColor(ptr->hintLabel, label);
         setTextColor(ptr->field, label);
         setBackground(ptr->field, fieldBg);
-        setKBColor(ptr->field, darkMode ? 1 : 0);
+        setKBColor(ptr->field, darkMode);
     }
 }
 
@@ -47,6 +47,7 @@ void settingsVC_viewDidLoad(id self, SEL _cmd) {
     CFBundleRef bundle = CFBundleGetMainBundle();
     InputVC *parent = (InputVC *) ((char *)self + VCSize);
     SettingsVC *data = (SettingsVC *) ((char *)self + InputVCSize);
+    id viewBG = createColor(ColorSecondaryBGGrouped);
     setBackground(getView(self), createColor(ColorPrimaryBGGrouped));
     setVCTitle(self, CFBundleCopyLocalizedString(bundle, CFSTR("settingsTitle"), NULL, NULL));
 
@@ -54,7 +55,7 @@ void settingsVC_viewDidLoad(id self, SEL _cmd) {
     unsigned char segment = userData->currentPlan + 1;
     id planLabel = createLabel(CFBundleCopyLocalizedString(bundle, CFSTR("planPickerTitle"),
                                                            NULL, NULL),
-                               TextFootnote, true);
+                               UIFontTextStyleFootnote, true);
     id picker = createSegmentedControl(bundle, CFSTR("settingsSegment%d"), segment);
     setHeight(picker, 44, false);
     data->planContainer = createStackView((id []){planLabel,picker}, 2, 1, 2,(Padding){0, 8, 0, 8});
@@ -65,17 +66,18 @@ void settingsVC_viewDidLoad(id self, SEL _cmd) {
 
     if (!(darkMode & 128)) {
         updateSegmentedControl(picker, createColor(ColorLabel), darkMode);
-        data->switchContainer = createView();
-        setBackground(data->switchContainer, createColor(ColorSecondaryBGGrouped));
+        data->switchContainer = createNew(ViewClass);
+        setBackground(data->switchContainer, viewBG);
         setHeight(data->switchContainer, 44, false);
         id switchView = createNew(objc_getClass("UISwitch"));
-        setBool(switchView, sel_getUid("setOn:"), darkMode);
+        msg1(void, bool, switchView, sel_getUid("setOn:"), darkMode);
         id label = createLabel(CFBundleCopyLocalizedString(bundle, CFSTR("darkMode"), NULL, NULL),
-                               TextBody, true);
+                               UIFontTextStyleBody, true);
         id sv = createStackView((id[]){label, switchView}, 2, 0, 5, (Padding){0, 8, 0, 8});
+        setUsesAutolayout(sv);
         centerHStack(sv);
         addSubview(data->switchContainer, sv);
-        pin(sv, data->switchContainer, (Padding){0}, 0);
+        pin(sv, data->switchContainer);
         addArrangedSubview(aboveTF, data->switchContainer);
         releaseObj(sv);
         releaseObj(label);
@@ -91,13 +93,15 @@ void settingsVC_viewDidLoad(id self, SEL _cmd) {
     SEL btnTap = sel_getUid("buttonTapped:");
     parent->button = createButton(CFBundleCopyLocalizedString(bundle, CFSTR("settingsSave"),
                                                               NULL, NULL),
-                                  ColorBlue, BtnBackground, 0, self, btnTap);
-    setHeight(parent->button, 44, true);
+                                  ColorBlue, 0, self, btnTap);
+    setBackground(parent->button, viewBG);
+    setHeight(parent->button, 44, false);
 
     data->deleteButton = createButton(CFBundleCopyLocalizedString(bundle, CFSTR("settingsDelete"),
                                                                   NULL, NULL),
-                                      ColorRed, BtnBackground, 1, self, btnTap);
-    setHeight(data->deleteButton, 44, true);
+                                      ColorRed, 1, self, btnTap);
+    setBackground(data->deleteButton, viewBG);
+    setHeight(data->deleteButton, 44, false);
 
     id belowTF = createStackView((id[]){parent->button, data->deleteButton}, 2, 1, 20,
                                  (Padding){20, 0, 0, 0});
@@ -123,7 +127,7 @@ void settingsVC_buttonTapped(id self, SEL _cmd _U_, id btn) {
         addAlertAction(ctrl, CFBundleCopyLocalizedString(bundle, CFSTR("delete"), NULL, NULL), 2, ^{
             appDel_deleteAppData();
         });
-        presentVC(self, ctrl);
+        presentVC(ctrl);
         return;
     }
 
@@ -132,7 +136,7 @@ void settingsVC_buttonTapped(id self, SEL _cmd _U_, id btn) {
     if (data->switchContainer) {
         id sv = (id) CFArrayGetValueAtIndex(getSubviews(data->switchContainer), 0);
         id switchView = (id) CFArrayGetValueAtIndex(getArrangedSubviews(sv), 1);
-        dark = getBool(switchView, sel_getUid("isOn")) ? 1 : 0;
+        dark = msg0(bool, switchView, sel_getUid("isOn")) ? 1 : 0;
     }
     id picker = (id) CFArrayGetValueAtIndex(getArrangedSubviews(data->planContainer), 1);
     unsigned char plan = (unsigned char) (getSelectedSegment(picker) - 1);
@@ -145,5 +149,5 @@ void settingsVC_buttonTapped(id self, SEL _cmd _U_, id btn) {
     addAlertAction(ctrl, CFBundleCopyLocalizedString(bundle, CFSTR("save"), NULL, NULL), 0, ^{
         appDel_updateUserInfo(plan, dark, arr);
     });
-    presentVC(self, ctrl);
+    presentVC(ctrl);
 }

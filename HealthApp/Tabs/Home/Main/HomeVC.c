@@ -42,8 +42,7 @@ void homeVC_createWorkoutsList(id self, unsigned char plan) {
     CFArrayRef views = getArrangedSubviews(data->planContainer->stack);
     int count = (int) CFArrayGetCount(views);
     for (int i = 0; i < count; ++i) {
-        id v = (id) CFArrayGetValueAtIndex(views, i);
-        removeView(v);
+        removeView((id) CFArrayGetValueAtIndex(views, i));
     }
 
     if ((plan & 128) || userData->planStart > time(NULL)) {
@@ -58,11 +57,11 @@ void homeVC_createWorkoutsList(id self, unsigned char plan) {
     SEL btnTap = sel_getUid("buttonTapped:");
     CFStringRef days[7];
     fillStringArray(CFBundleGetMainBundle(), days, CFSTR("dayNames%d"), 7);
+    StatusView *sv;
     for (int i = 0; i < 7; ++i) {
         if (!workoutNames[i]) continue;
-        id btn = statusView_init(workoutNames[i], i, self, btnTap);
-        StatusView *ptr = (StatusView *) ((char *)btn + ViewSize);
-        setLabelText(ptr->headerLabel, days[i]);
+        id btn = statusView_init(workoutNames[i], &sv, i, self, btnTap);
+        setLabelText(sv->headerLabel, days[i]);
         addArrangedSubview(data->planContainer->stack, btn);
         CFRelease(days[i]);
         releaseObj(btn);
@@ -91,7 +90,7 @@ void homeVC_updateColors(id self) {
         setButtonColor(ptr->button, label, 0);
         setButtonColor(ptr->button, disabled, 2);
         setBackground(ptr->button, bg);
-        setBackground(ptr->box, getBool(ptr->button, enabled) ? gray : green);
+        setBackground(ptr->box, msg0(bool, ptr->button, enabled) ? gray : green);
     }
     views = getArrangedSubviews(data->customContainer->stack);
     for (int i = 0; i < 5; ++i) {
@@ -116,30 +115,24 @@ void homeVC_viewDidLoad(id self, SEL _cmd) {
     fillStringArray(bundle, titles, CFSTR("homeWorkoutType%d"), 5);
     fillStringArray(bundle, headers, CFSTR("homeHeader%d"), 2);
 
-    id planContainer = containerView_init(headers[0], 0, true);
-    data->planContainer = (ContainerView *) ((char *)planContainer + ViewSize);
+    id planContainer = containerView_init(headers[0], &data->planContainer, 0, true);
     hideView(data->planContainer->divider, true);
-    id customContainer = containerView_init(headers[1], 4, true);
-    data->customContainer = (ContainerView *) ((char *)customContainer + ViewSize);
+    id customContainer = containerView_init(headers[1], &data->customContainer, 4, true);
     id vStack = createStackView((id[]){planContainer, customContainer}, 2, 1, 20,
                                 (Padding){10, 0, 16, 0});
 
     SEL btnTap = sel_getUid("customButtonTapped:");
+    StatusView *sv;
     for (int i = 0; i < 5; ++i) {
-        id btn = statusView_init(titles[i], i, self, btnTap);
-        StatusView *ptr = (StatusView *) ((char *)btn + ViewSize);
-        hideView(ptr->box, true);
-        statusView_updateAccessibility(ptr, NULL);
+        id btn = statusView_init(titles[i], &sv, i, self, btnTap);
+        hideView(sv->box, true);
+        statusView_updateAccessibility(sv, NULL);
         addArrangedSubview(data->customContainer->stack, btn);
         releaseObj(btn);
     }
 
     id scrollView = createScrollView();
-    addSubview(view, scrollView);
-    id guide = getLayoutGuide(view);
-    pin(scrollView, guide, (Padding){0}, 0);
-    addVStackToScrollView(vStack, scrollView);
-
+    addVStackToScrollView(view, vStack, scrollView);
     releaseObj(vStack);
     releaseObj(scrollView);
 
@@ -161,77 +154,75 @@ void homeVC_customButtonTapped(id self, SEL _cmd _U_, id btn) {
         return;
     }
 
-    presentModalVC(self, setupWorkoutVC_init(self, --index));
+    presentModalVC(setupWorkoutVC_init(self, --index));
 }
 
 void homeVC_navigateToAddWorkout(id self, void *workout) {
     id vc = workoutVC_init(workout);
-    id navVC = getNavVC(self);
-    ((void(*)(id,SEL,id,bool))objc_msgSend)(navVC,
-                                            sel_getUid("pushViewController:animated:"), vc, true);
+    msg2(void, id, bool, getNavVC(self), sel_getUid("pushViewController:animated:"), vc, true);
     releaseObj(vc);
 }
 
 static void showConfetti(id self) {
     id view = getView(self);
     CGRect frame;
-    getRect(view, &frame, 0);
+    getRect(view, &frame, RectFrame);
     id confettiView = createObjectWithFrame(ViewClass, frame);
-    id bg = getObjectWithFloat(createColor(ColorGray), sel_getUid("colorWithAlphaComponent:"), 0.8);
+    id bg = msg1(id, CGFloat, createColor(ColorGray),
+                           sel_getUid("colorWithAlphaComponent:"), 0.8);
     setBackground(confettiView, bg);
 
     Class cellClass = objc_getClass("CAEmitterCell");
-    SEL cgImg = sel_getUid("CGImage"), cgCol = sel_getUid("CGColor");
-    SEL sColor = sel_getUid("setColor:"), sImg = sel_getUid("setContents:");
-    SEL sRate = sel_getUid("setBirthRate:"), sLife = sel_getUid("setLifetime:");
-    SEL sVel = sel_getUid("setVelocity:"), sELong = sel_getUid("setEmissionLongitude:");
-    SEL sERange = sel_getUid("setEmissionRange:"), sSpin = sel_getUid("setSpin:");
-    SEL sScale = sel_getUid("setScale:"), sScaleR = sel_getUid("setScaleRange:");
+    SEL cgSels[] = {sel_getUid("CGImage"), sel_getUid("CGColor")};
+    SEL cellSels[10] = {
+        sel_getUid("setBirthRate:"), sel_getUid("setLifetime:"), sel_getUid("setVelocity:"),
+        sel_getUid("setEmissionLongitude:"), sel_getUid("setEmissionRange:"), sel_getUid("setSpin:"),
+        sel_getUid("setColor:"), sel_getUid("setContents:"),
+        sel_getUid("setScaleRange:"), sel_getUid("setScale:")
+    };
 
     int const velocities[] = {100, 90, 150, 200};
-    id _colors[] = {
-        createColor(ColorRed), createColor(ColorBlue),
-        createColor(ColorGreen), getColorRef(1, 0.84, 0.04, 1)
+    const char *const colorNames[4] = {
+        "systemRedColor", "systemBlueColor", "systemGreenColor", "systemYellowColor"
+    };
+    CFStringRef imgNames[] = {
+        CFSTR("confetti0"), CFSTR("confetti1"), CFSTR("confetti2"), CFSTR("confetti3")
     };
     CGColorRef shapeColors[4];
     id images[4];
     for (int i = 0; i < 4; ++i) {
-        CFStringRef name = CFStringCreateWithFormat(NULL, NULL, CFSTR("confetti%d"), i);
-        id img = createImage(name);
-        CFRelease(name);
-        images[i] = (id)((CGImageRef(*)(id,SEL))objc_msgSend)(img, cgImg);
-        shapeColors[i] = ((CGColorRef(*)(id,SEL))objc_msgSend)(_colors[i], cgCol);
+        images[i] = (id) msg0(CGImageRef, createImage(imgNames[i]), cgSels[0]);
+        id color = clsF0(id, ColorClass, sel_getUid(colorNames[i]));
+        shapeColors[i] = msg0(CGColorRef, color, cgSels[1]);
     }
 
     id cells[16];
     for (int i = 0; i < 16; ++i) {
         cells[i] = createNew(cellClass);
-        setFloat(cells[i], sRate, 4);
-        setFloat(cells[i], sLife, 14);
+        msg1(void, float, cells[i], cellSels[0], 4);
+        msg1(void, float, cells[i], cellSels[1], 14);
         int velocity = velocities[arc4random_uniform(4)];
-        setCGFloat(cells[i], sVel, velocity);
-        setCGFloat(cells[i], sELong, M_PI);
-        setCGFloat(cells[i], sERange, 0.5);
-        setCGFloat(cells[i], sSpin, 3.5);
-        ((void(*)(id,SEL,CGColorRef))objc_msgSend)(cells[i], sColor, shapeColors[i >> 2]);
-        setObject(cells[i], sImg, images[i % 4]);
-        setCGFloat(cells[i], sScaleR, 0.25);
-        setCGFloat(cells[i], sScale, 0.1);
+        msg1(void, CGFloat, cells[i], cellSels[2], velocity);
+        msg1(void, CGFloat, cells[i], cellSels[3], M_PI);
+        msg1(void, CGFloat, cells[i], cellSels[4], 0.5);
+        msg1(void, CGFloat, cells[i], cellSels[5], 3.5);
+        msg1(void, CGColorRef, cells[i], cellSels[6], shapeColors[i >> 2]);
+        msg1(void, id, cells[i], cellSels[7], images[i % 4]);
+        msg1(void, CGFloat, cells[i], cellSels[8], 0.25);
+        msg1(void, CGFloat, cells[i], cellSels[9], 0.1);
     }
 
     CFArrayRef array = CFArrayCreate(NULL, (const void **)cells, 16, &retainedArrCallbacks);
-    id particleLayer = createNew(objc_getClass("CAEmitterLayer"));
-    id viewLayer = getLayer(confettiView);
-    setObject(viewLayer, sel_getUid("addSublayer:"), particleLayer);
-    ((void(*)(id,SEL,CGPoint))objc_msgSend)(particleLayer, sel_getUid("setEmitterPosition:"),
-                                            (CGPoint){frame.size.width / 2, 0});
-    setObject(particleLayer, sel_getUid("setEmitterShape:"), kCAEmitterLayerLine);
-    ((void(*)(id,SEL,CGSize))objc_msgSend)(particleLayer, sel_getUid("setEmitterSize:"),
-                                           (CGSize){frame.size.width - 16, 1});
-    setArray(particleLayer, sel_getUid("setEmitterCells:"), array);
+    id layer = createNew(objc_getClass("CAEmitterLayer"));
+    msg1(void, id, getLayer(confettiView), sel_getUid("addSublayer:"), layer);
+    msg1(void, CGPoint, layer,
+         sel_getUid("setEmitterPosition:"), ((CGPoint){frame.size.width * 0.5, 0}));
+    msg1(void, id, layer, sel_getUid("setEmitterShape:"), kCAEmitterLayerLine);
+    msg1(void, CGSize, layer, sel_getUid("setEmitterSize:"), ((CGSize){frame.size.width - 16, 1}));
+    msg1(void, CFArrayRef, layer, sel_getUid("setEmitterCells:"), array);
 
     CFRelease(array);
-    releaseObj(particleLayer);
+    releaseObj(layer);
     for (int i = 0; i < 16; ++i) {
         releaseObj(cells[i]);
     }
@@ -247,7 +238,7 @@ static void showConfetti(id self) {
                                         CFBundleCopyLocalizedString(bundle, CFSTR("homeAlertMessage"),
                                                                     NULL, NULL));
         addAlertAction(ctrl, CFBundleCopyLocalizedString(bundle, CFSTR("ok"), NULL, NULL), 0, NULL);
-        presentVC(self, ctrl);
+        presentVC(ctrl);
     });
 }
 

@@ -12,7 +12,8 @@ typedef struct {
     id stack;
 } ContainerView;
 
-id containerView_init(CFStringRef title CF_CONSUMED, int spacing, bool margins);
+id containerView_init(CFStringRef title CF_CONSUMED,
+                      ContainerView **ref, int spacing, bool margins);
 void containerView_deinit(id self, SEL _cmd);
 void containerView_updateColors(ContainerView *data, id labelColor, id divColor);
 

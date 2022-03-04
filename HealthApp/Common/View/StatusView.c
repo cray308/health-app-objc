@@ -2,27 +2,37 @@
 #include "CocoaHelpers.h"
 #include "Views.h"
 
+#define addCornerRadius(v) msg1(void, CGFloat, getLayer(v), sel_getUid("setCornerRadius:"), 5)
+
+extern id UIFontTextStyleHeadline;
+
 Class StatusViewClass;
 
-id statusView_init(CFStringRef text, int tag, id target, SEL action) {
+id statusView_init(CFStringRef text, StatusView **ref, int tag, id target, SEL action) {
     id self = createNew(StatusViewClass);
     StatusView *data = (StatusView *) ((char *)self + ViewSize);
     setTag(self, tag);
-    int params = BtnLargeFont | BtnBackground | BtnRounded;
-    data->button = createButton(text, ColorLabel, params, tag, target, action);
+    data->button = createButton(text, ColorLabel, tag, target, action);
+    addCornerRadius(data->button);
+    setFont(getTitleLabel(data->button), getPreferredFont(UIFontTextStyleHeadline));
+    setBackground(data->button, createColor(ColorSecondaryBGGrouped));
     setHeight(data->button, 50, true);
-    data->headerLabel = createLabel(NULL, TextSubhead, false);
-    data->box = createView();
-    setCGFloat(getLayer(data->box), sel_getUid("setCornerRadius:"), 5);
-    setWidth(data->box, 20);
+    data->headerLabel = createLabel(NULL, UIFontTextStyleSubheadline, false);
+    data->box = createNew(ViewClass);
+    addCornerRadius(data->box);
+    id width = createConstraint(data->box, 7, 0, nil, 0, 20);
+    lowerPriority(width);
+    activateConstraint(width);
     setHeight(data->box, 20, true);
     id hStack = createStackView((id []){data->button, data->box}, 2, 0, 5, (Padding){0});
     centerHStack(hStack);
     id vStack = createStackView((id []){data->headerLabel, hStack}, 2, 1, 4, (Padding){4, 0, 4, 0});
+    setUsesAutolayout(vStack);
     addSubview(self, vStack);
-    pin(vStack, self, (Padding){0}, 0);
+    pin(vStack, self);
     releaseObj(hStack);
     releaseObj(vStack);
+    *ref = data;
     return self;
 }
 
@@ -39,9 +49,7 @@ void statusView_updateAccessibility(StatusView *ptr, CFStringRef stateText) {
     CFMutableStringRef label = CFStringCreateMutableCopy(NULL, 128, CFSTR(""));
     if (header)
         CFStringAppendFormat(label, NULL, CFSTR("%@. "), header);
-    id titleLabel = getTitleLabel(ptr->button);
-    CFStringRef btnTitle = getText(titleLabel);
-    CFStringAppend(label, btnTitle);
+    CFStringAppend(label, msg0(CFStringRef, ptr->button, sel_getUid("currentTitle")));
     if (stateText)
         CFStringAppendFormat(label, NULL, CFSTR(". %@"), stateText);
     setAccessibilityLabel(ptr->button, label);

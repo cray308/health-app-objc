@@ -9,6 +9,8 @@ extern Class SetupWorkoutVCClass;
 typedef struct {
     id parent;
     CFArrayRef names;
+    CFDictionaryRef normalDict;
+    CFDictionaryRef selectedDict;
     id workoutTextField;
     int index;
     unsigned char type;

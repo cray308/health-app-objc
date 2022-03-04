@@ -246,19 +246,17 @@ void initExerciseData(int week, CFBundleRef bundle) {
     weekInPlan = week;
 
     Class storeClass = objc_getClass("HKHealthStore");
-    if (!((bool(*)(Class,SEL))objc_msgSend)(storeClass, sel_getUid("isHealthDataAvailable"))) {
-        return;
-    }
+    if (!clsF0(bool, storeClass, sel_getUid("isHealthDataAvailable"))) return;
 
     id store = createNew(storeClass);
-    id weightType = staticMethodWithString(objc_getClass("HKSampleType"),
-                                           sel_getUid("quantityTypeForIdentifier:"),
-                                           (CFStringRef) HKQuantityTypeIdentifierBodyMass);
+    id weightType = clsF1(id, CFStringRef, objc_getClass("HKSampleType"),
+                          sel_getUid("quantityTypeForIdentifier:"),
+                          (CFStringRef) HKQuantityTypeIdentifierBodyMass);
     CFSetRef set = CFSetCreate(NULL, (const void *[]){weightType}, 1, NULL);
 
-    (((void(*)(id,SEL,CFSetRef,CFSetRef,void(^)(bool,id)))objc_msgSend)
-     (store, sel_getUid("requestAuthorizationToShareTypes:readTypes:completion:"),
-      NULL, set, ^(bool granted, id error1 _U_) {
+    msg3(void, CFSetRef, CFSetRef, void(^)(bool,id), store,
+         sel_getUid("requestAuthorizationToShareTypes:readTypes:completion:"),
+         NULL, set, ^(bool granted, id er _U_) {
         if (!granted) {
             releaseObj(store);
             return;
@@ -266,24 +264,23 @@ void initExerciseData(int week, CFBundleRef bundle) {
 
         CFArrayRef arr = createSortDescriptors((CFStringRef)HKSampleSortIdentifierStartDate, false);
         id _req = allocClass(objc_getClass("HKSampleQuery"));
+        SEL qInit = sel_getUid("initWithSampleType:predicate:limit:sortDescriptors:resultsHandler:");
         id req = (((id(*)(id,SEL,id,id,unsigned long,CFArrayRef,void(^)(id,CFArrayRef,id)))objc_msgSend)
-                  (_req, sel_getUid("initWithSampleType:predicate:limit:sortDescriptors:resultsHandler:"),
-                   weightType, nil, 1, arr, ^(id query _U_, CFArrayRef data, id error2 _U_) {
+                  (_req, qInit, weightType, nil, 1, arr, ^(id q _U_, CFArrayRef data, id err2 _U_) {
             short weight = 145;
             if (data && CFArrayGetCount(data)) {
-                id unit = staticMethod(objc_getClass("HKUnit"), sel_getUid("poundUnit"));
+                id unit = clsF0(id, objc_getClass("HKUnit"), sel_getUid("poundUnit"));
                 id sample = (id) CFArrayGetValueAtIndex(data, 0);
-                id quantity = getObject(sample, sel_getUid("quantity"));
-                weight = (short) (((double(*)(id,SEL,id))objc_msgSend)
-                                  (quantity, sel_getUid("doubleValueForUnit:"), unit));
+                id quantity = msg0(id, sample, sel_getUid("quantity"));
+                weight = (short)msg1(double, id, quantity, sel_getUid("doubleValueForUnit:"), unit);
             }
             bodyweight = weight;
             releaseObj(store);
         }));
-        setObject(store, sel_getUid("executeQuery:"), req);
+        msg1(void, id, store, sel_getUid("executeQuery:"), req);
         CFRelease(arr);
         releaseObj(req);
-    }));
+    });
     CFRelease(set);
 }
 

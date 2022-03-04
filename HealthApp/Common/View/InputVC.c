@@ -3,10 +3,9 @@
 #include "AppUserData.h"
 #include "ViewControllerHelpers.h"
 
-#define toggleScrolling(_v, _enable) setBool(_v, sel_getUid("setScrollEnabled:"), _enable)
+#define toggleScrolling(_v, _enable) msg1(void, bool, _v, sel_getUid("setScrollEnabled:"), _enable)
 
-#define setScrollInsets(_v, _mg) (((void(*)(id,SEL,HAInsets))objc_msgSend)\
-((_v), sel_getUid("setContentInset:"), (_mg)))
+#define setScrollInsets(_v, _mg) msg1(void, HAInsets, _v, sel_getUid("setContentInset:"), _mg)
 
 extern id UIKeyboardDidShowNotification;
 extern id UIKeyboardWillHideNotification;
@@ -26,13 +25,13 @@ static void keyboardShown(CFNotificationCenterRef center _U_,
     id value = (id) CFDictionaryGetValue(userinfo, (CFStringRef) UIKeyboardFrameEndUserInfoKey);
     CGRect kbRect, viewRect, fieldRect, fieldInView;
     id view = getView((id) observer);
-    getRect(data->activeField, &fieldRect, 1);
-    getRect(view, &viewRect, 0);
+    getRect(data->activeField, &fieldRect, RectBounds);
+    getRect(view, &viewRect, RectFrame);
 
 #if defined(__arm64__)
-    kbRect = ((CGRect(*)(id,SEL))objc_msgSend)(value, sel_getUid("CGRectValue"));
-    fieldInView = (((CGRect(*)(id,SEL,CGRect,id))objc_msgSend)
-                   (view, sel_getUid("convertRect:fromView:"), fieldRect, data->activeField));
+    kbRect = msg0(CGRect, value, sel_getUid("CGRectValue"));
+    fieldInView = msg2(CGRect, CGRect, id, view,
+                       sel_getUid("convertRect:fromView:"), fieldRect, data->activeField);
 #else
     ((void(*)(CGRect*,id,SEL))objc_msgSend_stret)(&kbRect, value, sel_getUid("CGRectValue"));
     (((void(*)(CGRect*,id,SEL,CGRect,id))objc_msgSend_stret)
@@ -45,8 +44,8 @@ static void keyboardShown(CFNotificationCenterRef center _U_,
     CGPoint upperY = {fieldInView.origin.x, fieldInView.origin.y + fieldInView.size.height};
     if (!(CGRectContainsPoint(viewRect, fieldInView.origin) &&
           CGRectContainsPoint(viewRect, upperY))) {
-        (((void(*)(id,SEL,CGRect,bool))objc_msgSend)
-         (data->scrollView, sel_getUid("scrollRectToVisible:animated:"), fieldRect, true));
+        msg2(void, CGRect, bool, data->scrollView,
+             sel_getUid("scrollRectToVisible:animated:"), fieldRect, true);
     }
 }
 
@@ -56,7 +55,7 @@ static void keyboardWillHide(CFNotificationCenterRef center _U_,
     InputVC *data = (InputVC *) ((char *)observer + VCSize);
     setScrollInsets(data->scrollView, ((HAInsets){data->topOffset, 0, data->bottomOffset, 0}));
     CGRect bounds;
-    getRect(data->vStack, &bounds, 1);
+    getRect(data->vStack, &bounds, RectBounds);
     toggleScrolling(data->scrollView, (int) bounds.size.height >= data->scrollHeight);
 }
 
@@ -92,17 +91,18 @@ void inputVC_addChild(id self, CFStringRef hint, short min, short max) {
     ptr->maxVal = max;
     CFStringRef errorText = CFStringCreateWithFormat(NULL, NULL, inputFieldError, min, max);
     CFRetain(hint);
-    ptr->hintLabel = createLabel(hint, TextFootnote, false);
+    ptr->hintLabel = createLabel(hint, UIFontTextStyleFootnote, false);
     ptr->field = createTextfield(self, CFSTR(""), hint, 4, 4, index);
     if (d->setKB)
         setKBColor(ptr->field, 1);
-    ptr->errorLabel = createLabel(errorText, TextFootnote, false);
+    ptr->errorLabel = createLabel(errorText, UIFontTextStyleFootnote, false);
     setTextColor(ptr->errorLabel, createColor(ColorRed));
 
     id vStack = createStackView((id []){ptr->hintLabel, ptr->field, ptr->errorLabel},
                                 3, 1, 4, (Padding){4, 8, 4, 8});
+    setUsesAutolayout(vStack);
     addSubview(view, vStack);
-    pin(vStack, view, (Padding){0}, 0);
+    pin(vStack, view);
     addArrangedSubview(d->vStack, view);
     releaseObj(vStack);
     hideView(ptr->errorLabel, true);
@@ -169,32 +169,24 @@ void inputVC_viewDidLoad(id self, SEL _cmd) {
         setBarTint(data->toolbar, getBarColor(ColorBarModal));
         data->setKB = dark == 1;
     }
-    voidFunc(data->toolbar, sel_getUid("sizeToFit"));
+    msg0(void, data->toolbar, sel_getUid("sizeToFit"));
 
     CFStringRef doneLabel = CFBundleCopyLocalizedString(CFBundleGetMainBundle(),
                                                         CFSTR("done"), NULL, NULL);
     Class btnClass = objc_getClass("UIBarButtonItem");
-    id flexSpace = (((id(*)(id,SEL,long,id,SEL))objc_msgSend)
-                    (allocClass(btnClass), sel_getUid("initWithBarButtonSystemItem:target:action:"),
-                     5, nil, nil));
-    id doneButton = (((id(*)(id,SEL,CFStringRef,long,id,SEL))objc_msgSend)
-                     (allocClass(btnClass), sel_getUid("initWithTitle:style:target:action:"),
-                      doneLabel, 0, self, sel_getUid("dismissKeyboard")));
+    id flexSpace = msg3(id, long, id, SEL, allocClass(btnClass),
+                        sel_getUid("initWithBarButtonSystemItem:target:action:"), 5, nil, nil);
+    id doneButton = msg4(id, CFStringRef, long, id, SEL, allocClass(btnClass),
+                         sel_getUid("initWithTitle:style:target:action:"),
+                         doneLabel, 0, self, sel_getUid("dismissKeyboard"));
     setTintColor(doneButton, createColor(ColorRed));
     CFRelease(doneLabel);
 
     CFArrayRef array = CFArrayCreate(NULL, (const void *[]){flexSpace, doneButton},
                                      2, &retainedArrCallbacks);
-    ((void(*)(id,SEL,CFArrayRef,bool))objc_msgSend)(data->toolbar,
-                                                    sel_getUid("setItems:animated:"), array, false);
-    toggleInteraction(data->toolbar, true);
+    msg2(void, CFArrayRef, bool, data->toolbar, sel_getUid("setItems:animated:"), array, false);
 
-    id view = getView(self);
-    addSubview(view, data->scrollView);
-    id guide = getLayoutGuide(view);
-    pin(data->scrollView, guide, (Padding){0}, 0);
-    addVStackToScrollView(data->vStack, data->scrollView);
-
+    addVStackToScrollView(getView(self), data->vStack, data->scrollView);
     CFRelease(array);
     releaseObj(flexSpace);
     releaseObj(doneButton);
@@ -216,10 +208,10 @@ void inputVC_viewDidAppear(id self, SEL _cmd, bool animated) {
     if (!data->scrollHeight) {
         CGRect bounds;
         HAInsets insets;
-        getRect(data->scrollView, &bounds, 1);
+        getRect(data->scrollView, &bounds, RectBounds);
         data->scrollHeight = (int) bounds.size.height;
 #if defined(__arm64__)
-        insets = ((HAInsets(*)(id,SEL))objc_msgSend)(data->scrollView, sel_getUid("contentInset"));
+        insets = msg0(HAInsets, data->scrollView, sel_getUid("contentInset"));
 #else
         ((void(*)(HAInsets*,id,SEL))objc_msgSend_stret)(&insets, data->scrollView,
                                                         sel_getUid("contentInset"));
@@ -234,9 +226,9 @@ void inputVC_dismissKeyboard(id self, SEL _cmd _U_) {
     int tag = d->activeField ? ((int) getTag(d->activeField)) : 255;
     if (tag >= d->count - 1) {
         id view = getView(self);
-        setBool(view, sel_getUid("endEditing:"), true);
+        msg1(void, bool, view, sel_getUid("endEditing:"), true);
     } else {
-        getBool(d->children[tag + 1]->field, sel_getUid("becomeFirstResponder"));
+        msg0(bool, d->children[tag + 1]->field, sel_getUid("becomeFirstResponder"));
     }
 }
 

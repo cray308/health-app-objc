@@ -14,58 +14,32 @@
 
 #define _U_ __attribute__((__unused__))
 
-#define staticMethod(_cls, _cmd) (((id(*)(Class,SEL))objc_msgSend)((_cls), (_cmd)))
+#define clsF0(rv, cls, cmd) (((rv(*)(Class,SEL))objc_msgSend)((cls),(cmd)))
+#define clsF1(rv, t, cls, cmd, a) (((rv(*)(Class,SEL,t))objc_msgSend)((cls),(cmd),(a)))
+#define clsF2(rv, t1, t2, cls, cmd, a1, a2)\
+ (((rv(*)(Class,SEL,t1,t2))objc_msgSend)((cls),(cmd),(a1),(a2)))
+#define clsF3(rv, t1, t2, t3, cls, cmd, a1, a2, a3)\
+ (((rv(*)(Class,SEL,t1,t2,t3))objc_msgSend)((cls),(cmd),(a1),(a2),(a3)))
 
-#define staticMethodWithString(_cls, _cmd, arg) \
-(((id(*)(Class,SEL,CFStringRef))objc_msgSend)((_cls), (_cmd), (arg)))
+#define msg0(rv, o, cmd) (((rv(*)(id,SEL))objc_msgSend)((o),(cmd)))
+#define msg1(rv, t, o, cmd, a) (((rv(*)(id,SEL,t))objc_msgSend)((o),(cmd),(a)))
+#define msg2(rv, t1, t2, o, cmd, a1, a2) (((rv(*)(id,SEL,t1,t2))objc_msgSend)((o),(cmd),(a1),(a2)))
+#define msg3(rv, t1, t2, t3, o, cmd, a1, a2, a3)\
+ (((rv(*)(id,SEL,t1,t2,t3))objc_msgSend)((o),(cmd),(a1),(a2),(a3)))
+#define msg4(rv, t1, t2, t3, t4, o, cmd, a1, a2, a3, a4)\
+ (((rv(*)(id,SEL,t1,t2,t3,t4))objc_msgSend)((o),(cmd),(a1),(a2),(a3),(a4)))
 
-#define voidFunc(obj, _cmd) (((void(*)(id,SEL))objc_msgSend)((obj), (_cmd)))
+#define releaseObj(obj) msg0(void,obj,sel_getUid("release"))
+#define createNew(cls) clsF0(id,cls,sel_getUid("new"))
+#define allocClass(cls) clsF0(id,cls,sel_getUid("alloc"))
 
-#define releaseObj(_obj) voidFunc(_obj, sel_getUid("release"))
+#define createColor(t) clsF1(id,int,ColorClass,sel_getUid("getColorWithType:"),t)
+#define getBarColor(t) clsF1(id,int,ColorClass,sel_getUid("getBarColorWithType:"),t)
 
-#define createNew(_cls) staticMethod(_cls, sel_getUid("new"))
+#define createImage(n) clsF1(id,CFStringRef,objc_getClass("UIImage"),sel_getUid("imageNamed:"),n)
 
-#define getObject(_obj, _cmd) (((id(*)(id,SEL))objc_msgSend)((_obj), (_cmd)))
-
-#define setObject(_obj, _cmd, _arg) (((void(*)(id,SEL,id))objc_msgSend)((_obj), (_cmd), (_arg)))
-
-#define getBool(_obj, _cmd) (((bool(*)(id,SEL))objc_msgSend)((_obj), (_cmd)))
-
-#define setBool(_obj, _cmd, _arg) (((void(*)(id,SEL,bool))objc_msgSend)((_obj), (_cmd), (_arg)))
-
-#define setString(_obj, _cmd, _arg) (((void(*)(id,SEL,CFStringRef))objc_msgSend)((_obj), (_cmd), (_arg)))
-
-#define getInt(_obj, _cmd) (((long(*)(id,SEL))objc_msgSend)((_obj), (_cmd)))
-
-#define setInt(_obj, _cmd, _arg) (((void(*)(id,SEL,long))objc_msgSend)((_obj), (_cmd), (_arg)))
-
-#define setCGFloat(_obj, _cmd, _arg) (((void(*)(id,SEL,CGFloat))objc_msgSend)((_obj), (_cmd), (_arg)))
-
-#define setFloat(_obj, _cmd, _arg) (((void(*)(id,SEL,float))objc_msgSend)((_obj), (_cmd), (_arg)))
-
-#define setArray(_obj, _cmd, _arg) (((void(*)(id,SEL,CFArrayRef))objc_msgSend)((_obj), (_cmd), (_arg)))
-
-#define getArray(_obj, _cmd) (((CFArrayRef(*)(id,SEL))objc_msgSend)((_obj), (_cmd)))
-
-#define getObjectWithFloat(_obj, _cmd, _arg) (((id(*)(id,SEL,CGFloat))objc_msgSend)((_obj), (_cmd), (_arg)))
-
-#define getObjectWithObject(_obj, _cmd, _arg) (((id(*)(id,SEL,id))objc_msgSend)((_obj), (_cmd), (_arg)))
-
-#define allocClass(_cls) staticMethod(_cls, sel_getUid("alloc"))
-
-#define getColorRef(red, green, blue, alpha) \
-(((id(*)(Class,SEL,CGFloat,CGFloat,CGFloat,CGFloat))objc_msgSend) \
-(ColorClass, sel_getUid("colorWithRed:green:blue:alpha:"), (red), (green), (blue), (alpha)))
-
-#define createColor(_t) \
-(((id(*)(Class,SEL,int))objc_msgSend)(ColorClass, sel_getUid("getColorWithType:"), (_t)))
-
-#define getBarColor(_t) \
-(((id(*)(Class,SEL,int))objc_msgSend)(ColorClass, sel_getUid("getBarColorWithType:"), (_t)))
-
-#define createImage(_name) staticMethodWithString(objc_getClass("UIImage"), sel_getUid("imageNamed:"), (_name))
-
-#define getUserNotificationCenter() staticMethod(objc_getClass("UNUserNotificationCenter"), sel_getUid("currentNotificationCenter"))
+#define getUserNotificationCenter()\
+ clsF0(id,objc_getClass("UNUserNotificationCenter"),sel_getUid("currentNotificationCenter"))
 
 extern const CFArrayCallBacks retainedArrCallbacks;
 extern Class ColorClass;
@@ -86,14 +60,11 @@ enum {
     ColorTertiaryBG,
     ColorBarModal = ColorLabel
 };
+enum {
+    RectFrame, RectBounds
+};
 
-id colorCreateLegacy(id self, SEL _cmd, int type);
-id colorCreate(id self, SEL _cmd, int type);
-id barColorCreateLegacy(id self, SEL _cmd, int type);
-id barColorCreate(id self, SEL _cmd, int type);
-
-void setupAppColors(unsigned char darkMode, bool deleteOld);
-void getRect(id view, CGRect *result, char type);
+void getRect(id view, CGRect *result, int type);
 void getScreenBounds(CGRect *result);
 void fillStringArray(CFBundleRef bundle, CFStringRef *arr, CFStringRef format, int count);
 CFArrayRef createSortDescriptors(CFStringRef key, bool ascending);
