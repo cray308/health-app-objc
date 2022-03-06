@@ -1,11 +1,15 @@
 #ifndef Views_h
 #define Views_h
 
-#include <objc/objc.h>
-#include <CoreGraphics/CGGeometry.h>
-#include <CoreFoundation/CFBundle.h>
+#include "CocoaHelpers.h"
 
 #define createObjectWithFrame(cls, f) msg1(id,CGRect,allocClass(cls),sel_getUid("initWithFrame:"),f)
+
+#define getViewControllers(v) msg0(CFArrayRef,v,sel_getUid("viewControllers"))
+#define getView(v) msg0(id,v,sel_getUid("view"))
+#define getNavItem(v) msg0(id,v,sel_getUid("navigationItem"))
+#define getNavVC(v) msg0(id,v,sel_getUid("navigationController"))
+#define isViewLoaded(v) msg0(bool,v,sel_getUid("isViewLoaded"))
 
 #define getPreferredFont(style)\
  clsF1(id,CFStringRef,FontClass,sel_getUid("preferredFontForTextStyle:"),(CFStringRef)style)
@@ -44,6 +48,7 @@
 #define hideView(v, hide) msg1(void,bool,v,sel_getUid("setHidden:"),hide)
 #define setBackground(v, color) msg1(void,id,v,sel_getUid("setBackgroundColor:"),color)
 #define setTintColor(v, color) msg1(void,id,v,sel_getUid("setTintColor:"),color)
+#define setBarTint(v, c) msg1(void,id,v,sel_getUid("setBarTintColor:"),c)
 
 #define setAccessibilityLabel(v,t) msg1(void,CFStringRef,v,sel_getUid("setAccessibilityLabel:"),t)
 #define setLabelText(v, t) msg1(void,CFStringRef,v,sel_getUid("setText:"),t)
@@ -63,7 +68,9 @@
 #define setButtonColor(v, color, state)\
  msg2(void,id,unsigned long,v,sel_getUid("setTitleColor:forState:"),color, state)
 
+extern size_t VCSize;
 extern size_t ViewSize;
+extern Class VCClass;
 extern Class ViewClass;
 extern Class FontClass;
 extern Class ConstraintCls;
@@ -97,6 +104,8 @@ id createTextfield(id delegate, CFStringRef text,
 id createButton(CFStringRef title CF_CONSUMED, int color, int tag, id target, SEL action);
 id createSegmentedControl(CFBundleRef bundle, CFStringRef format, int startIndex);
 void addVStackToScrollView(id view, id vStack, id scrollView);
+void setNavButtons(id vc, id *buttons);
+void setVCTitle(id vc, CFStringRef title CF_CONSUMED);
 
 void updateSegmentedControl(id view, id foreground, unsigned char darkMode);
 

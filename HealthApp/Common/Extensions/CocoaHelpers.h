@@ -14,6 +14,9 @@
 
 #define _U_ __attribute__((__unused__))
 
+#define getImpC(cls, cmd) method_getImplementation(class_getClassMethod((cls), (cmd)))
+#define getImpO(cls, cmd) method_getImplementation(class_getInstanceMethod((cls), (cmd)))
+
 #define clsF0(rv, cls, cmd) (((rv(*)(Class,SEL))objc_msgSend)((cls),(cmd)))
 #define clsF1(rv, t, cls, cmd, a) (((rv(*)(Class,SEL,t))objc_msgSend)((cls),(cmd),(a)))
 #define clsF2(rv, t1, t2, cls, cmd, a1, a2)\
@@ -43,6 +46,7 @@
 
 extern const CFArrayCallBacks retainedArrCallbacks;
 extern Class ColorClass;
+extern Class Object;
 
 enum {
     ColorSeparator,

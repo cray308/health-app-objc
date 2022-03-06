@@ -1,16 +1,20 @@
 #include "SetupWorkoutVC.h"
+#include <CoreFoundation/CFAttributedString.h>
+#include "AppDelegate.h"
 #include "ExerciseManager.h"
-#include "HomeVC.h"
 #include "InputVC.h"
-#include "ViewControllerHelpers.h"
+#include "Views.h"
 
 Class SetupWorkoutVCClass;
+
+CFArrayRef createWorkoutNames(unsigned char type);
+void homeVC_navigateToAddWorkout(id self, void *workout);
 
 id setupWorkoutVC_init(id parent, unsigned char type) {
     id self = createNew(SetupWorkoutVCClass);
     SetupWorkoutVC *data = (SetupWorkoutVC *) ((char *)self + InputVCSize);
     data->parent = parent;
-    data->names = exerciseManager_createWorkoutNames(type);
+    data->names = createWorkoutNames(type);
     id font = getPreferredFont(UIFontTextStyleTitle3);
     const void *keys[] = {
         (CFStringRef) NSForegroundColorAttributeName, (CFStringRef) NSFontAttributeName
@@ -124,7 +128,7 @@ void setupWorkoutVC_tappedButton(id self, SEL _cmd _U_, id btn) {
         default:
             break;
     }
-    Workout *w = exerciseManager_getWorkoutFromLibrary(&(WorkoutParams){
+    Workout *w = getWorkoutFromLibrary(&(WorkoutParams){
         data->index, sets, reps, weight, data->type, 0xff
     });
     id parent = data->parent;

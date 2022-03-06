@@ -2,14 +2,15 @@
 #include <CoreGraphics/CGColor.h>
 #include <dispatch/queue.h>
 #include <math.h>
-#include "AppUserData.h"
-#include "ExerciseManager.h"
-#include "SetupWorkoutVC.h"
+#include <time.h>
 #include "StatusView.h"
-#include "ViewControllerHelpers.h"
-#include "WorkoutVC.h"
+#include "Views.h"
 
 extern id kCAEmitterLayerLine;
+void setWeeklyWorkoutNames(unsigned char plan, CFStringRef *names);
+Workout *getWeeklyWorkout(unsigned char plan, int index);
+id setupWorkoutVC_init(id parent, unsigned char type);
+id workoutVC_init(Workout *workout);
 
 Class HomeVCClass;
 
@@ -34,7 +35,7 @@ void homeVC_updateWorkoutsList(HomeVC *self, unsigned char completed) {
     }
 }
 
-void homeVC_createWorkoutsList(id self, unsigned char plan) {
+void homeVC_createWorkoutsList(id self, const UserInfo *info) {
     HomeVC *data = (HomeVC *) ((char *)self + VCSize);
     id planContainer = (id) ((char *)data->planContainer - ViewSize);
 
@@ -45,14 +46,14 @@ void homeVC_createWorkoutsList(id self, unsigned char plan) {
         removeView((id) CFArrayGetValueAtIndex(views, i));
     }
 
-    if ((plan & 128) || userData->planStart > time(NULL)) {
+    if ((info->currentPlan & 128) || info->planStart > time(NULL)) {
         hideView(planContainer, true);
         hideView(data->customContainer->divider, true);
         return;
     }
 
     CFStringRef workoutNames[7] = {0};
-    exerciseManager_setWeeklyWorkoutNames(plan, workoutNames);
+    setWeeklyWorkoutNames(info->currentPlan, workoutNames);
 
     SEL btnTap = sel_getUid("buttonTapped:");
     CFStringRef days[7];
@@ -70,7 +71,7 @@ void homeVC_createWorkoutsList(id self, unsigned char plan) {
 
     hideView(planContainer, false);
     hideView(data->customContainer->divider, false);
-    homeVC_updateWorkoutsList(data, userData->completedWorkouts);
+    homeVC_updateWorkoutsList(data, info->completedWorkouts);
 }
 
 void homeVC_updateColors(id self) {
@@ -115,11 +116,11 @@ void homeVC_viewDidLoad(id self, SEL _cmd) {
     fillStringArray(bundle, titles, CFSTR("homeWorkoutType%d"), 5);
     fillStringArray(bundle, headers, CFSTR("homeHeader%d"), 2);
 
-    id planContainer = containerView_init(headers[0], &data->planContainer, 0, true);
+    id planContainer = containerView_init(headers[0], &data->planContainer, 0);
     hideView(data->planContainer->divider, true);
-    id customContainer = containerView_init(headers[1], &data->customContainer, 4, true);
+    id customContainer = containerView_init(headers[1], &data->customContainer, 4);
     id vStack = createStackView((id[]){planContainer, customContainer}, 2, 1, 20,
-                                (Padding){10, 0, 16, 0});
+                                (Padding){10, 8, 16, 8});
 
     SEL btnTap = sel_getUid("customButtonTapped:");
     StatusView *sv;
@@ -136,31 +137,29 @@ void homeVC_viewDidLoad(id self, SEL _cmd) {
     releaseObj(vStack);
     releaseObj(scrollView);
 
-    homeVC_createWorkoutsList(self, userData->currentPlan);
-}
-
-void homeVC_workoutButtonTapped(id self, SEL _cmd _U_, id btn) {
-    Workout *w = exerciseManager_getWeeklyWorkout(userData->currentPlan, (int) getTag(btn));
-    homeVC_navigateToAddWorkout(self, w);
-}
-
-void homeVC_customButtonTapped(id self, SEL _cmd _U_, id btn) {
-    unsigned char index = (unsigned char) getTag(btn);
-    if (!index) {
-        Workout *w = exerciseManager_getWorkoutFromLibrary(&(WorkoutParams){
-            2, 1, 1, 100, WorkoutStrength, 0xff
-        });
-        homeVC_navigateToAddWorkout(self, w);
-        return;
-    }
-
-    presentModalVC(setupWorkoutVC_init(self, --index));
+    homeVC_createWorkoutsList(self, getUserInfo());
 }
 
 void homeVC_navigateToAddWorkout(id self, void *workout) {
     id vc = workoutVC_init(workout);
     msg2(void, id, bool, getNavVC(self), sel_getUid("pushViewController:animated:"), vc, true);
     releaseObj(vc);
+}
+
+void homeVC_workoutButtonTapped(id self, SEL _cmd _U_, id btn) {
+    Workout *w = getWeeklyWorkout(getUserInfo()->currentPlan, (int) getTag(btn));
+    homeVC_navigateToAddWorkout(self, w);
+}
+
+void homeVC_customButtonTapped(id self, SEL _cmd _U_, id btn) {
+    unsigned char index = (unsigned char) getTag(btn);
+    if (!index) {
+        Workout *w = getWorkoutFromLibrary(&(WorkoutParams){2, 1, 1, 100, WorkoutStrength, 0xff});
+        homeVC_navigateToAddWorkout(self, w);
+        return;
+    }
+
+    presentModalVC(setupWorkoutVC_init(self, --index));
 }
 
 static void showConfetti(id self) {

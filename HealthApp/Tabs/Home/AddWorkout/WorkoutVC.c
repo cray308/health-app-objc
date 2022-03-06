@@ -3,12 +3,8 @@
 #include <dispatch/queue.h>
 #include <signal.h>
 #include "AppDelegate.h"
-#include "AppUserData.h"
-#include "HomeVC.h"
-#include "PersistenceService.h"
 #include "StatusView.h"
-#include "UpdateMaxesVC.h"
-#include "ViewControllerHelpers.h"
+#include "Views.h"
 
 #define toggleInteraction(v, e) msg1(void, bool, v, sel_getUid("setUserInteractionEnabled:"), e)
 
@@ -16,8 +12,15 @@
 
 extern id UIApplicationDidBecomeActiveNotification;
 extern id UIApplicationWillResignActiveNotification;
+id updateMaxesVC_init(id parent, int index, short bodyweight);
+unsigned char addWorkoutData(unsigned char day, int type, int16_t duration, short *weights);
+void homeVC_handleFinishedWorkout(id self, unsigned char completed);
 
 Class WorkoutVCClass;
+
+enum {
+    ExerciseStateDisabled, ExerciseStateActive, ExerciseStateResting, ExerciseStateCompleted
+};
 
 enum {
     SignalGroup = SIGUSR2,
@@ -413,41 +416,18 @@ static inline bool setDuration(Workout *w) {
     return w->duration >= 15;
 }
 
-static void updateStoredData(int type, int16_t duration, short *lifts) {
-    id context = backgroundContext;
-    msg1(void, void(^)(void), context, sel_getUid("performBlock:"), ^{
-        CFArrayRef currentWeeks = persistenceService_fetchData(context, 2, &(int){0});
-        id data = (id) CFArrayGetValueAtIndex(currentWeeks, 0);
-        int16_t newDuration = duration + weekData_getWorkoutTimeForType(data, type);
-        weekData_setWorkoutTimeForType(data, type, newDuration);
-        int16_t totalWorkouts = weekData_getTotalWorkouts(data) + 1;
-        weekData_setTotalWorkouts(data, totalWorkouts);
-        if (lifts) {
-            weekData_setLiftingMaxArray(data, lifts);
-            free(lifts);
-        }
-        persistenceService_saveContext(context);
-    });
-}
-
 static void workoutVC_handleFinishedWorkout(id self, WorkoutVC *data, bool longEnough) {
-    unsigned char totalCompleted = 0;
     short *lifts = NULL;
-
     if (data->weights[0]) {
-        appDel_updateMaxWeights(data->weights);
         lifts = malloc(sizeof(short) << 2);
         memcpy(lifts, data->weights, sizeof(short) << 2);
-        if (!longEnough) {
-            data->workout->duration = 15;
-            longEnough = true;
-        }
+        longEnough = true;
     }
 
+    unsigned char totalCompleted = 0;
     if (longEnough) {
-        if (data->workout->day != 0xff)
-            totalCompleted = appUserData_addCompletedWorkout(data->workout->day);
-        updateStoredData(data->workout->type, data->workout->duration, lifts);
+        totalCompleted = addWorkoutData(data->workout->day,
+                                        data->workout->type, data->workout->duration, lifts);
     }
 
     id navVC = getNavVC(self);
@@ -483,7 +463,7 @@ void workoutVC_viewDidLoad(id self, SEL _cmd) {
         Circuit *c = &data->workout->activities[i];
         if (c->headerStr)
             CFRetain(c->headerStr);
-        data->containers[i] = containerView_init(c->headerStr, &container, 0, false);
+        data->containers[i] = containerView_init(c->headerStr, &container, 0);
         if (!i) {
             data->first = container;
             hideView(container->divider, true);
@@ -542,7 +522,7 @@ void workoutVC_startEndWorkout(id self, SEL _cmd _U_, id btn) {
             workoutVC_handleFinishedWorkout(self, data, longEnough);
         } else {
             if (longEnough)
-                updateStoredData(data->workout->type, data->workout->duration, NULL);
+                addWorkoutData(0xff, data->workout->type, data->workout->duration, NULL);
             popVC(getNavVC(self));
         }
     }
@@ -561,7 +541,7 @@ void workoutVC_willDisappear(id self, SEL _cmd, bool animated) {
                 if (isCompleted(data->workout)) {
                     workoutVC_handleFinishedWorkout(self, data, longEnough);
                 } else if (longEnough) {
-                    updateStoredData(data->workout->type, data->workout->duration, NULL);
+                    addWorkoutData(0xff, data->workout->type, data->workout->duration, NULL);
                 }
             }
         }

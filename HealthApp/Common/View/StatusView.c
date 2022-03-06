@@ -1,5 +1,4 @@
 #include "StatusView.h"
-#include "CocoaHelpers.h"
 #include "Views.h"
 
 #define addCornerRadius(v) msg1(void, CGFloat, getLayer(v), sel_getUid("setCornerRadius:"), 5)

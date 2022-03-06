@@ -5,8 +5,6 @@
 #include "ContainerView.h"
 #include "ExerciseManager.h"
 
-extern Class WorkoutVCClass;
-
 typedef struct {
     pthread_mutex_t lock;
     pthread_cond_t cond;
@@ -38,15 +36,5 @@ typedef struct {
     short weights[4];
     bool done;
 } WorkoutVC;
-
-void initWorkoutStrings(CFBundleRef bundle);
-id workoutVC_init(Workout *workout);
-void workoutVC_deinit(id self, SEL _cmd);
-void workoutVC_viewDidLoad(id self, SEL _cmd);
-void workoutVC_willDisappear(id self, SEL _cmd, bool animated);
-void workoutVC_startEndWorkout(id self, SEL _cmd, id btn);
-void workoutVC_handleTap(id self, SEL _cmd, id btn);
-
-void workoutVC_finishedBottomSheet(id self, int index, short weight);
 
 #endif /* WorkoutVC_h */

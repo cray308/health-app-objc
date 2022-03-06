@@ -2,20 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "AppUserData.h"
 #include "ContainerView.h"
-#include "ExerciseManager.h"
-#include "PersistenceService.h"
 #include "SwiftBridging.h"
 
 void setLineLimit(id v, float limit);
-
-struct WeekDataModel {
-    short totalWorkouts;
-    short durationByType[4];
-    short cumulativeDuration[4];
-    short weightArray[4];
-};
 
 Class HistoryVCClass;
 
@@ -27,7 +17,9 @@ static CFStringRef liftNames[4];
 
 #pragma mark - Load Data
 
-static void historyData_populate(HistoryViewModel *m, struct WeekDataModel *results, int size) {
+static void historyData_populate(void *_model, CFArrayRef strs, WeekDataModel *results, int size) {
+    HistoryViewModel *m = _model;
+    m->axisStrings = strs;
     int innerLimits[] = {-1, 0, 1};
     int refIndices[] = {size, size - 26, size - 52, 0};
     if (refIndices[2] < 0)
@@ -56,7 +48,7 @@ static void historyData_populate(HistoryViewModel *m, struct WeekDataModel *resu
         int limit = refIndices[section - 1];
         int jEnd = innerLimits[section - 1];
         for (int i = refIndices[section]; i < limit; ++i, ++index) {
-            struct WeekDataModel *e = &results[i];
+            WeekDataModel *e = &results[i];
 
             for (int j = 2; j > jEnd; --j) {
                 totalWorkouts[j] += e->totalWorkouts;
@@ -100,54 +92,14 @@ static void historyData_populate(HistoryViewModel *m, struct WeekDataModel *resu
     free(results);
 }
 
-static void historyData_fetch(void *_model) {
-    HistoryViewModel *model = _model;
-    id context = backgroundContext;
-    msg1(void, void(^)(void), context, sel_getUid("performBlock:"), ^{
-        struct tm localInfo;
-        int count = 0;
-
-        CFArrayRef data = persistenceService_fetchData(context, 1, &count);
-        if (data && count > 1) {
-            count -= 1;
-            CFMutableArrayRef strs = CFArrayCreateMutable(NULL, count, &kCFTypeArrayCallBacks);
-            struct WeekDataModel *results = malloc((unsigned) count * sizeof(struct WeekDataModel));
-            customAssert(count > 0)
-            for (int i = 0; i < count; ++i) {
-                id d = (id) CFArrayGetValueAtIndex(data, i);
-                struct WeekDataModel *r = &results[i];
-                time_t timestamp = (time_t) weekData_getWeekStart(d);
-                localtime_r(&timestamp, &localInfo);
-                CFStringRef str = CFStringCreateWithFormat(NULL, NULL, CFSTR("%d/%d/%d"),
-                                                           localInfo.tm_mon + 1, localInfo.tm_mday,
-                                                           localInfo.tm_year % 100);
-                CFArrayAppendValue(strs, str);
-                r->totalWorkouts = weekData_getTotalWorkouts(d);
-                r->durationByType[0] = weekData_getWorkoutTimeForType(d, WorkoutStrength);
-                r->durationByType[1] = weekData_getWorkoutTimeForType(d, WorkoutHIC);
-                r->durationByType[2] = weekData_getWorkoutTimeForType(d, WorkoutSE);
-                r->durationByType[3] = weekData_getWorkoutTimeForType(d, WorkoutEndurance);
-                weekData_getLiftingLimits(d, r->weightArray);
-
-                r->cumulativeDuration[0] = results[i].durationByType[0];
-                for (int j = 1; j < 4; ++j) {
-                    r->cumulativeDuration[j] = r->cumulativeDuration[j - 1] + r->durationByType[j];
-                }
-                CFRelease(str);
-            }
-            model->axisStrings = strs;
-            historyData_populate(model, results, count);
-        }
-    });
-}
-
 #pragma mark - Main Functions
 
-id historyVC_init(CFBundleRef bundle, void **model, void (**handler)(void*)) {
+id historyVC_init(CFBundleRef bundle, void **model,
+                  void (**handler)(void*, CFArrayRef, WeekDataModel*, int)) {
     id self = createNew(HistoryVCClass);
     HistoryVC *data = (HistoryVC *) ((char *)self + VCSize);
     *model = &data->model;
-    *handler = &historyData_fetch;
+    *handler = &historyData_populate;
     HistoryViewModel *m = &data->model;
     int chartColors[] = {0, 1, 2, 3};
     id *areaDataSets = m->workoutTypes.dataSets;
@@ -180,52 +132,6 @@ id historyVC_init(CFBundleRef bundle, void **model, void (**handler)(void*)) {
     m->lifts.chartData = createChartData(dataArr, 3, 0);
     CFRelease(dataArr);
     return self;
-}
-
-void historyVC_viewDidLoad(id self, SEL _cmd) {
-    struct objc_super super = {self, VCClass};
-    ((void(*)(struct objc_super *,SEL))objc_msgSendSuper)(&super, _cmd);
-
-    CFBundleRef bundle = CFBundleGetMainBundle();
-    const unsigned char darkMode = userData->darkMode;
-    HistoryVC *data = (HistoryVC *) ((char *)self + VCSize);
-    id view = getView(self);
-    setBackground(view, createColor(ColorPrimaryBG));
-
-    CFStringRef titles[3];
-    fillStringArray(bundle, titles, CFSTR("chartHeader%d"), 3);
-
-    data->charts[0] = createChartView(self, (long []){4}, 1, 1);
-    setHeight(data->charts[0], 390, false);
-    data->charts[1] = createChartView(self, (long []){0, 1, 2, 3}, 4, 6);
-    setHeight(data->charts[1], 425, false);
-    data->charts[2] = createChartView(self, (long []){0, 1, 2, 3}, 4, 0);
-    setHeight(data->charts[2], 550, false);
-
-    data->picker = createSegmentedControl(bundle, CFSTR("historySegment%d"), 0);
-    addTarget(data->picker, self, sel_getUid("buttonTapped:"), 4096);
-    if (!(darkMode & 128))
-        updateSegmentedControl(data->picker, createColor(ColorLabel), darkMode);
-    msg1(void, id, getNavItem(self), sel_getUid("setTitleView:"), data->picker);
-
-    id containers[3];
-    ContainerView *c;
-    for (int i = 0; i < 3; ++i) {
-        containers[i] = containerView_init(titles[i], &c, 0, false);
-        addArrangedSubview(c->stack, data->charts[i]);
-        hideView(c->divider, !i);
-    }
-
-    id vStack = createStackView(containers, 3, 1, 5, (Padding){10, 8, 10, 8});
-    id scrollView = createScrollView();
-    addVStackToScrollView(view, vStack, scrollView);
-    releaseObj(vStack);
-    releaseObj(scrollView);
-    for (int i = 0; i < 3; ++i) {
-        releaseObj(containers[i]);
-    }
-
-    historyVC_updateSegment(self, nil, data->picker);
 }
 
 void historyVC_updateSegment(id self, SEL _cmd _U_, id picker) {
@@ -283,6 +189,52 @@ void historyVC_updateSegment(id self, SEL _cmd _U_, id picker) {
         replaceDataSetEntries(m3->dataSets[i], &m3->entries[i][ref], count);
     }
     updateChart(liftsChart, m3->chartData, m3->maxes[index]);
+}
+
+void historyVC_viewDidLoad(id self, SEL _cmd) {
+    struct objc_super super = {self, VCClass};
+    ((void(*)(struct objc_super *,SEL))objc_msgSendSuper)(&super, _cmd);
+
+    CFBundleRef bundle = CFBundleGetMainBundle();
+    const unsigned char darkMode = getUserInfo()->darkMode;
+    HistoryVC *data = (HistoryVC *) ((char *)self + VCSize);
+    id view = getView(self);
+    setBackground(view, createColor(ColorPrimaryBG));
+
+    CFStringRef titles[3];
+    fillStringArray(bundle, titles, CFSTR("chartHeader%d"), 3);
+
+    data->charts[0] = createChartView(self, (long []){4}, 1, 1);
+    setHeight(data->charts[0], 390, false);
+    data->charts[1] = createChartView(self, (long []){0, 1, 2, 3}, 4, 6);
+    setHeight(data->charts[1], 425, false);
+    data->charts[2] = createChartView(self, (long []){0, 1, 2, 3}, 4, 0);
+    setHeight(data->charts[2], 550, false);
+
+    data->picker = createSegmentedControl(bundle, CFSTR("historySegment%d"), 0);
+    addTarget(data->picker, self, sel_getUid("buttonTapped:"), 4096);
+    if (!(darkMode & 128))
+        updateSegmentedControl(data->picker, createColor(ColorLabel), darkMode);
+    msg1(void, id, getNavItem(self), sel_getUid("setTitleView:"), data->picker);
+
+    id containers[3];
+    ContainerView *c;
+    for (int i = 0; i < 3; ++i) {
+        containers[i] = containerView_init(titles[i], &c, 0);
+        addArrangedSubview(c->stack, data->charts[i]);
+        hideView(c->divider, !i);
+    }
+
+    id vStack = createStackView(containers, 3, 1, 5, (Padding){10, 8, 10, 8});
+    id scrollView = createScrollView();
+    addVStackToScrollView(view, vStack, scrollView);
+    releaseObj(vStack);
+    releaseObj(scrollView);
+    for (int i = 0; i < 3; ++i) {
+        releaseObj(containers[i]);
+    }
+
+    historyVC_updateSegment(self, nil, data->picker);
 }
 
 void historyVC_clearData(id self) {

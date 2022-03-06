@@ -1,5 +1,4 @@
 #include "Views.h"
-#include "CocoaHelpers.h"
 
 #define adjustFontForSizeCategory(v)\
  msg1(void,bool,v,sel_getUid("setAdjustsFontForContentSizeCategory:"),true)
@@ -9,6 +8,8 @@
 
 extern CGFloat UIFontWeightMedium;
 
+size_t VCSize;
+Class VCClass;
 size_t ViewSize;
 Class ViewClass;
 Class FontClass;
@@ -128,6 +129,27 @@ void addVStackToScrollView(id view, id vStack, id scrollView) {
     pin(scrollView, msg0(id, view, sel_getUid("safeAreaLayoutGuide")));
     pin(vStack, scrollView);
     activateConstraint(createConstraint(vStack, 7, 0, scrollView, 7, 0));
+}
+
+void setNavButtons(id vc, id *buttons) {
+    Class itemClass = objc_getClass("UIBarButtonItem");
+    SEL itemInit = sel_getUid("initWithCustomView:");
+    id navItem = getNavItem(vc);
+    const char *const setters[] = {"setLeftBarButtonItem:", "setRightBarButtonItem:"};
+    for (int i = 0; i < 2; ++i) {
+        id btn = buttons[i];
+        if (btn) {
+            setUsesAutolayout(btn);
+            id item = msg1(id, id, allocClass(itemClass), itemInit, btn);
+            msg1(void, id, navItem, sel_getUid(setters[i]), item);
+            releaseObj(item);
+        }
+    }
+}
+
+void setVCTitle(id vc, CFStringRef title) {
+    msg1(void, CFStringRef, getNavItem(vc), sel_getUid("setTitle:"), title);
+    CFRelease(title);
 }
 
 void updateSegmentedControl(id view, id foreground, unsigned char darkMode) {

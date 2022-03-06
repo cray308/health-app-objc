@@ -2,9 +2,7 @@
 #define ContainerView_h
 
 #include <CoreFoundation/CFBase.h>
-#include <objc/runtime.h>
-
-extern Class ContainerViewClass;
+#include <objc/objc.h>
 
 typedef struct {
     id divider;
@@ -12,9 +10,7 @@ typedef struct {
     id stack;
 } ContainerView;
 
-id containerView_init(CFStringRef title CF_CONSUMED,
-                      ContainerView **ref, int spacing, bool margins);
-void containerView_deinit(id self, SEL _cmd);
+id containerView_init(CFStringRef title CF_CONSUMED, ContainerView **ref, int spacing);
 void containerView_updateColors(ContainerView *data, id labelColor, id divColor);
 
 #endif /* ContainerView_h */

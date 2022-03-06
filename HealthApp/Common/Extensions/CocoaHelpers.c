@@ -1,6 +1,4 @@
 #include "CocoaHelpers.h"
-#include <stdlib.h>
-#include <string.h>
 
 #define allocColor(r, g, b, a)\
  msg4(id, CGFloat, CGFloat, CGFloat, CGFloat, allocClass(ColorClass), sel, r, g, b, a)
@@ -16,6 +14,7 @@ static void cocoaArrRelease(CFAllocatorRef allocator _U_, const void *value) {
 
 const CFArrayCallBacks retainedArrCallbacks = {0, cocoaArrRetain, cocoaArrRelease, NULL, NULL};
 Class ColorClass;
+Class Object;
 static id appColors[13];
 static id barColors[2];
 

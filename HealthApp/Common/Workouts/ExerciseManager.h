@@ -1,39 +1,22 @@
 #ifndef ExerciseManager_h
 #define ExerciseManager_h
 
-#include <CoreFoundation/CFBundle.h>
+#include <CoreFoundation/CFBase.h>
 
 enum {
-    LiftSquat,
-    LiftPullup,
-    LiftBench,
-    LiftDeadlift
+    LiftSquat, LiftPullup, LiftBench, LiftDeadlift
 };
 
 enum {
-    WorkoutStrength,
-    WorkoutSE,
-    WorkoutEndurance,
-    WorkoutHIC
+    WorkoutStrength, WorkoutSE, WorkoutEndurance, WorkoutHIC
 };
 
 enum {
-    CircuitRounds,
-    CircuitAMRAP,
-    CircuitDecrement
+    CircuitRounds, CircuitAMRAP, CircuitDecrement
 };
 
 enum {
-    ExerciseReps,
-    ExerciseDuration,
-    ExerciseDistance
-};
-
-enum {
-    ExerciseStateDisabled,
-    ExerciseStateActive,
-    ExerciseStateResting,
-    ExerciseStateCompleted
+    ExerciseReps, ExerciseDuration, ExerciseDistance
 };
 
 typedef struct {
@@ -83,11 +66,6 @@ typedef struct {
     const unsigned char day;
 } WorkoutParams;
 
-void initExerciseData(int week, CFBundleRef bundle);
-
-void exerciseManager_setWeeklyWorkoutNames(unsigned char plan, CFStringRef *names);
-Workout *exerciseManager_getWeeklyWorkout(unsigned char plan, int index);
-CFArrayRef exerciseManager_createWorkoutNames(unsigned char type);
-Workout *exerciseManager_getWorkoutFromLibrary(WorkoutParams *params);
+Workout *getWorkoutFromLibrary(WorkoutParams *params);
 
 #endif /* ExerciseManager_h */

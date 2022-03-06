@@ -31,7 +31,6 @@
 		612FD048266DAF25002C9993 /* WorkoutData.plist in Resources */ = {isa = PBXBuildFile; fileRef = 612FD047266DAF25002C9993 /* WorkoutData.plist */; };
 		614DA69A270A8D1F00EC90C4 /* ExerciseManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 614DA698270A8D1F00EC90C4 /* ExerciseManager.h */; };
 		614DA69B270A8D1F00EC90C4 /* ExerciseManager.c in Sources */ = {isa = PBXBuildFile; fileRef = 614DA699270A8D1F00EC90C4 /* ExerciseManager.c */; };
-		614DC13026082BBE00B9588E /* ViewControllerHelpers.c in Sources */ = {isa = PBXBuildFile; fileRef = 614DC12F26082BBE00B9588E /* ViewControllerHelpers.c */; };
 		615086ED26D3222500521269 /* SwiftBridging.m in Sources */ = {isa = PBXBuildFile; fileRef = 615086EC26D3222500521269 /* SwiftBridging.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61594D0C26068105000D01A1 /* AppDelegate.c in Sources */ = {isa = PBXBuildFile; fileRef = 61594D0B26068105000D01A1 /* AppDelegate.c */; };
 		61594D1826068105000D01A1 /* HealthApp.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 61594D1626068105000D01A1 /* HealthApp.xcdatamodeld */; };
@@ -39,8 +38,6 @@
 		61594D1D26068106000D01A1 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 61594D1B26068106000D01A1 /* LaunchScreen.storyboard */; };
 		61594D2026068106000D01A1 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 61594D1F26068106000D01A1 /* main.c */; };
 		61594D2A26068106000D01A1 /* HealthAppTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 61594D2926068106000D01A1 /* HealthAppTests.m */; };
-		61594D652606C7C6000D01A1 /* AppUserData.c in Sources */ = {isa = PBXBuildFile; fileRef = 61594D642606C7C6000D01A1 /* AppUserData.c */; };
-		615A1C4C2608406100858C32 /* PersistenceService.c in Sources */ = {isa = PBXBuildFile; fileRef = 615A1C4B2608406100858C32 /* PersistenceService.c */; };
 		6161838226AC80A0001587B2 /* CocoaHelpers.c in Sources */ = {isa = PBXBuildFile; fileRef = 6161838126AC80A0001587B2 /* CocoaHelpers.c */; };
 		619919ED27824DBE00418A57 /* Charts.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 619919EB27824DB500418A57 /* Charts.xcframework */; };
 		619919EE27824DBE00418A57 /* Charts.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 619919EB27824DB500418A57 /* Charts.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -99,8 +96,6 @@
 		612FD047266DAF25002C9993 /* WorkoutData.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = WorkoutData.plist; sourceTree = "<group>"; };
 		614DA698270A8D1F00EC90C4 /* ExerciseManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ExerciseManager.h; sourceTree = "<group>"; };
 		614DA699270A8D1F00EC90C4 /* ExerciseManager.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = ExerciseManager.c; sourceTree = "<group>"; };
-		614DC12826081E9E00B9588E /* ViewControllerHelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewControllerHelpers.h; sourceTree = "<group>"; };
-		614DC12F26082BBE00B9588E /* ViewControllerHelpers.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = ViewControllerHelpers.c; sourceTree = "<group>"; };
 		615086EC26D3222500521269 /* SwiftBridging.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SwiftBridging.m; sourceTree = "<group>"; };
 		615086F026D3223400521269 /* SwiftBridging.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SwiftBridging.h; sourceTree = "<group>"; };
 		61594D0726068105000D01A1 /* HealthApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HealthApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -113,10 +108,6 @@
 		61594D2526068106000D01A1 /* HealthAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HealthAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		61594D2926068106000D01A1 /* HealthAppTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HealthAppTests.m; sourceTree = "<group>"; };
 		61594D2B26068106000D01A1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		61594D632606C7AE000D01A1 /* AppUserData.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppUserData.h; sourceTree = "<group>"; };
-		61594D642606C7C6000D01A1 /* AppUserData.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = AppUserData.c; sourceTree = "<group>"; };
-		615A1C4A2608403900858C32 /* PersistenceService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PersistenceService.h; sourceTree = "<group>"; };
-		615A1C4B2608406100858C32 /* PersistenceService.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = PersistenceService.c; sourceTree = "<group>"; };
 		6161838026AC8089001587B2 /* CocoaHelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CocoaHelpers.h; sourceTree = "<group>"; };
 		6161838126AC80A0001587B2 /* CocoaHelpers.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = CocoaHelpers.c; sourceTree = "<group>"; };
 		619919EB27824DB500418A57 /* Charts.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = Charts.xcframework; sourceTree = "<group>"; };
@@ -296,23 +287,11 @@
 			children = (
 				61594D5326068A05000D01A1 /* CoreData */,
 				61C7790426102663001326A1 /* Extensions */,
-				61C7790326102620001326A1 /* SharedData */,
 				617BDE1926FE48CB00BDDB73 /* View */,
 				6107C957266C159B00DDBCCF /* Workouts */,
 				612FD047266DAF25002C9993 /* WorkoutData.plist */,
 			);
 			path = Common;
-			sourceTree = "<group>";
-		};
-		61C7790326102620001326A1 /* SharedData */ = {
-			isa = PBXGroup;
-			children = (
-				61594D642606C7C6000D01A1 /* AppUserData.c */,
-				61594D632606C7AE000D01A1 /* AppUserData.h */,
-				615A1C4B2608406100858C32 /* PersistenceService.c */,
-				615A1C4A2608403900858C32 /* PersistenceService.h */,
-			);
-			path = SharedData;
 			sourceTree = "<group>";
 		};
 		61C7790426102663001326A1 /* Extensions */ = {
@@ -322,8 +301,6 @@
 				6161838026AC8089001587B2 /* CocoaHelpers.h */,
 				615086F026D3223400521269 /* SwiftBridging.h */,
 				615086EC26D3222500521269 /* SwiftBridging.m */,
-				614DC12F26082BBE00B9588E /* ViewControllerHelpers.c */,
-				614DC12826081E9E00B9588E /* ViewControllerHelpers.h */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -455,11 +432,9 @@
 				61594D1826068105000D01A1 /* HealthApp.xcdatamodeld in Sources */,
 				61BC6F56266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m in Sources */,
 				6161838226AC80A0001587B2 /* CocoaHelpers.c in Sources */,
-				61594D652606C7C6000D01A1 /* AppUserData.c in Sources */,
-				615A1C4C2608406100858C32 /* PersistenceService.c in Sources */,
 				610B92BA270A6E9000358DBD /* Views.c in Sources */,
-				614DC13026082BBE00B9588E /* ViewControllerHelpers.c in Sources */,
 				615086ED26D3222500521269 /* SwiftBridging.m in Sources */,
+				61594D0C26068105000D01A1 /* AppDelegate.c in Sources */,
 				614DA69B270A8D1F00EC90C4 /* ExerciseManager.c in Sources */,
 				611EDDA42741F8750064B254 /* StatusView.c in Sources */,
 				610B92CC270A7F4900358DBD /* ContainerView.c in Sources */,
@@ -470,7 +445,6 @@
 				611EDDE927476ED50064B254 /* HistoryVC.c in Sources */,
 				611EDDD12745FEA70064B254 /* WorkoutVC.c in Sources */,
 				611EDDC72744CB2D0064B254 /* UpdateMaxesVC.c in Sources */,
-				61594D0C26068105000D01A1 /* AppDelegate.c in Sources */,
 				61594D2026068106000D01A1 /* main.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

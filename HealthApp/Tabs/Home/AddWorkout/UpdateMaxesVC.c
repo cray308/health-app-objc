@@ -1,9 +1,12 @@
 #include "UpdateMaxesVC.h"
+#include "AppDelegate.h"
+#include "ExerciseManager.h"
 #include "InputVC.h"
-#include "ViewControllerHelpers.h"
-#include "WorkoutVC.h"
+#include "Views.h"
 
 #define getStepperValue(_v) msg0(double, _v, sel_getUid("value"))
+
+void workoutVC_finishedBottomSheet(id self, int index, short weight);
 
 Class UpdateMaxesVCClass;
 

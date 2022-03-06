@@ -1,8 +1,10 @@
 #include "SettingsVC.h"
 #include "AppDelegate.h"
-#include "AppUserData.h"
 #include "InputVC.h"
-#include "ViewControllerHelpers.h"
+#include "Views.h"
+
+void updateUserInfo(unsigned char plan, unsigned char darkMode, short *weights);
+void deleteAppData(void);
 
 Class SettingsVCClass;
 
@@ -51,8 +53,9 @@ void settingsVC_viewDidLoad(id self, SEL _cmd) {
     setBackground(getView(self), createColor(ColorPrimaryBGGrouped));
     setVCTitle(self, CFBundleCopyLocalizedString(bundle, CFSTR("settingsTitle"), NULL, NULL));
 
-    const unsigned char darkMode = userData->darkMode;
-    unsigned char segment = userData->currentPlan + 1;
+    UserInfo const *info = getUserInfo();
+    const unsigned char darkMode = info->darkMode;
+    unsigned char segment = info->currentPlan + 1;
     id planLabel = createLabel(CFBundleCopyLocalizedString(bundle, CFSTR("planPickerTitle"),
                                                            NULL, NULL),
                                UIFontTextStyleFootnote, true);
@@ -112,7 +115,7 @@ void settingsVC_viewDidLoad(id self, SEL _cmd) {
     releaseObj(belowTF);
     releaseObj(picker);
 
-    inputVC_updateFields(parent, userData->liftMaxes);
+    inputVC_updateFields(parent, info->liftMaxes);
 }
 
 void settingsVC_buttonTapped(id self, SEL _cmd _U_, id btn) {
@@ -125,7 +128,7 @@ void settingsVC_buttonTapped(id self, SEL _cmd _U_, id btn) {
     addAlertAction(ctrl, CFBundleCopyLocalizedString(bundle, CFSTR("cancel"), NULL, NULL), 1, NULL);
     if (tag) {
         addAlertAction(ctrl, CFBundleCopyLocalizedString(bundle, CFSTR("delete"), NULL, NULL), 2, ^{
-            appDel_deleteAppData();
+            deleteAppData();
         });
         presentVC(ctrl);
         return;
@@ -147,7 +150,7 @@ void settingsVC_buttonTapped(id self, SEL _cmd _U_, id btn) {
         arr[i] = fields[i]->result;
     }
     addAlertAction(ctrl, CFBundleCopyLocalizedString(bundle, CFSTR("save"), NULL, NULL), 0, ^{
-        appDel_updateUserInfo(plan, dark, arr);
+        updateUserInfo(plan, dark, arr);
     });
     presentVC(ctrl);
 }

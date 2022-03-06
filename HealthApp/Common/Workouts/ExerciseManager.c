@@ -2,9 +2,7 @@
 #include <CoreFoundation/CFNumber.h>
 #include <CoreFoundation/CFPropertyList.h>
 #include <CoreFoundation/CFSet.h>
-#include <stdlib.h>
-#include <string.h>
-#include "AppUserData.h"
+#include "AppDelegate.h"
 #include "CocoaHelpers.h"
 
 extern id HKQuantityTypeIdentifierBodyMass;
@@ -71,7 +69,7 @@ static Workout *buildWorkout(CFDictionaryRef dict, WorkoutParams *params) {
     short exerciseSets = 1, customReps = 0, customCircuitReps = 0;
     bool testMax = false;
     if (params->type == WorkoutStrength) {
-        short *lifts = userData->liftMaxes;
+        const short *lifts = getUserInfo()->liftMaxes;
         float multiplier = params->weight / 100.f;
 
         weights[0] = (short) (multiplier * lifts[0]);
@@ -288,7 +286,7 @@ void initExerciseData(int week, CFBundleRef bundle) {
 void exerciseManager_setCurrentWeek(int newValue) { weekInPlan = newValue; }
 #endif
 
-void exerciseManager_setWeeklyWorkoutNames(unsigned char plan, CFStringRef *names) {
+void setWeeklyWorkoutNames(unsigned char plan, CFStringRef *names) {
     struct DictWrapper info;
     createRootAndLibDict(&info);
     CFArrayRef currWeek = getCurrentWeekForPlan(&info, plan);
@@ -310,7 +308,7 @@ void exerciseManager_setWeeklyWorkoutNames(unsigned char plan, CFStringRef *name
     CFRelease(info.root);
 }
 
-Workout *exerciseManager_getWeeklyWorkout(unsigned char plan, int index) {
+Workout *getWeeklyWorkout(unsigned char plan, int index) {
     struct DictWrapper info;
     int arrayIdx;
     short sets, reps, weight;
@@ -339,7 +337,7 @@ Workout *exerciseManager_getWeeklyWorkout(unsigned char plan, int index) {
     return w;
 }
 
-CFArrayRef exerciseManager_createWorkoutNames(unsigned char type) {
+CFArrayRef createWorkoutNames(unsigned char type) {
     struct DictWrapper info;
     createRootAndLibDict(&info);
 
@@ -357,7 +355,7 @@ CFArrayRef exerciseManager_createWorkoutNames(unsigned char type) {
     return results;
 }
 
-Workout *exerciseManager_getWorkoutFromLibrary(WorkoutParams *params) {
+Workout *getWorkoutFromLibrary(WorkoutParams *params) {
     struct DictWrapper info;
     createRootAndLibDict(&info);
     CFArrayRef libArr = getLibraryArrayForType(&info, params->type);

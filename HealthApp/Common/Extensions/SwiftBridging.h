@@ -1,7 +1,7 @@
 #ifndef SwiftBridging_h
 #define SwiftBridging_h
 
-#include "ViewControllerHelpers.h"
+#include "Views.h"
 
 id createDataSet(int color, id fillSet);
 id createChartData(CFArrayRef dataSets, int lineWidth, uint8_t options);

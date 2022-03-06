@@ -1,7 +1,7 @@
 #include "InputVC.h"
 #include <CoreFoundation/CFNotificationCenter.h>
-#include "AppUserData.h"
-#include "ViewControllerHelpers.h"
+#include "AppDelegate.h"
+#include "Views.h"
 
 #define toggleScrolling(_v, _enable) msg1(void, bool, _v, sel_getUid("setScrollEnabled:"), _enable)
 
@@ -109,7 +109,7 @@ void inputVC_addChild(id self, CFStringRef hint, short min, short max) {
     setInputAccessory(ptr->field, d->toolbar);
 }
 
-void inputVC_updateFields(InputVC *self, short *vals) {
+void inputVC_updateFields(InputVC *self, const short *vals) {
     int count = self->count;
     for (int i = 0; i < count; ++i) {
         short value = vals[i];
@@ -159,7 +159,7 @@ void inputVC_viewDidLoad(id self, SEL _cmd) {
     CGRect bounds;
     getScreenBounds(&bounds);
     CGFloat width = bounds.size.width;
-    unsigned char dark = userData->darkMode;
+    unsigned char dark = getUserInfo()->darkMode;
 
     InputVC *data = (InputVC *) ((char *)self + VCSize);
     data->scrollView = createScrollView();

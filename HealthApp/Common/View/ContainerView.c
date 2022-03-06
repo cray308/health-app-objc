@@ -1,10 +1,9 @@
 #include "ContainerView.h"
-#include "CocoaHelpers.h"
 #include "Views.h"
 
 Class ContainerViewClass;
 
-id containerView_init(CFStringRef title, ContainerView **ref, int spacing, bool margins) {
+id containerView_init(CFStringRef title, ContainerView **ref, int spacing) {
     id self = createNew(ContainerViewClass);
     ContainerView *data = (ContainerView *) ((char *)self + ViewSize);
     data->divider = createNew(ViewClass);
@@ -26,11 +25,8 @@ id containerView_init(CFStringRef title, ContainerView **ref, int spacing, bool 
     activateConstraintsArray(divArray);
     CFRelease(divArray);
 
-    Padding padding = {0};
-    if (margins)
-        padding.left = padding.right = 8;
     id vStack = createStackView((id []){data->divider, data->headerLabel, data->stack},
-                                3, 1, 0, padding);
+                                3, 1, 0, (Padding){0});
     setUsesAutolayout(vStack);
     addSubview(self, vStack);
     pin(vStack, self);

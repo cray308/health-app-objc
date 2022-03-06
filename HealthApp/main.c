@@ -1,4 +1,3 @@
-#include "CocoaHelpers.h"
 #include "SetupWorkoutVC.h"
 #include "StatusView.h"
 #include "InputVC.h"
@@ -7,14 +6,57 @@
 #include "SettingsVC.h"
 #include "WorkoutVC.h"
 #include "UpdateMaxesVC.h"
-#include "AppDelegate.h"
-#include "ViewControllerHelpers.h"
+#include "Views.h"
 
+extern Class AppDelegateClass;
+extern Class StatusViewClass;
+extern Class InputViewClass;
+extern Class ContainerViewClass;
+extern Class HomeVCClass;
+extern Class HistoryVCClass;
+extern Class SettingsVCClass;
+extern Class WorkoutVCClass;
+extern Class UpdateMaxesVCClass;
 extern int UIApplicationMain(int, char *[], CFStringRef, CFStringRef);
-extern Protocol *getValueFormatterType(void);
-extern SEL getValueFormatterAction(void);
+Protocol *getValueFormatterType(void);
+SEL getValueFormatterAction(void);
+void containerView_deinit(id, SEL);
+void statusView_deinit(id, SEL);
+void inputView_deinit(id, SEL);
+id inputVC_init(id, SEL);
+void inputVC_deinit(id, SEL);
+void inputVC_viewDidLoad(id, SEL);
+void inputVC_viewDidAppear(id, SEL, bool);
+void inputVC_dismissKeyboard(id, SEL);
+void inputVC_fieldBeganEditing(id, SEL, id);
+void inputVC_fieldStoppedEditing(id, SEL, id);
+bool inputVC_fieldChanged(id, SEL, id, CFRange, CFStringRef);
+void homeVC_viewDidLoad(id, SEL);
+void homeVC_workoutButtonTapped(id, SEL, id);
+void homeVC_customButtonTapped(id, SEL, id);
+void historyVC_viewDidLoad(id, SEL);
+void historyVC_updateSegment(id, SEL, id);
+CFStringRef historyVC_stringForValue(id, SEL, double);
+void settingsVC_viewDidLoad(id, SEL);
+void settingsVC_buttonTapped(id, SEL, id);
+void setupWorkoutVC_deinit(id, SEL);
+void setupWorkoutVC_viewDidLoad(id, SEL);
+void setupWorkoutVC_tappedButton(id, SEL, id);
+long setupWorkoutVC_numberOfRows(id, SEL, id, long);
+void workoutVC_deinit(id, SEL);
+void workoutVC_viewDidLoad(id, SEL);
+void workoutVC_willDisappear(id, SEL, bool);
+void workoutVC_startEndWorkout(id, SEL, id);
+void workoutVC_handleTap(id, SEL, id);
+void updateMaxesVC_deinit(id, SEL);
+void updateMaxesVC_viewDidLoad(id, SEL);
+void updateMaxesVC_updatedStepper(id, SEL);
+void updateMaxesVC_tappedFinish(id, SEL);
+bool appDelegate_didFinishLaunching(AppDelegate*, SEL, id, id);
+int appDelegate_supportedOrientations(AppDelegate*, SEL, id, id);
 
 int main(int argc, char *argv[]) {
+    Object = objc_getClass("NSObject");
     ViewClass = objc_getClass("UIView");
     VCClass = objc_getClass("UIViewController");
     ColorClass = objc_getClass("UIColor");
@@ -28,8 +70,6 @@ int main(int argc, char *argv[]) {
     SEL deinit = sel_getUid("dealloc");
     SEL viewLoad = sel_getUid("viewDidLoad");
     SEL btnTap = sel_getUid("buttonTapped:");
-
-    DMNavVC = objc_allocateClassPair(objc_getClass("UINavigationController"), "DMNavVC", 0);
 
     StatusViewClass = objc_allocateClassPair(ViewClass, "StatusView", 0);
     class_addIvar(StatusViewClass, dataKey, sizeof(StatusView), 0, "{?=@@@@}");
@@ -82,6 +122,7 @@ int main(int argc, char *argv[]) {
                     (IMP) setupWorkoutVC_tappedButton, tapSig);
     class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:numberOfRowsInComponent:"),
                     (IMP) setupWorkoutVC_numberOfRows, "q@:@q");
+    objc_registerClassPair(SetupWorkoutVCClass);
 
     UpdateMaxesVCClass = objc_allocateClassPair(InputVCClass, "UpdateMaxesVC", 0);
     class_addIvar(UpdateMaxesVCClass, dataKey, sizeof(UpdateMaxesVC), 0, "{?=@@@@is}");
@@ -127,7 +168,9 @@ int main(int argc, char *argv[]) {
 
     AppDelegateClass = objc_allocateClassPair(objc_getClass("UIResponder"), "AppDelegate", 0);
     class_addIvar(AppDelegateClass, "window", sizeof(id), 0, "@");
+    class_addIvar(AppDelegateClass, "context", sizeof(id), 0, "@");
     class_addIvar(AppDelegateClass, "children", 3 * sizeof(id), 0, "[3@]");
+    class_addIvar(AppDelegateClass, "userData", sizeof(UserInfo), 0, "{?=qq[4s]CCC}");
     class_addMethod(AppDelegateClass, sel_getUid("application:didFinishLaunchingWithOptions:"),
                     (IMP) appDelegate_didFinishLaunching, appSig);
     class_addMethod(AppDelegateClass,
