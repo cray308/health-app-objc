@@ -1,8 +1,8 @@
 #ifndef AppDelegate_h
 #define AppDelegate_h
 
-#include <objc/objc.h>
-#include <CoreFoundation/CFBase.h>
+#include "ColorCache.h"
+#include "ViewCache.h"
 
 typedef struct {
     time_t planStart;
@@ -25,10 +25,13 @@ typedef struct {
     id window;
     id context;
     id children[3];
+    ColorCache clr;
+    VCache tbl;
     UserInfo userData;
 } AppDelegate;
 
 typedef void (^Callback)(void);
+typedef void (*FetchHandler)(void*, CFArrayRef, WeekDataModel*, int);
 
 UserInfo const *getUserInfo(void);
 

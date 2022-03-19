@@ -2,11 +2,12 @@
 #include <CoreFoundation/CFNumber.h>
 #include <CoreFoundation/CFPropertyList.h>
 #include <CoreFoundation/CFSet.h>
+#include <dispatch/queue.h>
 #include "AppDelegate.h"
 #include "CocoaHelpers.h"
 
-extern id HKQuantityTypeIdentifierBodyMass;
-extern id HKSampleSortIdentifierStartDate;
+extern CFStringRef HKQuantityTypeIdentifierBodyMass;
+extern CFStringRef HKSampleSortIdentifierStartDate;
 
 struct DictWrapper {
     CFDictionaryRef root;
@@ -40,8 +41,7 @@ static void createRootAndLibDict(struct DictWrapper *data) {
     CFRelease(url);
     CFReadStreamOpen(stream);
     unsigned char *buf = malloc(12000);
-    long nBytes = CFReadStreamRead(stream, buf, 12000);
-    CFDataRef plistData = CFDataCreate(NULL, buf, nBytes);
+    CFDataRef plistData = CFDataCreate(NULL, buf, CFReadStreamRead(stream, buf, 12000));
     free(buf);
     CFReadStreamClose(stream);
     CFRelease(stream);
@@ -59,12 +59,10 @@ static CFArrayRef getLibraryArrayForType(struct DictWrapper *data, unsigned char
 static CFArrayRef getCurrentWeekForPlan(struct DictWrapper *data, unsigned char plan) {
     static CFStringRef const planKeys[] = {CFSTR("bb"), CFSTR("cc")};
     CFDictionaryRef plans = CFDictionaryGetValue(data->root, CFSTR("plans"));
-    CFArrayRef weeks = CFDictionaryGetValue(plans, planKeys[plan]);
-    return CFArrayGetValueAtIndex(weeks, weekInPlan);
+    return CFArrayGetValueAtIndex(CFDictionaryGetValue(plans, planKeys[plan]), weekInPlan);
 }
 
 static Workout *buildWorkout(CFDictionaryRef dict, WorkoutParams *params) {
-    CFNumberRef number;
     short weights[4];
     short exerciseSets = 1, customReps = 0, customCircuitReps = 0;
     bool testMax = false;
@@ -72,16 +70,16 @@ static Workout *buildWorkout(CFDictionaryRef dict, WorkoutParams *params) {
         const short *lifts = getUserInfo()->liftMaxes;
         float multiplier = params->weight / 100.f;
 
-        weights[0] = (short) (multiplier * lifts[0]);
+        weights[0] = (short)(multiplier * lifts[0]);
         if (params->index <= 1) {
-            weights[1] = (short) (multiplier * lifts[LiftBench]);
+            weights[1] = (short)(multiplier * lifts[LiftBench]);
             if (params->index == 0) {
-                short weight = (short) ((lifts[LiftPullup] + bodyweight) * multiplier) - bodyweight;
+                short weight = (short)((lifts[LiftPullup] + bodyweight) * multiplier) - bodyweight;
                 if (weight < 0)
                     weight = 0;
                 weights[2] = weight;
             } else {
-                weights[2] = (short) (multiplier * lifts[LiftDeadlift]);
+                weights[2] = (short)(multiplier * lifts[LiftDeadlift]);
             }
         } else {
             memcpy(&weights[1], &lifts[1], 3 * sizeof(short));
@@ -97,11 +95,11 @@ static Workout *buildWorkout(CFDictionaryRef dict, WorkoutParams *params) {
     }
 
     CFArrayRef foundActivities = CFDictionaryGetValue(dict, CFSTR("activities"));
-    int nActivities = (int) CFArrayGetCount(foundActivities);
+    int nActivities = (int)CFArrayGetCount(foundActivities);
     customAssert(nActivities > 0)
 
     Workout workout = {
-        .activities = malloc((unsigned) nActivities * sizeof(Circuit)),
+        .activities = malloc((unsigned)nActivities * sizeof(Circuit)),
         .title = CFRetain(CFDictionaryGetValue(dict, Keys.title)), .size = nActivities,
         .bodyweight = bodyweight, .type = params->type, .day = params->day, .testMax = testMax
     };
@@ -115,11 +113,9 @@ static Workout *buildWorkout(CFDictionaryRef dict, WorkoutParams *params) {
         short circuitReps = customCircuitReps;
         unsigned char circuitType;
 
-        number = CFDictionaryGetValue(act, Keys.type);
-        CFNumberGetValue(number, kCFNumberCharType, &circuitType);
+        CFNumberGetValue(CFDictionaryGetValue(act, Keys.type), kCFNumberCharType, &circuitType);
         if (!circuitReps) {
-            number = CFDictionaryGetValue(act, Keys.reps);
-            CFNumberGetValue(number, kCFNumberShortType, &circuitReps);
+            CFNumberGetValue(CFDictionaryGetValue(act, Keys.reps), kCFNumberShortType, &circuitReps);
         }
 #if TARGET_OS_SIMULATOR
         if (circuitType == CircuitAMRAP)
@@ -127,23 +123,22 @@ static Workout *buildWorkout(CFDictionaryRef dict, WorkoutParams *params) {
 #endif
 
         if (circuitType == CircuitAMRAP) {
-            circuitHeader = CFStringCreateWithFormat(NULL, NULL, amrapFormat, circuitReps);
+            circuitHeader = formatStr(amrapFormat, circuitReps);
         } else if (circuitReps > 1) {
-            circuitHeader = CFStringCreateWithFormat(NULL, NULL, roundsFormat, 1, circuitReps);
+            circuitHeader = formatStr(roundsFormat, 1, circuitReps);
             circuitRange = CFStringFind(circuitHeader, CFSTR("1"), 0);
         }
 
         if (circuitHeader) {
-            circuitHeaderMutable = CFStringCreateMutable(NULL, 16);
-            CFStringReplaceAll(circuitHeaderMutable, circuitHeader);
+            circuitHeaderMutable = CFStringCreateMutableCopy(NULL, 16, circuitHeader);
             CFRelease(circuitHeader);
         }
 
         CFArrayRef foundExercises = CFDictionaryGetValue(act, CFSTR("exercises"));
-        int nExercises = (int) CFArrayGetCount(foundExercises);
+        int nExercises = (int)CFArrayGetCount(foundExercises);
         customAssert(nExercises > 0)
         Circuit circuit = {
-            .exercises = malloc((unsigned) nExercises * sizeof(ExerciseEntry)),
+            .exercises = malloc((unsigned)nExercises * sizeof(ExerciseEntry)),
             .headerStr = circuitHeaderMutable, .numberRange = circuitRange,
             .size = nExercises, .reps = circuitReps, .type = circuitType
         };
@@ -155,11 +150,9 @@ static Workout *buildWorkout(CFDictionaryRef dict, WorkoutParams *params) {
             short rest = 0, exerciseReps = customReps;
             unsigned char exerciseType;
 
-            number = CFDictionaryGetValue(exDict, Keys.type);
-            CFNumberGetValue(number, kCFNumberCharType, &exerciseType);
+            CFNumberGetValue(CFDictionaryGetValue(exDict, Keys.type), kCFNumberCharType, &exerciseType);
             if (!exerciseReps) {
-                number = CFDictionaryGetValue(exDict, Keys.reps);
-                CFNumberGetValue(number, kCFNumberShortType, &exerciseReps);
+                CFNumberGetValue(CFDictionaryGetValue(exDict, Keys.reps), kCFNumberShortType, &exerciseReps);
             }
 #if TARGET_OS_SIMULATOR
             if (workout.type == WorkoutHIC && exerciseType == ExerciseDuration && exerciseReps > 30)
@@ -167,11 +160,9 @@ static Workout *buildWorkout(CFDictionaryRef dict, WorkoutParams *params) {
 #endif
 
             if (exerciseSets > 1) {
-                exerciseHeader = CFStringCreateMutable(NULL, 16);
-                CFStringRef numberStr = CFStringCreateWithFormat(NULL, NULL,
-                                                                 setsFormat, 1, exerciseSets);
+                CFStringRef numberStr = formatStr(setsFormat, 1, exerciseSets);
                 exerciseHeaderRange = CFStringFind(numberStr, CFSTR("1"), 0);
-                CFStringReplaceAll(exerciseHeader, numberStr);
+                exerciseHeader = CFStringCreateMutableCopy(NULL, 16, numberStr);
                 CFRelease(numberStr);
             }
 
@@ -180,36 +171,30 @@ static Workout *buildWorkout(CFDictionaryRef dict, WorkoutParams *params) {
                 .sets = exerciseSets, .type = exerciseType
             };
 
-            number = CFDictionaryGetValue(exDict, CFSTR("rest"));
-            CFNumberGetValue(number, kCFNumberShortType, &rest);
+            CFNumberGetValue(CFDictionaryGetValue(exDict, CFSTR("rest")), kCFNumberShortType, &rest);
             if (rest)
-                e.restStr = CFStringCreateWithFormat(NULL, NULL, restFormat, rest);
+                e.restStr = formatStr(restFormat, rest);
 
             CFStringRef name = CFDictionaryGetValue(exDict, CFSTR("name"));
             CFStringRef titleStr;
 
             if (e.type == ExerciseReps) {
                 if (!workout.type) {
-                    titleStr = CFStringCreateWithFormat(NULL, NULL, weightFormat,
-                                                        name, e.reps, weights[j]);
+                    titleStr = formatStr(weightFormat, name, e.reps, weights[j]);
                 } else {
-                    titleStr = CFStringCreateWithFormat(NULL, NULL, repsFormat, name, e.reps);
+                    titleStr = formatStr(repsFormat, name, e.reps);
                 }
             } else if (e.type == ExerciseDuration) {
                 if (e.reps > 120) {
-                    titleStr = CFStringCreateWithFormat(NULL, NULL, durationMinsFormat,
-                                                        name, e.reps / 60.f);
+                    titleStr = formatStr(durationMinsFormat, name, e.reps / 60.f);
                 } else {
-                    titleStr = CFStringCreateWithFormat(NULL, NULL, durationSecsFormat,
-                                                        name, e.reps);
+                    titleStr = formatStr(durationSecsFormat, name, e.reps);
                 }
             } else {
-                titleStr = CFStringCreateWithFormat(NULL, NULL, distanceFormat,
-                                                    e.reps, (5 * e.reps) >> 2);
+                titleStr = formatStr(distanceFormat, e.reps, (5 * e.reps) >> 2);
             }
 
-            e.titleStr = CFStringCreateMutable(NULL, 64);
-            CFStringReplaceAll(e.titleStr, titleStr);
+            e.titleStr = CFStringCreateMutableCopy(NULL, 64, titleStr);
             CFRelease(titleStr);
             if (circuit.type == CircuitDecrement && e.type == ExerciseReps)
                 e.tRange = CFStringFind(e.titleStr, CFSTR("10"), 0);
@@ -227,59 +212,57 @@ static Workout *buildWorkout(CFDictionaryRef dict, WorkoutParams *params) {
     return w;
 }
 
-void initExerciseData(int week, CFBundleRef bundle) {
-    restFormat = CFBundleCopyLocalizedString(bundle, CFSTR("exerciseTitleRest"), NULL, NULL);
-    repsFormat = CFBundleCopyLocalizedString(bundle, CFSTR("exerciseTitleReps"), NULL, NULL);
-    setsFormat = CFBundleCopyLocalizedString(bundle, CFSTR("exerciseHeader"), NULL, NULL);
-    weightFormat = CFBundleCopyLocalizedString(bundle,
-                                               CFSTR("exerciseTitleRepsWithWeight"), NULL, NULL);
-    durationMinsFormat = CFBundleCopyLocalizedString(bundle, CFSTR("exerciseTitleDurationMinutes"),
-                                                     NULL, NULL);
-    durationSecsFormat = CFBundleCopyLocalizedString(bundle, CFSTR("exerciseTitleDurationSeconds"),
-                                                     NULL, NULL);
-    distanceFormat = CFBundleCopyLocalizedString(bundle,
-                                                 CFSTR("exerciseTitleDistance"), NULL, NULL);
-    roundsFormat = CFBundleCopyLocalizedString(bundle, CFSTR("circuitHeaderRounds"), NULL, NULL);
-    amrapFormat = CFBundleCopyLocalizedString(bundle, CFSTR("circuitHeaderAMRAP"), NULL, NULL);
-    weekInPlan = week;
-
+static void getHealthData(void) {
     Class storeClass = objc_getClass("HKHealthStore");
     if (!clsF0(bool, storeClass, sel_getUid("isHealthDataAvailable"))) return;
 
-    id store = createNew(storeClass);
+    id store = Sels.new(storeClass, Sels.nw);
     id weightType = clsF1(id, CFStringRef, objc_getClass("HKSampleType"),
-                          sel_getUid("quantityTypeForIdentifier:"),
-                          (CFStringRef) HKQuantityTypeIdentifierBodyMass);
+                          sel_getUid("quantityTypeForIdentifier:"), HKQuantityTypeIdentifierBodyMass);
     CFSetRef set = CFSetCreate(NULL, (const void *[]){weightType}, 1, NULL);
 
     msg3(void, CFSetRef, CFSetRef, void(^)(bool,id), store,
          sel_getUid("requestAuthorizationToShareTypes:readTypes:completion:"),
          NULL, set, ^(bool granted, id er _U_) {
         if (!granted) {
-            releaseObj(store);
+            Sels.objRel(store, Sels.rel);
             return;
         }
 
-        CFArrayRef arr = createSortDescriptors((CFStringRef)HKSampleSortIdentifierStartDate, false);
-        id _req = allocClass(objc_getClass("HKSampleQuery"));
+        CFArrayRef arr = createSortDescriptors(HKSampleSortIdentifierStartDate, false);
+        id _req = Sels.alloc(objc_getClass("HKSampleQuery"), Sels.alo);
         SEL qInit = sel_getUid("initWithSampleType:predicate:limit:sortDescriptors:resultsHandler:");
         id req = (((id(*)(id,SEL,id,id,unsigned long,CFArrayRef,void(^)(id,CFArrayRef,id)))objc_msgSend)
                   (_req, qInit, weightType, nil, 1, arr, ^(id q _U_, CFArrayRef data, id err2 _U_) {
             short weight = 145;
             if (data && CFArrayGetCount(data)) {
                 id unit = clsF0(id, objc_getClass("HKUnit"), sel_getUid("poundUnit"));
-                id sample = (id) CFArrayGetValueAtIndex(data, 0);
-                id quantity = msg0(id, sample, sel_getUid("quantity"));
+                id quantity = msg0(id, (id)CFArrayGetValueAtIndex(data, 0), sel_getUid("quantity"));
                 weight = (short)msg1(double, id, quantity, sel_getUid("doubleValueForUnit:"), unit);
             }
             bodyweight = weight;
-            releaseObj(store);
+            Sels.objRel(store, Sels.rel);
         }));
         msg1(void, id, store, sel_getUid("executeQuery:"), req);
         CFRelease(arr);
-        releaseObj(req);
+        Sels.objRel(req, Sels.rel);
     });
     CFRelease(set);
+}
+
+void initExerciseData(int week, CFBundleRef bundle) {
+    restFormat = localize(bundle, CFSTR("exerciseTitleRest"));
+    repsFormat = localize(bundle, CFSTR("exerciseTitleReps"));
+    setsFormat = localize(bundle, CFSTR("exerciseHeader"));
+    weightFormat = localize(bundle, CFSTR("exerciseTitleRepsWithWeight"));
+    durationMinsFormat = localize(bundle, CFSTR("exerciseTitleDurationMinutes"));
+    durationSecsFormat = localize(bundle, CFSTR("exerciseTitleDurationSeconds"));
+    distanceFormat = localize(bundle, CFSTR("exerciseTitleDistance"));
+    roundsFormat = localize(bundle, CFSTR("circuitHeaderRounds"));
+    amrapFormat = localize(bundle, CFSTR("circuitHeaderAMRAP"));
+    weekInPlan = week;
+
+    dispatch_async(dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0), ^{ getHealthData(); });
 }
 
 #if TARGET_OS_SIMULATOR
@@ -295,15 +278,12 @@ void setWeeklyWorkoutNames(unsigned char plan, CFStringRef *names) {
 
     for (int i = 0; i < 7; ++i) {
         CFDictionaryRef day = CFArrayGetValueAtIndex(currWeek, i);
-        CFNumberRef number = CFDictionaryGetValue(day, Keys.type);
-        CFNumberGetValue(number, kCFNumberCharType, &type);
+        CFNumberGetValue(CFDictionaryGetValue(day, Keys.type), kCFNumberCharType, &type);
         if (type > 3) continue;
 
+        CFNumberGetValue(CFDictionaryGetValue(day, Keys.index), kCFNumberIntType, &index);
         CFArrayRef libArr = getLibraryArrayForType(&info, type);
-        number = CFDictionaryGetValue(day, Keys.index);
-        CFNumberGetValue(number, kCFNumberIntType, &index);
-        CFStringRef str = CFDictionaryGetValue(CFArrayGetValueAtIndex(libArr, index), Keys.title);
-        names[i] = CFStringCreateCopy(NULL, str);
+        names[i] = CFRetain(CFDictionaryGetValue(CFArrayGetValueAtIndex(libArr, index), Keys.title));
     }
     CFRelease(info.root);
 }
@@ -315,24 +295,14 @@ Workout *getWeeklyWorkout(unsigned char plan, int index) {
     unsigned char type;
     createRootAndLibDict(&info);
     CFDictionaryRef day = CFArrayGetValueAtIndex(getCurrentWeekForPlan(&info, plan), index);
+    CFNumberGetValue(CFDictionaryGetValue(day, Keys.type), kCFNumberCharType, &type);
+    CFNumberGetValue(CFDictionaryGetValue(day, Keys.index), kCFNumberIntType, &arrayIdx);
+    CFNumberGetValue(CFDictionaryGetValue(day, CFSTR("sets")), kCFNumberShortType, &sets);
+    CFNumberGetValue(CFDictionaryGetValue(day, Keys.reps), kCFNumberShortType, &reps);
+    CFNumberGetValue(CFDictionaryGetValue(day, CFSTR("weight")), kCFNumberShortType, &weight);
 
-    CFNumberRef number = CFDictionaryGetValue(day, Keys.type);
-    CFNumberGetValue(number, kCFNumberCharType, &type);
-
-    CFArrayRef libArr = getLibraryArrayForType(&info, type);
-
-    number = CFDictionaryGetValue(day, Keys.index);
-    CFNumberGetValue(number, kCFNumberIntType, &arrayIdx);
-    number = CFDictionaryGetValue(day, CFSTR("sets"));
-    CFNumberGetValue(number, kCFNumberShortType, &sets);
-    number = CFDictionaryGetValue(day, Keys.reps);
-    CFNumberGetValue(number, kCFNumberShortType, &reps);
-    number = CFDictionaryGetValue(day, CFSTR("weight"));
-    CFNumberGetValue(number, kCFNumberShortType, &weight);
-
-    Workout *w = buildWorkout(CFArrayGetValueAtIndex(libArr, arrayIdx), &(WorkoutParams){
-        arrayIdx, sets, reps, weight, type, (unsigned char) index
-    });
+    Workout *w = buildWorkout(CFArrayGetValueAtIndex(getLibraryArrayForType(&info, type), arrayIdx),
+                              &(WorkoutParams){arrayIdx, sets, reps, weight, type, (unsigned char)index});
     CFRelease(info.root);
     return w;
 }
@@ -342,14 +312,13 @@ CFArrayRef createWorkoutNames(unsigned char type) {
     createRootAndLibDict(&info);
 
     CFArrayRef libArr = getLibraryArrayForType(&info, type);
-    int len = (int) CFArrayGetCount(libArr);
+    int len = (int)CFArrayGetCount(libArr);
     if (type == WorkoutStrength)
         len = 2;
 
     CFMutableArrayRef results = CFArrayCreateMutable(NULL, len, &kCFTypeArrayCallBacks);
     for (int i = 0; i < len; ++i) {
-        CFStringRef title = CFDictionaryGetValue(CFArrayGetValueAtIndex(libArr, i), Keys.title);
-        CFArrayAppendValue(results, title);
+        CFArrayAppendValue(results, CFDictionaryGetValue(CFArrayGetValueAtIndex(libArr, i), Keys.title));
     }
     CFRelease(info.root);
     return results;

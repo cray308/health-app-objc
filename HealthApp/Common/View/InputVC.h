@@ -1,11 +1,10 @@
 #ifndef InputVC_h
 #define InputVC_h
 
-#include <CoreFoundation/CFBase.h>
-#include <objc/objc.h>
+#include "ColorCache.h"
+#include "ViewCache.h"
 
 extern Class InputVCClass;
-extern size_t InputVCSize;
 
 typedef struct {
     id hintLabel;
@@ -18,6 +17,8 @@ typedef struct {
 } InputView;
 
 typedef struct {
+    CCacheRef clr;
+    VCacheRef tbl;
     InputView *children[4];
     id button;
     id activeField;

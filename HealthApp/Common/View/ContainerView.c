@@ -3,51 +3,54 @@
 
 Class ContainerViewClass;
 
-id containerView_init(CFStringRef title, ContainerView **ref, int spacing) {
-    id self = createNew(ContainerViewClass);
-    ContainerView *data = (ContainerView *) ((char *)self + ViewSize);
-    data->divider = createNew(ViewClass);
-    data->headerLabel = createLabel(title, UIFontTextStyleTitle3, true);
-    data->stack = createStackView(NULL, 0, 1, spacing, (Padding){.top = 5});
+id containerView_init(VCacheRef tbl, CCacheRef clr, CFStringRef title, ContainerView **ref, int spacing) {
+    id self = Sels.new(ContainerViewClass, Sels.nw);
+    ContainerView *data = (ContainerView *)((char *)self + ViewSize);
+    ConstraintCache const *cc = &tbl->cc;
+    data->divider = Sels.new(View, Sels.nw);
+    data->headerLabel = createLabel(tbl, clr, title, UIFontTextStyleTitle3, true);
+    data->stack = createStackView(tbl, NULL, 0, 1, 0, spacing, (Padding){.top = 5});
 
-    setHeight(data->divider, 21, true);
-    id divLine = createNew(ViewClass);
-    setUsesAutolayout(divLine);
-    setBackground(divLine, createColor(ColorSeparator));
-    setHeight(divLine, 1, true);
-    addSubview(data->divider, divLine);
-    id constraints[] = {
-        createConstraint(divLine, 3, 0, data->divider, 3, 0),
-        createConstraint(divLine, 5, 0, data->divider, 5, 0),
-        createConstraint(divLine, 6, 0, data->divider, 6, 0)
+    id containerHeight = cc->init(cc->cls, cc->cr, data->divider, 8, 0, nil, 0, 1, 21);
+    cc->lowerPri(containerHeight, cc->lp, 999);
+    cc->activateC(containerHeight, cc->ac, true);
+    id divLine = Sels.new(View, Sels.nw);
+    tbl->view.setTrans(divLine, tbl->view.trans, false);
+    tbl->view.setBG(divLine, tbl->view.sbg, clr->getColor(clr->cls, clr->sc, ColorSeparator));
+    id lineHeight = cc->init(cc->cls, cc->cr, divLine, 8, 0, nil, 0, 1, 1);
+    cc->lowerPri(lineHeight, cc->lp, 999);
+    cc->activateC(lineHeight, cc->ac, true);
+    tbl->view.addSub(data->divider, tbl->view.asv, divLine);
+    const void *constraints[] = {
+        cc->init(cc->cls, cc->cr, divLine, 3, 0, data->divider, 3, 1, 0),
+        cc->init(cc->cls, cc->cr, divLine, 5, 0, data->divider, 5, 1, 0),
+        cc->init(cc->cls, cc->cr, divLine, 6, 0, data->divider, 6, 1, 0)
     };
-    CFArrayRef divArray = CFArrayCreate(NULL, (const void **)constraints, 3, NULL);
-    activateConstraintsArray(divArray);
+    CFArrayRef divArray = CFArrayCreate(NULL, constraints, 3, NULL);
+    cc->activateArr(cc->cls, cc->aar, divArray);
     CFRelease(divArray);
+    Sels.viewRel(divLine, Sels.rel);
 
-    id vStack = createStackView((id []){data->divider, data->headerLabel, data->stack},
-                                3, 1, 0, (Padding){0});
-    setUsesAutolayout(vStack);
-    addSubview(self, vStack);
-    pin(vStack, self);
-
-    releaseObj(vStack);
-    releaseObj(divLine);
+    id vStack = createStackView(tbl, (id []){data->divider, data->headerLabel, data->stack},
+                                3, 1, 0, 0, (Padding){0});
+    tbl->view.setTrans(vStack, tbl->view.trans, false);
+    tbl->view.addSub(self, tbl->view.asv, vStack);
+    pin(cc, vStack, self);
+    Sels.viewRel(vStack, Sels.rel);
     *ref = data;
     return self;
 }
 
 void containerView_deinit(id self, SEL _cmd) {
-    ContainerView *ptr = (ContainerView *) ((char *)self + ViewSize);
-    struct objc_super super = {self, ViewClass};
-    releaseObj(ptr->divider);
-    releaseObj(ptr->headerLabel);
-    releaseObj(ptr->stack);
-    ((void(*)(struct objc_super *,SEL))objc_msgSendSuper)(&super, _cmd);
+    ContainerView *ptr = (ContainerView *)((char *)self + ViewSize);
+    Sels.viewRel(ptr->divider, Sels.rel);
+    Sels.viewRel(ptr->headerLabel, Sels.rel);
+    Sels.viewRel(ptr->stack, Sels.rel);
+    msgSup0(void, (&(struct objc_super){self, View}), _cmd);
 }
 
-void containerView_updateColors(ContainerView *data, id labelColor, id divColor) {
-    setTextColor(data->headerLabel, labelColor);
-    id divLine = (id) CFArrayGetValueAtIndex(getSubviews(data->divider), 0);
-    setBackground(divLine, divColor);
+void containerView_updateColors(ContainerView *data, VCacheRef tbl, CCacheRef clr) {
+    tbl->label.setColor(data->headerLabel, tbl->label.stc, clr->getColor(clr->cls, clr->sc, ColorLabel));
+    id divLine = (id)CFArrayGetValueAtIndex(msg0(CFArrayRef, data->divider, sel_getUid("subviews")), 0);
+    tbl->view.setBG(divLine, tbl->view.sbg, clr->getColor(clr->cls, clr->sc, ColorSeparator));
 }

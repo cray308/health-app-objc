@@ -1,9 +1,9 @@
 #ifndef StatusView_h
 #define StatusView_h
 
-#include <CoreFoundation/CFBase.h>
-#include <objc/objc.h>
 #include "ExerciseManager.h"
+#include "ColorCache.h"
+#include "ViewCache.h"
 
 typedef struct {
     id button;
@@ -12,7 +12,8 @@ typedef struct {
     ExerciseEntry *entry;
 } StatusView;
 
-id statusView_init(CFStringRef text CF_CONSUMED, StatusView **ref, int tag, id target, SEL action);
-void statusView_updateAccessibility(StatusView *ptr, CFStringRef stateText);
+id statusView_init(VCacheRef tbl, CCacheRef clr,
+                   CFStringRef text CF_CONSUMED, StatusView **ref, int tag, id target, SEL action);
+void statusView_updateAccessibility(StatusView *ptr, VCacheRef tbl, CFStringRef stateText);
 
 #endif /* StatusView_h */

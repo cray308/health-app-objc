@@ -4,32 +4,22 @@
 
 void toggleDarkModeForCharts(bool enabled) { [ChartUtility setDarkModeWithEnabled:enabled]; }
 
-void setLegendLabel(LineChart *v, int index, CFStringRef text) {
-    [v setLegendLabel:index text:(__bridge NSString*)text];
+void populateChartsSelsAndFuncs(Class *classes, IMP *impArr, SEL *selArr) {
+    Class Chart = LineChart.class, CSet = DataSet.class, CData = ChartData.class;
+    memcpy(classes, (Class []){CSet, CData}, sizeof(Class) << 1);
+    SEL localSels[] = {@selector(setLegendLabel:text:), @selector(setLineLimit:),
+        @selector(setData:axisMax:), @selector(replaceEntries:count:),
+        @selector(initWithColorVal:fillSet:), @selector(initWithDataSets:lineWidth:options:)
+    };
+    impArr[0] = method_getImplementation(class_getInstanceMethod(Chart, localSels[0]));
+    impArr[1] = method_getImplementation(class_getInstanceMethod(Chart, localSels[1]));
+    impArr[2] = method_getImplementation(class_getInstanceMethod(Chart, localSels[2]));
+    impArr[3] = method_getImplementation(class_getInstanceMethod(CSet, localSels[3]));
+    impArr[4] = method_getImplementation(class_getInstanceMethod(CSet, localSels[4]));
+    impArr[5] = method_getImplementation(class_getInstanceMethod(CData, localSels[5]));
+    memcpy(selArr, localSels, sizeof(SEL) * 6);
 }
-
-void setLineLimit(LineChart *v, float limit) { [v setLineLimit:limit]; }
-
-Protocol *getValueFormatterType(void) { return @protocol(ValueFormatter); }
-
-SEL getValueFormatterAction(void) { return @selector(stringForValue:); }
-
-void disableLineChartView(LineChart *v) { [v setData:nil axisMax:0]; }
-
-void updateChart(LineChart *v, ChartData *data, float max) { [v setData:data axisMax:max]; }
 
 id createChartView(id formatter, long *colors, int count, uint8_t options) {
     return [[LineChart alloc] initWithColors:colors count:count xFormatter:formatter options:options];
-}
-
-id createDataSet(int color, DataSet *fillSet) {
-    return [[DataSet alloc] initWithColorVal:color fillSet:fillSet];
-}
-
-id createChartData(CFArrayRef dataSets, int lineWidth, uint8_t options) {
-    return [[ChartData alloc] initWithDataSets:(__bridge NSArray*)dataSets lineWidth:lineWidth options:options];
-}
-
-void replaceDataSetEntries(DataSet *dataSet, CGPoint *entries, int count) {
-    [dataSet replaceEntries:entries count:count];
 }

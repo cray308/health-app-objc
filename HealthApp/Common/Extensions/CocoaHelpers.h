@@ -4,13 +4,24 @@
 #include <CoreFoundation/CFBundle.h>
 #include <CoreGraphics/CGGeometry.h>
 #include <objc/message.h>
+#include "ColorCache.h"
 
 #if DEBUG
 #include <assert.h>
+#include <stdio.h>
 #define customAssert(x) assert(x);
 #else
 #define customAssert(x)
 #endif
+
+struct SelCache {
+    const SEL alo, nw, rel;
+    id (*alloc)(Class,SEL);
+    id (*new)(Class,SEL);
+    void (*objRel)(id,SEL);
+    void (*viewRel)(id,SEL);
+    void (*vcRel)(id,SEL);
+};
 
 #define _U_ __attribute__((__unused__))
 
@@ -32,21 +43,16 @@
 #define msg4(rv, t1, t2, t3, t4, o, cmd, a1, a2, a3, a4)\
  (((rv(*)(id,SEL,t1,t2,t3,t4))objc_msgSend)((o),(cmd),(a1),(a2),(a3),(a4)))
 
-#define releaseObj(obj) msg0(void,obj,sel_getUid("release"))
-#define createNew(cls) clsF0(id,cls,sel_getUid("new"))
-#define allocClass(cls) clsF0(id,cls,sel_getUid("alloc"))
+#define msgSup0(rv, s, cmd) (((rv(*)(struct objc_super*,SEL))objc_msgSendSuper)(s, cmd))
+#define msgSup1(rv, t, s, cmd, a) (((rv(*)(struct objc_super*,SEL,t))objc_msgSendSuper)(s, cmd, a))
 
-#define createColor(t) clsF1(id,int,ColorClass,sel_getUid("getColorWithType:"),t)
-#define getBarColor(t) clsF1(id,int,ColorClass,sel_getUid("getBarColorWithType:"),t)
-
-#define createImage(n) clsF1(id,CFStringRef,objc_getClass("UIImage"),sel_getUid("imageNamed:"),n)
-
-#define getUserNotificationCenter()\
- clsF0(id,objc_getClass("UNUserNotificationCenter"),sel_getUid("currentNotificationCenter"))
+#define formatStr(fmt, ...) CFStringCreateWithFormat(NULL, NULL, fmt, ##__VA_ARGS__)
+#define localize(b, s) CFBundleCopyLocalizedString(b, s, NULL, NULL)
+#define createDict(k, v, s, cb)\
+ CFDictionaryCreate(NULL, k, v, s, &kCFCopyStringDictionaryKeyCallBacks, cb)
 
 extern const CFArrayCallBacks retainedArrCallbacks;
-extern Class ColorClass;
-extern Class Object;
+extern struct SelCache Sels;
 
 enum {
     ColorSeparator,

@@ -1,8 +1,8 @@
 #ifndef ContainerView_h
 #define ContainerView_h
 
-#include <CoreFoundation/CFBase.h>
-#include <objc/objc.h>
+#include "ColorCache.h"
+#include "ViewCache.h"
 
 typedef struct {
     id divider;
@@ -10,7 +10,8 @@ typedef struct {
     id stack;
 } ContainerView;
 
-id containerView_init(CFStringRef title CF_CONSUMED, ContainerView **ref, int spacing);
-void containerView_updateColors(ContainerView *data, id labelColor, id divColor);
+id containerView_init(VCacheRef tbl, CCacheRef clr,
+                      CFStringRef title CF_CONSUMED, ContainerView **ref, int spacing);
+void containerView_updateColors(ContainerView *data, VCacheRef tbl, CCacheRef clr);
 
 #endif /* ContainerView_h */

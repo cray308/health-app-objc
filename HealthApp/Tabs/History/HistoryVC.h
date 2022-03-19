@@ -3,7 +3,8 @@
 
 #include <CoreFoundation/CFArray.h>
 #include <CoreGraphics/CGGeometry.h>
-#include "AppDelegate.h"
+#include "ColorCache.h"
+#include "ViewCache.h"
 
 typedef struct {
     CGPoint *entries;
@@ -39,6 +40,8 @@ typedef struct {
 } HistoryViewModel;
 
 typedef struct {
+    CCacheRef clr;
+    VCacheRef tbl;
     HistoryViewModel model;
     id picker;
     id charts[3];

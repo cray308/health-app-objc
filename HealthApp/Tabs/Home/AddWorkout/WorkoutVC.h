@@ -2,13 +2,15 @@
 #define WorkoutVC_h
 
 #include <pthread.h>
+#include "ColorCache.h"
 #include "ContainerView.h"
 #include "ExerciseManager.h"
+#include "ViewCache.h"
 
 typedef struct {
     pthread_mutex_t lock;
     pthread_cond_t cond;
-    id parent;
+    void *parent;
     time_t refTime;
     int container;
     int exercise;
@@ -21,6 +23,8 @@ typedef struct {
 } WorkoutTimer;
 
 typedef struct {
+    CCacheRef clr;
+    VCacheRef tbl;
     WorkoutTimer timers[2];
     pthread_t threads[2];
     Workout *workout;

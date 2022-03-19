@@ -6,14 +6,6 @@
 "notifications0" = "Finished AMRAP circuit!";
 "notifications1" = "Finished exercise!";
 
-"dayNames0" = "Monday";
-"dayNames1" = "Tuesday";
-"dayNames2" = "Wednesday";
-"dayNames3" = "Thursday";
-"dayNames4" = "Friday";
-"dayNames5" = "Saturday";
-"dayNames6" = "Sunday";
-
 "workoutTypes0" = "Strength";
 "workoutTypes1" = "HIC";
 "workoutTypes2" = "SE";
@@ -85,7 +77,7 @@
 "setupWorkoutMaxWeight" = "Max Weight Percentage";
 "setupWorkoutDuration" = "Duration (minutes)";
 
-"stepperLabelFormat" = "Reps: %d";
+"stepperLabelInit" = "Reps: 1";
 "exerciseHeader" = "Set %d of %d";
 "exerciseTitleRest" = "Rest: %d s";
 "exerciseTitleReps" = "%@ x %d";

@@ -1,10 +1,11 @@
 #ifndef HomeVC_h
 #define HomeVC_h
 
-#include "AppDelegate.h"
 #include "ContainerView.h"
 
 typedef struct {
+    CCacheRef clr;
+    VCacheRef tbl;
     ContainerView *planContainer;
     ContainerView *customContainer;
     int numWorkouts;

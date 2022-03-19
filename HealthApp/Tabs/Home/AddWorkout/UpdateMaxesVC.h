@@ -5,10 +5,11 @@
 #include <CoreFoundation/CFBase.h>
 
 typedef struct {
-    id parent;
+    void *parent;
     id stepper;
     id stepperLabel;
-    CFStringRef stepperFormat;
+    CFMutableStringRef repsStr;
+    CFRange range;
     int index;
     short bodyweight;
 } UpdateMaxesVC;
