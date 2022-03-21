@@ -75,7 +75,6 @@ enum {
 };
 
 void getRect(id view, CGRect *result, int type);
-void getScreenBounds(CGRect *result);
 void fillStringArray(CFBundleRef bundle, CFStringRef *arr, CFStringRef format, int count);
 CFArrayRef createSortDescriptors(CFStringRef key, bool ascending);
 

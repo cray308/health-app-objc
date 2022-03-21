@@ -19,12 +19,13 @@ struct StackData {
 };
 struct LabelData {
     Class cls;
-    SEL sajfs, sajfc, smsf, sace, sf;
+    SEL sajfs, sajfc, smsf, sace, sf, snl;
     void (*adjFontWidth)(id,SEL,bool);
     void (*adjFontCat)(id,SEL,bool);
     void (*setScale)(id,SEL,CGFloat);
     void (*setAcc)(id,SEL,bool);
     void (*setFont)(id,SEL,id);
+    void (*setLines)(id,SEL,long);
 };
 struct ButtonData {
     Class cls;
@@ -72,13 +73,13 @@ void initViewData(VCache *cacheRef) {
     SEL trans = sel_getUid("setTranslatesAutoresizingMaskIntoConstraints:"), glyr = sel_getUid("layer");
     SEL asv = sel_getUid("addSubview:"), rsv = sel_getUid("removeFromSuperview"), gtg = sel_getUid("tag");
     SEL stg = sel_getUid("setTag:"), shd = sel_getUid("setHidden:"), sbg = sel_getUid("setBackgroundColor:");
-    SEL sacl = sel_getUid("setAccessibilityLabel:");
-    ViewCache view = {trans, asv, rsv, glyr, stg, gtg, shd, sbg, sacl,
+    SEL sacl = sel_getUid("setAccessibilityLabel:"), shn = sel_getUid("setAccessibilityHint:");
+    ViewCache view = {trans, asv, rsv, glyr, stg, gtg, shd, sbg, sacl, shn,
         (void(*)(id,SEL,bool))getImpO(View, trans), (void(*)(id,SEL,id))getImpO(View, asv),
         (void(*)(id,SEL))getImpO(View, rsv), (id(*)(id,SEL))getImpO(View, glyr),
         (void(*)(id,SEL,long))getImpO(View, stg), (long(*)(id,SEL))getImpO(View, gtg),
         (void(*)(id,SEL,bool))getImpO(View, shd), (void(*)(id,SEL,id))getImpO(View, sbg),
-        (void(*)(id,SEL,CFStringRef))getImpO(View, sacl)
+        (void(*)(id,SEL,CFStringRef))getImpO(View, sacl), (void(*)(id,SEL,CFStringRef))getImpO(View, shn)
     };
 
     Class Stack = objc_getClass("UIStackView"); SEL istack = sel_getUid("initWithArrangedSubviews:");
@@ -95,15 +96,15 @@ void initViewData(VCache *cacheRef) {
         (CFArrayRef(*)(id,SEL))getImpO(Stack, gsv), (void(*)(id,SEL,HAInsets))getImpO(Stack, smr)
     };
 
-    Class Label = objc_getClass("UILabel");
+    Class Label = objc_getClass("UILabel"); SEL snl = sel_getUid("setNumberOfLines:");
     SEL smsf = sel_getUid("setMinimumScaleFactor:"), sace = sel_getUid("setIsAccessibilityElement:");
     SEL sajfs = sel_getUid("setAdjustsFontSizeToFitWidth:"), sf = sel_getUid("setFont:");
     SEL sajfc = sel_getUid("setAdjustsFontForContentSizeCategory:"), gtxt = sel_getUid("text");
     SEL stxt = sel_getUid("setText:"), stc = sel_getUid("setTextColor:");
-    struct LabelData _lData = {Label, sajfs, sajfc, smsf, sace, sf,
+    struct LabelData _lData = {Label, sajfs, sajfc, smsf, sace, sf, snl,
         (void(*)(id,SEL,bool))getImpO(Label, sajfs), (void(*)(id,SEL,bool))getImpO(Label, sajfc),
         (void(*)(id,SEL,CGFloat))getImpO(Label, smsf), (void(*)(id,SEL,bool))getImpO(Label, sace),
-        (void(*)(id,SEL,id))getImpO(Label, sf)
+        (void(*)(id,SEL,id))getImpO(Label, sf), (void(*)(id,SEL,long))getImpO(Label, snl)
     };
     LabelCache label = {stxt, gtxt, stc, (void(*)(id,SEL,CFStringRef))getImpO(Label, stxt),
         (CFStringRef(*)(id,SEL))getImpO(Label, gtxt), (void(*)(id,SEL,id))getImpO(Label, stc)
@@ -138,10 +139,10 @@ void initViewData(VCache *cacheRef) {
     memcpy(&cache, &localData, sizeof(struct PrivVData));
 }
 
-static void setDynamicFont(id view) {
+static void setDynamicFont(id view, bool accessibilitySize) {
     cache.label.adjFontWidth(view, cache.label.sajfs, true);
-    cache.label.adjFontCat(view, cache.label.sajfc, true);
-    cache.label.setScale(view, cache.label.smsf, 0.85);
+    cache.label.adjFontCat(view, cache.label.sajfc, accessibilitySize);
+    cache.label.setScale(view, cache.label.smsf, 0.35);
 }
 
 void pin(ConstraintCache const *tbl, id v, id container) {
@@ -185,7 +186,8 @@ id createLabel(VCacheRef tbl, CCacheRef clr, CFStringRef text, CFStringRef style
     if (text)
         CFRelease(text);
     cache.label.setFont(view, cache.label.sf, cache.fc.pref(cache.fc.cls, cache.fc.pf, style));
-    setDynamicFont(view);
+    setDynamicFont(view, true);
+    cache.label.setLines(view, cache.label.snl, 0);
     c->setColor(view, c->stc, clr->getColor(clr->cls, clr->sc, ColorLabel));
     cache.label.setAcc(view, cache.label.sace, accessible);
     return view;
@@ -203,7 +205,7 @@ id createButton(VCacheRef tbl, CCacheRef clr, CFStringRef title,
     bt->setColor(view, bt->sbc, clr->getColor(clr->cls, clr->sc, ColorSecondaryLabel), 2);
     id label = cache.button.getLabel(view, cache.button.glb);
     cache.label.setFont(label, cache.label.sf, cache.fc.pref(cache.fc.cls, cache.fc.pf, style));
-    setDynamicFont(label);
+    setDynamicFont(label, false);
     tbl->view.setTag(view, tbl->view.stg, tag);
     bt->addTarget(view, bt->atgt, target, action, 64);
     return view;

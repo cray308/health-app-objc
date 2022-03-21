@@ -7,21 +7,18 @@
 "notifications1" = "Finished exercise!";
 
 "workoutTypes0" = "Strength";
-"workoutTypes1" = "HIC";
-"workoutTypes2" = "SE";
-"workoutTypes3" = "Endurance";
+"workoutTypes1" = "Strength-Endurance";
+"workoutTypes2" = "Endurance";
+"workoutTypes3" = "Conditioning";
 
 "liftTypes0" = "Squat";
 "liftTypes1" = "Pull-up";
 "liftTypes2" = "Bench";
 "liftTypes3" = "Deadlift";
 
-"exerciseState0" = "Not active";
-"exerciseState1" = "Active";
-"exerciseState2" = "Resting";
-"exerciseState3" = "Completed";
-
 "workoutNotificationTitle" = "Workout Update";
+"workoutCompleteMsg" = "Workout completed";
+"exerciseProgressHint" = "Exercise %d of %d";
 
 "cancel" = "Cancel";
 "go" = "Go";
@@ -32,16 +29,11 @@
 "start" = "Start";
 "end" = "End";
 "done" = "Done";
+"next" = "Next";
 
 "homeHeader0" = "Workouts this week";
 "homeHeader1" = "Add Custom Workout";
-"homeState0" = "Completed";
-"homeState1" = "Not completed";
-"homeWorkoutType0" = "Test Max";
-"homeWorkoutType1" = "Strength";
-"homeWorkoutType2" = "SE";
-"homeWorkoutType3" = "Endurance";
-"homeWorkoutType4" = "HIC";
+"homeTestMax" = "Test Max";
 "homeAlertTitle" = "Nicely done!";
 "homeAlertMessage" = "Great job meeting your workout goal this week.";
 
@@ -60,10 +52,7 @@
 "settingsSegment0" = "None";
 "settingsSegment1" = "Base-Building";
 "settingsSegment2" = "Continuation";
-"maxWeight0" = "Max Squat Weight";
-"maxWeight1" = "Max Pull-up Weight";
-"maxWeight2" = "Max Bench Weight";
-"maxWeight3" = "Max Deadlift Weight";
+"maxWeight" = "Max %@ Weight";
 "settingsSave" = "Save Settings";
 "settingsDelete" = "Delete Data";
 "settingsAlertTitle" = "Are you sure?";
@@ -85,5 +74,6 @@
 "exerciseTitleDurationMinutes" = "%@ for %.1f min";
 "exerciseTitleDurationSeconds" = "%@ for %d s";
 "exerciseTitleDistance" = "Run/row %d/%d m";
+"circuitProgressHint" = "Circuit %d of %d";
 "circuitHeaderRounds" = "Round %d of %d";
 "circuitHeaderAMRAP" = "AMRAP %d min";

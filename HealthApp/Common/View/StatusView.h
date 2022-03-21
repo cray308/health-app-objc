@@ -14,6 +14,6 @@ typedef struct {
 
 id statusView_init(VCacheRef tbl, CCacheRef clr,
                    CFStringRef text CF_CONSUMED, StatusView **ref, int tag, id target, SEL action);
-void statusView_updateAccessibility(StatusView *ptr, VCacheRef tbl, CFStringRef stateText);
+void statusView_updateAccessibility(StatusView *ptr, VCacheRef tbl);
 
 #endif /* StatusView_h */

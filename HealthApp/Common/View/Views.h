@@ -19,6 +19,9 @@ extern CFStringRef UIFontTextStyleFootnote;
 
 extern CGFloat UIFontWeightRegular;
 
+extern uint32_t UIAccessibilityAnnouncementNotification;
+extern void UIAccessibilityPostNotification(uint32_t, id);
+
 typedef struct {
     short top, left, bottom, right;
 } Padding;

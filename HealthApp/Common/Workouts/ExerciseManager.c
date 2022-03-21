@@ -15,7 +15,7 @@ struct DictWrapper {
 };
 
 static int weekInPlan;
-static short bodyweight = 145;
+static short bodyweight = 165;
 
 static struct {
     CFStringRef const reps;
@@ -33,6 +33,7 @@ static CFStringRef durationMinsFormat;
 static CFStringRef durationSecsFormat;
 static CFStringRef distanceFormat;
 static CFStringRef amrapFormat;
+static CFStringRef circuitProgressFmt;
 
 static void createRootAndLibDict(struct DictWrapper *data) {
     CFBundleRef bundle = CFBundleGetMainBundle();
@@ -64,7 +65,7 @@ static CFArrayRef getCurrentWeekForPlan(struct DictWrapper *data, unsigned char 
 
 static Workout *buildWorkout(CFDictionaryRef dict, WorkoutParams *params) {
     short weights[4];
-    short exerciseSets = 1, customReps = 0, customCircuitReps = 0;
+    short customSets = 1, customReps = 0, customCircuitReps = 0;
     bool testMax = false;
     if (params->type == WorkoutStrength) {
         const short *lifts = getUserInfo()->liftMaxes;
@@ -86,7 +87,7 @@ static Workout *buildWorkout(CFDictionaryRef dict, WorkoutParams *params) {
             testMax = true;
         }
         customReps = params->reps;
-        exerciseSets = params->sets;
+        customSets = params->sets;
     } else if (params->type == WorkoutSE) {
         customCircuitReps = params->sets;
         customReps = params->reps;
@@ -107,42 +108,58 @@ static Workout *buildWorkout(CFDictionaryRef dict, WorkoutParams *params) {
 
     for (int i = 0; i < nActivities; ++i) {
         CFDictionaryRef act = CFArrayGetValueAtIndex(foundActivities, i);
-        CFMutableStringRef circuitHeaderMutable = NULL;
-        CFStringRef circuitHeader = NULL;
+        CFMutableStringRef circuitHeader = CFStringCreateMutable(NULL, 40);
+        CFStringRef separator = CFSTR("");
         CFRange circuitRange = {0, 0};
-        short circuitReps = customCircuitReps;
+        short circuitReps = customCircuitReps, exerciseSets = customSets;
         unsigned char circuitType;
 
         CFNumberGetValue(CFDictionaryGetValue(act, Keys.type), kCFNumberCharType, &circuitType);
-        if (!circuitReps) {
+        if (!circuitReps)
             CFNumberGetValue(CFDictionaryGetValue(act, Keys.reps), kCFNumberShortType, &circuitReps);
-        }
 #if TARGET_OS_SIMULATOR
-        if (circuitType == CircuitAMRAP)
-            circuitReps = nActivities > 1 ? 1 : 2;
+        if (circuitType == CircuitAMRAP) circuitReps = nActivities > 1 ? 1 : 2;
 #endif
-
-        if (circuitType == CircuitAMRAP) {
-            circuitHeader = formatStr(amrapFormat, circuitReps);
-        } else if (circuitReps > 1) {
-            circuitHeader = formatStr(roundsFormat, 1, circuitReps);
-            circuitRange = CFStringFind(circuitHeader, CFSTR("1"), 0);
-        }
-
-        if (circuitHeader) {
-            circuitHeaderMutable = CFStringCreateMutableCopy(NULL, 16, circuitHeader);
-            CFRelease(circuitHeader);
-        }
 
         CFArrayRef foundExercises = CFDictionaryGetValue(act, CFSTR("exercises"));
         int nExercises = (int)CFArrayGetCount(foundExercises);
-        customAssert(nExercises > 0)
+
+        if (params->type == WorkoutHIC && !circuitType && nExercises == 1) {
+            exerciseSets = circuitReps;
+            circuitReps = 1;
+        }
+        if (nActivities > 1) {
+            CFStringRef circuitLoc = formatStr(circuitProgressFmt, i + 1, nActivities);
+            CFStringAppend(circuitHeader, circuitLoc);
+            CFRelease(circuitLoc);
+            separator = CFSTR(" - ");
+        }
+        if (circuitType == CircuitAMRAP) {
+            CFStringRef header = formatStr(amrapFormat, circuitReps);
+            CFStringAppend(circuitHeader, separator);
+            CFStringAppend(circuitHeader, header);
+            CFRelease(header);
+        } else if (circuitReps > 1) {
+            CFStringRef header = formatStr(roundsFormat, 1, circuitReps);
+            CFStringAppend(circuitHeader, separator);
+            CFStringAppend(circuitHeader, header);
+            CFRelease(header);
+            circuitRange = CFStringFind(circuitHeader, CFSTR("1"), kCFCompareBackwards);
+        }
+
+        if (CFStringGetLength(circuitHeader)) {
+            CFRetain(circuitHeader);
+        } else {
+            CFRelease(circuitHeader);
+            circuitHeader = NULL;
+        }
+
         Circuit circuit = {
             .exercises = malloc((unsigned)nExercises * sizeof(ExerciseEntry)),
-            .headerStr = circuitHeaderMutable, .numberRange = circuitRange,
+            .headerStr = circuitHeader, .numberRange = circuitRange,
             .size = nExercises, .reps = circuitReps, .type = circuitType
         };
-
+        customAssert(nExercises > 0)
         for (int j = 0; j < nExercises; ++j) {
             CFDictionaryRef exDict = CFArrayGetValueAtIndex(foundExercises, j);
             CFMutableStringRef exerciseHeader = NULL;
@@ -151,9 +168,8 @@ static Workout *buildWorkout(CFDictionaryRef dict, WorkoutParams *params) {
             unsigned char exerciseType;
 
             CFNumberGetValue(CFDictionaryGetValue(exDict, Keys.type), kCFNumberCharType, &exerciseType);
-            if (!exerciseReps) {
+            if (!exerciseReps)
                 CFNumberGetValue(CFDictionaryGetValue(exDict, Keys.reps), kCFNumberShortType, &exerciseReps);
-            }
 #if TARGET_OS_SIMULATOR
             if (workout.type == WorkoutHIC && exerciseType == ExerciseDuration && exerciseReps > 30)
                 exerciseReps = 30;
@@ -234,13 +250,11 @@ static void getHealthData(void) {
         SEL qInit = sel_getUid("initWithSampleType:predicate:limit:sortDescriptors:resultsHandler:");
         id req = (((id(*)(id,SEL,id,id,unsigned long,CFArrayRef,void(^)(id,CFArrayRef,id)))objc_msgSend)
                   (_req, qInit, weightType, nil, 1, arr, ^(id q _U_, CFArrayRef data, id err2 _U_) {
-            short weight = 145;
             if (data && CFArrayGetCount(data)) {
                 id unit = clsF0(id, objc_getClass("HKUnit"), sel_getUid("poundUnit"));
                 id quantity = msg0(id, (id)CFArrayGetValueAtIndex(data, 0), sel_getUid("quantity"));
-                weight = (short)msg1(double, id, quantity, sel_getUid("doubleValueForUnit:"), unit);
+                bodyweight = (short)msg1(double, id, quantity, sel_getUid("doubleValueForUnit:"), unit);
             }
-            bodyweight = weight;
             Sels.objRel(store, Sels.rel);
         }));
         msg1(void, id, store, sel_getUid("executeQuery:"), req);
@@ -260,6 +274,7 @@ void initExerciseData(int week, CFBundleRef bundle) {
     distanceFormat = localize(bundle, CFSTR("exerciseTitleDistance"));
     roundsFormat = localize(bundle, CFSTR("circuitHeaderRounds"));
     amrapFormat = localize(bundle, CFSTR("circuitHeaderAMRAP"));
+    circuitProgressFmt = localize(bundle, CFSTR("circuitProgressHint"));
     weekInPlan = week;
 
     dispatch_async(dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0), ^{ getHealthData(); });

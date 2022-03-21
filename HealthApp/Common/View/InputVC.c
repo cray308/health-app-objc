@@ -71,17 +71,13 @@ static void inputView_reset(InputView *data, short value, VCacheRef tbl) {
     data->valid = true;
     data->result = value;
     tbl->view.hide(data->errorLabel, tbl->view.shd, true);
-    tbl->view.setAcc(data->field, tbl->view.sacl, tbl->label.getText(data->hintLabel, tbl->label.gtxt));
 }
 
 static void showInputError(InputView *child, VCacheRef tbl) {
     child->valid = false;
     tbl->view.hide(child->errorLabel, tbl->view.shd, false);
-    CFStringRef hintText = tbl->label.getText(child->hintLabel, tbl->label.gtxt);
     CFStringRef errorText = tbl->label.getText(child->errorLabel, tbl->label.gtxt);
-    CFStringRef text = formatStr(CFSTR("%@. %@"), hintText, errorText);
-    tbl->view.setAcc(child->field, tbl->view.sacl, text);
-    CFRelease(text);
+    UIAccessibilityPostNotification(UIAccessibilityAnnouncementNotification, (id)errorText);
 }
 
 void inputVC_addChild(id self, CFStringRef hint, short min, short max) {
@@ -95,9 +91,9 @@ void inputVC_addChild(id self, CFStringRef hint, short min, short max) {
     ptr->minVal = min;
     ptr->maxVal = max;
     CFStringRef errorText = formatStr(inputFieldError, min, max);
-    CFRetain(hint);
-    ptr->hintLabel = createLabel(tbl, d->clr, hint, UIFontTextStyleFootnote, false);
+    ptr->hintLabel = createLabel(tbl, d->clr, CFRetain(hint), UIFontTextStyleFootnote, false);
     ptr->field = createTextfield(tbl, d->clr, self, CFSTR(""), hint, 4, 4, index);
+    tbl->view.setHint(ptr->field, tbl->view.shn, errorText);
     if (d->setKB)
         msg1(void, long, ptr->field, sel_getUid("setKeyboardAppearance:"), 1);
     ptr->errorLabel = createLabel(tbl, d->clr, errorText, UIFontTextStyleFootnote, false);
@@ -160,15 +156,12 @@ void inputVC_deinit(id self, SEL _cmd) {
 void inputVC_viewDidLoad(id self, SEL _cmd) {
     msgSup0(void, (&(struct objc_super){self, VC}), _cmd);
 
-    CGRect bounds;
-    getScreenBounds(&bounds);
-    unsigned char dark = getUserInfo()->darkMode;
-
     InputVC *data = (InputVC *)((char *)self + VCSize);
     data->scrollView = createScrollView();
     data->vStack = createStackView(data->tbl, nil, 0, 1, 0, 0, (Padding){0});
     data->toolbar = msg1(id, CGRect, Sels.alloc(objc_getClass("UIToolbar"), Sels.alo),
-                         sel_getUid("initWithFrame:"), ((CGRect){{0}, {bounds.size.width, 50}}));
+                         sel_getUid("initWithFrame:"), ((CGRect){{0}, {100, 100}}));
+    unsigned char dark = getUserInfo()->darkMode;
     if (dark < 2) {
         msg1(void, id, data->toolbar, sel_getUid("setBarTintColor:"),
              clsF1(id, int, data->clr->cls, sel_getUid("getBarColorWithType:"), ColorBarModal));
@@ -176,23 +169,29 @@ void inputVC_viewDidLoad(id self, SEL _cmd) {
     }
     msg0(void, data->toolbar, sel_getUid("sizeToFit"));
 
-    CFStringRef doneLabel = localize(CFBundleGetMainBundle(), CFSTR("done"));
+    CFBundleRef bundle = CFBundleGetMainBundle();
+    CFStringRef doneLabel = localize(bundle, CFSTR("done")), nextLabel = localize(bundle, CFSTR("next"));
     Class BarItem = objc_getClass("UIBarButtonItem");
+    SEL btnInit = sel_getUid("initWithTitle:style:target:action:");
     id flexSpace = msg3(id, long, id, SEL, Sels.alloc(BarItem, Sels.alo),
                         sel_getUid("initWithBarButtonSystemItem:target:action:"), 5, nil, nil);
+    id nextButton = msg4(id, CFStringRef, long, id, SEL, Sels.alloc(BarItem, Sels.alo),
+                         btnInit, nextLabel, 0, self, sel_getUid("jumpToNext"));
     id doneButton = msg4(id, CFStringRef, long, id, SEL, Sels.alloc(BarItem, Sels.alo),
-                         sel_getUid("initWithTitle:style:target:action:"),
-                         doneLabel, 0, self, sel_getUid("dismissKeyboard"));
+                         btnInit, doneLabel, 0, self, sel_getUid("dismissKeyboard"));
     msg1(void, id, data->toolbar, sel_getUid("setTintColor:"),
          data->clr->getColor(data->clr->cls, data->clr->sc, ColorRed));
     CFRelease(doneLabel);
+    CFRelease(nextLabel);
 
-    CFArrayRef array = CFArrayCreate(NULL, (const void *[]){flexSpace, doneButton}, 2, &retainedArrCallbacks);
+    CFArrayRef array = CFArrayCreate(NULL, (const void *[]){doneButton, flexSpace, nextButton},
+                                     3, &retainedArrCallbacks);
     msg2(void, CFArrayRef, bool, data->toolbar, sel_getUid("setItems:animated:"), array, false);
 
     addVStackToScrollView(data->tbl, msg0(id, self, sel_getUid("view")), data->vStack, data->scrollView);
     CFRelease(array);
     Sels.objRel(flexSpace, Sels.rel);
+    Sels.objRel(nextButton, Sels.rel);
     Sels.objRel(doneButton, Sels.rel);
 
     CFNotificationCenterRef center = CFNotificationCenterGetLocalCenter();
@@ -223,10 +222,14 @@ void inputVC_viewDidAppear(id self, SEL _cmd, bool animated) {
 }
 
 void inputVC_dismissKeyboard(id self, SEL _cmd _U_) {
+    msg1(bool, bool, msg0(id, self, sel_getUid("view")), sel_getUid("endEditing:"), true);
+}
+
+void inputVC_jumpToNext(id self, SEL _cmd _U_) {
     InputVC *d = (InputVC *)((char *)self + VCSize);
     int tag = d->activeField ? ((int)d->tbl->view.getTag(d->activeField, d->tbl->view.gtg)) : 255;
     if (tag >= d->count - 1) {
-        msg1(bool, bool, msg0(id, self, sel_getUid("view")), sel_getUid("endEditing:"), true);
+        inputVC_dismissKeyboard(self, nil);
     } else {
         msg0(bool, d->children[tag + 1]->field, sel_getUid("becomeFirstResponder"));
     }

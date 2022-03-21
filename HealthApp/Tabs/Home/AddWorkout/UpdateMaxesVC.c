@@ -41,12 +41,15 @@ void updateMaxesVC_viewDidLoad(id self, SEL _cmd) {
     tbl->view.setBG(view, tbl->view.sbg, sup->clr->getColor(sup->clr->cls, sup->clr->sc, ColorSecondaryBG));
 
     tbl->stack.setMargins(sup->vStack, tbl->stack.smr, (HAInsets){.top = 20});
-    CFStringRef fieldKey = formatStr(CFSTR("maxWeight%d"), data->index);
-    inputVC_addChild(self, localize(bundle, fieldKey), 1, 999);
+    CFStringRef liftKey = formatStr(CFSTR("liftTypes%d"), data->index);
+    CFStringRef liftVal = localize(bundle, liftKey);
+    CFRelease(liftKey);
+    CFStringRef fieldKey = localize(bundle, CFSTR("maxWeight"));
+    inputVC_addChild(self, formatStr(fieldKey, liftVal), 1, 999);
+    CFRelease(liftVal);
     CFRelease(fieldKey);
 
-    CFRetain(data->repsStr);
-    data->stepperLabel = createLabel(tbl, sup->clr, data->repsStr, UIFontTextStyleBody, true);
+    data->stepperLabel = createLabel(tbl, sup->clr, CFRetain(data->repsStr), UIFontTextStyleBody, true);
     data->stepper = Sels.new(objc_getClass("UIStepper"), Sels.nw);
     msg1(void, double, data->stepper, sel_getUid("setValue:"), 1);
     msg1(void, double, data->stepper, sel_getUid("setMinimumValue:"), 1);
@@ -76,6 +79,7 @@ void updateMaxesVC_updatedStepper(id self, SEL _cmd _U_) {
     } else if (data->range.length == 2) {
         data->range.length = 1;
     }
+    UIAccessibilityPostNotification(UIAccessibilityAnnouncementNotification, (id)data->repsStr);
 }
 
 void updateMaxesVC_tappedFinish(id self, SEL _cmd _U_) {

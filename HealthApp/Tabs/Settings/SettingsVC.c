@@ -68,7 +68,7 @@ void settingsVC_viewDidLoad(id self, SEL _cmd) {
     id planLabel = createLabel(tbl, sup->clr, localize(bundle, CFSTR("planPickerTitle")),
                                UIFontTextStyleFootnote, true);
     id picker = createSegmentedControl(bundle, CFSTR("settingsSegment%d"), segment);
-    cc->activateC(cc->init(cc->cls, cc->cr, picker, 8, 0, nil, 0, 1, 44), cc->ac, true);
+    cc->activateC(cc->init(cc->cls, cc->cr, picker, 8, 1, nil, 0, 1, 44), cc->ac, true);
     data->planContainer = createStackView(tbl, (id []){planLabel, picker}, 2, 1, 0, 2, (Padding){0, 8, 0, 8});
     id aboveTF = createStackView(tbl, (id []){data->planContainer}, 1, 1, 0, 20, (Padding){0, 0, 20, 0});
 
@@ -94,22 +94,25 @@ void settingsVC_viewDidLoad(id self, SEL _cmd) {
         Sels.viewRel(switchView, Sels.rel);
     }
 
-    CFStringRef titles[4];
-    fillStringArray(bundle, titles, CFSTR("maxWeight%d"), 4);
+    CFStringRef liftNames[4];
+    fillStringArray(bundle, liftNames, CFSTR("liftTypes%d"), 4);
+    CFStringRef fieldKey = localize(bundle, CFSTR("maxWeight"));
     for (int i = 0; i < 4; ++i) {
-        inputVC_addChild(self, titles[i], 0, 999);
+        inputVC_addChild(self, formatStr(fieldKey, liftNames[i]), 0, 999);
+        CFRelease(liftNames[i]);
     }
+    CFRelease(fieldKey);
 
     SEL btnTap = sel_getUid("buttonTapped:");
     sup->button = createButton(tbl, sup->clr, localize(bundle, CFSTR("settingsSave")),
                                ColorBlue, UIFontTextStyleBody, 0, self, btnTap);
     tbl->view.setBG(sup->button, tbl->view.sbg, viewBG);
-    cc->activateC(cc->init(cc->cls, cc->cr, sup->button, 8, 0, nil, 0, 1, 44), cc->ac, true);
+    cc->activateC(cc->init(cc->cls, cc->cr, sup->button, 8, 1, nil, 0, 1, 44), cc->ac, true);
 
     data->deleteButton = createButton(tbl, sup->clr, localize(bundle, CFSTR("settingsDelete")),
                                       ColorRed, UIFontTextStyleBody, 1, self, btnTap);
     tbl->view.setBG(data->deleteButton, tbl->view.sbg, viewBG);
-    cc->activateC(cc->init(cc->cls, cc->cr, data->deleteButton, 8, 0, nil, 0, 1, 44), cc->ac, true);
+    cc->activateC(cc->init(cc->cls, cc->cr, data->deleteButton, 8, 1, nil, 0, 1, 44), cc->ac, true);
 
     id belowTF = createStackView(tbl, (id []){sup->button, data->deleteButton}, 2, 1, 0, 20,
                                  (Padding){.top = 20});

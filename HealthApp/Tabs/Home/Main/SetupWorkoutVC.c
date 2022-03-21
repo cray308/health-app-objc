@@ -47,8 +47,7 @@ void setupWorkoutVC_viewDidLoad(id self, SEL _cmd) {
     tbl->view.setBG(view, tbl->view.sbg, sup->clr->getColor(sup->clr->cls, sup->clr->sc, ColorSecondaryBG));
 
     CFStringRef pickerTitle = localize(bundle, CFSTR("setupWorkoutTitle"));
-    CFRetain(pickerTitle);
-    id workoutLabel = createLabel(tbl, sup->clr, pickerTitle, UIFontTextStyleFootnote, false);
+    id workoutLabel = createLabel(tbl, sup->clr, CFRetain(pickerTitle), UIFontTextStyleFootnote, false);
     data->workoutTextField = createTextfield(
       tbl, sup->clr, nil, CFArrayGetValueAtIndex(data->names, 0), pickerTitle, 1, 0, 0);
     id workoutContainer = createStackView(tbl, (id []){workoutLabel, data->workoutTextField},

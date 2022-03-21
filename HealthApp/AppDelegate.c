@@ -25,7 +25,8 @@ void initValidatorStrings(CFBundleRef);
 void initExerciseData(int, CFBundleRef);
 void initWorkoutStrings(CFBundleRef);
 void initStatVData(void);
-id homeVC_init(CFBundleRef, VCacheRef, CCacheRef, time_t);
+void initContainerVData(void);
+id homeVC_init(VCacheRef, CCacheRef, time_t);
 void homeVC_updateWorkoutsList(HomeVC *self, unsigned char completed);
 void homeVC_createWorkoutsList(id self, const UserInfo *info);
 void homeVC_updateColors(id self);
@@ -151,7 +152,7 @@ static void createDummyData(id context) {
         while (endpts[0] < endpts[1]) {
             int16_t totalWorkouts = 0;
             int16_t times[4] = {0};
-            id data = msg1(id, id, clsF0(id, objc_getClass("WeekData"), Sels.alo),
+            id data = msg1(id, id, clsF0(id, objc_getClass("WeeklyData"), Sels.alo),
                            sel_getUid("initWithContext:"), context);
             int addnlTime = 0, addnlWk = 1;
             if (r == 0 || (i < 24)) {
@@ -284,7 +285,7 @@ static void runStartupDataJob(id *cRef, void *model, FetchHandler handler, time_
     if (FIRST_LAUNCH) createDummyData(context);
 #endif
     ((void(*)(id,SEL,Callback))objc_msgSend)(context, sel_getUid("performBlock:"), ^{
-        Class WeekData = objc_getClass("WeekData");
+        Class WeeklyData = objc_getClass("WeeklyData");
         SEL liftSels[4];
         SEL getStart = sel_getUid("weekStart"), delObj = sel_getUid("deleteObject:");
         SEL weekInit = sel_getUid("initWithContext:"), setStart = sel_getUid("setWeekStart:");
@@ -293,7 +294,7 @@ static void runStartupDataJob(id *cRef, void *model, FetchHandler handler, time_
         int count = 0;
         CFArrayRef data = context_fetchData(context, 1, &count);
         if (!data) {
-            id first = msg1(id, id, clsF0(id, WeekData, Sels.alo), weekInit, context);
+            id first = msg1(id, id, clsF0(id, WeeklyData, Sels.alo), weekInit, context);
             msg1(void, int64_t, first, setStart, weekStart);
             msg0(void, first, Sels.rel);
             context_saveChanges(context);
@@ -316,7 +317,7 @@ static void runStartupDataJob(id *cRef, void *model, FetchHandler handler, time_
         }
         start = msg0(int64_t, last, getStart);
         if (start != weekStart) {
-            id currWeek = msg1(id, id, clsF0(id, WeekData, Sels.alo), weekInit, context);
+            id currWeek = msg1(id, id, clsF0(id, WeeklyData, Sels.alo), weekInit, context);
             msg1(void, int64_t, currWeek, setStart, weekStart);
             for (int j = 0; j < 4; ++j) {
                 msg1(void, int16_t, currWeek, liftSels[j], lastLifts[j]);
@@ -333,7 +334,7 @@ static void runStartupDataJob(id *cRef, void *model, FetchHandler handler, time_
 
         start += WeekSeconds;
         for (; start < weekStart; start += WeekSeconds) {
-            id curr = msg1(id, id, clsF0(id, WeekData, Sels.alo), weekInit, context);
+            id curr = msg1(id, id, clsF0(id, WeeklyData, Sels.alo), weekInit, context);
             msg1(void, int64_t, curr, setStart, start);
             for (int j = 0; j < 4; ++j) {
                 msg1(void, int16_t, curr, liftSels[j], lastLifts[j]);
@@ -632,6 +633,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id applicat
 
     CFBundleRef bundle = CFBundleGetMainBundle();
     initStatVData();
+    initContainerVData();
     initValidatorStrings(bundle);
     initExerciseData(week, bundle);
     initWorkoutStrings(bundle);
@@ -661,7 +663,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id applicat
                     sel_registerName("getCtrlWithTitle:message:"), imps[3], "@@:@@");
 
     void *fetchArg; FetchHandler fetchHandler;
-    self->children[0] = homeVC_init(bundle, &self->tbl, &self->clr, weekStart + 43200);
+    self->children[0] = homeVC_init(&self->tbl, &self->clr, weekStart + 43200);
     self->children[1] = historyVC_init(bundle, &fetchArg, &fetchHandler, &self->tbl, &self->clr);
     self->children[2] = settingsVC_init(&self->tbl, &self->clr);
 
@@ -682,10 +684,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id applicat
         CFRelease(titles[i]);
     }
 
-    CGRect bounds;
-    getScreenBounds(&bounds);
-    self->window = msg1(id, CGRect, Sels.alloc(objc_getClass("UIWindow"), Sels.alo),
-                        sel_getUid("initWithFrame:"), bounds);
+    self->window = Sels.new(objc_getClass("UIWindow"), Sels.nw);
     msg1(void, id, self->window, sel_getUid("setTintColor:"),
          self->clr.getColor(self->clr.cls, self->clr.sc, ColorRed));
     id tabVC = Sels.new(objc_getClass("UITabBarController"), Sels.nw);

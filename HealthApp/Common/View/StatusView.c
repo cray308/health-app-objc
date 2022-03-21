@@ -24,7 +24,7 @@ id statusView_init(VCacheRef tbl, CCacheRef clr, CFStringRef text,
     data->button = createButton(tbl, clr, text, ColorLabel, UIFontTextStyleHeadline, tag, target, action);
     setCorner(tbl->view.layer(data->button, tbl->view.glyr), scrad, 5);
     tbl->view.setBG(data->button, tbl->view.sbg, clr->getColor(clr->cls, clr->sc, ColorSecondaryBGGrouped));
-    id btnHeight = cc->init(cc->cls, cc->cr, data->button, 8, 0, nil, 0, 1, 50);
+    id btnHeight = cc->init(cc->cls, cc->cr, data->button, 8, 1, nil, 0, 1, 50);
     cc->lowerPri(btnHeight, cc->lp, 999);
     cc->activateC(btnHeight, cc->ac, true);
     data->headerLabel = createLabel(tbl, clr, NULL, UIFontTextStyleSubheadline, false);
@@ -54,14 +54,12 @@ void statusView_deinit(id self, SEL _cmd) {
     msgSup0(void, (&(struct objc_super){self, View}), _cmd);
 }
 
-void statusView_updateAccessibility(StatusView *ptr, VCacheRef tbl, CFStringRef stateText) {
+void statusView_updateAccessibility(StatusView *ptr, VCacheRef tbl) {
     CFStringRef header = tbl->label.getText(ptr->headerLabel, tbl->label.gtxt);
     CFMutableStringRef label = CFStringCreateMutableCopy(NULL, 128, CFSTR(""));
     if (header)
         CFStringAppendFormat(label, NULL, CFSTR("%@. "), header);
     CFStringAppend(label, getTitle(ptr->button, gct));
-    if (stateText)
-        CFStringAppendFormat(label, NULL, CFSTR(". %@"), stateText);
     tbl->view.setAcc(ptr->button, tbl->view.sacl, label);
     CFRelease(label);
 }

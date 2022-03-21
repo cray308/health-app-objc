@@ -8,6 +8,7 @@
 
 extern CFStringRef UIApplicationDidBecomeActiveNotification;
 extern CFStringRef UIApplicationWillResignActiveNotification;
+extern uint32_t UIAccessibilityLayoutChangedNotification;
 id updateMaxesVC_init(void *parent, int index, short bodyweight, VCacheRef tbl, CCacheRef clr);
 unsigned char addWorkoutData(unsigned char day, int type, int16_t duration, short *weights);
 void homeVC_handleFinishedWorkout(id self, unsigned char completed);
@@ -56,8 +57,8 @@ struct WorkoutData {
 };
 
 static CFStringRef notificationMessages[2];
-static CFStringRef ExerciseStates[4];
 static CFStringRef notifTitle;
+static CFStringRef exerciseProgressFmt;
 static pthread_t *exerciseTimerThread;
 static pthread_mutex_t timerLock;
 static struct WorkoutData wkData;
@@ -65,9 +66,9 @@ static struct WorkoutData wkData;
 static void handleEvent(WorkoutVC *data, int gIdx, int eIdx, int event);
 
 void initWorkoutStrings(CFBundleRef bundle) {
-    fillStringArray(bundle, ExerciseStates, CFSTR("exerciseState%d"), 4);
     fillStringArray(bundle, notificationMessages, CFSTR("notifications%d"), 2);
     notifTitle = localize(bundle, CFSTR("workoutNotificationTitle"));
+    exerciseProgressFmt = localize(bundle, CFSTR("exerciseProgressHint"));
     SEL btnEn = sel_getUid("setUserInteractionEnabled:");
     Class NotifCenter = objc_getClass("UNUserNotificationCenter");
     Class Content = objc_getClass("UNMutableNotificationContent");
@@ -255,6 +256,10 @@ static bool cycleExerciseEntry(ExerciseEntry *e, WorkoutTimer *timers) {
                 CFStringRef sets = formatStr(CFSTR("%d"), e->completedSets + 1);
                 CFStringReplace(e->headerStr, e->hRange, sets);
                 CFRelease(sets);
+                if (e->type == ExerciseDuration) {
+                    startWorkoutTimer(&timers[TimerExercise], (unsigned)e->reps);
+                    scheduleNotification((unsigned)e->reps, TimerExercise);
+                }
             }
         default:
             break;
@@ -289,7 +294,7 @@ static void exerciseView_configure(StatusView *ptr, VCacheRef tbl, CCacheRef clr
         tbl->button.setTitle(ptr->button, tbl->button.sbtxt, e->titleStr, 0);
     }
 
-    statusView_updateAccessibility(ptr, tbl, ExerciseStates[e->state]);
+    statusView_updateAccessibility(ptr, tbl);
 
     switch (e->state) {
         case ExerciseStateDisabled:
@@ -453,6 +458,9 @@ static void workoutVC_handleFinishedWorkout(WorkoutVC *data, bool longEnough) {
     }
 
     id navVC = msg0(id, (id)((char *)data - VCSize), sel_getUid("navigationController"));
+    CFStringRef message = localize(CFBundleGetMainBundle(), CFSTR("workoutCompleteMsg"));
+    UIAccessibilityPostNotification(UIAccessibilityAnnouncementNotification, (id)message);
+    CFRelease(message);
     if (totalCompleted) {
         CFArrayRef ctrls = msg0(CFArrayRef, navVC, sel_getUid("viewControllers"));
         homeVC_handleFinishedWorkout((id)CFArrayGetValueAtIndex(ctrls, 0), totalCompleted);
@@ -482,8 +490,6 @@ void workoutVC_viewDidLoad(id self, SEL _cmd) {
     StatusView *sv;
     for (int i = 0; i < data->workout->size; ++i) {
         Circuit *c = &data->workout->activities[i];
-        if (c->headerStr)
-            CFRetain(c->headerStr);
         data->containers[i] = containerView_init(tbl, data->clr, c->headerStr, &container, 0);
         if (!i) {
             data->first = container;
@@ -491,9 +497,15 @@ void workoutVC_viewDidLoad(id self, SEL _cmd) {
         }
         tbl->stack.addSub(stack, tbl->stack.asv, data->containers[i]);
 
+        bool addHint = c->size > 1;
         for (int j = 0; j < c->size; ++j) {
             id v = statusView_init(tbl, data->clr, NULL, &sv, (int)((i << 8) | j), self, btnTap);
             sv->entry = &c->exercises[j];
+            if (addHint) {
+                CFStringRef exerciseHint = formatStr(exerciseProgressFmt, j + 1, c->size);
+                tbl->view.setHint(sv->button, tbl->view.shn, exerciseHint);
+                CFRelease(exerciseHint);
+            }
             exerciseView_configure(sv, tbl, data->clr);
             tbl->stack.addSub(container->stack, tbl->stack.asv, v);
             Sels.viewRel(v, Sels.rel);
@@ -529,6 +541,13 @@ void workoutVC_startEndWorkout(id self, SEL _cmd _U_, id btn) {
             exerciseView_configure(
               (StatusView *)((char *)CFArrayGetValueAtIndex(views, i) + ViewSize), tbl, data->clr);
         }
+        id nextView;
+        if (data->workout->group->headerStr) {
+            nextView = data->first->headerLabel;
+        } else {
+            nextView = ((StatusView *)((char *)CFArrayGetValueAtIndex(views, 0) + ViewSize))->button;
+        }
+        UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, nextView);
     } else {
         pthread_mutex_lock(&timerLock);
         if (data->done) {
@@ -586,6 +605,7 @@ void handleEvent(WorkoutVC *data, int gIdx, int eIdx, int event) {
 
     CFArrayRef views = tbl->stack.getSub(data->first->stack, tbl->stack.gsv);
     StatusView *ptr = (StatusView *)((char *)CFArrayGetValueAtIndex(views, eIdx) + ViewSize);
+    id nextView = nil;
     bool longEnough, exerciseDone;
     int t = 0;
     switch (event) {
@@ -625,6 +645,7 @@ foundTransition:
             views = tbl->stack.getSub(data->first->stack, tbl->stack.gsv);
             tbl->view.rmSub(data->containers[w->index - 1], tbl->view.rsv);
             tbl->view.hide(data->first->divider, tbl->view.shd, true);
+            nextView = data->first->headerLabel;
 
         case TransitionFinishedCircuit:
             if (w->group->reps > 1 && w->group->type == CircuitRounds) {
@@ -632,6 +653,7 @@ foundTransition:
                 CFStringReplace(w->group->headerStr, w->group->numberRange, newNumber);
                 CFRelease(newNumber);
                 tbl->label.setText(data->first->headerLabel, tbl->label.stxt, w->group->headerStr);
+                nextView = data->first->headerLabel;
             }
 
             for (int i = 0; i < w->group->size; ++i) {
@@ -639,11 +661,14 @@ foundTransition:
                 tbl->button.setEnabled(ptr->button, tbl->button.en, true);
                 exerciseView_configure(ptr, tbl, data->clr);
             }
+            if (!nextView)
+                nextView = ((StatusView *)((char *)CFArrayGetValueAtIndex(views, 0) + ViewSize))->button;
             break;
 
         case TransitionFinishedExercise:
             ptr = (StatusView *)((char *)CFArrayGetValueAtIndex(views, w->group->index) + ViewSize);
             exerciseView_configure(ptr, tbl, data->clr);
+            nextView = ptr->button;
             break;
 
         default:
@@ -655,6 +680,8 @@ foundTransition:
             break;
     }
     pthread_mutex_unlock(&timerLock);
+    if (nextView)
+        UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, nextView);
 }
 
 void workoutVC_finishedBottomSheet(void *self, int index, short weight) {

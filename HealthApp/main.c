@@ -27,6 +27,7 @@ void inputVC_deinit(id, SEL);
 void inputVC_viewDidLoad(id, SEL);
 void inputVC_viewDidAppear(id, SEL, bool);
 void inputVC_dismissKeyboard(id, SEL);
+void inputVC_jumpToNext(id, SEL);
 void inputVC_fieldBeganEditing(id, SEL, id);
 void inputVC_fieldStoppedEditing(id, SEL, id);
 bool inputVC_fieldChanged(id, SEL, id, CFRange, CFStringRef);
@@ -86,6 +87,7 @@ int main(int argc, char *argv[]) {
     class_addMethod(InputVCClass, viewLoad, (IMP)inputVC_viewDidLoad, voidSig);
     class_addMethod(InputVCClass, sel_getUid("viewDidAppear:"), (IMP)inputVC_viewDidAppear, appearSig);
     class_addMethod(InputVCClass, sel_registerName("dismissKeyboard"), (IMP)inputVC_dismissKeyboard, voidSig);
+    class_addMethod(InputVCClass, sel_registerName("jumpToNext"), (IMP)inputVC_jumpToNext, voidSig);
     class_addMethod(InputVCClass, sel_getUid("textFieldDidBeginEditing:"),
                     (IMP)inputVC_fieldBeganEditing, tapSig);
     class_addMethod(InputVCClass, sel_getUid("textFieldDidEndEditing:"),
@@ -158,7 +160,7 @@ int main(int argc, char *argv[]) {
     class_addIvar(AppDelegateClass, "children", 3 * sizeof(id), 0, "[3@]");
     class_addIvar(AppDelegateClass, "clr", sizeof(ColorCache), 0, "{?=#:?}");
     class_addIvar(AppDelegateClass, "tbl", sizeof(VCache), 0,
-                  "{?={?=#::::????}{?=:::::::::?????????}{?=:::???}{?=:::???}{?=::::????}{?=::???}}");
+                  "{?={?=#::::????}{?=::::::::::??????????}{?=:::???}{?=:::???}{?=::::????}{?=::???}}");
     class_addIvar(AppDelegateClass, "userData", sizeof(UserInfo), 0, "{?=qq[4s]CCC}");
     class_addMethod(AppDelegateClass, sel_getUid("application:didFinishLaunchingWithOptions:"),
                     (IMP)appDelegate_didFinishLaunching, appSig);

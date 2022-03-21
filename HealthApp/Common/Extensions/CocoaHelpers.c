@@ -21,7 +21,6 @@ static id (*modernImps[13])(Class,SEL);
 static id (*modernBarImp)(Class,SEL,CFStringRef);
 static SEL sbcInt;
 static SEL rectSels[2];
-static CGRect screen;
 
 id colorCreateLegacy(id self _U_, SEL _cmd _U_, int type) { return appColors[type]; }
 id barColorCreateLegacy(id self _U_, SEL _cmd _U_, int type) { return barColors[type]; }
@@ -73,9 +72,7 @@ void initNSData(bool modern, ColorCache *cacheRef, Class **clsRefs, size_t **siz
     class_addMethod(colorMeta, sc, colorImp, "@@:i");
     class_addMethod(colorMeta, sbc, barImp, "@@:i");
     memcpy(cacheRef, &(ColorCache){Color, sc, (id(*)(Class,SEL,int))getImpC(Color, sc)}, sizeof(ColorCache));
-
     rectSels[0] = sel_getUid("frame"); rectSels[1] = sel_getUid("bounds");
-    getRect(clsF0(id, objc_getClass("UIScreen"), sel_getUid("mainScreen")), &screen, RectBounds);
 }
 
 void setupAppColors(unsigned char darkMode, bool deleteOld) {
@@ -140,8 +137,6 @@ void getRect(id view, CGRect *result, int type) {
     ((void(*)(CGRect*,id,SEL))objc_msgSend_stret)(result, view, rectSels[type]);
 #endif
 }
-
-void getScreenBounds(CGRect *result) { memcpy(result, &screen, sizeof(CGRect)); }
 
 void fillStringArray(CFBundleRef bundle, CFStringRef *arr, CFStringRef format, int count) {
     for (int i = 0; i < count; ++i) {

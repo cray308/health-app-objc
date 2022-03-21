@@ -14,13 +14,10 @@ id setupWorkoutVC_init(id parent, unsigned char type, VCacheRef tbl, CCacheRef c
 id workoutVC_init(Workout *workout, VCacheRef tbl, CCacheRef clr);
 
 Class HomeVCClass;
-
-static CFStringRef stateNames[2];
 static CFStringRef dayNames[7];
 
-id homeVC_init(CFBundleRef bundle, VCacheRef tbl, CCacheRef clr, time_t startDate) {
+id homeVC_init(VCacheRef tbl, CCacheRef clr, time_t startDate) {
     id self = Sels.new(HomeVCClass, Sels.nw);
-    fillStringArray(bundle, stateNames, CFSTR("homeState%d"), 2);
     HomeVC *data = (HomeVC *)((char *)self + VCSize);
     data->tbl = tbl;
     data->clr = clr;
@@ -45,7 +42,6 @@ void homeVC_updateWorkoutsList(HomeVC *self, unsigned char completed) {
         bool enable = !(completed & (1 << tbl->view.getTag(v, tbl->view.gtg)));
         tbl->button.setEnabled(ptr->button, tbl->button.en, enable);
         tbl->view.setBG(ptr->box, tbl->view.sbg, enable ? gray : green);
-        statusView_updateAccessibility(ptr, tbl, stateNames[enable]);
     }
 }
 
@@ -76,6 +72,7 @@ void homeVC_createWorkoutsList(id self, const UserInfo *info) {
         if (!workoutNames[i]) continue;
         id btn = statusView_init(tbl, data->clr, workoutNames[i], &sv, i, self, btnTap);
         tbl->label.setText(sv->headerLabel, tbl->label.stxt, dayNames[i]);
+        statusView_updateAccessibility(sv, tbl);
         tbl->stack.addSub(data->planContainer->stack, tbl->stack.asv, btn);
         Sels.viewRel(btn, Sels.rel);
         data->numWorkouts += 1;
@@ -128,8 +125,8 @@ void homeVC_viewDidLoad(id self, SEL _cmd) {
                     data->clr->getColor(data->clr->cls, data->clr->sc, ColorPrimaryBGGrouped));
     setVCTitle(self, localize(bundle, CFSTR("tabs0")));
 
-    CFStringRef titles[5], headers[2];
-    fillStringArray(bundle, titles, CFSTR("homeWorkoutType%d"), 5);
+    CFStringRef titles[5] = {[0] = localize(bundle, CFSTR("homeTestMax"))}, headers[2];
+    fillStringArray(bundle, &titles[1], CFSTR("workoutTypes%d"), 4);
     fillStringArray(bundle, headers, CFSTR("homeHeader%d"), 2);
 
     id planContainer = containerView_init(tbl, data->clr, headers[0], &data->planContainer, 0);
@@ -143,7 +140,7 @@ void homeVC_viewDidLoad(id self, SEL _cmd) {
     for (int i = 0; i < 5; ++i) {
         id btn = statusView_init(tbl, data->clr, titles[i], &sv, i, self, btnTap);
         tbl->view.hide(sv->box, tbl->view.shd, true);
-        statusView_updateAccessibility(sv, tbl, NULL);
+        statusView_updateAccessibility(sv, tbl);
         tbl->stack.addSub(data->customContainer->stack, tbl->stack.asv, btn);
         Sels.viewRel(btn, Sels.rel);
     }
