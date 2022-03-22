@@ -622,8 +622,16 @@ void handleEvent(WorkoutVC *data, int gIdx, int eIdx, int event) {
 
         case EventFinishExercise:
             wkData.setInteraction(ptr->button, wkData.btnEn, true);
-            if (w->type == WorkoutEndurance)
+            if (w->type == WorkoutEndurance) {
+                tbl->label.setColor(ptr->headerLabel, tbl->label.stc,
+                                    data->clr->getColor(data->clr->cls, data->clr->sc, ColorGreen));
+                CFStringRef message = localize(CFBundleGetMainBundle(), CFSTR("exerciseDurationMessage"));
+                tbl->label.setText(ptr->headerLabel, tbl->label.stxt, message);
+                CFRelease(message);
+                statusView_updateAccessibility(ptr, tbl);
+                nextView = ptr->button;
                 goto foundTransition;
+            }
         default:
             exerciseDone = cycleExerciseEntry(ptr->entry, data->timers);
             exerciseView_configure(ptr, tbl, data->clr);

@@ -19,6 +19,7 @@
 "workoutNotificationTitle" = "Workout Update";
 "workoutCompleteMsg" = "Workout completed";
 "exerciseProgressHint" = "Exercise %d of %d";
+"exerciseDurationMessage" = "Minimum exercise duration met";
 
 "cancel" = "Cancel";
 "go" = "Go";
