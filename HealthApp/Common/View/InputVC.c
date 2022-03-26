@@ -1,5 +1,6 @@
 #include "InputVC.h"
 #include <CoreFoundation/CFNotificationCenter.h>
+#include <dispatch/queue.h>
 #include <string.h>
 #include "AppDelegate.h"
 #include "Views.h"
@@ -12,9 +13,10 @@ Class InputVCClass;
 Class InputViewClass;
 
 struct InputCache {
-    const SEL sse, sci;
+    const SEL sse, sci, snlo;
     void (*setScroll)(id,SEL,bool);
     void (*setInset)(id,SEL,HAInsets);
+    void (*needsLayout)(id,SEL);
 };
 
 static CFStringRef inputFieldError;
@@ -61,9 +63,9 @@ static void keyboardWillHide(CFNotificationCenterRef ctr _U_, void *self,
 void initValidatorStrings(CFBundleRef bundle) {
     inputFieldError = localize(bundle, CFSTR("inputFieldError"));
     SEL sse = sel_getUid("setScrollEnabled:"), sci = sel_getUid("setContentInset:");
-    Class Scroll = objc_getClass("UIScrollView");
-    memcpy(&cache, &(struct InputCache){sse, sci, (void(*)(id,SEL,bool))getImpO(Scroll, sse),
-        (void(*)(id,SEL,HAInsets))getImpO(Scroll, sci)
+    SEL snlo = sel_getUid("setNeedsLayout"); Class Scroll = objc_getClass("UIScrollView");
+    memcpy(&cache, &(struct InputCache){sse, sci, snlo, (void(*)(id,SEL,bool))getImpO(Scroll, sse),
+        (void(*)(id,SEL,HAInsets))getImpO(Scroll, sci), (void(*)(id,SEL))getImpO(View, snlo)
     }, sizeof(struct InputCache));
 }
 
@@ -71,13 +73,19 @@ static void inputView_reset(InputView *data, short value, VCacheRef tbl) {
     data->valid = true;
     data->result = value;
     tbl->view.hide(data->errorLabel, tbl->view.shd, true);
+    cache.needsLayout((id)((char *)data - ViewSize), cache.snlo);
 }
 
 static void showInputError(InputView *child, VCacheRef tbl) {
     child->valid = false;
     tbl->view.hide(child->errorLabel, tbl->view.shd, false);
-    CFStringRef errorText = tbl->label.getText(child->errorLabel, tbl->label.gtxt);
-    UIAccessibilityPostNotification(UIAccessibilityAnnouncementNotification, (id)errorText);
+    cache.needsLayout((id)((char *)child - ViewSize), cache.snlo);
+    if (UIAccessibilityIsVoiceOverRunning()) {
+        CFStringRef message = tbl->label.getText(child->errorLabel, tbl->label.gtxt);
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1500000000), dispatch_get_main_queue(), ^{
+            UIAccessibilityPostNotification(UIAccessibilityAnnouncementNotification, (id)message);
+        });
+    }
 }
 
 void inputVC_addChild(id self, CFStringRef hint, short min, short max) {

@@ -5,11 +5,17 @@
 #include <CoreFoundation/CFBase.h>
 
 typedef struct {
-    void *parent;
+    SEL stxt;
+    void (*setText)(id,SEL,CFStringRef);
+    id label;
     id stepper;
-    id stepperLabel;
     CFMutableStringRef repsStr;
     CFRange range;
+} StepperView;
+
+typedef struct {
+    void *parent;
+    StepperView *stack;
     int index;
     short bodyweight;
 } UpdateMaxesVC;

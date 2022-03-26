@@ -18,10 +18,15 @@ extern Class HistoryVCClass;
 extern Class SettingsVCClass;
 extern Class WorkoutVCClass;
 extern Class UpdateMaxesVCClass;
+extern Class StepperViewClass;
 extern int UIApplicationMain(int, char *[], CFStringRef, CFStringRef);
 void containerView_deinit(id, SEL);
 void statusView_deinit(id, SEL);
 void inputView_deinit(id, SEL);
+void stepperView_deinit(id, SEL);
+void stepperView_updatedStepper(id, SEL);
+void stepperView_increment(id, SEL);
+void stepperView_decrement(id, SEL);
 id inputVC_init(id, SEL, VCacheRef, CCacheRef);
 void inputVC_deinit(id, SEL);
 void inputVC_viewDidLoad(id, SEL);
@@ -50,7 +55,6 @@ void workoutVC_startEndWorkout(id, SEL, id);
 void workoutVC_handleTap(id, SEL, id);
 void updateMaxesVC_deinit(id, SEL);
 void updateMaxesVC_viewDidLoad(id, SEL);
-void updateMaxesVC_updatedStepper(id, SEL);
 void updateMaxesVC_tappedFinish(id, SEL);
 bool appDelegate_didFinishLaunching(AppDelegate*, SEL, id, id);
 int appDelegate_supportedOrientations(AppDelegate*, SEL, id, id);
@@ -78,6 +82,17 @@ int main(int argc, char *argv[]) {
     class_addIvar(InputViewClass, dataKey, sizeof(InputView), 0, "{?=@@@iisB}");
     class_addMethod(InputViewClass, deinit, (IMP)inputView_deinit, voidSig);
     objc_registerClassPair(InputViewClass);
+
+    StepperViewClass = objc_allocateClassPair(View, "StepperView", 0);
+    class_addIvar(StepperViewClass, dataKey, sizeof(StepperView), 0, "{?=:?@@@{?=qq}}");
+    class_addMethod(StepperViewClass, deinit, (IMP)stepperView_deinit, voidSig);
+    class_addMethod(StepperViewClass, sel_registerName("stepperChanged"),
+                    (IMP)stepperView_updatedStepper, voidSig);
+    class_addMethod(StepperViewClass, sel_getUid("accessibilityIncrement"),
+                    (IMP)stepperView_increment, voidSig);
+    class_addMethod(StepperViewClass, sel_getUid("accessibilityDecrement"),
+                    (IMP)stepperView_decrement, voidSig);
+    objc_registerClassPair(StepperViewClass);
 
     InputVCClass = objc_allocateClassPair(VC, "InputVC", 0);
     class_addProtocol(InputVCClass, objc_getProtocol("UITextFieldDelegate"));
@@ -114,11 +129,9 @@ int main(int argc, char *argv[]) {
     objc_registerClassPair(SetupWorkoutVCClass);
 
     UpdateMaxesVCClass = objc_allocateClassPair(InputVCClass, "UpdateMaxesVC", 0);
-    class_addIvar(UpdateMaxesVCClass, dataKey, sizeof(UpdateMaxesVC), 0, "{?=@@@@{?=qq}is}");
+    class_addIvar(UpdateMaxesVCClass, dataKey, sizeof(UpdateMaxesVC), 0, "{?=@@is}");
     class_addMethod(UpdateMaxesVCClass, deinit, (IMP)updateMaxesVC_deinit, voidSig);
     class_addMethod(UpdateMaxesVCClass, viewLoad, (IMP)updateMaxesVC_viewDidLoad, voidSig);
-    class_addMethod(UpdateMaxesVCClass, sel_registerName("stepperChanged"),
-                    (IMP)updateMaxesVC_updatedStepper, voidSig);
     class_addMethod(UpdateMaxesVCClass, sel_registerName("tappedFinish"),
                     (IMP)updateMaxesVC_tappedFinish, voidSig);
     objc_registerClassPair(UpdateMaxesVCClass);
@@ -160,7 +173,7 @@ int main(int argc, char *argv[]) {
     class_addIvar(AppDelegateClass, "children", 3 * sizeof(id), 0, "[3@]");
     class_addIvar(AppDelegateClass, "clr", sizeof(ColorCache), 0, "{?=#:?}");
     class_addIvar(AppDelegateClass, "tbl", sizeof(VCache), 0,
-                  "{?={?=#::::????}{?=::::::::::??????????}{?=:::???}{?=:::???}{?=::::????}{?=::???}}");
+                  "{?={?=#::::????}{?=::::::::::::????????????}{?=:::???}{?=:::???}{?=::::????}{?=::???}}");
     class_addIvar(AppDelegateClass, "userData", sizeof(UserInfo), 0, "{?=qq[4s]CCC}");
     class_addMethod(AppDelegateClass, sel_getUid("application:didFinishLaunchingWithOptions:"),
                     (IMP)appDelegate_didFinishLaunching, appSig);

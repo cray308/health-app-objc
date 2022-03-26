@@ -25,7 +25,6 @@ void initValidatorStrings(CFBundleRef);
 void initExerciseData(int, CFBundleRef);
 void initWorkoutStrings(CFBundleRef);
 void initStatVData(void);
-void initContainerVData(void);
 id homeVC_init(VCacheRef, CCacheRef, time_t);
 void homeVC_updateWorkoutsList(HomeVC *self, unsigned char completed);
 void homeVC_createWorkoutsList(id self, const UserInfo *info);
@@ -633,7 +632,6 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id applicat
 
     CFBundleRef bundle = CFBundleGetMainBundle();
     initStatVData();
-    initContainerVData();
     initValidatorStrings(bundle);
     initExerciseData(week, bundle);
     initWorkoutStrings(bundle);

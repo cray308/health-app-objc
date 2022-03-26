@@ -19,11 +19,10 @@ struct StackData {
 };
 struct LabelData {
     Class cls;
-    SEL sajfs, sajfc, smsf, sace, sf, snl;
+    SEL sajfs, sajfc, smsf, sf, snl;
     void (*adjFontWidth)(id,SEL,bool);
     void (*adjFontCat)(id,SEL,bool);
     void (*setScale)(id,SEL,CGFloat);
-    void (*setAcc)(id,SEL,bool);
     void (*setFont)(id,SEL,id);
     void (*setLines)(id,SEL,long);
 };
@@ -74,12 +73,14 @@ void initViewData(VCache *cacheRef) {
     SEL asv = sel_getUid("addSubview:"), rsv = sel_getUid("removeFromSuperview"), gtg = sel_getUid("tag");
     SEL stg = sel_getUid("setTag:"), shd = sel_getUid("setHidden:"), sbg = sel_getUid("setBackgroundColor:");
     SEL sacl = sel_getUid("setAccessibilityLabel:"), shn = sel_getUid("setAccessibilityHint:");
-    ViewCache view = {trans, asv, rsv, glyr, stg, gtg, shd, sbg, sacl, shn,
+    SEL satrs = sel_getUid("setAccessibilityTraits:"), sace = sel_getUid("setIsAccessibilityElement:");
+    ViewCache view = {trans, asv, rsv, glyr, stg, gtg, shd, sbg, sacl, shn, satrs, sace,
         (void(*)(id,SEL,bool))getImpO(View, trans), (void(*)(id,SEL,id))getImpO(View, asv),
         (void(*)(id,SEL))getImpO(View, rsv), (id(*)(id,SEL))getImpO(View, glyr),
         (void(*)(id,SEL,long))getImpO(View, stg), (long(*)(id,SEL))getImpO(View, gtg),
         (void(*)(id,SEL,bool))getImpO(View, shd), (void(*)(id,SEL,id))getImpO(View, sbg),
-        (void(*)(id,SEL,CFStringRef))getImpO(View, sacl), (void(*)(id,SEL,CFStringRef))getImpO(View, shn)
+        (void(*)(id,SEL,CFStringRef))getImpO(View, sacl), (void(*)(id,SEL,CFStringRef))getImpO(View, shn),
+        (void(*)(id,SEL,uint64_t))getImpO(View, satrs), (void(*)(id,SEL,bool))getImpO(View, sace)
     };
 
     Class Stack = objc_getClass("UIStackView"); SEL istack = sel_getUid("initWithArrangedSubviews:");
@@ -96,15 +97,15 @@ void initViewData(VCache *cacheRef) {
         (CFArrayRef(*)(id,SEL))getImpO(Stack, gsv), (void(*)(id,SEL,HAInsets))getImpO(Stack, smr)
     };
 
-    Class Label = objc_getClass("UILabel"); SEL snl = sel_getUid("setNumberOfLines:");
-    SEL smsf = sel_getUid("setMinimumScaleFactor:"), sace = sel_getUid("setIsAccessibilityElement:");
+    Class Label = objc_getClass("UILabel");
+    SEL smsf = sel_getUid("setMinimumScaleFactor:"), snl = sel_getUid("setNumberOfLines:");
     SEL sajfs = sel_getUid("setAdjustsFontSizeToFitWidth:"), sf = sel_getUid("setFont:");
     SEL sajfc = sel_getUid("setAdjustsFontForContentSizeCategory:"), gtxt = sel_getUid("text");
     SEL stxt = sel_getUid("setText:"), stc = sel_getUid("setTextColor:");
-    struct LabelData _lData = {Label, sajfs, sajfc, smsf, sace, sf, snl,
+    struct LabelData _lData = {Label, sajfs, sajfc, smsf, sf, snl,
         (void(*)(id,SEL,bool))getImpO(Label, sajfs), (void(*)(id,SEL,bool))getImpO(Label, sajfc),
-        (void(*)(id,SEL,CGFloat))getImpO(Label, smsf), (void(*)(id,SEL,bool))getImpO(Label, sace),
-        (void(*)(id,SEL,id))getImpO(Label, sf), (void(*)(id,SEL,long))getImpO(Label, snl)
+        (void(*)(id,SEL,CGFloat))getImpO(Label, smsf), (void(*)(id,SEL,id))getImpO(Label, sf),
+        (void(*)(id,SEL,long))getImpO(Label, snl)
     };
     LabelCache label = {stxt, gtxt, stc, (void(*)(id,SEL,CFStringRef))getImpO(Label, stxt),
         (CFStringRef(*)(id,SEL))getImpO(Label, gtxt), (void(*)(id,SEL,id))getImpO(Label, stc)
@@ -189,7 +190,7 @@ id createLabel(VCacheRef tbl, CCacheRef clr, CFStringRef text, CFStringRef style
     setDynamicFont(view, true);
     cache.label.setLines(view, cache.label.snl, 0);
     c->setColor(view, c->stc, clr->getColor(clr->cls, clr->sc, ColorLabel));
-    cache.label.setAcc(view, cache.label.sace, accessible);
+    tbl->view.setIsAcc(view, tbl->view.sace, accessible);
     return view;
 }
 

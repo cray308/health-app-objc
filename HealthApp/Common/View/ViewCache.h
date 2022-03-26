@@ -20,7 +20,7 @@ typedef struct {
 } ConstraintCache;
 
 typedef struct {
-    SEL trans, asv, rsv, glyr, stg, gtg, shd, sbg, sacl, shn;
+    SEL trans, asv, rsv, glyr, stg, gtg, shd, sbg, sacl, shn, satrs, sace;
     void (*setTrans)(id,SEL,bool);
     void (*addSub)(id,SEL,id);
     void (*rmSub)(id,SEL);
@@ -31,6 +31,8 @@ typedef struct {
     void (*setBG)(id,SEL,id);
     void (*setAcc)(id,SEL,CFStringRef);
     void (*setHint)(id,SEL,CFStringRef);
+    void (*setTraits)(id,SEL,uint64_t);
+    void (*setIsAcc)(id,SEL,bool);
 } ViewCache;
 
 typedef struct {

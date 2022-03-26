@@ -68,6 +68,7 @@
 "setupWorkoutDuration" = "Duration (minutes)";
 
 "stepperLabelInit" = "Reps: 1";
+"stepperLabelDescr" = "Change the number of reps completed";
 "exerciseHeader" = "Set %d of %d";
 "exerciseTitleRest" = "Rest: %d s";
 "exerciseTitleReps" = "%@ x %d";

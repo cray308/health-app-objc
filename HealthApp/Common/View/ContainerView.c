@@ -3,13 +3,6 @@
 
 Class ContainerViewClass;
 extern uint64_t UIAccessibilityTraitHeader;
-static SEL satrs;
-static void (*setTraits)(id,SEL,uint64_t);
-
-void initContainerVData(void) {
-    satrs = sel_getUid("setAccessibilityTraits:");
-    setTraits = (void(*)(id,SEL,uint64_t))getImpO(View, satrs);
-}
 
 id containerView_init(VCacheRef tbl, CCacheRef clr, CFStringRef title, ContainerView **ref, int spacing) {
     id self = Sels.new(ContainerViewClass, Sels.nw);
@@ -17,7 +10,7 @@ id containerView_init(VCacheRef tbl, CCacheRef clr, CFStringRef title, Container
     ConstraintCache const *cc = &tbl->cc;
     data->divider = Sels.new(View, Sels.nw);
     data->headerLabel = createLabel(tbl, clr, title, UIFontTextStyleTitle3, true);
-    setTraits(data->headerLabel, satrs, UIAccessibilityTraitHeader);
+    tbl->view.setTraits(data->headerLabel, tbl->view.satrs, UIAccessibilityTraitHeader);
     data->stack = createStackView(tbl, NULL, 0, 1, 0, spacing, (Padding){.top = 5});
 
     id containerHeight = cc->init(cc->cls, cc->cr, data->divider, 8, 0, nil, 0, 1, 21);

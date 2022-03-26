@@ -458,9 +458,6 @@ static void workoutVC_handleFinishedWorkout(WorkoutVC *data, bool longEnough) {
     }
 
     id navVC = msg0(id, (id)((char *)data - VCSize), sel_getUid("navigationController"));
-    CFStringRef message = localize(CFBundleGetMainBundle(), CFSTR("workoutCompleteMsg"));
-    UIAccessibilityPostNotification(UIAccessibilityAnnouncementNotification, (id)message);
-    CFRelease(message);
     if (totalCompleted) {
         CFArrayRef ctrls = msg0(CFArrayRef, navVC, sel_getUid("viewControllers"));
         homeVC_handleFinishedWorkout((id)CFArrayGetValueAtIndex(ctrls, 0), totalCompleted);
@@ -645,6 +642,13 @@ foundTransition:
             cleanupWorkoutNotifications(data);
             longEnough = setDuration(w);
             pthread_mutex_unlock(&timerLock);
+            if (UIAccessibilityIsVoiceOverRunning()) {
+                CFStringRef message = localize(CFBundleGetMainBundle(), CFSTR("workoutCompleteMsg"));
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 4000000000), dispatch_get_main_queue(), ^{
+                    UIAccessibilityPostNotification(UIAccessibilityAnnouncementNotification, (id)message);
+                    CFRelease(message);
+                });
+            }
             workoutVC_handleFinishedWorkout(data, longEnough);
             return;
 

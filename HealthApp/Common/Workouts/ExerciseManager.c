@@ -141,10 +141,11 @@ static Workout *buildWorkout(CFDictionaryRef dict, WorkoutParams *params) {
             CFRelease(header);
         } else if (circuitReps > 1) {
             CFStringRef header = formatStr(roundsFormat, 1, circuitReps);
+            circuitRange = CFStringFind(header, CFSTR("1"), 0);
             CFStringAppend(circuitHeader, separator);
+            circuitRange.location += CFStringGetLength(circuitHeader);
             CFStringAppend(circuitHeader, header);
             CFRelease(header);
-            circuitRange = CFStringFind(circuitHeader, CFSTR("1"), kCFCompareBackwards);
         }
 
         if (CFStringGetLength(circuitHeader)) {

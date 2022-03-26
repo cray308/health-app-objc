@@ -21,6 +21,7 @@ extern CGFloat UIFontWeightRegular;
 
 extern uint32_t UIAccessibilityAnnouncementNotification;
 extern void UIAccessibilityPostNotification(uint32_t, id);
+extern BOOL UIAccessibilityIsVoiceOverRunning(void);
 
 typedef struct {
     short top, left, bottom, right;
