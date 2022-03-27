@@ -477,7 +477,7 @@ void workoutVC_viewDidLoad(id self, SEL _cmd) {
                     data->clr->getColor(data->clr->cls, data->clr->sc, ColorPrimaryBGGrouped));
     setVCTitle(self, data->workout->title);
 
-    id stack = createStackView(tbl, NULL, 0, 1, 0, 20, (Padding){20, 8, 20, 8});
+    id stack = createStackView(tbl, NULL, 0, 1, 20, (Padding){20, 8, 20, 8});
     id startBtn = createButton(tbl, data->clr, localize(CFBundleGetMainBundle(), CFSTR("start")),
                                ColorGreen, UIFontTextStyleBody, 0, self, sel_getUid("startEndWorkout:"));
     setNavButtons(self, (id []){nil, startBtn});

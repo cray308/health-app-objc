@@ -241,7 +241,7 @@ void historyVC_viewDidLoad(id self, SEL _cmd) {
         tbl->view.hide(c->divider, tbl->view.shd, !i);
     }
 
-    id vStack = createStackView(tbl, containers, 3, 1, 0, 5, (Padding){10, 8, 10, 8});
+    id vStack = createStackView(tbl, containers, 3, 1, 5, (Padding){10, 8, 10, 8});
     id scrollView = createScrollView();
     addVStackToScrollView(tbl, view, vStack, scrollView);
     Sels.viewRel(vStack, Sels.rel);

@@ -13,10 +13,9 @@ Class InputVCClass;
 Class InputViewClass;
 
 struct InputCache {
-    const SEL sse, sci, snlo;
+    const SEL sse, sci;
     void (*setScroll)(id,SEL,bool);
     void (*setInset)(id,SEL,HAInsets);
-    void (*needsLayout)(id,SEL);
 };
 
 static CFStringRef inputFieldError;
@@ -63,9 +62,9 @@ static void keyboardWillHide(CFNotificationCenterRef ctr _U_, void *self,
 void initValidatorStrings(CFBundleRef bundle) {
     inputFieldError = localize(bundle, CFSTR("inputFieldError"));
     SEL sse = sel_getUid("setScrollEnabled:"), sci = sel_getUid("setContentInset:");
-    SEL snlo = sel_getUid("setNeedsLayout"); Class Scroll = objc_getClass("UIScrollView");
-    memcpy(&cache, &(struct InputCache){sse, sci, snlo, (void(*)(id,SEL,bool))getImpO(Scroll, sse),
-        (void(*)(id,SEL,HAInsets))getImpO(Scroll, sci), (void(*)(id,SEL))getImpO(View, snlo)
+    Class Scroll = objc_getClass("UIScrollView");
+    memcpy(&cache, &(struct InputCache){sse, sci, (void(*)(id,SEL,bool))getImpO(Scroll, sse),
+        (void(*)(id,SEL,HAInsets))getImpO(Scroll, sci)
     }, sizeof(struct InputCache));
 }
 
@@ -73,13 +72,11 @@ static void inputView_reset(InputView *data, short value, VCacheRef tbl) {
     data->valid = true;
     data->result = value;
     tbl->view.hide(data->errorLabel, tbl->view.shd, true);
-    cache.needsLayout((id)((char *)data - ViewSize), cache.snlo);
 }
 
 static void showInputError(InputView *child, VCacheRef tbl) {
     child->valid = false;
     tbl->view.hide(child->errorLabel, tbl->view.shd, false);
-    cache.needsLayout((id)((char *)child - ViewSize), cache.snlo);
     if (UIAccessibilityIsVoiceOverRunning()) {
         CFStringRef message = tbl->label.getText(child->errorLabel, tbl->label.gtxt);
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1500000000), dispatch_get_main_queue(), ^{
@@ -99,17 +96,19 @@ void inputVC_addChild(id self, CFStringRef hint, short min, short max) {
     ptr->minVal = min;
     ptr->maxVal = max;
     CFStringRef errorText = formatStr(inputFieldError, min, max);
-    ptr->hintLabel = createLabel(tbl, d->clr, CFRetain(hint), UIFontTextStyleFootnote, false);
+    ptr->hintLabel = createLabel(tbl, d->clr, CFRetain(hint), UIFontTextStyleFootnote, 0);
+    tbl->view.setIsAcc(ptr->hintLabel, tbl->view.sace, false);
     ptr->field = createTextfield(tbl, d->clr, self, CFSTR(""), hint, 4, 4, index);
     tbl->view.setHint(ptr->field, tbl->view.shn, errorText);
     if (d->setKB)
         msg1(void, long, ptr->field, sel_getUid("setKeyboardAppearance:"), 1);
-    ptr->errorLabel = createLabel(tbl, d->clr, errorText, UIFontTextStyleFootnote, false);
+    ptr->errorLabel = createLabel(tbl, d->clr, errorText, UIFontTextStyleFootnote, 0);
+    tbl->view.setIsAcc(ptr->errorLabel, tbl->view.sace, false);
     tbl->label.setColor(ptr->errorLabel, tbl->label.stc, d->clr->getColor(d->clr->cls, d->clr->sc, ColorRed));
 
     id vStack = createStackView(tbl, (id []){ptr->hintLabel, ptr->field, ptr->errorLabel},
-                                3, 1, 0, 4, (Padding){4, 8, 4, 8});
-    tbl->view.setTrans(vStack, tbl->view.trans, false);
+                                3, 1, 4, (Padding){4, 8, 4, 8});
+    msg1(void, bool, vStack, tbl->view.trans, false);
     tbl->view.addSub(view, tbl->view.asv, vStack);
     pin(&tbl->cc, vStack, view);
     tbl->stack.addSub(d->vStack, tbl->stack.asv, view);
@@ -166,7 +165,7 @@ void inputVC_viewDidLoad(id self, SEL _cmd) {
 
     InputVC *data = (InputVC *)((char *)self + VCSize);
     data->scrollView = createScrollView();
-    data->vStack = createStackView(data->tbl, nil, 0, 1, 0, 0, (Padding){0});
+    data->vStack = createStackView(data->tbl, nil, 0, 1, 0, (Padding){0});
     data->toolbar = msg1(id, CGRect, Sels.alloc(objc_getClass("UIToolbar"), Sels.alo),
                          sel_getUid("initWithFrame:"), ((CGRect){{0}, {100, 100}}));
     unsigned char dark = getUserInfo()->darkMode;

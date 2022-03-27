@@ -29,10 +29,9 @@ typedef struct {
 
 void pin(ConstraintCache const *tbl, id v, id container);
 
-id createStackView(VCacheRef tbl, id *subviews, int count, int axis, int align, int spacing, Padding margins);
+id createStackView(VCacheRef tbl, id *subviews, int count, int axis, int spacing, Padding margins);
 id createScrollView(void);
-id createLabel(VCacheRef tbl, CCacheRef clr,
-               CFStringRef text CF_CONSUMED, CFStringRef style, bool accessible);
+id createLabel(VCacheRef tbl, CCacheRef clr, CFStringRef text CF_CONSUMED, CFStringRef style, int lines);
 id createTextfield(VCacheRef tbl, CCacheRef clr, id delegate, CFStringRef text,
                    CFStringRef hint CF_CONSUMED, int alignment, int keyboard, int tag);
 id createButton(VCacheRef tbl, CCacheRef clr, CFStringRef title CF_CONSUMED,

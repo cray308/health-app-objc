@@ -66,11 +66,11 @@ void settingsVC_viewDidLoad(id self, SEL _cmd) {
     const unsigned char darkMode = info->darkMode;
     unsigned char segment = info->currentPlan + 1;
     id planLabel = createLabel(tbl, sup->clr, localize(bundle, CFSTR("planPickerTitle")),
-                               UIFontTextStyleFootnote, true);
+                               UIFontTextStyleFootnote, 0);
     id picker = createSegmentedControl(bundle, CFSTR("settingsSegment%d"), segment);
     cc->activateC(cc->init(cc->cls, cc->cr, picker, 8, 1, nil, 0, 1, 44), cc->ac, true);
-    data->planContainer = createStackView(tbl, (id []){planLabel, picker}, 2, 1, 0, 2, (Padding){0, 8, 0, 8});
-    id aboveTF = createStackView(tbl, (id []){data->planContainer}, 1, 1, 0, 20, (Padding){0, 0, 20, 0});
+    data->planContainer = createStackView(tbl, (id []){planLabel, picker}, 2, 1, 2, (Padding){0, 8, 0, 8});
+    id aboveTF = createStackView(tbl, (id []){data->planContainer}, 1, 1, 20, (Padding){0, 0, 20, 0});
 
     tbl->stack.setMargins(sup->vStack, tbl->stack.smr, (HAInsets){20, 0, 20, 0});
     tbl->stack.addSub(sup->vStack, tbl->stack.asv, aboveTF);
@@ -79,13 +79,12 @@ void settingsVC_viewDidLoad(id self, SEL _cmd) {
         updateSegmentedControl(sup->clr, picker, darkMode);
         data->switchContainer = Sels.new(View, Sels.nw);
         tbl->view.setBG(data->switchContainer, tbl->view.sbg, viewBG);
-        cc->activateC(cc->init(cc->cls, cc->cr, data->switchContainer, 8, 0, nil, 0, 1, 44), cc->ac, true);
+        cc->activateC(cc->init(cc->cls, cc->cr, data->switchContainer, 8, 1, nil, 0, 1, 44), cc->ac, true);
         id switchView = Sels.new(objc_getClass("UISwitch"), Sels.nw);
         msg1(void, bool, switchView, sel_getUid("setOn:"), darkMode);
-        id label = createLabel(tbl, sup->clr, localize(bundle, CFSTR("darkMode")),
-                               UIFontTextStyleBody, true);
-        id sv = createStackView(tbl, (id []){label, switchView}, 2, 0, 3, 5, (Padding){0, 8, 0, 8});
-        tbl->view.setTrans(sv, tbl->view.trans, false);
+        id label = createLabel(tbl, sup->clr, localize(bundle, CFSTR("darkMode")), UIFontTextStyleBody, 1);
+        id sv = createStackView(tbl, (id []){label, switchView}, 2, 0, 5, (Padding){0, 8, 0, 8});
+        msg1(void, bool, sv, tbl->view.trans, false);
         tbl->view.addSub(data->switchContainer, tbl->view.asv, sv);
         pin(cc, sv, data->switchContainer);
         tbl->stack.addSub(aboveTF, tbl->stack.asv, data->switchContainer);
@@ -114,7 +113,7 @@ void settingsVC_viewDidLoad(id self, SEL _cmd) {
     tbl->view.setBG(data->deleteButton, tbl->view.sbg, viewBG);
     cc->activateC(cc->init(cc->cls, cc->cr, data->deleteButton, 8, 1, nil, 0, 1, 44), cc->ac, true);
 
-    id belowTF = createStackView(tbl, (id []){sup->button, data->deleteButton}, 2, 1, 0, 20,
+    id belowTF = createStackView(tbl, (id []){sup->button, data->deleteButton}, 2, 1, 20,
                                  (Padding){.top = 20});
     tbl->stack.addSub(sup->vStack, tbl->stack.asv, belowTF);
 

@@ -47,11 +47,12 @@ void setupWorkoutVC_viewDidLoad(id self, SEL _cmd) {
     tbl->view.setBG(view, tbl->view.sbg, sup->clr->getColor(sup->clr->cls, sup->clr->sc, ColorSecondaryBG));
 
     CFStringRef pickerTitle = localize(bundle, CFSTR("setupWorkoutTitle"));
-    id workoutLabel = createLabel(tbl, sup->clr, CFRetain(pickerTitle), UIFontTextStyleFootnote, false);
+    id workoutLabel = createLabel(tbl, sup->clr, CFRetain(pickerTitle), UIFontTextStyleFootnote, 0);
+    tbl->view.setIsAcc(workoutLabel, tbl->view.sace, false);
     data->workoutTextField = createTextfield(
       tbl, sup->clr, nil, CFArrayGetValueAtIndex(data->names, 0), pickerTitle, 1, 0, 0);
     id workoutContainer = createStackView(tbl, (id []){workoutLabel, data->workoutTextField},
-                                          2, 1, 0, 2, (Padding){30, 8, 20, 8});
+                                          2, 1, 2, (Padding){30, 8, 20, 8});
 
     id workoutPicker = Sels.new(objc_getClass("UIPickerView"), Sels.nw);
     msg1(void, id, workoutPicker, tbl->field.sdg, self);

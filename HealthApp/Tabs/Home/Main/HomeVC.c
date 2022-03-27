@@ -132,7 +132,7 @@ void homeVC_viewDidLoad(id self, SEL _cmd) {
     id planContainer = containerView_init(tbl, data->clr, headers[0], &data->planContainer, 0);
     tbl->view.hide(data->planContainer->divider, tbl->view.shd, true);
     id customContainer = containerView_init(tbl, data->clr, headers[1], &data->customContainer, 4);
-    id vStack = createStackView(tbl, (id []){planContainer, customContainer}, 2, 1, 0, 20,
+    id vStack = createStackView(tbl, (id []){planContainer, customContainer}, 2, 1, 20,
                                 (Padding){10, 8, 16, 8});
 
     SEL btnTap = sel_getUid("customButtonTapped:");

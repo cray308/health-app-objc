@@ -21,7 +21,6 @@ typedef struct {
 
 typedef struct {
     SEL trans, asv, rsv, glyr, stg, gtg, shd, sbg, sacl, shn, satrs, sace;
-    void (*setTrans)(id,SEL,bool);
     void (*addSub)(id,SEL,id);
     void (*rmSub)(id,SEL);
     id (*layer)(id,SEL);

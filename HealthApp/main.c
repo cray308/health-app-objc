@@ -173,7 +173,7 @@ int main(int argc, char *argv[]) {
     class_addIvar(AppDelegateClass, "children", 3 * sizeof(id), 0, "[3@]");
     class_addIvar(AppDelegateClass, "clr", sizeof(ColorCache), 0, "{?=#:?}");
     class_addIvar(AppDelegateClass, "tbl", sizeof(VCache), 0,
-                  "{?={?=#::::????}{?=::::::::::::????????????}{?=:::???}{?=:::???}{?=::::????}{?=::???}}");
+                  "{?={?=#::::????}{?=::::::::::::???????????}{?=:::???}{?=:::???}{?=::::????}{?=::???}}");
     class_addIvar(AppDelegateClass, "userData", sizeof(UserInfo), 0, "{?=qq[4s]CCC}");
     class_addMethod(AppDelegateClass, sel_getUid("application:didFinishLaunchingWithOptions:"),
                     (IMP)appDelegate_didFinishLaunching, appSig);

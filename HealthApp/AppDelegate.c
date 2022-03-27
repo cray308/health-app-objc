@@ -17,14 +17,14 @@
 void exerciseManager_setCurrentWeek(int);
 #endif
 extern CGFloat UIFontWeightSemibold;
-void initViewData(VCache *cacheRef);
+void initViewData(VCache *cacheRef, Class *clsRef);
 void initNSData(bool modern, ColorCache *cacheRef, Class **clsRefs, size_t **sizeRefs);
 void setupAppColors(unsigned char darkMode, bool deleteOld);
 void toggleDarkModeForCharts(bool);
 void initValidatorStrings(CFBundleRef);
 void initExerciseData(int, CFBundleRef);
 void initWorkoutStrings(CFBundleRef);
-void initStatVData(void);
+void initStatVData(Class);
 id homeVC_init(VCacheRef, CCacheRef, time_t);
 void homeVC_updateWorkoutsList(HomeVC *self, unsigned char completed);
 void homeVC_createWorkoutsList(id self, const UserInfo *info);
@@ -106,8 +106,6 @@ static void saveChanges(CFMutableDictionaryRef dict CF_CONSUMED,
 }
 
 #pragma mark - Core Data Helpers
-
-#define weekData_setTotalWorkouts(d, val) msg1(void,int16_t,d,sel_getUid("setTotalWorkouts:"),val)
 
 static void context_saveChanges(id context) {
     if (msg0(bool, context, sel_getUid("hasChanges")))
@@ -514,7 +512,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id applicat
     objc_registerClassPair(DMNavVC);
     Class TabAppear = objc_getClass("UITabBarAppearance");
     initNSData(TabAppear, &self->clr, (Class*[]){&View, &VC}, (size_t*[]){&ViewSize, &VCSize});
-    initViewData(&self->tbl);
+    Class btnRef; initViewData(&self->tbl, &btnRef);
     UIApplication = objc_getClass("UIApplication");
     sharedApplication = sel_getUid("sharedApplication");
     delegate = sel_getUid("delegate");
@@ -631,7 +629,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id applicat
     }
 
     CFBundleRef bundle = CFBundleGetMainBundle();
-    initStatVData();
+    initStatVData(btnRef);
     initValidatorStrings(bundle);
     initExerciseData(week, bundle);
     initWorkoutStrings(bundle);
@@ -792,7 +790,7 @@ void deleteAppData(void) {
                 msg1(void, id, context, delObj, (id)CFArrayGetValueAtIndex(data, i));
             }
             id currWeek = (id)CFArrayGetValueAtIndex(data, end);
-            weekData_setTotalWorkouts(currWeek, 0);
+            msg1(void, int16_t, currWeek, sel_getUid("setTotalWorkouts:"), 0);
             for (int i = 0; i < 4; ++i) {
                 msg1(void, int16_t, currWeek, sel_getUid(timeSets[i]), 0);
             }
@@ -829,7 +827,7 @@ unsigned char addWorkoutData(unsigned char day, int type, int16_t duration, shor
         int16_t newDuration = duration + msg0(int16_t, data, sel_getUid(timeGets[type]));
         msg1(void, int16_t, data, sel_getUid(timeSets[type]), newDuration);
         int16_t totalWorkouts = msg0(int16_t, data, sel_getUid("totalWorkouts")) + 1;
-        weekData_setTotalWorkouts(data, totalWorkouts);
+        msg1(void, int16_t, data, sel_getUid("setTotalWorkouts:"), totalWorkouts);
         if (weights) {
             for (int i = 0; i < 4; ++i) {
                 msg1(void, int16_t, data, sel_getUid(liftSets[i]), weights[i]);

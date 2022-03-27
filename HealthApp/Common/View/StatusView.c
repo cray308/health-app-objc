@@ -8,11 +8,11 @@ static SEL scrad, gct;
 static void (*setCorner)(id,SEL,CGFloat);
 static CFStringRef (*getTitle)(id,SEL);
 
-void initStatVData(void) {
+void initStatVData(Class Button) {
     scrad = sel_getUid("setCornerRadius:");
     gct = sel_getUid("currentTitle");
     setCorner = (void(*)(id,SEL,CGFloat))getImpO(clsF0(Class, View, sel_getUid("layerClass")), scrad);
-    getTitle = (CFStringRef(*)(id,SEL))getImpO(objc_getClass("UIButton"), gct);
+    getTitle = (CFStringRef(*)(id,SEL))getImpO(Button, gct);
 }
 
 id statusView_init(VCacheRef tbl, CCacheRef clr, CFStringRef text,
@@ -27,7 +27,8 @@ id statusView_init(VCacheRef tbl, CCacheRef clr, CFStringRef text,
     id btnHeight = cc->init(cc->cls, cc->cr, data->button, 8, 1, nil, 0, 1, 50);
     cc->lowerPri(btnHeight, cc->lp, 999);
     cc->activateC(btnHeight, cc->ac, true);
-    data->headerLabel = createLabel(tbl, clr, NULL, UIFontTextStyleSubheadline, false);
+    data->headerLabel = createLabel(tbl, clr, NULL, UIFontTextStyleSubheadline, 0);
+    tbl->view.setIsAcc(data->headerLabel, tbl->view.sace, false);
     data->box = Sels.new(View, Sels.nw);
     setCorner(tbl->view.layer(data->box, tbl->view.glyr), scrad, 5);
     id boxWidth = cc->init(cc->cls, cc->cr, data->box, 7, 0, nil, 0, 1, 20);
@@ -36,9 +37,9 @@ id statusView_init(VCacheRef tbl, CCacheRef clr, CFStringRef text,
     id boxHeight = cc->init(cc->cls, cc->cr, data->box, 8, 0, nil, 0, 1, 20);
     cc->lowerPri(boxHeight, cc->lp, 999);
     cc->activateC(boxHeight, cc->ac, true);
-    id hStack = createStackView(tbl, (id []){data->button, data->box}, 2, 0, 3, 5, (Padding){0});
-    id vStack = createStackView(tbl, (id []){data->headerLabel, hStack}, 2, 1, 0, 4, (Padding){4, 0, 4, 0});
-    tbl->view.setTrans(vStack, tbl->view.trans, false);
+    id hStack = createStackView(tbl, (id []){data->button, data->box}, 2, 0, 5, (Padding){0});
+    id vStack = createStackView(tbl, (id []){data->headerLabel, hStack}, 2, 1, 4, (Padding){4, 0, 4, 0});
+    msg1(void, bool, vStack, tbl->view.trans, false);
     tbl->view.addSub(self, tbl->view.asv, vStack);
     pin(cc, vStack, self);
     Sels.viewRel(hStack, Sels.rel);
@@ -56,7 +57,7 @@ void statusView_deinit(id self, SEL _cmd) {
 
 void statusView_updateAccessibility(StatusView *ptr, VCacheRef tbl) {
     CFStringRef header = tbl->label.getText(ptr->headerLabel, tbl->label.gtxt);
-    CFMutableStringRef label = CFStringCreateMutableCopy(NULL, 128, CFSTR(""));
+    CFMutableStringRef label = CFStringCreateMutable(NULL, 128);
     if (header)
         CFStringAppendFormat(label, NULL, CFSTR("%@. "), header);
     CFStringAppend(label, getTitle(ptr->button, gct));

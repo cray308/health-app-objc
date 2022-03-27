@@ -9,15 +9,15 @@ id containerView_init(VCacheRef tbl, CCacheRef clr, CFStringRef title, Container
     ContainerView *data = (ContainerView *)((char *)self + ViewSize);
     ConstraintCache const *cc = &tbl->cc;
     data->divider = Sels.new(View, Sels.nw);
-    data->headerLabel = createLabel(tbl, clr, title, UIFontTextStyleTitle3, true);
+    data->headerLabel = createLabel(tbl, clr, title, UIFontTextStyleTitle3, 0);
     tbl->view.setTraits(data->headerLabel, tbl->view.satrs, UIAccessibilityTraitHeader);
-    data->stack = createStackView(tbl, NULL, 0, 1, 0, spacing, (Padding){.top = 5});
+    data->stack = createStackView(tbl, NULL, 0, 1, spacing, (Padding){.top = 5});
 
     id containerHeight = cc->init(cc->cls, cc->cr, data->divider, 8, 0, nil, 0, 1, 21);
     cc->lowerPri(containerHeight, cc->lp, 999);
     cc->activateC(containerHeight, cc->ac, true);
     id divLine = Sels.new(View, Sels.nw);
-    tbl->view.setTrans(divLine, tbl->view.trans, false);
+    msg1(void, bool, divLine, tbl->view.trans, false);
     tbl->view.setBG(divLine, tbl->view.sbg, clr->getColor(clr->cls, clr->sc, ColorSeparator));
     id lineHeight = cc->init(cc->cls, cc->cr, divLine, 8, 0, nil, 0, 1, 1);
     cc->lowerPri(lineHeight, cc->lp, 999);
@@ -34,8 +34,8 @@ id containerView_init(VCacheRef tbl, CCacheRef clr, CFStringRef title, Container
     Sels.viewRel(divLine, Sels.rel);
 
     id vStack = createStackView(tbl, (id []){data->divider, data->headerLabel, data->stack},
-                                3, 1, 0, 0, (Padding){0});
-    tbl->view.setTrans(vStack, tbl->view.trans, false);
+                                3, 1, 0, (Padding){0});
+    msg1(void, bool, vStack, tbl->view.trans, false);
     tbl->view.addSub(self, tbl->view.asv, vStack);
     pin(cc, vStack, self);
     Sels.viewRel(vStack, Sels.rel);
