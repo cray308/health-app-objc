@@ -4,7 +4,7 @@
 #include <CoreFoundation/CFBase.h>
 
 enum {
-    LiftSquat, LiftPullup, LiftBench, LiftDeadlift
+    LiftPullup = 1, LiftBench, LiftDeadlift
 };
 
 enum {
@@ -16,7 +16,7 @@ enum {
 };
 
 enum {
-    ExerciseReps, ExerciseDuration, ExerciseDistance
+    ExerciseReps, ExerciseDuration
 };
 
 typedef struct {

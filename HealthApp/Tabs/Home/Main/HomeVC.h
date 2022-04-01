@@ -6,7 +6,7 @@
 typedef struct {
     CCacheRef clr;
     VCacheRef tbl;
-    ContainerView *planContainer;
+    CVPair planContainer;
     ContainerView *customContainer;
     int numWorkouts;
 } HomeVC;

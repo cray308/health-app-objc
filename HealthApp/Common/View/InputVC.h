@@ -17,9 +17,14 @@ typedef struct {
 } InputView;
 
 typedef struct {
+    id view;
+    InputView *data;
+} IVPair;
+
+typedef struct {
     CCacheRef clr;
     VCacheRef tbl;
-    InputView *children[4];
+    IVPair children[4];
     id button;
     id activeField;
     id scrollView;

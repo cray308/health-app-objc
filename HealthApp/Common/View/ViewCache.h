@@ -35,14 +35,17 @@ typedef struct {
 } ViewCache;
 
 typedef struct {
-    SEL asv, gsv, smr;
+    SEL asv, gsv, smr, ssp, scsp;
     void (*addSub)(id,SEL,id);
     CFArrayRef (*getSub)(id,SEL);
     void (*setMargins)(id,SEL,HAInsets);
+    void (*setSpace)(id,SEL,CGFloat);
+    void (*setSpaceAfter)(id,SEL,CGFloat,id);
 } StackCache;
 
 typedef struct {
-    SEL stxt, gtxt, stc;
+    SEL snl, stxt, gtxt, stc;
+    void (*setLines)(id,SEL,long);
     void (*setText)(id,SEL,CFStringRef);
     CFStringRef (*getText)(id,SEL);
     void (*setColor)(id,SEL,id);
@@ -57,10 +60,9 @@ typedef struct {
 } ButtonCache;
 
 typedef struct {
-    SEL sdg, siac;
+    SEL sdg;
     void (*setText)(id,SEL,CFStringRef);
     void (*setColor)(id,SEL,id);
-    void (*setInput)(id,SEL,id);
 } FieldCache;
 
 typedef struct {

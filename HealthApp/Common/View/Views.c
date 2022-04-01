@@ -10,21 +10,19 @@ struct FontData {
 };
 struct StackData {
     Class cls;
-    SEL si, sa, saln, ssp, slmra;
+    SEL si, sa, saln, slmra;
     id (*init)(id,SEL,CFArrayRef);
     void (*setAxis)(id,SEL,long);
     void (*setAlign)(id,SEL,long);
-    void (*setSpace)(id,SEL,CGFloat);
     void (*setRelative)(id,SEL,bool);
 };
 struct LabelData {
     Class cls;
-    SEL sajfs, sajfc, smsf, sf, snl;
+    SEL sajfs, sajfc, smsf, sf;
     void (*adjFontWidth)(id,SEL,bool);
     void (*adjFontCat)(id,SEL,bool);
     void (*setScale)(id,SEL,CGFloat);
     void (*setFont)(id,SEL,id);
-    void (*setLines)(id,SEL,long);
 };
 struct ButtonData {
     Class cls;
@@ -34,12 +32,12 @@ struct ButtonData {
 };
 struct FieldData {
     Class cls;
-    SEL salg, sbs, skbt;
+    SEL sbs, siac;
     void (*adjFontCat)(id,SEL,bool);
     void (*setFont)(id,SEL,id);
-    void (*setAlign)(id,SEL,long);
     void (*setBorder)(id,SEL,long);
     void (*setDel)(id,SEL,id);
+    void (*setInput)(id,SEL,id);
 };
 struct PrivVData {
     const struct FontData fc;
@@ -55,89 +53,88 @@ size_t VCSize;
 size_t ViewSize;
 static struct PrivVData cache;
 
-void initViewData(VCache *cacheRef, Class *clsRef) {
+void initViewData(VCache *cacheRef, Class *clsRefs) {
     Class Font = objc_getClass("UIFont"); SEL pf = sel_getUid("preferredFontForTextStyle:");
-    struct FontData fc = {Font, pf, (id(*)(Class,SEL,CFStringRef))getImpC(Font, pf)};
 
     Class Constraint = objc_getClass("NSLayoutConstraint"); SEL lp = sel_getUid("setPriority:");
     SEL cr = sel_getUid("constraintWithItem:attribute:relatedBy:toItem:attribute:multiplier:constant:");
     SEL ac = sel_getUid("setActive:"), aar = sel_getUid("activateConstraints:");
-    ConstraintCache cc = {Constraint, cr, ac, aar, lp,
-        (id(*)(Class,SEL,id,long,long,id,long,CGFloat,CGFloat))getImpC(Constraint, cr),
-        (void(*)(id,SEL,bool))getImpO(Constraint, ac),
-        (void(*)(Class,SEL,CFArrayRef))getImpC(Constraint, aar),
-        (void(*)(id,SEL,float))getImpO(Constraint, lp)
-    };
 
     SEL glyr = sel_getUid("layer");
     SEL asv = sel_getUid("addSubview:"), rsv = sel_getUid("removeFromSuperview"), gtg = sel_getUid("tag");
     SEL stg = sel_getUid("setTag:"), shd = sel_getUid("setHidden:"), sbg = sel_getUid("setBackgroundColor:");
     SEL sacl = sel_getUid("setAccessibilityLabel:"), shn = sel_getUid("setAccessibilityHint:");
     SEL satrs = sel_getUid("setAccessibilityTraits:"), sace = sel_getUid("setIsAccessibilityElement:");
-    ViewCache view = {sel_getUid("setTranslatesAutoresizingMaskIntoConstraints:"), asv, rsv, glyr,
-        stg, gtg, shd, sbg, sacl, shn, satrs, sace, (void(*)(id,SEL,id))getImpO(View, asv),
-        (void(*)(id,SEL))getImpO(View, rsv), (id(*)(id,SEL))getImpO(View, glyr),
-        (void(*)(id,SEL,long))getImpO(View, stg), (long(*)(id,SEL))getImpO(View, gtg),
-        (void(*)(id,SEL,bool))getImpO(View, shd), (void(*)(id,SEL,id))getImpO(View, sbg),
-        (void(*)(id,SEL,CFStringRef))getImpO(View, sacl), (void(*)(id,SEL,CFStringRef))getImpO(View, shn),
-        (void(*)(id,SEL,uint64_t))getImpO(View, satrs), (void(*)(id,SEL,bool))getImpO(View, sace)
-    };
 
     Class Stack = objc_getClass("UIStackView"); SEL istack = sel_getUid("initWithArrangedSubviews:");
     SEL aasv = sel_getUid("addArrangedSubview:"), gsv = sel_getUid("arrangedSubviews");
     SEL smr = sel_getUid("setLayoutMargins:"), saln = sel_getUid("setAlignment:");
     SEL ssp = sel_getUid("setSpacing:"), slmra = sel_getUid("setLayoutMarginsRelativeArrangement:");
-    SEL sa = sel_getUid("setAxis:");
-    struct StackData _stData = {Stack, istack, sa, saln, ssp, slmra,
-        (id(*)(id,SEL,CFArrayRef))getImpO(Stack, istack), (void(*)(id,SEL,long))getImpO(Stack, sa),
-        (void(*)(id,SEL,long))getImpO(Stack, saln), (void(*)(id,SEL,CGFloat))getImpO(Stack, ssp),
-        (void(*)(id,SEL,bool))getImpO(Stack, slmra)
-    };
-    StackCache stack = {aasv, gsv, smr, (void(*)(id,SEL,id))getImpO(Stack, aasv),
-        (CFArrayRef(*)(id,SEL))getImpO(Stack, gsv), (void(*)(id,SEL,HAInsets))getImpO(Stack, smr)
-    };
+    SEL sa = sel_getUid("setAxis:"), scsp = sel_getUid("setCustomSpacing:afterView:");
 
-    Class Label = objc_getClass("UILabel");
+    Class Label = objc_getClass("UILabel"); SEL sajfc = sel_getUid("setAdjustsFontForContentSizeCategory:");
     SEL smsf = sel_getUid("setMinimumScaleFactor:"), snl = sel_getUid("setNumberOfLines:");
     SEL sajfs = sel_getUid("setAdjustsFontSizeToFitWidth:"), sf = sel_getUid("setFont:");
-    SEL sajfc = sel_getUid("setAdjustsFontForContentSizeCategory:"), gtxt = sel_getUid("text");
-    SEL stxt = sel_getUid("setText:"), stc = sel_getUid("setTextColor:");
-    struct LabelData _lData = {Label, sajfs, sajfc, smsf, sf, snl,
-        (void(*)(id,SEL,bool))getImpO(Label, sajfs), (void(*)(id,SEL,bool))getImpO(Label, sajfc),
-        (void(*)(id,SEL,CGFloat))getImpO(Label, smsf), (void(*)(id,SEL,id))getImpO(Label, sf),
-        (void(*)(id,SEL,long))getImpO(Label, snl)
-    };
-    LabelCache label = {stxt, gtxt, stc, (void(*)(id,SEL,CFStringRef))getImpO(Label, stxt),
-        (CFStringRef(*)(id,SEL))getImpO(Label, gtxt), (void(*)(id,SEL,id))getImpO(Label, stc)
-    };
+    SEL gtxt = sel_getUid("text"), stxt = sel_getUid("setText:"), stc = sel_getUid("setTextColor:");
 
     Class Button = objc_getClass("UIButton"); SEL ibtn = sel_getUid("buttonWithType:");
     SEL atgt = sel_getUid("addTarget:action:forControlEvents:"), en = sel_getUid("setEnabled:");
     SEL sbtxt = sel_getUid("setTitle:forState:"), sbc = sel_getUid("setTitleColor:forState:");
     SEL glb = sel_getUid("titleLabel");
-    struct ButtonData _bData = {Button, ibtn, glb, (id(*)(Class,SEL,long))getImpC(Button, ibtn),
-        (id(*)(id,SEL))getImpO(Button, glb)
-    };
-    ButtonCache button = {atgt, en, sbtxt, sbc, (void(*)(id,SEL,id,SEL,u_long))getImpO(Button, atgt),
-        (void(*)(id,SEL,bool))getImpO(Button, en), (void(*)(id,SEL,CFStringRef,u_long))getImpO(Button, sbtxt),
-        (void(*)(id,SEL,id,u_long))getImpO(Button, sbc)
-    };
 
-    Class Field = objc_getClass("UITextField"); SEL salg = sel_getUid("setTextAlignment:");
-    SEL sbs = sel_getUid("setBorderStyle:"), skbt = sel_getUid("setKeyboardType:");
-    SEL sdg = sel_getUid("setDelegate:"), siac = sel_getUid("setInputAccessoryView:");
-    struct FieldData _fData = {Field, salg, sbs, skbt, (void(*)(id,SEL,bool))getImpO(Field, sajfc),
-        (void(*)(id,SEL,id))getImpO(Field, sf), (void(*)(id,SEL,long))getImpO(Field, salg),
-        (void(*)(id,SEL,long))getImpO(Field, sbs), (void(*)(id,SEL,id))getImpO(Field, sdg)
-    };
-    FieldCache field = {sdg, siac, (void(*)(id,SEL,CFStringRef))getImpO(Field, stxt),
-        (void(*)(id,SEL,id))getImpO(Field, stc), (void(*)(id,SEL,id))getImpO(Field, siac)
-    };
+    Class Field = objc_getClass("UITextField"); SEL sdg = sel_getUid("setDelegate:");
+    SEL sbs = sel_getUid("setBorderStyle:"), siac = sel_getUid("setInputAccessoryView:");
 
-    VCache lcache = {cc, view, stack, label, button, field};
+    VCache lcache = {
+        {Constraint, cr, ac, aar, lp,
+            (id(*)(Class,SEL,id,long,long,id,long,CGFloat,CGFloat))getImpC(Constraint, cr),
+            (void(*)(id,SEL,bool))getImpO(Constraint, ac),
+            (void(*)(Class,SEL,CFArrayRef))getImpC(Constraint, aar),
+            (void(*)(id,SEL,float))getImpO(Constraint, lp)
+        },
+        {sel_getUid("setTranslatesAutoresizingMaskIntoConstraints:"), asv, rsv, glyr,
+            stg, gtg, shd, sbg, sacl, shn, satrs, sace,
+            (void(*)(id,SEL,id))getImpO(View, asv), (void(*)(id,SEL))getImpO(View, rsv),
+            (id(*)(id,SEL))getImpO(View, glyr), (void(*)(id,SEL,long))getImpO(View, stg),
+            (long(*)(id,SEL))getImpO(View, gtg), (void(*)(id,SEL,bool))getImpO(View, shd),
+            (void(*)(id,SEL,id))getImpO(View, sbg), (void(*)(id,SEL,CFStringRef))getImpO(View, sacl),
+            (void(*)(id,SEL,CFStringRef))getImpO(View, shn), (void(*)(id,SEL,uint64_t))getImpO(View, satrs),
+            (void(*)(id,SEL,bool))getImpO(View, sace)
+        },
+        {aasv, gsv, smr, ssp, scsp, (void(*)(id,SEL,id))getImpO(Stack, aasv),
+            (CFArrayRef(*)(id,SEL))getImpO(Stack, gsv), (void(*)(id,SEL,HAInsets))getImpO(Stack, smr),
+            (void(*)(id,SEL,CGFloat))getImpO(Stack, ssp), (void(*)(id,SEL,CGFloat,id))getImpO(Stack, scsp)
+        },
+        {snl, stxt, gtxt, stc, (void(*)(id,SEL,long))getImpO(Label, snl),
+            (void(*)(id,SEL,CFStringRef))getImpO(Label, stxt), (CFStringRef(*)(id,SEL))getImpO(Label, gtxt),
+            (void(*)(id,SEL,id))getImpO(Label, stc)
+        },
+        {atgt, en, sbtxt, sbc, (void(*)(id,SEL,id,SEL,u_long))getImpO(Button, atgt),
+            (void(*)(id,SEL,bool))getImpO(Button, en),
+            (void(*)(id,SEL,CFStringRef,u_long))getImpO(Button, sbtxt),
+            (void(*)(id,SEL,id,u_long))getImpO(Button, sbc)
+        },
+        {sdg, (void(*)(id,SEL,CFStringRef))getImpO(Field, stxt), (void(*)(id,SEL,id))getImpO(Field, stc)}
+    };
     memcpy(cacheRef, &lcache, sizeof(VCache));
-    *clsRef = Button;
-    struct PrivVData localData = {fc, _stData, _lData, _bData, _fData};
+    clsRefs[0] = Button;
+    clsRefs[1] = Field;
+    struct PrivVData localData = {
+        {Font, pf, (id(*)(Class,SEL,CFStringRef))getImpC(Font, pf)},
+        {Stack, istack, sa, saln, slmra, (id(*)(id,SEL,CFArrayRef))getImpO(Stack, istack),
+            (void(*)(id,SEL,long))getImpO(Stack, sa), (void(*)(id,SEL,long))getImpO(Stack, saln),
+            (void(*)(id,SEL,bool))getImpO(Stack, slmra)
+        },
+        {Label, sajfs, sajfc, smsf, sf, (void(*)(id,SEL,bool))getImpO(Label, sajfs),
+            (void(*)(id,SEL,bool))getImpO(Label, sajfc), (void(*)(id,SEL,CGFloat))getImpO(Label, smsf),
+            (void(*)(id,SEL,id))getImpO(Label, sf)
+        },
+        {Button, ibtn, glb, (id(*)(Class,SEL,long))getImpC(Button, ibtn), (id(*)(id,SEL))getImpO(Button, glb)},
+        {Field, sbs, siac, (void(*)(id,SEL,bool))getImpO(Field, sajfc), (void(*)(id,SEL,id))getImpO(Field, sf),
+            (void(*)(id,SEL,long))getImpO(Field, sbs), (void(*)(id,SEL,id))getImpO(Field, sdg),
+            (void(*)(id,SEL,id))getImpO(Field, siac)
+        }
+    };
     memcpy(&cache, &localData, sizeof(struct PrivVData));
 }
 
@@ -159,18 +156,30 @@ void pin(ConstraintCache const *tbl, id v, id container) {
     CFRelease(array);
 }
 
+void setHeight(ConstraintCache const *cc, id v, int height, bool geq, bool optional) {
+    id c = cc->init(cc->cls, cc->cr, v, 8, geq, nil, 0, 1, height);
+    if (optional) cc->lowerPri(c, cc->lp, 999);
+    cc->activateC(c, cc->ac, true);
+}
+
 #pragma mark - View initializers
 
-id createStackView(VCacheRef tbl, id *subviews, int count, int axis, int spacing, Padding margins) {
+id createHStack(VCacheRef tbl, id *subviews) {
+    CFArrayRef arr = CFArrayCreate(NULL, (const void **)subviews, 2, NULL);
+    id view = cache.stack.init(Sels.alloc(cache.stack.cls, Sels.alo), cache.stack.si, arr);
+    CFRelease(arr);
+    cache.stack.setAlign(view, cache.stack.saln, 3);
+    cache.stack.setRelative(view, cache.stack.slmra, true);
+    tbl->stack.setSpace(view, tbl->stack.ssp, 8);
+    return view;
+}
+
+id createVStack(id *subviews, int count) {
     CFArrayRef arr = CFArrayCreate(NULL, (const void **)subviews, count, NULL);
     id view = cache.stack.init(Sels.alloc(cache.stack.cls, Sels.alo), cache.stack.si, arr);
     CFRelease(arr);
-    cache.stack.setAxis(view, cache.stack.sa, axis);
-    cache.stack.setAlign(view, cache.stack.saln, axis ? 0 : 3);
-    cache.stack.setSpace(view, cache.stack.ssp, spacing);
+    cache.stack.setAxis(view, cache.stack.sa, 1);
     cache.stack.setRelative(view, cache.stack.slmra, true);
-    HAInsets insets = {margins.top, margins.left, margins.bottom, margins.right};
-    tbl->stack.setMargins(view, tbl->stack.smr, insets);
     return view;
 }
 
@@ -180,7 +189,7 @@ id createScrollView(void) {
     return view;
 }
 
-id createLabel(VCacheRef tbl, CCacheRef clr, CFStringRef text, CFStringRef style, int lines) {
+id createLabel(VCacheRef tbl, CCacheRef clr, CFStringRef text, CFStringRef style, int color) {
     LabelCache const *c = &tbl->label;
     id view = Sels.new(cache.label.cls, Sels.nw);
     c->setText(view, c->stxt, text);
@@ -188,13 +197,12 @@ id createLabel(VCacheRef tbl, CCacheRef clr, CFStringRef text, CFStringRef style
         CFRelease(text);
     cache.label.setFont(view, cache.label.sf, cache.fc.pref(cache.fc.cls, cache.fc.pf, style));
     setDynamicFont(view, true);
-    cache.label.setLines(view, cache.label.snl, lines);
-    c->setColor(view, c->stc, clr->getColor(clr->cls, clr->sc, ColorLabel));
+    c->setColor(view, c->stc, clr->getColor(clr->cls, clr->sc, color));
     return view;
 }
 
 id createButton(VCacheRef tbl, CCacheRef clr, CFStringRef title,
-                int color, CFStringRef style, int tag, id target, SEL action) {
+                int color, CFStringRef style, id target, SEL action) {
     ButtonCache const *bt = &tbl->button;
     id view = cache.button.init(cache.button.cls, cache.button.si, 1);
     msg1(void, bool, view, tbl->view.trans, false);
@@ -206,7 +214,6 @@ id createButton(VCacheRef tbl, CCacheRef clr, CFStringRef title,
     id label = cache.button.getLabel(view, cache.button.glb);
     cache.label.setFont(label, cache.label.sf, cache.fc.pref(cache.fc.cls, cache.fc.pf, style));
     setDynamicFont(label, false);
-    tbl->view.setTag(view, tbl->view.stg, tag);
     bt->addTarget(view, bt->atgt, target, action, 64);
     return view;
 }
@@ -226,7 +233,7 @@ id createSegmentedControl(CFBundleRef bundle, CFStringRef format, int startIndex
 }
 
 id createTextfield(VCacheRef tbl, CCacheRef clr, id delegate,
-                   CFStringRef text, CFStringRef hint, int alignment, int keyboard, int tag) {
+                   id acc, CFStringRef text, CFStringRef hint, int tag) {
     FieldCache const *c = &tbl->field;
     id view = Sels.new(cache.field.cls, Sels.nw);
     tbl->view.setBG(view, tbl->view.sbg, clr->getColor(clr->cls, clr->sc, ColorTertiaryBG));
@@ -234,13 +241,11 @@ id createTextfield(VCacheRef tbl, CCacheRef clr, id delegate,
     cache.field.setFont(view, cache.label.sf, cache.fc.pref(cache.fc.cls, cache.fc.pf, UIFontTextStyleBody));
     c->setColor(view, tbl->label.stc, clr->getColor(clr->cls, clr->sc, ColorLabel));
     cache.field.adjFontCat(view, cache.label.sajfc, true);
-    cache.field.setAlign(view, cache.field.salg, alignment);
     tbl->view.setTag(view, tbl->view.stg, tag);
     cache.field.setBorder(view, cache.field.sbs, 3);
-    msg1(void, long, view, cache.field.skbt, keyboard);
     cache.field.setDel(view, c->sdg, delegate);
-    ConstraintCache const *cc = &tbl->cc;
-    cc->activateC(cc->init(cc->cls, cc->cr, view, 8, 1, nil, 0, 1, 44), cc->ac, true);
+    cache.field.setInput(view, cache.field.siac, acc);
+    setHeight(&tbl->cc, view, 44, true, false);
     tbl->view.setAcc(view, tbl->view.sacl, hint);
     CFRelease(hint);
     return view;
@@ -257,11 +262,10 @@ void addVStackToScrollView(VCacheRef tbl, id view, id vStack, id scrollView) {
                       tbl->cc.ac, true);
 }
 
-void setNavButtons(id vc, id *buttons) {
+void setNavButtons(id navItem, id *buttons) {
     static const char *const setters[] = {"setLeftBarButtonItem:", "setRightBarButtonItem:"};
     Class BarItem = objc_getClass("UIBarButtonItem");
     SEL itemInit = sel_getUid("initWithCustomView:");
-    id navItem = msg0(id, vc, sel_getUid("navigationItem"));
     for (int i = 0; i < 2; ++i) {
         id btn = buttons[i];
         if (btn) {
@@ -272,8 +276,8 @@ void setNavButtons(id vc, id *buttons) {
     }
 }
 
-void setVCTitle(id vc, CFStringRef title) {
-    msg1(void, CFStringRef, msg0(id, vc, sel_getUid("navigationItem")), sel_getUid("setTitle:"), title);
+void setVCTitle(id navItem, CFStringRef title) {
+    msg1(void, CFStringRef, navItem, sel_getUid("setTitle:"), title);
     CFRelease(title);
 }
 

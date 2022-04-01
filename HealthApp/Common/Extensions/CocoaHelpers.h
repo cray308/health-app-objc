@@ -68,13 +68,8 @@ enum {
     ColorSecondaryBG,
     ColorSecondaryBGGrouped,
     ColorTertiaryBG,
-    ColorBarModal = ColorLabel
-};
-enum {
-    RectFrame, RectBounds
 };
 
-void getRect(id view, CGRect *result, int type);
 void fillStringArray(CFBundleRef bundle, CFStringRef *arr, CFStringRef format, int count);
 CFArrayRef createSortDescriptors(CFStringRef key, bool ascending);
 

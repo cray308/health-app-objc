@@ -4,7 +4,8 @@
 #include <objc/objc.h>
 
 typedef struct {
-    id planContainer;
+    id planLabel;
+    id planPicker;
     id switchContainer;
     id deleteButton;
     short results[4];

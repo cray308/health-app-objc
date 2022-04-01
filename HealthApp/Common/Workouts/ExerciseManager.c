@@ -34,6 +34,8 @@ static CFStringRef durationSecsFormat;
 static CFStringRef distanceFormat;
 static CFStringRef amrapFormat;
 static CFStringRef circuitProgressFmt;
+static long setLoc;
+static long roundLoc;
 
 static void createRootAndLibDict(struct DictWrapper *data) {
     CFBundleRef bundle = CFBundleGetMainBundle();
@@ -110,7 +112,7 @@ static Workout *buildWorkout(CFDictionaryRef dict, WorkoutParams *params) {
         CFDictionaryRef act = CFArrayGetValueAtIndex(foundActivities, i);
         CFMutableStringRef circuitHeader = CFStringCreateMutable(NULL, 40);
         CFStringRef separator = CFSTR("");
-        CFRange circuitRange = {0, 0};
+        CFRange circuitRange = {roundLoc, 1};
         short circuitReps = customCircuitReps, exerciseSets = customSets;
         unsigned char circuitType;
 
@@ -141,7 +143,6 @@ static Workout *buildWorkout(CFDictionaryRef dict, WorkoutParams *params) {
             CFRelease(header);
         } else if (circuitReps > 1) {
             CFStringRef header = formatStr(roundsFormat, 1, circuitReps);
-            circuitRange = CFStringFind(header, CFSTR("1"), 0);
             CFStringAppend(circuitHeader, separator);
             circuitRange.location += CFStringGetLength(circuitHeader);
             CFStringAppend(circuitHeader, header);
@@ -164,7 +165,6 @@ static Workout *buildWorkout(CFDictionaryRef dict, WorkoutParams *params) {
         for (int j = 0; j < nExercises; ++j) {
             CFDictionaryRef exDict = CFArrayGetValueAtIndex(foundExercises, j);
             CFMutableStringRef exerciseHeader = NULL;
-            CFRange exerciseHeaderRange = {0, 0};
             short rest = 0, exerciseReps = customReps;
             unsigned char exerciseType;
 
@@ -172,19 +172,17 @@ static Workout *buildWorkout(CFDictionaryRef dict, WorkoutParams *params) {
             if (!exerciseReps)
                 CFNumberGetValue(CFDictionaryGetValue(exDict, Keys.reps), kCFNumberShortType, &exerciseReps);
 #if TARGET_OS_SIMULATOR
-            if (workout.type == WorkoutHIC && exerciseType == ExerciseDuration && exerciseReps > 30)
-                exerciseReps = 30;
+            if (exerciseType == ExerciseDuration) exerciseReps = workout.type == WorkoutHIC ? 15 : 120;
 #endif
 
             if (exerciseSets > 1) {
                 CFStringRef numberStr = formatStr(setsFormat, 1, exerciseSets);
-                exerciseHeaderRange = CFStringFind(numberStr, CFSTR("1"), 0);
                 exerciseHeader = CFStringCreateMutableCopy(NULL, 16, numberStr);
                 CFRelease(numberStr);
             }
 
             ExerciseEntry e = {
-                .headerStr = exerciseHeader, .hRange = exerciseHeaderRange, .reps = exerciseReps,
+                .headerStr = exerciseHeader, .hRange = (CFRange){setLoc, 1}, .reps = exerciseReps,
                 .sets = exerciseSets, .type = exerciseType
             };
 
@@ -277,6 +275,14 @@ void initExerciseData(int week, CFBundleRef bundle) {
     amrapFormat = localize(bundle, CFSTR("circuitHeaderAMRAP"));
     circuitProgressFmt = localize(bundle, CFSTR("circuitProgressHint"));
     weekInPlan = week;
+
+    long *locs[] = {&setLoc, &roundLoc};
+    CFStringRef strs[] = {setsFormat, roundsFormat};
+    for (int i = 0; i < 2; ++i) {
+        CFStringRef str = formatStr(strs[i], 1, 5);
+        *(locs[i]) = CFStringFind(str, CFSTR("1"), 0).location;
+        CFRelease(str);
+    }
 
     dispatch_async(dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0), ^{ getHealthData(); });
 }

@@ -10,8 +10,12 @@ typedef struct {
     id stack;
 } ContainerView;
 
-id containerView_init(VCacheRef tbl, CCacheRef clr,
-                      CFStringRef title CF_CONSUMED, ContainerView **ref, int spacing);
+typedef struct {
+    id view;
+    ContainerView *data;
+} CVPair;
+
+id containerView_init(VCacheRef tbl, CCacheRef clr, CFStringRef title CF_CONSUMED, ContainerView **ref);
 void containerView_updateColors(ContainerView *data, VCacheRef tbl, CCacheRef clr);
 
 #endif /* ContainerView_h */

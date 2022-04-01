@@ -213,35 +213,31 @@ void historyVC_viewDidLoad(id self, SEL _cmd) {
     const unsigned char darkMode = getUserInfo()->darkMode;
     HistoryVC *data = (HistoryVC *)((char *)self + VCSize);
     VCacheRef tbl = data->tbl;
-    ConstraintCache const *cc = &tbl->cc;
     id view = msg0(id, self, sel_getUid("view"));
     tbl->view.setBG(view, tbl->view.sbg, data->clr->getColor(data->clr->cls, data->clr->sc, ColorPrimaryBG));
 
-    CFStringRef titles[3];
-    fillStringArray(bundle, titles, CFSTR("chartHeader%d"), 3);
-
     data->charts[0] = createChartView(self, (long []){4}, 1, 1);
-    cc->activateC(cc->init(cc->cls, cc->cr, data->charts[0], 8, 0, nil, 0, 1, 390), cc->ac, true);
     data->charts[1] = createChartView(self, (long []){0, 1, 2, 3}, 4, 6);
-    cc->activateC(cc->init(cc->cls, cc->cr, data->charts[1], 8, 0, nil, 0, 1, 425), cc->ac, true);
     data->charts[2] = createChartView(self, (long []){0, 1, 2, 3}, 4, 0);
-    cc->activateC(cc->init(cc->cls, cc->cr, data->charts[2], 8, 0, nil, 0, 1, 550), cc->ac, true);
-
     data->picker = createSegmentedControl(bundle, CFSTR("historySegment%d"), 0);
     tbl->button.addTarget(data->picker, tbl->button.atgt, self, sel_getUid("buttonTapped:"), 4096);
     if (darkMode < 2)
         updateSegmentedControl(data->clr, data->picker, darkMode);
     msg1(void, id, msg0(id, self, sel_getUid("navigationItem")), sel_getUid("setTitleView:"), data->picker);
 
-    id containers[3];
+    CFStringRef titles[3]; id containers[3]; int heights[] = {390, 425, 550};
     ContainerView *c;
+    fillStringArray(bundle, titles, CFSTR("chartHeader%d"), 3);
     for (int i = 0; i < 3; ++i) {
-        containers[i] = containerView_init(tbl, data->clr, titles[i], &c, 0);
+        containers[i] = containerView_init(tbl, data->clr, titles[i], &c);
+        setHeight(&tbl->cc, data->charts[i], heights[i], false, false);
         tbl->stack.addSub(c->stack, tbl->stack.asv, data->charts[i]);
         tbl->view.hide(c->divider, tbl->view.shd, !i);
     }
 
-    id vStack = createStackView(tbl, containers, 3, 1, 5, (Padding){10, 8, 10, 8});
+    id vStack = createVStack(containers, 3);
+    tbl->stack.setSpace(vStack, tbl->stack.ssp, 4);
+    tbl->stack.setMargins(vStack, tbl->stack.smr, (HAInsets){16, 8, 16, 8});
     id scrollView = createScrollView();
     addVStackToScrollView(tbl, view, vStack, scrollView);
     Sels.viewRel(vStack, Sels.rel);

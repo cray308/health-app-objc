@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include "ExerciseManager.h"
 #include "HomeVC.h"
 #include "InputVC.h"
 #include "SetupWorkoutVC.h"
@@ -17,11 +16,11 @@
 void exerciseManager_setCurrentWeek(int);
 #endif
 extern CGFloat UIFontWeightSemibold;
-void initViewData(VCache *cacheRef, Class *clsRef);
+void initViewData(VCache*, Class*);
 void initNSData(bool modern, ColorCache *cacheRef, Class **clsRefs, size_t **sizeRefs);
-void setupAppColors(unsigned char darkMode, bool deleteOld);
+void setupAppColors(Class Color, unsigned char darkMode, bool deleteOld);
 void toggleDarkModeForCharts(bool);
-void initValidatorStrings(CFBundleRef);
+void initValidatorStrings(CFBundleRef, Class);
 void initExerciseData(int, CFBundleRef);
 void initWorkoutStrings(CFBundleRef);
 void initStatVData(Class);
@@ -40,14 +39,6 @@ CFAttributedStringRef setupWorkoutVC_attrTitleForRow(id, SEL, id, long, long);
 CFStringRef setupWorkoutVC_titleForRow(id, SEL, id, long, long);
 void setupWorkoutVC_didSelectRow(id, SEL, id, long, long);
 void setupWorkoutVC_didSelectRowLegacy(id, SEL, id, long, long);
-id colorCreateLegacy(id self, SEL _cmd, int type);
-id colorCreate(id self, SEL _cmd, int type);
-id barColorCreateLegacy(id self, SEL _cmd, int type);
-id barColorCreate(id self, SEL _cmd, int type);
-
-enum {
-    WorkoutPlanBaseBuilding, WorkoutPlanContinuation
-};
 
 enum {
     IWeekStart, IPlanStart, ITzOffset, ICurrentPlan, ICompletedWorkouts, IDarkMode, ILiftArray
@@ -349,12 +340,12 @@ static void runStartupDataJob(id *cRef, void *model, FetchHandler handler, time_
 
 static int getStatusBarStyle(id self _U_, SEL _cmd _U_) { return barStyle; }
 
-static void setupBarGeneric(id bar, Class appearanceClass, id color) {
+static void setupBarGeneric(id bar, Class appearanceClass, id color, SEL sbgc) {
     if (appearanceClass) {
         SEL scrollEdge = sel_getUid("setScrollEdgeAppearance:");
         id appearance = Sels.new(appearanceClass, Sels.nw);
         msg0(void, appearance, sel_getUid("configureWithOpaqueBackground"));
-        msg1(void, id, appearance, sel_getUid("setBackgroundColor:"), color);
+        msg1(void, id, appearance, sbgc, color);
         msg1(void, id, bar, sel_getUid("setStandardAppearance:"), appearance);
         if (msg1(bool, SEL, bar, sel_getUid("respondsToSelector:"), scrollEdge))
             msg1(void, id, bar, scrollEdge, appearance);
@@ -373,7 +364,7 @@ static void setupTabVC(AppDelegate *self, id vc, Class TabAppear) {
     id tabBar = msg0(id, vc, sel_getUid("tabBar"));
     id barColor = clsF1(id, int, self->clr.cls, sel_getUid("getBarColorWithType:"), 0);
     SEL nb = sel_getUid("navigationBar");
-    setupBarGeneric(tabBar, TabAppear, barColor);
+    setupBarGeneric(tabBar, TabAppear, barColor, self->tbl.view.sbg);
     if (!TabAppear)
         msg1(void, id, tabBar, sel_getUid("setUnselectedItemTintColor:"),
              self->clr.getColor(self->clr.cls, self->clr.sc, ColorGray));
@@ -381,7 +372,7 @@ static void setupTabVC(AppDelegate *self, id vc, Class TabAppear) {
     for (int i = 0; i < 3; ++i) {
         id navVC = (id)CFArrayGetValueAtIndex(ctrls, i);
         id navBar = msg0(id, navVC, nb);
-        setupBarGeneric(navBar, NavAppear, barColor);
+        setupBarGeneric(navBar, NavAppear, barColor, self->tbl.view.sbg);
         if (!TabAppear) {
             msg1(void, CFDictionaryRef, navBar, sel_getUid("setTitleTextAttributes:"), dict);
             msg0(void, navVC, sel_getUid("setNeedsStatusBarAppearanceUpdate"));
@@ -390,18 +381,21 @@ static void setupTabVC(AppDelegate *self, id vc, Class TabAppear) {
     CFRelease(dict);
 }
 
-void presentVC(id child) {
-    id window = getAppDel()->window;
+static void present(id window, id child) {
     msg1(void, id, window, sel_getUid("setTintColor:"), nil);
     msg3(void, id, bool, id, msg0(id, window, sel_getUid("rootViewController")),
          sel_getUid("presentViewController:animated:completion:"), child, true, nil);
 }
 
+void presentVC(id child) { present(getAppDel()->window, child); }
+
 void presentModalVC(id modal) {
+    AppDelegate *self = getAppDel();
     id nav = msg1(id, id, Sels.alloc(DMNavVC, Sels.alo), sel_getUid("initWithRootViewController:"), modal);
-    setupBarGeneric(msg0(id, nav, sel_getUid("navigationBar")), objc_getClass("UINavigationBarAppearance"),
-                    clsF1(id, int, objc_getClass("UIColor"), sel_getUid("getBarColorWithType:"), 1));
-    presentVC(nav);
+    id color = clsF1(id, int, self->clr.cls, sel_getUid("getBarColorWithType:"), 1);
+    setupBarGeneric(msg0(id, nav, sel_getUid("navigationBar")),
+                    objc_getClass("UINavigationBarAppearance"), color, self->tbl.view.sbg);
+    present(self->window, nav);
     Sels.vcRel(nav, Sels.rel);
     Sels.vcRel(modal, Sels.rel);
 }
@@ -426,8 +420,8 @@ id createAlertController(CFStringRef title, CFStringRef message) {
     return ctrl;
 }
 
-static id alertCtrlCreate(id self _U_, SEL _cmd _U_, CFStringRef title, CFStringRef message) {
-    return clsF3(id, CFStringRef, CFStringRef, long, objc_getClass("UIAlertController"),
+static id alertCtrlCreate(id self, SEL _cmd _U_, CFStringRef title, CFStringRef message) {
+    return clsF3(id, CFStringRef, CFStringRef, long, (Class)self,
                  sel_getUid("alertControllerWithTitle:message:preferredStyle:"), title, message, 1);
 }
 
@@ -512,7 +506,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id applicat
     objc_registerClassPair(DMNavVC);
     Class TabAppear = objc_getClass("UITabBarAppearance");
     initNSData(TabAppear, &self->clr, (Class*[]){&View, &VC}, (size_t*[]){&ViewSize, &VCSize});
-    Class btnRef; initViewData(&self->tbl, &btnRef);
+    Class clsRefs[2]; initViewData(&self->tbl, clsRefs);
     UIApplication = objc_getClass("UIApplication");
     sharedApplication = sel_getUid("sharedApplication");
     delegate = sel_getUid("delegate");
@@ -565,8 +559,8 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id applicat
             completed = 0;
 
             if (!(plan & 128) && week >= planLengths[plan]) {
-                if (plan == WorkoutPlanBaseBuilding) {
-                    plan = WorkoutPlanContinuation;
+                if (!plan) {
+                    plan = 1;
                     changes |= 8;
                 }
                 planStart = weekStart;
@@ -629,25 +623,22 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id applicat
     }
 
     CFBundleRef bundle = CFBundleGetMainBundle();
-    initStatVData(btnRef);
-    initValidatorStrings(bundle);
+    initStatVData(clsRefs[0]);
+    initValidatorStrings(bundle, clsRefs[1]);
     initExerciseData(week, bundle);
     initWorkoutStrings(bundle);
 
-    IMP imps[4];
-    if (TabAppear) {
-        imps[0] = (IMP)setupWorkoutVC_numberOfComponents;
-        imps[1] = (IMP)setupWorkoutVC_didSelectRow;
-        imps[2] = (IMP)setupWorkoutVC_titleForRow;
-        imps[3] = (IMP)alertCtrlCreate;
-    } else {
+    IMP imps[] = {(IMP)setupWorkoutVC_numberOfComponents, (IMP)setupWorkoutVC_didSelectRow,
+        (IMP)setupWorkoutVC_titleForRow, (IMP)alertCtrlCreate
+    };
+    if (!TabAppear) {
         barStyle = dm ? 2 : 0;
         class_addMethod(DMNavVC, sel_getUid("preferredStatusBarStyle"), (IMP)getStatusBarStyle, "i@:");
         imps[0] = (IMP)setupWorkoutVC_numberOfComponentsLegacy;
         imps[1] = (IMP)setupWorkoutVC_didSelectRowLegacy;
         imps[2] = (IMP)setupWorkoutVC_attrTitleForRow;
         imps[3] = (IMP)alertCtrlCreateLegacy;
-        setupAppColors(dm, false);
+        setupAppColors(self->clr.cls, dm, false);
         toggleDarkModeForCharts(dm);
     }
     class_addMethod(SetupWorkoutVCClass, sel_getUid("numberOfComponentsInPickerView:"), imps[0], "q@:@");
@@ -754,7 +745,7 @@ void updateUserInfo(unsigned char plan, unsigned char darkMode, short *weights) 
 
     if (changes & 2) {
         barStyle = darkMode ? 2 : 0;
-        setupAppColors(darkMode, true);
+        setupAppColors(self->clr.cls, darkMode, true);
         msg1(void, id, self->window, sel_getUid("setTintColor:"),
              self->clr.getColor(self->clr.cls, self->clr.sc, ColorRed));
         setupTabVC(self, msg0(id, self->window, sel_getUid("rootViewController")),

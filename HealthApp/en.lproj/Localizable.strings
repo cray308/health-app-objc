@@ -30,9 +30,8 @@
 "start" = "Start";
 "end" = "End";
 "done" = "Done";
-"next" = "Next";
 
-"homeHeader0" = "Workouts this week";
+"homeHeader0" = "Workouts This Week";
 "homeHeader1" = "Add Custom Workout";
 "homeTestMax" = "Test Max";
 "homeAlertTitle" = "Nicely done!";
@@ -41,9 +40,9 @@
 "historySegment0" = "6 Months";
 "historySegment1" = "1 Year";
 "historySegment2" = "2 Years";
-"chartHeader1" = "Activity Time Each Week (By Type)";
+"chartHeader0" = "Total Workouts";
+"chartHeader1" = "Activity Time By Type";
 "chartHeader2" = "Lift Progress";
-"chartHeader0" = "Workouts Each Week";
 "totalWorkoutsLegend" = "Avg Workouts (%.2f)";
 "workoutTypeLegend" = "%@ (Avg: %s)";
 "liftLegend" = "%@ (Avg: %.1f)";
@@ -61,12 +60,14 @@
 "alertMsgSave" = "This will save the currently entered data.";
 "alertMsgDelete" = "This will delete all workout history.";
 
-"setupWorkoutTitle" = "Choose workout";
+"setupWorkoutTitle" = "Set up Workout";
+"setupWorkoutPickerTitle" = "Choose workout";
 "setupWorkoutSets" = "Sets";
 "setupWorkoutReps" = "Reps";
 "setupWorkoutMaxWeight" = "Max Weight Percentage";
-"setupWorkoutDuration" = "Duration (minutes)";
+"setupWorkoutDuration" = "Duration in minutes";
 
+"updateMaxesTitle" = "Set Weight & Reps";
 "stepperLabelInit" = "Reps: 1";
 "stepperLabelDescr" = "Change the number of reps completed";
 "exerciseHeader" = "Set %d of %d";

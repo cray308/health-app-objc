@@ -32,6 +32,7 @@ void inputVC_deinit(id, SEL);
 void inputVC_viewDidLoad(id, SEL);
 void inputVC_viewDidAppear(id, SEL, bool);
 void inputVC_dismissKeyboard(id, SEL);
+void inputVC_jumpToPrev(id, SEL);
 void inputVC_jumpToNext(id, SEL);
 void inputVC_fieldBeganEditing(id, SEL, id);
 void inputVC_fieldStoppedEditing(id, SEL, id);
@@ -96,12 +97,13 @@ int main(int argc, char *argv[]) {
 
     InputVCClass = objc_allocateClassPair(VC, "InputVC", 0);
     class_addProtocol(InputVCClass, objc_getProtocol("UITextFieldDelegate"));
-    class_addIvar(InputVCClass, "validatorData", sizeof(InputVC), 0, "{?=@@[4@]@@@@@iissB}");
+    class_addIvar(InputVCClass, "validatorData", sizeof(InputVC), 0, "{?=@@[4{?=@@}]@@@@@iissB}");
     class_addMethod(InputVCClass, sel_registerName("initWithVCache:cCache:"), (IMP)inputVC_init, "@@:@@");
     class_addMethod(InputVCClass, deinit, (IMP)inputVC_deinit, voidSig);
     class_addMethod(InputVCClass, viewLoad, (IMP)inputVC_viewDidLoad, voidSig);
     class_addMethod(InputVCClass, sel_getUid("viewDidAppear:"), (IMP)inputVC_viewDidAppear, appearSig);
     class_addMethod(InputVCClass, sel_registerName("dismissKeyboard"), (IMP)inputVC_dismissKeyboard, voidSig);
+    class_addMethod(InputVCClass, sel_registerName("jumpToPrev"), (IMP)inputVC_jumpToPrev, voidSig);
     class_addMethod(InputVCClass, sel_registerName("jumpToNext"), (IMP)inputVC_jumpToNext, voidSig);
     class_addMethod(InputVCClass, sel_getUid("textFieldDidBeginEditing:"),
                     (IMP)inputVC_fieldBeganEditing, tapSig);
@@ -112,7 +114,7 @@ int main(int argc, char *argv[]) {
     objc_registerClassPair(InputVCClass);
 
     SettingsVCClass = objc_allocateClassPair(InputVCClass, "SettingsVC", 0);
-    class_addIvar(SettingsVCClass, dataKey, sizeof(SettingsVC), 0, "{?=@@@[4s]}");
+    class_addIvar(SettingsVCClass, dataKey, sizeof(SettingsVC), 0, "{?=@@@@[4s]}");
     class_addMethod(SettingsVCClass, viewLoad, (IMP)settingsVC_viewDidLoad, voidSig);
     class_addMethod(SettingsVCClass, btnTap, (IMP)settingsVC_buttonTapped, tapSig);
     objc_registerClassPair(SettingsVCClass);
@@ -137,7 +139,7 @@ int main(int argc, char *argv[]) {
     objc_registerClassPair(UpdateMaxesVCClass);
 
     HomeVCClass = objc_allocateClassPair(VC, "HomeVC", 0);
-    class_addIvar(HomeVCClass, dataKey, sizeof(HomeVC), 0, "{?=@@@@i}");
+    class_addIvar(HomeVCClass, dataKey, sizeof(HomeVC), 0, "{?=@@{?=@@}@i}");
     class_addMethod(HomeVCClass, viewLoad, (IMP)homeVC_viewDidLoad, voidSig);
     class_addMethod(HomeVCClass, btnTap, (IMP)homeVC_workoutButtonTapped, tapSig);
     class_addMethod(HomeVCClass, sel_registerName("customButtonTapped:"),
@@ -173,7 +175,7 @@ int main(int argc, char *argv[]) {
     class_addIvar(AppDelegateClass, "children", 3 * sizeof(id), 0, "[3@]");
     class_addIvar(AppDelegateClass, "clr", sizeof(ColorCache), 0, "{?=#:?}");
     class_addIvar(AppDelegateClass, "tbl", sizeof(VCache), 0,
-                  "{?={?=#::::????}{?=::::::::::::???????????}{?=:::???}{?=:::???}{?=::::????}{?=::???}}");
+                  "{?={?=#::::????}{?=::::::::::::???????????}{?=:::::?????}{?=::::????}{?=::::????}{?=:??}}");
     class_addIvar(AppDelegateClass, "userData", sizeof(UserInfo), 0, "{?=qq[4s]CCC}");
     class_addMethod(AppDelegateClass, sel_getUid("application:didFinishLaunchingWithOptions:"),
                     (IMP)appDelegate_didFinishLaunching, appSig);

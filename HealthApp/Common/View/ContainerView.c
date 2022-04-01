@@ -4,40 +4,23 @@
 Class ContainerViewClass;
 extern uint64_t UIAccessibilityTraitHeader;
 
-id containerView_init(VCacheRef tbl, CCacheRef clr, CFStringRef title, ContainerView **ref, int spacing) {
+id containerView_init(VCacheRef tbl, CCacheRef clr, CFStringRef title, ContainerView **ref) {
     id self = Sels.new(ContainerViewClass, Sels.nw);
     ContainerView *data = (ContainerView *)((char *)self + ViewSize);
-    ConstraintCache const *cc = &tbl->cc;
     data->divider = Sels.new(View, Sels.nw);
-    data->headerLabel = createLabel(tbl, clr, title, UIFontTextStyleTitle3, 0);
+    tbl->view.setBG(data->divider, tbl->view.sbg, clr->getColor(clr->cls, clr->sc, ColorSeparator));
+    setHeight(&tbl->cc, data->divider, 1, false, true);
+    data->headerLabel = createLabel(tbl, clr, title, UIFontTextStyleTitle3, ColorLabel);
+    tbl->label.setLines(data->headerLabel, tbl->label.snl, 0);
     tbl->view.setTraits(data->headerLabel, tbl->view.satrs, UIAccessibilityTraitHeader);
-    data->stack = createStackView(tbl, NULL, 0, 1, spacing, (Padding){.top = 5});
+    data->stack = createVStack(NULL, 0);
+    tbl->stack.setMargins(data->stack, tbl->stack.smr, (HAInsets){.top = 4});
 
-    id containerHeight = cc->init(cc->cls, cc->cr, data->divider, 8, 0, nil, 0, 1, 21);
-    cc->lowerPri(containerHeight, cc->lp, 999);
-    cc->activateC(containerHeight, cc->ac, true);
-    id divLine = Sels.new(View, Sels.nw);
-    msg1(void, bool, divLine, tbl->view.trans, false);
-    tbl->view.setBG(divLine, tbl->view.sbg, clr->getColor(clr->cls, clr->sc, ColorSeparator));
-    id lineHeight = cc->init(cc->cls, cc->cr, divLine, 8, 0, nil, 0, 1, 1);
-    cc->lowerPri(lineHeight, cc->lp, 999);
-    cc->activateC(lineHeight, cc->ac, true);
-    tbl->view.addSub(data->divider, tbl->view.asv, divLine);
-    const void *constraints[] = {
-        cc->init(cc->cls, cc->cr, divLine, 3, 0, data->divider, 3, 1, 0),
-        cc->init(cc->cls, cc->cr, divLine, 5, 0, data->divider, 5, 1, 0),
-        cc->init(cc->cls, cc->cr, divLine, 6, 0, data->divider, 6, 1, 0)
-    };
-    CFArrayRef divArray = CFArrayCreate(NULL, constraints, 3, NULL);
-    cc->activateArr(cc->cls, cc->aar, divArray);
-    CFRelease(divArray);
-    Sels.viewRel(divLine, Sels.rel);
-
-    id vStack = createStackView(tbl, (id []){data->divider, data->headerLabel, data->stack},
-                                3, 1, 0, (Padding){0});
+    id vStack = createVStack((id []){data->divider, data->headerLabel, data->stack}, 3);
     msg1(void, bool, vStack, tbl->view.trans, false);
+    tbl->stack.setSpaceAfter(vStack, tbl->stack.scsp, 20, data->divider);
     tbl->view.addSub(self, tbl->view.asv, vStack);
-    pin(cc, vStack, self);
+    pin(&tbl->cc, vStack, self);
     Sels.viewRel(vStack, Sels.rel);
     *ref = data;
     return self;
@@ -53,6 +36,5 @@ void containerView_deinit(id self, SEL _cmd) {
 
 void containerView_updateColors(ContainerView *data, VCacheRef tbl, CCacheRef clr) {
     tbl->label.setColor(data->headerLabel, tbl->label.stc, clr->getColor(clr->cls, clr->sc, ColorLabel));
-    id divLine = (id)CFArrayGetValueAtIndex(msg0(CFArrayRef, data->divider, sel_getUid("subviews")), 0);
-    tbl->view.setBG(divLine, tbl->view.sbg, clr->getColor(clr->cls, clr->sc, ColorSeparator));
+    tbl->view.setBG(data->divider, tbl->view.sbg, clr->getColor(clr->cls, clr->sc, ColorSeparator));
 }

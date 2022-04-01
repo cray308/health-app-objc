@@ -41,14 +41,14 @@ static id stepperViewInit(CFBundleRef bundle, StepperView **ref, VCacheRef tbl, 
     data->range = CFStringFind(repsStr, CFSTR("1"), 0);
     data->repsStr = CFStringCreateMutableCopy(NULL, CFStringGetLength(repsStr) + 2, repsStr);
     msg1(void, CFStringRef, self, sel_getUid("setAccessibilityValue:"), repsStr);
-    tbl->cc.activateC(tbl->cc.init(tbl->cc.cls, tbl->cc.cr, self, 8, 1, nil, 0, 1, 44), tbl->cc.ac, true);
-    data->label = createLabel(tbl, clr, repsStr, UIFontTextStyleBody, 1);
+    setHeight(&tbl->cc, self, 44, true, false);
+    data->label = createLabel(tbl, clr, repsStr, UIFontTextStyleBody, ColorLabel);
     data->stepper = Sels.new(objc_getClass("UIStepper"), Sels.nw);
     msg1(void, double, data->stepper, sel_getUid("setValue:"), 1);
     msg1(void, double, data->stepper, sel_getUid("setMinimumValue:"), 1);
     msg1(void, double, data->stepper, sel_getUid("setMaximumValue:"), 10);
     tbl->button.addTarget(data->stepper, tbl->button.atgt, self, sel_getUid("stepperChanged"), 4096);
-    id stack = createStackView(tbl, (id []){data->label, data->stepper}, 2, 0, 8, (Padding){20, 8, 0, 8});
+    id stack = createHStack(tbl, (id []){data->label, data->stepper});
     msg1(void, bool, stack, tbl->view.trans, false);
     tbl->view.addSub(self, tbl->view.asv, stack);
     pin(&tbl->cc, stack, self);
@@ -71,10 +71,12 @@ void updateMaxesVC_viewDidLoad(id self, SEL _cmd) {
     InputVC *sup = (InputVC *)((char *)self + VCSize);
     VCacheRef tbl = sup->tbl;
     UpdateMaxesVC *data = (UpdateMaxesVC *)((char *)sup + sizeof(InputVC));
-    id view = msg0(id, self, sel_getUid("view"));
-    tbl->view.setBG(view, tbl->view.sbg, sup->clr->getColor(sup->clr->cls, sup->clr->sc, ColorSecondaryBG));
+    id navItem = msg0(id, self, sel_getUid("navigationItem"));
+    tbl->view.setBG(msg0(id, self, sel_getUid("view")), tbl->view.sbg,
+                    sup->clr->getColor(sup->clr->cls, sup->clr->sc, ColorSecondaryBG));
+    setVCTitle(navItem, localize(bundle, CFSTR("updateMaxesTitle")));
 
-    tbl->stack.setMargins(sup->vStack, tbl->stack.smr, (HAInsets){.top = 20});
+    tbl->stack.setSpace(sup->vStack, tbl->stack.ssp, 20);
     CFStringRef liftKey = formatStr(CFSTR("liftTypes%d"), data->index);
     CFStringRef liftVal = localize(bundle, liftKey);
     CFRelease(liftKey);
@@ -87,8 +89,8 @@ void updateMaxesVC_viewDidLoad(id self, SEL _cmd) {
     tbl->stack.addSub(sup->vStack, tbl->stack.asv, stepperView);
 
     sup->button = createButton(tbl, sup->clr, localize(bundle, CFSTR("finish")),
-                               ColorBlue, UIFontTextStyleBody, 0, self, sel_getUid("tappedFinish"));
-    setNavButtons(self, (id []){nil, sup->button});
+                               ColorBlue, UIFontTextStyleBody, self, sel_getUid("tappedFinish"));
+    setNavButtons(navItem, (id []){nil, sup->button});
     tbl->button.setEnabled(sup->button, tbl->button.en, false);
     if (objc_getClass("UINavigationBarAppearance"))
         msg1(void, bool, self, sel_getUid("setModalInPresentation:"), true);
@@ -129,7 +131,7 @@ void updateMaxesVC_tappedFinish(id self, SEL _cmd _U_) {
     InputVC *sup = (InputVC *)((char *)self + VCSize);
     UpdateMaxesVC *data = (UpdateMaxesVC *)((char *)sup + sizeof(InputVC));
     short extra = data->index == LiftPullup ? data->bodyweight : 0;
-    int initWeight = (sup->children[0]->result + extra) * 36;
+    int initWeight = (sup->children[0].data->result + extra) * 36;
     float reps = 37.f - (float)msg0(double, data->stack->stepper, sel_getUid("value"));
     short weight = (short)((initWeight / reps) + 0.5f) - extra;
     void *parent = data->parent;

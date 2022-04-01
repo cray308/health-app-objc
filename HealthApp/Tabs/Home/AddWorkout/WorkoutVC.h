@@ -29,7 +29,7 @@ typedef struct {
     pthread_t threads[2];
     Workout *workout;
     ContainerView *first;
-    id *containers;
+    CVPair *containers;
     struct {
         int groupTag;
         struct {

@@ -16,22 +16,26 @@ id setupWorkoutVC_init(id parent, unsigned char type, VCacheRef tbl, CCacheRef c
     SetupWorkoutVC *data = (SetupWorkoutVC *)((char *)self + VCSize + sizeof(InputVC));
     data->parent = parent;
     data->names = createWorkoutNames(type);
-    id font = clsF1(id, CFStringRef, objc_getClass("UIFont"),
-                    sel_getUid("preferredFontForTextStyle:"), UIFontTextStyleTitle3);
-    const void *keys[] = {NSForegroundColorAttributeName, NSFontAttributeName};
-    const void *normalVals[] = {clr->getColor(clr->cls, clr->sc, ColorSecondaryLabel), font};
-    const void *selectedVals[] = {clr->getColor(clr->cls, clr->sc, ColorLabel), font};
-    data->normalDict = createDict(keys, normalVals, 2, &kCFTypeDictionaryValueCallBacks);
-    data->selectedDict = createDict(keys, selectedVals, 2, &kCFTypeDictionaryValueCallBacks);
     data->type = type;
+    if (!objc_getClass("UITabBarAppearance")) {
+        id font = clsF1(id, CFStringRef, objc_getClass("UIFont"),
+                        sel_getUid("preferredFontForTextStyle:"), UIFontTextStyleTitle3);
+        const void *keys[] = {NSForegroundColorAttributeName, NSFontAttributeName};
+        const void *normalVals[] = {clr->getColor(clr->cls, clr->sc, ColorSecondaryLabel), font};
+        const void *selectedVals[] = {clr->getColor(clr->cls, clr->sc, ColorLabel), font};
+        data->normalDict = createDict(keys, normalVals, 2, &kCFTypeDictionaryValueCallBacks);
+        data->selectedDict = createDict(keys, selectedVals, 2, &kCFTypeDictionaryValueCallBacks);
+    }
     return self;
 }
 
 void setupWorkoutVC_deinit(id self, SEL _cmd) {
     SetupWorkoutVC *data = (SetupWorkoutVC *)((char *)self + VCSize + sizeof(InputVC));
     CFRelease(data->names);
-    CFRelease(data->normalDict);
-    CFRelease(data->selectedDict);
+    if (data->normalDict) {
+        CFRelease(data->normalDict);
+        CFRelease(data->selectedDict);
+    }
     Sels.viewRel(data->workoutTextField, Sels.rel);
     msgSup0(void, (&(struct objc_super){self, InputVCClass}), _cmd);
 }
@@ -43,31 +47,36 @@ void setupWorkoutVC_viewDidLoad(id self, SEL _cmd) {
     InputVC *sup = (InputVC *)((char *)self + VCSize);
     VCacheRef tbl = sup->tbl;
     SetupWorkoutVC *data = (SetupWorkoutVC *)((char *)sup + sizeof(InputVC));
-    id view = msg0(id, self, sel_getUid("view"));
-    tbl->view.setBG(view, tbl->view.sbg, sup->clr->getColor(sup->clr->cls, sup->clr->sc, ColorSecondaryBG));
+    tbl->view.setBG(msg0(id, self, sel_getUid("view")), tbl->view.sbg,
+                    sup->clr->getColor(sup->clr->cls, sup->clr->sc, ColorSecondaryBG));
+    id navItem = msg0(id, self, sel_getUid("navigationItem"));
+    setVCTitle(navItem, localize(bundle, CFSTR("setupWorkoutTitle")));
 
-    CFStringRef pickerTitle = localize(bundle, CFSTR("setupWorkoutTitle"));
-    id workoutLabel = createLabel(tbl, sup->clr, CFRetain(pickerTitle), UIFontTextStyleFootnote, 0);
+    CFStringRef pickerTitle = localize(bundle, CFSTR("setupWorkoutPickerTitle"));
+    id workoutLabel = createLabel(tbl, sup->clr, CFRetain(pickerTitle), UIFontTextStyleFootnote, ColorLabel);
+    tbl->label.setLines(workoutLabel, tbl->label.snl, 0);
     tbl->view.setIsAcc(workoutLabel, tbl->view.sace, false);
+    tbl->stack.addSub(sup->vStack, tbl->stack.asv, workoutLabel);
+    tbl->stack.setSpaceAfter(sup->vStack, tbl->stack.scsp, 4, workoutLabel);
+
     data->workoutTextField = createTextfield(
-      tbl, sup->clr, nil, CFArrayGetValueAtIndex(data->names, 0), pickerTitle, 1, 0, 0);
-    id workoutContainer = createStackView(tbl, (id []){workoutLabel, data->workoutTextField},
-                                          2, 1, 2, (Padding){30, 8, 20, 8});
+      tbl, sup->clr, self, sup->toolbar, CFArrayGetValueAtIndex(data->names, 0), pickerTitle, -1);
+    msg1(void, long, data->workoutTextField, sel_getUid("setTextAlignment:"), 1);
+    tbl->stack.addSub(sup->vStack, tbl->stack.asv, data->workoutTextField);
+    tbl->stack.setSpaceAfter(sup->vStack, tbl->stack.scsp, 20, data->workoutTextField);
 
     id workoutPicker = Sels.new(objc_getClass("UIPickerView"), Sels.nw);
     msg1(void, id, workoutPicker, tbl->field.sdg, self);
     msg1(void, id, data->workoutTextField, sel_getUid("setInputView:"), workoutPicker);
-    tbl->field.setInput(data->workoutTextField, tbl->field.siac, sup->toolbar);
-
-    tbl->stack.addSub(sup->vStack, tbl->stack.asv, workoutContainer);
 
     SEL tapSel = sel_getUid("buttonTapped:");
     id cancelButton = createButton(tbl, sup->clr, localize(bundle, CFSTR("cancel")),
-                                   ColorBlue, UIFontTextStyleBody, 0, self, tapSel);
+                                   ColorBlue, UIFontTextStyleBody, self, tapSel);
     sup->button = createButton(tbl, sup->clr, localize(bundle, CFSTR("go")),
-                               ColorBlue, UIFontTextStyleBody, 1, self, tapSel);
+                               ColorBlue, UIFontTextStyleBody, self, tapSel);
+    tbl->view.setTag(sup->button, tbl->view.stg, 1);
 
-    setNavButtons(self, (id []){cancelButton, sup->button});
+    setNavButtons(navItem, (id []){cancelButton, sup->button});
     tbl->button.setEnabled(sup->button, tbl->button.en, false);
 
     short maxes[] = {5, 5, 100}, mins[] = {1, 1, 1};
@@ -95,7 +104,6 @@ void setupWorkoutVC_viewDidLoad(id self, SEL _cmd) {
     }
 
     Sels.viewRel(workoutLabel, Sels.rel);
-    Sels.viewRel(workoutContainer, Sels.rel);
     Sels.viewRel(workoutPicker, Sels.rel);
 }
 
@@ -110,14 +118,14 @@ void setupWorkoutVC_tappedButton(id self, SEL _cmd _U_, id btn) {
     short weight = 0, sets = 0, reps = 0;
     switch (data->type) {
         case WorkoutStrength:
-            weight = sup->children[2]->result;
+            weight = sup->children[2].data->result;
         case WorkoutSE:
-            sets = sup->children[0]->result;
-            reps = sup->children[1]->result;
+            sets = sup->children[0].data->result;
+            reps = sup->children[1].data->result;
             break;
 
         case WorkoutEndurance:
-            reps = sup->children[0]->result;
+            reps = sup->children[0].data->result;
         default:
             break;
     }

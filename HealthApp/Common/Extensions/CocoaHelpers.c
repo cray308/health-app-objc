@@ -13,23 +13,21 @@ static void cocoaArrRelease(CFAllocatorRef allocator _U_, const void *value) {
 const CFArrayCallBacks retainedArrCallbacks = {0, cocoaArrRetain, cocoaArrRelease, NULL, NULL};
 struct SelCache Sels;
 
-static Class Color;
 static id appColors[13];
 static id barColors[2];
 static SEL scArr[13];
 static id (*modernImps[13])(Class,SEL);
 static id (*modernBarImp)(Class,SEL,CFStringRef);
 static SEL sbcInt;
-static SEL rectSels[2];
 
 id colorCreateLegacy(id self _U_, SEL _cmd _U_, int type) { return appColors[type]; }
 id barColorCreateLegacy(id self _U_, SEL _cmd _U_, int type) { return barColors[type]; }
 
-id colorCreate(id self _U_, SEL _cmd _U_, int type) { return modernImps[type](Color, scArr[type]); }
+id colorCreate(id self, SEL _cmd _U_, int type) { return modernImps[type]((Class)self, scArr[type]); }
 
-id barColorCreate(id self _U_, SEL _cmd _U_, int type) {
+id barColorCreate(id self, SEL _cmd _U_, int type) {
     static CFStringRef const names[] = {CFSTR("navBarColor"), CFSTR("modalColor")};
-    return modernBarImp(Color, sbcInt, names[type]);
+    return modernBarImp((Class)self, sbcInt, names[type]);
 }
 
 void initNSData(bool modern, ColorCache *cacheRef, Class **clsRefs, size_t **sizeRefs) {
@@ -43,26 +41,25 @@ void initNSData(bool modern, ColorCache *cacheRef, Class **clsRefs, size_t **siz
     *clsRefs[0] = View; *clsRefs[1] = VC;
     *sizeRefs[0] = class_getInstanceSize(View); *sizeRefs[1] = class_getInstanceSize(VC);
 
-    Color = objc_getClass("UIColor"); Class colorMeta = objc_getMetaClass("UIColor");
-    SEL sc = sel_registerName("getColorWithType:"), sbc = sel_registerName("getBarColorWithType:");
-    IMP colorImp, barImp;
+    Class Color = objc_getClass("UIColor"), colorMeta = objc_getMetaClass("UIColor");
+    SEL sc = sel_registerName("getColorWithType:");
+    IMP colorImp = (IMP)colorCreate, barImp = (IMP)barColorCreate;
+    sbcInt = sel_getUid("colorNamed:");
+    scArr[0] = sel_getUid("separatorColor");
+    scArr[1] = sel_getUid("labelColor");
+    scArr[2] = sel_getUid("secondaryLabelColor");
+    scArr[3] = sel_getUid("systemGrayColor");
+    scArr[4] = sel_getUid("systemRedColor");
+    scArr[5] = sel_getUid("systemBlueColor");
+    scArr[6] = sel_getUid("systemGreenColor");
+    scArr[7] = sel_getUid("systemOrangeColor");
+    scArr[8] = sel_getUid("systemBackgroundColor");
+    scArr[9] = sel_getUid("systemGroupedBackgroundColor");
+    scArr[10] = sel_getUid("secondarySystemBackgroundColor");
+    scArr[11] = sel_getUid("secondarySystemGroupedBackgroundColor");
+    scArr[12] = sel_getUid("tertiarySystemBackgroundColor");
     if (modern) {
-        colorImp = (IMP)colorCreate; barImp = (IMP)barColorCreate;
-        sbcInt = sel_getUid("colorNamed:");
         modernBarImp = (id(*)(Class,SEL,CFStringRef))getImpC(Color, sbcInt);
-        scArr[0] = sel_getUid("separatorColor");
-        scArr[1] = sel_getUid("labelColor");
-        scArr[2] = sel_getUid("secondaryLabelColor");
-        scArr[3] = sel_getUid("systemGrayColor");
-        scArr[4] = sel_getUid("systemRedColor");
-        scArr[5] = sel_getUid("systemBlueColor");
-        scArr[6] = sel_getUid("systemGreenColor");
-        scArr[7] = sel_getUid("systemOrangeColor");
-        scArr[8] = sel_getUid("systemBackgroundColor");
-        scArr[9] = sel_getUid("systemGroupedBackgroundColor");
-        scArr[10] = sel_getUid("secondarySystemBackgroundColor");
-        scArr[11] = sel_getUid("secondarySystemGroupedBackgroundColor");
-        scArr[12] = sel_getUid("tertiarySystemBackgroundColor");
         for (int i = 0; i < 13; ++i) {
             modernImps[i] = (id(*)(Class,SEL))getImpC(Color, scArr[i]);
         }
@@ -70,12 +67,11 @@ void initNSData(bool modern, ColorCache *cacheRef, Class **clsRefs, size_t **siz
         colorImp = (IMP)colorCreateLegacy; barImp = (IMP)barColorCreateLegacy;
     }
     class_addMethod(colorMeta, sc, colorImp, "@@:i");
-    class_addMethod(colorMeta, sbc, barImp, "@@:i");
+    class_addMethod(colorMeta, sel_registerName("getBarColorWithType:"), barImp, "@@:i");
     memcpy(cacheRef, &(ColorCache){Color, sc, (id(*)(Class,SEL,int))getImpC(Color, sc)}, sizeof(ColorCache));
-    rectSels[0] = sel_getUid("frame"); rectSels[1] = sel_getUid("bounds");
 }
 
-void setupAppColors(unsigned char darkMode, bool deleteOld) {
+void setupAppColors(Class Color, unsigned char darkMode, bool deleteOld) {
     if (deleteOld) {
         for (int i = 0; i < 13; ++i) {
             Sels.objRel(appColors[i], Sels.rel);
@@ -128,14 +124,6 @@ void setupAppColors(unsigned char darkMode, bool deleteOld) {
         appColors[ColorSecondaryBGGrouped] = msg0(id, secondary, retain);
         appColors[ColorTertiaryBG] = init(Sels.alloc(Color, Sels.alo), sel, 0.17f, 0.17f, 0.18f, 1);
     }
-}
-
-void getRect(id view, CGRect *result, int type) {
-#if defined(__arm64__)
-    *result = msg0(CGRect, view, rectSels[type]);
-#else
-    ((void(*)(CGRect*,id,SEL))objc_msgSend_stret)(result, view, rectSels[type]);
-#endif
 }
 
 void fillStringArray(CFBundleRef bundle, CFStringRef *arr, CFStringRef format, int count) {

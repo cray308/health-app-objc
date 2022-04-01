@@ -364,7 +364,7 @@ id workoutVC_init(Workout *workout, VCacheRef tbl, CCacheRef clr) {
     data->tbl = tbl;
     data->clr = clr;
     data->workout = workout;
-    data->containers = malloc((unsigned)workout->size * sizeof(id));
+    data->containers = malloc((unsigned)workout->size * sizeof(CVPair));
 
     pthread_mutex_init(&timerLock, NULL);
     for (unsigned char i = 0; i < 2; ++i) {
@@ -415,7 +415,7 @@ void workoutVC_deinit(id self, SEL _cmd) {
     free(data->workout);
 
     for (int i = 0; i < size; ++i) {
-        Sels.viewRel(data->containers[i], Sels.rel);
+        Sels.viewRel(data->containers[i].view, Sels.rel);
     }
     free(data->containers);
     msgSup0(void, (&(struct objc_super){self, VC}), _cmd);
@@ -475,24 +475,28 @@ void workoutVC_viewDidLoad(id self, SEL _cmd) {
     id view = msg0(id, self, sel_getUid("view"));
     tbl->view.setBG(view, tbl->view.sbg,
                     data->clr->getColor(data->clr->cls, data->clr->sc, ColorPrimaryBGGrouped));
-    setVCTitle(self, data->workout->title);
+    id navItem = msg0(id, self, sel_getUid("navigationItem"));
+    setVCTitle(navItem, data->workout->title);
 
-    id stack = createStackView(tbl, NULL, 0, 1, 20, (Padding){20, 8, 20, 8});
+    id stack = createVStack(NULL, 0);
+    tbl->stack.setSpace(stack, tbl->stack.ssp, 20);
+    tbl->stack.setMargins(stack, tbl->stack.smr, (HAInsets){16, 8, 16, 8});
     id startBtn = createButton(tbl, data->clr, localize(CFBundleGetMainBundle(), CFSTR("start")),
-                               ColorGreen, UIFontTextStyleBody, 0, self, sel_getUid("startEndWorkout:"));
-    setNavButtons(self, (id []){nil, startBtn});
+                               ColorGreen, UIFontTextStyleBody, self, sel_getUid("startEndWorkout:"));
+    setNavButtons(navItem, (id []){nil, startBtn});
 
     SEL btnTap = sel_getUid("buttonTapped:");
     ContainerView *container;
     StatusView *sv;
     for (int i = 0; i < data->workout->size; ++i) {
         Circuit *c = &data->workout->activities[i];
-        data->containers[i] = containerView_init(tbl, data->clr, c->headerStr, &container, 0);
+        data->containers[i].view = containerView_init(tbl, data->clr, c->headerStr, &container);
+        data->containers[i].data = container;
         if (!i) {
             data->first = container;
             tbl->view.hide(container->divider, tbl->view.shd, true);
         }
-        tbl->stack.addSub(stack, tbl->stack.asv, data->containers[i]);
+        tbl->stack.addSub(stack, tbl->stack.asv, data->containers[i].view);
 
         bool addHint = c->size > 1;
         for (int j = 0; j < c->size; ++j) {
@@ -653,9 +657,9 @@ foundTransition:
             return;
 
         case TransitionFinishedCircuitDeleteFirst:
-            data->first = (ContainerView *)((char *)data->containers[w->index] + ViewSize);
+            data->first = data->containers[w->index].data;
             views = tbl->stack.getSub(data->first->stack, tbl->stack.gsv);
-            tbl->view.rmSub(data->containers[w->index - 1], tbl->view.rsv);
+            tbl->view.rmSub(data->containers[w->index - 1].view, tbl->view.rsv);
             tbl->view.hide(data->first->divider, tbl->view.shd, true);
             nextView = data->first->headerLabel;
 
