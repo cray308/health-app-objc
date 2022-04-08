@@ -8,6 +8,7 @@
 extern CFStringRef UIKeyboardDidShowNotification;
 extern CFStringRef UIKeyboardWillHideNotification;
 extern CFStringRef UIKeyboardFrameEndUserInfoKey;
+extern CFStringRef UIFontTextStyleFootnote;
 
 Class InputVCClass;
 Class InputViewClass;
@@ -119,7 +120,7 @@ void inputVC_addChild(id self, CFStringRef hint, short min, short max) {
     ptr->minVal = min;
     ptr->maxVal = max;
     CFStringRef errorText = formatStr(inputFieldError, min, max);
-    ptr->hintLabel = createLabel(tbl, d->clr, CFRetain(hint), UIFontTextStyleFootnote, ColorLabel);
+    ptr->hintLabel = createLabel(tbl, d->clr, CFRetain(hint), UIFontTextStyleSubheadline, ColorLabel);
     tbl->label.setLines(ptr->hintLabel, tbl->label.snl, 0);
     tbl->view.setIsAcc(ptr->hintLabel, tbl->view.sace, false);
     ptr->field = createTextfield(tbl, d->clr, self, d->toolbar, CFSTR(""), hint, index);

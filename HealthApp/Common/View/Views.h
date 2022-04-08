@@ -15,7 +15,6 @@ extern CFStringRef NSFontAttributeName;
 extern CFStringRef UIFontTextStyleTitle3;
 extern CFStringRef UIFontTextStyleSubheadline;
 extern CFStringRef UIFontTextStyleBody;
-extern CFStringRef UIFontTextStyleFootnote;
 
 extern CGFloat UIFontWeightRegular;
 

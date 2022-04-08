@@ -64,7 +64,7 @@ void settingsVC_viewDidLoad(id self, SEL _cmd) {
     const unsigned char darkMode = info->darkMode;
     unsigned char segment = info->currentPlan + 1;
     data->planLabel = createLabel(tbl, sup->clr, localize(bundle, CFSTR("planPickerTitle")),
-                                  UIFontTextStyleFootnote, ColorLabel);
+                                  UIFontTextStyleSubheadline, ColorLabel);
     tbl->label.setLines(data->planLabel, tbl->label.snl, 0);
     tbl->stack.addSub(sup->vStack, tbl->stack.asv, data->planLabel);
     tbl->stack.setSpaceAfter(sup->vStack, tbl->stack.scsp, 4, data->planLabel);
@@ -73,12 +73,12 @@ void settingsVC_viewDidLoad(id self, SEL _cmd) {
     tbl->stack.addSub(sup->vStack, tbl->stack.asv, data->planPicker);
     tbl->stack.setSpaceAfter(sup->vStack, tbl->stack.scsp, 20, data->planPicker);
 
+    SEL setCorner = sel_getUid("setCornerRadius:");
     if (darkMode < 2) {
         updateSegmentedControl(sup->clr, data->planPicker, darkMode);
         data->switchContainer = Sels.new(View, Sels.nw);
         tbl->view.setBG(data->switchContainer, tbl->view.sbg, viewBG);
-        msg1(void, CGFloat, tbl->view.layer(data->switchContainer, tbl->view.glyr),
-             sel_getUid("setCornerRadius:"), 5);
+        msg1(void, CGFloat, tbl->view.layer(data->switchContainer, tbl->view.glyr), setCorner, 5);
         setHeight(&tbl->cc, data->switchContainer, 44, true, false);
         id switchView = Sels.new(objc_getClass("UISwitch"), Sels.nw);
         msg1(void, bool, switchView, sel_getUid("setOn:"), darkMode);
@@ -110,6 +110,7 @@ void settingsVC_viewDidLoad(id self, SEL _cmd) {
     sup->button = createButton(tbl, sup->clr, localize(bundle, CFSTR("settingsSave")),
                                ColorBlue, UIFontTextStyleBody, self, btnTap);
     tbl->view.setBG(sup->button, tbl->view.sbg, viewBG);
+    msg1(void, CGFloat, tbl->view.layer(sup->button, tbl->view.glyr), setCorner, 5);
     setHeight(&tbl->cc, sup->button, 44, true, false);
     tbl->stack.addSub(sup->vStack, tbl->stack.asv, sup->button);
     tbl->stack.setSpaceAfter(sup->vStack, tbl->stack.scsp, 20, sup->button);
@@ -118,6 +119,7 @@ void settingsVC_viewDidLoad(id self, SEL _cmd) {
                                       ColorRed, UIFontTextStyleBody, self, btnTap);
     tbl->view.setTag(data->deleteButton, tbl->view.stg, 1);
     tbl->view.setBG(data->deleteButton, tbl->view.sbg, viewBG);
+    msg1(void, CGFloat, tbl->view.layer(data->deleteButton, tbl->view.glyr), setCorner, 5);
     setHeight(&tbl->cc, data->deleteButton, 44, true, false);
     tbl->stack.addSub(sup->vStack, tbl->stack.asv, data->deleteButton);
 

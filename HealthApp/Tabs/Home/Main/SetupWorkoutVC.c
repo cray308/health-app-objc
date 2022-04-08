@@ -53,7 +53,8 @@ void setupWorkoutVC_viewDidLoad(id self, SEL _cmd) {
     setVCTitle(navItem, localize(bundle, CFSTR("setupWorkoutTitle")));
 
     CFStringRef pickerTitle = localize(bundle, CFSTR("setupWorkoutPickerTitle"));
-    id workoutLabel = createLabel(tbl, sup->clr, CFRetain(pickerTitle), UIFontTextStyleFootnote, ColorLabel);
+    id workoutLabel = createLabel(tbl, sup->clr, CFRetain(pickerTitle),
+                                  UIFontTextStyleSubheadline, ColorLabel);
     tbl->label.setLines(workoutLabel, tbl->label.snl, 0);
     tbl->view.setIsAcc(workoutLabel, tbl->view.sace, false);
     tbl->stack.addSub(sup->vStack, tbl->stack.asv, workoutLabel);
