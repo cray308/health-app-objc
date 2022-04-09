@@ -77,7 +77,7 @@ void updateMaxesVC_viewDidLoad(id self, SEL _cmd) {
     setVCTitle(navItem, localize(bundle, CFSTR("updateMaxesTitle")));
 
     tbl->stack.setSpace(sup->vStack, tbl->stack.ssp, 20);
-    CFStringRef liftKey = formatStr(CFSTR("liftTypes%d"), data->index);
+    CFStringRef liftKey = formatStr(CFSTR("exNames%02d"), data->index);
     CFStringRef liftVal = localize(bundle, liftKey);
     CFRelease(liftKey);
     CFStringRef fieldKey = localize(bundle, CFSTR("maxWeight"));

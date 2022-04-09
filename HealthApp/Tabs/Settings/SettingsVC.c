@@ -97,7 +97,7 @@ void settingsVC_viewDidLoad(id self, SEL _cmd) {
     }
 
     CFStringRef liftNames[4];
-    fillStringArray(bundle, liftNames, CFSTR("liftTypes%d"), 4);
+    fillStringArray(bundle, liftNames, CFSTR("exNames%02d"), 4);
     CFStringRef fieldKey = localize(bundle, CFSTR("maxWeight"));
     for (int i = 0; i < 4; ++i) {
         inputVC_addChild(self, formatStr(fieldKey, liftNames[i]), 0, 999);

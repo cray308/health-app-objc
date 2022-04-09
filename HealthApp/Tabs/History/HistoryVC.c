@@ -129,7 +129,7 @@ id historyVC_init(CFBundleRef bundle, void **model, FetchHandler *handler, VCach
     m->totalWorkouts.dataSet = setInit(Sels.alloc(SetCls, Sels.alo), iSet, 5, nil);
     m->workoutTypes.dataSets[0] = setInit(Sels.alloc(SetCls, Sels.alo), iSet, -1, nil);
     fillStringArray(bundle, workoutTypeNames, CFSTR("workoutTypes%d"), 4);
-    fillStringArray(bundle, liftNames, CFSTR("liftTypes%d"), 4);
+    fillStringArray(bundle, liftNames, CFSTR("exNames%02d"), 4);
     totalWorkoutsFormat = localize(bundle, CFSTR("totalWorkoutsLegend"));
     liftFormat = localize(bundle, CFSTR("liftLegend"));
     workoutTypeFormat = localize(bundle, CFSTR("workoutTypeLegend"));

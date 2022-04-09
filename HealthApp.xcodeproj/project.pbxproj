@@ -28,7 +28,6 @@
 		611EDDE827476ED50064B254 /* HistoryVC.h in Headers */ = {isa = PBXBuildFile; fileRef = 611EDDE627476ED50064B254 /* HistoryVC.h */; };
 		611EDDE927476ED50064B254 /* HistoryVC.c in Sources */ = {isa = PBXBuildFile; fileRef = 611EDDE727476ED50064B254 /* HistoryVC.c */; };
 		6122434027934B0D006709E8 /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6122433F27934B0D006709E8 /* HealthKit.framework */; };
-		612FD048266DAF25002C9993 /* WorkoutData.plist in Resources */ = {isa = PBXBuildFile; fileRef = 612FD047266DAF25002C9993 /* WorkoutData.plist */; };
 		614DA69A270A8D1F00EC90C4 /* ExerciseManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 614DA698270A8D1F00EC90C4 /* ExerciseManager.h */; };
 		614DA69B270A8D1F00EC90C4 /* ExerciseManager.c in Sources */ = {isa = PBXBuildFile; fileRef = 614DA699270A8D1F00EC90C4 /* ExerciseManager.c */; };
 		615086ED26D3222500521269 /* SwiftBridging.m in Sources */ = {isa = PBXBuildFile; fileRef = 615086EC26D3222500521269 /* SwiftBridging.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
@@ -44,6 +43,7 @@
 		619919ED27824DBE00418A57 /* Charts.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 619919EB27824DB500418A57 /* Charts.xcframework */; };
 		619919EE27824DBE00418A57 /* Charts.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 619919EB27824DB500418A57 /* Charts.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		61BC6F56266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m in Sources */ = {isa = PBXBuildFile; fileRef = 61BC6F52266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		61C34508280107E600CA8B03 /* WorkoutData.plist in Resources */ = {isa = PBXBuildFile; fileRef = 61C34507280107E600CA8B03 /* WorkoutData.plist */; };
 		61E8ED6726FD60B400942368 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 61E8ED6926FD60B400942368 /* Localizable.strings */; };
 		61FFEEA2272CCCB5002BFFA6 /* AppDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 61FFEEA1272CCCAE002BFFA6 /* AppDelegate.h */; };
 /* End PBXBuildFile section */
@@ -95,7 +95,6 @@
 		611EDDE727476ED50064B254 /* HistoryVC.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = HistoryVC.c; sourceTree = "<group>"; };
 		6122433E27934B0D006709E8 /* HealthApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HealthApp.entitlements; sourceTree = "<group>"; };
 		6122433F27934B0D006709E8 /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
-		612FD047266DAF25002C9993 /* WorkoutData.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = WorkoutData.plist; sourceTree = "<group>"; };
 		614DA698270A8D1F00EC90C4 /* ExerciseManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ExerciseManager.h; sourceTree = "<group>"; };
 		614DA699270A8D1F00EC90C4 /* ExerciseManager.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = ExerciseManager.c; sourceTree = "<group>"; };
 		615086EC26D3222500521269 /* SwiftBridging.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SwiftBridging.m; sourceTree = "<group>"; };
@@ -116,6 +115,7 @@
 		618782C927DBF4BA0075466C /* ColorCache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ColorCache.h; sourceTree = "<group>"; };
 		619919EB27824DB500418A57 /* Charts.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = Charts.xcframework; sourceTree = "<group>"; };
 		61BC6F52266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "WeeklyData+CoreDataClass.m"; sourceTree = "<group>"; };
+		61C34507280107E600CA8B03 /* WorkoutData.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = WorkoutData.plist; sourceTree = "<group>"; };
 		61E8ED6826FD60B400942368 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		61FFEEA1272CCCAE002BFFA6 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -294,7 +294,7 @@
 				61C7790426102663001326A1 /* Extensions */,
 				617BDE1926FE48CB00BDDB73 /* View */,
 				6107C957266C159B00DDBCCF /* Workouts */,
-				612FD047266DAF25002C9993 /* WorkoutData.plist */,
+				61C34507280107E600CA8B03 /* WorkoutData.plist */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -416,10 +416,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				61C34508280107E600CA8B03 /* WorkoutData.plist in Resources */,
 				61594D1D26068106000D01A1 /* LaunchScreen.storyboard in Resources */,
 				61E8ED6726FD60B400942368 /* Localizable.strings in Resources */,
 				61594D1A26068106000D01A1 /* Assets.xcassets in Resources */,
-				612FD048266DAF25002C9993 /* WorkoutData.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
