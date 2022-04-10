@@ -42,8 +42,8 @@ void settingsVC_updateColors(id self, unsigned char darkMode) {
         InputView *ptr = sup->children[i].data;
         tbl->label.setColor(ptr->errorLabel, tbl->label.stc, red);
         tbl->label.setColor(ptr->hintLabel, tbl->label.stc, label);
-        tbl->field.setColor(ptr->field, tbl->label.stc, label);
-        tbl->view.setBG(ptr->field, tbl->view.sbg, fieldBg);
+        msg1(void, id, ptr->field, tbl->label.stc, label);
+        msg1(void, id, ptr->field, tbl->view.sbg, fieldBg);
         msg1(void, long, ptr->field, sel_getUid("setKeyboardAppearance:"), darkMode);
     }
 }

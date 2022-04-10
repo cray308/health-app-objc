@@ -38,6 +38,7 @@ struct FieldData {
     void (*setBorder)(id,SEL,long);
     void (*setDel)(id,SEL,id);
     void (*setInput)(id,SEL,id);
+    void (*setColor)(id,SEL,id);
 };
 struct PrivVData {
     const struct FontData fc;
@@ -114,7 +115,7 @@ void initViewData(VCache *cacheRef, Class *clsRefs) {
             (void(*)(id,SEL,CFStringRef,u_long))getImpO(Button, sbtxt),
             (void(*)(id,SEL,id,u_long))getImpO(Button, sbc)
         },
-        {sdg, (void(*)(id,SEL,CFStringRef))getImpO(Field, stxt), (void(*)(id,SEL,id))getImpO(Field, stc)}
+        {sdg, (void(*)(id,SEL,CFStringRef))getImpO(Field, stxt)}
     };
     memcpy(cacheRef, &lcache, sizeof(VCache));
     clsRefs[0] = Button;
@@ -132,7 +133,7 @@ void initViewData(VCache *cacheRef, Class *clsRefs) {
         {Button, ibtn, glb, (id(*)(Class,SEL,long))getImpC(Button, ibtn), (id(*)(id,SEL))getImpO(Button, glb)},
         {Field, sbs, siac, (void(*)(id,SEL,bool))getImpO(Field, sajfc), (void(*)(id,SEL,id))getImpO(Field, sf),
             (void(*)(id,SEL,long))getImpO(Field, sbs), (void(*)(id,SEL,id))getImpO(Field, sdg),
-            (void(*)(id,SEL,id))getImpO(Field, siac)
+            (void(*)(id,SEL,id))getImpO(Field, siac), (void(*)(id,SEL,id))getImpO(Field, stc)
         }
     };
     memcpy(&cache, &localData, sizeof(struct PrivVData));
@@ -239,7 +240,7 @@ id createTextfield(VCacheRef tbl, CCacheRef clr, id delegate,
     tbl->view.setBG(view, tbl->view.sbg, clr->getColor(clr->cls, clr->sc, ColorTertiaryBG));
     c->setText(view, tbl->label.stxt, text);
     cache.field.setFont(view, cache.label.sf, cache.fc.pref(cache.fc.cls, cache.fc.pf, UIFontTextStyleBody));
-    c->setColor(view, tbl->label.stc, clr->getColor(clr->cls, clr->sc, ColorLabel));
+    cache.field.setColor(view, tbl->label.stc, clr->getColor(clr->cls, clr->sc, ColorLabel));
     cache.field.adjFontCat(view, cache.label.sajfc, true);
     tbl->view.setTag(view, tbl->view.stg, tag);
     cache.field.setBorder(view, cache.field.sbs, 3);

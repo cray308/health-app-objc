@@ -340,6 +340,14 @@ static void runStartupDataJob(id *cRef, void *model, FetchHandler handler, time_
 
 static int getStatusBarStyle(id self _U_, SEL _cmd _U_) { return barStyle; }
 
+static void setupNavBarColor(id bar, CCacheRef clr) {
+    const void *keys[] = {NSForegroundColorAttributeName};
+    const void *vals[] = {clr->getColor(clr->cls, clr->sc, ColorLabel)};
+    CFDictionaryRef dict = createDict(keys, vals, 1, NULL);
+    msg1(void, CFDictionaryRef, bar, sel_getUid("setTitleTextAttributes:"), dict);
+    CFRelease(dict);
+}
+
 static void setupBarGeneric(id bar, Class appearanceClass, id color, SEL sbgc) {
     if (appearanceClass) {
         SEL scrollEdge = sel_getUid("setScrollEdgeAppearance:");
@@ -357,9 +365,6 @@ static void setupBarGeneric(id bar, Class appearanceClass, id color, SEL sbgc) {
 }
 
 static void setupTabVC(AppDelegate *self, id vc, Class TabAppear) {
-    const void *keys[] = {NSForegroundColorAttributeName};
-    const void *vals[] = {self->clr.getColor(self->clr.cls, self->clr.sc, ColorLabel)};
-    CFDictionaryRef dict = createDict(keys, vals, 1, NULL);
     Class NavAppear = objc_getClass("UINavigationBarAppearance");
     id tabBar = msg0(id, vc, sel_getUid("tabBar"));
     id barColor = clsF1(id, int, self->clr.cls, sel_getUid("getBarColorWithType:"), 0);
@@ -374,11 +379,10 @@ static void setupTabVC(AppDelegate *self, id vc, Class TabAppear) {
         id navBar = msg0(id, navVC, nb);
         setupBarGeneric(navBar, NavAppear, barColor, self->tbl.view.sbg);
         if (!TabAppear) {
-            msg1(void, CFDictionaryRef, navBar, sel_getUid("setTitleTextAttributes:"), dict);
+            setupNavBarColor(navBar, &self->clr);
             msg0(void, navVC, sel_getUid("setNeedsStatusBarAppearanceUpdate"));
         }
     }
-    CFRelease(dict);
 }
 
 static void present(id window, id child) {
@@ -392,9 +396,12 @@ void presentVC(id child) { present(getAppDel()->window, child); }
 void presentModalVC(id modal) {
     AppDelegate *self = getAppDel();
     id nav = msg1(id, id, Sels.alloc(DMNavVC, Sels.alo), sel_getUid("initWithRootViewController:"), modal);
-    id color = clsF1(id, int, self->clr.cls, sel_getUid("getBarColorWithType:"), 1);
-    setupBarGeneric(msg0(id, nav, sel_getUid("navigationBar")),
-                    objc_getClass("UINavigationBarAppearance"), color, self->tbl.view.sbg);
+    id bar = msg0(id, nav, sel_getUid("navigationBar"));
+    Class appear = objc_getClass("UINavigationBarAppearance");
+    setupBarGeneric(bar, appear, clsF1(id, int, self->clr.cls, sel_getUid("getBarColorWithType:"), 1),
+                    self->tbl.view.sbg);
+    if (!appear)
+        setupNavBarColor(bar, &self->clr);
     present(self->window, nav);
     Sels.vcRel(nav, Sels.rel);
     Sels.vcRel(modal, Sels.rel);
@@ -631,6 +638,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id applicat
     IMP imps[] = {(IMP)setupWorkoutVC_numberOfComponents, (IMP)setupWorkoutVC_didSelectRow,
         (IMP)setupWorkoutVC_titleForRow, (IMP)alertCtrlCreate
     };
+    SEL pickerSel = sel_getUid("pickerView:titleForRow:forComponent:");
     if (!TabAppear) {
         barStyle = dm ? 2 : 0;
         class_addMethod(DMNavVC, sel_getUid("preferredStatusBarStyle"), (IMP)getStatusBarStyle, "i@:");
@@ -638,14 +646,14 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id applicat
         imps[1] = (IMP)setupWorkoutVC_didSelectRowLegacy;
         imps[2] = (IMP)setupWorkoutVC_attrTitleForRow;
         imps[3] = (IMP)alertCtrlCreateLegacy;
+        pickerSel = sel_getUid("pickerView:attributedTitleForRow:forComponent:");
         setupAppColors(self->clr.cls, dm, false);
         toggleDarkModeForCharts(dm);
     }
     class_addMethod(SetupWorkoutVCClass, sel_getUid("numberOfComponentsInPickerView:"), imps[0], "q@:@");
     class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:didSelectRow:inComponent:"),
                     imps[1], "v@:@qq");
-    class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:titleForRow:forComponent:"),
-                    imps[2], "@@:@qq");
+    class_addMethod(SetupWorkoutVCClass, pickerSel, imps[2], "@@:@qq");
     class_addMethod(objc_getMetaClass("UIAlertController"),
                     sel_registerName("getCtrlWithTitle:message:"), imps[3], "@@:@@");
 

@@ -62,7 +62,6 @@ typedef struct {
 typedef struct {
     SEL sdg;
     void (*setText)(id,SEL,CFStringRef);
-    void (*setColor)(id,SEL,id);
 } FieldCache;
 
 typedef struct {
