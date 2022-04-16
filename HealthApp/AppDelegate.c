@@ -1,5 +1,6 @@
 #include "AppDelegate.h"
 #include <CoreFoundation/CFAttributedString.h>
+#include <CoreFoundation/CFDateFormatter.h>
 #include <CoreFoundation/CFNumber.h>
 #include <CoreFoundation/CFPreferences.h>
 #include <stdlib.h>
@@ -35,8 +36,8 @@ id settingsVC_init(VCacheRef, CCacheRef);
 void settingsVC_updateColors(id self, unsigned char darkMode);
 long setupWorkoutVC_numberOfComponents(id, SEL, id);
 long setupWorkoutVC_numberOfComponentsLegacy(id, SEL, id);
-CFAttributedStringRef setupWorkoutVC_attrTitleForRow(id, SEL, id, long, long);
-CFStringRef setupWorkoutVC_titleForRow(id, SEL, id, long, long);
+CFAttributedStringRef setupWorkoutVC_getAttrTitle(id, SEL, id, long, long);
+CFStringRef setupWorkoutVC_getTitle(id, SEL, id, long, long);
 void setupWorkoutVC_didSelectRow(id, SEL, id, long, long);
 void setupWorkoutVC_didSelectRowLegacy(id, SEL, id, long, long);
 
@@ -224,7 +225,6 @@ static void createDummyData(id context) {
 
 static void fetchHistory(id context, void *model, FetchHandler handler) {
     ((void(*)(id,SEL,Callback))objc_msgSend)(context, sel_getUid("performBlock:"), ^{
-        struct tm tm;
         int count = 0;
         CFArrayRef data = context_fetchData(context, 1, &count);
         if (data && count > 1) {
@@ -235,14 +235,18 @@ static void fetchHistory(id context, void *model, FetchHandler handler) {
                 timeSels[i] = sel_getUid(timeGets[i]);
             }
 
+            const long diff = (long)kCFAbsoluteTimeIntervalSince1970;
+            CFLocaleRef l = CFLocaleCopyCurrent();
+            CFDateFormatterRef f = CFDateFormatterCreate(NULL, l, 1, 0);
+            CFRelease(l);
             CFMutableArrayRef strs = CFArrayCreateMutable(NULL, --count, &kCFTypeArrayCallBacks);
             WeekDataModel *results = malloc((unsigned)count * sizeof(WeekDataModel));
             customAssert(count > 0)
             for (int i = 0; i < count; ++i) {
                 id d = (id)CFArrayGetValueAtIndex(data, i);
                 WeekDataModel *r = &results[i];
-                localtime_r(&(time_t){msg0(int64_t, d, getStart)}, &tm);
-                CFStringRef str = formatStr(CFSTR("%d/%d/%d"), tm.tm_mon + 1, tm.tm_mday, tm.tm_year % 100);
+                CFStringRef str = CFDateFormatterCreateStringWithAbsoluteTime(
+                  NULL, f, msg0(int64_t, d, getStart) - diff);
                 CFArrayAppendValue(strs, str);
                 r->totalWorkouts = msg0(int16_t, d, getTotal);
                 for (int j = 0; j < 4; ++j) {
@@ -256,6 +260,7 @@ static void fetchHistory(id context, void *model, FetchHandler handler) {
                 }
                 CFRelease(str);
             }
+            CFRelease(f);
             handler(model, strs, results, count);
         }
     });
@@ -629,14 +634,14 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id applicat
         dm = self->userData.darkMode;
     }
 
-    CFBundleRef bundle = CFBundleGetMainBundle();
+    CFBundleRef b = CFBundleGetMainBundle();
     initStatVData(clsRefs[0]);
-    initValidatorStrings(bundle, clsRefs[1]);
-    initExerciseData(week, bundle);
-    initWorkoutStrings(bundle);
+    initValidatorStrings(b, clsRefs[1]);
+    initExerciseData(week, b);
+    initWorkoutStrings(b);
 
     IMP imps[] = {(IMP)setupWorkoutVC_numberOfComponents, (IMP)setupWorkoutVC_didSelectRow,
-        (IMP)setupWorkoutVC_titleForRow, (IMP)alertCtrlCreate
+        (IMP)setupWorkoutVC_getTitle, (IMP)alertCtrlCreate
     };
     SEL pickerSel = sel_getUid("pickerView:titleForRow:forComponent:");
     if (!TabAppear) {
@@ -644,7 +649,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id applicat
         class_addMethod(DMNavVC, sel_getUid("preferredStatusBarStyle"), (IMP)getStatusBarStyle, "i@:");
         imps[0] = (IMP)setupWorkoutVC_numberOfComponentsLegacy;
         imps[1] = (IMP)setupWorkoutVC_didSelectRowLegacy;
-        imps[2] = (IMP)setupWorkoutVC_attrTitleForRow;
+        imps[2] = (IMP)setupWorkoutVC_getAttrTitle;
         imps[3] = (IMP)alertCtrlCreateLegacy;
         pickerSel = sel_getUid("pickerView:attributedTitleForRow:forComponent:");
         setupAppColors(self->clr.cls, dm, false);
@@ -659,7 +664,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id applicat
 
     void *fetchArg; FetchHandler fetchHandler;
     self->children[0] = homeVC_init(&self->tbl, &self->clr, weekStart + 43200);
-    self->children[1] = historyVC_init(bundle, &fetchArg, &fetchHandler, &self->tbl, &self->clr);
+    self->children[1] = historyVC_init(b, &fetchArg, &fetchHandler, &self->tbl, &self->clr);
     self->children[2] = settingsVC_init(&self->tbl, &self->clr);
 
     Class Item = objc_getClass("UITabBarItem"), Image = objc_getClass("UIImage");
@@ -668,7 +673,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id applicat
     id controllers[3];
     CFStringRef imgNames[] = {CFSTR("ico_house"), CFSTR("ico_chart"), CFSTR("ico_gear")};
     CFStringRef titles[3];
-    fillStringArray(bundle, titles, CFSTR("tabs%d"), 3);
+    fillStringArray(b, titles, CFSTR("tabs%d"), 3);
 
     for (int i = 0; i < 3; ++i) {
         id img = clsF1(id, CFStringRef, Image, imgInit, imgNames[i]);

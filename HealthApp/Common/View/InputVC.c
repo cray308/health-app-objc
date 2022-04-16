@@ -1,5 +1,7 @@
 #include "InputVC.h"
 #include <CoreFoundation/CFNotificationCenter.h>
+#include <CoreFoundation/CFCharacterSet.h>
+#include <CoreFoundation/CFNumberFormatter.h>
 #include <dispatch/queue.h>
 #include <string.h>
 #include "AppDelegate.h"
@@ -23,6 +25,8 @@ struct InputCache {
 };
 
 static CFStringRef inputFieldError;
+static CFCharacterSetRef charSet;
+static CFNumberFormatterRef numFormatter;
 static struct InputCache cache;
 
 static void getBounds(id view, CGRect *result) {
@@ -48,12 +52,12 @@ static void checkScrollPos(id scroll, id child) {
 }
 
 static void keyboardShown(CFNotificationCenterRef ctr _U_, void *self,
-                          CFNotificationName name _U_, const void *obj _U_, CFDictionaryRef userinfo) {
+                          CFNotificationName name _U_, const void *obj _U_, CFDictionaryRef info) {
     InputVC *data = (InputVC *)((char *)self + VCSize);
     int index = (int)data->tbl->view.getTag(data->activeField, data->tbl->view.gtg);
     if (index < 0) return;
 
-    id value = (id)CFDictionaryGetValue(userinfo, UIKeyboardFrameEndUserInfoKey);
+    id value = (id)CFDictionaryGetValue(info, UIKeyboardFrameEndUserInfoKey);
     CGRect kbRect;
 #if defined(__arm64__)
     kbRect = msg0(CGRect, value, cache.cgrv);
@@ -75,8 +79,12 @@ static void keyboardWillHide(CFNotificationCenterRef ctr _U_, void *self,
     cache.setScroll(data->scrollView, cache.sse, (int)bounds.size.height >= data->scrollHeight);
 }
 
-void initValidatorStrings(CFBundleRef bundle, Class Field) {
-    inputFieldError = localize(bundle, CFSTR("inputFieldError"));
+void initValidatorStrings(CFBundleRef b, Class Field) {
+    charSet = CFCharacterSetGetPredefined(kCFCharacterSetDecimalDigit);
+    CFLocaleRef locale = CFLocaleCopyCurrent();
+    numFormatter = CFNumberFormatterCreate(NULL, locale, kCFNumberFormatterDecimalStyle);
+    CFRelease(locale);
+    inputFieldError = localize(b, CFSTR("inputFieldError"));
     SEL sse = sel_getUid("setScrollEnabled:"), sci = sel_getUid("setContentInset:");
     SEL scrvs = sel_getUid("scrollRectToVisible:animated:"), bfr = sel_getUid("becomeFirstResponder");
     SEL lfn = sel_getUid("layoutIfNeeded");
@@ -84,8 +92,8 @@ void initValidatorStrings(CFBundleRef bundle, Class Field) {
     memcpy(&cache, &(struct InputCache){sel_getUid("bounds"), sel_getUid("setKeyboardType:"),
         sel_getUid("convertRect:fromView:"), sel_getUid("CGRectValue"), bfr, sse, sci, scrvs, lfn,
         (bool(*)(id,SEL))getImpO(Field, bfr), (void(*)(id,SEL,bool))getImpO(Scroll, sse),
-        (void(*)(id,SEL,HAInsets))getImpO(Scroll, sci), (void(*)(id,SEL,CGRect,bool))getImpO(Scroll, scrvs),
-        (void(*)(id,SEL))getImpO(View, lfn)
+        (void(*)(id,SEL,HAInsets))getImpO(Scroll, sci),
+        (void(*)(id,SEL,CGRect,bool))getImpO(Scroll, scrvs), (void(*)(id,SEL))getImpO(View, lfn)
     }, sizeof(struct InputCache));
 }
 
@@ -119,7 +127,9 @@ void inputVC_addChild(id self, CFStringRef hint, short min, short max) {
     InputView *ptr = d->children[index].data;
     ptr->minVal = min;
     ptr->maxVal = max;
-    CFStringRef errorText = formatStr(inputFieldError, min, max);
+    CFLocaleRef l = CFLocaleCopyCurrent();
+    CFStringRef errorText = formatStr(l, inputFieldError, min, max);
+    CFRelease(l);
     ptr->hintLabel = createLabel(tbl, d->clr, CFRetain(hint), UIFontTextStyleSubheadline, ColorLabel);
     tbl->label.setLines(ptr->hintLabel, tbl->label.snl, 0);
     tbl->view.setIsAcc(ptr->hintLabel, tbl->view.sace, false);
@@ -145,15 +155,17 @@ void inputVC_addChild(id self, CFStringRef hint, short min, short max) {
 
 void inputVC_updateFields(InputVC *self, const short *vals) {
     int count = self->count;
+    CFLocaleRef l = CFLocaleCopyCurrent();
     for (int i = 0; i < count; ++i) {
         short value = vals[i];
         InputView *child = self->children[i].data;
-        CFStringRef str = formatStr(CFSTR("%d"), value);
+        CFStringRef str = formatStr(l, CFSTR("%d"), value);
         self->tbl->field.setText(child->field, self->tbl->label.stxt, str);
         inputView_reset(child, value, self->tbl);
         CFRelease(str);
     }
     self->tbl->button.setEnabled(self->button, self->tbl->button.en, true);
+    CFRelease(l);
 }
 
 void inputView_deinit(id self, SEL _cmd) {
@@ -224,7 +236,8 @@ void inputVC_viewDidLoad(id self, SEL _cmd) {
       NULL, (const void *[]){arrows[0], arrows[1], flexSpace, doneButton}, 4, &retainedArrCallbacks);
     msg2(void, CFArrayRef, bool, data->toolbar, sel_getUid("setItems:animated:"), array, false);
 
-    addVStackToScrollView(data->tbl, msg0(id, self, sel_getUid("view")), data->vStack, data->scrollView);
+    addVStackToScrollView(data->tbl,
+                          msg0(id, self, sel_getUid("view")), data->vStack, data->scrollView);
     CFRelease(array);
     Sels.objRel(flexSpace, Sels.rel);
     Sels.objRel(arrows[0], Sels.rel);
@@ -313,8 +326,8 @@ bool inputVC_fieldChanged(id self, SEL _cmd _U_, id field, CFRange range, CFStri
         CFStringInlineBuffer buf;
         CFStringInitInlineBuffer(replacement, &buf, CFRangeMake(0, len));
         for (int i = 0; i < len; ++i) {
-            UniChar val = CFStringGetCharacterFromInlineBuffer(&buf, i);
-            if (val < 48 || val > 57) return false;
+            if (!CFCharacterSetIsCharacterMember(
+                   charSet, CFStringGetCharacterFromInlineBuffer(&buf, i))) return false;
         }
     }
 
@@ -333,8 +346,13 @@ bool inputVC_fieldChanged(id self, SEL _cmd _U_, id field, CFRange range, CFStri
         return true;
     }
 
-    int newVal = (int)CFStringGetIntValue(newText);
+    CFNumberRef num = CFNumberFormatterCreateNumberFromString(NULL, numFormatter, newText, NULL, 0);
+    int newVal = -1;
     CFRelease(newText);
+    if (num != NULL) {
+        CFNumberGetValue(num, kCFNumberIntType, &newVal);
+        CFRelease(num);
+    }
 
     if (newVal < pair->data->minVal || newVal > pair->data->maxVal) {
         tbl->button.setEnabled(d->button, tbl->button.en, false);

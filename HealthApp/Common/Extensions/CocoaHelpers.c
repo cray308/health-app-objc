@@ -126,10 +126,10 @@ void setupAppColors(Class Color, unsigned char darkMode, bool deleteOld) {
     }
 }
 
-void fillStringArray(CFBundleRef bundle, CFStringRef *arr, CFStringRef format, int count) {
+void fillStringArray(CFBundleRef b, CFStringRef *arr, CFStringRef format, int count) {
     for (int i = 0; i < count; ++i) {
-        CFStringRef key = formatStr(format, i);
-        arr[i] = localize(bundle, key);
+        CFStringRef key = formatStr(NULL, format, i);
+        arr[i] = localize(b, key);
         CFRelease(key);
     }
 }

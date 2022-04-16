@@ -219,9 +219,9 @@ id createButton(VCacheRef tbl, CCacheRef clr, CFStringRef title,
     return view;
 }
 
-id createSegmentedControl(CFBundleRef bundle, CFStringRef format, int startIndex) {
+id createSegmentedControl(CFBundleRef b, CFStringRef format, int startIndex) {
     CFStringRef segments[3];
-    fillStringArray(bundle, segments, format, 3);
+    fillStringArray(b, segments, format, 3);
     CFArrayRef array = CFArrayCreate(NULL, (const void **)segments, 3, NULL);
     id view = msg1(id, CFArrayRef, Sels.alloc(objc_getClass("UISegmentedControl"), Sels.alo),
                    sel_getUid("initWithItems:"), array);

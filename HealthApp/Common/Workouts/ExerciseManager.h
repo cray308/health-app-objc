@@ -24,7 +24,7 @@ typedef struct {
     CFMutableStringRef headerStr;
     CFStringRef restStr;
     CFRange tRange;
-    const CFRange hRange;
+    CFRange hRange;
     const short reps;
     const short sets;
     short completedSets;
@@ -35,7 +35,7 @@ typedef struct {
 typedef struct {
     ExerciseEntry *exercises;
     CFMutableStringRef headerStr;
-    const CFRange numberRange;
+    CFRange range;
     int index;
     const int size;
     const short reps;

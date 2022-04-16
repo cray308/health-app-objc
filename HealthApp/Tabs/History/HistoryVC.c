@@ -1,5 +1,4 @@
 #include "HistoryVC.h"
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "AppDelegate.h"
@@ -21,6 +20,8 @@ Class HistoryVCClass;
 static CFStringRef totalWorkoutsFormat;
 static CFStringRef workoutTypeFormat;
 static CFStringRef liftFormat;
+static CFStringRef hourMinFmt;
+static CFStringRef minsFmt;
 static CFStringRef workoutTypeNames[4];
 static CFStringRef liftNames[4];
 static struct HistCache cache;
@@ -104,7 +105,7 @@ static void historyData_populate(void *_model, CFArrayRef strs, WeekDataModel *r
 
 #pragma mark - Main Functions
 
-id historyVC_init(CFBundleRef bundle, void **model, FetchHandler *handler, VCacheRef tbl, CCacheRef clr) {
+id historyVC_init(CFBundleRef b, void **model, FetchHandler *handler, VCacheRef tbl, CCacheRef clr) {
     id self = Sels.new(HistoryVCClass, Sels.nw);
     HistoryVC *data = (HistoryVC *)((char *)self + VCSize);
     data->tbl = tbl;
@@ -121,35 +122,36 @@ id historyVC_init(CFBundleRef bundle, void **model, FetchHandler *handler, VCach
         (void(*)(id,SEL,long,id))impArr[0], (void(*)(id,SEL,CGFloat))impArr[1],
         (void(*)(id,SEL,id,CGFloat))impArr[2], (void(*)(id,SEL,CGPoint*,long))impArr[3]
     }, sizeof(struct HistCache));
-    Class SetCls = classes[0], DataCls = classes[1];
+    Class Set = classes[0], Data = classes[1];
     SEL iSet = selArr[4], iData = selArr[5];
     id (*setInit)(id,SEL,long,id) = (id(*)(id,SEL,long,id))impArr[4];
     id (*dataInit)(id,SEL,CFArrayRef,long,uint8_t) = (id(*)(id,SEL,CFArrayRef,long,uint8_t))impArr[5];
 
-    m->totalWorkouts.dataSet = setInit(Sels.alloc(SetCls, Sels.alo), iSet, 5, nil);
-    m->workoutTypes.dataSets[0] = setInit(Sels.alloc(SetCls, Sels.alo), iSet, -1, nil);
-    fillStringArray(bundle, workoutTypeNames, CFSTR("workoutTypes%d"), 4);
-    fillStringArray(bundle, liftNames, CFSTR("exNames%02d"), 4);
-    totalWorkoutsFormat = localize(bundle, CFSTR("totalWorkoutsLegend"));
-    liftFormat = localize(bundle, CFSTR("liftLegend"));
-    workoutTypeFormat = localize(bundle, CFSTR("workoutTypeLegend"));
+    m->totalWorkouts.dataSet = setInit(Sels.alloc(Set, Sels.alo), iSet, 5, nil);
+    m->workoutTypes.dataSets[0] = setInit(Sels.alloc(Set, Sels.alo), iSet, -1, nil);
+    fillStringArray(b, workoutTypeNames, CFSTR("workoutTypes%d"), 4);
+    fillStringArray(b, liftNames, CFSTR("exNames%02d"), 4);
+    totalWorkoutsFormat = localize(b, CFSTR("totalWorkoutsLegend"));
+    liftFormat = localize(b, CFSTR("liftLegend"));
+    workoutTypeFormat = localize(b, CFSTR("workoutTypeLegend"));
+    hourMinFmt = localize(b, CFSTR("hourMinFmt"));
+    minsFmt = localize(b, CFSTR("minsFmt"));
 
     for (int i = 0; i < 4; ++i) {
-        id boundary = m->workoutTypes.dataSets[i];
-        m->workoutTypes.dataSets[i + 1] = setInit(Sels.alloc(SetCls, Sels.alo), iSet, colors[i], boundary);
-        m->lifts.dataSets[i] = setInit(Sels.alloc(SetCls, Sels.alo), iSet, colors[i], nil);
+        id bound = m->workoutTypes.dataSets[i];
+        m->workoutTypes.dataSets[i + 1] = setInit(Sels.alloc(Set, Sels.alo), iSet, colors[i], bound);
+        m->lifts.dataSets[i] = setInit(Sels.alloc(Set, Sels.alo), iSet, colors[i], nil);
     }
 
     CFArrayRef dataArr = CFArrayCreate(NULL, (const void *[]){m->totalWorkouts.dataSet}, 1, NULL);
-    m->totalWorkouts.chartData = dataInit(Sels.alloc(DataCls, Sels.alo), iData, dataArr, 1, 3);
+    m->totalWorkouts.chartData = dataInit(Sels.alloc(Data, Sels.alo), iData, dataArr, 1, 3);
     CFRelease(dataArr);
-    id *areaSets = m->workoutTypes.dataSets;
-    dataArr = CFArrayCreate(NULL, (const void *[]){areaSets[4], areaSets[3], areaSets[2], areaSets[1]},
-                            4, NULL);
-    m->workoutTypes.chartData = dataInit(Sels.alloc(DataCls, Sels.alo), iData, dataArr, 1, 5);
+    id *area = m->workoutTypes.dataSets;
+    dataArr = CFArrayCreate(NULL, (const void *[]){area[4], area[3], area[2], area[1]}, 4, NULL);
+    m->workoutTypes.chartData = dataInit(Sels.alloc(Data, Sels.alo), iData, dataArr, 1, 5);
     CFRelease(dataArr);
     dataArr = CFArrayCreate(NULL, (const void **)m->lifts.dataSets, 4, NULL);
-    m->lifts.chartData = dataInit(Sels.alloc(DataCls, Sels.alo), iData, dataArr, 3, 0);
+    m->lifts.chartData = dataInit(Sels.alloc(Data, Sels.alo), iData, dataArr, 3, 0);
     CFRelease(dataArr);
     return self;
 }
@@ -172,26 +174,29 @@ void historyVC_updateSegment(id self, SEL _cmd _U_, id picker) {
         return;
     }
 
-    char buf[16];
-    CFStringRef label = formatStr(totalWorkoutsFormat, m1->avgs[index]);
+    CFLocaleRef l = CFLocaleCopyCurrent();
+    CFStringRef label = formatStr(l, totalWorkoutsFormat, m1->avgs[index]);
     cache.setLegendLabel(totalsChart, cache.slglb, 0, (id)label);
     CFRelease(label);
 
     for (int i = 0; i < 4; ++i) {
         int typeAverage = m2->avgs[index][i];
+        CFStringRef duration;
         if (typeAverage > 59) {
-            sprintf(buf, "%d h %d m", typeAverage / 60, typeAverage % 60);
+            duration = formatStr(l, hourMinFmt, typeAverage / 60, typeAverage % 60);
         } else {
-            sprintf(buf, "%d m", typeAverage);
+            duration = formatStr(l, minsFmt, typeAverage);
         }
-        label = formatStr(workoutTypeFormat, workoutTypeNames[i], buf);
+        label = formatStr(l, workoutTypeFormat, workoutTypeNames[i], duration);
+        CFRelease(duration);
         cache.setLegendLabel(typesChart, cache.slglb, i, (id)label);
         CFRelease(label);
 
-        label = formatStr(liftFormat, liftNames[i], m3->avgs[index][i]);
+        label = formatStr(l, liftFormat, liftNames[i], m3->avgs[index][i]);
         cache.setLegendLabel(liftsChart, cache.slglb, i, (id)label);
         CFRelease(label);
     }
+    CFRelease(l);
 
     int ref = data->model.refIndices[index];
     cache.setLineLimit(totalsChart, cache.slilm, m1->avgs[index]);
@@ -209,25 +214,27 @@ void historyVC_updateSegment(id self, SEL _cmd _U_, id picker) {
 void historyVC_viewDidLoad(id self, SEL _cmd) {
     msgSup0(void, (&(struct objc_super){self, VC}), _cmd);
 
-    CFBundleRef bundle = CFBundleGetMainBundle();
+    CFBundleRef b = CFBundleGetMainBundle();
     const unsigned char darkMode = getUserInfo()->darkMode;
     HistoryVC *data = (HistoryVC *)((char *)self + VCSize);
     VCacheRef tbl = data->tbl;
     id view = msg0(id, self, sel_getUid("view"));
-    tbl->view.setBG(view, tbl->view.sbg, data->clr->getColor(data->clr->cls, data->clr->sc, ColorPrimaryBG));
+    tbl->view.setBG(view, tbl->view.sbg,
+                    data->clr->getColor(data->clr->cls, data->clr->sc, ColorPrimaryBG));
 
     data->charts[0] = createChartView(self, (long []){4}, 1, 1);
     data->charts[1] = createChartView(self, (long []){0, 1, 2, 3}, 4, 6);
     data->charts[2] = createChartView(self, (long []){0, 1, 2, 3}, 4, 0);
-    data->picker = createSegmentedControl(bundle, CFSTR("historySegment%d"), 0);
+    data->picker = createSegmentedControl(b, CFSTR("historySegment%d"), 0);
     tbl->button.addTarget(data->picker, tbl->button.atgt, self, sel_getUid("buttonTapped:"), 4096);
     if (darkMode < 2)
         updateSegmentedControl(data->clr, data->picker, darkMode);
-    msg1(void, id, msg0(id, self, sel_getUid("navigationItem")), sel_getUid("setTitleView:"), data->picker);
+    msg1(void, id, msg0(id, self, sel_getUid("navigationItem")),
+         sel_getUid("setTitleView:"), data->picker);
 
     CFStringRef titles[3]; id containers[3]; int heights[] = {390, 425, 550};
     ContainerView *c;
-    fillStringArray(bundle, titles, CFSTR("chartHeader%d"), 3);
+    fillStringArray(b, titles, CFSTR("chartHeader%d"), 3);
     for (int i = 0; i < 3; ++i) {
         containers[i] = containerView_init(tbl, data->clr, titles[i], &c);
         setHeight(&tbl->cc, data->charts[i], heights[i], false, false);
@@ -282,7 +289,8 @@ void historyVC_updateColors(id self, unsigned char darkMode) {
     HistoryVC *data = (HistoryVC *)((char *)self + VCSize);
     VCacheRef tbl = data->tbl;
     id view = msg0(id, self, sel_getUid("view"));
-    tbl->view.setBG(view, tbl->view.sbg, data->clr->getColor(data->clr->cls, data->clr->sc, ColorPrimaryBG));
+    tbl->view.setBG(view, tbl->view.sbg,
+                    data->clr->getColor(data->clr->cls, data->clr->sc, ColorPrimaryBG));
     updateSegmentedControl(data->clr, data->picker, darkMode);
     view = (id)CFArrayGetValueAtIndex(msg0(CFArrayRef, view, sel_getUid("subviews")), 0);
     view = (id)CFArrayGetValueAtIndex(msg0(CFArrayRef, view, sel_getUid("subviews")), 0);

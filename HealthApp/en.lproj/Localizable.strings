@@ -13,7 +13,7 @@
 
 "workoutNotificationTitle" = "Workout Update";
 "workoutCompleteMsg" = "Workout completed";
-"exerciseProgressHint" = "Exercise %d of %d";
+"exerciseProgressHint" = "Exercise %1$d of %2$d";
 "exerciseDurationMessage" = "Minimum exercise duration met";
 
 "cancel" = "Cancel";
@@ -39,8 +39,10 @@
 "chartHeader1" = "Activity Time By Type";
 "chartHeader2" = "Lift Progress";
 "totalWorkoutsLegend" = "Avg Workouts (%.2f)";
-"workoutTypeLegend" = "%@ (Avg: %s)";
-"liftLegend" = "%@ (Avg: %.1f)";
+"workoutTypeLegend" = "%1$@ (Avg: %2$@)";
+"liftLegend" = "%1$@ (Avg: %2$.1f)";
+"hourMinFmt" = "%1$dh %2$dm";
+"minsFmt" = "%dm";
 
 "planPickerTitle" = "Change workout plan";
 "darkMode" = "Dark Mode";
@@ -51,7 +53,7 @@
 "settingsSave" = "Save Settings";
 "settingsDelete" = "Delete Data";
 "settingsAlertTitle" = "Are you sure?";
-"inputFieldError" = "Input must be between %d and %d.";
+"inputFieldError" = "Input must be between %1$d and %2$d.";
 "alertMsgSave" = "This will save the currently entered data.";
 "alertMsgDelete" = "This will delete all workout history.";
 
@@ -63,18 +65,23 @@
 "setupWorkoutDuration" = "Duration in minutes";
 
 "updateMaxesTitle" = "Set Weight & Reps";
-"stepperLabelInit" = "Reps: 1";
+"stepperLabelInit" = "Reps: %d";
 "stepperLabelDescr" = "Change the number of reps completed";
-"exerciseHeader" = "Set %d of %d";
+"exerciseHeader" = "Set %1$d of %2$d";
 "exerciseTitleRest" = "Rest: %d s";
-"exerciseTitleReps" = "%@ x %d";
-"exerciseTitleRepsWithWeight" = "%@ x %d @ %d lbs";
-"exerciseTitleDurationMinutes" = "%@ for %.1f min";
-"exerciseTitleDurationSeconds" = "%@ for %d s";
-"exerciseTitleDistance" = "%@ %d/%d m";
-"circuitProgressHint" = "Circuit %d of %d";
-"circuitHeaderRounds" = "Round %d of %d";
+"exerciseTitleReps" = "%1$@ x %2$d";
+"exerciseTitleRepsWithWeight" = "%1$@ x %2$d @ %3$d lbs";
+"exerciseTitleDurationMinutes" = "%1$@ for %2$.1f min";
+"exerciseTitleDurationSeconds" = "%1$@ for %2$d s";
+"exerciseTitleDistance" = "%1$@ %2$d/%3$d m";
+"circuitProgressHint" = "Circuit %1$d of %2$d";
+"circuitHeaderRounds" = "Round %1$d of %2$d";
 "circuitHeaderAMRAP" = "AMRAP %d min";
+"circuitHeaderLocAndRounds" = "Circuit %1$d of %2$d - Round %3$d of %4$d";
+"circuitHeaderLocAndAMRAP" = "Circuit %1$d of %2$d - AMRAP %3$d min";
+"sets1" = "Set 1";
+"rounds1S" = "Round 1";
+"rounds1M" = "Round 1";
 
 "exNames00" = "Squat";
 "exNames01" = "Pull-up";

@@ -8,8 +8,8 @@
 
 #if DEBUG
 #include <assert.h>
-#include <stdio.h>
 #define customAssert(x) assert(x);
+extern void NSLog(id format, ...);
 #else
 #define customAssert(x)
 #endif
@@ -46,7 +46,7 @@ struct SelCache {
 #define msgSup0(rv, s, cmd) (((rv(*)(struct objc_super*,SEL))objc_msgSendSuper)(s, cmd))
 #define msgSup1(rv, t, s, cmd, a) (((rv(*)(struct objc_super*,SEL,t))objc_msgSendSuper)(s, cmd, a))
 
-#define formatStr(fmt, ...) CFStringCreateWithFormat(NULL, NULL, fmt, ##__VA_ARGS__)
+#define formatStr(l, fmt, ...) CFStringCreateWithFormat(NULL, (CFDictionaryRef)(l), fmt, ##__VA_ARGS__)
 #define localize(b, s) CFBundleCopyLocalizedString(b, s, NULL, NULL)
 #define createDict(k, v, s, cb)\
  CFDictionaryCreate(NULL, k, v, s, &kCFCopyStringDictionaryKeyCallBacks, cb)

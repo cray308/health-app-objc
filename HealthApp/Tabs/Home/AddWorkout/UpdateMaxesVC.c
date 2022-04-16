@@ -26,7 +26,7 @@ void updateMaxesVC_deinit(id self, SEL _cmd) {
     msgSup0(void, (&(struct objc_super){self, InputVCClass}), _cmd);
 }
 
-static id stepperViewInit(CFBundleRef bundle, StepperView **ref, VCacheRef tbl, CCacheRef clr) {
+static id stepperViewInit(CFBundleRef b, StepperView **ref, VCacheRef tbl, CCacheRef clr) {
     id self = Sels.new(StepperViewClass, Sels.nw);
     StepperView *data = (StepperView *)((char *)self + ViewSize);
     *ref = data;
@@ -34,12 +34,19 @@ static id stepperViewInit(CFBundleRef bundle, StepperView **ref, VCacheRef tbl, 
     data->setText = tbl->label.setText;
     tbl->view.setIsAcc(self, tbl->view.sace, true);
     tbl->view.setTraits(self, tbl->view.satrs, UIAccessibilityTraitAdjustable);
-    CFStringRef stepperDescr = localize(bundle, CFSTR("stepperLabelDescr"));
+    CFStringRef stepperDescr = localize(b, CFSTR("stepperLabelDescr"));
     tbl->view.setAcc(self, tbl->view.sacl, stepperDescr);
     CFRelease(stepperDescr);
-    CFStringRef repsStr = localize(bundle, CFSTR("stepperLabelInit"));
-    data->range = CFStringFind(repsStr, CFSTR("1"), 0);
-    data->repsStr = CFStringCreateMutableCopy(NULL, CFStringGetLength(repsStr) + 2, repsStr);
+    CFLocaleRef l = CFLocaleCopyCurrent();
+    CFStringRef repsFmt = localize(b, CFSTR("stepperLabelInit"));
+    CFStringRef repsStr = formatStr(l, repsFmt, 1);
+    CFRelease(repsFmt);
+    CFStringRef one = formatStr(l, CFSTR("%d"), 1);
+    CFStringFindWithOptionsAndLocale(
+      repsStr, one, (CFRange){0, CFStringGetLength(repsStr)}, 0, l, &data->range);
+    CFRelease(one);
+    CFRelease(l);
+    data->repsStr = CFStringCreateMutableCopy(NULL, 64, repsStr);
     msg1(void, CFStringRef, self, sel_getUid("setAccessibilityValue:"), repsStr);
     setHeight(&tbl->cc, self, 44, true, false);
     data->label = createLabel(tbl, clr, repsStr, UIFontTextStyleBody, ColorLabel);
@@ -67,28 +74,28 @@ void stepperView_deinit(id self, SEL _cmd) {
 void updateMaxesVC_viewDidLoad(id self, SEL _cmd) {
     msgSup0(void, (&(struct objc_super){self, InputVCClass}), _cmd);
 
-    CFBundleRef bundle = CFBundleGetMainBundle();
+    CFBundleRef b = CFBundleGetMainBundle();
     InputVC *sup = (InputVC *)((char *)self + VCSize);
     VCacheRef tbl = sup->tbl;
     UpdateMaxesVC *data = (UpdateMaxesVC *)((char *)sup + sizeof(InputVC));
     id navItem = msg0(id, self, sel_getUid("navigationItem"));
     tbl->view.setBG(msg0(id, self, sel_getUid("view")), tbl->view.sbg,
                     sup->clr->getColor(sup->clr->cls, sup->clr->sc, ColorSecondaryBG));
-    setVCTitle(navItem, localize(bundle, CFSTR("updateMaxesTitle")));
+    setVCTitle(navItem, localize(b, CFSTR("updateMaxesTitle")));
 
     tbl->stack.setSpace(sup->vStack, tbl->stack.ssp, 20);
-    CFStringRef liftKey = formatStr(CFSTR("exNames%02d"), data->index);
-    CFStringRef liftVal = localize(bundle, liftKey);
+    CFStringRef liftKey = formatStr(NULL, CFSTR("exNames%02d"), data->index);
+    CFStringRef liftVal = localize(b, liftKey);
     CFRelease(liftKey);
-    CFStringRef fieldKey = localize(bundle, CFSTR("maxWeight"));
-    inputVC_addChild(self, formatStr(fieldKey, liftVal), 1, 999);
+    CFStringRef fieldKey = localize(b, CFSTR("maxWeight"));
+    inputVC_addChild(self, formatStr(NULL, fieldKey, liftVal), 1, 999);
     CFRelease(liftVal);
     CFRelease(fieldKey);
 
-    id stepperView = stepperViewInit(bundle, &data->stack, tbl, sup->clr);
+    id stepperView = stepperViewInit(b, &data->stack, tbl, sup->clr);
     tbl->stack.addSub(sup->vStack, tbl->stack.asv, stepperView);
 
-    sup->button = createButton(tbl, sup->clr, localize(bundle, CFSTR("finish")),
+    sup->button = createButton(tbl, sup->clr, localize(b, CFSTR("finish")),
                                ColorBlue, UIFontTextStyleBody, self, sel_getUid("tappedFinish"));
     setNavButtons(navItem, (id []){nil, sup->button});
     tbl->button.setEnabled(sup->button, tbl->button.en, false);
@@ -97,15 +104,13 @@ void updateMaxesVC_viewDidLoad(id self, SEL _cmd) {
 }
 
 static void handleNewStepperValue(id self, StepperView *data, int value) {
-    CFStringRef newVal = formatStr(CFSTR("%d"), value);
+    CFLocaleRef l = CFLocaleCopyCurrent();
+    CFStringRef newVal = formatStr(l, CFSTR("%d"), value);
+    CFRelease(l);
     CFStringReplace(data->repsStr, data->range, newVal);
+    data->range.length = CFStringGetLength(newVal);
     CFRelease(newVal);
     data->setText(data->label, data->stxt, data->repsStr);
-    if (value == 10) {
-        data->range.length = 2;
-    } else if (data->range.length == 2) {
-        data->range.length = 1;
-    }
     msg1(void, CFStringRef, self, sel_getUid("setAccessibilityValue:"), data->repsStr);
 }
 

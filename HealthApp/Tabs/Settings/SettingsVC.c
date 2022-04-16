@@ -20,18 +20,21 @@ void settingsVC_updateColors(id self, unsigned char darkMode) {
     CCacheRef clr = sup->clr;
     tbl->view.setBG(msg0(id, self, sel_getUid("view")), tbl->view.sbg,
                     clr->getColor(clr->cls, clr->sc, ColorPrimaryBGGrouped));
-    id red = clr->getColor(clr->cls, clr->sc, ColorRed), label = clr->getColor(clr->cls, clr->sc, ColorLabel);
+    id red = clr->getColor(clr->cls, clr->sc, ColorRed);
+    id label = clr->getColor(clr->cls, clr->sc, ColorLabel);
     id btnBg = clr->getColor(clr->cls, clr->sc, ColorSecondaryBGGrouped);
     id fieldBg = clr->getColor(clr->cls, clr->sc, ColorTertiaryBG);
     tbl->label.setColor(data->planLabel, tbl->label.stc, label);
     updateSegmentedControl(clr, data->planPicker, darkMode);
     tbl->view.setBG(data->switchContainer, tbl->view.sbg, btnBg);
-    id view = (id)CFArrayGetValueAtIndex(msg0(CFArrayRef, data->switchContainer, sel_getUid("subviews")), 0);
+    id view = (id)CFArrayGetValueAtIndex(
+      msg0(CFArrayRef, data->switchContainer, sel_getUid("subviews")), 0);
     tbl->label.setColor((id)CFArrayGetValueAtIndex(tbl->stack.getSub(view, tbl->stack.gsv), 0),
                         tbl->label.stc, label);
     tbl->button.setColor(data->deleteButton, tbl->button.sbc, red, 0);
     tbl->view.setBG(data->deleteButton, tbl->view.sbg, btnBg);
-    tbl->button.setColor(sup->button, tbl->button.sbc, clr->getColor(clr->cls, clr->sc, ColorBlue), 0);
+    tbl->button.setColor(sup->button, tbl->button.sbc,
+                         clr->getColor(clr->cls, clr->sc, ColorBlue), 0);
     tbl->button.setColor(sup->button, tbl->button.sbc,
                          clr->getColor(clr->cls, clr->sc, ColorSecondaryLabel), 2);
     tbl->view.setBG(sup->button, tbl->view.sbg, btnBg);
@@ -51,24 +54,24 @@ void settingsVC_updateColors(id self, unsigned char darkMode) {
 void settingsVC_viewDidLoad(id self, SEL _cmd) {
     msgSup0(void, (&(struct objc_super){self, InputVCClass}), _cmd);
 
-    CFBundleRef bundle = CFBundleGetMainBundle();
+    CFBundleRef b = CFBundleGetMainBundle();
     InputVC *sup = (InputVC *)((char *)self + VCSize);
     VCacheRef tbl = sup->tbl;
     SettingsVC *data = (SettingsVC *)((char *)sup + sizeof(InputVC));
     id viewBG = sup->clr->getColor(sup->clr->cls, sup->clr->sc, ColorSecondaryBGGrouped);
     tbl->view.setBG(msg0(id, self, sel_getUid("view")), tbl->view.sbg,
                     sup->clr->getColor(sup->clr->cls, sup->clr->sc, ColorPrimaryBGGrouped));
-    setVCTitle(msg0(id, self, sel_getUid("navigationItem")), localize(bundle, CFSTR("settingsTitle")));
+    setVCTitle(msg0(id, self, sel_getUid("navigationItem")), localize(b, CFSTR("settingsTitle")));
 
     UserInfo const *info = getUserInfo();
     const unsigned char darkMode = info->darkMode;
     unsigned char segment = info->currentPlan + 1;
-    data->planLabel = createLabel(tbl, sup->clr, localize(bundle, CFSTR("planPickerTitle")),
+    data->planLabel = createLabel(tbl, sup->clr, localize(b, CFSTR("planPickerTitle")),
                                   UIFontTextStyleSubheadline, ColorLabel);
     tbl->label.setLines(data->planLabel, tbl->label.snl, 0);
     tbl->stack.addSub(sup->vStack, tbl->stack.asv, data->planLabel);
     tbl->stack.setSpaceAfter(sup->vStack, tbl->stack.scsp, 4, data->planLabel);
-    data->planPicker = createSegmentedControl(bundle, CFSTR("settingsSegment%d"), segment);
+    data->planPicker = createSegmentedControl(b, CFSTR("settingsSegment%d"), segment);
     setHeight(&tbl->cc, data->planPicker, 44, true, false);
     tbl->stack.addSub(sup->vStack, tbl->stack.asv, data->planPicker);
     tbl->stack.setSpaceAfter(sup->vStack, tbl->stack.scsp, 20, data->planPicker);
@@ -82,7 +85,7 @@ void settingsVC_viewDidLoad(id self, SEL _cmd) {
         setHeight(&tbl->cc, data->switchContainer, 44, true, false);
         id switchView = Sels.new(objc_getClass("UISwitch"), Sels.nw);
         msg1(void, bool, switchView, sel_getUid("setOn:"), darkMode);
-        id label = createLabel(tbl, sup->clr, localize(bundle, CFSTR("darkMode")),
+        id label = createLabel(tbl, sup->clr, localize(b, CFSTR("darkMode")),
                                UIFontTextStyleBody, ColorLabel);
         id sv = createHStack(tbl, (id []){label, switchView});
         msg1(void, bool, sv, tbl->view.trans, false);
@@ -97,17 +100,17 @@ void settingsVC_viewDidLoad(id self, SEL _cmd) {
     }
 
     CFStringRef liftNames[4];
-    fillStringArray(bundle, liftNames, CFSTR("exNames%02d"), 4);
-    CFStringRef fieldKey = localize(bundle, CFSTR("maxWeight"));
+    fillStringArray(b, liftNames, CFSTR("exNames%02d"), 4);
+    CFStringRef fieldKey = localize(b, CFSTR("maxWeight"));
     for (int i = 0; i < 4; ++i) {
-        inputVC_addChild(self, formatStr(fieldKey, liftNames[i]), 0, 999);
+        inputVC_addChild(self, formatStr(NULL, fieldKey, liftNames[i]), 0, 999);
         CFRelease(liftNames[i]);
     }
     CFRelease(fieldKey);
     tbl->stack.setSpaceAfter(sup->vStack, tbl->stack.scsp, 20, sup->children[3].view);
 
     SEL btnTap = sel_getUid("buttonTapped:");
-    sup->button = createButton(tbl, sup->clr, localize(bundle, CFSTR("settingsSave")),
+    sup->button = createButton(tbl, sup->clr, localize(b, CFSTR("settingsSave")),
                                ColorBlue, UIFontTextStyleBody, self, btnTap);
     tbl->view.setBG(sup->button, tbl->view.sbg, viewBG);
     msg1(void, CGFloat, tbl->view.layer(sup->button, tbl->view.glyr), setCorner, 5);
@@ -115,7 +118,7 @@ void settingsVC_viewDidLoad(id self, SEL _cmd) {
     tbl->stack.addSub(sup->vStack, tbl->stack.asv, sup->button);
     tbl->stack.setSpaceAfter(sup->vStack, tbl->stack.scsp, 20, sup->button);
 
-    data->deleteButton = createButton(tbl, sup->clr, localize(bundle, CFSTR("settingsDelete")),
+    data->deleteButton = createButton(tbl, sup->clr, localize(b, CFSTR("settingsDelete")),
                                       ColorRed, UIFontTextStyleBody, self, btnTap);
     tbl->view.setTag(data->deleteButton, tbl->view.stg, 1);
     tbl->view.setBG(data->deleteButton, tbl->view.sbg, viewBG);
@@ -130,13 +133,13 @@ void settingsVC_buttonTapped(id self, SEL _cmd _U_, id btn) {
     InputVC *sup = (InputVC *)((char *)self + VCSize);
     SettingsVC *data = (SettingsVC *)((char *)sup + sizeof(InputVC));
     VCacheRef tbl = sup->tbl;
-    CFBundleRef bundle = CFBundleGetMainBundle();
+    CFBundleRef b = CFBundleGetMainBundle();
     int tag = (int)tbl->view.getTag(btn, tbl->view.gtg);
     CFStringRef msgKey = tag ? CFSTR("alertMsgDelete") : CFSTR("alertMsgSave");
-    id ctrl = createAlertController(localize(bundle, CFSTR("settingsAlertTitle")), localize(bundle, msgKey));
-    addAlertAction(ctrl, localize(bundle, CFSTR("cancel")), 1, NULL);
+    id ctrl = createAlertController(localize(b, CFSTR("settingsAlertTitle")), localize(b, msgKey));
+    addAlertAction(ctrl, localize(b, CFSTR("cancel")), 1, NULL);
     if (tag) {
-        addAlertAction(ctrl, localize(bundle, CFSTR("delete")), 2, ^{ deleteAppData(); });
+        addAlertAction(ctrl, localize(b, CFSTR("delete")), 2, ^{ deleteAppData(); });
         presentVC(ctrl);
         return;
     }
@@ -155,6 +158,6 @@ void settingsVC_buttonTapped(id self, SEL _cmd _U_, id btn) {
     for (int i = 0; i < 4; ++i) {
         arr[i] = sup->children[i].data->result;
     }
-    addAlertAction(ctrl, localize(bundle, CFSTR("save")), 0, ^{ updateUserInfo(plan, dark, arr); });
+    addAlertAction(ctrl, localize(b, CFSTR("save")), 0, ^{ updateUserInfo(plan, dark, arr); });
     presentVC(ctrl);
 }

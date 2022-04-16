@@ -1,4 +1,5 @@
 #include "HomeVC.h"
+#include <CoreFoundation/CFDateFormatter.h>
 #include <CoreGraphics/CGColor.h>
 #include <dispatch/queue.h>
 #include <math.h>
@@ -21,13 +22,15 @@ id homeVC_init(VCacheRef tbl, CCacheRef clr, time_t startDate) {
     HomeVC *data = (HomeVC *)((char *)self + VCSize);
     data->tbl = tbl;
     data->clr = clr;
-    char buf[16];
-    struct tm tmInfo;
+    const long diff = (long)kCFAbsoluteTimeIntervalSince1970;
+    CFLocaleRef l = CFLocaleCopyCurrent();
+    CFDateFormatterRef f = CFDateFormatterCreate(NULL, l, 0, 0);
+    CFRelease(l);
+    CFDateFormatterSetFormat(f, CFSTR("EEEE"));
     for (int i = 0; i < 7; ++i, startDate += 86400) {
-        localtime_r(&startDate, &tmInfo);
-        strftime(buf, 16, "%A", &tmInfo);
-        dayNames[i] = CFStringCreateWithCString(NULL, buf, kCFStringEncodingUTF8);
+        dayNames[i] = CFDateFormatterCreateStringWithAbsoluteTime(NULL, f, startDate - diff);
     }
+    CFRelease(f);
     return self;
 }
 
@@ -116,19 +119,20 @@ void homeVC_updateColors(id self) {
 void homeVC_viewDidLoad(id self, SEL _cmd) {
     msgSup0(void, (&(struct objc_super){self, VC}), _cmd);
 
-    CFBundleRef bundle = CFBundleGetMainBundle();
+    CFBundleRef b = CFBundleGetMainBundle();
     HomeVC *data = (HomeVC *)((char *)self + VCSize);
     VCacheRef tbl = data->tbl;
     id view = msg0(id, self, sel_getUid("view"));
     tbl->view.setBG(view, tbl->view.sbg,
                     data->clr->getColor(data->clr->cls, data->clr->sc, ColorPrimaryBGGrouped));
-    setVCTitle(msg0(id, self, sel_getUid("navigationItem")), localize(bundle, CFSTR("tabs0")));
+    setVCTitle(msg0(id, self, sel_getUid("navigationItem")), localize(b, CFSTR("tabs0")));
 
-    CFStringRef titles[5] = {[0] = localize(bundle, CFSTR("homeTestMax"))}, headers[2];
-    fillStringArray(bundle, &titles[1], CFSTR("workoutTypes%d"), 4);
-    fillStringArray(bundle, headers, CFSTR("homeHeader%d"), 2);
+    CFStringRef titles[5] = {[0] = localize(b, CFSTR("homeTestMax"))}, headers[2];
+    fillStringArray(b, &titles[1], CFSTR("workoutTypes%d"), 4);
+    fillStringArray(b, headers, CFSTR("homeHeader%d"), 2);
 
-    data->planContainer.view = containerView_init(tbl, data->clr, headers[0], &data->planContainer.data);
+    data->planContainer.view = containerView_init(tbl, data->clr,
+                                                  headers[0], &data->planContainer.data);
     tbl->view.hide(data->planContainer.data->divider, tbl->view.shd, true);
     id customContainer = containerView_init(tbl, data->clr, headers[1], &data->customContainer);
     tbl->stack.setSpace(data->customContainer->stack, tbl->stack.ssp, 4);
@@ -189,10 +193,10 @@ static void showConfetti(id view, HomeVC *data) {
 #else
     ((void(*)(CGRect*,id,SEL))objc_msgSend_stret)(&frame, view, sel_getUid("frame"));
 #endif
-    id confettiView = msg1(id, CGRect, Sels.alloc(View, Sels.alo), sel_getUid("initWithFrame:"), frame);
+    id confetti = msg1(id, CGRect, Sels.alloc(View, Sels.alo), sel_getUid("initWithFrame:"), frame);
     id bg = msg1(id, CGFloat, data->clr->getColor(data->clr->cls, data->clr->sc, ColorGray),
                  sel_getUid("colorWithAlphaComponent:"), 0.8);
-    tbl->view.setBG(confettiView, tbl->view.sbg, bg);
+    tbl->view.setBG(confetti, tbl->view.sbg, bg);
 
     Class cellClass = objc_getClass("CAEmitterCell");
     SEL cgSels[] = {sel_getUid("imageNamed:"), sel_getUid("CGImage"), sel_getUid("CGColor")};
@@ -208,7 +212,7 @@ static void showConfetti(id view, HomeVC *data) {
         "systemRedColor", "systemBlueColor", "systemGreenColor", "systemYellowColor"
     };
     Class Image = objc_getClass("UIImage");
-    CFStringRef imgNames[] = {CFSTR("confetti0"), CFSTR("confetti1"), CFSTR("confetti2"), CFSTR("confetti3")};
+    CFStringRef imgNames[] = {CFSTR("cv0"), CFSTR("cv1"), CFSTR("cv2"), CFSTR("cv3")};
     CGColorRef shapeColors[4];
     id images[4];
     for (int i = 0; i < 4; ++i) {
@@ -236,8 +240,9 @@ static void showConfetti(id view, HomeVC *data) {
 
     CFArrayRef array = CFArrayCreate(NULL, (const void **)cells, 16, &retainedArrCallbacks);
     id layer = Sels.new(objc_getClass("CAEmitterLayer"), Sels.nw);
-    msg1(void, id, tbl->view.layer(confettiView, tbl->view.glyr), sel_getUid("addSublayer:"), layer);
-    msg1(void, CGPoint, layer, sel_getUid("setEmitterPosition:"), ((CGPoint){frame.size.width * 0.5, 0}));
+    msg1(void, id, tbl->view.layer(confetti, tbl->view.glyr), sel_getUid("addSublayer:"), layer);
+    msg1(void, CGPoint, layer,
+         sel_getUid("setEmitterPosition:"), ((CGPoint){frame.size.width * 0.5, 0}));
     msg1(void, id, layer, sel_getUid("setEmitterShape:"), kCAEmitterLayerLine);
     msg1(void, CGSize, layer, sel_getUid("setEmitterSize:"), ((CGSize){frame.size.width - 16, 1}));
     msg1(void, CFArrayRef, layer, sel_getUid("setEmitterCells:"), array);
@@ -247,15 +252,15 @@ static void showConfetti(id view, HomeVC *data) {
     for (int i = 0; i < 16; ++i) {
         Sels.objRel(cells[i], Sels.rel);
     }
-    tbl->view.addSub(view, tbl->view.asv, confettiView);
+    tbl->view.addSub(view, tbl->view.asv, confetti);
 
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 5000000000), dispatch_get_main_queue(), ^(void) {
-        tbl->view.rmSub(confettiView, tbl->view.rsv);
-        Sels.viewRel(confettiView, Sels.rel);
-        CFBundleRef bundle = CFBundleGetMainBundle();
-        id ctrl = createAlertController(localize(bundle, CFSTR("homeAlertTitle")),
-                                        localize(bundle, CFSTR("homeAlertMessage")));
-        addAlertAction(ctrl, localize(bundle, CFSTR("ok")), 0, NULL);
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 5000000000), dispatch_get_main_queue(), ^{
+        tbl->view.rmSub(confetti, tbl->view.rsv);
+        Sels.viewRel(confetti, Sels.rel);
+        CFBundleRef b = CFBundleGetMainBundle();
+        id ctrl = createAlertController(localize(b, CFSTR("homeAlertTitle")),
+                                        localize(b, CFSTR("homeAlertMessage")));
+        addAlertAction(ctrl, localize(b, CFSTR("ok")), 0, NULL);
         presentVC(ctrl);
     });
 }
@@ -270,7 +275,7 @@ void homeVC_handleFinishedWorkout(id self, unsigned char completed) {
     homeVC_updateWorkoutsList(data, completed);
     if (data->numWorkouts == total) {
         id view = msg0(id, self, sel_getUid("view"));
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 2500000000), dispatch_get_main_queue(), ^(void) {
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 2500000000), dispatch_get_main_queue(), ^{
             showConfetti(view, data);
         });
     }

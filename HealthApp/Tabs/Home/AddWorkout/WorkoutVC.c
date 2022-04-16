@@ -42,7 +42,7 @@ enum {
 };
 
 struct WorkoutData {
-    const Class NotifCenter, Content, Trigger, Request, Sound;
+    const Class Center, Content, Trigger, Request, Sound;
     const SEL dc, ds, newTri, newReq, addReq, btnEn;
     const SEL sct[3];
     id (*getCenter)(Class,SEL);
@@ -65,29 +65,29 @@ static struct WorkoutData wkData;
 
 static void handleEvent(WorkoutVC *data, int gIdx, int eIdx, int event);
 
-void initWorkoutStrings(CFBundleRef bundle) {
-    fillStringArray(bundle, notificationMessages, CFSTR("notifications%d"), 2);
-    notifTitle = localize(bundle, CFSTR("workoutNotificationTitle"));
-    exerciseProgressFmt = localize(bundle, CFSTR("exerciseProgressHint"));
+void initWorkoutStrings(CFBundleRef b) {
+    fillStringArray(b, notificationMessages, CFSTR("notifications%d"), 2);
+    notifTitle = localize(b, CFSTR("workoutNotificationTitle"));
+    exerciseProgressFmt = localize(b, CFSTR("exerciseProgressHint"));
     SEL btnEn = sel_getUid("setUserInteractionEnabled:");
-    Class NotifCenter = objc_getClass("UNUserNotificationCenter");
+    Class Center = objc_getClass("UNUserNotificationCenter");
     Class Content = objc_getClass("UNMutableNotificationContent");
     Class Trigger = objc_getClass("UNTimeIntervalNotificationTrigger");
-    Class Request = objc_getClass("UNNotificationRequest"), Sound = objc_getClass("UNNotificationSound");
+    Class Req = objc_getClass("UNNotificationRequest"), Sound = objc_getClass("UNNotificationSound");
     SEL ds = sel_getUid("defaultSound"), dc = sel_getUid("currentNotificationCenter");
     SEL newTri = sel_getUid("triggerWithTimeInterval:repeats:");
     SEL newReq = sel_getUid("requestWithIdentifier:content:trigger:");
     SEL addReq = sel_getUid("addNotificationRequest:withCompletionHandler:");
     SEL sct[] = {sel_getUid("setTitle:"), sel_getUid("setBody:"), sel_getUid("setSound:")};
-    memcpy(&wkData, &(struct WorkoutData){NotifCenter, Content, Trigger, Request, Sound, dc, ds, newTri,
-        newReq, addReq, btnEn, {sct[0], sct[1], sct[2]}, (id(*)(Class,SEL))getImpC(NotifCenter, dc),
+    memcpy(&wkData, &(struct WorkoutData){Center, Content, Trigger, Req, Sound, dc, ds, newTri,
+        newReq, addReq, btnEn, {sct[0], sct[1], sct[2]}, (id(*)(Class,SEL))getImpC(Center, dc),
         (id(*)(Class,SEL))getImpC(Sound, ds), (void(*)(id,SEL,bool))getImpO(View, btnEn),
         (void(*)(id,SEL,CFStringRef))getImpO(Content, sct[0]),
         (void(*)(id,SEL,CFStringRef))getImpO(Content, sct[1]),
         (void(*)(id,SEL,id))getImpO(Content, sct[2]),
         (id(*)(Class,SEL,double,bool))getImpC(Trigger, newTri),
-        (id(*)(Class,SEL,CFStringRef,id,id))getImpC(Request, newReq),
-        (void(*)(id,SEL,id,void(^)(id)))getImpO(NotifCenter, addReq)
+        (id(*)(Class,SEL,CFStringRef,id,id))getImpC(Req, newReq),
+        (void(*)(id,SEL,id,void(^)(id)))getImpO(Center, addReq)
     }, sizeof(struct WorkoutData));
 }
 
@@ -118,7 +118,7 @@ static void *timer_loop(void *arg) {
             void *parent = t->parent;
             if (t->info.type == 0 && t[1].info.active == 1)
                 pthread_kill(*exerciseTimerThread, SignalExercise);
-            dispatch_async(dispatch_get_main_queue(), ^(void) {
+            dispatch_async(dispatch_get_main_queue(), ^{
                 handleEvent(parent, container, exercise, eventType);
             });
         }
@@ -204,14 +204,14 @@ static void restartTimers(CFNotificationCenterRef ctr _U_, void *self,
 static void scheduleNotification(unsigned secondsFromNow, int type) {
     static int identifier = 0;
     int currentId = identifier++;
-    CFStringRef idString = formatStr(CFSTR("%d"), currentId);
+    CFStringRef idString = formatStr(NULL, CFSTR("%d"), currentId);
     id content = Sels.new(wkData.Content, Sels.nw);
     wkData.setTitle(content, wkData.sct[0], notifTitle);
     wkData.setBody(content, wkData.sct[1], notificationMessages[type]);
     wkData.setSound(content, wkData.sct[2], wkData.getSound(wkData.Sound, wkData.ds));
     id trigger = wkData.createTrigger(wkData.Trigger, wkData.newTri, secondsFromNow, false);
     id req = wkData.createReq(wkData.Request, wkData.newReq, idString, content, trigger);
-    wkData.addToCenter(wkData.getCenter(wkData.NotifCenter, wkData.dc), wkData.addReq, req, ^(id e _U_){});
+    wkData.addToCenter(wkData.getCenter(wkData.Center, wkData.dc), wkData.addReq, req, ^(id e _U_){});
     CFRelease(idString);
     Sels.objRel(content, Sels.rel);
 }
@@ -222,8 +222,9 @@ static void cleanupWorkoutNotifications(WorkoutVC *data) {
         pthread_kill(data->threads[TimerGroup], SignalGroup);
     if (data->timers[TimerExercise].info.active == 1)
         pthread_kill(data->threads[TimerExercise], SignalExercise);
-    CFNotificationCenterRemoveEveryObserver(CFNotificationCenterGetLocalCenter(), (char *)data - VCSize);
-    id center = wkData.getCenter(wkData.NotifCenter, wkData.dc);
+    CFNotificationCenterRemoveEveryObserver(
+      CFNotificationCenterGetLocalCenter(), (char *)data - VCSize);
+    id center = wkData.getCenter(wkData.Center, wkData.dc);
     msg0(void, center, sel_getUid("removeAllPendingNotificationRequests"));
     msg0(void, center, sel_getUid("removeAllDeliveredNotifications"));
 }
@@ -253,8 +254,11 @@ static bool cycleExerciseEntry(ExerciseEntry *e, WorkoutTimer *timers) {
                 return true;
             } else {
                 e->state = ExerciseStateActive;
-                CFStringRef sets = formatStr(CFSTR("%d"), e->completedSets + 1);
+                CFLocaleRef l = CFLocaleCopyCurrent();
+                CFStringRef sets = formatStr(l, CFSTR("%d"), e->completedSets + 1);
+                CFRelease(l);
                 CFStringReplace(e->headerStr, e->hRange, sets);
+                e->hRange.length = CFStringGetLength(sets);
                 CFRelease(sets);
                 if (e->type == ExerciseDuration) {
                     startWorkoutTimer(&timers[TimerExercise], (unsigned)e->reps);
@@ -287,14 +291,11 @@ static void startGroup(Circuit *c, WorkoutTimer *timers, bool startTimer) {
 static void exerciseView_configure(StatusView *ptr, VCacheRef tbl, CCacheRef clr) {
     ExerciseEntry *e = ptr->entry;
 
-    tbl->label.setText(ptr->headerLabel, tbl->label.stxt, e->headerStr);
     if (e->state == ExerciseStateResting) {
         tbl->button.setTitle(ptr->button, tbl->button.sbtxt, e->restStr, 0);
     } else {
         tbl->button.setTitle(ptr->button, tbl->button.sbtxt, e->titleStr, 0);
     }
-
-    statusView_updateAccessibility(ptr, tbl);
 
     switch (e->state) {
         case ExerciseStateDisabled:
@@ -302,6 +303,7 @@ static void exerciseView_configure(StatusView *ptr, VCacheRef tbl, CCacheRef clr
             tbl->button.setEnabled(ptr->button, tbl->button.en, false);
             break;
         case ExerciseStateActive:
+            tbl->label.setText(ptr->headerLabel, tbl->label.stxt, e->headerStr);
             if (e->type == ExerciseDuration)
                 wkData.setInteraction(ptr->button, wkData.btnEn, false);
         case ExerciseStateResting:
@@ -312,22 +314,24 @@ static void exerciseView_configure(StatusView *ptr, VCacheRef tbl, CCacheRef clr
             tbl->button.setEnabled(ptr->button, tbl->button.en, false);
             tbl->view.setBG(ptr->box, tbl->view.sbg, clr->getColor(clr->cls, clr->sc, ColorGreen));
     }
+    statusView_updateAccessibility(ptr, tbl);
 }
 
 static bool didFinishCircuit(Circuit *c) {
     if (c->type == CircuitRounds) {
         return ++c->completedReps == c->reps;
     } else if (c->type == CircuitDecrement) {
-        bool changeRange = c->completedReps-- == 10;
-        if (c->completedReps == 0) return true;
+        if (--c->completedReps == 0) return true;
 
-        CFStringRef reps = formatStr(CFSTR("%d"), c->completedReps);
+        CFLocaleRef l = CFLocaleCopyCurrent();
+        CFStringRef reps = formatStr(l, CFSTR("%d"), c->completedReps);
+        CFRelease(l);
+        long len = CFStringGetLength(reps);
         ExerciseEntry *end = &c->exercises[c->size];
         for (ExerciseEntry *e = c->exercises; e < end; ++e) {
             if (e->type == ExerciseReps) {
                 CFStringReplace(e->titleStr, e->tRange, reps);
-                if (changeRange)
-                    e->tRange.length -= 1;
+                e->tRange.length = len;
             }
         }
         CFRelease(reps);
@@ -488,6 +492,7 @@ void workoutVC_viewDidLoad(id self, SEL _cmd) {
     SEL btnTap = sel_getUid("buttonTapped:");
     ContainerView *container;
     StatusView *sv;
+    CFLocaleRef l = CFLocaleCopyCurrent();
     for (int i = 0; i < data->workout->size; ++i) {
         Circuit *c = &data->workout->activities[i];
         data->containers[i].view = containerView_init(tbl, data->clr, c->headerStr, &container);
@@ -501,27 +506,30 @@ void workoutVC_viewDidLoad(id self, SEL _cmd) {
         bool addHint = c->size > 1;
         for (int j = 0; j < c->size; ++j) {
             id v = statusView_init(tbl, data->clr, NULL, &sv, (int)((i << 8) | j), self, btnTap);
-            sv->entry = &c->exercises[j];
+            ExerciseEntry *e = &c->exercises[j];
+            sv->entry = e;
             if (addHint) {
-                CFStringRef exerciseHint = formatStr(exerciseProgressFmt, j + 1, c->size);
+                CFStringRef exerciseHint = formatStr(l, exerciseProgressFmt, j + 1, c->size);
                 tbl->view.setHint(sv->button, tbl->view.shn, exerciseHint);
                 CFRelease(exerciseHint);
             }
+            tbl->label.setText(sv->headerLabel, tbl->label.stxt, e->headerStr);
             exerciseView_configure(sv, tbl, data->clr);
             tbl->stack.addSub(container->stack, tbl->stack.asv, v);
             Sels.viewRel(v, Sels.rel);
         }
     }
+    CFRelease(l);
 
     id scrollView = createScrollView();
     addVStackToScrollView(tbl, view, stack, scrollView);
     Sels.viewRel(scrollView, Sels.rel);
     Sels.viewRel(stack, Sels.rel);
 
-    CFNotificationCenterRef center = CFNotificationCenterGetLocalCenter();
-    CFNotificationCenterAddObserver(center, self, restartTimers, UIApplicationDidBecomeActiveNotification,
+    CFNotificationCenterRef c = CFNotificationCenterGetLocalCenter();
+    CFNotificationCenterAddObserver(c, self, restartTimers, UIApplicationDidBecomeActiveNotification,
                                     NULL, CFNotificationSuspensionBehaviorDrop);
-    CFNotificationCenterAddObserver(center, self, stopTimers, UIApplicationWillResignActiveNotification,
+    CFNotificationCenterAddObserver(c, self, stopTimers, UIApplicationWillResignActiveNotification,
                                     NULL, CFNotificationSuspensionBehaviorDrop);
 }
 
@@ -538,16 +546,9 @@ void workoutVC_startEndWorkout(id self, SEL _cmd _U_, id btn) {
         data->workout->startTime = time(NULL);
         startGroup(data->workout->group, data->timers, true);
         CFArrayRef views = tbl->stack.getSub(data->first->stack, tbl->stack.gsv);
-        for (int i = 0; i < data->workout->group->size; ++i) {
-            exerciseView_configure(
-              (StatusView *)((char *)CFArrayGetValueAtIndex(views, i) + ViewSize), tbl, data->clr);
-        }
-        id nextView;
-        if (data->workout->group->headerStr) {
-            nextView = data->first->headerLabel;
-        } else {
-            nextView = ((StatusView *)((char *)CFArrayGetValueAtIndex(views, 0) + ViewSize))->button;
-        }
+        StatusView *sv = (StatusView *)((char *)CFArrayGetValueAtIndex(views, 0) + ViewSize);
+        exerciseView_configure(sv, tbl, data->clr);
+        id nextView = data->workout->group->headerStr ? data->first->headerLabel : sv->button;
         UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, nextView);
     } else {
         pthread_mutex_lock(&timerLock);
@@ -626,9 +627,9 @@ void handleEvent(WorkoutVC *data, int gIdx, int eIdx, int event) {
             if (w->type == WorkoutEndurance) {
                 tbl->label.setColor(ptr->headerLabel, tbl->label.stc,
                                     data->clr->getColor(data->clr->cls, data->clr->sc, ColorGreen));
-                CFStringRef message = localize(CFBundleGetMainBundle(), CFSTR("exerciseDurationMessage"));
-                tbl->label.setText(ptr->headerLabel, tbl->label.stxt, message);
-                CFRelease(message);
+                CFStringRef msg = localize(CFBundleGetMainBundle(), CFSTR("exerciseDurationMessage"));
+                tbl->label.setText(ptr->headerLabel, tbl->label.stxt, msg);
+                CFRelease(msg);
                 statusView_updateAccessibility(ptr, tbl);
                 nextView = ptr->button;
                 goto foundTransition;
@@ -647,10 +648,10 @@ foundTransition:
             longEnough = setDuration(w);
             pthread_mutex_unlock(&timerLock);
             if (UIAccessibilityIsVoiceOverRunning()) {
-                CFStringRef message = localize(CFBundleGetMainBundle(), CFSTR("workoutCompleteMsg"));
+                CFStringRef msg = localize(CFBundleGetMainBundle(), CFSTR("workoutCompleteMsg"));
                 dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 4000000000), dispatch_get_main_queue(), ^{
-                    UIAccessibilityPostNotification(UIAccessibilityAnnouncementNotification, (id)message);
-                    CFRelease(message);
+                    UIAccessibilityPostNotification(UIAccessibilityAnnouncementNotification, (id)msg);
+                    CFRelease(msg);
                 });
             }
             workoutVC_handleFinishedWorkout(data, longEnough);
@@ -665,8 +666,11 @@ foundTransition:
 
         case TransitionFinishedCircuit:
             if (w->group->reps > 1 && w->group->type == CircuitRounds) {
-                CFStringRef newNumber = formatStr(CFSTR("%d"), w->group->completedReps + 1);
-                CFStringReplace(w->group->headerStr, w->group->numberRange, newNumber);
+                CFLocaleRef l = CFLocaleCopyCurrent();
+                CFStringRef newNumber = formatStr(l, CFSTR("%d"), w->group->completedReps + 1);
+                CFRelease(l);
+                CFStringReplace(w->group->headerStr, w->group->range, newNumber);
+                w->group->range.length = CFStringGetLength(newNumber);
                 CFRelease(newNumber);
                 tbl->label.setText(data->first->headerLabel, tbl->label.stxt, w->group->headerStr);
                 nextView = data->first->headerLabel;

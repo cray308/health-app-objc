@@ -38,10 +38,10 @@
 		61594D2026068106000D01A1 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 61594D1F26068106000D01A1 /* main.c */; };
 		61594D2A26068106000D01A1 /* HealthAppTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 61594D2926068106000D01A1 /* HealthAppTests.m */; };
 		6161838226AC80A0001587B2 /* CocoaHelpers.c in Sources */ = {isa = PBXBuildFile; fileRef = 6161838126AC80A0001587B2 /* CocoaHelpers.c */; };
+		616F8818280849E900395852 /* Charts.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 616F8816280849E500395852 /* Charts.xcframework */; };
+		616F8819280849E900395852 /* Charts.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 616F8816280849E500395852 /* Charts.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		618782C827D96BC60075466C /* ViewCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 618782C727D96BC60075466C /* ViewCache.h */; };
 		618782CA27DBF4BA0075466C /* ColorCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 618782C927DBF4BA0075466C /* ColorCache.h */; };
-		619919ED27824DBE00418A57 /* Charts.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 619919EB27824DB500418A57 /* Charts.xcframework */; };
-		619919EE27824DBE00418A57 /* Charts.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 619919EB27824DB500418A57 /* Charts.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		61BC6F56266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m in Sources */ = {isa = PBXBuildFile; fileRef = 61BC6F52266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		61C34508280107E600CA8B03 /* WorkoutData.plist in Resources */ = {isa = PBXBuildFile; fileRef = 61C34507280107E600CA8B03 /* WorkoutData.plist */; };
 		61E8ED6726FD60B400942368 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 61E8ED6926FD60B400942368 /* Localizable.strings */; };
@@ -65,7 +65,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				619919EE27824DBE00418A57 /* Charts.xcframework in Embed Frameworks */,
+				616F8819280849E900395852 /* Charts.xcframework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -111,9 +111,9 @@
 		61594D2B26068106000D01A1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		6161838026AC8089001587B2 /* CocoaHelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CocoaHelpers.h; sourceTree = "<group>"; };
 		6161838126AC80A0001587B2 /* CocoaHelpers.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = CocoaHelpers.c; sourceTree = "<group>"; };
+		616F8816280849E500395852 /* Charts.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = Charts.xcframework; sourceTree = "<group>"; };
 		618782C727D96BC60075466C /* ViewCache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewCache.h; sourceTree = "<group>"; };
 		618782C927DBF4BA0075466C /* ColorCache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ColorCache.h; sourceTree = "<group>"; };
-		619919EB27824DB500418A57 /* Charts.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = Charts.xcframework; sourceTree = "<group>"; };
 		61BC6F52266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "WeeklyData+CoreDataClass.m"; sourceTree = "<group>"; };
 		61C34507280107E600CA8B03 /* WorkoutData.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = WorkoutData.plist; sourceTree = "<group>"; };
 		61E8ED6826FD60B400942368 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -125,7 +125,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				619919ED27824DBE00418A57 /* Charts.xcframework in Frameworks */,
+				616F8818280849E900395852 /* Charts.xcframework in Frameworks */,
 				6122434027934B0D006709E8 /* HealthKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -222,8 +222,8 @@
 		6185D9B926E4263700DB2BF2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				616F8816280849E500395852 /* Charts.xcframework */,
 				6122433F27934B0D006709E8 /* HealthKit.framework */,
-				619919EB27824DB500418A57 /* Charts.xcframework */,
 			);
 			path = Frameworks;
 			sourceTree = "<group>";
