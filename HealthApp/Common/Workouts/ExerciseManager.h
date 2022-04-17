@@ -20,9 +20,9 @@ enum {
 };
 
 typedef struct {
-    CFMutableStringRef titleStr;
-    CFMutableStringRef headerStr;
-    CFStringRef restStr;
+    CFMutableStringRef title;
+    CFMutableStringRef header;
+    CFStringRef rest;
     CFRange tRange;
     CFRange hRange;
     const short reps;
@@ -34,7 +34,7 @@ typedef struct {
 
 typedef struct {
     ExerciseEntry *exercises;
-    CFMutableStringRef headerStr;
+    CFMutableStringRef header;
     CFRange range;
     int index;
     const int size;

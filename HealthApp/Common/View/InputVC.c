@@ -133,7 +133,7 @@ void inputVC_addChild(id self, CFStringRef hint, short min, short max) {
     v->hintLabel = createLabel(tbl, d->clr, CFRetain(hint), UIFontTextStyleSubheadline, ColorLabel);
     tbl->label.setLines(v->hintLabel, tbl->label.snl, 0);
     tbl->view.setIsAcc(v->hintLabel, tbl->view.sace, false);
-    v->field = createTextfield(tbl, d->clr, self, d->toolbar, CFSTR(""), hint, index);
+    v->field = createTextfield(tbl, d->clr, self, d->toolbar, hint, index);
     msg1(void, long, v->field, cache.skbt, 4);
     tbl->view.setHint(v->field, tbl->view.shn, errorText);
     if (d->setKB)

@@ -7,12 +7,19 @@
 
 typedef struct {
     id button;
-    id headerLabel;
+    id header;
     id box;
     ExerciseEntry *entry;
 } StatusView;
 
-id statusView_init(VCacheRef tbl, CCacheRef clr, StatusView **v, int tag, id target, SEL action);
+typedef struct {
+    VCacheRef tbl;
+    CCacheRef clr;
+    StatusView **v;
+} SVArgs;
+
+id statusView_init(SVArgs *args,
+                   CFStringRef header, CFStringRef title CF_CONSUMED, int tag, id target, SEL action);
 void statusView_updateAccessibility(StatusView *v, VCacheRef tbl);
 
 #endif /* StatusView_h */

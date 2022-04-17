@@ -68,13 +68,10 @@ void homeVC_createWorkoutsList(id self, const UserInfo *info) {
     setWeeklyWorkoutNames(info->currentPlan, workoutNames);
 
     SEL btnTap = sel_getUid("buttonTapped:");
-    StatusView *sv;
+    StatusView *sv; SVArgs args = {d->tbl, d->clr, &sv};
     for (int i = 0; i < 7; ++i) {
         if (!workoutNames[i]) continue;
-        id btn = statusView_init(tbl, d->clr, &sv, i, self, btnTap);
-        tbl->button.setTitle(sv->button, tbl->button.sbtxt, workoutNames[i], 0);
-        CFRelease(workoutNames[i]);
-        tbl->label.setText(sv->headerLabel, tbl->label.stxt, dayNames[i]);
+        id btn = statusView_init(&args, dayNames[i], workoutNames[i], i, self, btnTap);
         statusView_updateAccessibility(sv, tbl);
         tbl->stack.addSub(d->planContainer.data->stack, tbl->stack.asv, btn);
         Sels.viewRel(btn, Sels.rel);
@@ -103,7 +100,7 @@ void homeVC_updateColors(id self) {
     CFArrayRef views = tbl->stack.getSub(d->planContainer.data->stack, tbl->stack.gsv);
     for (int i = 0; i < d->numWorkouts; ++i) {
         StatusView *v = (StatusView *)((char *)CFArrayGetValueAtIndex(views, i) + ViewSize);
-        tbl->label.setColor(v->headerLabel, tbl->label.stc, label);
+        tbl->label.setColor(v->header, tbl->label.stc, label);
         tbl->button.setColor(v->button, tbl->button.sbc, label, 0);
         tbl->button.setColor(v->button, tbl->button.sbc, disabled, 2);
         tbl->view.setBG(v->button, tbl->view.sbg, bg);
@@ -131,24 +128,18 @@ void homeVC_viewDidLoad(id self, SEL _cmd) {
     fillStringArray(&titles[1], CFSTR("workoutTypes%d"), 4);
     fillStringArray(headers, CFSTR("homeHeader%d"), 2);
 
-    d->planContainer.view = containerView_init(tbl, d->clr, &d->planContainer.data);
-    tbl->label.setText(d->planContainer.data->headerLabel, tbl->label.stxt, headers[0]);
-    CFRelease(headers[0]);
+    d->planContainer.view = containerView_init(tbl, d->clr, &d->planContainer.data, headers[0]);
     tbl->view.hide(d->planContainer.data->divider, tbl->view.shd, true);
-    id customContainer = containerView_init(tbl, d->clr, &d->customContainer);
-    tbl->label.setText(d->customContainer->headerLabel, tbl->label.stxt, headers[1]);
-    CFRelease(headers[1]);
+    id customContainer = containerView_init(tbl, d->clr, &d->customContainer, headers[1]);
     tbl->stack.setSpace(d->customContainer->stack, tbl->stack.ssp, 4);
     id vStack = createVStack((id []){d->planContainer.view, customContainer}, 2);
     tbl->stack.setSpace(vStack, tbl->stack.ssp, 20);
     tbl->stack.setMargins(vStack, tbl->stack.smr, (HAInsets){16, 8, 16, 8});
 
     SEL btnTap = sel_getUid("customButtonTapped:");
-    StatusView *sv;
+    StatusView *sv; SVArgs args = {d->tbl, d->clr, &sv};
     for (int i = 0; i < 5; ++i) {
-        id btn = statusView_init(tbl, d->clr, &sv, i, self, btnTap);
-        tbl->button.setTitle(sv->button, tbl->button.sbtxt, titles[i], 0);
-        CFRelease(titles[i]);
+        id btn = statusView_init(&args, NULL, titles[i], i, self, btnTap);
         tbl->view.hide(sv->box, tbl->view.shd, true);
         statusView_updateAccessibility(sv, tbl);
         tbl->stack.addSub(d->customContainer->stack, tbl->stack.asv, btn);

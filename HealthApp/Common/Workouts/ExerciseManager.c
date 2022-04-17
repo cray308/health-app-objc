@@ -168,7 +168,8 @@ static Workout *buildWorkout(CFArrayRef acts, WorkoutParams *params) {
         }
 
         if (circuitHeader) {
-            circuit.headerStr = CFStringCreateMutableCopy(NULL, 80, circuitHeader);
+            circuit.header = CFStringCreateMutableCopy(NULL, 80, circuitHeader);
+            CFRetain(circuit.header);
             CFRelease(circuitHeader);
         }
 
@@ -192,7 +193,7 @@ static Workout *buildWorkout(CFArrayRef acts, WorkoutParams *params) {
                 CFStringRef subhead = CFStringCreateWithSubstring(NULL, header, subrange);
                 CFStringFindWithOptionsAndLocale(
                   subhead, one, (CFRange){0, CFStringGetLength(subhead)}, 0, l, &numrange);
-                e.headerStr = CFStringCreateMutableCopy(NULL, 32, header);
+                e.header = CFStringCreateMutableCopy(NULL, 32, header);
                 CFRelease(subhead);
                 CFRelease(header);
                 e.hRange.location = subrange.location + numrange.location;
@@ -201,7 +202,7 @@ static Workout *buildWorkout(CFArrayRef acts, WorkoutParams *params) {
 
             CFNumberGetValue(CFDictionaryGetValue(exDict, CFSTR("B")), kCFNumberShortType, &rest);
             if (rest)
-                e.restStr = formatStr(l, restFormat, rest);
+                e.rest = formatStr(l, restFormat, rest);
 
             int n;
             CFNumberGetValue(CFDictionaryGetValue(exDict, Keys.index), kCFNumberIntType, &n);
@@ -227,12 +228,13 @@ static Workout *buildWorkout(CFArrayRef acts, WorkoutParams *params) {
             CFRelease(nameKey);
             CFRelease(name);
 
-            e.titleStr = CFStringCreateMutableCopy(NULL, 64, titleStr);
+            e.title = CFStringCreateMutableCopy(NULL, 64, titleStr);
+            CFRetain(e.title);
             CFRelease(titleStr);
             if (circuit.type == CircuitDecrement && e.type == ExerciseReps) {
                 CFStringRef ten = formatStr(l, CFSTR("%d"), 10);
                 CFStringFindWithOptionsAndLocale(
-                  e.titleStr, ten, (CFRange){0, CFStringGetLength(e.titleStr)}, 0, l, &e.tRange);
+                  e.title, ten, (CFRange){0, CFStringGetLength(e.title)}, 0, l, &e.tRange);
                 CFRelease(ten);
             }
 

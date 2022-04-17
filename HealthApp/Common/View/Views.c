@@ -235,11 +235,10 @@ id createSegmentedControl(CFStringRef format, int startIndex) {
 }
 
 id createTextfield(VCacheRef tbl, CCacheRef clr, id delegate,
-                   id accessory, CFStringRef text, CFStringRef hint, int tag) {
+                   id accessory, CFStringRef hint, int tag) {
     FieldCache const *c = &tbl->field;
     id view = Sels.new(cache.field.cls, Sels.nw);
     tbl->view.setBG(view, tbl->view.sbg, clr->getColor(clr->cls, clr->sc, ColorTertiaryBG));
-    c->setText(view, tbl->label.stxt, text);
     cache.field.setFont(view, cache.label.sf,
                         cache.fc.pref(cache.fc.cls, cache.fc.pf, UIFontTextStyleBody));
     cache.field.setColor(view, tbl->label.stc, clr->getColor(clr->cls, clr->sc, ColorLabel));

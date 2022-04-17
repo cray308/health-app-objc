@@ -240,7 +240,7 @@ static bool cycleExerciseEntry(ExerciseEntry *e, WorkoutTimer *timers) {
             break;
 
         case ExerciseStateActive:
-            if (e->restStr) {
+            if (e->rest) {
                 e->state = ExerciseStateResting;
                 break;
             }
@@ -255,7 +255,7 @@ static bool cycleExerciseEntry(ExerciseEntry *e, WorkoutTimer *timers) {
                 CFLocaleRef l = CFLocaleCopyCurrent();
                 CFStringRef sets = formatStr(l, CFSTR("%d"), e->completedSets + 1);
                 CFRelease(l);
-                CFStringReplace(e->headerStr, e->hRange, sets);
+                CFStringReplace(e->header, e->hRange, sets);
                 e->hRange.length = CFStringGetLength(sets);
                 CFRelease(sets);
                 if (e->type == ExerciseDuration) {
@@ -290,9 +290,9 @@ static void exerciseView_configure(StatusView *v, VCacheRef tbl, CCacheRef clr) 
     ExerciseEntry *e = v->entry;
 
     if (e->state == ExerciseStateResting) {
-        tbl->button.setTitle(v->button, tbl->button.sbtxt, e->restStr, 0);
+        tbl->button.setTitle(v->button, tbl->button.sbtxt, e->rest, 0);
     } else {
-        tbl->button.setTitle(v->button, tbl->button.sbtxt, e->titleStr, 0);
+        tbl->button.setTitle(v->button, tbl->button.sbtxt, e->title, 0);
     }
 
     switch (e->state) {
@@ -301,7 +301,7 @@ static void exerciseView_configure(StatusView *v, VCacheRef tbl, CCacheRef clr) 
             tbl->button.setEnabled(v->button, tbl->button.en, false);
             break;
         case ExerciseStateActive:
-            tbl->label.setText(v->headerLabel, tbl->label.stxt, e->headerStr);
+            tbl->label.setText(v->header, tbl->label.stxt, e->header);
             if (e->type == ExerciseDuration)
                 wkData.setInteraction(v->button, wkData.btnEn, false);
         case ExerciseStateResting:
@@ -328,7 +328,7 @@ static bool didFinishCircuit(Circuit *c) {
         ExerciseEntry *end = &c->exercises[c->size];
         for (ExerciseEntry *e = c->exercises; e < end; ++e) {
             if (e->type == ExerciseReps) {
-                CFStringReplace(e->titleStr, e->tRange, reps);
+                CFStringReplace(e->title, e->tRange, reps);
                 e->tRange.length = len;
             }
         }
@@ -405,11 +405,11 @@ void workoutVC_deinit(id self, SEL _cmd) {
     int size = d->workout->size;
     Circuit *cEnd = &d->workout->activities[size];
     for (Circuit *c = &d->workout->activities[0]; c < cEnd; ++c) {
-        if (c->headerStr) CFRelease(c->headerStr);
+        if (c->header) CFRelease(c->header);
         for (ExerciseEntry *e = &c->exercises[0]; e < &c->exercises[c->size]; ++e) {
-            CFRelease(e->titleStr);
-            if (e->restStr) CFRelease(e->restStr);
-            if (e->headerStr) CFRelease(e->headerStr);
+            CFRelease(e->title);
+            if (e->rest) CFRelease(e->rest);
+            if (e->header) CFRelease(e->header);
         }
         free(c->exercises);
     }
@@ -487,13 +487,12 @@ void workoutVC_viewDidLoad(id self, SEL _cmd) {
 
     SEL btnTap = sel_getUid("buttonTapped:");
     ContainerView *cv;
-    StatusView *sv;
+    StatusView *sv; SVArgs args = {d->tbl, d->clr, &sv};
     CFLocaleRef l = CFLocaleCopyCurrent();
     for (int i = 0; i < d->workout->size; ++i) {
         Circuit *c = &d->workout->activities[i];
-        d->containers[i].view = containerView_init(tbl, d->clr, &cv);
+        d->containers[i].view = containerView_init(tbl, d->clr, &cv, c->header);
         d->containers[i].data = cv;
-        tbl->label.setText(cv->headerLabel, tbl->label.stxt, c->headerStr);
         if (!i) {
             d->first = cv;
             tbl->view.hide(cv->divider, tbl->view.shd, true);
@@ -502,15 +501,14 @@ void workoutVC_viewDidLoad(id self, SEL _cmd) {
 
         bool addHint = c->size > 1;
         for (int j = 0; j < c->size; ++j) {
-            id v = statusView_init(tbl, d->clr, &sv, (int)((i << 8) | j), self, btnTap);
             ExerciseEntry *e = &c->exercises[j];
+            id v = statusView_init(&args, e->header, e->title, (int)((i << 8) | j), self, btnTap);
             sv->entry = e;
             if (addHint) {
                 CFStringRef exerciseHint = formatStr(l, exerciseProgressFmt, j + 1, c->size);
                 tbl->view.setHint(sv->button, tbl->view.shn, exerciseHint);
                 CFRelease(exerciseHint);
             }
-            tbl->label.setText(sv->headerLabel, tbl->label.stxt, e->headerStr);
             exerciseView_configure(sv, tbl, d->clr);
             tbl->stack.addSub(cv->stack, tbl->stack.asv, v);
             Sels.viewRel(v, Sels.rel);
@@ -545,7 +543,7 @@ void workoutVC_startEndWorkout(id self, SEL _cmd _U_, id btn) {
         CFArrayRef views = tbl->stack.getSub(d->first->stack, tbl->stack.gsv);
         StatusView *sv = (StatusView *)((char *)CFArrayGetValueAtIndex(views, 0) + ViewSize);
         exerciseView_configure(sv, tbl, d->clr);
-        id nextView = d->workout->group->headerStr ? d->first->headerLabel : sv->button;
+        id nextView = d->workout->group->header ? d->first->header : sv->button;
         UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, nextView);
     } else {
         pthread_mutex_lock(&timerLock);
@@ -622,10 +620,10 @@ void handleEvent(WorkoutVC *d, int gIdx, int eIdx, int event) {
         case EventFinishExercise:
             wkData.setInteraction(v->button, wkData.btnEn, true);
             if (w->type == WorkoutEndurance) {
-                tbl->label.setColor(v->headerLabel, tbl->label.stc,
+                tbl->label.setColor(v->header, tbl->label.stc,
                                     d->clr->getColor(d->clr->cls, d->clr->sc, ColorGreen));
                 CFStringRef msg = localize(CFSTR("exerciseDurationMessage"));
-                tbl->label.setText(v->headerLabel, tbl->label.stxt, msg);
+                tbl->label.setText(v->header, tbl->label.stxt, msg);
                 CFRelease(msg);
                 statusView_updateAccessibility(v, tbl);
                 nextView = v->button;
@@ -659,18 +657,18 @@ foundTransition:
             views = tbl->stack.getSub(d->first->stack, tbl->stack.gsv);
             tbl->view.rmSub(d->containers[w->index - 1].view, tbl->view.rsv);
             tbl->view.hide(d->first->divider, tbl->view.shd, true);
-            nextView = d->first->headerLabel;
+            nextView = d->first->header;
 
         case TransitionFinishedCircuit:
             if (w->group->reps > 1 && w->group->type == CircuitRounds) {
                 CFLocaleRef l = CFLocaleCopyCurrent();
                 CFStringRef newNumber = formatStr(l, CFSTR("%d"), w->group->completedReps + 1);
                 CFRelease(l);
-                CFStringReplace(w->group->headerStr, w->group->range, newNumber);
+                CFStringReplace(w->group->header, w->group->range, newNumber);
                 w->group->range.length = CFStringGetLength(newNumber);
                 CFRelease(newNumber);
-                tbl->label.setText(d->first->headerLabel, tbl->label.stxt, w->group->headerStr);
-                nextView = d->first->headerLabel;
+                tbl->label.setText(d->first->header, tbl->label.stxt, w->group->header);
+                nextView = d->first->header;
             }
 
             for (int i = 0; i < w->group->size; ++i) {

@@ -59,8 +59,8 @@ void setupWorkoutVC_viewDidLoad(id self, SEL _cmd) {
     tbl->stack.addSub(sup->vStack, tbl->stack.asv, workoutLabel);
     tbl->stack.setSpaceAfter(sup->vStack, tbl->stack.scsp, 4, workoutLabel);
 
-    d->workoutTextField = createTextfield(
-      tbl, sup->clr, self, sup->toolbar, CFArrayGetValueAtIndex(d->names, 0), pickerTitle, -1);
+    d->workoutTextField = createTextfield(tbl, sup->clr, self, sup->toolbar, pickerTitle, -1);
+    tbl->field.setText(d->workoutTextField, tbl->label.stxt, CFArrayGetValueAtIndex(d->names, 0));
     msg1(void, long, d->workoutTextField, sel_getUid("setTextAlignment:"), 1);
     tbl->stack.addSub(sup->vStack, tbl->stack.asv, d->workoutTextField);
     tbl->stack.setSpaceAfter(sup->vStack, tbl->stack.scsp, 20, d->workoutTextField);

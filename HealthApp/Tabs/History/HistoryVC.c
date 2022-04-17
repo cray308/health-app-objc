@@ -234,9 +234,7 @@ void historyVC_viewDidLoad(id self, SEL _cmd) {
     ContainerView *c;
     fillStringArray(titles, CFSTR("chartHeader%d"), 3);
     for (int i = 0; i < 3; ++i) {
-        containers[i] = containerView_init(tbl, d->clr, &c);
-        tbl->label.setText(c->headerLabel, tbl->label.stxt, titles[i]);
-        CFRelease(titles[i]);
+        containers[i] = containerView_init(tbl, d->clr, &c, titles[i]);
         setHeight(&tbl->cc, d->charts[i], heights[i], false, false);
         tbl->stack.addSub(c->stack, tbl->stack.asv, d->charts[i]);
         tbl->view.hide(c->divider, tbl->view.shd, !i);
