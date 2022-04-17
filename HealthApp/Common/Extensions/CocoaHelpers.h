@@ -47,17 +47,17 @@ struct SelCache {
 #define msgSup1(rv, t, s, cmd, a) (((rv(*)(struct objc_super*,SEL,t))objc_msgSendSuper)(s, cmd, a))
 
 #define formatStr(l, fmt, ...) CFStringCreateWithFormat(NULL, (CFDictionaryRef)(l), fmt, ##__VA_ARGS__)
-#define localize(b, s) CFBundleCopyLocalizedString(b, s, NULL, NULL)
-#define createDict(k, v, s, cb)\
- CFDictionaryCreate(NULL, k, v, s, &kCFCopyStringDictionaryKeyCallBacks, cb)
+#define localize(s) CFCopyLocalizedString(s, )
+#define createDict(k, v, s)\
+ CFDictionaryCreate(NULL, k, v, s, &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks)
 
 extern const CFArrayCallBacks retainedArrCallbacks;
 extern struct SelCache Sels;
 
 enum {
-    ColorSeparator,
+    ColorDiv,
     ColorLabel,
-    ColorSecondaryLabel,
+    ColorDisabled,
     ColorGray,
     ColorRed,
     ColorBlue,
@@ -70,7 +70,7 @@ enum {
     ColorTertiaryBG,
 };
 
-void fillStringArray(CFBundleRef bundle, CFStringRef *arr, CFStringRef format, int count);
+void fillStringArray(CFStringRef *arr, CFStringRef format, int count);
 CFArrayRef createSortDescriptors(CFStringRef key, bool ascending);
 
 #endif /* CocoaBridging_h */

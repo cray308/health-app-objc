@@ -21,15 +21,15 @@ void initViewData(VCache*, Class*);
 void initNSData(bool modern, ColorCache *cacheRef, Class **clsRefs, size_t **sizeRefs);
 void setupAppColors(Class Color, unsigned char darkMode, bool deleteOld);
 void toggleDarkModeForCharts(bool);
-void initValidatorStrings(CFBundleRef, Class);
-void initExerciseData(int, CFBundleRef);
-void initWorkoutStrings(CFBundleRef);
+void initValidatorStrings(Class);
+void initExerciseData(int);
+void initWorkoutStrings(void);
 void initStatVData(Class);
 id homeVC_init(VCacheRef, CCacheRef, time_t);
 void homeVC_updateWorkoutsList(HomeVC *self, unsigned char completed);
 void homeVC_createWorkoutsList(id self, const UserInfo *info);
 void homeVC_updateColors(id self);
-id historyVC_init(CFBundleRef, void **, FetchHandler*, VCacheRef, CCacheRef);
+id historyVC_init(void **, FetchHandler*, VCacheRef, CCacheRef);
 void historyVC_clearData(id self);
 void historyVC_updateColors(id vc, unsigned char darkMode);
 id settingsVC_init(VCacheRef, CCacheRef);
@@ -57,7 +57,9 @@ static const void *DictKeys[] = {
 };
 static const char *const liftGets[] = {"bestSquat", "bestPullup", "bestBench", "bestDeadlift"};
 static const char *const timeGets[] = {"timeStrength", "timeSE", "timeEndurance", "timeHIC"};
-static char const *const timeSets[] = {"setTimeStrength:", "setTimeSE:", "setTimeEndurance:", "setTimeHIC:"};
+static char const *const timeSets[] = {
+    "setTimeStrength:", "setTimeSE:", "setTimeEndurance:", "setTimeHIC:"
+};
 static char const *const liftSets[] = {
     "setBestSquat:", "setBestPullup:", "setBestBench:", "setBestDeadlift:"
 };
@@ -114,7 +116,8 @@ static CFArrayRef context_fetchData(id context, int options, int *count) {
     CFRelease(descriptorArr);
 
     int len = 0;
-    CFArrayRef data = msg2(CFArrayRef, id, id, context, sel_getUid("executeFetchRequest:error:"), req, nil);
+    CFArrayRef data = msg2(CFArrayRef, id, id, context,
+                           sel_getUid("executeFetchRequest:error:"), req, nil);
     if (!(data && (len = (int)(CFArrayGetCount(data)))))
         data = NULL;
     *count = len;
@@ -266,7 +269,7 @@ static void fetchHistory(id context, void *model, FetchHandler handler) {
     });
 }
 
-static void runStartupDataJob(id *cRef, void *model, FetchHandler handler, time_t weekStart, int tzDiff) {
+static void runStartupDataJob(id *cRef, void *m, FetchHandler h, time_t weekStart, int tzDiff) {
     service = msg1(id, CFStringRef, Sels.alloc(objc_getClass("NSPersistentContainer"), Sels.alo),
                    sel_getUid("initWithName:"), CFSTR("HealthApp"));
     msg1(void, void(^)(id,id), service,
@@ -337,7 +340,7 @@ static void runStartupDataJob(id *cRef, void *model, FetchHandler handler, time_
         context_saveChanges(context);
 
     cleanup:
-        fetchHistory(context, model, handler);
+        fetchHistory(context, m, h);
     });
 }
 
@@ -348,7 +351,7 @@ static int getStatusBarStyle(id self _U_, SEL _cmd _U_) { return barStyle; }
 static void setupNavBarColor(id bar, CCacheRef clr) {
     const void *keys[] = {NSForegroundColorAttributeName};
     const void *vals[] = {clr->getColor(clr->cls, clr->sc, ColorLabel)};
-    CFDictionaryRef dict = createDict(keys, vals, 1, NULL);
+    CFDictionaryRef dict = createDict(keys, vals, 1);
     msg1(void, CFDictionaryRef, bar, sel_getUid("setTitleTextAttributes:"), dict);
     CFRelease(dict);
 }
@@ -400,7 +403,8 @@ void presentVC(id child) { present(getAppDel()->window, child); }
 
 void presentModalVC(id modal) {
     AppDelegate *self = getAppDel();
-    id nav = msg1(id, id, Sels.alloc(DMNavVC, Sels.alo), sel_getUid("initWithRootViewController:"), modal);
+    id nav = msg1(id, id, Sels.alloc(DMNavVC, Sels.alo),
+                  sel_getUid("initWithRootViewController:"), modal);
     id bar = msg0(id, nav, sel_getUid("navigationBar"));
     Class appear = objc_getClass("UINavigationBarAppearance");
     setupBarGeneric(bar, appear, clsF1(id, int, self->clr.cls, sel_getUid("getBarColorWithType:"), 1),
@@ -415,8 +419,8 @@ void presentModalVC(id modal) {
 void dismissPresentedVC(Callback handler) {
     AppDelegate *self = getAppDel();
     id window = self->window;
-    msg2(void, bool, Callback, msg0(id, window, sel_getUid("rootViewController")),
-         sel_getUid("dismissViewControllerAnimated:completion:"), true, ^{
+    id root = msg0(id, window, sel_getUid("rootViewController"));
+    msg2(void, bool, Callback, root, sel_getUid("dismissViewControllerAnimated:completion:"), true, ^{
         if (handler)
             handler();
         msg1(void, id, window, sel_getUid("setTintColor:"),
@@ -443,11 +447,11 @@ static id alertCtrlCreateLegacy(id self, SEL _cmd _U_, CFStringRef title, CFStri
     id fg = del->clr.getColor(del->clr.cls, del->clr.sc, ColorLabel);
     const void *keys[] = {NSForegroundColorAttributeName, NSFontAttributeName};
     Class Font = objc_getClass("UIFont");
-    SEL getFont = sel_getUid("systemFontOfSize:weight:");
-    const void *titleVals[] = {fg, clsF2(id, CGFloat, CGFloat, Font, getFont, 17, UIFontWeightSemibold)};
-    const void *msgVals[] = {fg, clsF2(id, CGFloat, CGFloat, Font, getFont, 13, UIFontWeightRegular)};
-    CFDictionaryRef titleDict = createDict(keys, titleVals, 2, &kCFTypeDictionaryValueCallBacks);
-    CFDictionaryRef msgDict = createDict(keys, msgVals, 2, &kCFTypeDictionaryValueCallBacks);
+    SEL gf = sel_getUid("systemFontOfSize:weight:");
+    const void *titleVals[] = {fg, clsF2(id, CGFloat, CGFloat, Font, gf, 17, UIFontWeightSemibold)};
+    const void *msgVals[] = {fg, clsF2(id, CGFloat, CGFloat, Font, gf, 13, UIFontWeightRegular)};
+    CFDictionaryRef titleDict = createDict(keys, titleVals, 2);
+    CFDictionaryRef msgDict = createDict(keys, msgVals, 2);
     CFAttributedStringRef titleString = CFAttributedStringCreate(NULL, title, titleDict);
     CFAttributedStringRef msgString = CFAttributedStringCreate(NULL, message, msgDict);
     SEL sKV = sel_getUid("setValue:forKey:"), gsv = sel_getUid("subviews");
@@ -483,13 +487,13 @@ void addAlertAction(id ctrl, CFStringRef title, int style, Callback handler) {
 
 #pragma mark - App Delegate Main Funcs
 
-static void handleFirstLaunch(AppDelegate *self, CFStringRef key, time_t start, int tzOffset, bool modern) {
+static void handleFirstLaunch(AppDelegate *self, CFStringRef k, time_t start, int tzOff, bool modern) {
     CFNumberRef hasLaunched = CFNumberCreate(NULL, kCFNumberCharType, &(bool){true});
     UserInfo data = {start, start, {0}, modern ? 0xff : 0, 0xff, 0};
     const void *values[] = {
         CFNumberCreate(NULL, kCFNumberLongType, &start),
         CFNumberCreate(NULL, kCFNumberLongType, &start),
-        CFNumberCreate(NULL, kCFNumberIntType, &tzOffset),
+        CFNumberCreate(NULL, kCFNumberIntType, &tzOff),
         CFNumberCreate(NULL, kCFNumberCharType, &(unsigned char){0xff}),
         CFNumberCreate(NULL, kCFNumberCharType, &(unsigned char){0}),
         CFNumberCreate(NULL, kCFNumberCharType, &data.darkMode),
@@ -498,8 +502,8 @@ static void handleFirstLaunch(AppDelegate *self, CFStringRef key, time_t start, 
         CFNumberCreate(NULL, kCFNumberShortType, &(short){0}),
         CFNumberCreate(NULL, kCFNumberShortType, &(short){0})
     };
-    CFDictionaryRef dict = createDict(DictKeys, values, 10, &kCFTypeDictionaryValueCallBacks);
-    CFPreferencesSetAppValue(key, hasLaunched, kCFPreferencesCurrentApplication);
+    CFDictionaryRef dict = createDict(DictKeys, values, 10);
+    CFPreferencesSetAppValue(k, hasLaunched, kCFPreferencesCurrentApplication);
     CFPreferencesSetAppValue(dictKey, dict, kCFPreferencesCurrentApplication);
     CFPreferencesAppSynchronize(kCFPreferencesCurrentApplication);
     CFRelease(dict);
@@ -508,12 +512,13 @@ static void handleFirstLaunch(AppDelegate *self, CFStringRef key, time_t start, 
         CFRelease(values[i]);
     }
     memcpy(&self->userData, &data, sizeof(UserInfo));
-    id center = clsF0(id, objc_getClass("UNUserNotificationCenter"), sel_getUid("currentNotificationCenter"));
+    id center = clsF0(id, objc_getClass("UNUserNotificationCenter"),
+                      sel_getUid("currentNotificationCenter"));
     msg2(void, unsigned long, void(^)(bool,id), center,
          sel_getUid("requestAuthorizationWithOptions:completionHandler:"), 6, ^(bool g _U_, id e _U_){});
 }
 
-bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id application _U_, id options _U_) {
+bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id app _U_, id opt _U_) {
     DMNavVC = objc_allocateClassPair(objc_getClass("UINavigationController"), "DMNavVC", 0);
     objc_registerClassPair(DMNavVC);
     Class TabAppear = objc_getClass("UITabBarAppearance");
@@ -634,11 +639,10 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id applicat
         dm = self->userData.darkMode;
     }
 
-    CFBundleRef b = CFBundleGetMainBundle();
     initStatVData(clsRefs[0]);
-    initValidatorStrings(b, clsRefs[1]);
-    initExerciseData(week, b);
-    initWorkoutStrings(b);
+    initValidatorStrings(clsRefs[1]);
+    initExerciseData(week);
+    initWorkoutStrings();
 
     IMP imps[] = {(IMP)setupWorkoutVC_numberOfComponents, (IMP)setupWorkoutVC_didSelectRow,
         (IMP)setupWorkoutVC_getTitle, (IMP)alertCtrlCreate
@@ -655,7 +659,8 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id applicat
         setupAppColors(self->clr.cls, dm, false);
         toggleDarkModeForCharts(dm);
     }
-    class_addMethod(SetupWorkoutVCClass, sel_getUid("numberOfComponentsInPickerView:"), imps[0], "q@:@");
+    class_addMethod(SetupWorkoutVCClass, sel_getUid("numberOfComponentsInPickerView:"),
+                    imps[0], "q@:@");
     class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:didSelectRow:inComponent:"),
                     imps[1], "v@:@qq");
     class_addMethod(SetupWorkoutVCClass, pickerSel, imps[2], "@@:@qq");
@@ -664,7 +669,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id applicat
 
     void *fetchArg; FetchHandler fetchHandler;
     self->children[0] = homeVC_init(&self->tbl, &self->clr, weekStart + 43200);
-    self->children[1] = historyVC_init(b, &fetchArg, &fetchHandler, &self->tbl, &self->clr);
+    self->children[1] = historyVC_init(&fetchArg, &fetchHandler, &self->tbl, &self->clr);
     self->children[2] = settingsVC_init(&self->tbl, &self->clr);
 
     Class Item = objc_getClass("UITabBarItem"), Image = objc_getClass("UIImage");
@@ -673,11 +678,12 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id applicat
     id controllers[3];
     CFStringRef imgNames[] = {CFSTR("ico_house"), CFSTR("ico_chart"), CFSTR("ico_gear")};
     CFStringRef titles[3];
-    fillStringArray(b, titles, CFSTR("tabs%d"), 3);
+    fillStringArray(titles, CFSTR("tabs%d"), 3);
 
     for (int i = 0; i < 3; ++i) {
         id img = clsF1(id, CFStringRef, Image, imgInit, imgNames[i]);
-        id item = msg3(id, CFStringRef, id, long, Sels.alloc(Item, Sels.alo), itemInit, titles[i], img, i);
+        id item = msg3(id, CFStringRef, id, long, Sels.alloc(Item, Sels.alo),
+                       itemInit, titles[i], img, i);
         controllers[i] = msg1(id, id, Sels.alloc(DMNavVC, Sels.alo), navInit, self->children[i]);
         msg1(void, id, controllers[i], setItem, item);
         Sels.objRel(item, Sels.rel);
@@ -702,8 +708,9 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id applicat
     return true;
 }
 
-int appDelegate_supportedOrientations(AppDelegate *self _U_, SEL _cmd _U_,
-                                      id application _U_, id window _U_) { return orientations; }
+int appDelegate_supportedOrientations(AppDelegate *self _U_, SEL _cmd _U_, id app _U_, id win _U_) {
+    return orientations;
+}
 
 #pragma mark - Child VC Callbacks
 

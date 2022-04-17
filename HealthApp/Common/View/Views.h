@@ -28,12 +28,13 @@ void setHeight(ConstraintCache const *cc, id v, int height, bool geq, bool optio
 id createHStack(VCacheRef tbl, id *subviews);
 id createVStack(id *subviews, int count);
 id createScrollView(void);
-id createLabel(VCacheRef tbl, CCacheRef clr, CFStringRef text CF_CONSUMED, CFStringRef style, int color);
-id createTextfield(VCacheRef tbl, CCacheRef clr, id delegate, id acc, CFStringRef text,
-                   CFStringRef hint CF_CONSUMED, int tag);
+id createLabel(VCacheRef tbl, CCacheRef clr,
+               CFStringRef text CF_CONSUMED, CFStringRef style, int color);
+id createTextfield(VCacheRef tbl, CCacheRef clr, id delegate, id accessory,
+                   CFStringRef text, CFStringRef hint CF_CONSUMED, int tag);
 id createButton(VCacheRef tbl, CCacheRef clr, CFStringRef title CF_CONSUMED,
                 int color, CFStringRef style, id target, SEL action);
-id createSegmentedControl(CFBundleRef bundle, CFStringRef format, int startIndex);
+id createSegmentedControl(CFStringRef format, int startIndex);
 void addVStackToScrollView(VCacheRef tbl, id view, id vStack, id scrollView);
 void setNavButtons(id navItem, id *buttons);
 void setVCTitle(id navItem, CFStringRef title CF_CONSUMED);

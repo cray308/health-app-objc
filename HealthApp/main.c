@@ -98,19 +98,22 @@ int main(int argc, char *argv[]) {
     InputVCClass = objc_allocateClassPair(VC, "InputVC", 0);
     class_addProtocol(InputVCClass, objc_getProtocol("UITextFieldDelegate"));
     class_addIvar(InputVCClass, "validatorData", sizeof(InputVC), 0, "{?=@@[4{?=@@}]@@@@@iissB}");
-    class_addMethod(InputVCClass, sel_registerName("initWithVCache:cCache:"), (IMP)inputVC_init, "@@:@@");
+    class_addMethod(InputVCClass, sel_registerName("initWithVCache:cCache:"),
+                    (IMP)inputVC_init, "@@:@@");
     class_addMethod(InputVCClass, deinit, (IMP)inputVC_deinit, voidSig);
     class_addMethod(InputVCClass, viewLoad, (IMP)inputVC_viewDidLoad, voidSig);
-    class_addMethod(InputVCClass, sel_getUid("viewDidAppear:"), (IMP)inputVC_viewDidAppear, appearSig);
-    class_addMethod(InputVCClass, sel_registerName("dismissKeyboard"), (IMP)inputVC_dismissKeyboard, voidSig);
+    class_addMethod(InputVCClass, sel_getUid("viewDidAppear:"),
+                    (IMP)inputVC_viewDidAppear, appearSig);
+    class_addMethod(InputVCClass, sel_registerName("dismissKeyboard"),
+                    (IMP)inputVC_dismissKeyboard, voidSig);
     class_addMethod(InputVCClass, sel_registerName("jumpToPrev"), (IMP)inputVC_jumpToPrev, voidSig);
     class_addMethod(InputVCClass, sel_registerName("jumpToNext"), (IMP)inputVC_jumpToNext, voidSig);
     class_addMethod(InputVCClass, sel_getUid("textFieldDidBeginEditing:"),
                     (IMP)inputVC_fieldBeganEditing, tapSig);
     class_addMethod(InputVCClass, sel_getUid("textFieldDidEndEditing:"),
                     (IMP)inputVC_fieldStoppedEditing, tapSig);
-    class_addMethod(InputVCClass, sel_getUid("textField:shouldChangeCharactersInRange:replacementString:"),
-                    (IMP)inputVC_fieldChanged, "i@:@{?=qq}@");
+    SEL tfChange = sel_getUid("textField:shouldChangeCharactersInRange:replacementString:");
+    class_addMethod(InputVCClass, tfChange, (IMP)inputVC_fieldChanged, "i@:@{?=qq}@");
     objc_registerClassPair(InputVCClass);
 
     SettingsVCClass = objc_allocateClassPair(InputVCClass, "SettingsVC", 0);
@@ -153,7 +156,8 @@ int main(int argc, char *argv[]) {
                   "{?=[4@][4@]@[3[4f]][3f]}@[3i][3i]}@[3@]}");
     class_addMethod(HistoryVCClass, viewLoad, (IMP)historyVC_viewDidLoad, voidSig);
     class_addMethod(HistoryVCClass, btnTap, (IMP)historyVC_updateSegment, tapSig);
-    class_addMethod(HistoryVCClass, sel_getUid("stringForValue:"), (IMP)historyVC_stringForValue, "@@:d");
+    class_addMethod(HistoryVCClass, sel_getUid("stringForValue:"),
+                    (IMP)historyVC_stringForValue, "@@:d");
     objc_registerClassPair(HistoryVCClass);
 
     WorkoutVCClass = objc_allocateClassPair(VC, "WorkoutVC", 0);
@@ -175,12 +179,13 @@ int main(int argc, char *argv[]) {
     class_addIvar(AppDelegateClass, "children", 3 * sizeof(id), 0, "[3@]");
     class_addIvar(AppDelegateClass, "clr", sizeof(ColorCache), 0, "{?=#:?}");
     class_addIvar(AppDelegateClass, "tbl", sizeof(VCache), 0,
-                  "{?={?=#::::????}{?=::::::::::::???????????}{?=:::::?????}{?=::::????}{?=::::????}{?=:?}}");
+                  "{?={?=#::::????}{?=::::::::::::???????????}"
+                  "{?=:::::?????}{?=::::????}{?=::::????}{?=:?}}");
     class_addIvar(AppDelegateClass, "userData", sizeof(UserInfo), 0, "{?=qq[4s]CCC}");
     class_addMethod(AppDelegateClass, sel_getUid("application:didFinishLaunchingWithOptions:"),
                     (IMP)appDelegate_didFinishLaunching, appSig);
-    class_addMethod(AppDelegateClass, sel_getUid("application:supportedInterfaceOrientationsForWindow:"),
-                    (IMP)appDelegate_supportedOrientations, appSig);
+    SEL orient = sel_getUid("application:supportedInterfaceOrientationsForWindow:");
+    class_addMethod(AppDelegateClass, orient, (IMP)appDelegate_supportedOrientations, appSig);
     objc_registerClassPair(AppDelegateClass);
     return UIApplicationMain(argc, argv, nil, CFSTR("AppDelegate"));
 }

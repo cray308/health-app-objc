@@ -39,8 +39,9 @@ static CFStringRef sets1;
 static CFStringRef rounds1S;
 static CFStringRef rounds1M;
 
-static void createRootAndLibDict(CFBundleRef b, struct DictWrapper *data) {
-    CFURLRef url = CFBundleCopyResourceURL(b, CFSTR("WorkoutData"), CFSTR("plist"), NULL);
+static void createRootAndLibDict(struct DictWrapper *data) {
+    CFURLRef url = CFBundleCopyResourceURL(
+      CFBundleGetMainBundle(), CFSTR("WorkoutData"), CFSTR("plist"), NULL);
     CFReadStreamRef stream = CFReadStreamCreateWithFile(NULL, url);
     CFRelease(url);
     CFReadStreamOpen(stream);
@@ -60,14 +61,14 @@ static CFArrayRef getCurrentWeekForPlan(struct DictWrapper *data, unsigned char 
     return CFArrayGetValueAtIndex(CFArrayGetValueAtIndex(plans, plan), weekInPlan);
 }
 
-static CFStringRef createTitle(CFBundleRef b, int type, int index) {
+static CFStringRef createTitle(int type, int index) {
     CFStringRef key = formatStr(NULL, CFSTR("wkNames%d%02d"), type, index);
-    CFStringRef title = localize(b, key);
+    CFStringRef title = localize(key);
     CFRelease(key);
     return title;
 }
 
-static Workout *buildWorkout(CFBundleRef b, CFArrayRef acts, WorkoutParams *params) {
+static Workout *buildWorkout(CFArrayRef acts, WorkoutParams *params) {
     short weights[4];
     short customSets = 1, customReps = 0, customCircuitReps = 0;
     bool testMax = false;
@@ -104,7 +105,7 @@ static Workout *buildWorkout(CFBundleRef b, CFArrayRef acts, WorkoutParams *para
 
     Workout workout = {
         .activities = malloc((unsigned)nActivities * sizeof(Circuit)),
-        .title = createTitle(b, params->type, params->index), .size = nActivities,
+        .title = createTitle(params->type, params->index), .size = nActivities,
         .bodyweight = bodyweight, .type = params->type, .day = params->day, .testMax = testMax
     };
     workout.group = &workout.activities[0];
@@ -168,7 +169,6 @@ static Workout *buildWorkout(CFBundleRef b, CFArrayRef acts, WorkoutParams *para
 
         if (circuitHeader) {
             circuit.headerStr = CFStringCreateMutableCopy(NULL, 80, circuitHeader);
-            CFRetain(circuit.headerStr);
             CFRelease(circuitHeader);
         }
 
@@ -206,7 +206,7 @@ static Workout *buildWorkout(CFBundleRef b, CFArrayRef acts, WorkoutParams *para
             int n;
             CFNumberGetValue(CFDictionaryGetValue(exDict, Keys.index), kCFNumberIntType, &n);
             CFStringRef nameKey = formatStr(NULL, CFSTR("exNames%02d"), n);
-            CFStringRef name = localize(b, nameKey);
+            CFStringRef name = localize(nameKey);
             CFStringRef titleStr;
 
             if (e.type == ExerciseReps) {
@@ -286,24 +286,24 @@ static void getHealthData(void) {
     CFRelease(set);
 }
 
-void initExerciseData(int week, CFBundleRef b) {
-    restFormat = localize(b, CFSTR("exerciseTitleRest"));
-    repsFormat = localize(b, CFSTR("exerciseTitleReps"));
-    setsFormat = localize(b, CFSTR("exerciseHeader"));
-    weightFormat = localize(b, CFSTR("exerciseTitleRepsWithWeight"));
-    durationMinsFormat = localize(b, CFSTR("exerciseTitleDurationMinutes"));
-    durationSecsFormat = localize(b, CFSTR("exerciseTitleDurationSeconds"));
-    distanceFormat = localize(b, CFSTR("exerciseTitleDistance"));
-    roundsFormat = localize(b, CFSTR("circuitHeaderRounds"));
-    amrapFormat = localize(b, CFSTR("circuitHeaderAMRAP"));
-    circuitProgressFmt = localize(b, CFSTR("circuitProgressHint"));
-    roundsLoc = localize(b, CFSTR("circuitHeaderLocAndRounds"));
-    amrapLoc = localize(b, CFSTR("circuitHeaderLocAndAMRAP"));
+void initExerciseData(int week) {
+    restFormat = localize(CFSTR("exerciseTitleRest"));
+    repsFormat = localize(CFSTR("exerciseTitleReps"));
+    setsFormat = localize(CFSTR("exerciseHeader"));
+    weightFormat = localize(CFSTR("exerciseTitleRepsWithWeight"));
+    durationMinsFormat = localize(CFSTR("exerciseTitleDurationMinutes"));
+    durationSecsFormat = localize(CFSTR("exerciseTitleDurationSeconds"));
+    distanceFormat = localize(CFSTR("exerciseTitleDistance"));
+    roundsFormat = localize(CFSTR("circuitHeaderRounds"));
+    amrapFormat = localize(CFSTR("circuitHeaderAMRAP"));
+    circuitProgressFmt = localize(CFSTR("circuitProgressHint"));
+    roundsLoc = localize(CFSTR("circuitHeaderLocAndRounds"));
+    amrapLoc = localize(CFSTR("circuitHeaderLocAndAMRAP"));
     weekInPlan = week;
 
     CFStringRef *refs[] = {&sets1, &rounds1S, &rounds1M};
     CFStringRef arr[] = {
-        localize(b, CFSTR("sets1")), localize(b, CFSTR("rounds1S")), localize(b, CFSTR("rounds1M"))
+        localize(CFSTR("sets1")), localize(CFSTR("rounds1S")), localize(CFSTR("rounds1M"))
     };
     for (int i = 0; i < 3; ++i) {
         CFMutableStringRef m = CFStringCreateMutableCopy(NULL, CFStringGetLength(arr[i]) + 2, arr[i]);
@@ -324,9 +324,8 @@ void exerciseManager_setCurrentWeek(int newValue) { weekInPlan = newValue; }
 #endif
 
 void setWeeklyWorkoutNames(unsigned char plan, CFStringRef *names) {
-    CFBundleRef b = CFBundleGetMainBundle();
     struct DictWrapper info;
-    createRootAndLibDict(b, &info);
+    createRootAndLibDict(&info);
     CFArrayRef currWeek = getCurrentWeekForPlan(&info, plan);
     int index = 0;
     unsigned char type;
@@ -337,18 +336,17 @@ void setWeeklyWorkoutNames(unsigned char plan, CFStringRef *names) {
         if (type > 3) continue;
 
         CFNumberGetValue(CFDictionaryGetValue(day, Keys.index), kCFNumberIntType, &index);
-        names[i] = createTitle(b, type, index);
+        names[i] = createTitle(type, index);
     }
     CFRelease(info.root);
 }
 
 Workout *getWeeklyWorkout(unsigned char plan, int i) {
-    CFBundleRef b = CFBundleGetMainBundle();
     struct DictWrapper info;
     int arrayIdx;
     short sets, reps, weight;
     unsigned char type;
-    createRootAndLibDict(b, &info);
+    createRootAndLibDict(&info);
     CFDictionaryRef day = CFArrayGetValueAtIndex(getCurrentWeekForPlan(&info, plan), i);
     CFNumberGetValue(CFDictionaryGetValue(day, Keys.type), kCFNumberCharType, &type);
     CFNumberGetValue(CFDictionaryGetValue(day, Keys.index), kCFNumberIntType, &arrayIdx);
@@ -357,7 +355,7 @@ Workout *getWeeklyWorkout(unsigned char plan, int i) {
     CFNumberGetValue(CFDictionaryGetValue(day, CFSTR("W")), kCFNumberShortType, &weight);
 
     CFArrayRef libArr = CFArrayGetValueAtIndex(info.lib, type);
-    Workout *w = buildWorkout(b, CFArrayGetValueAtIndex(libArr, arrayIdx),
+    Workout *w = buildWorkout(CFArrayGetValueAtIndex(libArr, arrayIdx),
                               &(WorkoutParams){arrayIdx, sets, reps, weight, type, (unsigned char)i});
     CFRelease(info.root);
     return w;
@@ -365,11 +363,10 @@ Workout *getWeeklyWorkout(unsigned char plan, int i) {
 
 CFArrayRef createWorkoutNames(unsigned char type) {
     static const int counts[] = {2, 8, 1, 27};
-    CFBundleRef b = CFBundleGetMainBundle();
     int len = counts[type];
     CFMutableArrayRef results = CFArrayCreateMutable(NULL, len, &kCFTypeArrayCallBacks);
     for (int i = 0; i < len; ++i) {
-        CFStringRef t = createTitle(b, type, i);
+        CFStringRef t = createTitle(type, i);
         CFArrayAppendValue(results, t);
         CFRelease(t);
     }
@@ -377,11 +374,10 @@ CFArrayRef createWorkoutNames(unsigned char type) {
 }
 
 Workout *getWorkoutFromLibrary(WorkoutParams *params) {
-    CFBundleRef b = CFBundleGetMainBundle();
     struct DictWrapper info;
-    createRootAndLibDict(b, &info);
+    createRootAndLibDict(&info);
     CFArrayRef libArr = CFArrayGetValueAtIndex(info.lib, params->type);
-    Workout *w = buildWorkout(b, CFArrayGetValueAtIndex(libArr, params->index), params);
+    Workout *w = buildWorkout(CFArrayGetValueAtIndex(libArr, params->index), params);
     CFRelease(info.root);
     return w;
 }

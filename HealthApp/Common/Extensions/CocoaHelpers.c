@@ -1,16 +1,14 @@
 #include "CocoaHelpers.h"
 #include <string.h>
 
-static const void *cocoaArrRetain(CFAllocatorRef allocator _U_, const void *value) {
+static const void *cocoaRetain(CFAllocatorRef alo _U_, const void *value) {
     msg0(id, (id)value, sel_getUid("retain"));
     return value;
 }
 
-static void cocoaArrRelease(CFAllocatorRef allocator _U_, const void *value) {
-    Sels.objRel((id)value, Sels.rel);
-}
+static void cocoaRel(CFAllocatorRef alo _U_, const void *value) { Sels.objRel((id)value, Sels.rel); }
 
-const CFArrayCallBacks retainedArrCallbacks = {0, cocoaArrRetain, cocoaArrRelease, NULL, NULL};
+const CFArrayCallBacks retainedArrCallbacks = {0, cocoaRetain, cocoaRel, NULL, NULL};
 struct SelCache Sels;
 
 static id appColors[13];
@@ -30,7 +28,7 @@ id barColorCreate(id self, SEL _cmd _U_, int type) {
     return modernBarImp((Class)self, sbcInt, names[type]);
 }
 
-void initNSData(bool modern, ColorCache *cacheRef, Class **clsRefs, size_t **sizeRefs) {
+void initNSData(bool modern, ColorCache *r, Class **clsRefs, size_t **sizeRefs) {
     SEL alo = sel_getUid("alloc"), nw = sel_getUid("new"), rel = sel_getUid("release");
     Class Object = objc_getClass("NSObject"), View = objc_getClass("UIView");
     Class VC = objc_getClass("UIViewController");
@@ -68,7 +66,7 @@ void initNSData(bool modern, ColorCache *cacheRef, Class **clsRefs, size_t **siz
     }
     class_addMethod(colorMeta, sc, colorImp, "@@:i");
     class_addMethod(colorMeta, sel_registerName("getBarColorWithType:"), barImp, "@@:i");
-    memcpy(cacheRef, &(ColorCache){Color, sc, (id(*)(Class,SEL,int))getImpC(Color, sc)}, sizeof(ColorCache));
+    memcpy(r, &(ColorCache){Color, sc, (id(*)(Class,SEL,int))getImpC(Color, sc)}, sizeof(ColorCache));
 }
 
 void setupAppColors(Class Color, unsigned char darkMode, bool deleteOld) {
@@ -87,9 +85,9 @@ void setupAppColors(Class Color, unsigned char darkMode, bool deleteOld) {
         barColors[0] = init(Sels.alloc(Color, Sels.alo), sel, 0.984f, 0.984f, 0.992f, 1);
         barColors[1] = init(Sels.alloc(Color, Sels.alo), sel, 0.988f, 0.988f, 0.988f, 1);
 
-        appColors[ColorSeparator] = init(Sels.alloc(Color, Sels.alo), sel, 0.24f, 0.24f, 0.26f, 0.29f);
+        appColors[ColorDiv] = init(Sels.alloc(Color, Sels.alo), sel, 0.24f, 0.24f, 0.26f, 0.29f);
         appColors[ColorLabel] = init(Sels.alloc(Color, Sels.alo), sel, 0, 0, 0, 1);
-        appColors[ColorSecondaryLabel] = init(Sels.alloc(Color, Sels.alo), sel, 0.24f, 0.24f, 0.26f, 0.6f);
+        appColors[ColorDisabled] = init(Sels.alloc(Color, Sels.alo), sel, 0.24f, 0.24f, 0.26f, 0.6f);
         appColors[ColorGray] = init(Sels.alloc(Color, Sels.alo), sel, 0.56f, 0.56f, 0.58f, 1);
         appColors[ColorRed] = init(Sels.alloc(Color, Sels.alo), sel, 1, 0.23f, 0.19f, 1);
         appColors[ColorBlue] = init(Sels.alloc(Color, Sels.alo), sel, 0, 0.48f, 1, 1);
@@ -107,9 +105,9 @@ void setupAppColors(Class Color, unsigned char darkMode, bool deleteOld) {
         barColors[0] = init(Sels.alloc(Color, Sels.alo), sel, 0.075f, 0.075f, 0.075f, 1);
         barColors[1] = init(Sels.alloc(Color, Sels.alo), sel, 0.196f, 0.196f, 0.196f, 1);
 
-        appColors[ColorSeparator] = init(Sels.alloc(Color, Sels.alo), sel, 0.33f, 0.33f, 0.35f, 0.6f);
+        appColors[ColorDiv] = init(Sels.alloc(Color, Sels.alo), sel, 0.33f, 0.33f, 0.35f, 0.6f);
         appColors[ColorLabel] = init(Sels.alloc(Color, Sels.alo), sel, 1, 1, 1, 1);
-        appColors[ColorSecondaryLabel] = init(Sels.alloc(Color, Sels.alo), sel, 0.92f, 0.92f, 0.96f, 0.6f);
+        appColors[ColorDisabled] = init(Sels.alloc(Color, Sels.alo), sel, 0.92f, 0.92f, 0.96f, 0.6f);
         appColors[ColorGray] = init(Sels.alloc(Color, Sels.alo), sel, 0.56f, 0.56f, 0.58f, 1);
         appColors[ColorRed] = init(Sels.alloc(Color, Sels.alo), sel, 1, 0.27f, 0.23f, 1);
         appColors[ColorBlue] = init(Sels.alloc(Color, Sels.alo), sel, 0.04f, 0.52f, 1, 1);
@@ -126,18 +124,18 @@ void setupAppColors(Class Color, unsigned char darkMode, bool deleteOld) {
     }
 }
 
-void fillStringArray(CFBundleRef b, CFStringRef *arr, CFStringRef format, int count) {
+void fillStringArray(CFStringRef *arr, CFStringRef format, int count) {
     for (int i = 0; i < count; ++i) {
         CFStringRef key = formatStr(NULL, format, i);
-        arr[i] = localize(b, key);
+        arr[i] = localize(key);
         CFRelease(key);
     }
 }
 
 CFArrayRef createSortDescriptors(CFStringRef key, bool ascending) {
-    id descriptor = msg2(id, CFStringRef, bool, Sels.alloc(objc_getClass("NSSortDescriptor"), Sels.alo),
-                         sel_getUid("initWithKey:ascending:"), key, ascending);
-    CFArrayRef arr = CFArrayCreate(NULL, (const void *[]){descriptor}, 1, &retainedArrCallbacks);
-    Sels.objRel(descriptor, Sels.rel);
+    id desc = msg2(id, CFStringRef, bool, Sels.alloc(objc_getClass("NSSortDescriptor"), Sels.alo),
+                   sel_getUid("initWithKey:ascending:"), key, ascending);
+    CFArrayRef arr = CFArrayCreate(NULL, (const void *[]){desc}, 1, &retainedArrCallbacks);
+    Sels.objRel(desc, Sels.rel);
     return arr;
 }

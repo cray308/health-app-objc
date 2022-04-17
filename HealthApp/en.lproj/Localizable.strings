@@ -82,6 +82,7 @@
 "sets1" = "Set 1";
 "rounds1S" = "Round 1";
 "rounds1M" = "Round 1";
+"sep" = "%1$@, %2$@";
 
 "exNames00" = "Squat";
 "exNames01" = "Pull-up";

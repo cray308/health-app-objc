@@ -15,7 +15,7 @@ typedef struct {
     ContainerView *data;
 } CVPair;
 
-id containerView_init(VCacheRef tbl, CCacheRef clr, CFStringRef title CF_CONSUMED, ContainerView **ref);
-void containerView_updateColors(ContainerView *data, VCacheRef tbl, CCacheRef clr);
+id containerView_init(VCacheRef tbl, CCacheRef clr, ContainerView **v);
+void containerView_updateColors(ContainerView *v, VCacheRef tbl, CCacheRef clr);
 
 #endif /* ContainerView_h */

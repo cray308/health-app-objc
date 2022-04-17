@@ -105,14 +105,14 @@ static void historyData_populate(void *_model, CFArrayRef strs, WeekDataModel *r
 
 #pragma mark - Main Functions
 
-id historyVC_init(CFBundleRef b, void **model, FetchHandler *handler, VCacheRef tbl, CCacheRef clr) {
+id historyVC_init(void **model, FetchHandler *handler, VCacheRef tbl, CCacheRef clr) {
     id self = Sels.new(HistoryVCClass, Sels.nw);
-    HistoryVC *data = (HistoryVC *)((char *)self + VCSize);
-    data->tbl = tbl;
-    data->clr = clr;
-    *model = &data->model;
+    HistoryVC *d = (HistoryVC *)((char *)self + VCSize);
+    d->tbl = tbl;
+    d->clr = clr;
+    HistoryViewModel *m = &d->model;
+    *model = m;
     *handler = &historyData_populate;
-    HistoryViewModel *m = &data->model;
     int colors[] = {0, 1, 2, 3};
     Class classes[2];
     SEL selArr[6];
@@ -129,13 +129,13 @@ id historyVC_init(CFBundleRef b, void **model, FetchHandler *handler, VCacheRef 
 
     m->totalWorkouts.dataSet = setInit(Sels.alloc(Set, Sels.alo), iSet, 5, nil);
     m->workoutTypes.dataSets[0] = setInit(Sels.alloc(Set, Sels.alo), iSet, -1, nil);
-    fillStringArray(b, workoutTypeNames, CFSTR("workoutTypes%d"), 4);
-    fillStringArray(b, liftNames, CFSTR("exNames%02d"), 4);
-    totalWorkoutsFormat = localize(b, CFSTR("totalWorkoutsLegend"));
-    liftFormat = localize(b, CFSTR("liftLegend"));
-    workoutTypeFormat = localize(b, CFSTR("workoutTypeLegend"));
-    hourMinFmt = localize(b, CFSTR("hourMinFmt"));
-    minsFmt = localize(b, CFSTR("minsFmt"));
+    fillStringArray(workoutTypeNames, CFSTR("workoutTypes%d"), 4);
+    fillStringArray(liftNames, CFSTR("exNames%02d"), 4);
+    totalWorkoutsFormat = localize(CFSTR("totalWorkoutsLegend"));
+    liftFormat = localize(CFSTR("liftLegend"));
+    workoutTypeFormat = localize(CFSTR("workoutTypeLegend"));
+    hourMinFmt = localize(CFSTR("hourMinFmt"));
+    minsFmt = localize(CFSTR("minsFmt"));
 
     for (int i = 0; i < 4; ++i) {
         id bound = m->workoutTypes.dataSets[i];
@@ -157,19 +157,19 @@ id historyVC_init(CFBundleRef b, void **model, FetchHandler *handler, VCacheRef 
 }
 
 void historyVC_updateSegment(id self, SEL _cmd _U_, id picker) {
-    HistoryVC *data = (HistoryVC *)((char *)self + VCSize);
-    id totalsChart = data->charts[0], typesChart = data->charts[1], liftsChart = data->charts[2];
-    TotalWorkoutsChartModel *m1 = &data->model.totalWorkouts;
-    WorkoutTypeChartModel *m2 = &data->model.workoutTypes;
-    LiftChartModel *m3 = &data->model.lifts;
+    HistoryVC *d = (HistoryVC *)((char *)self + VCSize);
+    id totalsChart = d->charts[0], typesChart = d->charts[1], liftsChart = d->charts[2];
+    TotalWorkoutsChartModel *m1 = &d->model.totalWorkouts;
+    WorkoutTypeChartModel *m2 = &d->model.workoutTypes;
+    LiftChartModel *m3 = &d->model.lifts;
 
     int index = (int)msg0(long, picker, sel_getUid("selectedSegmentIndex"));
-    int count = data->model.nEntries[index];
+    int count = d->model.nEntries[index];
     if (!count) {
         cache.setData(totalsChart, cache.sdt, nil, 0);
         cache.setData(typesChart, cache.sdt, nil, 0);
         cache.setData(liftsChart, cache.sdt, nil, 0);
-        msg3(void, id, SEL, unsigned long, data->picker,
+        msg3(void, id, SEL, unsigned long, d->picker,
              sel_getUid("removeTarget:action:forControlEvents:"), nil, nil, 4096);
         return;
     }
@@ -198,7 +198,7 @@ void historyVC_updateSegment(id self, SEL _cmd _U_, id picker) {
     }
     CFRelease(l);
 
-    int ref = data->model.refIndices[index];
+    int ref = d->model.refIndices[index];
     cache.setLineLimit(totalsChart, cache.slilm, m1->avgs[index]);
     cache.replaceEntries(m1->dataSet, cache.rpe, &m1->entries[ref], count);
     for (int i = 0; i < 4; ++i) {
@@ -214,31 +214,31 @@ void historyVC_updateSegment(id self, SEL _cmd _U_, id picker) {
 void historyVC_viewDidLoad(id self, SEL _cmd) {
     msgSup0(void, (&(struct objc_super){self, VC}), _cmd);
 
-    CFBundleRef b = CFBundleGetMainBundle();
     const unsigned char darkMode = getUserInfo()->darkMode;
-    HistoryVC *data = (HistoryVC *)((char *)self + VCSize);
-    VCacheRef tbl = data->tbl;
+    HistoryVC *d = (HistoryVC *)((char *)self + VCSize);
+    VCacheRef tbl = d->tbl;
     id view = msg0(id, self, sel_getUid("view"));
-    tbl->view.setBG(view, tbl->view.sbg,
-                    data->clr->getColor(data->clr->cls, data->clr->sc, ColorPrimaryBG));
+    tbl->view.setBG(view, tbl->view.sbg, d->clr->getColor(d->clr->cls, d->clr->sc, ColorPrimaryBG));
 
-    data->charts[0] = createChartView(self, (long []){4}, 1, 1);
-    data->charts[1] = createChartView(self, (long []){0, 1, 2, 3}, 4, 6);
-    data->charts[2] = createChartView(self, (long []){0, 1, 2, 3}, 4, 0);
-    data->picker = createSegmentedControl(b, CFSTR("historySegment%d"), 0);
-    tbl->button.addTarget(data->picker, tbl->button.atgt, self, sel_getUid("buttonTapped:"), 4096);
+    d->charts[0] = createChartView(self, (long []){4}, 1, 1);
+    d->charts[1] = createChartView(self, (long []){0, 1, 2, 3}, 4, 6);
+    d->charts[2] = createChartView(self, (long []){0, 1, 2, 3}, 4, 0);
+    d->picker = createSegmentedControl(CFSTR("historySegment%d"), 0);
+    tbl->button.addTarget(d->picker, tbl->button.atgt, self, sel_getUid("buttonTapped:"), 4096);
     if (darkMode < 2)
-        updateSegmentedControl(data->clr, data->picker, darkMode);
+        updateSegmentedControl(d->clr, d->picker, darkMode);
     msg1(void, id, msg0(id, self, sel_getUid("navigationItem")),
-         sel_getUid("setTitleView:"), data->picker);
+         sel_getUid("setTitleView:"), d->picker);
 
     CFStringRef titles[3]; id containers[3]; int heights[] = {390, 425, 550};
     ContainerView *c;
-    fillStringArray(b, titles, CFSTR("chartHeader%d"), 3);
+    fillStringArray(titles, CFSTR("chartHeader%d"), 3);
     for (int i = 0; i < 3; ++i) {
-        containers[i] = containerView_init(tbl, data->clr, titles[i], &c);
-        setHeight(&tbl->cc, data->charts[i], heights[i], false, false);
-        tbl->stack.addSub(c->stack, tbl->stack.asv, data->charts[i]);
+        containers[i] = containerView_init(tbl, d->clr, &c);
+        tbl->label.setText(c->headerLabel, tbl->label.stxt, titles[i]);
+        CFRelease(titles[i]);
+        setHeight(&tbl->cc, d->charts[i], heights[i], false, false);
+        tbl->stack.addSub(c->stack, tbl->stack.asv, d->charts[i]);
         tbl->view.hide(c->divider, tbl->view.shd, !i);
     }
 
@@ -253,12 +253,12 @@ void historyVC_viewDidLoad(id self, SEL _cmd) {
         Sels.viewRel(containers[i], Sels.rel);
     }
 
-    historyVC_updateSegment(self, nil, data->picker);
+    historyVC_updateSegment(self, nil, d->picker);
 }
 
 void historyVC_clearData(id self) {
-    HistoryVC *data = (HistoryVC *)((char *)self + VCSize);
-    HistoryViewModel *model = &data->model;
+    HistoryVC *d = (HistoryVC *)((char *)self + VCSize);
+    HistoryViewModel *model = &d->model;
     if (!model->nEntries[2]) return;
 
     CFRelease(model->axisStrings);
@@ -275,8 +275,8 @@ void historyVC_clearData(id self) {
     cache.replaceEntries(model->workoutTypes.dataSets[4], cache.rpe, NULL, 0);
 
     if (msg0(bool, self, sel_getUid("isViewLoaded"))) {
-        msg1(void, long, data->picker, sel_getUid("setSelectedSegmentIndex:"), 0);
-        historyVC_updateSegment(self, nil, data->picker);
+        msg1(void, long, d->picker, sel_getUid("setSelectedSegmentIndex:"), 0);
+        historyVC_updateSegment(self, nil, d->picker);
     }
 }
 
@@ -286,17 +286,16 @@ CFStringRef historyVC_stringForValue(id self, SEL _cmd _U_, double value) {
 }
 
 void historyVC_updateColors(id self, unsigned char darkMode) {
-    HistoryVC *data = (HistoryVC *)((char *)self + VCSize);
-    VCacheRef tbl = data->tbl;
+    HistoryVC *d = (HistoryVC *)((char *)self + VCSize);
+    VCacheRef tbl = d->tbl;
     id view = msg0(id, self, sel_getUid("view"));
-    tbl->view.setBG(view, tbl->view.sbg,
-                    data->clr->getColor(data->clr->cls, data->clr->sc, ColorPrimaryBG));
-    updateSegmentedControl(data->clr, data->picker, darkMode);
+    tbl->view.setBG(view, tbl->view.sbg, d->clr->getColor(d->clr->cls, d->clr->sc, ColorPrimaryBG));
+    updateSegmentedControl(d->clr, d->picker, darkMode);
     view = (id)CFArrayGetValueAtIndex(msg0(CFArrayRef, view, sel_getUid("subviews")), 0);
     view = (id)CFArrayGetValueAtIndex(msg0(CFArrayRef, view, sel_getUid("subviews")), 0);
     CFArrayRef views = tbl->stack.getSub(view, tbl->stack.gsv);
     for (int i = 0; i < 3; ++i) {
         containerView_updateColors(
-          (ContainerView *)((char *)CFArrayGetValueAtIndex(views, i) + ViewSize), tbl, data->clr);
+          (ContainerView *)((char *)CFArrayGetValueAtIndex(views, i) + ViewSize), tbl, d->clr);
     }
 }

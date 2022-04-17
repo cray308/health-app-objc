@@ -12,8 +12,7 @@ typedef struct {
     ExerciseEntry *entry;
 } StatusView;
 
-id statusView_init(VCacheRef tbl, CCacheRef clr,
-                   CFStringRef text CF_CONSUMED, StatusView **ref, int tag, id target, SEL action);
-void statusView_updateAccessibility(StatusView *ptr, VCacheRef tbl);
+id statusView_init(VCacheRef tbl, CCacheRef clr, StatusView **v, int tag, id target, SEL action);
+void statusView_updateAccessibility(StatusView *v, VCacheRef tbl);
 
 #endif /* StatusView_h */
