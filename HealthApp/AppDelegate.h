@@ -31,7 +31,7 @@ typedef struct {
 } AppDelegate;
 
 typedef void (^Callback)(void);
-typedef void (*FetchHandler)(void*, CFArrayRef, WeekDataModel*, int);
+typedef void (*FetchHandler)(void*, CFArrayRef, WeekDataModel*, int, bool);
 
 UserInfo const *getUserInfo(void);
 

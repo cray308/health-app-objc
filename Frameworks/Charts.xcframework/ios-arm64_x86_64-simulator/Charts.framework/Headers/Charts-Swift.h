@@ -229,7 +229,7 @@ SWIFT_CLASS("_TtC6Charts9ChartData")
 
 SWIFT_CLASS("_TtC6Charts12ChartUtility")
 @interface ChartUtility : NSObject
-+ (void)setDarkModeWithEnabled:(BOOL)enabled;
++ (BOOL)setup:(BOOL)enabled SWIFT_WARN_UNUSED_RESULT;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
@@ -503,7 +503,7 @@ SWIFT_CLASS("_TtC6Charts9ChartData")
 
 SWIFT_CLASS("_TtC6Charts12ChartUtility")
 @interface ChartUtility : NSObject
-+ (void)setDarkModeWithEnabled:(BOOL)enabled;
++ (BOOL)setup:(BOOL)enabled SWIFT_WARN_UNUSED_RESULT;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 

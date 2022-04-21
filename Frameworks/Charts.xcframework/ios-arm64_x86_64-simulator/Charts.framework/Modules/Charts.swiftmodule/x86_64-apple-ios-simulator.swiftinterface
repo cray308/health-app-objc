@@ -22,7 +22,7 @@ import _Concurrency
   @_Concurrency.MainActor(unsafe) @objc public func gestureRecognizer(_ gestureRecognizer: UIKit.UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIKit.UIGestureRecognizer) -> Swift.Bool
 }
 @objc @_inheritsConvenienceInitializers public class ChartUtility : ObjectiveC.NSObject {
-  @objc public class func setDarkMode(enabled: Swift.Bool)
+  @objc public class func setup(_ enabled: Swift.Bool) -> Swift.Bool
   @objc override dynamic public init()
   @objc deinit
 }

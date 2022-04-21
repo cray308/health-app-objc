@@ -28,9 +28,11 @@ static struct HistCache cache;
 
 #pragma mark - Load Data
 
-static void historyData_populate(void *_model, CFArrayRef strs, WeekDataModel *results, int size) {
-    HistoryViewModel *m = _model;
+static void populateHistory(void *_m, CFArrayRef strs, WeekDataModel *results, int size, bool ltr) {
+    HistoryViewModel *m = _m;
     m->axisStrings = strs;
+    int incr = ltr ? 1 : -1;
+    int last = size - 1;
     int innerLimits[] = {-1, 0, 1};
     int refIndices[] = {size, size - 26, size - 52, 0};
     if (refIndices[2] < 0)
@@ -39,7 +41,7 @@ static void historyData_populate(void *_model, CFArrayRef strs, WeekDataModel *r
         refIndices[1] = 0;
 
     memcpy(m->nEntries, (int[]){size - refIndices[1], size - refIndices[2], size}, 3 * sizeof(int));
-    memcpy(m->refIndices, &refIndices[1], 3 * sizeof(int));
+    if (ltr) memcpy(m->refIndices, &refIndices[1], 3 * sizeof(int));
 
     int totalWorkouts[3] = {0};
     int totalByType[3][4] = {{0},{0},{0}}, totalByExercise[3][4] = {{0},{0},{0}};
@@ -55,18 +57,19 @@ static void historyData_populate(void *_model, CFArrayRef strs, WeekDataModel *r
     m->workoutTypes.entries[3] = malloc((unsigned)size * sizeof(CGPoint));
     m->workoutTypes.entries[4] = malloc((unsigned)size * sizeof(CGPoint));
 
-    for (int section = 3, index = 0; section > 0; --section) {
+    for (int section = 3, index = ltr ? 0 : last; section > 0; --section) {
         int limit = refIndices[section - 1];
         int jEnd = innerLimits[section - 1];
-        for (int i = refIndices[section]; i < limit; ++i, ++index) {
+        for (int i = refIndices[section]; i < limit; ++i, index += incr) {
             WeekDataModel *e = &results[i];
+            int ptIdx = ltr ? i : last - i;
 
             for (int j = 2; j > jEnd; --j) {
                 totalWorkouts[j] += e->totalWorkouts;
                 if (e->totalWorkouts > maxWorkouts[j])
                     maxWorkouts[j] = e->totalWorkouts;
             }
-            m->totalWorkouts.entries[index] = (CGPoint){i, e->totalWorkouts};
+            m->totalWorkouts.entries[index] = (CGPoint){ptIdx, e->totalWorkouts};
 
             for (int x = 0; x < 4; ++x) {
                 for (int j = 2; j > jEnd; --j) {
@@ -75,16 +78,16 @@ static void historyData_populate(void *_model, CFArrayRef strs, WeekDataModel *r
                     if (e->weightArray[x] > maxWeight[j])
                         maxWeight[j] = e->weightArray[x];
                 }
-                m->lifts.entries[x][index] = (CGPoint){i, e->weightArray[x]};
+                m->lifts.entries[x][index] = (CGPoint){ptIdx, e->weightArray[x]};
             }
 
             for (int j = 2; j > jEnd; --j) {
                 if (e->cumulativeDuration[3] > maxTime[j])
                     maxTime[j] = e->cumulativeDuration[3];
             }
-            m->workoutTypes.entries[0][index] = (CGPoint){i, 0};
+            m->workoutTypes.entries[0][index] = (CGPoint){ptIdx, 0};
             for (int x = 1; x < 5; ++x) {
-                m->workoutTypes.entries[x][index] = (CGPoint){i, e->cumulativeDuration[x - 1]};
+                m->workoutTypes.entries[x][index] = (CGPoint){ptIdx, e->cumulativeDuration[x - 1]};
             }
         }
     }
@@ -112,7 +115,7 @@ id historyVC_init(void **model, FetchHandler *handler, VCacheRef tbl, CCacheRef 
     d->clr = clr;
     HistoryViewModel *m = &d->model;
     *model = m;
-    *handler = &historyData_populate;
+    *handler = &populateHistory;
     int colors[] = {0, 1, 2, 3};
     Class classes[2];
     SEL selArr[6];

@@ -20,7 +20,7 @@ extern CGFloat UIFontWeightSemibold;
 void initViewData(VCache*, Class*);
 void initNSData(bool modern, ColorCache *cacheRef, Class **clsRefs, size_t **sizeRefs);
 void setupAppColors(Class Color, unsigned char darkMode, bool deleteOld);
-void toggleDarkModeForCharts(bool);
+bool setupCharts(bool);
 void initValidatorStrings(Class);
 void initExerciseData(int);
 void initWorkoutStrings(void);
@@ -226,7 +226,7 @@ static void createDummyData(id context) {
 }
 #endif
 
-static void fetchHistory(id context, void *model, FetchHandler handler) {
+static void fetchHistory(id context, void *model, FetchHandler handler, bool ltr) {
     ((void(*)(id,SEL,Callback))objc_msgSend)(context, sel_getUid("performBlock:"), ^{
         int count = 0;
         CFArrayRef data = context_fetchData(context, 1, &count);
@@ -257,19 +257,24 @@ static void fetchHistory(id context, void *model, FetchHandler handler) {
                     r->weightArray[j] = msg0(int16_t, d, liftSels[j]);
                 }
 
-                r->cumulativeDuration[0] = results[i].durationByType[0];
+                r->cumulativeDuration[0] = r->durationByType[0];
                 for (int j = 1; j < 4; ++j) {
                     r->cumulativeDuration[j] = r->cumulativeDuration[j - 1] + r->durationByType[j];
                 }
                 CFRelease(str);
             }
+            if (!ltr) {
+                for (int i = 0, j = count - 1; i < j; ++i, --j) {
+                    CFArrayExchangeValuesAtIndices(strs, i, j);
+                }
+            }
             CFRelease(f);
-            handler(model, strs, results, count);
+            handler(model, strs, results, count, ltr);
         }
     });
 }
 
-static void runStartupDataJob(id *cRef, void *m, FetchHandler h, time_t weekStart, int tzDiff) {
+static void runStartupDataJob(id *cRef, void *m, FetchHandler h, time_t wStart, int tzDiff, bool ltr) {
     service = msg1(id, CFStringRef, Sels.alloc(objc_getClass("NSPersistentContainer"), Sels.alo),
                    sel_getUid("initWithName:"), CFSTR("HealthApp"));
     msg1(void, void(^)(id,id), service,
@@ -285,13 +290,13 @@ static void runStartupDataJob(id *cRef, void *m, FetchHandler h, time_t weekStar
         SEL liftSels[4];
         SEL getStart = sel_getUid("weekStart"), delObj = sel_getUid("deleteObject:");
         SEL weekInit = sel_getUid("initWithContext:"), setStart = sel_getUid("setWeekStart:");
-        const time_t endPt = weekStart - 63244800;
+        const time_t endPt = wStart - 63244800;
         time_t start;
         int count = 0;
         CFArrayRef data = context_fetchData(context, 1, &count);
         if (!data) {
             id first = msg1(id, id, clsF0(id, WeeklyData, Sels.alo), weekInit, context);
-            msg1(void, int64_t, first, setStart, weekStart);
+            msg1(void, int64_t, first, setStart, wStart);
             msg0(void, first, Sels.rel);
             context_saveChanges(context);
             goto cleanup;
@@ -312,9 +317,9 @@ static void runStartupDataJob(id *cRef, void *m, FetchHandler h, time_t weekStar
             lastLifts[i] = msg0(int16_t, last, sel_getUid(liftGets[i]));
         }
         start = msg0(int64_t, last, getStart);
-        if (start != weekStart) {
+        if (start != wStart) {
             id currWeek = msg1(id, id, clsF0(id, WeeklyData, Sels.alo), weekInit, context);
-            msg1(void, int64_t, currWeek, setStart, weekStart);
+            msg1(void, int64_t, currWeek, setStart, wStart);
             for (int j = 0; j < 4; ++j) {
                 msg1(void, int16_t, currWeek, liftSels[j], lastLifts[j]);
             }
@@ -329,7 +334,7 @@ static void runStartupDataJob(id *cRef, void *m, FetchHandler h, time_t weekStar
         }
 
         start += WeekSeconds;
-        for (; start < weekStart; start += WeekSeconds) {
+        for (; start < wStart; start += WeekSeconds) {
             id curr = msg1(id, id, clsF0(id, WeeklyData, Sels.alo), weekInit, context);
             msg1(void, int64_t, curr, setStart, start);
             for (int j = 0; j < 4; ++j) {
@@ -340,7 +345,7 @@ static void runStartupDataJob(id *cRef, void *m, FetchHandler h, time_t weekStar
         context_saveChanges(context);
 
     cleanup:
-        fetchHistory(context, m, h);
+        fetchHistory(context, m, h, ltr);
     });
 }
 
@@ -657,7 +662,6 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id app _U_,
         imps[3] = (IMP)alertCtrlCreateLegacy;
         pickerSel = sel_getUid("pickerView:attributedTitleForRow:forComponent:");
         setupAppColors(self->clr.cls, dm, false);
-        toggleDarkModeForCharts(dm);
     }
     class_addMethod(SetupWorkoutVCClass, sel_getUid("numberOfComponentsInPickerView:"),
                     imps[0], "q@:@");
@@ -666,6 +670,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id app _U_,
     class_addMethod(SetupWorkoutVCClass, pickerSel, imps[2], "@@:@qq");
     class_addMethod(objc_getMetaClass("UIAlertController"),
                     sel_registerName("getCtrlWithTitle:message:"), imps[3], "@@:@@");
+    bool ltr = setupCharts(dm);
 
     void *fetchArg; FetchHandler fetchHandler;
     self->children[0] = homeVC_init(&self->tbl, &self->clr, weekStart + 43200);
@@ -704,7 +709,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id app _U_,
     CFRelease(array);
     Sels.vcRel(tabVC, Sels.rel);
     msg0(void, self->window, sel_getUid("makeKeyAndVisible"));
-    runStartupDataJob(&self->context, fetchArg, fetchHandler, weekStart, tzDiff);
+    runStartupDataJob(&self->context, fetchArg, fetchHandler, weekStart, tzDiff, ltr);
     return true;
 }
 
@@ -770,7 +775,7 @@ void updateUserInfo(unsigned char plan, unsigned char darkMode, short *weights) 
              self->clr.getColor(self->clr.cls, self->clr.sc, ColorRed));
         setupTabVC(self, msg0(id, self->window, sel_getUid("rootViewController")),
                    objc_getClass("UITabBarAppearance"));
-        toggleDarkModeForCharts(darkMode);
+        setupCharts(darkMode);
         homeVC_updateColors(self->children[0]);
         if (msg0(bool, self->children[1], sel_getUid("isViewLoaded")))
             historyVC_updateColors(self->children[1], darkMode);

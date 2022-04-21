@@ -2,7 +2,7 @@
 #import "UIKit/UIKit.h"
 @import Charts;
 
-void toggleDarkModeForCharts(bool enabled) { [ChartUtility setDarkModeWithEnabled:enabled]; }
+bool setupCharts(bool enabled) { return [ChartUtility setup:enabled]; }
 
 void populateChartsSelsAndFuncs(Class *classes, IMP *impArr, SEL *selArr) {
     Class Chart = LineChart.class, CSet = DataSet.class, CData = ChartData.class;
