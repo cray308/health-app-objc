@@ -41,8 +41,8 @@
 "totalWorkoutsLegend" = "\U202Fمتوسط التدريبات (%.2f)\U202C";
 "workoutTypeLegend" = "\U202F%1$@ (المتوسط: %2$@)\U202C";
 "liftLegend" = "\U202F%1$@ (المتوسط: %2$.1f)\U202C";
-"hourMinFmt" = "\U202Fد %2$d س %1$d\U202C";
-"minsFmt" = "\U202F د %d\U202C";
+"hourMinFmt" = "\U202F%1$d س %2$d د\U202C";
+"minsFmt" = "\U202F%d د\U202C";
 
 "planPickerTitle" = "تغيير خطة التمرين";
 "darkMode" = "مظهر داكن";
