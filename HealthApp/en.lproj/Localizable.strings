@@ -47,7 +47,7 @@
 "planPickerTitle" = "Change workout plan";
 "darkMode" = "Dark Mode";
 "settingsSegment0" = "None";
-"settingsSegment1" = "Base-Building";
+"settingsSegment1" = "Foundation";
 "settingsSegment2" = "Continuation";
 "maxWeight" = "Max %@ Weight";
 "settingsSave" = "Save Settings";
@@ -80,8 +80,7 @@
 "circuitHeaderLocAndRounds" = "Circuit %1$d of %2$d - Round %3$d of %4$d";
 "circuitHeaderLocAndAMRAP" = "Circuit %1$d of %2$d - AMRAP %3$d min";
 "sets1" = "Set 1";
-"rounds1S" = "Round 1";
-"rounds1M" = "Round 1";
+"rounds1" = "Round 1";
 "sep" = "%1$@, %2$@";
 
 "exNames00" = "Squat";
@@ -153,7 +152,7 @@
 "wkNames302" = "600 Meter Resets";
 "wkNames303" = "Black on Oxygen";
 "wkNames304" = "BoO II";
-"wkNames305" = "Fobbit Intervals";
+"wkNames305" = "Track Intervals";
 "wkNames306" = "Oxygen Debt 101";
 "wkNames307" = "Sprint Ladders";
 "wkNames308" = "Meat-Eater";

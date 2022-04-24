@@ -36,8 +36,7 @@ static CFStringRef circuitProgressFmt;
 static CFStringRef roundsLoc;
 static CFStringRef amrapLoc;
 static CFStringRef sets1;
-static CFStringRef rounds1S;
-static CFStringRef rounds1M;
+static CFStringRef rounds1;
 
 static void createRootAndLibDict(struct DictWrapper *data) {
     CFURLRef url = CFBundleCopyResourceURL(
@@ -147,16 +146,13 @@ static Workout *buildWorkout(CFArrayRef acts, WorkoutParams *params) {
                 circuitHeader = formatStr(l, amrapFormat, circuitReps);
             }
         } else if (circuitReps > 1) {
-            CFStringRef substr;
             CFRange subrange, numrange;
             if (multiple) {
                 circuitHeader = formatStr(l, roundsLoc, i + 1, nActivities, 1, circuitReps);
-                substr = rounds1M;
             } else {
                 circuitHeader = formatStr(l, roundsFormat, 1, circuitReps);
-                substr = rounds1S;
             }
-            subrange = CFStringFind(circuitHeader, substr, 0);
+            subrange = CFStringFind(circuitHeader, rounds1, 0);
             CFStringRef subhead = CFStringCreateWithSubstring(NULL, circuitHeader, subrange);
             CFStringFindWithOptionsAndLocale(
               subhead, one, (CFRange){0, CFStringGetLength(subhead)}, 0, l, &numrange);
@@ -303,13 +299,11 @@ void initExerciseData(int week) {
     amrapLoc = localize(CFSTR("circuitHeaderLocAndAMRAP"));
     weekInPlan = week;
 
-    CFStringRef *refs[] = {&sets1, &rounds1S, &rounds1M};
-    CFStringRef arr[] = {
-        localize(CFSTR("sets1")), localize(CFSTR("rounds1S")), localize(CFSTR("rounds1M"))
-    };
-    for (int i = 0; i < 3; ++i) {
+    CFStringRef *refs[] = {&sets1, &rounds1};
+    CFStringRef arr[] = {localize(CFSTR("sets1")), localize(CFSTR("rounds1"))};
+    for (int i = 0; i < 2; ++i) {
         CFMutableStringRef m = CFStringCreateMutableCopy(NULL, CFStringGetLength(arr[i]) + 2, arr[i]);
-        if (CFStringHasPrefix(m, CFSTR("\U0000202e")))
+        if (CFStringHasPrefix(m, CFSTR("\U0000202e")) || CFStringHasPrefix(m, CFSTR("\U0000202f")))
             CFStringDelete(m, (CFRange){0, 1});
         if (CFStringHasSuffix(m, CFSTR("\U0000202c")))
             CFStringDelete(m, (CFRange){CFStringGetLength(m) - 1, 1});
