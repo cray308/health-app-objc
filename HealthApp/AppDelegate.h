@@ -14,10 +14,10 @@ typedef struct {
 } UserInfo;
 
 typedef struct {
+    float weightArray[4];
     short totalWorkouts;
     short durationByType[4];
     short cumulativeDuration[4];
-    short weightArray[4];
 } WeekDataModel;
 
 typedef struct {
@@ -33,13 +33,17 @@ typedef struct {
 typedef void (^Callback)(void);
 typedef void (*FetchHandler)(void*, CFArrayRef, WeekDataModel*, int, bool);
 
+extern int massType;
+extern float fromSavedMass;
+extern float toSavedMass;
+
 UserInfo const *getUserInfo(void);
 
 void presentVC(id child);
 void presentModalVC(id modal);
 void dismissPresentedVC(Callback handler);
 
-id createAlertController(CFStringRef title CF_CONSUMED, CFStringRef message CF_CONSUMED);
-void addAlertAction(id ctrl, CFStringRef title CF_CONSUMED, int style, Callback handler);
+id createAlertController(CFStringRef titleKey, CFStringRef msgKey);
+void addAlertAction(id ctrl, CFStringRef titleKey, int style, Callback handler);
 
 #endif /* AppDelegate_h */

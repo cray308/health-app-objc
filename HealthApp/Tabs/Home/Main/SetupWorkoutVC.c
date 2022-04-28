@@ -98,7 +98,7 @@ void setupWorkoutVC_viewDidLoad(id self, SEL _cmd) {
     }
 
     for (int i = 0; i < 3; ++i) {
-        if (rows[i]) inputVC_addChild(self, localize(rows[i]), mins[i], maxes[i]);
+        if (rows[i]) inputVC_addChild(self, localize(rows[i]), 4, mins[i], maxes[i]);
     }
 
     Sels.viewRel(workoutLabel, Sels.rel);
@@ -116,14 +116,14 @@ void setupWorkoutVC_tappedButton(id self, SEL _cmd _U_, id btn) {
     short weight = 0, sets = 0, reps = 0;
     switch (d->type) {
         case WorkoutStrength:
-            weight = sup->children[2].data->result;
+            weight = (short)sup->children[2].data->result;
         case WorkoutSE:
-            sets = sup->children[0].data->result;
-            reps = sup->children[1].data->result;
+            sets = (short)sup->children[0].data->result;
+            reps = (short)sup->children[1].data->result;
             break;
 
         case WorkoutEndurance:
-            reps = sup->children[0].data->result;
+            reps = (short)sup->children[0].data->result;
         default:
             break;
     }

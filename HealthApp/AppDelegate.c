@@ -45,6 +45,10 @@ enum {
     IWeekStart, IPlanStart, ITzOffset, ICurrentPlan, ICompletedWorkouts, IDarkMode, ILiftArray
 };
 
+int massType = 0;
+float fromSavedMass = 1;
+float toSavedMass = 1;
+
 #if DEBUG
 static bool FIRST_LAUNCH;
 #endif
@@ -254,7 +258,7 @@ static void fetchHistory(id context, void *model, FetchHandler handler, bool ltr
                 r->totalWorkouts = msg0(int16_t, d, getTotal);
                 for (int j = 0; j < 4; ++j) {
                     r->durationByType[j] = msg0(int16_t, d, timeSels[j]);
-                    r->weightArray[j] = msg0(int16_t, d, liftSels[j]);
+                    r->weightArray[j] = msg0(int16_t, d, liftSels[j]) * fromSavedMass;
                 }
 
                 r->cumulativeDuration[0] = r->durationByType[0];
@@ -433,7 +437,8 @@ void dismissPresentedVC(Callback handler) {
     });
 }
 
-id createAlertController(CFStringRef title, CFStringRef message) {
+id createAlertController(CFStringRef titleKey, CFStringRef msgKey) {
+    CFStringRef title = localize(titleKey), message = localize(msgKey);
     id ctrl = clsF2(id, CFStringRef, CFStringRef, objc_getClass("UIAlertController"),
                     sel_getUid("getCtrlWithTitle:message:"), title, message);
     CFRelease(title);
@@ -477,7 +482,8 @@ static id alertCtrlCreateLegacy(id self, SEL _cmd _U_, CFStringRef title, CFStri
     return vc;
 }
 
-void addAlertAction(id ctrl, CFStringRef title, int style, Callback handler) {
+void addAlertAction(id ctrl, CFStringRef titleKey, int style, Callback handler) {
+    CFStringRef title = localize(titleKey);
     id action = clsF3(id, CFStringRef, long, void(^)(id), objc_getClass("UIAlertAction"),
                       sel_getUid("actionWithTitle:style:handler:"), title, style, ^(id hdlr _U_) {
         if (handler)
@@ -821,8 +827,11 @@ unsigned char addWorkoutData(unsigned char day, int type, int16_t duration, shor
     CFStringRef keys[5];
     CFNumberRef values[5];
     int nChanges = 0;
-    if (weights)
-        nChanges = updateWeight(self->userData.liftMaxes, weights, keys, values);
+    if (weights && (nChanges = updateWeight(self->userData.liftMaxes, weights, keys, values))) {
+        id vc = self->children[2];
+        if (msg0(bool, vc, sel_getUid("isViewLoaded")))
+            inputVC_updateFields((InputVC *)((char *)vc + VCSize), self->userData.liftMaxes);
+    }
     if (day != 0xff) {
         completed = self->userData.completedWorkouts;
         completed |= (1 << day);
@@ -830,12 +839,7 @@ unsigned char addWorkoutData(unsigned char day, int type, int16_t duration, shor
         keys[nChanges] = DictKeys[ICompletedWorkouts];
         values[nChanges++] = CFNumberCreate(NULL, kCFNumberCharType, &completed);
     }
-    if (nChanges) {
-        saveChanges(createMutableDict(), keys, values, nChanges);
-        id vc = self->children[2];
-        if (msg0(bool, vc, sel_getUid("isViewLoaded")))
-            inputVC_updateFields((InputVC *)((char *)vc + VCSize), self->userData.liftMaxes);
-    }
+    if (nChanges) saveChanges(createMutableDict(), keys, values, nChanges);
 
     id context = self->context;
     ((void(*)(id,SEL,Callback))objc_msgSend)(context, sel_getUid("performBlock:"), ^{

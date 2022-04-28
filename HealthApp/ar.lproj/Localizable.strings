@@ -70,7 +70,7 @@
 "exerciseHeader" = "\U202Fالمجموعة %1$d من %2$d\U202C";
 "exerciseTitleRest" = "\U202Fاسترح لمدة %d ث\U202C";
 "exerciseTitleReps" = "\U202F%1$@ %2$d مرات\U202C";
-"exerciseTitleRepsWithWeight" = "\U202F%1$@ %2$d مرات مع %3$d رطلا\U202C";
+"exerciseTitleRepsWithWeight" = "\U202F%1$@ %2$d مرات مع %3$.2f %4$@\U202C";
 "exerciseTitleDurationMinutes" = "\U202F%1$@ لمدة %2$.1f د\U202C";
 "exerciseTitleDurationSeconds" = "\U202F%1$@ لمدة %2$d ث\U202C";
 "exerciseTitleDistance" = "\U202F%1$@ %2$d أو %3$d م\U202C";

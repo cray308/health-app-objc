@@ -253,9 +253,8 @@ static void showConfetti(id view, HomeVC *d) {
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 5000000000), dispatch_get_main_queue(), ^{
         tbl->view.rmSub(confetti, tbl->view.rsv);
         Sels.viewRel(confetti, Sels.rel);
-        id ctrl = createAlertController(localize(CFSTR("homeAlertTitle")),
-                                        localize(CFSTR("homeAlertMessage")));
-        addAlertAction(ctrl, localize(CFSTR("ok")), 0, NULL);
+        id ctrl = createAlertController(CFSTR("homeAlertTitle"), CFSTR("homeAlertMessage"));
+        addAlertAction(ctrl, CFSTR("ok"), 0, NULL);
         presentVC(ctrl);
     });
 }

@@ -35,6 +35,7 @@ static CFStringRef amrapFormat;
 static CFStringRef circuitProgressFmt;
 static CFStringRef roundsLoc;
 static CFStringRef amrapLoc;
+static CFStringRef weightUnit;
 static CFStringRef sets1;
 static CFStringRef rounds1;
 
@@ -68,27 +69,30 @@ static CFStringRef createTitle(int type, int index) {
 }
 
 static Workout *buildWorkout(CFArrayRef acts, WorkoutParams *params) {
-    short weights[4];
+    float weights[4] = {[3] = 0};
     short customSets = 1, customReps = 0, customCircuitReps = 0;
     bool testMax = false;
     if (params->type == WorkoutStrength) {
         const short *lifts = getUserInfo()->liftMaxes;
         float multiplier = params->weight / 100.f;
 
-        weights[0] = (short)(multiplier * lifts[0]);
+        weights[0] = lifts[0] * multiplier;
         if (params->index <= 1) {
-            weights[1] = (short)(multiplier * lifts[LiftBench]);
+            weights[1] = lifts[LiftBench] * multiplier;
             if (params->index == 0) {
-                short weight = (short)((lifts[LiftPullup] + bodyweight) * multiplier) - bodyweight;
+                int weight = (int)((lifts[LiftPullup] + bodyweight) * multiplier) - bodyweight;
                 if (weight < 0)
                     weight = 0;
                 weights[2] = weight;
             } else {
-                weights[2] = (short)(multiplier * lifts[LiftDeadlift]);
+                weights[2] = lifts[LiftDeadlift] * multiplier;
             }
         } else {
-            memcpy(&weights[1], &lifts[1], 3 * sizeof(short));
+            for (int i = 1; i < 4; ++i) weights[i] = lifts[i];
             testMax = true;
+        }
+        if (massType) {
+            for (int i = 0; i < 4; ++i) weights[i] *= fromSavedMass;
         }
         customReps = params->reps;
         customSets = params->sets;
@@ -208,7 +212,7 @@ static Workout *buildWorkout(CFArrayRef acts, WorkoutParams *params) {
 
             if (e.type == ExerciseReps) {
                 if (!workout.type) {
-                    titleStr = formatStr(l, weightFormat, name, e.reps, weights[j]);
+                    titleStr = formatStr(l, weightFormat, name, e.reps, weights[j], weightUnit);
                 } else {
                     titleStr = formatStr(l, repsFormat, name, e.reps);
                 }
@@ -311,6 +315,25 @@ void initExerciseData(int week) {
         CFRelease(arr[i]);
         CFRelease(m);
     }
+
+    CFLocaleRef l = CFLocaleCopyCurrent();
+    CFStringRef key;
+    if (CFBooleanGetValue(CFLocaleGetValue(l, kCFLocaleUsesMetricSystem))) {
+        key = CFSTR("kg");
+        massType = 1;
+        fromSavedMass = 0.453592f;
+        toSavedMass = 2.204623f;
+    } else {
+        key = CFSTR("lb");
+    }
+    CFRelease(l);
+    id unit = msg1(id, CFStringRef, Sels.alloc(objc_getClass("NSUnit"), Sels.alo),
+                   sel_getUid("initWithSymbol:"), key);
+    id formatter = Sels.new(objc_getClass("NSMeasurementFormatter"), Sels.nw);
+    CFStringRef _unitStr = msg1(CFStringRef, id, formatter, sel_getUid("stringFromUnit:"), unit);
+    weightUnit = CFStringCreateCopy(NULL, _unitStr);
+    Sels.objRel(unit, Sels.rel);
+    Sels.objRel(formatter, Sels.rel);
 
     dispatch_async(dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0), ^{ getHealthData(); });
 }

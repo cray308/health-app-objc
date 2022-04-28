@@ -1,6 +1,5 @@
 #include "InputVC.h"
 #include <CoreFoundation/CFNotificationCenter.h>
-#include <CoreFoundation/CFCharacterSet.h>
 #include <CoreFoundation/CFNumberFormatter.h>
 #include <dispatch/queue.h>
 #include <string.h>
@@ -25,6 +24,7 @@ struct InputCache {
 };
 
 static CFStringRef inputFieldError;
+static CFStringRef sep;
 static CFCharacterSetRef charSet;
 static CFNumberFormatterRef numFormatter;
 static struct InputCache cache;
@@ -80,8 +80,13 @@ static void keyboardWillHide(CFNotificationCenterRef ctr _U_, void *self,
 }
 
 void initValidatorStrings(Class Field) {
-    charSet = CFCharacterSetGetPredefined(kCFCharacterSetDecimalDigit);
     CFLocaleRef locale = CFLocaleCopyCurrent();
+    sep = CFStringCreateCopy(NULL, CFLocaleGetValue(locale, kCFLocaleDecimalSeparator));
+    CFMutableCharacterSetRef ms = CFCharacterSetCreateMutableCopy(
+      NULL, CFCharacterSetGetPredefined(kCFCharacterSetDecimalDigit));
+    CFCharacterSetAddCharactersInString(ms, sep);
+    charSet = CFCharacterSetCreateCopy(NULL, ms);
+    CFRelease(ms);
     numFormatter = CFNumberFormatterCreate(NULL, locale, kCFNumberFormatterDecimalStyle);
     CFRelease(locale);
     inputFieldError = localize(CFSTR("inputFieldError"));
@@ -97,7 +102,7 @@ void initValidatorStrings(Class Field) {
     }, sizeof(struct InputCache));
 }
 
-static void inputView_reset(InputView *v, short value, VCacheRef tbl) {
+static void inputView_reset(InputView *v, float value, VCacheRef tbl) {
     v->valid = true;
     v->result = value;
     tbl->view.hide(v->errorLabel, tbl->view.shd, true);
@@ -116,7 +121,7 @@ static void showInputError(IVPair *pair, InputVC *d) {
     }
 }
 
-void inputVC_addChild(id self, CFStringRef hint, short min, short max) {
+void inputVC_addChild(id self, CFStringRef hint, int kb, short min, short max) {
     InputVC *d = (InputVC *)((char *)self + VCSize);
     VCacheRef tbl = d->tbl;
 
@@ -134,7 +139,8 @@ void inputVC_addChild(id self, CFStringRef hint, short min, short max) {
     tbl->label.setLines(v->hintLabel, tbl->label.snl, 0);
     tbl->view.setIsAcc(v->hintLabel, tbl->view.sace, false);
     v->field = createTextfield(tbl, d->clr, self, d->toolbar, hint, index);
-    msg1(void, long, v->field, cache.skbt, 4);
+    msg1(void, long, v->field, cache.skbt, kb);
+    v->set = kb == 4 ? CFCharacterSetGetPredefined(kCFCharacterSetDecimalDigit) : charSet;
     tbl->view.setHint(v->field, tbl->view.shn, errorText);
     if (d->setKB)
         msg1(void, long, v->field, sel_getUid("setKeyboardAppearance:"), 1);
@@ -154,15 +160,25 @@ void inputVC_addChild(id self, CFStringRef hint, short min, short max) {
 }
 
 void inputVC_updateFields(InputVC *self, const short *vals) {
-    int count = self->count;
     CFLocaleRef l = CFLocaleCopyCurrent();
-    for (int i = 0; i < count; ++i) {
-        short value = vals[i];
-        InputView *v = self->children[i].data;
-        CFStringRef str = formatStr(l, CFSTR("%d"), value);
-        self->tbl->field.setText(v->field, self->tbl->label.stxt, str);
-        inputView_reset(v, value, self->tbl);
-        CFRelease(str);
+    if (massType) {
+        for (int i = 0; i < 4; ++i) {
+            float value = vals[i] * fromSavedMass;
+            InputView *v = self->children[i].data;
+            CFStringRef str = formatStr(l, CFSTR("%.2f"), value);
+            self->tbl->field.setText(v->field, self->tbl->label.stxt, str);
+            inputView_reset(v, value, self->tbl);
+            CFRelease(str);
+        }
+    } else {
+        for (int i = 0; i < 4; ++i) {
+            short value = vals[i];
+            InputView *v = self->children[i].data;
+            CFStringRef str = formatStr(l, CFSTR("%d"), value);
+            self->tbl->field.setText(v->field, self->tbl->label.stxt, str);
+            inputView_reset(v, value, self->tbl);
+            CFRelease(str);
+        }
     }
     self->tbl->button.setEnabled(self->button, self->tbl->button.en, true);
     CFRelease(l);
@@ -319,38 +335,54 @@ bool inputVC_fieldChanged(id self, SEL _cmd _U_, id field, CFRange range, CFStri
     InputVC *d = (InputVC *)((char *)self + VCSize);
     VCacheRef tbl = d->tbl;
 
+    IVPair *pair = &d->children[tbl->view.getTag(field, tbl->view.gtg)];
     int len = (int)CFStringGetLength(replacement);
     if (len) {
         CFStringInlineBuffer buf;
         CFStringInitInlineBuffer(replacement, &buf, CFRangeMake(0, len));
-        for (int i = 0; i < len; ++i) {
+        for (int c = 0; c < len; ++c) {
             if (!CFCharacterSetIsCharacterMember(
-                   charSet, CFStringGetCharacterFromInlineBuffer(&buf, i))) return false;
+                   pair->data->set, CFStringGetCharacterFromInlineBuffer(&buf, c))) return false;
         }
     }
-
-    int i = (int)tbl->view.getTag(field, tbl->view.gtg);
-    IVPair *pair = &d->children[i];
 
     CFStringRef text = msg0(CFStringRef, field, tbl->label.gtxt);
     if (range.location + range.length > CFStringGetLength(text)) return false;
     CFMutableStringRef newText = CFStringCreateMutableCopy(NULL, 0, text);
     CFStringReplace(newText, range, replacement);
 
-    if (!CFStringGetLength(newText)) {
+    long newLen = CFStringGetLength(newText);
+    if (!newLen) {
         CFRelease(newText);
         tbl->button.setEnabled(d->button, tbl->button.en, false);
         showInputError(pair, d);
         return true;
     }
 
-    CFNumberRef num = CFNumberFormatterCreateNumberFromString(NULL, numFormatter, newText, NULL, 0);
-    int newVal = -1;
-    CFRelease(newText);
-    if (num != NULL) {
-        CFNumberGetValue(num, kCFNumberIntType, &newVal);
-        CFRelease(num);
+    if (len && pair->data->set == charSet) {
+        CFArrayRef res = CFStringCreateArrayWithFindResults(NULL, newText, sep,
+                                                            (CFRange){0, newLen}, 0);
+        if (res) {
+            if (CFArrayGetCount(res) > 1) {
+                CFRelease(res);
+                CFRelease(newText);
+                return false;
+            }
+            if (newLen - ((CFRange *)CFArrayGetValueAtIndex(res, 0))->location > 3) {
+                CFRelease(res);
+                CFRelease(newText);
+                return false;
+            }
+            CFRelease(res);
+        }
     }
+
+    CFNumberRef num = CFNumberFormatterCreateNumberFromString(NULL, numFormatter, newText, NULL, 0);
+    float newVal = -1;
+    CFRelease(newText);
+    if (num == NULL) return false;
+    CFNumberGetValue(num, kCFNumberFloatType, &newVal);
+    CFRelease(num);
 
     if (newVal < pair->data->minVal || newVal > pair->data->maxVal) {
         tbl->button.setEnabled(d->button, tbl->button.en, false);
@@ -358,8 +390,8 @@ bool inputVC_fieldChanged(id self, SEL _cmd _U_, id field, CFRange range, CFStri
         return true;
     }
 
-    inputView_reset(pair->data, (short)newVal, tbl);
-    for (i = 0; i < d->count; ++i) {
+    inputView_reset(pair->data, newVal, tbl);
+    for (int i = 0; i < d->count; ++i) {
         if (!d->children[i].data->valid) return true;
     }
 

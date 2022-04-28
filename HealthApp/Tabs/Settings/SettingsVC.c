@@ -1,4 +1,5 @@
 #include "SettingsVC.h"
+#include <math.h>
 #include "AppDelegate.h"
 #include "InputVC.h"
 #include "Views.h"
@@ -100,12 +101,18 @@ void settingsVC_viewDidLoad(id self, SEL _cmd) {
 
     CFStringRef liftNames[4];
     fillStringArray(liftNames, CFSTR("exNames%02d"), 4);
+    CFLocaleRef l = CFLocaleCopyCurrent();
     CFStringRef fieldKey = localize(CFSTR("maxWeight"));
+    int kb = massType ? 8 : 4;
     for (int i = 0; i < 4; ++i) {
-        inputVC_addChild(self, formatStr(NULL, fieldKey, liftNames[i]), 0, 999);
+        CFMutableStringRef adjName = CFStringCreateMutableCopy(NULL, 128, liftNames[i]);
         CFRelease(liftNames[i]);
+        CFStringLowercase(adjName, l);
+        inputVC_addChild(self, formatStr(NULL, fieldKey, adjName), kb, 0, 999);
+        CFRelease(adjName);
     }
     CFRelease(fieldKey);
+    CFRelease(l);
     tbl->stack.setSpaceAfter(sup->vStack, tbl->stack.scsp, 20, sup->children[3].view);
 
     SEL btnTap = sel_getUid("buttonTapped:");
@@ -133,11 +140,11 @@ void settingsVC_buttonTapped(id self, SEL _cmd _U_, id btn) {
     SettingsVC *d = (SettingsVC *)((char *)sup + sizeof(InputVC));
     VCacheRef tbl = sup->tbl;
     int tag = (int)tbl->view.getTag(btn, tbl->view.gtg);
-    CFStringRef msgKey = tag ? CFSTR("alertMsgDelete") : CFSTR("alertMsgSave");
-    id ctrl = createAlertController(localize(CFSTR("settingsAlertTitle")), localize(msgKey));
-    addAlertAction(ctrl, localize(CFSTR("cancel")), 1, NULL);
+    id ctrl = createAlertController(
+      CFSTR("settingsAlertTitle"), tag ? CFSTR("alertMsgDelete") : CFSTR("alertMsgSave"));
+    addAlertAction(ctrl, CFSTR("cancel"), 1, NULL);
     if (tag) {
-        addAlertAction(ctrl, localize(CFSTR("delete")), 2, ^{ deleteAppData(); });
+        addAlertAction(ctrl, CFSTR("delete"), 2, ^{ deleteAppData(); });
         presentVC(ctrl);
         return;
     }
@@ -154,8 +161,8 @@ void settingsVC_buttonTapped(id self, SEL _cmd _U_, id btn) {
 
     short *arr = d->results;
     for (int i = 0; i < 4; ++i) {
-        arr[i] = sup->children[i].data->result;
+        arr[i] = (short)lrintf(sup->children[i].data->result * toSavedMass);
     }
-    addAlertAction(ctrl, localize(CFSTR("save")), 0, ^{ updateUserInfo(plan, dark, arr); });
+    addAlertAction(ctrl, CFSTR("save"), 0, ^{ updateUserInfo(plan, dark, arr); });
     presentVC(ctrl);
 }

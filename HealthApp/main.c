@@ -80,7 +80,7 @@ int main(int argc, char *argv[]) {
     objc_registerClassPair(ContainerViewClass);
 
     InputViewClass = objc_allocateClassPair(View, "InputView", 0);
-    class_addIvar(InputViewClass, dataKey, sizeof(InputView), 0, "{?=@@@iisB}");
+    class_addIvar(InputViewClass, dataKey, sizeof(InputView), 0, "{?=@@@@iifB}");
     class_addMethod(InputViewClass, deinit, (IMP)inputView_deinit, voidSig);
     objc_registerClassPair(InputViewClass);
 

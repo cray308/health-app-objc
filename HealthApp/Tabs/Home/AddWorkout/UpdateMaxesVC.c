@@ -1,4 +1,5 @@
 #include "UpdateMaxesVC.h"
+#include <math.h>
 #include "AppDelegate.h"
 #include "ExerciseManager.h"
 #include "InputVC.h"
@@ -26,7 +27,7 @@ void updateMaxesVC_deinit(id self, SEL _cmd) {
     msgSup0(void, (&(struct objc_super){self, InputVCClass}), _cmd);
 }
 
-static id stepperViewInit(StepperView **ref, VCacheRef tbl, CCacheRef clr) {
+static id stepperViewInit(StepperView **ref, CFLocaleRef l CF_CONSUMED, VCacheRef tbl, CCacheRef clr) {
     id self = Sels.new(StepperViewClass, Sels.nw);
     StepperView *v = (StepperView *)((char *)self + ViewSize);
     *ref = v;
@@ -37,7 +38,6 @@ static id stepperViewInit(StepperView **ref, VCacheRef tbl, CCacheRef clr) {
     CFStringRef stepperDescr = localize(CFSTR("stepperLabelDescr"));
     tbl->view.setAcc(self, tbl->view.sacl, stepperDescr);
     CFRelease(stepperDescr);
-    CFLocaleRef l = CFLocaleCopyCurrent();
     CFStringRef repsFmt = localize(CFSTR("stepperLabelInit"));
     CFStringRef repsStr = formatStr(l, repsFmt, 1);
     CFRelease(repsFmt);
@@ -83,15 +83,19 @@ void updateMaxesVC_viewDidLoad(id self, SEL _cmd) {
     setVCTitle(navItem, localize(CFSTR("updateMaxesTitle")));
 
     tbl->stack.setSpace(sup->vStack, tbl->stack.ssp, 20);
+    CFLocaleRef l = CFLocaleCopyCurrent();
     CFStringRef liftKey = formatStr(NULL, CFSTR("exNames%02d"), d->index);
     CFStringRef liftVal = localize(liftKey);
     CFRelease(liftKey);
-    CFStringRef fieldKey = localize(CFSTR("maxWeight"));
-    inputVC_addChild(self, formatStr(NULL, fieldKey, liftVal), 1, 999);
+    CFMutableStringRef adjLift = CFStringCreateMutableCopy(NULL, 128, liftVal);
     CFRelease(liftVal);
+    CFStringLowercase(adjLift, l);
+    CFStringRef fieldKey = localize(CFSTR("maxWeight"));
+    inputVC_addChild(self, formatStr(NULL, fieldKey, adjLift), massType ? 8 : 4, 1, 999);
+    CFRelease(adjLift);
     CFRelease(fieldKey);
 
-    id stepperView = stepperViewInit(&d->stack, tbl, sup->clr);
+    id stepperView = stepperViewInit(&d->stack, l, tbl, sup->clr);
     tbl->stack.addSub(sup->vStack, tbl->stack.asv, stepperView);
 
     sup->button = createButton(tbl, sup->clr, localize(CFSTR("finish")),
@@ -135,9 +139,9 @@ void updateMaxesVC_tappedFinish(id self, SEL _cmd _U_) {
     InputVC *sup = (InputVC *)((char *)self + VCSize);
     UpdateMaxesVC *d = (UpdateMaxesVC *)((char *)sup + sizeof(InputVC));
     short extra = d->index == LiftPullup ? d->bodyweight : 0;
-    int initWeight = (sup->children[0].data->result + extra) * 36;
+    float initWeight = ((sup->children[0].data->result * toSavedMass) + extra) * 36;
     float reps = 37.f - (float)msg0(double, d->stack->stepper, sel_getUid("value"));
-    short weight = (short)((initWeight / reps) + 0.5f) - extra;
+    short weight = (short)lrintf(initWeight / reps) - extra;
     void *parent = d->parent;
     int index = d->index;
     dismissPresentedVC(^{ workoutVC_finishedBottomSheet(parent, index, weight); });

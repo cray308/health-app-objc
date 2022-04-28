@@ -733,6 +733,7 @@
 					"-Wextra",
 					"-fconstant-cfstrings",
 					"-finline-functions",
+					"-fno-math-errno",
 				);
 				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
 				PRODUCT_BUNDLE_IDENTIFIER = cray2.HealthApp;
