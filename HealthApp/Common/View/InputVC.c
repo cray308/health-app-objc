@@ -163,7 +163,7 @@ void inputVC_updateFields(InputVC *self, const short *vals) {
     CFLocaleRef l = CFLocaleCopyCurrent();
     if (massType) {
         for (int i = 0; i < 4; ++i) {
-            float value = vals[i] * fromSavedMass;
+            float value = vals[i] * 0.453592f;
             InputView *v = self->children[i].data;
             CFStringRef str = formatStr(l, CFSTR("%.2f"), value);
             self->tbl->field.setText(v->field, self->tbl->label.stxt, str);

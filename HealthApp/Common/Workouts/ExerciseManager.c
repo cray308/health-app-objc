@@ -92,7 +92,7 @@ static Workout *buildWorkout(CFArrayRef acts, WorkoutParams *params) {
             testMax = true;
         }
         if (massType) {
-            for (int i = 0; i < 4; ++i) weights[i] *= fromSavedMass;
+            for (int i = 0; i < 4; ++i) weights[i] *= 0.453592f;
         }
         customReps = params->reps;
         customSets = params->sets;
@@ -321,7 +321,6 @@ void initExerciseData(int week) {
     if (CFBooleanGetValue(CFLocaleGetValue(l, kCFLocaleUsesMetricSystem))) {
         key = CFSTR("kg");
         massType = 1;
-        fromSavedMass = 0.453592f;
         toSavedMass = 2.204623f;
     } else {
         key = CFSTR("lb");

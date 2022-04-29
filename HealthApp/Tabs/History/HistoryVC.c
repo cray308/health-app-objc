@@ -43,9 +43,9 @@ static void populateHistory(void *_m, CFArrayRef strs, WeekDataModel *results, i
     memcpy(m->nEntries, (int[]){size - refIndices[1], size - refIndices[2], size}, 3 * sizeof(int));
     if (ltr) memcpy(m->refIndices, &refIndices[1], 3 * sizeof(int));
 
-    int totalWorkouts[3] = {0}, totalByType[3][4] = {{0},{0},{0}};
-    float totalByExercise[3][4] = {{0},{0},{0}}, maxWeight[3] = {0};
-    short maxWorkouts[3] = {0}, maxTime[3] = {0};
+    int totalWorkouts[3] = {0};
+    int totalByType[3][4] = {{0},{0},{0}}, totalByExercise[3][4] = {{0},{0},{0}};
+    short maxWorkouts[3] = {0}, maxTime[3] = {0}, maxWeight[3] = {0};
     m->totalWorkouts.entries = malloc((unsigned)size * sizeof(CGPoint));
     m->lifts.entries[0] = malloc((unsigned)size * sizeof(CGPoint));
     m->lifts.entries[1] = malloc((unsigned)size * sizeof(CGPoint));
@@ -92,15 +92,25 @@ static void populateHistory(void *_m, CFArrayRef strs, WeekDataModel *results, i
         }
     }
 
+    float invEntries[] = {1.f / m->nEntries[0], 1.f / m->nEntries[1], 1.f / m->nEntries[2]};
     for (int i = 0; i < 3; ++i) {
-        m->totalWorkouts.avgs[i] = (float)totalWorkouts[i] / m->nEntries[i];
+        m->totalWorkouts.avgs[i] = totalWorkouts[i] * invEntries[i];
         m->totalWorkouts.maxes[i] = maxWorkouts[i] < 7 ? 7 : 1.1f * maxWorkouts[i];
         m->workoutTypes.maxes[i] = 1.1f * maxTime[i];
-        m->lifts.maxes[i] = 1.1f * maxWeight[i];
+        m->lifts.maxes[i] = maxWeight[i] * 1.1f;
 
         for (int j = 0; j < 4; ++j) {
             m->workoutTypes.avgs[i][j] = totalByType[i][j] / m->nEntries[i];
-            m->lifts.avgs[i][j] = totalByExercise[i][j] / m->nEntries[i];
+            m->lifts.avgs[i][j] = totalByExercise[i][j] * invEntries[i];
+        }
+    }
+    if (massType) {
+        for (int i = 0; i < size; ++i) {
+            for (int j = 0; j < 4; ++j) m->lifts.entries[j][i].y *= 0.453592;
+        }
+        for (int i = 0; i < 3; ++i) {
+            m->lifts.maxes[i] *= 0.453592f;
+            for (int j = 0; j < 4; ++j) m->lifts.avgs[i][j] *= 0.453592f;
         }
     }
     free(results);

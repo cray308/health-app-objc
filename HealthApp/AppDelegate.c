@@ -46,7 +46,6 @@ enum {
 };
 
 int massType = 0;
-float fromSavedMass = 1;
 float toSavedMass = 1;
 
 #if DEBUG
@@ -258,7 +257,7 @@ static void fetchHistory(id context, void *model, FetchHandler handler, bool ltr
                 r->totalWorkouts = msg0(int16_t, d, getTotal);
                 for (int j = 0; j < 4; ++j) {
                     r->durationByType[j] = msg0(int16_t, d, timeSels[j]);
-                    r->weightArray[j] = msg0(int16_t, d, liftSels[j]) * fromSavedMass;
+                    r->weightArray[j] = msg0(int16_t, d, liftSels[j]);
                 }
 
                 r->cumulativeDuration[0] = r->durationByType[0];

@@ -14,10 +14,10 @@ typedef struct {
 } UserInfo;
 
 typedef struct {
-    float weightArray[4];
     short totalWorkouts;
     short durationByType[4];
     short cumulativeDuration[4];
+    short weightArray[4];
 } WeekDataModel;
 
 typedef struct {
@@ -34,7 +34,6 @@ typedef void (^Callback)(void);
 typedef void (*FetchHandler)(void*, CFArrayRef, WeekDataModel*, int, bool);
 
 extern int massType;
-extern float fromSavedMass;
 extern float toSavedMass;
 
 UserInfo const *getUserInfo(void);
