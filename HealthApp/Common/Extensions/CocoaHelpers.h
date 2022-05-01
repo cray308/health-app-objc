@@ -24,6 +24,7 @@ struct SelCache {
 };
 
 #define _U_ __attribute__((__unused__))
+#define max(a, b) (((a) > (b)) ? (a) : (b))
 
 #define getImpC(cls, cmd) method_getImplementation(class_getClassMethod((cls), (cmd)))
 #define getImpO(cls, cmd) method_getImplementation(class_getInstanceMethod((cls), (cmd)))

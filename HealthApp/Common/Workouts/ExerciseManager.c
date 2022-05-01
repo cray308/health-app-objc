@@ -81,9 +81,7 @@ static Workout *buildWorkout(CFArrayRef acts, WorkoutParams *params) {
             weights[1] = lifts[LiftBench] * multiplier;
             if (params->index == 0) {
                 int weight = (int)((lifts[LiftPullup] + bodyweight) * multiplier) - bodyweight;
-                if (weight < 0)
-                    weight = 0;
-                weights[2] = weight;
+                weights[2] = max(weight, 0);
             } else {
                 weights[2] = lifts[LiftDeadlift] * multiplier;
             }
