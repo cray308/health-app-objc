@@ -262,8 +262,7 @@ void homeVC_handleFinishedWorkout(id self, unsigned char completed) {
     HomeVC *d = (HomeVC *)((char *)self + VCSize);
     int total = 0;
     for (int i = 0; i < 7; ++i) {
-        if ((1 << i) & completed)
-            ++total;
+        if ((1 << i) & completed) ++total;
     }
     homeVC_updateWorkoutsList(d, completed);
     if (d->numWorkouts == total) {

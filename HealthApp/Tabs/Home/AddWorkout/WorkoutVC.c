@@ -192,10 +192,8 @@ static void restartTimers(CFNotificationCenterRef ctr _U_, void *self,
     }
     pthread_mutex_unlock(&timerLock);
 
-    if (endExercise)
-        handleEvent(d, groupIdx, exerciseIdx, EventFinishExercise);
-    if (endGroup)
-        handleEvent(d, groupIdx, 0, EventFinishGroup);
+    if (endExercise) handleEvent(d, groupIdx, exerciseIdx, EventFinishExercise);
+    if (endGroup) handleEvent(d, groupIdx, 0, EventFinishGroup);
 }
 
 #pragma mark - Notifications
@@ -427,8 +425,7 @@ static bool isCompleted(Workout *w) {
     Circuit *group = w->group;
     int groupIndex = group->index;
     if (w->index != w->size - 1 || groupIndex != group->size - 1) return false;
-    if (w->type == WorkoutEndurance)
-        return w->duration >= (int16_t)(group->exercises[0].reps / 60);
+    if (w->type == WorkoutEndurance) return w->duration >= (int16_t)(group->exercises[0].reps / 60);
 
     if (group->type == CircuitRounds && group->completedReps == group->reps - 1) {
         ExerciseEntry *e = &group->exercises[groupIndex];
@@ -632,8 +629,7 @@ void handleEvent(WorkoutVC *d, int gIdx, int eIdx, int event) {
         default:
             exerciseDone = cycleExerciseEntry(v->entry, d->timers);
             exerciseView_configure(v, tbl, d->clr);
-            if (exerciseDone)
-                t = findTransition(w, d->timers, v);
+            if (exerciseDone) t = findTransition(w, d->timers, v);
     }
 foundTransition:
 
@@ -695,8 +691,7 @@ foundTransition:
             break;
     }
     pthread_mutex_unlock(&timerLock);
-    if (nextView)
-        UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, nextView);
+    if (nextView) UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, nextView);
 }
 
 void workoutVC_finishedBottomSheet(void *self, int index, short weight) {

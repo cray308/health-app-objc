@@ -62,8 +62,7 @@ static void populateHistory(void *_m, CFArrayRef strs, WeekDataModel *results, i
 
             for (int j = 2; j > jEnd; --j) {
                 totalWorkouts[j] += e->totalWorkouts;
-                if (e->totalWorkouts > maxWorkouts[j])
-                    maxWorkouts[j] = e->totalWorkouts;
+                if (e->totalWorkouts > maxWorkouts[j]) maxWorkouts[j] = e->totalWorkouts;
             }
             m->totalWorkouts.entries[index] = (CGPoint){index, e->totalWorkouts};
 
@@ -71,15 +70,13 @@ static void populateHistory(void *_m, CFArrayRef strs, WeekDataModel *results, i
                 for (int j = 2; j > jEnd; --j) {
                     totalByType[j][x] += e->durationByType[x];
                     totalByExercise[j][x] += e->weightArray[x];
-                    if (e->weightArray[x] > maxWeight[j])
-                        maxWeight[j] = e->weightArray[x];
+                    if (e->weightArray[x] > maxWeight[j]) maxWeight[j] = e->weightArray[x];
                 }
                 m->lifts.entries[x][index] = (CGPoint){index, e->weightArray[x]};
             }
 
             for (int j = 2; j > jEnd; --j) {
-                if (e->cumulativeDuration[3] > maxTime[j])
-                    maxTime[j] = e->cumulativeDuration[3];
+                if (e->cumulativeDuration[3] > maxTime[j]) maxTime[j] = e->cumulativeDuration[3];
             }
             m->workoutTypes.entries[0][index] = (CGPoint){index, 0};
             for (int x = 1; x < 5; ++x) {
@@ -234,8 +231,7 @@ void historyVC_viewDidLoad(id self, SEL _cmd) {
     d->charts[2] = createChartView(self, (long []){0, 1, 2, 3}, 4, 0);
     d->picker = createSegmentedControl(CFSTR("historySegment%d"), 0);
     tbl->button.addTarget(d->picker, tbl->button.atgt, self, sel_getUid("buttonTapped:"), 4096);
-    if (darkMode < 2)
-        updateSegmentedControl(d->clr, d->picker, darkMode);
+    if (darkMode < 2) updateSegmentedControl(d->clr, d->picker, darkMode);
     msg1(void, id, msg0(id, self, sel_getUid("navigationItem")),
          sel_getUid("setTitleView:"), d->picker);
 

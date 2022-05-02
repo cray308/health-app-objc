@@ -195,8 +195,7 @@ id createLabel(VCacheRef tbl, CCacheRef clr, CFStringRef text, CFStringRef style
     LabelCache const *c = &tbl->label;
     id view = Sels.new(cache.label.cls, Sels.nw);
     c->setText(view, c->stxt, text);
-    if (text)
-        CFRelease(text);
+    if (text) CFRelease(text);
     cache.label.setFont(view, cache.label.sf, cache.fc.pref(cache.fc.cls, cache.fc.pf, style));
     setDynamicFont(view, true);
     c->setColor(view, c->stc, clr->getColor(clr->cls, clr->sc, color));
@@ -209,8 +208,7 @@ id createButton(VCacheRef tbl, CCacheRef clr, CFStringRef title,
     id view = cache.button.init(cache.button.cls, cache.button.si, 1);
     msg1(void, bool, view, tbl->view.trans, false);
     bt->setTitle(view, bt->sbtxt, title, 0);
-    if (title)
-        CFRelease(title);
+    if (title) CFRelease(title);
     bt->setColor(view, bt->sbc, clr->getColor(clr->cls, clr->sc, color), 0);
     bt->setColor(view, bt->sbc, clr->getColor(clr->cls, clr->sc, ColorDisabled), 2);
     id label = cache.button.getLabel(view, cache.button.glb);
