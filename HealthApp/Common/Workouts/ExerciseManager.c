@@ -50,8 +50,7 @@ static void createRootAndLibDict(struct DictWrapper *data) {
     free(buf);
     CFReadStreamClose(stream);
     CFRelease(stream);
-    CFPropertyListFormat format = kCFPropertyListXMLFormat_v1_0;
-    data->root = CFPropertyListCreateWithData(NULL, plistData, 0, &format, NULL);
+    data->root = CFPropertyListCreateWithData(NULL, plistData, 0, NULL, NULL);
     data->lib = CFDictionaryGetValue(data->root, CFSTR("L"));
     CFRelease(plistData);
 }
@@ -120,9 +119,8 @@ static Workout *buildWorkout(CFArrayRef acts, WorkoutParams *params) {
         short circuitReps = customCircuitReps, exerciseSets = customSets;
         unsigned char circuitType;
 
-        CFNumberGetValue(CFDictionaryGetValue(act, Keys.type), kCFNumberCharType, &circuitType);
-        if (!circuitReps)
-            CFNumberGetValue(CFDictionaryGetValue(act, Keys.reps), kCFNumberShortType, &circuitReps);
+        CFNumberGetValue(CFDictionaryGetValue(act, Keys.type), 7, &circuitType);
+        if (!circuitReps) CFNumberGetValue(CFDictionaryGetValue(act, Keys.reps), 8, &circuitReps);
 #if TARGET_OS_SIMULATOR
         if (circuitType == CircuitAMRAP) circuitReps = nActivities > 1 ? 1 : 2;
 #endif
@@ -176,9 +174,8 @@ static Workout *buildWorkout(CFArrayRef acts, WorkoutParams *params) {
             short rest = 0, eReps = customReps;
             unsigned char eType;
 
-            CFNumberGetValue(CFDictionaryGetValue(exDict, Keys.type), kCFNumberCharType, &eType);
-            if (!eReps)
-                CFNumberGetValue(CFDictionaryGetValue(exDict, Keys.reps), kCFNumberShortType, &eReps);
+            CFNumberGetValue(CFDictionaryGetValue(exDict, Keys.type), 7, &eType);
+            if (!eReps) CFNumberGetValue(CFDictionaryGetValue(exDict, Keys.reps), 8, &eReps);
 #if TARGET_OS_SIMULATOR
             if (eType == ExerciseDuration) eReps = workout.type == WorkoutHIC ? 15 : 120;
 #endif
@@ -198,12 +195,11 @@ static Workout *buildWorkout(CFArrayRef acts, WorkoutParams *params) {
                 e.hRange.length = numrange.length;
             }
 
-            CFNumberGetValue(CFDictionaryGetValue(exDict, CFSTR("B")), kCFNumberShortType, &rest);
-            if (rest)
-                e.rest = formatStr(l, restFormat, rest);
+            CFNumberGetValue(CFDictionaryGetValue(exDict, CFSTR("B")), 8, &rest);
+            if (rest) e.rest = formatStr(l, restFormat, rest);
 
             int n;
-            CFNumberGetValue(CFDictionaryGetValue(exDict, Keys.index), kCFNumberIntType, &n);
+            CFNumberGetValue(CFDictionaryGetValue(exDict, Keys.index), 9, &n);
             CFStringRef nameKey = formatStr(NULL, CFSTR("exNames%02d"), n);
             CFStringRef name = localize(nameKey);
             CFStringRef titleStr;
@@ -239,8 +235,7 @@ static Workout *buildWorkout(CFArrayRef acts, WorkoutParams *params) {
             memcpy(&circuit.exercises[j], &e, sizeof(ExerciseEntry));
         }
 
-        if (circuit.type == CircuitDecrement)
-            circuit.completedReps = circuit.exercises[0].reps;
+        if (circuit.type == CircuitDecrement) circuit.completedReps = circuit.exercises[0].reps;
         memcpy(&workout.activities[i], &circuit, sizeof(Circuit));
     }
     CFRelease(one);
@@ -348,10 +343,10 @@ void setWeeklyWorkoutNames(unsigned char plan, CFStringRef *names) {
 
     for (int i = 0; i < 7; ++i) {
         CFDictionaryRef day = CFArrayGetValueAtIndex(currWeek, i);
-        CFNumberGetValue(CFDictionaryGetValue(day, Keys.type), kCFNumberCharType, &type);
+        CFNumberGetValue(CFDictionaryGetValue(day, Keys.type), 7, &type);
         if (type > 3) continue;
 
-        CFNumberGetValue(CFDictionaryGetValue(day, Keys.index), kCFNumberIntType, &index);
+        CFNumberGetValue(CFDictionaryGetValue(day, Keys.index), 9, &index);
         names[i] = createTitle(type, index);
     }
     CFRelease(info.root);
@@ -364,11 +359,11 @@ Workout *getWeeklyWorkout(unsigned char plan, int i) {
     unsigned char type;
     createRootAndLibDict(&info);
     CFDictionaryRef day = CFArrayGetValueAtIndex(getCurrentWeekForPlan(&info, plan), i);
-    CFNumberGetValue(CFDictionaryGetValue(day, Keys.type), kCFNumberCharType, &type);
-    CFNumberGetValue(CFDictionaryGetValue(day, Keys.index), kCFNumberIntType, &arrayIdx);
-    CFNumberGetValue(CFDictionaryGetValue(day, CFSTR("S")), kCFNumberShortType, &sets);
-    CFNumberGetValue(CFDictionaryGetValue(day, Keys.reps), kCFNumberShortType, &reps);
-    CFNumberGetValue(CFDictionaryGetValue(day, CFSTR("W")), kCFNumberShortType, &weight);
+    CFNumberGetValue(CFDictionaryGetValue(day, Keys.type), 7, &type);
+    CFNumberGetValue(CFDictionaryGetValue(day, Keys.index), 9, &arrayIdx);
+    CFNumberGetValue(CFDictionaryGetValue(day, CFSTR("S")), 8, &sets);
+    CFNumberGetValue(CFDictionaryGetValue(day, Keys.reps), 8, &reps);
+    CFNumberGetValue(CFDictionaryGetValue(day, CFSTR("W")), 8, &weight);
 
     CFArrayRef libArr = CFArrayGetValueAtIndex(info.lib, type);
     Workout *w = buildWorkout(CFArrayGetValueAtIndex(libArr, arrayIdx),

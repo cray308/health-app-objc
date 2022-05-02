@@ -22,13 +22,12 @@ id homeVC_init(VCacheRef tbl, CCacheRef clr, time_t startDate) {
     HomeVC *d = (HomeVC *)((char *)self + VCSize);
     d->tbl = tbl;
     d->clr = clr;
-    const long diff = (long)kCFAbsoluteTimeIntervalSince1970;
     CFLocaleRef l = CFLocaleCopyCurrent();
     CFDateFormatterRef f = CFDateFormatterCreate(NULL, l, 0, 0);
     CFRelease(l);
     CFDateFormatterSetFormat(f, CFSTR("EEEE"));
     for (int i = 0; i < 7; ++i, startDate += 86400) {
-        dayNames[i] = CFDateFormatterCreateStringWithAbsoluteTime(NULL, f, startDate - diff);
+        dayNames[i] = CFDateFormatterCreateStringWithAbsoluteTime(NULL, f, startDate - 978307200);
     }
     CFRelease(f);
     return self;

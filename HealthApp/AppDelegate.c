@@ -112,8 +112,7 @@ static void context_saveChanges(id context) {
 static CFArrayRef context_fetchData(id context, int options, int *count) {
     id req = clsF1(id, CFStringRef, objc_getClass("NSFetchRequest"),
                    sel_getUid("fetchRequestWithEntityName:"), CFSTR("WeeklyData"));
-    if (options & 0x2)
-        msg1(void, unsigned long, req, sel_getUid("setFetchLimit:"), 1);
+    if (options & 0x2) msg1(void, unsigned long, req, sel_getUid("setFetchLimit:"), 1);
     CFArrayRef descriptorArr = createSortDescriptors(CFSTR("weekStart"), options & 0x1);
     msg1(void, CFArrayRef, req, sel_getUid("setSortDescriptors:"), descriptorArr);
     CFRelease(descriptorArr);
@@ -121,8 +120,7 @@ static CFArrayRef context_fetchData(id context, int options, int *count) {
     int len = 0;
     CFArrayRef data = msg2(CFArrayRef, id, id, context,
                            sel_getUid("executeFetchRequest:error:"), req, nil);
-    if (!(data && (len = (int)(CFArrayGetCount(data)))))
-        data = NULL;
+    if (!(data && (len = (int)(CFArrayGetCount(data))))) data = NULL;
     *count = len;
     return data;
 }
@@ -241,7 +239,6 @@ static void fetchHistory(id context, void *model, FetchHandler handler, bool ltr
                 timeSels[i] = sel_getUid(timeGets[i]);
             }
 
-            const long diff = (long)kCFAbsoluteTimeIntervalSince1970;
             CFLocaleRef l = CFLocaleCopyCurrent();
             CFDateFormatterRef f = CFDateFormatterCreate(NULL, l, 1, 0);
             CFRelease(l);
@@ -252,7 +249,7 @@ static void fetchHistory(id context, void *model, FetchHandler handler, bool ltr
                 id d = (id)CFArrayGetValueAtIndex(data, i);
                 WeekDataModel *r = &results[i];
                 CFStringRef str = CFDateFormatterCreateStringWithAbsoluteTime(
-                  NULL, f, msg0(int64_t, d, getStart) - diff);
+                  NULL, f, msg0(int64_t, d, getStart) - 978307200);
                 CFArrayAppendValue(strs, str);
                 r->totalWorkouts = msg0(int16_t, d, getTotal);
                 for (int j = 0; j < 4; ++j) {
@@ -332,8 +329,7 @@ static void runStartupDataJob(id *cRef, void *m, FetchHandler h, time_t wStart, 
         for (int i = 0; i < count; ++i) {
             id d = (id)CFArrayGetValueAtIndex(data, i);
             time_t tmpStart = msg0(int64_t, d, getStart);
-            if (tmpStart < endPt)
-                msg1(void, id, context, delObj, d);
+            if (tmpStart < endPt) msg1(void, id, context, delObj, d);
         }
 
         start += WeekSeconds;
@@ -417,8 +413,7 @@ void presentModalVC(id modal) {
     Class appear = objc_getClass("UINavigationBarAppearance");
     setupBarGeneric(bar, appear, clsF1(id, int, self->clr.cls, sel_getUid("getBarColorWithType:"), 1),
                     self->tbl.view.sbg);
-    if (!appear)
-        setupNavBarColor(bar, &self->clr);
+    if (!appear) setupNavBarColor(bar, &self->clr);
     present(self->window, nav);
     Sels.vcRel(nav, Sels.rel);
     Sels.vcRel(modal, Sels.rel);
@@ -429,8 +424,7 @@ void dismissPresentedVC(Callback handler) {
     id window = self->window;
     id root = msg0(id, window, sel_getUid("rootViewController"));
     msg2(void, bool, Callback, root, sel_getUid("dismissViewControllerAnimated:completion:"), true, ^{
-        if (handler)
-            handler();
+        if (handler) handler();
         msg1(void, id, window, sel_getUid("setTintColor:"),
              self->clr.getColor(self->clr.cls, self->clr.sc, ColorRed));
     });
@@ -485,8 +479,7 @@ void addAlertAction(id ctrl, CFStringRef titleKey, int style, Callback handler) 
     CFStringRef title = localize(titleKey);
     id action = clsF3(id, CFStringRef, long, void(^)(id), objc_getClass("UIAlertAction"),
                       sel_getUid("actionWithTitle:style:handler:"), title, style, ^(id hdlr _U_) {
-        if (handler)
-            handler();
+        if (handler) handler();
         AppDelegate *self = getAppDel();
         msg1(void, id, self->window, sel_getUid("setTintColor:"),
              self->clr.getColor(self->clr.cls, self->clr.sc, ColorRed));
@@ -498,19 +491,14 @@ void addAlertAction(id ctrl, CFStringRef titleKey, int style, Callback handler) 
 #pragma mark - App Delegate Main Funcs
 
 static void handleFirstLaunch(AppDelegate *self, CFStringRef k, time_t start, int tzOff, bool modern) {
-    CFNumberRef hasLaunched = CFNumberCreate(NULL, kCFNumberCharType, &(bool){true});
+    CFNumberRef hasLaunched = CFNumberCreate(NULL, 7, &(bool){true});
     UserInfo data = {start, start, {0}, modern ? 0xff : 0, 0xff, 0};
     const void *values[] = {
-        CFNumberCreate(NULL, kCFNumberLongType, &start),
-        CFNumberCreate(NULL, kCFNumberLongType, &start),
-        CFNumberCreate(NULL, kCFNumberIntType, &tzOff),
-        CFNumberCreate(NULL, kCFNumberCharType, &(unsigned char){0xff}),
-        CFNumberCreate(NULL, kCFNumberCharType, &(unsigned char){0}),
-        CFNumberCreate(NULL, kCFNumberCharType, &data.darkMode),
-        CFNumberCreate(NULL, kCFNumberShortType, &(short){0}),
-        CFNumberCreate(NULL, kCFNumberShortType, &(short){0}),
-        CFNumberCreate(NULL, kCFNumberShortType, &(short){0}),
-        CFNumberCreate(NULL, kCFNumberShortType, &(short){0})
+        CFNumberCreate(NULL, 10, &start), CFNumberCreate(NULL, 10, &start),
+        CFNumberCreate(NULL, 9, &tzOff), CFNumberCreate(NULL, 7, &(unsigned char){0xff}),
+        CFNumberCreate(NULL, 7, &(unsigned char){0}), CFNumberCreate(NULL, 7, &data.darkMode),
+        CFNumberCreate(NULL, 8, &(short){0}), CFNumberCreate(NULL, 8, &(short){0}),
+        CFNumberCreate(NULL, 8, &(short){0}), CFNumberCreate(NULL, 8, &(short){0})
     };
     CFDictionaryRef dict = createDict(DictKeys, values, 10);
     CFPreferencesSetAppValue(k, hasLaunched, kCFPreferencesCurrentApplication);
@@ -562,12 +550,12 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id app _U_,
         time_t savedWeekStart, planStart;
         unsigned char changes = 0, plan, completed;
         CFDictionaryRef dict = CFPreferencesCopyAppValue(dictKey, kCFPreferencesCurrentApplication);
-        CFNumberGetValue(CFDictionaryGetValue(dict, DictKeys[0]), kCFNumberLongType, &savedWeekStart);
-        CFNumberGetValue(CFDictionaryGetValue(dict, DictKeys[1]), kCFNumberLongType, &planStart);
-        CFNumberGetValue(CFDictionaryGetValue(dict, DictKeys[2]), kCFNumberIntType, &savedTzOffset);
-        CFNumberGetValue(CFDictionaryGetValue(dict, DictKeys[3]), kCFNumberCharType, &plan);
-        CFNumberGetValue(CFDictionaryGetValue(dict, DictKeys[4]), kCFNumberCharType, &completed);
-        CFNumberGetValue(CFDictionaryGetValue(dict, DictKeys[5]), kCFNumberCharType, &dm);
+        CFNumberGetValue(CFDictionaryGetValue(dict, DictKeys[0]), 10, &savedWeekStart);
+        CFNumberGetValue(CFDictionaryGetValue(dict, DictKeys[1]), 10, &planStart);
+        CFNumberGetValue(CFDictionaryGetValue(dict, DictKeys[2]), 9, &savedTzOffset);
+        CFNumberGetValue(CFDictionaryGetValue(dict, DictKeys[3]), 7, &plan);
+        CFNumberGetValue(CFDictionaryGetValue(dict, DictKeys[4]), 7, &completed);
+        CFNumberGetValue(CFDictionaryGetValue(dict, DictKeys[5]), 7, &dm);
 
         if ((tzDiff = savedTzOffset - tzOffset)) {
             planStart += tzDiff;
@@ -608,27 +596,27 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id app _U_,
 
             if (changes & 1) {
                 keys[0] = DictKeys[IWeekStart];
-                values[nChanges++] = CFNumberCreate(NULL, kCFNumberLongType, &weekStart);
+                values[nChanges++] = CFNumberCreate(NULL, 10, &weekStart);
             }
             if (changes & 2) {
                 keys[nChanges] = DictKeys[IPlanStart];
-                values[nChanges++] = CFNumberCreate(NULL, kCFNumberLongType, &planStart);
+                values[nChanges++] = CFNumberCreate(NULL, 10, &planStart);
             }
             if (changes & 4) {
                 keys[nChanges] = DictKeys[ITzOffset];
-                values[nChanges++] = CFNumberCreate(NULL, kCFNumberIntType, &tzOffset);
+                values[nChanges++] = CFNumberCreate(NULL, 9, &tzOffset);
             }
             if (changes & 8) {
                 keys[nChanges] = DictKeys[ICurrentPlan];
-                values[nChanges++] = CFNumberCreate(NULL, kCFNumberCharType, &plan);
+                values[nChanges++] = CFNumberCreate(NULL, 7, &plan);
             }
             if (changes & 16) {
                 keys[nChanges] = DictKeys[ICompletedWorkouts];
-                values[nChanges++] = CFNumberCreate(NULL, kCFNumberCharType, &completed);
+                values[nChanges++] = CFNumberCreate(NULL, 7, &completed);
             }
             if (changes & 32) {
                 keys[nChanges] = DictKeys[IDarkMode];
-                values[nChanges++] = CFNumberCreate(NULL, kCFNumberCharType, &dm);
+                values[nChanges++] = CFNumberCreate(NULL, 7, &dm);
             }
             CFMutableDictionaryRef updates = CFDictionaryCreateMutableCopy(NULL, 10, dict);
             saveChanges(updates, keys, values, nChanges);
@@ -636,8 +624,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id app _U_,
 
         UserInfo data = {planStart, weekStart, {0}, dm, plan, completed};
         for (int i = 0; i < 4; ++i) {
-            CFNumberGetValue(CFDictionaryGetValue(dict, DictKeys[6 + i]),
-                             kCFNumberShortType, &data.liftMaxes[i]);
+            CFNumberGetValue(CFDictionaryGetValue(dict, DictKeys[6 + i]), 8, &data.liftMaxes[i]);
         }
         memcpy(&self->userData, &data, sizeof(UserInfo));
         CFRelease(dict);
@@ -733,7 +720,7 @@ static int updateWeight(short *curr, short *weights, CFStringRef *keys, CFNumber
         if (new > curr[i]) {
             curr[i] = new;
             keys[nChanges] = DictKeys[keyIndex];
-            values[nChanges++] = CFNumberCreate(NULL, kCFNumberShortType, &new);
+            values[nChanges++] = CFNumberCreate(NULL, 8, &new);
         }
     }
     return nChanges;
@@ -747,7 +734,7 @@ void updateUserInfo(unsigned char plan, unsigned char darkMode, short *weights) 
     unsigned char changes = plan != self->userData.currentPlan ? 1 : 0;
     if (changes) {
         keys[0] = DictKeys[ICurrentPlan];
-        values[nChanges++] = CFNumberCreate(NULL, kCFNumberCharType, &plan);
+        values[nChanges++] = CFNumberCreate(NULL, 7, &plan);
         self->userData.currentPlan = plan;
         if (!(plan & 128)) {
 #if TARGET_OS_SIMULATOR
@@ -757,7 +744,7 @@ void updateUserInfo(unsigned char plan, unsigned char darkMode, short *weights) 
             time_t newPlanStart = self->userData.weekStart + WeekSeconds;
 #endif
             keys[1] = DictKeys[IPlanStart];
-            values[nChanges++] = CFNumberCreate(NULL, kCFNumberLongType, &newPlanStart);
+            values[nChanges++] = CFNumberCreate(NULL, 10, &newPlanStart);
             self->userData.planStart = newPlanStart;
         }
     }
@@ -765,13 +752,12 @@ void updateUserInfo(unsigned char plan, unsigned char darkMode, short *weights) 
     if (darkMode != self->userData.darkMode) {
         changes |= 2;
         keys[nChanges] = DictKeys[IDarkMode];
-        values[nChanges++] = CFNumberCreate(NULL, kCFNumberCharType, &darkMode);
+        values[nChanges++] = CFNumberCreate(NULL, 7, &darkMode);
         self->userData.darkMode = darkMode;
     }
 
     nChanges += updateWeight(self->userData.liftMaxes, weights, &keys[nChanges], &values[nChanges]);
-    if (nChanges)
-        saveChanges(createMutableDict(), keys, values, nChanges);
+    if (nChanges) saveChanges(createMutableDict(), keys, values, nChanges);
 
     if (changes & 2) {
         barStyle = darkMode ? 2 : 0;
@@ -786,17 +772,15 @@ void updateUserInfo(unsigned char plan, unsigned char darkMode, short *weights) 
             historyVC_updateColors(self->children[1], darkMode);
         settingsVC_updateColors(self->children[2], darkMode);
     }
-    if (changes & 1)
-        homeVC_createWorkoutsList(self->children[0], &self->userData);
+    if (changes & 1) homeVC_createWorkoutsList(self->children[0], &self->userData);
 }
 
 void deleteAppData(void) {
     AppDelegate *self = getAppDel();
     if (self->userData.completedWorkouts) {
         self->userData.completedWorkouts = 0;
-        CFStringRef keys[] = {DictKeys[ICompletedWorkouts]};
-        CFNumberRef values[] = {CFNumberCreate(NULL, kCFNumberCharType, &(unsigned char){0})};
-        saveChanges(createMutableDict(), keys, values, 1);
+        saveChanges(createMutableDict(), (CFStringRef[]){DictKeys[ICompletedWorkouts]},
+                    (CFNumberRef[]){CFNumberCreate(NULL, 7, &(unsigned char){0})}, 1);
         homeVC_updateWorkoutsList((HomeVC *)((char *)self->children[0] + VCSize), 0);
     }
     historyVC_clearData(self->children[1]);
@@ -836,7 +820,7 @@ unsigned char addWorkoutData(unsigned char day, int type, int16_t duration, shor
         completed |= (1 << day);
         self->userData.completedWorkouts = completed;
         keys[nChanges] = DictKeys[ICompletedWorkouts];
-        values[nChanges++] = CFNumberCreate(NULL, kCFNumberCharType, &completed);
+        values[nChanges++] = CFNumberCreate(NULL, 7, &completed);
     }
     if (nChanges) saveChanges(createMutableDict(), keys, values, nChanges);
 
