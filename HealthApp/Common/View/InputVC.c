@@ -3,6 +3,7 @@
 #include <CoreFoundation/CFNumberFormatter.h>
 #include <dispatch/queue.h>
 #include <string.h>
+#include <unicode/uregex.h>
 #include "AppDelegate.h"
 #include "Views.h"
 
@@ -15,18 +16,18 @@ Class InputVCClass;
 Class InputViewClass;
 
 struct InputCache {
-    const SEL bnd, skbt, conv, cgrv, bfr, sse, sci, scrvs, lfn, rng;
+    const SEL bnd, skbt, conv, cgrv, bfr, sse, sci, scrvs, lfn;
     bool (*becomeResponder)(id,SEL);
     void (*setScroll)(id,SEL,bool);
     void (*setInset)(id,SEL,HAInsets);
     void (*scrollRect)(id,SEL,CGRect,bool);
     void (*layout)(id,SEL);
-    CFRange (*find)(id,SEL,CFStringRef,u_long);
 };
 
 static CFStringRef inputFieldError;
 static CFCharacterSetRef charSet;
 static CFNumberFormatterRef numFormatter;
+static URegularExpression *regex;
 static struct InputCache cache;
 
 static void getBounds(id view, CGRect *result) {
@@ -81,24 +82,28 @@ static void keyboardWillHide(CFNotificationCenterRef ctr _U_, void *self,
 
 void initValidatorStrings(Class Field) {
     CFLocaleRef locale = CFLocaleCopyCurrent();
-    CFMutableCharacterSetRef ms = CFCharacterSetCreateMutableCopy(
-      NULL, CFCharacterSetGetPredefined(kCFCharacterSetDecimalDigit));
-    CFCharacterSetAddCharactersInString(ms, CFLocaleGetValue(locale, kCFLocaleDecimalSeparator));
-    charSet = CFCharacterSetCreateCopy(NULL, ms);
-    CFRelease(ms);
+    if (massType) {
+        CFMutableCharacterSetRef ms = CFCharacterSetCreateMutableCopy(
+          NULL, CFCharacterSetGetPredefined(kCFCharacterSetDecimalDigit));
+        CFCharacterSetAddCharactersInString(ms, CFLocaleGetValue(locale, kCFLocaleDecimalSeparator));
+        charSet = CFCharacterSetCreateCopy(NULL, ms);
+        CFRelease(ms);
+        UErrorCode err = 0;
+        regex = uregex_open(
+          u"([٠١٢٣٤٥٦٧٨٩0123456789]+)([٫.,][٠١٢٣٤٥٦٧٨٩0123456789]{0,2})?", 60, 0, NULL, &err);
+    }
     numFormatter = CFNumberFormatterCreate(NULL, locale, 1);
     CFRelease(locale);
     inputFieldError = localize(CFSTR("inputFieldError"));
     SEL sse = sel_getUid("setScrollEnabled:"), sci = sel_getUid("setContentInset:");
     SEL scrvs = sel_getUid("scrollRectToVisible:animated:"), bfr = sel_getUid("becomeFirstResponder");
-    SEL lfn = sel_getUid("layoutIfNeeded"), rng = sel_getUid("rangeOfString:options:");
-    Class Scroll = objc_getClass("UIScrollView"), NSStr = objc_getClass("NSString");
+    SEL lfn = sel_getUid("layoutIfNeeded");
+    Class Scroll = objc_getClass("UIScrollView");
     memcpy(&cache, &(struct InputCache){sel_getUid("bounds"), sel_getUid("setKeyboardType:"),
-        sel_getUid("convertRect:fromView:"), sel_getUid("CGRectValue"), bfr, sse, sci, scrvs, lfn, rng,
+        sel_getUid("convertRect:fromView:"), sel_getUid("CGRectValue"), bfr, sse, sci, scrvs, lfn,
         (bool(*)(id,SEL))getImpO(Field, bfr), (void(*)(id,SEL,bool))getImpO(Scroll, sse),
         (void(*)(id,SEL,HAInsets))getImpO(Scroll, sci),
-        (void(*)(id,SEL,CGRect,bool))getImpO(Scroll, scrvs), (void(*)(id,SEL))getImpO(View, lfn),
-        (CFRange(*)(id,SEL,CFStringRef,u_long))getImpO(NSStr, rng)
+        (void(*)(id,SEL,CGRect,bool))getImpO(Scroll, scrvs), (void(*)(id,SEL))getImpO(View, lfn)
     }, sizeof(struct InputCache));
 }
 
@@ -331,7 +336,7 @@ void inputVC_fieldStoppedEditing(id self, SEL _cmd _U_, id field _U_) {
 }
 
 bool inputVC_fieldChanged(id self, SEL _cmd _U_, id field, CFRange range, CFStringRef replacement) {
-    static const CFStringRef regex = CFSTR("^([٠١٢٣٤٥٦٧٨٩0123456789]+)([٫\\.\\,][٠١٢٣٤٥٦٧٨٩0123456789]{0,2})?$");
+    static UChar buffer[32];
     InputVC *d = (InputVC *)((char *)self + VCSize);
     VCacheRef tbl = d->tbl;
 
@@ -347,19 +352,29 @@ bool inputVC_fieldChanged(id self, SEL _cmd _U_, id field, CFRange range, CFStri
     }
 
     CFStringRef text = msg0(CFStringRef, field, tbl->label.gtxt);
-    if (range.location + range.length > CFStringGetLength(text)) return false;
-    CFMutableStringRef newText = CFStringCreateMutableCopy(NULL, 0, text);
-    CFStringReplace(newText, range, replacement);
-
-    if (!CFStringGetLength(newText)) {
-        CFRelease(newText);
+    long oldLen = CFStringGetLength(text);
+    if (range.location + range.length > oldLen) return false;
+    int newLen = (int)(oldLen + len - range.length);
+    if (newLen > 16) return false;
+    if (!newLen) {
         tbl->button.setEnabled(d->button, tbl->button.en, false);
         showInputError(pair, d);
         return true;
     }
-    if (len && pair->data->set == charSet && cache.find((id)newText, cache.rng, regex, 1024).location) {
-        CFRelease(newText);
-        return false;
+    CFMutableStringRef newText = CFStringCreateMutableWithExternalCharactersNoCopy(
+      NULL, buffer, 0, 32, kCFAllocatorNull);
+    CFStringAppend(newText, text);
+    CFStringReplace(newText, range, replacement);
+
+    if (len && pair->data->set == charSet) {
+        UErrorCode err = 0;
+        uregex_setText(regex, buffer, newLen, &err);
+        UBool matches = uregex_matches(regex, 0, &err);
+        uregex_reset(regex, 0, &err);
+        if (!matches) {
+            CFRelease(newText);
+            return false;
+        }
     }
 
     CFNumberRef num = CFNumberFormatterCreateNumberFromString(NULL, numFormatter, newText, NULL, 0);

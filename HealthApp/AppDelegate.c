@@ -636,10 +636,10 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id app _U_,
         dm = self->userData.darkMode;
     }
 
-    initStatVData(clsRefs[0]);
-    initValidatorStrings(clsRefs[1]);
     initExerciseData(week);
     initWorkoutStrings();
+    initStatVData(clsRefs[0]);
+    initValidatorStrings(clsRefs[1]);
 
     IMP imps[] = {(IMP)setupWorkoutVC_numberOfComponents, (IMP)setupWorkoutVC_didSelectRow,
         (IMP)setupWorkoutVC_getTitle, (IMP)alertCtrlCreate
