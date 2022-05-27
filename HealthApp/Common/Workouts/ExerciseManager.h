@@ -1,22 +1,37 @@
 #ifndef ExerciseManager_h
 #define ExerciseManager_h
 
-#include <CoreFoundation/CFBase.h>
+#include <CoreFoundation/CoreFoundation.h>
+
+#define MinWorkoutDuration 15
 
 enum {
-    LiftPullup = 1, LiftBench, LiftDeadlift
+    StrengthIndexMain,
+    StrengthIndexTestMax = 2
 };
 
 enum {
-    WorkoutStrength, WorkoutSE, WorkoutEndurance, WorkoutHIC
+    LiftPullup = 1,
+    LiftBench,
+    LiftDeadlift
 };
 
 enum {
-    CircuitRounds, CircuitAMRAP, CircuitDecrement
+    WorkoutStrength,
+    WorkoutSE,
+    WorkoutEndurance,
+    WorkoutHIC
 };
 
 enum {
-    ExerciseReps, ExerciseDuration
+    CircuitRounds,
+    CircuitAMRAP,
+    CircuitDecrement
+};
+
+enum {
+    ExerciseReps,
+    ExerciseDuration
 };
 
 typedef struct {
@@ -46,12 +61,11 @@ typedef struct {
 typedef struct {
     Circuit *activities;
     Circuit *group;
-    CFStringRef title;
     time_t startTime;
     int index;
+    const int jIdx;
     const int size;
     int16_t duration;
-    const short bodyweight;
     const unsigned char type;
     const unsigned char day;
     const bool testMax;
@@ -66,6 +80,13 @@ typedef struct {
     const unsigned char day;
 } WorkoutParams;
 
-Workout *getWorkoutFromLibrary(WorkoutParams *params);
+extern short bodyweight;
+
+void initExerciseData(int week, float *multiplierRef);
+
+void setWeeklyWorkoutNames(unsigned char plan, CFStringRef *names);
+Workout *getWeeklyWorkout(int index, unsigned char plan, const short *lifts);
+CFArrayRef createWorkoutNames(unsigned char type);
+Workout *getWorkoutFromLibrary(WorkoutParams *params, const short *lifts);
 
 #endif /* ExerciseManager_h */

@@ -1,10 +1,25 @@
 #ifndef InputVC_h
 #define InputVC_h
 
-#include "ColorCache.h"
-#include "ViewCache.h"
-#include <CoreFoundation/CFCharacterSet.h>
+#include <CoreFoundation/CoreFoundation.h>
+#include <objc/objc.h>
 
+#define getIVIVCS(s) ((char *)(s) + sizeof(InputVC))
+#define getIVIVC(x) ((char *)(x) + VCSize + sizeof(InputVC))
+
+#define InputViewEncoding "{?=@@@@iifB}"
+#define InputVCEncoding "{?=[4{?=@@}]@@@@@iB}"
+
+#define FieldMaxDefault 999
+#define getKBForLocale(l) (CFBooleanGetValue(CFLocaleGetValue(l, kCFLocaleUsesMetricSystem)) \
+                           ? UIKeyboardTypeDecimalPad : UIKeyboardTypeNumberPad)
+
+enum {
+    UIKeyboardTypeNumberPad = 4,
+    UIKeyboardTypeDecimalPad = 8
+};
+
+extern Class InputViewClass;
 extern Class InputVCClass;
 
 typedef struct {
@@ -24,8 +39,6 @@ typedef struct {
 } IVPair;
 
 typedef struct {
-    CCacheRef clr;
-    VCacheRef tbl;
     IVPair children[4];
     id button;
     id activeField;
@@ -33,13 +46,24 @@ typedef struct {
     id vStack;
     id toolbar;
     int count;
-    int scrollHeight;
-    short topOffset;
-    short bottomOffset;
     bool setKB;
 } InputVC;
 
+void initValidatorData(void);
+
+void inputView_deinit(id self, SEL _cmd);
+
 void inputVC_addChild(id self, CFStringRef hint CF_CONSUMED, int kb, short min, short max);
-void inputVC_updateFields(InputVC *self, const short *vals);
+void inputVC_updateFields(InputVC *d, const short *vals);
+
+void inputVC_deinit(id self, SEL _cmd);
+void inputVC_viewDidLoad(id self, SEL _cmd);
+void inputVC_dismissKeyboard(id self, SEL _cmd);
+void inputVC_jumpToPrev(id self, SEL _cmd);
+void inputVC_jumpToNext(id self, SEL _cmd);
+void inputVC_fieldBeganEditing(id self, SEL _cmd, id field);
+void inputVC_fieldStoppedEditing(id self, SEL _cmd, id field);
+bool inputVC_fieldShouldReturn(id self, SEL _cmd, id field);
+bool inputVC_fieldChanged(id self, SEL _cmd, id field, CFRange range, CFStringRef replacement);
 
 #endif /* InputVC_h */

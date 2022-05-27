@@ -1,9 +1,10 @@
 #ifndef StatusView_h
 #define StatusView_h
 
+#include <objc/objc.h>
 #include "ExerciseManager.h"
-#include "ColorCache.h"
-#include "ViewCache.h"
+
+extern Class StatusViewClass;
 
 typedef struct {
     id button;
@@ -12,14 +13,11 @@ typedef struct {
     ExerciseEntry *entry;
 } StatusView;
 
-typedef struct {
-    VCacheRef tbl;
-    CCacheRef clr;
-    StatusView **v;
-} SVArgs;
+void initStatusViewData(void);
 
-id statusView_init(SVArgs *args,
+id statusView_init(StatusView **ref,
                    CFStringRef header, CFStringRef title CF_CONSUMED, int tag, id target, SEL action);
-void statusView_updateAccessibility(StatusView *v, VCacheRef tbl);
+void statusView_deinit(id self, SEL _cmd);
+void statusView_updateAccessibility(StatusView *v);
 
 #endif /* StatusView_h */

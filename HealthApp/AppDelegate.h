@@ -1,48 +1,27 @@
 #ifndef AppDelegate_h
 #define AppDelegate_h
 
-#include "ColorCache.h"
-#include "ViewCache.h"
+#include <objc/objc.h>
+#include "ExerciseManager.h"
+#include "UserData.h"
 
-typedef struct {
-    time_t planStart;
-    const time_t weekStart;
-    short liftMaxes[4];
-    unsigned char darkMode;
-    unsigned char currentPlan;
-    unsigned char completedWorkouts;
-} UserInfo;
-
-typedef struct {
-    short totalWorkouts;
-    short durationByType[4];
-    short cumulativeDuration[4];
-    short weightArray[4];
-} WeekDataModel;
+#define AppDelEncoding "@@[3@]{?=qq[4s]CCC}"
 
 typedef struct {
     Class isa;
     id window;
     id context;
     id children[3];
-    ColorCache clr;
-    VCache tbl;
     UserInfo userData;
 } AppDelegate;
 
-typedef void (^Callback)(void);
-typedef void (*FetchHandler)(void*, CFArrayRef, WeekDataModel*, int, bool);
+bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd, id app, id opt);
+u_long appDelegate_supportedOrientations(id self, SEL _cmd, id app, id win);
+void appDelegate_receivedNotif(AppDelegate *self, SEL _cmd,
+                               id unc, id notif, void (^callback)(u_long));
 
-extern int massType;
-extern float toSavedMass;
-
-UserInfo const *getUserInfo(void);
-
-void presentVC(id child);
-void presentModalVC(id modal);
-void dismissPresentedVC(Callback handler);
-
-id createAlertController(CFStringRef titleKey, CFStringRef msgKey);
-void addAlertAction(id ctrl, CFStringRef titleKey, int style, Callback handler);
+void updateUserInfo(unsigned char plan, unsigned char darkMode, short *weights);
+void deleteAppData(void);
+void addWorkoutData(id caller, Workout *workout, unsigned char day, short *weights, bool pop);
 
 #endif /* AppDelegate_h */

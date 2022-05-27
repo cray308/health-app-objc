@@ -65,7 +65,7 @@
 "setupWorkoutDuration" = "المدة بالدقائق";
 
 "updateMaxesTitle" = "توفير الوزن والتكرار";
-"stepperLabelInit" = "\U202Fالتكرار: %d.\U202C";
+"stepperLabelInit" = "\U202Fالتكرار: %d\U202C";
 "stepperLabelDescr" = "تغيير عدد التكرارات المكتملة";
 "exerciseHeader" = "\U202Fالمجموعة %1$d من %2$d\U202C";
 "exerciseTitleRest" = "\U202Fالراحة: %d ث\U202C";
