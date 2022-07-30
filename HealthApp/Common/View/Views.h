@@ -82,8 +82,7 @@ enum {
 
 enum {
     UIControlStateNormal,
-    UIControlStateDisabled = 2,
-    UIControlStateSelected = 4
+    UIControlStateDisabled = 2
 };
 
 enum {
@@ -101,7 +100,6 @@ enum {
 #define ViewSpacing 4
 #define ViewHeightDefault 44
 #define LayoutPriorityRequired 999
-#define FontSizeReg 13
 #define VCMargins ((HAInsets){16, 8, 16, 8})
 #define ViewMargins ((HAInsets){4, 0, 4, 0})
 
@@ -159,13 +157,8 @@ enum {
 #define setContentInset(s, i) Vtbl.scr.setInset((s), Vtbl.scr.sci, (i))
 #define scrollRect(s, r) Vtbl.scr.scrollR((s), Vtbl.scr.scrvs, (r), true)
 
-extern CFStringRef NSForegroundColorAttributeName;
-extern CFStringRef NSFontAttributeName;
-
 extern CFStringRef UIFontTextStyleSubheadline;
 extern CFStringRef UIFontTextStyleBody;
-
-extern CGFloat UIFontWeightRegular;
 
 extern uint32_t UIAccessibilityAnnouncementNotification;
 extern void UIAccessibilityPostNotification(uint32_t, id);
@@ -189,9 +182,6 @@ id createLabel(CFStringRef text CF_CONSUMED, CFStringRef style, int color);
 id createButton(CFStringRef title CF_CONSUMED, int color, CFStringRef style, id target, SEL action);
 id createSegmentedControl(CFStringRef format, int startIndex);
 id createTextfield(id delegate, id accessory, CFStringRef hint CF_CONSUMED, int tag);
-
-void updateButtonColors(id view, int color);
-void updateSegmentedControl(id view, bool darkMode);
 
 void setupNavItem(id vc, CFStringRef titleKey, id *buttons);
 void setupHierarchy(id vc, id vStack, id scrollView, int color);

@@ -3,8 +3,6 @@
 #include "UserData.h"
 #include "Views.h"
 
-extern CFStringRef UIFontTextStyleTitle3;
-
 Class SetupWorkoutVCClass;
 
 enum {
@@ -21,26 +19,6 @@ enum {
     IndexWeight
 };
 
-void initSetupWorkoutVCData(bool modern) {
-    IMP imps[] = {
-        (IMP)setupWorkoutVC_numberOfComponents,
-        (IMP)setupWorkoutVC_didSelectRow,
-        (IMP)setupWorkoutVC_getTitle
-    };
-    SEL pickerSel = sel_getUid("pickerView:titleForRow:forComponent:");
-    if (!modern) {
-        imps[0] = (IMP)setupWorkoutVC_numberOfComponentsLegacy;
-        imps[1] = (IMP)setupWorkoutVC_didSelectRowLegacy;
-        imps[2] = (IMP)setupWorkoutVC_getAttrTitle;
-        pickerSel = sel_getUid("pickerView:attributedTitleForRow:forComponent:");
-    }
-    class_addMethod(SetupWorkoutVCClass, sel_getUid("numberOfComponentsInPickerView:"),
-                    imps[0], "q@:@");
-    class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:didSelectRow:inComponent:"),
-                    imps[1], "v@:@qq");
-    class_addMethod(SetupWorkoutVCClass, pickerSel, imps[2], "@@:@qq");
-}
-
 #pragma mark - Lifecycle
 
 id setupWorkoutVC_init(id parent, unsigned char type) {
@@ -49,27 +27,12 @@ id setupWorkoutVC_init(id parent, unsigned char type) {
     d->parent = parent;
     d->names = createWorkoutNames(type);
     d->type = type;
-    if (!objc_getClass("UITabBarAppearance")) {
-        id font = clsF1(id, CFStringRef, objc_getClass("UIFont"),
-                        sel_getUid("preferredFontForTextStyle:"), UIFontTextStyleTitle3);
-        const void *keys[] = {NSForegroundColorAttributeName, NSFontAttributeName};
-        const void *nv[] = {getColor(ColorDisabled), font};
-        const void *sv[] = {getColor(ColorLabel), font};
-        d->normalDict = CFDictionaryCreate(
-          NULL, keys, nv, 2, &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-        d->selectedDict = CFDictionaryCreate(
-          NULL, keys, sv, 2, &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-    }
     return self;
 }
 
 void setupWorkoutVC_deinit(id self, SEL _cmd) {
     SetupWorkoutVC *d = (SetupWorkoutVC *)getIVIVC(self);
     CFRelease(d->names);
-    if (d->normalDict) {
-        CFRelease(d->normalDict);
-        CFRelease(d->selectedDict);
-    }
     releaseV(d->workoutTextField);
     msgSup0(void, (&(struct objc_super){self, InputVCClass}), _cmd);
 }
@@ -162,22 +125,8 @@ void setupWorkoutVC_tappedButton(id self, SEL _cmd _U_, id btn) {
 
 long setupWorkoutVC_numberOfComponents(id self _U_, SEL _cmd _U_, id picker _U_) { return 1; }
 
-long setupWorkoutVC_numberOfComponentsLegacy(id self _U_, SEL _cmd _U_, id picker) {
-    setBackgroundColor(picker, getColor(ColorTertiaryBG));
-    return 1;
-}
-
 long setupWorkoutVC_numberOfRows(id self, SEL _cmd _U_, id picker _U_, long section _U_) {
     return CFArrayGetCount(((SetupWorkoutVC *)getIVIVC(self))->names);
-}
-
-CFAttributedStringRef setupWorkoutVC_getAttrTitle(id self, SEL _cmd _U_,
-                                                  id picker _U_, long row, long section _U_) {
-    SetupWorkoutVC *d = (SetupWorkoutVC *)getIVIVC(self);
-    CFAttributedStringRef attrString = CFAttributedStringCreate(
-      NULL, CFArrayGetValueAtIndex(d->names, row), row == d->index ? d->selectedDict : d->normalDict);
-    CFAutorelease(attrString);
-    return attrString;
 }
 
 CFStringRef setupWorkoutVC_getTitle(id self, SEL _cmd _U_, id picker _U_, long row, long section _U_) {
@@ -188,9 +137,4 @@ void setupWorkoutVC_didSelectRow(id self, SEL _cmd _U_, id picker _U_, long row,
     SetupWorkoutVC *d = (SetupWorkoutVC *)getIVIVC(self);
     d->index = (int)row;
     setText(d->workoutTextField, CFArrayGetValueAtIndex(d->names, row));
-}
-
-void setupWorkoutVC_didSelectRowLegacy(id self, SEL _cmd _U_, id picker, long row, long section _U_) {
-    setupWorkoutVC_didSelectRow(self, nil, picker, row, 0);
-    msg1(void, long, picker, sel_getUid("reloadComponent:"), 0);
 }

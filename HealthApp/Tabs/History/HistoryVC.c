@@ -1,7 +1,6 @@
 #include "HistoryVC.h"
 #include "ContainerView.h"
 #include "SwiftBridging.h"
-#include "UserData.h"
 
 Class HistoryVCClass;
 
@@ -146,8 +145,6 @@ void historyVC_viewDidLoad(id self, SEL _cmd) {
     HistoryVC *d = (HistoryVC *)getIVVC(self);
     d->picker = createSegmentedControl(CFSTR("historySegment%d"), 0);
     addTarget(d->picker, self, sel_getUid("buttonTapped:"), UIControlEventValueChanged);
-    unsigned char darkMode = getUserInfo()->darkMode;
-    if (isCharValueValid(darkMode)) updateSegmentedControl(d->picker, darkMode);
     id navItem = msg0(id, self, sel_getUid("navigationItem"));
     msg1(void, id, navItem, sel_getUid("setTitleView:"), d->picker);
 
@@ -205,18 +202,5 @@ void historyVC_clearData(id self) {
     if (msg0(bool, self, sel_getUid("isViewLoaded"))) {
         msg1(void, long, d->picker, sel_getUid("setSelectedSegmentIndex:"), 0);
         historyVC_updateSegment(self, nil, d->picker);
-    }
-}
-
-void historyVC_updateColors(id self, bool darkMode) {
-    HistoryVC *d = (HistoryVC *)getIVVC(self);
-    id view = msg0(id, self, sel_getUid("view"));
-    setBackgroundColor(view, getColor(ColorPrimaryBG));
-    updateSegmentedControl(d->picker, darkMode);
-    view = (id)CFArrayGetValueAtIndex(msg0(CFArrayRef, view, sel_getUid("subviews")), 0);
-    view = (id)CFArrayGetValueAtIndex(msg0(CFArrayRef, view, sel_getUid("subviews")), 0);
-    CFArrayRef views = getArrangedSubviews(view);
-    for (int i = 0; i < 3; ++i) {
-        containerView_updateColors((ContainerView *)getIVV(CFArrayGetValueAtIndex(views, i)));
     }
 }

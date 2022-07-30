@@ -37,8 +37,3 @@ void containerView_deinit(id self, SEL _cmd) {
     releaseV(v->stack);
     msgSup0(void, (&(struct objc_super){self, View}), _cmd);
 }
-
-void containerView_updateColors(ContainerView *v) {
-    setTextColor(v->header, getColor(ColorLabel));
-    setBackgroundColor(v->divider, getColor(ColorDiv));
-}

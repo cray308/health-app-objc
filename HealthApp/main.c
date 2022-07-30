@@ -1,17 +1,18 @@
-#include <objc/runtime.h>
 #include "AppDelegate.h"
 #include "HomeVC.h"
 #include "InputVC.h"
 #include "HistoryVC.h"
 #include "SettingsVC.h"
 #include "StatusView.h"
+#include "Views.h"
 #include "WorkoutVC.h"
 
 extern int UIApplicationMain(int, char *[], CFStringRef, CFStringRef);
 
 int main(int argc, char *argv[]) {
     static Class AppDelegateClass;
-    Class VC = objc_getClass("UIViewController"), View = objc_getClass("UIView");
+    initNSData((Class*[]){&View, &VC}, (size_t*[]){&ViewSize, &VCSize});
+    initViewData((void(*[])(void)){initStatusViewData, initValidatorData});
     char const *dataKey = "data", *voidSig = "v@:", *tapSig = "v@:@";
     SEL deinit = sel_getUid("dealloc"), viewLoad = sel_getUid("viewDidLoad");
     SEL btnTap = sel_registerName("buttonTapped:");
@@ -41,14 +42,6 @@ int main(int argc, char *argv[]) {
     class_addMethod(StepperViewClass, sel_getUid("accessibilityDecrement"),
                     (IMP)stepperView_decrement, voidSig);
     objc_registerClassPair(StepperViewClass);
-
-    SwitchViewClass = objc_allocateClassPair(View, "SwitchView", 0);
-    class_addIvar(SwitchViewClass, dataKey, sizeof(SwitchView), 0, "{?=qq}");
-    class_addMethod(SwitchViewClass, sel_getUid("valueDidChange"),
-                    (IMP)switchView_didChange, voidSig);
-    class_addMethod(SwitchViewClass, sel_getUid("accessibilityActivate"),
-                    (IMP)switchView_activate, "B@:");
-    objc_registerClassPair(SwitchViewClass);
 
     InputVCClass = objc_allocateClassPair(VC, "InputVC", 0);
     class_addProtocol(InputVCClass, objc_getProtocol("UITextFieldDelegate"));
@@ -84,6 +77,12 @@ int main(int argc, char *argv[]) {
     class_addMethod(SetupWorkoutVCClass, btnTap, (IMP)setupWorkoutVC_tappedButton, tapSig);
     class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:numberOfRowsInComponent:"),
                     (IMP)setupWorkoutVC_numberOfRows, "q@:@q");
+    class_addMethod(SetupWorkoutVCClass, sel_getUid("numberOfComponentsInPickerView:"),
+                    (IMP)setupWorkoutVC_numberOfComponents, "q@:@");
+    class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:didSelectRow:inComponent:"),
+                    (IMP)setupWorkoutVC_didSelectRow, "v@:@qq");
+    class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:titleForRow:forComponent:"),
+                    (IMP)setupWorkoutVC_getTitle, "@@:@qq");
     objc_registerClassPair(SetupWorkoutVCClass);
 
     UpdateMaxesVCClass = objc_allocateClassPair(InputVCClass, "UpdateMaxesVC", 0);

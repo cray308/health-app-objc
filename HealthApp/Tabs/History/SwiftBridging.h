@@ -3,7 +3,7 @@
 
 #include "Views.h"
 
-bool setupCharts(bool enabled);
+bool setupCharts(void);
 void populateChartsSelsAndFuncs(IMP *impArr, Class **classes, SEL **selArr);
 id createChartView(id formatter, long *colors, int count, uint8_t options);
 

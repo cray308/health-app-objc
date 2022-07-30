@@ -5,7 +5,7 @@
 #include "ExerciseManager.h"
 #include "UserData.h"
 
-#define AppDelEncoding "@@[3@]{?=qq[4s]CCC}"
+#define AppDelEncoding "@@[3@]{?=qq[4s]CC}"
 
 typedef struct {
     Class isa;
@@ -20,7 +20,7 @@ u_long appDelegate_supportedOrientations(id self, SEL _cmd, id app, id win);
 void appDelegate_receivedNotif(AppDelegate *self, SEL _cmd,
                                id unc, id notif, void (^callback)(u_long));
 
-void updateUserInfo(unsigned char plan, unsigned char darkMode, short *weights);
+void updateUserInfo(unsigned char plan, short *weights);
 void deleteAppData(void);
 void addWorkoutData(id caller, Workout *workout, unsigned char day, short *weights, bool pop);
 

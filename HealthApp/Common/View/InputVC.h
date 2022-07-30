@@ -7,8 +7,8 @@
 #define getIVIVCS(s) ((char *)(s) + sizeof(InputVC))
 #define getIVIVC(x) ((char *)(x) + VCSize + sizeof(InputVC))
 
-#define InputViewEncoding "{?=@@@@iifB}"
-#define InputVCEncoding "{?=[4{?=@@}]@@@@@iB}"
+#define InputViewEncoding "{?=@@@iifB}"
+#define InputVCEncoding "{?=[4{?=@@}]@@@@@i}"
 
 #define FieldMaxDefault 999
 #define getKBForLocale(l) (CFBooleanGetValue(CFLocaleGetValue(l, kCFLocaleUsesMetricSystem)) \
@@ -23,7 +23,6 @@ extern Class InputViewClass;
 extern Class InputVCClass;
 
 typedef struct {
-    id hintLabel;
     id field;
     id errorLabel;
     CFCharacterSetRef set;
@@ -46,7 +45,6 @@ typedef struct {
     id vStack;
     id toolbar;
     int count;
-    bool setKB;
 } InputVC;
 
 void initValidatorData(void);

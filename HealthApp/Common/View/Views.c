@@ -3,8 +3,6 @@
 #define setFont(v, f) msg1(void, id, (v), pvc.lc.sf, (f))
 #define adjustFontCategory(v, a) msg1(void, bool, (v), pvc.lc.sajfc, (a))
 
-extern CGFloat UIFontWeightMedium;
-
 struct VCache Vtbl;
 Class VC;
 Class View;
@@ -274,44 +272,4 @@ id createTextfield(id delegate, id accessory, CFStringRef hint, int tag) {
     setAccessibilityLabel(view, hint);
     CFRelease(hint);
     return view;
-}
-
-#pragma mark - Color Updates
-
-void updateButtonColors(id view, int color) {
-    setTitleColor(view, getColor(color), UIControlStateNormal);
-    setTitleColor(view, getColor(ColorDisabled), UIControlStateDisabled);
-    setBackgroundColor(view, getColor(ColorSecondaryBGGrouped));
-}
-
-void updateSegmentedControl(id view, bool darkMode) {
-    id fg = getColor(ColorLabel);
-    float rg = 0.78f, blue = 0.8f;
-    if (darkMode) {
-        rg = 0.28f;
-        blue = 0.29f;
-    }
-    id tint = (((id(*)(id,SEL,CGFloat,CGFloat,CGFloat,CGFloat))objc_msgSend)
-               (alloc(UIColor), sel_getUid("initWithRed:green:blue:alpha:"), rg, rg, blue, 1));
-    msg1(void, id, view, sel_getUid("setTintColor:"), tint);
-    releaseO(tint);
-    const void *keys[] = {NSForegroundColorAttributeName, NSFontAttributeName};
-    SEL gf = sel_getUid("systemFontOfSize:weight:");
-    const void *nv[] = {
-        fg, ((id(*)(Class,SEL,CGFloat,CGFloat))objc_msgSend)(pvc.fc.cls, gf,
-                                                             FontSizeReg, UIFontWeightRegular)
-    };
-    const void *sv[] = {
-        fg, ((id(*)(Class,SEL,CGFloat,CGFloat))objc_msgSend)(pvc.fc.cls, gf,
-                                                             FontSizeReg, UIFontWeightMedium)
-    };
-    CFDictionaryRef normalDict = CFDictionaryCreate(
-      NULL, keys, nv, 2, &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-    CFDictionaryRef selectedDict = CFDictionaryCreate(
-      NULL, keys, sv, 2, &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-    SEL satr = sel_getUid("setTitleTextAttributes:forState:");
-    msg2(void, CFDictionaryRef, u_long, view, satr, normalDict, UIControlStateNormal);
-    msg2(void, CFDictionaryRef, u_long, view, satr, selectedDict, UIControlStateSelected);
-    CFRelease(normalDict);
-    CFRelease(selectedDict);
 }

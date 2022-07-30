@@ -2,7 +2,7 @@
 #import "UIKit/UIKit.h"
 @import Charts;
 
-bool setupCharts(bool enabled) { return [ChartUtility setup:enabled]; }
+bool setupCharts(void) { return [ChartUtility setup]; }
 
 void populateChartsSelsAndFuncs(IMP *impArr, Class **classes, SEL **selArr) {
     Class Chart = LineChart.class, CSet = DataSet.class;

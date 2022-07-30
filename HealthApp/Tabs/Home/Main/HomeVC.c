@@ -46,7 +46,7 @@ void homeVC_createWorkoutsList(id self, const UserInfo *info) {
 
     if (info->currentPlan > MaxValidCharVal || info->planStart > time(NULL)) {
         setHidden(d->planContainer.view, true);
-        setHidden(d->customContainer.data->divider, true);
+        setHidden(d->firstDiv, true);
         return;
     }
 
@@ -64,30 +64,8 @@ void homeVC_createWorkoutsList(id self, const UserInfo *info) {
     }
 
     setHidden(d->planContainer.view, false);
-    setHidden(d->customContainer.data->divider, false);
+    setHidden(d->firstDiv, false);
     homeVC_updateWorkoutsList(d, info->completedWorkouts);
-}
-
-void homeVC_updateColors(id self) {
-    HomeVC *d = (HomeVC *)getIVVC(self);
-    SEL enabled = sel_getUid("isEnabled");
-    id label = getColor(ColorLabel), gray = getColor(ColorGray), green = getColor(ColorGreen);
-    setBackgroundColor(msg0(id, self, sel_getUid("view")), getColor(ColorPrimaryBGGrouped));
-    containerView_updateColors(d->planContainer.data);
-    containerView_updateColors(d->customContainer.data);
-    CFArrayRef views = getArrangedSubviews(d->planContainer.data->stack);
-    int count = (int)CFArrayGetCount(views);
-    for (int i = 0; i < count; ++i) {
-        StatusView *v = (StatusView *)getIVV(CFArrayGetValueAtIndex(views, i));
-        setTextColor(v->header, label);
-        updateButtonColors(v->button, ColorLabel);
-        setBackgroundColor(v->box, msg0(bool, v->button, enabled) ? gray : green);
-    }
-    views = getArrangedSubviews(d->customContainer.data->stack);
-    for (int i = 0; i < 5; ++i) {
-        StatusView *v = (StatusView *)getIVV(CFArrayGetValueAtIndex(views, i));
-        updateButtonColors(v->button, ColorLabel);
-    }
 }
 
 #pragma mark - Selectors/Methods
@@ -104,8 +82,10 @@ void homeVC_viewDidLoad(id self, SEL _cmd) {
 
     d->planContainer.view = containerView_init(&d->planContainer.data, headers[0]);
     setHidden(d->planContainer.data->divider, true);
-    d->customContainer.view = containerView_init(&d->customContainer.data, headers[1]);
-    setSpacing(d->customContainer.data->stack, ViewSpacing);
+    ContainerView *cc;
+    id customContainer = containerView_init(&cc, headers[1]);
+    setSpacing(cc->stack, ViewSpacing);
+    d->firstDiv = msg0(id, cc->divider, sel_getUid("retain"));
 
     SEL btnTap = sel_getUid("customButtonTapped:");
     StatusView *sv;
@@ -113,14 +93,15 @@ void homeVC_viewDidLoad(id self, SEL _cmd) {
         id btn = statusView_init(&sv, NULL, titles[i], i, self, btnTap);
         setHidden(sv->box, true);
         statusView_updateAccessibility(sv);
-        addArrangedSubview(d->customContainer.data->stack, btn);
+        addArrangedSubview(cc->stack, btn);
         releaseV(btn);
     }
 
-    id vStack = createVStack((id []){d->planContainer.view, d->customContainer.view}, 2);
+    id vStack = createVStack((id []){d->planContainer.view, customContainer}, 2);
     setSpacing(vStack, GroupSpacing);
     setLayoutMargins(vStack, VCMargins);
     setupHierarchy(self, vStack, createScrollView(), ColorPrimaryBGGrouped);
+    releaseV(customContainer);
 
     homeVC_createWorkoutsList(self, getUserInfo());
 }

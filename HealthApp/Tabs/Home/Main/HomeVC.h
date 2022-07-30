@@ -5,19 +5,18 @@
 #include "SetupWorkoutVC.h"
 #include "UserData.h"
 
-#define HomeVCEncoding "{?={?=@@}{?=@@}}"
+#define HomeVCEncoding "{?={?=@@}@}"
 
 extern Class HomeVCClass;
 
 typedef struct {
     CVPair planContainer;
-    CVPair customContainer;
+    id firstDiv;
 } HomeVC;
 
 id homeVC_init(time_t startDate);
 void homeVC_updateWorkoutsList(HomeVC *d, unsigned char completed);
 void homeVC_createWorkoutsList(id self, const UserInfo *info);
-void homeVC_updateColors(id self);
 
 void homeVC_viewDidLoad(id self, SEL _cmd);
 void homeVC_workoutButtonTapped(id self, SEL _cmd, id btn);

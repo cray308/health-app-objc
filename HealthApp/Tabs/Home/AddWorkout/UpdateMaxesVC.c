@@ -112,9 +112,7 @@ void updateMaxesVC_viewDidLoad(id self, SEL _cmd) {
                              ColorBlue, UIFontTextStyleBody, self, sel_getUid("buttonTapped:"));
     setupNavItem(self, CFSTR("updateMaxesTitle"), (id []){nil, p->button});
     setEnabled(p->button, false);
-
-    if (objc_getClass("UINavigationBarAppearance"))
-        msg1(void, bool, self, sel_getUid("setModalInPresentation:"), true);
+    msg1(void, bool, self, sel_getUid("setModalInPresentation:"), true);
 
     setSpacing(p->vStack, GroupSpacing);
     CFLocaleRef locale = CFLocaleCopyCurrent();

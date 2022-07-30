@@ -4,7 +4,7 @@
 #include "InputVC.h"
 #include "PersistenceManager.h"
 #include "SettingsVC.h"
-#include "StatusView.h"
+#include "SwiftBridging.h"
 #include "Views_VCExt.h"
 #include "WorkoutVC.h"
 
@@ -46,9 +46,6 @@ UserInfo const *getUserInfo(void) { return &getAppDel()->userData; }
 #pragma mark - Application Delegate
 
 bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id app _U_, id opt _U_) {
-    Class TabAppear = objc_getClass("UITabBarAppearance");
-    initNSData(TabAppear, (Class*[]){&View, &VC}, (size_t*[]){&ViewSize, &VCSize});
-    initViewData((void(*[])(void)){initStatusViewData, initValidatorData});
     UIApplication = objc_getClass("UIApplication");
     sharedApplication = sel_getUid("sharedApplication");
     delegate = sel_getUid("delegate");
@@ -64,17 +61,17 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id app _U_,
     CFBooleanRef saved = CFPreferencesCopyAppValue(HasLaunchedKey, kCFPreferencesCurrentApplication);
     if (saved != NULL) {
         CFRelease(saved);
-        tzDiff = userInfo_init(&self->userData, &weekStart, &week, TabAppear);
+        tzDiff = userInfo_init(&self->userData, &weekStart, &week);
         self->context = context_init();
     } else {
-        userInfo_create(&self->userData, &weekStart, TabAppear);
+        userInfo_create(&self->userData, &weekStart);
         u_long options = UNAuthorizationOptionSound | UNAuthorizationOptionAlert;
         msg2(void, u_long, void(^)(bool,id), unc,
              sel_getUid("requestAuthorizationWithOptions:completionHandler:"), options, ^(bool g _U_, id e _U_){});
         self->context = context_init_first_launch();
     }
 
-    bool ltr = initVCData(TabAppear, self->userData.darkMode, initSetupWorkoutVCData);
+    bool ltr = setupCharts();
     initWorkoutData(week, &toSavedMass);
 
     HistoryModel *model;
@@ -82,17 +79,17 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id app _U_,
     self->children[IndexHistory] = historyVC_init(&model);
     self->children[IndexSettings] = new(SettingsVCClass);
 
-    Class Item = objc_getClass("UITabBarItem");
+    Class Item = objc_getClass("UITabBarItem"), NavVC = objc_getClass("UINavigationController");
     SEL itemInit = sel_getUid("initWithTitle:image:tag:"), setItem = sel_getUid("setTabBarItem:");
     SEL navInit = sel_getUid("initWithRootViewController:");
     id controllers[3];
-    CFStringRef imgs[] = {CFSTR("ico_house"), CFSTR("ico_chart"), CFSTR("ico_gear")}, titles[3];
+    CFStringRef imgs[] = {CFSTR("house"), CFSTR("chart.bar"), CFSTR("gear")}, titles[3];
     fillStringArray(titles, CFSTR("tabs%d"), 3);
 
     for (int i = 0; i < 3; ++i) {
         id _i = alloc(Item);
-        id item = msg3(id, CFStringRef, id, long, _i, itemInit, titles[i], getImg(imgs[i]), i);
-        controllers[i] = msg1(id, id, alloc(DMNavVC), navInit, self->children[i]);
+        id item = msg3(id, CFStringRef, id, long, _i, itemInit, titles[i], sysImg(imgs[i]), i);
+        controllers[i] = msg1(id, id, alloc(NavVC), navInit, self->children[i]);
         msg1(void, id, controllers[i], setItem, item);
         releaseO(item);
         CFRelease(titles[i]);
@@ -104,8 +101,14 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id app _U_,
     msg1(void, id, self->window, sel_getUid("setRootViewController:"), tabVC);
     CFArrayRef array = CFArrayCreate(NULL, (const void **)controllers, 3, NULL);
     msg2(void, CFArrayRef, bool, tabVC, sel_getUid("setViewControllers:animated:"), array, false);
-    setupTabVC(tabVC, TabAppear);
+
+    Class NavAppear = objc_getClass("UINavigationBarAppearance");
+    id tabBar = msg0(id, tabVC, sel_getUid("tabBar"));
+    id color = clsF1(id, CFStringRef, UIColor, sel_getUid("colorNamed:"), CFSTR("navBarColor"));
+    SEL nb = sel_getUid("navigationBar");
+    setupBarGeneric(tabBar, objc_getClass("UITabBarAppearance"), color);
     for (int i = 0; i < 3; ++i) {
+        setupBarGeneric(msg0(id, controllers[i], nb), NavAppear, color);
         releaseVC(controllers[i]);
     }
     CFRelease(array);
@@ -133,18 +136,10 @@ void appDelegate_receivedNotif(AppDelegate *self, SEL _cmd _U_,
 
 #pragma mark - Child VC Callbacks
 
-void updateUserInfo(unsigned char plan, unsigned char darkMode, short *weights) {
+void updateUserInfo(unsigned char plan, short *weights) {
     AppDelegate *self = getAppDel();
-    unsigned char res = userInfo_update(&self->userData, plan, darkMode, weights);
-    if (res & MaskCurrentPlan) homeVC_createWorkoutsList(self->children[IndexHome], &self->userData);
-
-    if (res & MaskDarkMode) {
-        handleTintChange(self->window, darkMode);
-        homeVC_updateColors(self->children[IndexHome]);
-        if (msg0(bool, self->children[IndexHistory], sel_getUid("isViewLoaded")))
-            historyVC_updateColors(self->children[IndexHistory], darkMode);
-        settingsVC_updateColors(self->children[IndexSettings], darkMode);
-    }
+    if (userInfo_update(&self->userData, plan, weights))
+        homeVC_createWorkoutsList(self->children[IndexHome], &self->userData);
 }
 
 void deleteAppData(void) {

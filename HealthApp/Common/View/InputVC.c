@@ -1,6 +1,5 @@
 #include "InputVC.h"
 #include <unicode/uregex.h>
-#include "UserData.h"
 #include "Views.h"
 
 extern CFStringRef UIKeyboardDidShowNotification;
@@ -10,10 +9,6 @@ extern CFStringRef UIFontTextStyleFootnote;
 
 Class InputViewClass;
 Class InputVCClass;
-
-enum {
-    UIKeyboardAppearanceDark = 1
-};
 
 enum {
     UIBarButtonItemStylePlain,
@@ -63,7 +58,6 @@ static void checkScrollPos(id scroll, id child) {
 
 void inputView_deinit(id self, SEL _cmd) {
     InputView *v = (InputView *)getIVV(self);
-    releaseV(v->hintLabel);
     releaseV(v->field);
     releaseV(v->errorLabel);
     msgSup0(void, (&(struct objc_super){self, View}), _cmd);
@@ -108,20 +102,18 @@ void inputVC_addChild(id self, CFStringRef hint, int kb, short min, short max) {
     CFStringRef errorText = formatStr(locale, inputFieldError, min, max);
     CFRelease(locale);
 
-    v->hintLabel = createLabel(CFRetain(hint), UIFontTextStyleSubheadline, ColorLabel);
-    setIsAccessibilityElement(v->hintLabel, false);
+    id hintLabel = createLabel(CFRetain(hint), UIFontTextStyleSubheadline, ColorLabel);
+    setIsAccessibilityElement(hintLabel, false);
 
     v->field = createTextfield(self, d->toolbar, hint, index);
     setKeyboardType(v->field, kb);
     setAccessibilityHint(v->field, errorText);
-    if (d->setKB)
-        msg1(void, long, v->field, sel_getUid("setKeyboardAppearance:"), UIKeyboardAppearanceDark);
 
     v->errorLabel = createLabel(errorText, UIFontTextStyleFootnote, ColorRed);
     setIsAccessibilityElement(v->errorLabel, false);
     setHidden(v->errorLabel, true);
 
-    id vStack = createVStack((id []){v->hintLabel, v->field, v->errorLabel}, 3);
+    id vStack = createVStack((id []){hintLabel, v->field, v->errorLabel}, 3);
     setTrans(vStack);
     setSpacing(vStack, ViewSpacing);
     setLayoutMargins(vStack, ViewMargins);
@@ -129,6 +121,7 @@ void inputVC_addChild(id self, CFStringRef hint, int kb, short min, short max) {
     pin(vStack, view);
     addArrangedSubview(d->vStack, view);
     releaseV(vStack);
+    releaseV(hintLabel);
 }
 
 void inputVC_updateFields(InputVC *d, const short *vals) {
@@ -180,10 +173,10 @@ void inputVC_viewDidLoad(id self, SEL _cmd) {
     id items[] = {
         (((id(*)(id,SEL,id,long,id,SEL))objc_msgSend)
          (alloc(BarItem), btnInit,
-          getImg(CFSTR("ico_chevron_up")), UIBarButtonItemStylePlain, self, sel_getUid("jumpToPrev"))),
+          sysImg(CFSTR("chevron.up")), UIBarButtonItemStylePlain, self, sel_getUid("jumpToPrev"))),
         (((id(*)(id,SEL,id,long,id,SEL))objc_msgSend)
          (alloc(BarItem), btnInit,
-          getImg(CFSTR("ico_chevron_down")), UIBarButtonItemStylePlain, self, sel_getUid("jumpToNext"))),
+          sysImg(CFSTR("chevron.down")), UIBarButtonItemStylePlain, self, sel_getUid("jumpToNext"))),
         msg3(id, long, id, SEL, alloc(BarItem),
              sel_getUid("initWithBarButtonSystemItem:target:action:"),
              UIBarButtonSystemItemFlexibleSpace, nil, nil),
@@ -195,12 +188,6 @@ void inputVC_viewDidLoad(id self, SEL _cmd) {
 
     id _t = alloc(objc_getClass("UIToolbar"));
     d->toolbar = msg1(id, CGRect, _t, sel_getUid("initWithFrame:"), ((CGRect){{0}, {100, 100}}));
-    unsigned char dark = getUserInfo()->darkMode;
-    if (isCharValueValid(dark)) {
-        id color = clsF1(id, int, UIColor, sel_getUid("getBarColorWithType:"), BarColorModal);
-        msg1(void, id, d->toolbar, sel_getUid("setBarTintColor:"), color);
-        d->setKB = dark;
-    }
     msg1(void, id, d->toolbar, sel_getUid("setTintColor:"), getColor(ColorRed));
     msg0(void, d->toolbar, sel_getUid("sizeToFit"));
     CFArrayRef array = CFArrayCreate(NULL, (const void **)items, 4, &retainedArrCallbacks);

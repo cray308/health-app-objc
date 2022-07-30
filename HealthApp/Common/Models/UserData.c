@@ -1,7 +1,7 @@
 #include "UserData.h"
 #include <CoreFoundation/CoreFoundation.h>
 
-#define NKeys 10
+#define NKeys 9
 
 #if TARGET_OS_SIMULATOR
 void exerciseManager_setCurrentWeek(int week);
@@ -20,7 +20,6 @@ enum {
     ITzOffset,
     ICurrentPlan,
     ICompletedWorkouts,
-    IDarkMode,
     ILiftArray
 };
 
@@ -32,7 +31,7 @@ enum {
 static CFStringRef const dictKey = CFSTR("userinfo");
 static const void *DictKeys[] = {
     CFSTR("weekStart"), CFSTR("planStart"), CFSTR("tzOffset"),
-    CFSTR("currentPlan"), CFSTR("completedWorkouts"), CFSTR("darkMode"),
+    CFSTR("currentPlan"), CFSTR("completedWorkouts"),
     CFSTR("squatMax"), CFSTR("pullUpMax"), CFSTR("benchMax"), CFSTR("deadliftMax")
 };
 
@@ -81,19 +80,18 @@ static time_t getWeekStart(int *tzOffset) {
     return now - ((tmInfo.tm_hour * 3600) + (tmInfo.tm_min * 60) + tmInfo.tm_sec);
 }
 
-void userInfo_create(UserInfo *out, time_t *weekStart, bool modern) {
+void userInfo_create(UserInfo *out, time_t *weekStart) {
     int tzOffset = 0;
     time_t start = getWeekStart(&tzOffset);
     *weekStart = start;
 
-    UserInfo data = {start, start, {0}, modern ? UCHAR_MAX : 0, UCHAR_MAX, 0};
+    UserInfo data = {start, start, {0}, UCHAR_MAX, 0};
     const void *values[] = {
         CFNumberCreate(NULL, kCFNumberLongType, &start),
         CFNumberCreate(NULL, kCFNumberLongType, &start),
         CFNumberCreate(NULL, kCFNumberIntType, &tzOffset),
         CFNumberCreate(NULL, kCFNumberCharType, &(unsigned char){UCHAR_MAX}),
         CFNumberCreate(NULL, kCFNumberCharType, &(unsigned char){0}),
-        CFNumberCreate(NULL, kCFNumberCharType, &data.darkMode),
         CFNumberCreate(NULL, kCFNumberShortType, &(short){0}),
         CFNumberCreate(NULL, kCFNumberShortType, &(short){0}),
         CFNumberCreate(NULL, kCFNumberShortType, &(short){0}),
@@ -113,14 +111,14 @@ void userInfo_create(UserInfo *out, time_t *weekStart, bool modern) {
     memcpy(out, &data, sizeof(UserInfo));
 }
 
-int userInfo_init(UserInfo *out, time_t *weekStart, int *week, bool modern) {
+int userInfo_init(UserInfo *out, time_t *weekStart, int *week) {
     int tzOffset = 0;
     time_t start = getWeekStart(&tzOffset);
 
     const int planLengths[] = {8, 13};
     int savedOffset;
     time_t savedWeekStart, planStart;
-    unsigned char changes = 0, plan, completed, dm;
+    unsigned char changes = 0, plan, completed;
     CFDictionaryRef dict = CFPreferencesCopyAppValue(dictKey, kCFPreferencesCurrentApplication);
     CFNumberGetValue(CFDictionaryGetValue(dict, DictKeys[IWeekStart]),
                      kCFNumberLongType, &savedWeekStart);
@@ -129,7 +127,6 @@ int userInfo_init(UserInfo *out, time_t *weekStart, int *week, bool modern) {
     CFNumberGetValue(CFDictionaryGetValue(dict, DictKeys[ICurrentPlan]), kCFNumberCharType, &plan);
     CFNumberGetValue(CFDictionaryGetValue(dict, DictKeys[ICompletedWorkouts]),
                      kCFNumberCharType, &completed);
-    CFNumberGetValue(CFDictionaryGetValue(dict, DictKeys[IDarkMode]), kCFNumberCharType, &dm);
 
     int tzDiff = savedOffset - tzOffset;
     if (tzDiff) {
@@ -159,11 +156,6 @@ int userInfo_init(UserInfo *out, time_t *weekStart, int *week, bool modern) {
         }
     }
 
-    if (isCharValueValid(dm) && modern) {
-        dm = UCHAR_MAX;
-        changes |= MaskDarkMode;
-    }
-
     if (changes) {
         CFStringRef keys[ILiftArray];
         CFNumberRef values[ILiftArray];
@@ -189,15 +181,11 @@ int userInfo_init(UserInfo *out, time_t *weekStart, int *week, bool modern) {
             keys[nChanges] = DictKeys[ICompletedWorkouts];
             values[nChanges++] = CFNumberCreate(NULL, kCFNumberCharType, &completed);
         }
-        if (changes & MaskDarkMode) {
-            keys[nChanges] = DictKeys[IDarkMode];
-            values[nChanges++] = CFNumberCreate(NULL, kCFNumberCharType, &dm);
-        }
         CFMutableDictionaryRef updates = CFDictionaryCreateMutableCopy(NULL, 10, dict);
         saveChanges(updates, keys, values, nChanges);
     }
 
-    UserInfo data = {planStart, start, {0}, dm, plan, completed};
+    UserInfo data = {planStart, start, {0}, plan, completed};
     for (int i = 0; i < 4; ++i) {
         const void *value = CFDictionaryGetValue(dict, DictKeys[ILiftArray + i]);
         CFNumberGetValue(value, kCFNumberShortType, &data.liftMaxes[i]);
@@ -209,9 +197,9 @@ int userInfo_init(UserInfo *out, time_t *weekStart, int *week, bool modern) {
     return tzDiff;
 }
 
-unsigned char userInfo_update(UserInfo *m, unsigned char plan, unsigned char dm, short *weights) {
+bool userInfo_update(UserInfo *m, unsigned char plan, short *weights) {
     int nChanges = 0;
-    unsigned char res = plan != m->currentPlan ? MaskCurrentPlan : 0;
+    bool res = plan != m->currentPlan;
     CFStringRef keys[ILiftArray + 1];
     CFNumberRef values[ILiftArray + 1];
     if (res) {
@@ -225,13 +213,6 @@ unsigned char userInfo_update(UserInfo *m, unsigned char plan, unsigned char dm,
             values[nChanges++] = CFNumberCreate(NULL, kCFNumberLongType, &newPlanStart);
             m->planStart = newPlanStart;
         }
-    }
-
-    if (dm != m->darkMode) {
-        res |= MaskDarkMode;
-        keys[nChanges] = DictKeys[IDarkMode];
-        values[nChanges++] = CFNumberCreate(NULL, kCFNumberCharType, &dm);
-        m->darkMode = dm;
     }
 
     nChanges += updateWeight(m->liftMaxes, weights, &keys[nChanges], &values[nChanges]);

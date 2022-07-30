@@ -30,16 +30,6 @@ enum {
     ColorTertiaryBG
 };
 
-enum {
-    BarColorNav,
-    BarColorModal
-};
-
-struct CCache {
-    const SEL sc;
-    id (*gColor)(Class,SEL,int);
-};
-
 #define alloc(C) Sels.allocate((C), Sels.alo)
 #define new(C) Sels.newObj((C), Sels.nw)
 #define releaseV(o) Sels.viewRel(o, Sels.rel)
@@ -64,15 +54,14 @@ typedef void (^Callback)(void);
 
 extern const CFArrayCallBacks retainedArrCallbacks;
 extern struct SelCache Sels;
-extern struct CCache Ctbl;
 extern Class UIColor;
 extern Class UIImage;
 
-#define getColor(t) Ctbl.gColor(UIColor, Ctbl.sc, (t))
 #define getImg(name) clsF1(id, CFStringRef, UIImage, sel_getUid("imageNamed:"), (name))
+#define sysImg(name) clsF1(id, CFStringRef, UIImage, sel_getUid("systemImageNamed:"), (name))
 
-void initNSData(bool modern, Class **clsRefs, size_t **sizeRefs);
-void setupAppColors(bool darkMode, bool deleteOld);
+void initNSData(Class **clsRefs, size_t **sizeRefs);
+id getColor(int type);
 
 CFArrayRef createSortDescriptors(CFStringRef key, bool ascending);
 
