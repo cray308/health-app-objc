@@ -186,11 +186,11 @@ id createTextfield(id delegate, id accessory, CFStringRef hint CF_CONSUMED, int 
 void setupNavItem(id vc, CFStringRef titleKey, id *buttons);
 void setupHierarchy(id vc, id vStack, id scrollView, int color);
 
+void presentVC(id presenter, id child);
 void presentModalVC(id presenter, id modal);
 void dismissPresentedVC(id vc, Callback handler);
 
 id createAlertController(CFStringRef titleKey, CFStringRef msgKey);
 void addAlertAction(id ctrl, CFStringRef titleKey, int style, Callback handler);
-void showAlert(id ctrl);
 
 #endif /* Views_h */

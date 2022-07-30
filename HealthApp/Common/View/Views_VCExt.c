@@ -58,7 +58,7 @@ void setupBarGeneric(id bar, Class appearanceClass, id color) {
 
 #pragma mark - VC Presentation
 
-static inline void presentVC(id presenter, id child) {
+void presentVC(id presenter, id child) {
     msg3(void, id, bool, Callback, presenter,
          sel_getUid("presentViewController:animated:completion:"), child, true, NULL);
 }
@@ -99,14 +99,7 @@ void addAlertAction(id ctrl, CFStringRef titleKey, int style, Callback handler) 
                  (objc_getClass("UIAlertAction"),
                   sel_getUid("actionWithTitle:style:handler:"), title, style, ^(id act _U_) {
         if (handler) handler();
-        msg1(void, id, getAppWindow(), sel_getUid("setTintColor:"), getColor(ColorRed));
     }));
     msg1(void, id, ctrl, sel_getUid("addAction:"), action);
     CFRelease(title);
-}
-
-void showAlert(id ctrl) {
-    id window = getAppWindow();
-    msg1(void, id, window, sel_getUid("setTintColor:"), nil);
-    presentVC(msg0(id, window, sel_getUid("rootViewController")), ctrl);
 }

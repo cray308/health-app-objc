@@ -196,7 +196,7 @@ static void showConfetti(id self) {
         releaseV(confetti);
         id ctrl = createAlertController(CFSTR("homeAlertTitle"), CFSTR("homeAlertMessage"));
         addAlertAction(ctrl, CFSTR("ok"), UIAlertActionStyleDefault, NULL);
-        showAlert(ctrl);
+        presentVC(self, ctrl);
     });
 }
 

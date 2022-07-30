@@ -188,7 +188,6 @@ void inputVC_viewDidLoad(id self, SEL _cmd) {
 
     id _t = alloc(objc_getClass("UIToolbar"));
     d->toolbar = msg1(id, CGRect, _t, sel_getUid("initWithFrame:"), ((CGRect){{0}, {100, 100}}));
-    msg1(void, id, d->toolbar, sel_getUid("setTintColor:"), getColor(ColorRed));
     msg0(void, d->toolbar, sel_getUid("sizeToFit"));
     CFArrayRef array = CFArrayCreate(NULL, (const void **)items, 4, &retainedArrCallbacks);
     msg2(void, CFArrayRef, bool, d->toolbar, sel_getUid("setItems:animated:"), array, false);

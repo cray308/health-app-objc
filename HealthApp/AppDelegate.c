@@ -39,8 +39,6 @@ static AppDelegate *getAppDel(void) {
     return (AppDelegate *)delegateImp(sharedAppImp(UIApplication, sharedApplication), delegate);
 }
 
-id getAppWindow(void) { return getAppDel()->window; }
-
 UserInfo const *getUserInfo(void) { return &getAppDel()->userData; }
 
 #pragma mark - Application Delegate
@@ -96,7 +94,6 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id app _U_,
     }
 
     self->window = new(objc_getClass("UIWindow"));
-    msg1(void, id, self->window, sel_getUid("setTintColor:"), getColor(ColorRed));
     id tabVC = new(objc_getClass("UITabBarController"));
     msg1(void, id, self->window, sel_getUid("setRootViewController:"), tabVC);
     CFArrayRef array = CFArrayCreate(NULL, (const void **)controllers, 3, NULL);

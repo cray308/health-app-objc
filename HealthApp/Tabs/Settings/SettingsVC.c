@@ -71,7 +71,7 @@ void settingsVC_buttonTapped(id self, SEL _cmd _U_, id btn) {
     addAlertAction(ctrl, CFSTR("cancel"), UIAlertActionStyleCancel, NULL);
     if (tag) {
         addAlertAction(ctrl, CFSTR("delete"), UIAlertActionStyleDestructive, ^{ deleteAppData(); });
-        showAlert(ctrl);
+        presentVC(self, ctrl);
         return;
     }
 
@@ -84,5 +84,5 @@ void settingsVC_buttonTapped(id self, SEL _cmd _U_, id btn) {
     addAlertAction(ctrl, CFSTR("save"), UIAlertActionStyleDefault, ^{
         updateUserInfo((unsigned char)plan, d->results);
     });
-    showAlert(ctrl);
+    presentVC(self, ctrl);
 }
