@@ -268,10 +268,12 @@ void updateSegmentedControl(CCacheRef clr, id view, unsigned char darkMode) {
     Sels.objRel(tint, Sels.rel);
     const void *keys[] = {NSForegroundColorAttributeName, NSFontAttributeName};
     SEL gf = sel_getUid("systemFontOfSize:weight:");
-    const void *norm[] = {fg, clsF2(id, CGFloat, CGFloat, cache.fc.cls, gf, 13, UIFontWeightRegular)};
-    const void *sel[] = {fg, clsF2(id, CGFloat, CGFloat, cache.fc.cls, gf, 13, UIFontWeightMedium)};
-    CFDictionaryRef normalDict = createDict(keys, norm, 2);
-    CFDictionaryRef selectedDict = createDict(keys, sel, 2);
+    CFDictionaryRef normalDict = CFDictionaryCreate(NULL, keys, (const void *[]){
+        fg, clsF2(id, CGFloat, CGFloat, cache.fc.cls, gf, 13, UIFontWeightRegular)
+    }, 2, &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+    CFDictionaryRef selectedDict = CFDictionaryCreate(NULL, keys, (const void *[]){
+        fg, clsF2(id, CGFloat, CGFloat, cache.fc.cls, gf, 13, UIFontWeightMedium)
+    }, 2, &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
     SEL satr = sel_getUid("setTitleTextAttributes:forState:");
     msg2(void, CFDictionaryRef, unsigned long, view, satr, normalDict, 0);
     msg2(void, CFDictionaryRef, unsigned long, view, satr, selectedDict, 4);

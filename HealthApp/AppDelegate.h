@@ -34,9 +34,6 @@ typedef struct {
 typedef void (^Callback)(void);
 typedef void (*FetchHandler)(void*, CFArrayRef, WeekDataModel*, int, bool);
 
-extern int massType;
-extern float toSavedMass;
-
 UserInfo const *getUserInfo(void);
 
 void presentVC(id child);

@@ -33,7 +33,7 @@ static void keyboardWillHide(CFNotificationCenterRef, void *,
 
 void initValidatorStrings(Class Field) {
     CFLocaleRef locale = CFLocaleCopyCurrent();
-    if (massType) {
+    if (isMetric(locale)) {
         CFMutableCharacterSetRef ms = CFCharacterSetCreateMutableCopy(
           NULL, CFCharacterSetGetPredefined(kCFCharacterSetDecimalDigit));
         CFCharacterSetAddCharactersInString(ms, CFLocaleGetValue(locale, kCFLocaleDecimalSeparator));
@@ -130,7 +130,8 @@ void inputVC_addChild(id self, CFStringRef hint, int kb, short min, short max) {
     tbl->view.setIsAcc(v->hintLabel, tbl->view.sace, false);
     v->field = createTextfield(tbl, d->clr, self, d->toolbar, hint, index);
     msg1(void, long, v->field, cache.skbt, kb);
-    v->set = kb == 4 ? CFCharacterSetGetPredefined(kCFCharacterSetDecimalDigit) : charSet;
+    v->set = kb == KeyboardTypeNumberPad
+             ? CFCharacterSetGetPredefined(kCFCharacterSetDecimalDigit) : charSet;
     tbl->view.setHint(v->field, tbl->view.shn, errorText);
     if (d->setKB) msg1(void, long, v->field, sel_getUid("setKeyboardAppearance:"), 1);
     v->errorLabel = createLabel(tbl, d->clr, errorText, UIFontTextStyleFootnote, ColorRed);
@@ -150,9 +151,9 @@ void inputVC_addChild(id self, CFStringRef hint, int kb, short min, short max) {
 
 void inputVC_updateFields(InputVC *self, const short *vals) {
     CFLocaleRef l = CFLocaleCopyCurrent();
-    if (massType) {
+    if (isMetric(l)) {
         for (int i = 0; i < 4; ++i) {
-            float value = vals[i] * 0.453592f;
+            float value = vals[i] * ToKg;
             InputView *v = self->children[i].data;
             CFStringRef str = formatStr(l, CFSTR("%.2f"), value);
             self->tbl->field.setText(v->field, self->tbl->label.stxt, str);

@@ -122,7 +122,8 @@ void updateMaxesVC_viewDidLoad(id self, SEL _cmd) {
     CFRelease(liftVal);
     CFStringLowercase(adjLift, l);
     CFStringRef fieldKey = localize(CFSTR("maxWeight"));
-    inputVC_addChild(self, formatStr(NULL, fieldKey, adjLift), massType ? 8 : 4, 1, 999);
+    int kbType = getKeyboardForLocale(l);
+    inputVC_addChild(self, formatStr(NULL, fieldKey, adjLift), kbType, 1, FieldMaxDefault);
     CFRelease(adjLift);
     CFRelease(fieldKey);
 
@@ -140,10 +141,12 @@ void updateMaxesVC_viewDidLoad(id self, SEL _cmd) {
 void updateMaxesVC_tappedFinish(id self, SEL _cmd _U_) {
     InputVC *sup = (InputVC *)((char *)self + VCSize);
     UpdateMaxesVC *d = (UpdateMaxesVC *)((char *)sup + sizeof(InputVC));
+    CFLocaleRef locale = CFLocaleCopyCurrent();
     short extra = d->index == LiftPullup ? d->bodyweight : 0;
-    float initWeight = ((sup->children[0].data->result * toSavedMass) + extra) * 36;
+    float initWeight = ((sup->children[0].data->result * getSavedMassFactor(locale)) + extra) * 36;
     float reps = 37.f - (float)msg0(double, d->stack->stepper, sel_getUid("value"));
     short weight = (short)lrintf(initWeight / reps) - extra;
+    CFRelease(locale);
     void *parent = d->parent;
     int index = d->index;
     dismissPresentedVC(^{ workoutVC_finishedBottomSheet(parent, index, weight); });

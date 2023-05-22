@@ -6,6 +6,13 @@
 #include "ColorCache.h"
 #include "ViewCache.h"
 
+#define FieldMaxDefault 999
+
+enum {
+    KeyboardTypeNumberPad = 4,
+    KeyboardTypeDecimalPad = 8
+};
+
 extern Class InputViewClass;
 extern Class InputVCClass;
 
@@ -40,6 +47,8 @@ typedef struct {
     short bottomOffset;
     bool setKB;
 } InputVC;
+
+#define getKeyboardForLocale(l) (isMetric(l) ? KeyboardTypeDecimalPad : KeyboardTypeNumberPad)
 
 void initValidatorStrings(Class Field);
 

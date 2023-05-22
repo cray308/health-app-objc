@@ -12,6 +12,7 @@
 		610B92BA270A6E9000358DBD /* Views.c in Sources */ = {isa = PBXBuildFile; fileRef = 610B92B8270A6E9000358DBD /* Views.c */; };
 		610B92CB270A7F4900358DBD /* ContainerView.h in Headers */ = {isa = PBXBuildFile; fileRef = 610B92C9270A7F4900358DBD /* ContainerView.h */; };
 		610B92CC270A7F4900358DBD /* ContainerView.c in Sources */ = {isa = PBXBuildFile; fileRef = 610B92CA270A7F4900358DBD /* ContainerView.c */; };
+		61115E842A1B06FC00BEB69B /* BaseMacros.h in Headers */ = {isa = PBXBuildFile; fileRef = 61115E832A1B06FC00BEB69B /* BaseMacros.h */; };
 		611EDDA32741F8750064B254 /* StatusView.h in Headers */ = {isa = PBXBuildFile; fileRef = 611EDDA12741F8750064B254 /* StatusView.h */; };
 		611EDDA42741F8750064B254 /* StatusView.c in Sources */ = {isa = PBXBuildFile; fileRef = 611EDDA22741F8750064B254 /* StatusView.c */; };
 		611EDDA9274355F10064B254 /* HomeVC.h in Headers */ = {isa = PBXBuildFile; fileRef = 611EDDA7274355F10064B254 /* HomeVC.h */; };
@@ -91,6 +92,7 @@
 		610B92B8270A6E9000358DBD /* Views.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = Views.c; sourceTree = "<group>"; };
 		610B92C9270A7F4900358DBD /* ContainerView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ContainerView.h; sourceTree = "<group>"; };
 		610B92CA270A7F4900358DBD /* ContainerView.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = ContainerView.c; sourceTree = "<group>"; };
+		61115E832A1B06FC00BEB69B /* BaseMacros.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BaseMacros.h; sourceTree = "<group>"; };
 		611EDDA12741F8750064B254 /* StatusView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StatusView.h; sourceTree = "<group>"; };
 		611EDDA22741F8750064B254 /* StatusView.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = StatusView.c; sourceTree = "<group>"; };
 		611EDDA7274355F10064B254 /* HomeVC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HomeVC.h; sourceTree = "<group>"; };
@@ -317,6 +319,7 @@
 		61C7790426102663001326A1 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				61115E832A1B06FC00BEB69B /* BaseMacros.h */,
 				6161838126AC80A0001587B2 /* CocoaHelpers.c */,
 				6161838026AC8089001587B2 /* CocoaHelpers.h */,
 				618782C927DBF4BA0075466C /* ColorCache.h */,
@@ -334,6 +337,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				611EDDBA274487010064B254 /* SettingsVC.h in Headers */,
+				61115E842A1B06FC00BEB69B /* BaseMacros.h in Headers */,
 				611EDDC62744CB2D0064B254 /* UpdateMaxesVC.h in Headers */,
 				61FFEEA2272CCCB5002BFFA6 /* AppDelegate.h in Headers */,
 				611EDDE827476ED50064B254 /* HistoryVC.h in Headers */,

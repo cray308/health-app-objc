@@ -102,12 +102,12 @@ void settingsVC_viewDidLoad(id self, SEL _cmd) {
     fillStringArray(liftNames, CFSTR("exNames%02d"), 4);
     CFLocaleRef l = CFLocaleCopyCurrent();
     CFStringRef fieldKey = localize(CFSTR("maxWeight"));
-    int kb = massType ? 8 : 4;
+    int kbType = getKeyboardForLocale(l);
     for (int i = 0; i < 4; ++i) {
         CFMutableStringRef adjName = CFStringCreateMutableCopy(NULL, 128, liftNames[i]);
         CFRelease(liftNames[i]);
         CFStringLowercase(adjName, l);
-        inputVC_addChild(self, formatStr(NULL, fieldKey, adjName), kb, 0, 999);
+        inputVC_addChild(self, formatStr(NULL, fieldKey, adjName), kbType, 0, FieldMaxDefault);
         CFRelease(adjName);
     }
     CFRelease(fieldKey);
@@ -158,6 +158,9 @@ void settingsVC_buttonTapped(id self, SEL _cmd _U_, id btn) {
     unsigned char plan =
       (unsigned char)(msg0(long, d->planPicker, sel_getUid("selectedSegmentIndex")) - 1);
 
+    CFLocaleRef locale = CFLocaleCopyCurrent();
+    float toSavedMass = getSavedMassFactor(locale);
+    CFRelease(locale);
     short *arr = d->results;
     for (int i = 0; i < 4; ++i) {
         arr[i] = (short)lrintf(sup->children[i].data->result * toSavedMass);

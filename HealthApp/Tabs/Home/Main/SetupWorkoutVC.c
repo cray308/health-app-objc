@@ -18,11 +18,13 @@ id setupWorkoutVC_init(id parent, unsigned char type, VCacheRef tbl, CCacheRef c
     if (!objc_getClass("UITabBarAppearance")) {
         id font = clsF1(id, CFStringRef, objc_getClass("UIFont"),
                         sel_getUid("preferredFontForTextStyle:"), UIFontTextStyleTitle3);
-        const void *keys[] = {NSForegroundColorAttributeName, NSFontAttributeName};
-        const void *normalVals[] = {clr->getColor(clr->cls, clr->sc, ColorDisabled), font};
-        const void *selectedVals[] = {clr->getColor(clr->cls, clr->sc, ColorLabel), font};
-        d->normalDict = createDict(keys, normalVals, 2);
-        d->selectedDict = createDict(keys, selectedVals, 2);
+        const void *keys[] = {NSFontAttributeName, NSForegroundColorAttributeName};
+         d->normalDict = CFDictionaryCreate(NULL, keys, (const void *[]){
+             font, clr->getColor(clr->cls, clr->sc, ColorDisabled)
+         }, 2, &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+         d->selectedDict = CFDictionaryCreate(NULL, keys, (const void *[]){
+             font, clr->getColor(clr->cls, clr->sc, ColorLabel)
+         }, 2, &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
     }
     return self;
 }
@@ -96,7 +98,8 @@ void setupWorkoutVC_viewDidLoad(id self, SEL _cmd) {
     }
 
     for (int i = 0; i < 3; ++i) {
-        if (rows[i]) inputVC_addChild(self, localize(rows[i]), 4, mins[i], maxes[i]);
+        if (rows[i])
+            inputVC_addChild(self, localize(rows[i]), KeyboardTypeNumberPad, mins[i], maxes[i]);
     }
 
     Sels.viewRel(workoutLabel, Sels.rel);

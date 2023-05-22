@@ -145,15 +145,18 @@ static void populateHistory(void *_m, CFArrayRef strs, WeekDataModel *results, i
             m->lifts.avgs[i][j] = totalByExercise[i][j] * invEntries[i];
         }
     }
-    if (massType) {
+
+    CFLocaleRef locale = CFLocaleCopyCurrent();
+    if (isMetric(locale)) {
         for (int i = 0; i < size; ++i) {
-            for (int j = 0; j < 4; ++j) m->lifts.entries[j][i].y *= 0.453592;
+            for (int j = 0; j < 4; ++j) m->lifts.entries[j][i].y *= ToKg;
         }
         for (int i = 0; i < 3; ++i) {
-            m->lifts.maxes[i] *= 0.453592f;
-            for (int j = 0; j < 4; ++j) m->lifts.avgs[i][j] *= 0.453592f;
+            m->lifts.maxes[i] *= ToKg;
+            for (int j = 0; j < 4; ++j) m->lifts.avgs[i][j] *= ToKg;
         }
     }
+    CFRelease(locale);
     free(results);
 }
 

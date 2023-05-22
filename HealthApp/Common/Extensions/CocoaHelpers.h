@@ -3,18 +3,8 @@
 
 #include <CoreFoundation/CoreFoundation.h>
 #include <objc/message.h>
+#include "BaseMacros.h"
 #include "ColorCache.h"
-
-#if DEBUG
-#include <assert.h>
-#define customAssert(x) assert(x);
-extern void NSLog(id format, ...);
-#else
-#define customAssert(x)
-#endif
-
-#define _U_ __attribute__((__unused__))
-#define max(a, b) (((a) > (b)) ? (a) : (b))
 
 #define getImpC(cls, cmd) method_getImplementation(class_getClassMethod((cls), (cmd)))
 #define getImpO(cls, cmd) method_getImplementation(class_getInstanceMethod((cls), (cmd)))
@@ -36,11 +26,6 @@ extern void NSLog(id format, ...);
 
 #define msgSup0(rv, s, cmd) (((rv(*)(struct objc_super*,SEL))objc_msgSendSuper)(s, cmd))
 #define msgSup1(rv, t, s, cmd, a) (((rv(*)(struct objc_super*,SEL,t))objc_msgSendSuper)(s, cmd, a))
-
-#define formatStr(l, fmt, ...) CFStringCreateWithFormat(NULL, (CFDictionaryRef)(l), fmt, ##__VA_ARGS__)
-#define localize(s) CFCopyLocalizedString(s, )
-#define createDict(k, v, s)\
- CFDictionaryCreate(NULL, k, v, s, &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks)
 
 enum {
     ColorDiv,

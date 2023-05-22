@@ -8,8 +8,6 @@
 #include "SwiftBridging.h"
 #include "WorkoutVC.h"
 
-#define WeekSeconds 604800
-
 #if TARGET_OS_SIMULATOR
 void exerciseManager_setCurrentWeek(int);
 #endif
@@ -18,9 +16,6 @@ extern CGFloat UIFontWeightSemibold;
 enum {
     IWeekStart, IPlanStart, ITzOffset, ICurrentPlan, ICompletedWorkouts, IDarkMode, ILiftArray
 };
-
-int massType = 0;
-float toSavedMass = 1;
 
 #if DEBUG
 static bool FIRST_LAUNCH;
@@ -330,8 +325,9 @@ static int getStatusBarStyle(id self _U_, SEL _cmd _U_) { return barStyle; }
 
 static void setupNavBarColor(id bar, CCacheRef clr) {
     const void *keys[] = {NSForegroundColorAttributeName};
-    const void *vals[] = {clr->getColor(clr->cls, clr->sc, ColorLabel)};
-    CFDictionaryRef dict = createDict(keys, vals, 1);
+    CFDictionaryRef dict = CFDictionaryCreate(NULL, keys, (const void *[]){
+        clr->getColor(clr->cls, clr->sc, ColorLabel)
+    }, 1, &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
     msg1(void, CFDictionaryRef, bar, sel_getUid("setTitleTextAttributes:"), dict);
     CFRelease(dict);
 }
@@ -427,10 +423,12 @@ static id alertCtrlCreateLegacy(id self, SEL _cmd _U_, CFStringRef title, CFStri
     const void *keys[] = {NSForegroundColorAttributeName, NSFontAttributeName};
     Class Font = objc_getClass("UIFont");
     SEL gf = sel_getUid("systemFontOfSize:weight:");
-    const void *titleVals[] = {fg, clsF2(id, CGFloat, CGFloat, Font, gf, 17, UIFontWeightSemibold)};
-    const void *msgVals[] = {fg, clsF2(id, CGFloat, CGFloat, Font, gf, 13, UIFontWeightRegular)};
-    CFDictionaryRef titleDict = createDict(keys, titleVals, 2);
-    CFDictionaryRef msgDict = createDict(keys, msgVals, 2);
+    CFDictionaryRef titleDict = CFDictionaryCreate(NULL, keys, (const void *[]){
+        fg, clsF2(id, CGFloat, CGFloat, Font, gf, 17, UIFontWeightSemibold)
+    }, 2, &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+    CFDictionaryRef msgDict = CFDictionaryCreate(NULL, keys, (const void *[]){
+        fg, clsF2(id, CGFloat, CGFloat, Font, gf, 13, UIFontWeightRegular)
+    }, 2, &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
     CFAttributedStringRef titleString = CFAttributedStringCreate(NULL, title, titleDict);
     CFAttributedStringRef msgString = CFAttributedStringCreate(NULL, message, msgDict);
     SEL sKV = sel_getUid("setValue:forKey:"), gsv = sel_getUid("subviews");
@@ -476,7 +474,8 @@ static void handleFirstLaunch(AppDelegate *self, CFStringRef k, time_t start, in
         CFNumberCreate(NULL, 8, &(short){0}), CFNumberCreate(NULL, 8, &(short){0}),
         CFNumberCreate(NULL, 8, &(short){0}), CFNumberCreate(NULL, 8, &(short){0})
     };
-    CFDictionaryRef dict = createDict(DictKeys, values, 10);
+    CFDictionaryRef dict = CFDictionaryCreate(NULL, DictKeys, values, 10,
+                                              &kCFCopyStringDictionaryKeyCallBacks, NULL);
     CFPreferencesSetAppValue(k, hasLaunched, kCFPreferencesCurrentApplication);
     CFPreferencesSetAppValue(dictKey, dict, kCFPreferencesCurrentApplication);
     CFPreferencesAppSynchronize(kCFPreferencesCurrentApplication);

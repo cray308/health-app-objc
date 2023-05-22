@@ -67,10 +67,8 @@ void initExerciseData(int week) {
 
     CFLocaleRef l = CFLocaleCopyCurrent();
     CFStringRef key;
-    if (CFBooleanGetValue(CFLocaleGetValue(l, kCFLocaleUsesMetricSystem))) {
+    if (isMetric(l)) {
         key = CFSTR("kg");
-        massType = 1;
-        toSavedMass = 2.204623f;
     } else {
         key = CFSTR("lb");
     }
@@ -150,6 +148,7 @@ static CFStringRef createTitle(int type, int index) {
 }
 
 static Workout *buildWorkout(CFArrayRef acts, WorkoutParams *params) {
+    CFLocaleRef l = CFLocaleCopyCurrent();
     float weights[4] = {[3] = 0};
     short customSets = 1, customReps = 0, customCircuitReps = 0;
     bool testMax = false;
@@ -170,8 +169,8 @@ static Workout *buildWorkout(CFArrayRef acts, WorkoutParams *params) {
             for (int i = 1; i < 4; ++i) weights[i] = lifts[i];
             testMax = true;
         }
-        if (massType) {
-            for (int i = 0; i < 4; ++i) weights[i] *= 0.453592f;
+        if (isMetric(l)) {
+            for (int i = 0; i < 4; ++i) weights[i] *= ToKg;
         }
         customReps = params->reps;
         customSets = params->sets;
@@ -192,7 +191,6 @@ static Workout *buildWorkout(CFArrayRef acts, WorkoutParams *params) {
     };
     workout.group = &workout.activities[0];
     bool multiple = nActivities > 1;
-    CFLocaleRef l = CFLocaleCopyCurrent();
     CFStringRef one = formatStr(l, CFSTR("%d"), 1);
 
     for (int i = 0; i < nActivities; ++i) {
