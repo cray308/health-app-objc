@@ -1,10 +1,8 @@
 #ifndef ViewCache_h
 #define ViewCache_h
 
+#include <CoreFoundation/CoreFoundation.h>
 #include <objc/objc.h>
-#include <CoreFoundation/CFArray.h>
-#include <CoreFoundation/CFDictionary.h>
-#include <CoreGraphics/CGGeometry.h>
 
 typedef struct {
     CGFloat top, left, bottom, right;

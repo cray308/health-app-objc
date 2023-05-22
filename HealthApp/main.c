@@ -1,64 +1,16 @@
-#include <objc/runtime.h>
-#include <CoreFoundation/CFString.h>
+#include <objc/message.h>
 #include "AppDelegate.h"
+#include "HistoryVC.h"
+#include "HomeVC.h"
+#include "InputVC.h"
+#include "SettingsVC.h"
 #include "SetupWorkoutVC.h"
 #include "StatusView.h"
-#include "InputVC.h"
-#include "HomeVC.h"
-#include "HistoryVC.h"
-#include "SettingsVC.h"
-#include "WorkoutVC.h"
 #include "UpdateMaxesVC.h"
+#include "WorkoutVC.h"
 
-extern Class StatusViewClass;
-extern Class InputViewClass;
-extern Class ContainerViewClass;
-extern Class HomeVCClass;
-extern Class HistoryVCClass;
-extern Class SettingsVCClass;
-extern Class WorkoutVCClass;
-extern Class UpdateMaxesVCClass;
-extern Class StepperViewClass;
 extern int UIApplicationMain(int, char *[], CFStringRef, CFStringRef);
-void containerView_deinit(id, SEL);
-void statusView_deinit(id, SEL);
-void inputView_deinit(id, SEL);
-void stepperView_deinit(id, SEL);
-void stepperView_updatedStepper(id, SEL);
-void stepperView_increment(id, SEL);
-void stepperView_decrement(id, SEL);
-id inputVC_init(id, SEL, VCacheRef, CCacheRef);
-void inputVC_deinit(id, SEL);
-void inputVC_viewDidLoad(id, SEL);
-void inputVC_viewDidAppear(id, SEL, bool);
-void inputVC_dismissKeyboard(id, SEL);
-void inputVC_jumpToPrev(id, SEL);
-void inputVC_jumpToNext(id, SEL);
-void inputVC_fieldBeganEditing(id, SEL, id);
-void inputVC_fieldStoppedEditing(id, SEL, id);
-bool inputVC_fieldChanged(id, SEL, id, CFRange, CFStringRef);
-void homeVC_viewDidLoad(id, SEL);
-void homeVC_workoutButtonTapped(id, SEL, id);
-void homeVC_customButtonTapped(id, SEL, id);
-void historyVC_viewDidLoad(id, SEL);
-void historyVC_updateSegment(id, SEL, id);
-CFStringRef historyVC_stringForValue(id, SEL, double);
-void settingsVC_viewDidLoad(id, SEL);
-void settingsVC_buttonTapped(id, SEL, id);
-void setupWorkoutVC_deinit(id, SEL);
-void setupWorkoutVC_viewDidLoad(id, SEL);
-void setupWorkoutVC_tappedButton(id, SEL, id);
-long setupWorkoutVC_numberOfRows(id, SEL, id, long);
-void workoutVC_deinit(id, SEL);
-void workoutVC_viewDidLoad(id, SEL);
-void workoutVC_willDisappear(id, SEL, bool);
-void workoutVC_startEndWorkout(id, SEL, id);
-void workoutVC_handleTap(id, SEL, id);
-void updateMaxesVC_deinit(id, SEL);
-void updateMaxesVC_viewDidLoad(id, SEL);
-void updateMaxesVC_tappedFinish(id, SEL);
-bool appDelegate_didFinishLaunching(AppDelegate*, SEL, id, id);
-int appDelegate_supportedOrientations(AppDelegate*, SEL, id, id);
+
 static Class AppDelegateClass;
 
 int main(int argc, char *argv[]) {

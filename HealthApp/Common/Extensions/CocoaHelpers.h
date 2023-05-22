@@ -1,8 +1,7 @@
 #ifndef CocoaBridging_h
 #define CocoaBridging_h
 
-#include <CoreFoundation/CFBundle.h>
-#include <CoreGraphics/CGGeometry.h>
+#include <CoreFoundation/CoreFoundation.h>
 #include <objc/message.h>
 #include "ColorCache.h"
 
@@ -13,15 +12,6 @@ extern void NSLog(id format, ...);
 #else
 #define customAssert(x)
 #endif
-
-struct SelCache {
-    const SEL alo, nw, rel;
-    id (*alloc)(Class,SEL);
-    id (*new)(Class,SEL);
-    void (*objRel)(id,SEL);
-    void (*viewRel)(id,SEL);
-    void (*vcRel)(id,SEL);
-};
 
 #define _U_ __attribute__((__unused__))
 #define max(a, b) (((a) > (b)) ? (a) : (b))
@@ -52,9 +42,6 @@ struct SelCache {
 #define createDict(k, v, s)\
  CFDictionaryCreate(NULL, k, v, s, &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks)
 
-extern const CFArrayCallBacks retainedArrCallbacks;
-extern struct SelCache Sels;
-
 enum {
     ColorDiv,
     ColorLabel,
@@ -70,6 +57,22 @@ enum {
     ColorSecondaryBGGrouped,
     ColorTertiaryBG,
 };
+
+struct SelCache {
+    const SEL alo, nw, rel;
+    id (*alloc)(Class,SEL);
+    id (*new)(Class,SEL);
+    void (*objRel)(id,SEL);
+    void (*viewRel)(id,SEL);
+    void (*vcRel)(id,SEL);
+};
+
+extern const CFArrayCallBacks retainedArrCallbacks;
+extern struct SelCache Sels;
+
+void initNSData(bool modern, ColorCache *r, Class **clsRefs, size_t **sizeRefs);
+
+void setupAppColors(Class Color, unsigned char darkMode, bool deleteOld);
 
 void fillStringArray(CFStringRef *arr, CFStringRef format, int count);
 CFArrayRef createSortDescriptors(CFStringRef key, bool ascending);

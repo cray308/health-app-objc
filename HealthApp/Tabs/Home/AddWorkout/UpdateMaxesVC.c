@@ -1,33 +1,17 @@
 #include "UpdateMaxesVC.h"
-#include <math.h>
 #include "AppDelegate.h"
 #include "ExerciseManager.h"
 #include "InputVC.h"
 #include "Views.h"
 
 extern uint64_t UIAccessibilityTraitAdjustable;
-void workoutVC_finishedBottomSheet(void *self, int index, short weight);
 
-Class UpdateMaxesVCClass;
 Class StepperViewClass;
+Class UpdateMaxesVCClass;
 
-id updateMaxesVC_init(void *parent, int index, short bodyweight, VCacheRef tbl, CCacheRef clr) {
-    id self = msg2(id, VCacheRef, CCacheRef, Sels.alloc(UpdateMaxesVCClass, Sels.alo),
-                   sel_getUid("initWithVCache:cCache:"), tbl, clr);
-    UpdateMaxesVC *d = (UpdateMaxesVC *)((char *)self + VCSize + sizeof(InputVC));
-    d->parent = parent;
-    d->index = index;
-    d->bodyweight = bodyweight;
-    return self;
-}
+#pragma mark - Stepper
 
-void updateMaxesVC_deinit(id self, SEL _cmd) {
-    UpdateMaxesVC *d = (UpdateMaxesVC *)((char *)self + VCSize + sizeof(InputVC));
-    Sels.viewRel((id)((char *)d->stack - ViewSize), Sels.rel);
-    msgSup0(void, (&(struct objc_super){self, InputVCClass}), _cmd);
-}
-
-static id stepperViewInit(StepperView **ref, CFLocaleRef l CF_CONSUMED, VCacheRef tbl, CCacheRef clr) {
+static id stepperView_init(StepperView **ref, CFLocaleRef l CF_CONSUMED, VCacheRef tbl, CCacheRef clr) {
     id self = Sels.new(StepperViewClass, Sels.nw);
     StepperView *v = (StepperView *)((char *)self + ViewSize);
     *ref = v;
@@ -71,41 +55,6 @@ void stepperView_deinit(id self, SEL _cmd) {
     msgSup0(void, (&(struct objc_super){self, View}), _cmd);
 }
 
-void updateMaxesVC_viewDidLoad(id self, SEL _cmd) {
-    msgSup0(void, (&(struct objc_super){self, InputVCClass}), _cmd);
-
-    InputVC *sup = (InputVC *)((char *)self + VCSize);
-    VCacheRef tbl = sup->tbl;
-    UpdateMaxesVC *d = (UpdateMaxesVC *)((char *)sup + sizeof(InputVC));
-    id navItem = msg0(id, self, sel_getUid("navigationItem"));
-    tbl->view.setBG(msg0(id, self, sel_getUid("view")), tbl->view.sbg,
-                    sup->clr->getColor(sup->clr->cls, sup->clr->sc, ColorSecondaryBG));
-    setVCTitle(navItem, localize(CFSTR("updateMaxesTitle")));
-
-    tbl->stack.setSpace(sup->vStack, tbl->stack.ssp, 20);
-    CFLocaleRef l = CFLocaleCopyCurrent();
-    CFStringRef liftKey = formatStr(NULL, CFSTR("exNames%02d"), d->index);
-    CFStringRef liftVal = localize(liftKey);
-    CFRelease(liftKey);
-    CFMutableStringRef adjLift = CFStringCreateMutableCopy(NULL, 128, liftVal);
-    CFRelease(liftVal);
-    CFStringLowercase(adjLift, l);
-    CFStringRef fieldKey = localize(CFSTR("maxWeight"));
-    inputVC_addChild(self, formatStr(NULL, fieldKey, adjLift), massType ? 8 : 4, 1, 999);
-    CFRelease(adjLift);
-    CFRelease(fieldKey);
-
-    id stepperView = stepperViewInit(&d->stack, l, tbl, sup->clr);
-    tbl->stack.addSub(sup->vStack, tbl->stack.asv, stepperView);
-
-    sup->button = createButton(tbl, sup->clr, localize(CFSTR("finish")),
-                               ColorBlue, UIFontTextStyleBody, self, sel_getUid("tappedFinish"));
-    setNavButtons(navItem, (id []){nil, sup->button});
-    tbl->button.setEnabled(sup->button, tbl->button.en, false);
-    if (objc_getClass("UINavigationBarAppearance"))
-        msg1(void, bool, self, sel_getUid("setModalInPresentation:"), true);
-}
-
 static void handleNewStepperValue(id self, StepperView *v, int value) {
     CFLocaleRef l = CFLocaleCopyCurrent();
     CFStringRef newVal = formatStr(l, CFSTR("%d"), value);
@@ -134,6 +83,59 @@ static void stepperChangeGeneric(id self, int change) {
 void stepperView_increment(id self, SEL _cmd _U_) { stepperChangeGeneric(self, 1); }
 
 void stepperView_decrement(id self, SEL _cmd _U_) { stepperChangeGeneric(self, -1); }
+
+#pragma mark - VC
+
+id updateMaxesVC_init(void *parent, int index, short bodyweight, VCacheRef tbl, CCacheRef clr) {
+    id self = msg2(id, VCacheRef, CCacheRef, Sels.alloc(UpdateMaxesVCClass, Sels.alo),
+                   sel_getUid("initWithVCache:cCache:"), tbl, clr);
+    UpdateMaxesVC *d = (UpdateMaxesVC *)((char *)self + VCSize + sizeof(InputVC));
+    d->parent = parent;
+    d->index = index;
+    d->bodyweight = bodyweight;
+    return self;
+}
+
+void updateMaxesVC_deinit(id self, SEL _cmd) {
+    UpdateMaxesVC *d = (UpdateMaxesVC *)((char *)self + VCSize + sizeof(InputVC));
+    Sels.viewRel((id)((char *)d->stack - ViewSize), Sels.rel);
+    msgSup0(void, (&(struct objc_super){self, InputVCClass}), _cmd);
+}
+
+void updateMaxesVC_viewDidLoad(id self, SEL _cmd) {
+    msgSup0(void, (&(struct objc_super){self, InputVCClass}), _cmd);
+
+    InputVC *sup = (InputVC *)((char *)self + VCSize);
+    VCacheRef tbl = sup->tbl;
+    UpdateMaxesVC *d = (UpdateMaxesVC *)((char *)sup + sizeof(InputVC));
+    id navItem = msg0(id, self, sel_getUid("navigationItem"));
+    tbl->view.setBG(msg0(id, self, sel_getUid("view")), tbl->view.sbg,
+                    sup->clr->getColor(sup->clr->cls, sup->clr->sc, ColorSecondaryBG));
+    setVCTitle(navItem, localize(CFSTR("updateMaxesTitle")));
+
+    tbl->stack.setSpace(sup->vStack, tbl->stack.ssp, 20);
+    CFLocaleRef l = CFLocaleCopyCurrent();
+    CFStringRef liftKey = formatStr(NULL, CFSTR("exNames%02d"), d->index);
+    CFStringRef liftVal = localize(liftKey);
+    CFRelease(liftKey);
+    CFMutableStringRef adjLift = CFStringCreateMutableCopy(NULL, 128, liftVal);
+    CFRelease(liftVal);
+    CFStringLowercase(adjLift, l);
+    CFStringRef fieldKey = localize(CFSTR("maxWeight"));
+    inputVC_addChild(self, formatStr(NULL, fieldKey, adjLift), massType ? 8 : 4, 1, 999);
+    CFRelease(adjLift);
+    CFRelease(fieldKey);
+
+    id stepperView = stepperView_init(&d->stack, l, tbl, sup->clr);
+    tbl->stack.addSub(sup->vStack, tbl->stack.asv, stepperView);
+
+    sup->button = createButton(tbl, sup->clr, localize(CFSTR("finish")),
+                               ColorBlue, UIFontTextStyleBody, self, sel_getUid("tappedFinish"));
+    setNavButtons(navItem, (id []){nil, sup->button});
+    tbl->button.setEnabled(sup->button, tbl->button.en, false);
+    if (objc_getClass("UINavigationBarAppearance"))
+        msg1(void, bool, self, sel_getUid("setModalInPresentation:"), true);
+}
 
 void updateMaxesVC_tappedFinish(id self, SEL _cmd _U_) {
     InputVC *sup = (InputVC *)((char *)self + VCSize);

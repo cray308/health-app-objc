@@ -1,11 +1,6 @@
 #include "HistoryVC.h"
-#include <stdlib.h>
-#include <string.h>
-#include "AppDelegate.h"
 #include "ContainerView.h"
 #include "SwiftBridging.h"
-
-void populateChartsSelsAndFuncs(Class *classes, IMP *impArr, SEL *selArr);
 
 struct HistCache {
     const SEL slglb, slilm, sdt, rpe;
@@ -25,6 +20,59 @@ static CFStringRef minsFmt;
 static CFStringRef workoutTypeNames[4];
 static CFStringRef liftNames[4];
 static struct HistCache cache;
+
+static void populateHistory(void *, CFArrayRef, WeekDataModel *, int, bool);
+
+id historyVC_init(void **model, FetchHandler *handler, VCacheRef tbl, CCacheRef clr) {
+    id self = Sels.new(HistoryVCClass, Sels.nw);
+    HistoryVC *d = (HistoryVC *)((char *)self + VCSize);
+    d->tbl = tbl;
+    d->clr = clr;
+    HistoryViewModel *m = &d->model;
+    *model = m;
+    *handler = &populateHistory;
+    int colors[] = {0, 1, 2, 3};
+    Class classes[2];
+    SEL selArr[6];
+    IMP impArr[6];
+    populateChartsSelsAndFuncs(classes, impArr, selArr);
+    memcpy(&cache, &(struct HistCache){selArr[0], selArr[1], selArr[2], selArr[3],
+        (void(*)(id,SEL,long,id))impArr[0], (void(*)(id,SEL,CGFloat))impArr[1],
+        (void(*)(id,SEL,id,CGFloat))impArr[2], (void(*)(id,SEL,CGPoint*,long))impArr[3]
+    }, sizeof(struct HistCache));
+    Class Set = classes[0], Data = classes[1];
+    SEL iSet = selArr[4], iData = selArr[5];
+    id (*setInit)(id,SEL,long,id) = (id(*)(id,SEL,long,id))impArr[4];
+    id (*dataInit)(id,SEL,CFArrayRef,long,uint8_t) = (id(*)(id,SEL,CFArrayRef,long,uint8_t))impArr[5];
+
+    m->totalWorkouts.dataSet = setInit(Sels.alloc(Set, Sels.alo), iSet, 5, nil);
+    m->workoutTypes.dataSets[0] = setInit(Sels.alloc(Set, Sels.alo), iSet, -1, nil);
+    fillStringArray(workoutTypeNames, CFSTR("workoutTypes%d"), 4);
+    fillStringArray(liftNames, CFSTR("exNames%02d"), 4);
+    totalWorkoutsFormat = localize(CFSTR("totalWorkoutsLegend"));
+    liftFormat = localize(CFSTR("liftLegend"));
+    workoutTypeFormat = localize(CFSTR("workoutTypeLegend"));
+    hourMinFmt = localize(CFSTR("hourMinFmt"));
+    minsFmt = localize(CFSTR("minsFmt"));
+
+    for (int i = 0; i < 4; ++i) {
+        id bound = m->workoutTypes.dataSets[i];
+        m->workoutTypes.dataSets[i + 1] = setInit(Sels.alloc(Set, Sels.alo), iSet, colors[i], bound);
+        m->lifts.dataSets[i] = setInit(Sels.alloc(Set, Sels.alo), iSet, colors[i], nil);
+    }
+
+    CFArrayRef dataArr = CFArrayCreate(NULL, (const void *[]){m->totalWorkouts.dataSet}, 1, NULL);
+    m->totalWorkouts.chartData = dataInit(Sels.alloc(Data, Sels.alo), iData, dataArr, 1, 3);
+    CFRelease(dataArr);
+    id *area = m->workoutTypes.dataSets;
+    dataArr = CFArrayCreate(NULL, (const void *[]){area[4], area[3], area[2], area[1]}, 4, NULL);
+    m->workoutTypes.chartData = dataInit(Sels.alloc(Data, Sels.alo), iData, dataArr, 1, 5);
+    CFRelease(dataArr);
+    dataArr = CFArrayCreate(NULL, (const void **)m->lifts.dataSets, 4, NULL);
+    m->lifts.chartData = dataInit(Sels.alloc(Data, Sels.alo), iData, dataArr, 3, 0);
+    CFRelease(dataArr);
+    return self;
+}
 
 #pragma mark - Load Data
 
@@ -109,58 +157,7 @@ static void populateHistory(void *_m, CFArrayRef strs, WeekDataModel *results, i
     free(results);
 }
 
-#pragma mark - Main Functions
-
-id historyVC_init(void **model, FetchHandler *handler, VCacheRef tbl, CCacheRef clr) {
-    id self = Sels.new(HistoryVCClass, Sels.nw);
-    HistoryVC *d = (HistoryVC *)((char *)self + VCSize);
-    d->tbl = tbl;
-    d->clr = clr;
-    HistoryViewModel *m = &d->model;
-    *model = m;
-    *handler = &populateHistory;
-    int colors[] = {0, 1, 2, 3};
-    Class classes[2];
-    SEL selArr[6];
-    IMP impArr[6];
-    populateChartsSelsAndFuncs(classes, impArr, selArr);
-    memcpy(&cache, &(struct HistCache){selArr[0], selArr[1], selArr[2], selArr[3],
-        (void(*)(id,SEL,long,id))impArr[0], (void(*)(id,SEL,CGFloat))impArr[1],
-        (void(*)(id,SEL,id,CGFloat))impArr[2], (void(*)(id,SEL,CGPoint*,long))impArr[3]
-    }, sizeof(struct HistCache));
-    Class Set = classes[0], Data = classes[1];
-    SEL iSet = selArr[4], iData = selArr[5];
-    id (*setInit)(id,SEL,long,id) = (id(*)(id,SEL,long,id))impArr[4];
-    id (*dataInit)(id,SEL,CFArrayRef,long,uint8_t) = (id(*)(id,SEL,CFArrayRef,long,uint8_t))impArr[5];
-
-    m->totalWorkouts.dataSet = setInit(Sels.alloc(Set, Sels.alo), iSet, 5, nil);
-    m->workoutTypes.dataSets[0] = setInit(Sels.alloc(Set, Sels.alo), iSet, -1, nil);
-    fillStringArray(workoutTypeNames, CFSTR("workoutTypes%d"), 4);
-    fillStringArray(liftNames, CFSTR("exNames%02d"), 4);
-    totalWorkoutsFormat = localize(CFSTR("totalWorkoutsLegend"));
-    liftFormat = localize(CFSTR("liftLegend"));
-    workoutTypeFormat = localize(CFSTR("workoutTypeLegend"));
-    hourMinFmt = localize(CFSTR("hourMinFmt"));
-    minsFmt = localize(CFSTR("minsFmt"));
-
-    for (int i = 0; i < 4; ++i) {
-        id bound = m->workoutTypes.dataSets[i];
-        m->workoutTypes.dataSets[i + 1] = setInit(Sels.alloc(Set, Sels.alo), iSet, colors[i], bound);
-        m->lifts.dataSets[i] = setInit(Sels.alloc(Set, Sels.alo), iSet, colors[i], nil);
-    }
-
-    CFArrayRef dataArr = CFArrayCreate(NULL, (const void *[]){m->totalWorkouts.dataSet}, 1, NULL);
-    m->totalWorkouts.chartData = dataInit(Sels.alloc(Data, Sels.alo), iData, dataArr, 1, 3);
-    CFRelease(dataArr);
-    id *area = m->workoutTypes.dataSets;
-    dataArr = CFArrayCreate(NULL, (const void *[]){area[4], area[3], area[2], area[1]}, 4, NULL);
-    m->workoutTypes.chartData = dataInit(Sels.alloc(Data, Sels.alo), iData, dataArr, 1, 5);
-    CFRelease(dataArr);
-    dataArr = CFArrayCreate(NULL, (const void **)m->lifts.dataSets, 4, NULL);
-    m->lifts.chartData = dataInit(Sels.alloc(Data, Sels.alo), iData, dataArr, 3, 0);
-    CFRelease(dataArr);
-    return self;
-}
+#pragma mark - Selectors/Methods
 
 void historyVC_updateSegment(id self, SEL _cmd _U_, id picker) {
     HistoryVC *d = (HistoryVC *)((char *)self + VCSize);
@@ -259,6 +256,13 @@ void historyVC_viewDidLoad(id self, SEL _cmd) {
     historyVC_updateSegment(self, nil, d->picker);
 }
 
+CFStringRef historyVC_stringForValue(id self, SEL _cmd _U_, double value) {
+    CFArrayRef strs = ((HistoryVC *)((char *)self + VCSize))->model.axisStrings;
+    return CFArrayGetValueAtIndex(strs, (int)value);
+}
+
+#pragma mark - Public Functions
+
 void historyVC_clearData(id self) {
     HistoryVC *d = (HistoryVC *)((char *)self + VCSize);
     HistoryViewModel *model = &d->model;
@@ -281,11 +285,6 @@ void historyVC_clearData(id self) {
         msg1(void, long, d->picker, sel_getUid("setSelectedSegmentIndex:"), 0);
         historyVC_updateSegment(self, nil, d->picker);
     }
-}
-
-CFStringRef historyVC_stringForValue(id self, SEL _cmd _U_, double value) {
-    CFArrayRef strs = ((HistoryVC *)((char *)self + VCSize))->model.axisStrings;
-    return CFArrayGetValueAtIndex(strs, (int)value);
 }
 
 void historyVC_updateColors(id self, unsigned char darkMode) {

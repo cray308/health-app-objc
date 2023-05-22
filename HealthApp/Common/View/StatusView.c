@@ -4,6 +4,7 @@
 extern CFStringRef UIFontTextStyleHeadline;
 
 Class StatusViewClass;
+
 static SEL scrad, gct;
 static void (*setCorner)(id,SEL,CGFloat);
 static CFStringRef (*getTitle)(id,SEL);

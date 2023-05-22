@@ -159,6 +159,7 @@
 			children = (
 				614DA699270A8D1F00EC90C4 /* ExerciseManager.c */,
 				614DA698270A8D1F00EC90C4 /* ExerciseManager.h */,
+				61C34507280107E600CA8B03 /* WorkoutData.plist */,
 			);
 			path = Workouts;
 			sourceTree = "<group>";
@@ -187,15 +188,15 @@
 			children = (
 				61C779022610260B001326A1 /* Common */,
 				61C778E926102446001326A1 /* Tabs */,
-				61FFEEA1272CCCAE002BFFA6 /* AppDelegate.h */,
 				61594D0B26068105000D01A1 /* AppDelegate.c */,
+				61FFEEA1272CCCAE002BFFA6 /* AppDelegate.h */,
 				61594D1926068106000D01A1 /* Assets.xcassets */,
 				6122433E27934B0D006709E8 /* HealthApp.entitlements */,
 				61594D1E26068106000D01A1 /* Info.plist */,
 				61057AD0281212D900E4C16F /* InfoPlist.strings */,
 				61594D1B26068106000D01A1 /* LaunchScreen.storyboard */,
-				61594D1F26068106000D01A1 /* main.c */,
 				61E8ED6926FD60B400942368 /* Localizable.strings */,
+				61594D1F26068106000D01A1 /* main.c */,
 			);
 			path = HealthApp;
 			sourceTree = "<group>";
@@ -309,7 +310,6 @@
 				61C7790426102663001326A1 /* Extensions */,
 				617BDE1926FE48CB00BDDB73 /* View */,
 				6107C957266C159B00DDBCCF /* Workouts */,
-				61C34507280107E600CA8B03 /* WorkoutData.plist */,
 			);
 			path = Common;
 			sourceTree = "<group>";

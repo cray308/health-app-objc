@@ -1,5 +1,4 @@
 #include "SettingsVC.h"
-#include <math.h>
 #include "AppDelegate.h"
 #include "InputVC.h"
 #include "Views.h"

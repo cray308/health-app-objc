@@ -1,8 +1,4 @@
 #include "InputVC.h"
-#include <CoreFoundation/CFNotificationCenter.h>
-#include <CoreFoundation/CFNumberFormatter.h>
-#include <dispatch/queue.h>
-#include <string.h>
 #include <unicode/uregex.h>
 #include "AppDelegate.h"
 #include "Views.h"
@@ -12,8 +8,8 @@ extern CFStringRef UIKeyboardWillHideNotification;
 extern CFStringRef UIKeyboardFrameEndUserInfoKey;
 extern CFStringRef UIFontTextStyleFootnote;
 
-Class InputVCClass;
 Class InputViewClass;
+Class InputVCClass;
 
 struct InputCache {
     const SEL bnd, skbt, conv, cgrv, bfr, sse, sci, scrvs, lfn;
@@ -30,55 +26,10 @@ static CFNumberFormatterRef numFormatter;
 static URegularExpression *regex;
 static struct InputCache cache;
 
-static void getBounds(id view, CGRect *result) {
-#if defined(__arm64__)
-    *result = msg0(CGRect, view, cache.bnd);
-#else
-    ((void(*)(CGRect*,id,SEL))objc_msgSend_stret)(result, view, cache.bnd);
-#endif
-}
-
-static void checkScrollPos(id scroll, id child) {
-    CGRect fieldRect, fieldInView;
-    getBounds(child, &fieldRect);
-#if defined(__arm64__)
-    fieldInView = msg2(CGRect, CGRect, id, scroll, cache.conv, fieldRect, child);
-#else
-    (((void(*)(CGRect*,id,SEL,CGRect,id))objc_msgSend_stret)(&fieldInView, scroll, cache.conv,
-                                                             fieldRect, child));
-#endif
-    fieldInView.size.height += 32;
-    fieldInView.origin.y -= 16;
-    cache.scrollRect(scroll, cache.scrvs, fieldInView, true);
-}
-
-static void keyboardShown(CFNotificationCenterRef ctr _U_, void *self,
-                          CFNotificationName name _U_, const void *obj _U_, CFDictionaryRef info) {
-    InputVC *d = (InputVC *)((char *)self + VCSize);
-    int index = (int)d->tbl->view.getTag(d->activeField, d->tbl->view.gtg);
-    if (index < 0) return;
-
-    id value = (id)CFDictionaryGetValue(info, UIKeyboardFrameEndUserInfoKey);
-    CGRect kbRect;
-#if defined(__arm64__)
-    kbRect = msg0(CGRect, value, cache.cgrv);
-#else
-    ((void(*)(CGRect*,id,SEL))objc_msgSend_stret)(&kbRect, value, cache.cgrv);
-#endif
-
-    cache.setScroll(d->scrollView, cache.sse, true);
-    cache.setInset(d->scrollView, cache.sci, (HAInsets){d->topOffset, 0, kbRect.size.height, 0});
-    checkScrollPos(d->scrollView, d->children[index].view);
-}
-
-static void keyboardWillHide(CFNotificationCenterRef ctr _U_, void *self,
-                             CFNotificationName name _U_, const void *obj _U_, CFDictionaryRef info _U_) {
-    InputVC *d = (InputVC *)((char *)self + VCSize);
-    cache.setInset(d->scrollView, cache.sci, (HAInsets){d->topOffset, 0, d->bottomOffset, 0});
-    CGRect bounds;
-    getBounds(d->vStack, &bounds);
-    cache.setScroll(d->scrollView, cache.sse, (int)bounds.size.height >= d->scrollHeight);
-}
+static void keyboardShown(CFNotificationCenterRef, void *,
+                          CFNotificationName, const void *, CFDictionaryRef);
+static void keyboardWillHide(CFNotificationCenterRef, void *,
+                             CFNotificationName, const void *, CFDictionaryRef);
 
 void initValidatorStrings(Class Field) {
     CFLocaleRef locale = CFLocaleCopyCurrent();
@@ -107,6 +58,38 @@ void initValidatorStrings(Class Field) {
     }, sizeof(struct InputCache));
 }
 
+static void getBounds(id view, CGRect *result) {
+#if defined(__arm64__)
+    *result = msg0(CGRect, view, cache.bnd);
+#else
+    ((void(*)(CGRect*,id,SEL))objc_msgSend_stret)(result, view, cache.bnd);
+#endif
+}
+
+static void checkScrollPos(id scroll, id child) {
+    CGRect fieldRect, fieldInView;
+    getBounds(child, &fieldRect);
+#if defined(__arm64__)
+    fieldInView = msg2(CGRect, CGRect, id, scroll, cache.conv, fieldRect, child);
+#else
+    (((void(*)(CGRect*,id,SEL,CGRect,id))objc_msgSend_stret)(&fieldInView, scroll, cache.conv,
+                                                             fieldRect, child));
+#endif
+    fieldInView.size.height += 32;
+    fieldInView.origin.y -= 16;
+    cache.scrollRect(scroll, cache.scrvs, fieldInView, true);
+}
+
+#pragma mark - Input View
+
+void inputView_deinit(id self, SEL _cmd) {
+    InputView *v = (InputView *)((char *)self + ViewSize);
+    Sels.viewRel(v->hintLabel, Sels.rel);
+    Sels.viewRel(v->field, Sels.rel);
+    Sels.viewRel(v->errorLabel, Sels.rel);
+    msgSup0(void, (&(struct objc_super){self, View}), _cmd);
+}
+
 static void inputView_reset(InputView *v, float value, VCacheRef tbl) {
     v->valid = true;
     v->result = value;
@@ -125,6 +108,8 @@ static void showInputError(IVPair *pair, InputVC *d) {
         });
     }
 }
+
+#pragma mark - VC - Public Functions
 
 void inputVC_addChild(id self, CFStringRef hint, int kb, short min, short max) {
     InputVC *d = (InputVC *)((char *)self + VCSize);
@@ -188,13 +173,7 @@ void inputVC_updateFields(InputVC *self, const short *vals) {
     CFRelease(l);
 }
 
-void inputView_deinit(id self, SEL _cmd) {
-    InputView *v = (InputView *)((char *)self + ViewSize);
-    Sels.viewRel(v->hintLabel, Sels.rel);
-    Sels.viewRel(v->field, Sels.rel);
-    Sels.viewRel(v->errorLabel, Sels.rel);
-    msgSup0(void, (&(struct objc_super){self, View}), _cmd);
-}
+#pragma mark - Lifecycle
 
 id inputVC_init(id self, SEL _cmd _U_, VCacheRef tbl, CCacheRef clr) {
     self = msgSup0(id, (&(struct objc_super){self, VC}), sel_getUid("init"));
@@ -289,6 +268,36 @@ void inputVC_viewDidAppear(id self, SEL _cmd, bool animated) {
     }
 }
 
+#pragma mark - Keyboard
+
+void keyboardShown(CFNotificationCenterRef ctr _U_, void *self,
+                   CFNotificationName name _U_, const void *obj _U_, CFDictionaryRef info) {
+    InputVC *d = (InputVC *)((char *)self + VCSize);
+    int index = (int)d->tbl->view.getTag(d->activeField, d->tbl->view.gtg);
+    if (index < 0) return;
+
+    id value = (id)CFDictionaryGetValue(info, UIKeyboardFrameEndUserInfoKey);
+    CGRect kbRect;
+#if defined(__arm64__)
+    kbRect = msg0(CGRect, value, cache.cgrv);
+#else
+    ((void(*)(CGRect*,id,SEL))objc_msgSend_stret)(&kbRect, value, cache.cgrv);
+#endif
+
+    cache.setScroll(d->scrollView, cache.sse, true);
+    cache.setInset(d->scrollView, cache.sci, (HAInsets){d->topOffset, 0, kbRect.size.height, 0});
+    checkScrollPos(d->scrollView, d->children[index].view);
+}
+
+void keyboardWillHide(CFNotificationCenterRef ctr _U_, void *self,
+                      CFNotificationName name _U_, const void *obj _U_, CFDictionaryRef info _U_) {
+    InputVC *d = (InputVC *)((char *)self + VCSize);
+    cache.setInset(d->scrollView, cache.sci, (HAInsets){d->topOffset, 0, d->bottomOffset, 0});
+    CGRect bounds;
+    getBounds(d->vStack, &bounds);
+    cache.setScroll(d->scrollView, cache.sse, (int)bounds.size.height >= d->scrollHeight);
+}
+
 void inputVC_dismissKeyboard(id self, SEL _cmd _U_) {
     msg1(bool, bool, msg0(id, self, sel_getUid("view")), sel_getUid("endEditing:"), true);
 }
@@ -326,6 +335,8 @@ void inputVC_jumpToNext(id self, SEL _cmd _U_) {
         cache.becomeResponder(d->children[tag + 1].data->field, cache.bfr);
     }
 }
+
+#pragma mark - UITextFieldDelegate
 
 void inputVC_fieldBeganEditing(id self, SEL _cmd _U_, id field) {
     ((InputVC *)((char *)self + VCSize))->activeField = field;

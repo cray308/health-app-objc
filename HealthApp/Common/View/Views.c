@@ -1,7 +1,11 @@
 #include "Views.h"
-#include <string.h>
 
 extern CGFloat UIFontWeightMedium;
+
+Class VC;
+Class View;
+size_t VCSize;
+size_t ViewSize;
 
 struct FontData {
     Class cls;
@@ -48,10 +52,6 @@ struct PrivVData {
     const struct FieldData field;
 };
 
-Class VC;
-Class View;
-size_t VCSize;
-size_t ViewSize;
 static struct PrivVData cache;
 
 void initViewData(VCache *cacheRef, Class *clsRefs) {
@@ -146,6 +146,8 @@ static void setDynamicFont(id view, bool accessibilitySize) {
     cache.label.setScale(view, cache.label.smsf, 0.35);
 }
 
+#pragma mark - Constraints
+
 void pin(ConstraintCache const *tbl, id v, id container) {
     const void *constraints[] = {
         tbl->init(tbl->cls, tbl->cr, v, 3, 0, container, 3, 1, 0),
@@ -164,7 +166,13 @@ void setHeight(ConstraintCache const *cc, id v, int height, bool geq, bool optio
     cc->activateC(c, cc->ac, true);
 }
 
-#pragma mark - View initializers
+#pragma mark - View Initializers
+
+id createScrollView(void) {
+    id view = Sels.new(objc_getClass("UIScrollView"), Sels.nw);
+    msg1(void, long, view, sel_getUid("setAutoresizingMask:"), 16);
+    return view;
+}
 
 id createHStack(VCacheRef tbl, id *subviews) {
     CFArrayRef arr = CFArrayCreate(NULL, (const void **)subviews, 2, NULL);
@@ -182,12 +190,6 @@ id createVStack(id *subviews, int count) {
     CFRelease(arr);
     cache.stack.setAxis(view, cache.stack.sa, 1);
     cache.stack.setRelative(view, cache.stack.slmra, true);
-    return view;
-}
-
-id createScrollView(void) {
-    id view = Sels.new(objc_getClass("UIScrollView"), Sels.nw);
-    msg1(void, long, view, sel_getUid("setAutoresizingMask:"), 16);
     return view;
 }
 
@@ -251,6 +253,34 @@ id createTextfield(VCacheRef tbl, CCacheRef clr, id delegate,
     return view;
 }
 
+#pragma mark - Color Updates
+
+void updateSegmentedControl(CCacheRef clr, id view, unsigned char darkMode) {
+    id fg = clr->getColor(clr->cls, clr->sc, ColorLabel);
+    float redGreen = 0.78f, blue = 0.8f;
+    if (darkMode) {
+        redGreen = 0.28f;
+        blue = 0.29f;
+    }
+    id tint = msg4(id, CGFloat, CGFloat, CGFloat, CGFloat, Sels.alloc(clr->cls, Sels.alo),
+                   sel_getUid("initWithRed:green:blue:alpha:"), redGreen, redGreen, blue, 1);
+    msg1(void, id, view, sel_getUid("setTintColor:"), tint);
+    Sels.objRel(tint, Sels.rel);
+    const void *keys[] = {NSForegroundColorAttributeName, NSFontAttributeName};
+    SEL gf = sel_getUid("systemFontOfSize:weight:");
+    const void *norm[] = {fg, clsF2(id, CGFloat, CGFloat, cache.fc.cls, gf, 13, UIFontWeightRegular)};
+    const void *sel[] = {fg, clsF2(id, CGFloat, CGFloat, cache.fc.cls, gf, 13, UIFontWeightMedium)};
+    CFDictionaryRef normalDict = createDict(keys, norm, 2);
+    CFDictionaryRef selectedDict = createDict(keys, sel, 2);
+    SEL satr = sel_getUid("setTitleTextAttributes:forState:");
+    msg2(void, CFDictionaryRef, unsigned long, view, satr, normalDict, 0);
+    msg2(void, CFDictionaryRef, unsigned long, view, satr, selectedDict, 4);
+    CFRelease(normalDict);
+    CFRelease(selectedDict);
+}
+
+#pragma mark - VC Helpers
+
 void addVStackToScrollView(VCacheRef tbl, id view, id vStack, id scrollView) {
     msg1(void, bool, scrollView, tbl->view.trans, false);
     msg1(void, bool, vStack, tbl->view.trans, false);
@@ -279,28 +309,4 @@ void setNavButtons(id navItem, id *buttons) {
 void setVCTitle(id navItem, CFStringRef title) {
     msg1(void, CFStringRef, navItem, sel_getUid("setTitle:"), title);
     CFRelease(title);
-}
-
-void updateSegmentedControl(CCacheRef clr, id view, unsigned char darkMode) {
-    id fg = clr->getColor(clr->cls, clr->sc, ColorLabel);
-    float redGreen = 0.78f, blue = 0.8f;
-    if (darkMode) {
-        redGreen = 0.28f;
-        blue = 0.29f;
-    }
-    id tint = msg4(id, CGFloat, CGFloat, CGFloat, CGFloat, Sels.alloc(clr->cls, Sels.alo),
-                   sel_getUid("initWithRed:green:blue:alpha:"), redGreen, redGreen, blue, 1);
-    msg1(void, id, view, sel_getUid("setTintColor:"), tint);
-    Sels.objRel(tint, Sels.rel);
-    const void *keys[] = {NSForegroundColorAttributeName, NSFontAttributeName};
-    SEL gf = sel_getUid("systemFontOfSize:weight:");
-    const void *norm[] = {fg, clsF2(id, CGFloat, CGFloat, cache.fc.cls, gf, 13, UIFontWeightRegular)};
-    const void *sel[] = {fg, clsF2(id, CGFloat, CGFloat, cache.fc.cls, gf, 13, UIFontWeightMedium)};
-    CFDictionaryRef normalDict = createDict(keys, norm, 2);
-    CFDictionaryRef selectedDict = createDict(keys, sel, 2);
-    SEL satr = sel_getUid("setTitleTextAttributes:forState:");
-    msg2(void, CFDictionaryRef, unsigned long, view, satr, normalDict, 0);
-    msg2(void, CFDictionaryRef, unsigned long, view, satr, selectedDict, 4);
-    CFRelease(normalDict);
-    CFRelease(selectedDict);
 }

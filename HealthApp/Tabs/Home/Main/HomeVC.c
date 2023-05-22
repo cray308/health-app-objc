@@ -1,21 +1,17 @@
 #include "HomeVC.h"
-#include <CoreFoundation/CFDateFormatter.h>
-#include <CoreGraphics/CGColor.h>
-#include <dispatch/queue.h>
-#include <math.h>
-#include <time.h>
-#include "AppDelegate.h"
+#include <CoreGraphics/CoreGraphics.h>
+#include "SetupWorkoutVC.h"
 #include "StatusView.h"
 #include "Views.h"
+#include "WorkoutVC.h"
 
 extern id kCAEmitterLayerLine;
-void setWeeklyWorkoutNames(unsigned char plan, CFStringRef *names);
-Workout *getWeeklyWorkout(unsigned char plan, int index);
-id setupWorkoutVC_init(id parent, unsigned char type, VCacheRef tbl, CCacheRef clr);
-id workoutVC_init(Workout *workout, VCacheRef tbl, CCacheRef clr);
 
 Class HomeVCClass;
+
 static CFStringRef dayNames[7];
+
+#pragma mark - Public Functions
 
 id homeVC_init(VCacheRef tbl, CCacheRef clr, time_t startDate) {
     id self = Sels.new(HomeVCClass, Sels.nw);
@@ -113,6 +109,8 @@ void homeVC_updateColors(id self) {
     }
 }
 
+#pragma mark - Selectors/Methods
+
 void homeVC_viewDidLoad(id self, SEL _cmd) {
     msgSup0(void, (&(struct objc_super){self, VC}), _cmd);
 
@@ -179,6 +177,8 @@ void homeVC_customButtonTapped(id self, SEL _cmd _U_, id btn) {
 
     presentModalVC(setupWorkoutVC_init(self, --index, d->tbl, d->clr));
 }
+
+#pragma mark - Navigate Back From Workout
 
 static void showConfetti(id view, HomeVC *d) {
     VCacheRef tbl = d->tbl;

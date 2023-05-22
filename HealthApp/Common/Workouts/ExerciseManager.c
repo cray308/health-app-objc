@@ -1,8 +1,4 @@
 #include "ExerciseManager.h"
-#include <CoreFoundation/CFNumber.h>
-#include <CoreFoundation/CFPropertyList.h>
-#include <CoreFoundation/CFSet.h>
-#include <dispatch/queue.h>
 #include "AppDelegate.h"
 #include "CocoaHelpers.h"
 
@@ -38,6 +34,92 @@ static CFStringRef amrapLoc;
 static CFStringRef weightUnit;
 static CFStringRef sets1;
 static CFStringRef rounds1;
+
+static void getHealthData(void);
+
+void initExerciseData(int week) {
+    restFormat = localize(CFSTR("exerciseTitleRest"));
+    repsFormat = localize(CFSTR("exerciseTitleReps"));
+    setsFormat = localize(CFSTR("exerciseHeader"));
+    weightFormat = localize(CFSTR("exerciseTitleRepsWithWeight"));
+    durationMinsFormat = localize(CFSTR("exerciseTitleDurationMinutes"));
+    durationSecsFormat = localize(CFSTR("exerciseTitleDurationSeconds"));
+    distanceFormat = localize(CFSTR("exerciseTitleDistance"));
+    roundsFormat = localize(CFSTR("circuitHeaderRounds"));
+    amrapFormat = localize(CFSTR("circuitHeaderAMRAP"));
+    circuitProgressFmt = localize(CFSTR("circuitProgressHint"));
+    roundsLoc = localize(CFSTR("circuitHeaderLocAndRounds"));
+    amrapLoc = localize(CFSTR("circuitHeaderLocAndAMRAP"));
+    weekInPlan = week;
+
+    CFStringRef *refs[] = {&sets1, &rounds1};
+    CFStringRef arr[] = {localize(CFSTR("sets1")), localize(CFSTR("rounds1"))};
+    for (int i = 0; i < 2; ++i) {
+        CFMutableStringRef m = CFStringCreateMutableCopy(NULL, CFStringGetLength(arr[i]) + 2, arr[i]);
+        if (CFStringHasPrefix(m, CFSTR("\U0000202e")) || CFStringHasPrefix(m, CFSTR("\U0000202f")))
+            CFStringDelete(m, (CFRange){0, 1});
+        if (CFStringHasSuffix(m, CFSTR("\U0000202c")))
+            CFStringDelete(m, (CFRange){CFStringGetLength(m) - 1, 1});
+        *refs[i] = CFStringCreateCopy(NULL, m);
+        CFRelease(arr[i]);
+        CFRelease(m);
+    }
+
+    CFLocaleRef l = CFLocaleCopyCurrent();
+    CFStringRef key;
+    if (CFBooleanGetValue(CFLocaleGetValue(l, kCFLocaleUsesMetricSystem))) {
+        key = CFSTR("kg");
+        massType = 1;
+        toSavedMass = 2.204623f;
+    } else {
+        key = CFSTR("lb");
+    }
+    CFRelease(l);
+    id unit = msg1(id, CFStringRef, Sels.alloc(objc_getClass("NSUnit"), Sels.alo),
+                   sel_getUid("initWithSymbol:"), key);
+    id formatter = Sels.new(objc_getClass("NSMeasurementFormatter"), Sels.nw);
+    CFStringRef _unitStr = msg1(CFStringRef, id, formatter, sel_getUid("stringFromUnit:"), unit);
+    weightUnit = CFStringCreateCopy(NULL, _unitStr);
+    Sels.objRel(unit, Sels.rel);
+    Sels.objRel(formatter, Sels.rel);
+
+    dispatch_async(dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0), ^{ getHealthData(); });
+}
+
+void getHealthData(void) {
+    Class storeClass = objc_getClass("HKHealthStore");
+    if (!clsF0(bool, storeClass, sel_getUid("isHealthDataAvailable"))) return;
+
+    id store = Sels.new(storeClass, Sels.nw);
+    id weightType = clsF1(id, CFStringRef, objc_getClass("HKSampleType"),
+                          sel_getUid("quantityTypeForIdentifier:"), HKQuantityTypeIdentifierBodyMass);
+    CFSetRef set = CFSetCreate(NULL, (const void *[]){weightType}, 1, NULL);
+
+    SEL auth = sel_getUid("requestAuthorizationToShareTypes:readTypes:completion:");
+    msg3(void, CFSetRef, CFSetRef, void(^)(bool,id), store, auth, NULL, set, ^(bool granted, id er _U_) {
+        if (!granted) {
+            Sels.objRel(store, Sels.rel);
+            return;
+        }
+
+        CFArrayRef arr = createSortDescriptors(HKSampleSortIdentifierStartDate, false);
+        id _req = Sels.alloc(objc_getClass("HKSampleQuery"), Sels.alo);
+        SEL qInit = sel_getUid("initWithSampleType:predicate:limit:sortDescriptors:resultsHandler:");
+        id req = (((id(*)(id,SEL,id,id,unsigned long,CFArrayRef,void(^)(id,CFArrayRef,id)))objc_msgSend)
+                  (_req, qInit, weightType, nil, 1, arr, ^(id q _U_, CFArrayRef data, id err2 _U_) {
+            if (data && CFArrayGetCount(data)) {
+                id unit = clsF0(id, objc_getClass("HKUnit"), sel_getUid("poundUnit"));
+                id qty = msg0(id, (id)CFArrayGetValueAtIndex(data, 0), sel_getUid("quantity"));
+                bodyweight = (short)msg1(double, id, qty, sel_getUid("doubleValueForUnit:"), unit);
+            }
+            Sels.objRel(store, Sels.rel);
+        }));
+        msg1(void, id, store, sel_getUid("executeQuery:"), req);
+        CFRelease(arr);
+        Sels.objRel(req, Sels.rel);
+    });
+    CFRelease(set);
+}
 
 static void createRootAndLibDict(struct DictWrapper *data) {
     CFURLRef url = CFBundleCopyResourceURL(
@@ -244,90 +326,6 @@ static Workout *buildWorkout(CFArrayRef acts, WorkoutParams *params) {
     Workout *w = malloc(sizeof(Workout));
     memcpy(w, &workout, sizeof(Workout));
     return w;
-}
-
-static void getHealthData(void) {
-    Class storeClass = objc_getClass("HKHealthStore");
-    if (!clsF0(bool, storeClass, sel_getUid("isHealthDataAvailable"))) return;
-
-    id store = Sels.new(storeClass, Sels.nw);
-    id weightType = clsF1(id, CFStringRef, objc_getClass("HKSampleType"),
-                          sel_getUid("quantityTypeForIdentifier:"), HKQuantityTypeIdentifierBodyMass);
-    CFSetRef set = CFSetCreate(NULL, (const void *[]){weightType}, 1, NULL);
-
-    SEL auth = sel_getUid("requestAuthorizationToShareTypes:readTypes:completion:");
-    msg3(void, CFSetRef, CFSetRef, void(^)(bool,id), store, auth, NULL, set, ^(bool granted, id er _U_) {
-        if (!granted) {
-            Sels.objRel(store, Sels.rel);
-            return;
-        }
-
-        CFArrayRef arr = createSortDescriptors(HKSampleSortIdentifierStartDate, false);
-        id _req = Sels.alloc(objc_getClass("HKSampleQuery"), Sels.alo);
-        SEL qInit = sel_getUid("initWithSampleType:predicate:limit:sortDescriptors:resultsHandler:");
-        id req = (((id(*)(id,SEL,id,id,unsigned long,CFArrayRef,void(^)(id,CFArrayRef,id)))objc_msgSend)
-                  (_req, qInit, weightType, nil, 1, arr, ^(id q _U_, CFArrayRef data, id err2 _U_) {
-            if (data && CFArrayGetCount(data)) {
-                id unit = clsF0(id, objc_getClass("HKUnit"), sel_getUid("poundUnit"));
-                id qty = msg0(id, (id)CFArrayGetValueAtIndex(data, 0), sel_getUid("quantity"));
-                bodyweight = (short)msg1(double, id, qty, sel_getUid("doubleValueForUnit:"), unit);
-            }
-            Sels.objRel(store, Sels.rel);
-        }));
-        msg1(void, id, store, sel_getUid("executeQuery:"), req);
-        CFRelease(arr);
-        Sels.objRel(req, Sels.rel);
-    });
-    CFRelease(set);
-}
-
-void initExerciseData(int week) {
-    restFormat = localize(CFSTR("exerciseTitleRest"));
-    repsFormat = localize(CFSTR("exerciseTitleReps"));
-    setsFormat = localize(CFSTR("exerciseHeader"));
-    weightFormat = localize(CFSTR("exerciseTitleRepsWithWeight"));
-    durationMinsFormat = localize(CFSTR("exerciseTitleDurationMinutes"));
-    durationSecsFormat = localize(CFSTR("exerciseTitleDurationSeconds"));
-    distanceFormat = localize(CFSTR("exerciseTitleDistance"));
-    roundsFormat = localize(CFSTR("circuitHeaderRounds"));
-    amrapFormat = localize(CFSTR("circuitHeaderAMRAP"));
-    circuitProgressFmt = localize(CFSTR("circuitProgressHint"));
-    roundsLoc = localize(CFSTR("circuitHeaderLocAndRounds"));
-    amrapLoc = localize(CFSTR("circuitHeaderLocAndAMRAP"));
-    weekInPlan = week;
-
-    CFStringRef *refs[] = {&sets1, &rounds1};
-    CFStringRef arr[] = {localize(CFSTR("sets1")), localize(CFSTR("rounds1"))};
-    for (int i = 0; i < 2; ++i) {
-        CFMutableStringRef m = CFStringCreateMutableCopy(NULL, CFStringGetLength(arr[i]) + 2, arr[i]);
-        if (CFStringHasPrefix(m, CFSTR("\U0000202e")) || CFStringHasPrefix(m, CFSTR("\U0000202f")))
-            CFStringDelete(m, (CFRange){0, 1});
-        if (CFStringHasSuffix(m, CFSTR("\U0000202c")))
-            CFStringDelete(m, (CFRange){CFStringGetLength(m) - 1, 1});
-        *refs[i] = CFStringCreateCopy(NULL, m);
-        CFRelease(arr[i]);
-        CFRelease(m);
-    }
-
-    CFLocaleRef l = CFLocaleCopyCurrent();
-    CFStringRef key;
-    if (CFBooleanGetValue(CFLocaleGetValue(l, kCFLocaleUsesMetricSystem))) {
-        key = CFSTR("kg");
-        massType = 1;
-        toSavedMass = 2.204623f;
-    } else {
-        key = CFSTR("lb");
-    }
-    CFRelease(l);
-    id unit = msg1(id, CFStringRef, Sels.alloc(objc_getClass("NSUnit"), Sels.alo),
-                   sel_getUid("initWithSymbol:"), key);
-    id formatter = Sels.new(objc_getClass("NSMeasurementFormatter"), Sels.nw);
-    CFStringRef _unitStr = msg1(CFStringRef, id, formatter, sel_getUid("stringFromUnit:"), unit);
-    weightUnit = CFStringCreateCopy(NULL, _unitStr);
-    Sels.objRel(unit, Sels.rel);
-    Sels.objRel(formatter, Sels.rel);
-
-    dispatch_async(dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0), ^{ getHealthData(); });
 }
 
 #if TARGET_OS_SIMULATOR

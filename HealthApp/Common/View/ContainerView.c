@@ -1,8 +1,9 @@
 #include "ContainerView.h"
 #include "Views.h"
 
-Class ContainerViewClass;
 extern uint64_t UIAccessibilityTraitHeader;
+
+Class ContainerViewClass;
 
 id containerView_init(VCacheRef tbl, CCacheRef clr, ContainerView **ref, CFStringRef header) {
     id self = Sels.new(ContainerViewClass, Sels.nw);

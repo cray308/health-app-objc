@@ -1,5 +1,4 @@
 #include "SetupWorkoutVC.h"
-#include <CoreFoundation/CFAttributedString.h>
 #include "AppDelegate.h"
 #include "ExerciseManager.h"
 #include "InputVC.h"
@@ -7,8 +6,7 @@
 
 Class SetupWorkoutVCClass;
 
-CFArrayRef createWorkoutNames(unsigned char type);
-void homeVC_navigateToAddWorkout(id self, void *workout);
+#pragma mark - Lifecycle
 
 id setupWorkoutVC_init(id parent, unsigned char type, VCacheRef tbl, CCacheRef clr) {
     id self = msg2(id, VCacheRef, CCacheRef, Sels.alloc(SetupWorkoutVCClass, Sels.alo),
@@ -132,6 +130,8 @@ void setupWorkoutVC_tappedButton(id self, SEL _cmd _U_, id btn) {
     dismissPresentedVC(^{ homeVC_navigateToAddWorkout(parent, w); });
 }
 
+#pragma mark - Picker Delegate
+
 long setupWorkoutVC_numberOfComponents(id self _U_, SEL _cmd _U_, id p _U_) { return 1; }
 
 long setupWorkoutVC_numberOfComponentsLegacy(id self _U_, SEL _cmd _U_, id picker) {
@@ -145,17 +145,17 @@ long setupWorkoutVC_numberOfRows(id self, SEL _cmd _U_, id p _U_, long s _U_) {
     return CFArrayGetCount(((SetupWorkoutVC *)((char *)self + VCSize + sizeof(InputVC)))->names);
 }
 
+CFStringRef setupWorkoutVC_getTitle(id self, SEL _cmd _U_, id p _U_, long row, long s _U_) {
+    CFArrayRef names = ((SetupWorkoutVC *)((char *)self + VCSize + sizeof(InputVC)))->names;
+    return CFArrayGetValueAtIndex(names, row);
+}
+
 CFAttributedStringRef setupWorkoutVC_getAttrTitle(id self, SEL _cmd _U_, id p _U_, long row, long s _U_) {
     SetupWorkoutVC *d = (SetupWorkoutVC *)((char *)self + VCSize + sizeof(InputVC));
     CFAttributedStringRef attrString = CFAttributedStringCreate(
       NULL, CFArrayGetValueAtIndex(d->names, row), row == d->index ? d->selectedDict : d->normalDict);
     CFAutorelease(attrString);
     return attrString;
-}
-
-CFStringRef setupWorkoutVC_getTitle(id self, SEL _cmd _U_, id p _U_, long row, long s _U_) {
-    CFArrayRef names = ((SetupWorkoutVC *)((char *)self + VCSize + sizeof(InputVC)))->names;
-    return CFArrayGetValueAtIndex(names, row);
 }
 
 void setupWorkoutVC_didSelectRow(id self, SEL _cmd _U_, id p _U_, long row, long s _U_) {

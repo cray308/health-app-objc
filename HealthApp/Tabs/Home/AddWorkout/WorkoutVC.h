@@ -2,10 +2,10 @@
 #define WorkoutVC_h
 
 #include <pthread.h>
-#include "ColorCache.h"
 #include "ContainerView.h"
 #include "ExerciseManager.h"
-#include "ViewCache.h"
+
+extern Class WorkoutVCClass;
 
 typedef struct {
     pthread_mutex_t lock;
@@ -40,5 +40,14 @@ typedef struct {
     short weights[4];
     bool done;
 } WorkoutVC;
+
+void initWorkoutStrings(void);
+
+id workoutVC_init(Workout *workout, VCacheRef tbl, CCacheRef clr);
+void workoutVC_deinit(id self, SEL _cmd);
+void workoutVC_viewDidLoad(id self, SEL _cmd);
+void workoutVC_startEndWorkout(id self, SEL _cmd, id btn);
+void workoutVC_willDisappear(id self, SEL _cmd, bool animated);
+void workoutVC_handleTap(id self, SEL _cmd, id btn);
 
 #endif /* WorkoutVC_h */

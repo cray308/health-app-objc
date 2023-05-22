@@ -1,10 +1,13 @@
 #ifndef HistoryVC_h
 #define HistoryVC_h
 
-#include <CoreFoundation/CFArray.h>
-#include <CoreGraphics/CGGeometry.h>
+#include <CoreFoundation/CoreFoundation.h>
+#include <objc/objc.h>
+#include "AppDelegate.h"
 #include "ColorCache.h"
 #include "ViewCache.h"
+
+extern Class HistoryVCClass;
 
 typedef struct {
     CGPoint *entries;
@@ -46,5 +49,13 @@ typedef struct {
     id picker;
     id charts[3];
 } HistoryVC;
+
+id historyVC_init(void **model, FetchHandler *handler, VCacheRef tbl, CCacheRef clr);
+void historyVC_updateSegment(id self, SEL _cmd, id picker);
+void historyVC_viewDidLoad(id self, SEL _cmd);
+CFStringRef historyVC_stringForValue(id self, SEL _cmd, double value);
+
+void historyVC_clearData(id self);
+void historyVC_updateColors(id self, unsigned char darkMode);
 
 #endif /* HistoryVC_h */

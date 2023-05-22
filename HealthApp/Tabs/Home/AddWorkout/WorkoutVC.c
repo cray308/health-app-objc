@@ -1,17 +1,13 @@
 #include "WorkoutVC.h"
-#include <CoreFoundation/CFNotificationCenter.h>
-#include <dispatch/queue.h>
-#include <signal.h>
 #include "AppDelegate.h"
+#include "HomeVC.h"
 #include "StatusView.h"
+#include "UpdateMaxesVC.h"
 #include "Views.h"
 
 extern CFStringRef UIApplicationDidBecomeActiveNotification;
 extern CFStringRef UIApplicationWillResignActiveNotification;
 extern uint32_t UIAccessibilityLayoutChangedNotification;
-id updateMaxesVC_init(void *parent, int index, short bodyweight, VCacheRef tbl, CCacheRef clr);
-unsigned char addWorkoutData(unsigned char day, int type, int16_t duration, short *weights);
-void homeVC_handleFinishedWorkout(id self, unsigned char completed);
 
 Class WorkoutVCClass;
 
@@ -63,7 +59,12 @@ static pthread_t *exerciseTimerThread;
 static pthread_mutex_t timerLock;
 static struct WorkoutData wkData;
 
-static void handleEvent(WorkoutVC *d, int gIdx, int eIdx, int event);
+static void handleEvent(WorkoutVC *, int, int, int);
+static void stopTimers(CFNotificationCenterRef, void *,
+                       CFNotificationName, const void *, CFDictionaryRef);
+static void restartTimers(CFNotificationCenterRef, void *,
+                          CFNotificationName, const void *, CFDictionaryRef);
+static void scheduleNotification(unsigned, int);
 
 void initWorkoutStrings(void) {
     fillStringArray(notificationMessages, CFSTR("notifications%d"), 2);
@@ -134,95 +135,6 @@ static void startWorkoutTimer(WorkoutTimer *t, unsigned duration) {
     t->info.active = 1;
     pthread_cond_signal(&t->cond);
     pthread_mutex_unlock(&t->lock);
-}
-
-static void stopTimers(CFNotificationCenterRef ctr _U_, void *self,
-                       CFNotificationName name _U_, const void *obj _U_, CFDictionaryRef info _U_) {
-    WorkoutVC *d = (WorkoutVC *)((char *)self + VCSize);
-    pthread_mutex_lock(&timerLock);
-    if (d->timers[TimerGroup].info.active == 1) {
-        d->savedInfo.groupTag = d->timers[TimerGroup].container;
-        pthread_kill(d->threads[TimerGroup], SignalGroup);
-    } else {
-        d->savedInfo.groupTag = -1;
-    }
-
-    if (d->timers[TimerExercise].info.active == 1) {
-        d->savedInfo.exerciseInfo.group = d->timers[TimerExercise].container;
-        d->savedInfo.exerciseInfo.tag = d->timers[TimerExercise].exercise;
-        pthread_kill(d->threads[TimerExercise], SignalExercise);
-    } else {
-        d->savedInfo.exerciseInfo.group = -1;
-    }
-    pthread_mutex_unlock(&timerLock);
-}
-
-static void restartTimers(CFNotificationCenterRef ctr _U_, void *self,
-                          CFNotificationName name _U_, const void *obj _U_, CFDictionaryRef info _U_) {
-    bool endExercise = false, endGroup = false;
-    int groupIdx = 0, exerciseIdx = 0;
-    WorkoutVC *d = (WorkoutVC *)((char *)self + VCSize);
-    pthread_mutex_lock(&timerLock);
-    if (d->done) {
-        pthread_mutex_unlock(&timerLock);
-        return;
-    }
-    time_t now = time(NULL);
-    int group = d->savedInfo.exerciseInfo.group;
-    exerciseIdx = d->savedInfo.exerciseInfo.tag;
-    if (group >= 0) {
-        unsigned diff = (unsigned)(now - d->timers[TimerExercise].refTime);
-        if (diff >= d->timers[TimerExercise].duration) {
-            endExercise = true;
-            groupIdx = group;
-        } else {
-            startWorkoutTimer(&d->timers[TimerExercise], d->timers[TimerExercise].duration - diff);
-        }
-    }
-
-    group = d->savedInfo.groupTag;
-    if (group >= 0) {
-        unsigned diff = (unsigned)(now - d->timers[TimerGroup].refTime);
-        if (diff >= d->timers[TimerGroup].duration) {
-            endGroup = true;
-            groupIdx = group;
-        } else {
-            startWorkoutTimer(&d->timers[TimerGroup], d->timers[TimerGroup].duration - diff);
-        }
-    }
-    pthread_mutex_unlock(&timerLock);
-
-    if (endExercise) handleEvent(d, groupIdx, exerciseIdx, EventFinishExercise);
-    if (endGroup) handleEvent(d, groupIdx, 0, EventFinishGroup);
-}
-
-#pragma mark - Notifications
-
-static void scheduleNotification(unsigned secondsFromNow, int type) {
-    static int identifier = 0;
-    int currentId = identifier++;
-    CFStringRef idString = formatStr(NULL, CFSTR("%d"), currentId);
-    id content = Sels.new(wkData.Content, Sels.nw);
-    wkData.setTitle(content, wkData.sct[0], notifTitle);
-    wkData.setBody(content, wkData.sct[1], notificationMessages[type]);
-    wkData.setSound(content, wkData.sct[2], wkData.getSound(wkData.Sound, wkData.ds));
-    id trigger = wkData.createTrigger(wkData.Trigger, wkData.newTri, secondsFromNow, false);
-    id req = wkData.createReq(wkData.Request, wkData.newReq, idString, content, trigger);
-    wkData.addToCenter(wkData.getCenter(wkData.Center, wkData.dc), wkData.addReq, req, ^(id e _U_){});
-    CFRelease(idString);
-    Sels.objRel(content, Sels.rel);
-}
-
-static void cleanupWorkoutNotifications(WorkoutVC *d) {
-    d->done = true;
-    if (d->timers[TimerGroup].info.active == 1)
-        pthread_kill(d->threads[TimerGroup], SignalGroup);
-    if (d->timers[TimerExercise].info.active == 1)
-        pthread_kill(d->threads[TimerExercise], SignalExercise);
-    CFNotificationCenterRemoveEveryObserver(CFNotificationCenterGetLocalCenter(), (char *)d - VCSize);
-    id center = wkData.getCenter(wkData.Center, wkData.dc);
-    msg0(void, center, sel_getUid("removeAllPendingNotificationRequests"));
-    msg0(void, center, sel_getUid("removeAllDeliveredNotifications"));
 }
 
 #pragma mark - View Configuration
@@ -356,6 +268,27 @@ static int findTransition(Workout *w, WorkoutTimer *timers, StatusView *v) {
     return t;
 }
 
+static bool isCompleted(Workout *w) {
+    Circuit *group = w->group;
+    int groupIndex = group->index;
+    if (w->index != w->size - 1 || groupIndex != group->size - 1) return false;
+    if (w->type == WorkoutEndurance) return w->duration >= (int16_t)(group->exercises[0].reps / 60);
+
+    if (group->type == CircuitRounds && group->completedReps == group->reps - 1) {
+        ExerciseEntry *e = &group->exercises[groupIndex];
+        return e->state == ExerciseStateResting && e->completedSets == e->sets - 1;
+    }
+    return false;
+}
+
+static inline bool setDuration(Workout *w) {
+    w->duration = ((int16_t)((time(NULL) - w->startTime) / 60.f)) + 1;
+#if TARGET_OS_SIMULATOR
+    w->duration *= 10;
+#endif
+    return w->duration >= 15;
+}
+
 #pragma mark - VC init/free
 
 id workoutVC_init(Workout *workout, VCacheRef tbl, CCacheRef clr) {
@@ -421,28 +354,7 @@ void workoutVC_deinit(id self, SEL _cmd) {
     msgSup0(void, (&(struct objc_super){self, VC}), _cmd);
 }
 
-static bool isCompleted(Workout *w) {
-    Circuit *group = w->group;
-    int groupIndex = group->index;
-    if (w->index != w->size - 1 || groupIndex != group->size - 1) return false;
-    if (w->type == WorkoutEndurance) return w->duration >= (int16_t)(group->exercises[0].reps / 60);
-
-    if (group->type == CircuitRounds && group->completedReps == group->reps - 1) {
-        ExerciseEntry *e = &group->exercises[groupIndex];
-        return e->state == ExerciseStateResting && e->completedSets == e->sets - 1;
-    }
-    return false;
-}
-
-static inline bool setDuration(Workout *w) {
-    w->duration = ((int16_t)((time(NULL) - w->startTime) / 60.f)) + 1;
-#if TARGET_OS_SIMULATOR
-    w->duration *= 10;
-#endif
-    return w->duration >= 15;
-}
-
-static void workoutVC_handleFinishedWorkout(WorkoutVC *d, bool longEnough) {
+static void handleFinishedWorkout(WorkoutVC *d, bool longEnough) {
     short *lifts = NULL;
     if (d->weights[0]) {
         lifts = malloc(sizeof(short) << 2);
@@ -462,7 +374,19 @@ static void workoutVC_handleFinishedWorkout(WorkoutVC *d, bool longEnough) {
     msg1(id, bool, navVC, sel_getUid("popViewControllerAnimated:"), true);
 }
 
-#pragma mark - Main VC Functions
+static void cleanupWorkoutNotifications(WorkoutVC *d) {
+    d->done = true;
+    if (d->timers[TimerGroup].info.active == 1)
+        pthread_kill(d->threads[TimerGroup], SignalGroup);
+    if (d->timers[TimerExercise].info.active == 1)
+        pthread_kill(d->threads[TimerExercise], SignalExercise);
+    CFNotificationCenterRemoveEveryObserver(CFNotificationCenterGetLocalCenter(), (char *)d - VCSize);
+    id center = wkData.getCenter(wkData.Center, wkData.dc);
+    msg0(void, center, sel_getUid("removeAllPendingNotificationRequests"));
+    msg0(void, center, sel_getUid("removeAllDeliveredNotifications"));
+}
+
+#pragma mark - Lifecycle
 
 void workoutVC_viewDidLoad(id self, SEL _cmd) {
     msgSup0(void, (&(struct objc_super){self, VC}), _cmd);
@@ -552,7 +476,7 @@ void workoutVC_startEndWorkout(id self, SEL _cmd _U_, id btn) {
         pthread_mutex_unlock(&timerLock);
         bool longEnough = setDuration(d->workout);
         if (isCompleted(d->workout)) {
-            workoutVC_handleFinishedWorkout(d, longEnough);
+            handleFinishedWorkout(d, longEnough);
         } else {
             if (longEnough)
                 addWorkoutData(0xff, d->workout->type, d->workout->duration, NULL);
@@ -572,7 +496,7 @@ void workoutVC_willDisappear(id self, SEL _cmd, bool animated) {
             if (d->workout->startTime) {
                 bool longEnough = setDuration(d->workout);
                 if (isCompleted(d->workout)) {
-                    workoutVC_handleFinishedWorkout(d, longEnough);
+                    handleFinishedWorkout(d, longEnough);
                 } else if (longEnough) {
                     addWorkoutData(0xff, d->workout->type, d->workout->duration, NULL);
                 }
@@ -580,6 +504,8 @@ void workoutVC_willDisappear(id self, SEL _cmd, bool animated) {
         }
     }
 }
+
+#pragma mark - Event Handling
 
 void workoutVC_handleTap(id self, SEL _cmd _U_, id btn) {
     WorkoutVC *d = (WorkoutVC *)((char *)self + VCSize);
@@ -645,7 +571,7 @@ foundTransition:
                     CFRelease(msg);
                 });
             }
-            workoutVC_handleFinishedWorkout(d, longEnough);
+            handleFinishedWorkout(d, longEnough);
             return;
 
         case TransitionFinishedCircuitDeleteFirst:
@@ -693,6 +619,85 @@ foundTransition:
     pthread_mutex_unlock(&timerLock);
     if (nextView) UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, nextView);
 }
+
+#pragma mark - Notifications
+
+void stopTimers(CFNotificationCenterRef ctr _U_, void *self,
+                CFNotificationName name _U_, const void *obj _U_, CFDictionaryRef info _U_) {
+    WorkoutVC *d = (WorkoutVC *)((char *)self + VCSize);
+    pthread_mutex_lock(&timerLock);
+    if (d->timers[TimerGroup].info.active == 1) {
+        d->savedInfo.groupTag = d->timers[TimerGroup].container;
+        pthread_kill(d->threads[TimerGroup], SignalGroup);
+    } else {
+        d->savedInfo.groupTag = -1;
+    }
+
+    if (d->timers[TimerExercise].info.active == 1) {
+        d->savedInfo.exerciseInfo.group = d->timers[TimerExercise].container;
+        d->savedInfo.exerciseInfo.tag = d->timers[TimerExercise].exercise;
+        pthread_kill(d->threads[TimerExercise], SignalExercise);
+    } else {
+        d->savedInfo.exerciseInfo.group = -1;
+    }
+    pthread_mutex_unlock(&timerLock);
+}
+
+void restartTimers(CFNotificationCenterRef ctr _U_, void *self,
+                   CFNotificationName name _U_, const void *obj _U_, CFDictionaryRef info _U_) {
+    bool endExercise = false, endGroup = false;
+    int groupIdx = 0, exerciseIdx = 0;
+    WorkoutVC *d = (WorkoutVC *)((char *)self + VCSize);
+    pthread_mutex_lock(&timerLock);
+    if (d->done) {
+        pthread_mutex_unlock(&timerLock);
+        return;
+    }
+    time_t now = time(NULL);
+    int group = d->savedInfo.exerciseInfo.group;
+    exerciseIdx = d->savedInfo.exerciseInfo.tag;
+    if (group >= 0) {
+        unsigned diff = (unsigned)(now - d->timers[TimerExercise].refTime);
+        if (diff >= d->timers[TimerExercise].duration) {
+            endExercise = true;
+            groupIdx = group;
+        } else {
+            startWorkoutTimer(&d->timers[TimerExercise], d->timers[TimerExercise].duration - diff);
+        }
+    }
+
+    group = d->savedInfo.groupTag;
+    if (group >= 0) {
+        unsigned diff = (unsigned)(now - d->timers[TimerGroup].refTime);
+        if (diff >= d->timers[TimerGroup].duration) {
+            endGroup = true;
+            groupIdx = group;
+        } else {
+            startWorkoutTimer(&d->timers[TimerGroup], d->timers[TimerGroup].duration - diff);
+        }
+    }
+    pthread_mutex_unlock(&timerLock);
+
+    if (endExercise) handleEvent(d, groupIdx, exerciseIdx, EventFinishExercise);
+    if (endGroup) handleEvent(d, groupIdx, 0, EventFinishGroup);
+}
+
+static void scheduleNotification(unsigned secondsFromNow, int type) {
+    static int identifier = 0;
+    int currentId = identifier++;
+    CFStringRef idString = formatStr(NULL, CFSTR("%d"), currentId);
+    id content = Sels.new(wkData.Content, Sels.nw);
+    wkData.setTitle(content, wkData.sct[0], notifTitle);
+    wkData.setBody(content, wkData.sct[1], notificationMessages[type]);
+    wkData.setSound(content, wkData.sct[2], wkData.getSound(wkData.Sound, wkData.ds));
+    id trigger = wkData.createTrigger(wkData.Trigger, wkData.newTri, secondsFromNow, false);
+    id req = wkData.createReq(wkData.Request, wkData.newReq, idString, content, trigger);
+    wkData.addToCenter(wkData.getCenter(wkData.Center, wkData.dc), wkData.addReq, req, ^(id e _U_){});
+    CFRelease(idString);
+    Sels.objRel(content, Sels.rel);
+}
+
+#pragma mark - Modal Delegate
 
 void workoutVC_finishedBottomSheet(void *self, int index, short weight) {
     WorkoutVC *d = (WorkoutVC *)self;

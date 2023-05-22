@@ -1,15 +1,12 @@
 #include "AppDelegate.h"
-#include <CoreFoundation/CFAttributedString.h>
-#include <CoreFoundation/CFDateFormatter.h>
-#include <CoreFoundation/CFNumber.h>
-#include <CoreFoundation/CFPreferences.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
+#include "HistoryVC.h"
 #include "HomeVC.h"
 #include "InputVC.h"
+#include "SettingsVC.h"
 #include "SetupWorkoutVC.h"
-#include "Views.h"
+#include "StatusView.h"
+#include "SwiftBridging.h"
+#include "WorkoutVC.h"
 
 #define WeekSeconds 604800
 
@@ -17,29 +14,6 @@
 void exerciseManager_setCurrentWeek(int);
 #endif
 extern CGFloat UIFontWeightSemibold;
-void initViewData(VCache*, Class*);
-void initNSData(bool modern, ColorCache *cacheRef, Class **clsRefs, size_t **sizeRefs);
-void setupAppColors(Class Color, unsigned char darkMode, bool deleteOld);
-bool setupCharts(bool);
-void initValidatorStrings(Class);
-void initExerciseData(int);
-void initWorkoutStrings(void);
-void initStatVData(Class);
-id homeVC_init(VCacheRef, CCacheRef, time_t);
-void homeVC_updateWorkoutsList(HomeVC *self, unsigned char completed);
-void homeVC_createWorkoutsList(id self, const UserInfo *info);
-void homeVC_updateColors(id self);
-id historyVC_init(void **, FetchHandler*, VCacheRef, CCacheRef);
-void historyVC_clearData(id self);
-void historyVC_updateColors(id vc, unsigned char darkMode);
-id settingsVC_init(VCacheRef, CCacheRef);
-void settingsVC_updateColors(id self, unsigned char darkMode);
-long setupWorkoutVC_numberOfComponents(id, SEL, id);
-long setupWorkoutVC_numberOfComponentsLegacy(id, SEL, id);
-CFAttributedStringRef setupWorkoutVC_getAttrTitle(id, SEL, id, long, long);
-CFStringRef setupWorkoutVC_getTitle(id, SEL, id, long, long);
-void setupWorkoutVC_didSelectRow(id, SEL, id, long, long);
-void setupWorkoutVC_didSelectRowLegacy(id, SEL, id, long, long);
 
 enum {
     IWeekStart, IPlanStart, ITzOffset, ICurrentPlan, ICompletedWorkouts, IDarkMode, ILiftArray
@@ -79,6 +53,8 @@ static AppDelegate *getAppDel(void) {
     id app = sharedAppImp(UIApplication, sharedApplication);
     return (AppDelegate *)delegateImp(app, delegate);
 }
+
+UserInfo const *getUserInfo(void) { return &getAppDel()->userData; }
 
 #pragma mark - User Defaults Helpers
 
@@ -488,7 +464,7 @@ void addAlertAction(id ctrl, CFStringRef titleKey, int style, Callback handler) 
     CFRelease(title);
 }
 
-#pragma mark - App Delegate Main Funcs
+#pragma mark - Application Delegate
 
 static void handleFirstLaunch(AppDelegate *self, CFStringRef k, time_t start, int tzOff, bool modern) {
     CFNumberRef hasLaunched = CFNumberCreate(NULL, 7, &(bool){true});
@@ -710,8 +686,6 @@ int appDelegate_supportedOrientations(AppDelegate *self _U_, SEL _cmd _U_, id ap
 }
 
 #pragma mark - Child VC Callbacks
-
-UserInfo const *getUserInfo(void) { return &getAppDel()->userData; }
 
 static int updateWeight(short *curr, short *weights, CFStringRef *keys, CFNumberRef *values) {
     int nChanges = 0;

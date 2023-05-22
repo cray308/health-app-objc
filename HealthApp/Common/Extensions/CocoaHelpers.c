@@ -1,12 +1,7 @@
 #include "CocoaHelpers.h"
-#include <string.h>
 
-static const void *cocoaRetain(CFAllocatorRef alo _U_, const void *value) {
-    msg0(id, (id)value, sel_getUid("retain"));
-    return value;
-}
-
-static void cocoaRel(CFAllocatorRef alo _U_, const void *value) { Sels.objRel((id)value, Sels.rel); }
+static const void *cocoaRetain(CFAllocatorRef, const void *);
+static void cocoaRel(CFAllocatorRef, const void *);
 
 const CFArrayCallBacks retainedArrCallbacks = {0, cocoaRetain, cocoaRel, NULL, NULL};
 struct SelCache Sels;
@@ -18,7 +13,15 @@ static id (*modernImps[13])(Class,SEL);
 static id (*modernBarImp)(Class,SEL,CFStringRef);
 static SEL sbcInt;
 
+const void *cocoaRetain(CFAllocatorRef alo _U_, const void *value) {
+    msg0(id, (id)value, sel_getUid("retain"));
+    return value;
+}
+
+void cocoaRel(CFAllocatorRef alo _U_, const void *value) { Sels.objRel((id)value, Sels.rel); }
+
 id colorCreateLegacy(id self _U_, SEL _cmd _U_, int type) { return appColors[type]; }
+
 id barColorCreateLegacy(id self _U_, SEL _cmd _U_, int type) { return barColors[type]; }
 
 id colorCreate(id self, SEL _cmd _U_, int type) { return modernImps[type]((Class)self, scArr[type]); }
