@@ -272,7 +272,7 @@ static bool isCompleted(Workout *w) {
     Circuit *group = w->group;
     int groupIndex = group->index;
     if (w->index != w->size - 1 || groupIndex != group->size - 1) return false;
-    if (w->type == WorkoutEndurance) return w->duration >= (int16_t)(group->exercises[0].reps / 60);
+    if (w->type == WorkoutEndurance) return w->duration >= (int)(group->exercises[0].reps / 60);
 
     if (group->type == CircuitRounds && group->completedReps == group->reps - 1) {
         ExerciseEntry *e = &group->exercises[groupIndex];
@@ -282,7 +282,7 @@ static bool isCompleted(Workout *w) {
 }
 
 static inline bool setDuration(Workout *w) {
-    w->duration = ((int16_t)((time(NULL) - w->startTime) / 60.f)) + 1;
+    w->duration = ((int)((time(NULL) - w->startTime) / 60.f)) + 1;
 #if TARGET_OS_SIMULATOR
     w->duration *= 10;
 #endif
@@ -355,10 +355,10 @@ void workoutVC_deinit(id self, SEL _cmd) {
 }
 
 static void handleFinishedWorkout(WorkoutVC *d, bool longEnough) {
-    short *lifts = NULL;
+    int *lifts = NULL;
     if (d->weights[0]) {
-        lifts = malloc(sizeof(short) << 2);
-        memcpy(lifts, d->weights, sizeof(short) << 2);
+        lifts = malloc(sizeof(int) << 2);
+        memcpy(lifts, d->weights, sizeof(int) << 2);
         longEnough = true;
     }
 
@@ -699,7 +699,7 @@ static void scheduleNotification(unsigned secondsFromNow, int type) {
 
 #pragma mark - Modal Delegate
 
-void workoutVC_finishedBottomSheet(void *self, int index, short weight) {
+void workoutVC_finishedBottomSheet(void *self, int index, int weight) {
     WorkoutVC *d = (WorkoutVC *)self;
     d->weights[index] = weight;
     handleEvent(d, 0, index, 0);

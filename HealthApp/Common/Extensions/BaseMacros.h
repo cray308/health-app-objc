@@ -13,10 +13,14 @@ extern void NSLog(id format, ...);
 
 #define ToKg 0.453592f
 #define WeekSeconds 604800
+#define DaySeconds 86400
+#define HourSeconds 3600
 
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 #define formatStr(l, fmt, ...)\
  CFStringCreateWithFormat(NULL, (CFDictionaryRef)(l), fmt, ##__VA_ARGS__)
+#define formatDate(f, d) CFDateFormatterCreateStringWithAbsoluteTime(\
+ NULL, (f), ((d) - (long)kCFAbsoluteTimeIntervalSince1970))
 #define localize(s) CFCopyLocalizedString(s, )
 #define isMetric(l) CFBooleanGetValue(CFLocaleGetValue((l), kCFLocaleUsesMetricSystem))
 #define getSavedMassFactor(l) (isMetric(l) ? 2.204623f : 1)

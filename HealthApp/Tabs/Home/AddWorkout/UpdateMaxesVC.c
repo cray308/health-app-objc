@@ -86,7 +86,7 @@ void stepperView_decrement(id self, SEL _cmd _U_) { stepperChangeGeneric(self, -
 
 #pragma mark - VC
 
-id updateMaxesVC_init(void *parent, int index, short bodyweight, VCacheRef tbl, CCacheRef clr) {
+id updateMaxesVC_init(void *parent, int index, int bodyweight, VCacheRef tbl, CCacheRef clr) {
     id self = msg2(id, VCacheRef, CCacheRef, Sels.alloc(UpdateMaxesVCClass, Sels.alo),
                    sel_getUid("initWithVCache:cCache:"), tbl, clr);
     UpdateMaxesVC *d = (UpdateMaxesVC *)((char *)self + VCSize + sizeof(InputVC));
@@ -142,10 +142,10 @@ void updateMaxesVC_tappedFinish(id self, SEL _cmd _U_) {
     InputVC *sup = (InputVC *)((char *)self + VCSize);
     UpdateMaxesVC *d = (UpdateMaxesVC *)((char *)sup + sizeof(InputVC));
     CFLocaleRef locale = CFLocaleCopyCurrent();
-    short extra = d->index == LiftPullup ? d->bodyweight : 0;
+    int extra = d->index == LiftPullup ? d->bodyweight : 0;
     float initWeight = ((sup->children[0].data->result * getSavedMassFactor(locale)) + extra) * 36;
     float reps = 37.f - (float)msg0(double, d->stack->stepper, sel_getUid("value"));
-    short weight = (short)lrintf(initWeight / reps) - extra;
+    int weight = (int)lrintf(initWeight / reps) - extra;
     CFRelease(locale);
     void *parent = d->parent;
     int index = d->index;

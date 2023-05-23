@@ -1,4 +1,5 @@
 #include "AppDelegate.h"
+#include "DatabaseManager.h"
 #include "HistoryVC.h"
 #include "HomeVC.h"
 #include "InputVC.h"
@@ -17,23 +18,11 @@ enum {
     IWeekStart, IPlanStart, ITzOffset, ICurrentPlan, ICompletedWorkouts, IDarkMode, ILiftArray
 };
 
-#if DEBUG
-static bool FIRST_LAUNCH;
-#endif
-static id service;
 static CFStringRef const dictKey = CFSTR("userinfo");
 static const void *DictKeys[] = {
     CFSTR("weekStart"), CFSTR("planStart"), CFSTR("tzOffset"),
     CFSTR("currentPlan"), CFSTR("completedWorkouts"), CFSTR("darkMode"),
     CFSTR("squatMax"), CFSTR("pullUpMax"), CFSTR("benchMax"), CFSTR("deadliftMax")
-};
-static const char *const liftGets[] = {"bestSquat", "bestPullup", "bestBench", "bestDeadlift"};
-static const char *const timeGets[] = {"timeStrength", "timeSE", "timeEndurance", "timeHIC"};
-static char const *const timeSets[] = {
-    "setTimeStrength:", "setTimeSE:", "setTimeEndurance:", "setTimeHIC:"
-};
-static char const *const liftSets[] = {
-    "setBestSquat:", "setBestPullup:", "setBestBench:", "setBestDeadlift:"
 };
 static int orientations;
 static int barStyle;
@@ -71,247 +60,6 @@ static void saveChanges(CFMutableDictionaryRef dict CF_CONSUMED,
     for (int i = 0; i < count; ++i) {
         CFRelease(values[i]);
     }
-}
-
-#pragma mark - Core Data Helpers
-
-static void context_saveChanges(id context) {
-    if (msg0(bool, context, sel_getUid("hasChanges")))
-        msg1(void, id, context, sel_getUid("save:"), nil);
-}
-
-static CFArrayRef context_fetchData(id context, int options, int *count) {
-    id req = clsF1(id, CFStringRef, objc_getClass("NSFetchRequest"),
-                   sel_getUid("fetchRequestWithEntityName:"), CFSTR("WeeklyData"));
-    if (options & 0x2) msg1(void, unsigned long, req, sel_getUid("setFetchLimit:"), 1);
-    CFArrayRef descriptorArr = createSortDescriptors(CFSTR("weekStart"), options & 0x1);
-    msg1(void, CFArrayRef, req, sel_getUid("setSortDescriptors:"), descriptorArr);
-    CFRelease(descriptorArr);
-
-    int len = 0;
-    CFArrayRef data = msg2(CFArrayRef, id, id, context,
-                           sel_getUid("executeFetchRequest:error:"), req, nil);
-    if (!(data && (len = (int)(CFArrayGetCount(data))))) data = NULL;
-    *count = len;
-    return data;
-}
-
-#if DEBUG
-static void createDummyData(id context) {
-    ((void(*)(id,SEL,Callback))objc_msgSend)(context, sel_getUid("performBlock:"), ^{
-        int16_t lifts[] = {300, 20, 185, 235};
-        int i = 0, r = 0;
-        unsigned char plan = 0;
-        time_t endpts[] = {time(NULL) - 126489600, time(NULL) - 2678400};
-        for (int x = 0; x < 2; ++x) {
-            time_t date = endpts[x];
-            struct tm tmInfo;
-            localtime_r(&date, &tmInfo);
-            if (tmInfo.tm_wday != 1) {
-                date = date - WeekSeconds + (((8 - tmInfo.tm_wday) % 7) * 86400);
-                localtime_r(&date, &tmInfo);
-            }
-            endpts[x] = date - ((tmInfo.tm_hour * 3600) + (tmInfo.tm_min * 60) + tmInfo.tm_sec);
-        }
-        while (endpts[0] < endpts[1]) {
-            int16_t totalWorkouts = 0;
-            int16_t times[4] = {0};
-            id data = msg1(id, id, clsF0(id, objc_getClass("WeeklyData"), Sels.alo),
-                           sel_getUid("initWithContext:"), context);
-            int addnlTime = 0, addnlWk = 1;
-            if (r == 0 || (i < 24)) {
-                addnlTime = rand() % 40;
-                addnlWk += rand() % 5;
-            }
-            msg1(void, int64_t, data, sel_getUid("setWeekStart:"), endpts[0]);
-
-            if (plan == 0) {
-                for (int j = 0; j < 6; ++j) {
-                    int extra = 10;
-                    bool didSE = true;
-                    switch (j) {
-                        case 1:
-                        case 2:
-                        case 5:
-                            times[2] += ((rand() % 30) + 30 + addnlTime);
-                            totalWorkouts += addnlWk;
-                            break;
-                        case 4:
-                            if ((didSE = (rand() % 10 >= 5))) extra = 0;
-                        case 0:
-                        case 3:
-                            if (didSE) {
-                                times[1] += ((rand() % 20) + extra + addnlTime);
-                                totalWorkouts += addnlWk;
-                            }
-                        default:
-                            break;
-                    }
-                }
-            } else {
-                for (int j = 0; j < 6; ++j) {
-                    switch (j) {
-                        case 0:
-                        case 2:
-                        case 4:
-                            times[0] += ((rand() % 20) + 20 + addnlTime);
-                            totalWorkouts += addnlWk;
-                            break;
-                        case 1:
-                        case 3:
-                            times[3] += ((rand() % 20) + 15 + addnlTime);
-                            totalWorkouts += addnlWk;
-                            break;
-                        case 5:
-                            times[2] += ((rand() % 30) + 60 + addnlTime);
-                            totalWorkouts += addnlWk;
-                        default:
-                            break;
-                    }
-                }
-            }
-
-            if (i == 7) {
-                plan = 1;
-            } else if (i == 20 || i == 32 || i == 44) {
-                lifts[2] = 185 + (rand() % 50);
-                lifts[1] = 20 + (rand() % 20);
-                lifts[0] = 300 + (rand() % 80);
-                lifts[3] = 235 + (rand() % 50);
-            }
-            msg1(void, int16_t, data, sel_getUid("setTotalWorkouts:"), totalWorkouts);
-            for (int x = 0; x < 4; ++x) {
-                msg1(void, int16_t, data, sel_getUid(liftSets[x]), lifts[x]);
-                msg1(void, int16_t, data, sel_getUid(timeSets[x]), times[x]);
-            }
-            msg0(void, data, Sels.rel);
-
-            if (++i == 52) {
-                i = 0;
-                plan = 0;
-                r += 1;
-            }
-            endpts[0] += WeekSeconds;
-        }
-        context_saveChanges(context);
-    });
-}
-#endif
-
-static void fetchHistory(id context, HistoryModel *model) {
-    ((void(*)(id,SEL,Callback))objc_msgSend)(context, sel_getUid("performBlock:"), ^{
-        int count = 0;
-        CFArrayRef data = context_fetchData(context, 1, &count);
-        if (data && count > 1) {
-            SEL liftSels[4], timeSels[4];
-            SEL getTotal = sel_getUid("totalWorkouts"), getStart = sel_getUid("weekStart");
-            for (int i = 0; i < 4; ++i) {
-                liftSels[i] = sel_getUid(liftGets[i]);
-                timeSels[i] = sel_getUid(timeGets[i]);
-            }
-
-            CFLocaleRef l = CFLocaleCopyCurrent();
-            CFDateFormatterRef f = CFDateFormatterCreate(NULL, l, 1, 0);
-            CFRelease(l);
-            CFMutableArrayRef strs = CFArrayCreateMutable(NULL, --count, &kCFTypeArrayCallBacks);
-            WeeklyData *results = malloc((unsigned)count * sizeof(WeeklyData));
-            customAssert(count > 0)
-            for (int i = 0; i < count; ++i) {
-                id d = (id)CFArrayGetValueAtIndex(data, i);
-                WeeklyData *r = &results[i];
-                CFStringRef str = CFDateFormatterCreateStringWithAbsoluteTime(
-                  NULL, f, msg0(int64_t, d, getStart) - 978307200);
-                CFArrayAppendValue(strs, str);
-                r->totalWorkouts = msg0(int16_t, d, getTotal);
-                for (int j = 0; j < 4; ++j) {
-                    r->durationByType[j] = msg0(int16_t, d, timeSels[j]);
-                    r->weights[j] = msg0(int16_t, d, liftSels[j]);
-                }
-
-                r->cumulativeDuration[0] = r->durationByType[0];
-                for (int j = 1; j < 4; ++j) {
-                    r->cumulativeDuration[j] = r->cumulativeDuration[j - 1] + r->durationByType[j];
-                }
-                CFRelease(str);
-            }
-            CFRelease(f);
-            historyModel_populate(model, strs, results, count);
-        }
-    });
-}
-
-static void runStartupDataJob(id *cRef, HistoryModel *m, time_t wStart, int tzDiff) {
-    service = msg1(id, CFStringRef, Sels.alloc(objc_getClass("NSPersistentContainer"), Sels.alo),
-                   sel_getUid("initWithName:"), CFSTR("HealthApp"));
-    msg1(void, void(^)(id,id), service,
-         sel_getUid("loadPersistentStoresWithCompletionHandler:"), ^(id desc _U_, id err _U_){});
-    id context = msg0(id, service, sel_getUid("newBackgroundContext"));
-    msg1(void, bool, context, sel_getUid("setAutomaticallyMergesChangesFromParent:"), true);
-    *cRef = context;
-#if DEBUG
-    if (FIRST_LAUNCH) createDummyData(context);
-#endif
-    ((void(*)(id,SEL,Callback))objc_msgSend)(context, sel_getUid("performBlock:"), ^{
-        Class WeeklyData = objc_getClass("WeeklyData");
-        SEL liftSels[4];
-        SEL getStart = sel_getUid("weekStart"), delObj = sel_getUid("deleteObject:");
-        SEL weekInit = sel_getUid("initWithContext:"), setStart = sel_getUid("setWeekStart:");
-        const time_t endPt = wStart - 63244800;
-        time_t start;
-        int count = 0;
-        CFArrayRef data = context_fetchData(context, 1, &count);
-        if (!data) {
-            id first = msg1(id, id, clsF0(id, WeeklyData, Sels.alo), weekInit, context);
-            msg1(void, int64_t, first, setStart, wStart);
-            msg0(void, first, Sels.rel);
-            context_saveChanges(context);
-            goto cleanup;
-        }
-
-        if (tzDiff) {
-            for (int i = 0; i < count; ++i) {
-                id d = (id)CFArrayGetValueAtIndex(data, i);
-                start = msg0(int64_t, d, getStart) + tzDiff;
-                msg1(void, int64_t, d, setStart, start);
-            }
-        }
-
-        id last = (id)CFArrayGetValueAtIndex(data, count - 1);
-        int16_t lastLifts[4];
-        for (int i = 0; i < 4; ++i) {
-            liftSels[i] = sel_getUid(liftSets[i]);
-            lastLifts[i] = msg0(int16_t, last, sel_getUid(liftGets[i]));
-        }
-        start = msg0(int64_t, last, getStart);
-        if (start != wStart) {
-            id currWeek = msg1(id, id, clsF0(id, WeeklyData, Sels.alo), weekInit, context);
-            msg1(void, int64_t, currWeek, setStart, wStart);
-            for (int j = 0; j < 4; ++j) {
-                msg1(void, int16_t, currWeek, liftSels[j], lastLifts[j]);
-            }
-            msg0(void, currWeek, Sels.rel);
-        }
-
-        for (int i = 0; i < count; ++i) {
-            id d = (id)CFArrayGetValueAtIndex(data, i);
-            time_t tmpStart = msg0(int64_t, d, getStart);
-            if (tmpStart < endPt) msg1(void, id, context, delObj, d);
-        }
-
-        start += WeekSeconds;
-        for (; start < wStart; start += WeekSeconds) {
-            id curr = msg1(id, id, clsF0(id, WeeklyData, Sels.alo), weekInit, context);
-            msg1(void, int64_t, curr, setStart, start);
-            for (int j = 0; j < 4; ++j) {
-                msg1(void, int16_t, curr, liftSels[j], lastLifts[j]);
-            }
-            msg0(void, curr, Sels.rel);
-        }
-        context_saveChanges(context);
-
-    cleanup:
-        fetchHistory(context, m);
-    });
 }
 
 #pragma mark - VC Helpers
@@ -466,8 +214,8 @@ static void handleFirstLaunch(AppDelegate *self, CFStringRef k, time_t start, in
         CFNumberCreate(NULL, 10, &start), CFNumberCreate(NULL, 10, &start),
         CFNumberCreate(NULL, 9, &tzOff), CFNumberCreate(NULL, 7, &(unsigned char){0xff}),
         CFNumberCreate(NULL, 7, &(unsigned char){0}), CFNumberCreate(NULL, 7, &data.darkMode),
-        CFNumberCreate(NULL, 8, &(short){0}), CFNumberCreate(NULL, 8, &(short){0}),
-        CFNumberCreate(NULL, 8, &(short){0}), CFNumberCreate(NULL, 8, &(short){0})
+        CFNumberCreate(NULL, 9, &(int){0}), CFNumberCreate(NULL, 9, &(int){0}),
+        CFNumberCreate(NULL, 9, &(int){0}), CFNumberCreate(NULL, 9, &(int){0})
     };
     CFDictionaryRef dict = CFDictionaryCreate(NULL, DictKeys, values, 10,
                                               &kCFCopyStringDictionaryKeyCallBacks, NULL);
@@ -594,16 +342,14 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id app _U_,
 
         UserInfo data = {planStart, weekStart, {0}, dm, plan, completed};
         for (int i = 0; i < 4; ++i) {
-            CFNumberGetValue(CFDictionaryGetValue(dict, DictKeys[6 + i]), 8, &data.liftMaxes[i]);
+            CFNumberGetValue(CFDictionaryGetValue(dict, DictKeys[6 + i]), 9, &data.liftMaxes[i]);
         }
         memcpy(&self->userData, &data, sizeof(UserInfo));
         CFRelease(dict);
     } else {
-#if DEBUG
-        FIRST_LAUNCH = true;
-#endif
         handleFirstLaunch(self, hlKey, weekStart, tzOffset, TabAppear);
         dm = self->userData.darkMode;
+        createDB();
     }
 
     initExerciseData(week);
@@ -671,7 +417,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id app _U_,
     CFRelease(array);
     Sels.vcRel(tabVC, Sels.rel);
     msg0(void, self->window, sel_getUid("makeKeyAndVisible"));
-    runStartupDataJob(&self->context, historyModel, weekStart, tzDiff);
+    runStartupJob(historyModel, weekStart, tzDiff);
     return true;
 }
 
@@ -681,20 +427,20 @@ int appDelegate_supportedOrientations(AppDelegate *self _U_, SEL _cmd _U_, id ap
 
 #pragma mark - Child VC Callbacks
 
-static int updateWeight(short *curr, short *weights, CFStringRef *keys, CFNumberRef *values) {
+static int updateWeight(int *curr, int *weights, CFStringRef *keys, CFNumberRef *values) {
     int nChanges = 0;
     for (int i = 0, keyIndex = ILiftArray; i < 4; ++i, ++keyIndex) {
-        short new = weights[i];
+        int new = weights[i];
         if (new > curr[i]) {
             curr[i] = new;
             keys[nChanges] = DictKeys[keyIndex];
-            values[nChanges++] = CFNumberCreate(NULL, 8, &new);
+            values[nChanges++] = CFNumberCreate(NULL, 9, &new);
         }
     }
     return nChanges;
 }
 
-void updateUserInfo(unsigned char plan, unsigned char darkMode, short *weights) {
+void updateUserInfo(unsigned char plan, unsigned char darkMode, int *weights) {
     AppDelegate *self = getAppDel();
     int nChanges = 0;
     CFStringRef keys[7];
@@ -752,27 +498,10 @@ void deleteAppData(void) {
         homeVC_updateWorkoutsList((HomeVC *)((char *)self->children[0] + VCSize), 0);
     }
     historyVC_clearData(self->children[1]);
-    id context = self->context;
-    ((void(*)(id,SEL,Callback))objc_msgSend)(context, sel_getUid("performBlock:"), ^{
-        SEL delObj = sel_getUid("deleteObject:");
-        int count = 0;
-        CFArrayRef data = context_fetchData(context, 1, &count);
-        if (data) {
-            int end = count - 1;
-            for (int i = 0; i < end; ++i) {
-                msg1(void, id, context, delObj, (id)CFArrayGetValueAtIndex(data, i));
-            }
-            id currWeek = (id)CFArrayGetValueAtIndex(data, end);
-            msg1(void, int16_t, currWeek, sel_getUid("setTotalWorkouts:"), 0);
-            for (int i = 0; i < 4; ++i) {
-                msg1(void, int16_t, currWeek, sel_getUid(timeSets[i]), 0);
-            }
-            context_saveChanges(context);
-        }
-    });
+    deleteStoredData();
 }
 
-unsigned char addWorkoutData(unsigned char day, int type, int16_t duration, short *weights) {
+unsigned char addWorkoutData(unsigned char day, unsigned char type, int duration, int *weights) {
     AppDelegate *self = getAppDel();
     unsigned char completed = 0;
     CFStringRef keys[5];
@@ -792,20 +521,6 @@ unsigned char addWorkoutData(unsigned char day, int type, int16_t duration, shor
     }
     if (nChanges) saveChanges(createMutableDict(), keys, values, nChanges);
 
-    id context = self->context;
-    ((void(*)(id,SEL,Callback))objc_msgSend)(context, sel_getUid("performBlock:"), ^{
-        id data = (id)CFArrayGetValueAtIndex(context_fetchData(context, 2, &(int){0}), 0);
-        int16_t newDuration = duration + msg0(int16_t, data, sel_getUid(timeGets[type]));
-        msg1(void, int16_t, data, sel_getUid(timeSets[type]), newDuration);
-        int16_t totalWorkouts = msg0(int16_t, data, sel_getUid("totalWorkouts")) + 1;
-        msg1(void, int16_t, data, sel_getUid("setTotalWorkouts:"), totalWorkouts);
-        if (weights) {
-            for (int i = 0; i < 4; ++i) {
-                msg1(void, int16_t, data, sel_getUid(liftSets[i]), weights[i]);
-            }
-            free(weights);
-        }
-        context_saveChanges(context);
-    });
+    saveWorkoutData(duration, type, weights);
     return completed;
 }

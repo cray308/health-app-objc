@@ -79,7 +79,7 @@ void setupWorkoutVC_viewDidLoad(id self, SEL _cmd) {
     setNavButtons(navItem, (id []){cancelButton, sup->button});
     tbl->button.setEnabled(sup->button, tbl->button.en, false);
 
-    short maxes[] = {5, 5, 100}, mins[] = {1, 1, 1};
+    int maxes[] = {5, 5, 100}, mins[] = {1, 1, 1};
     CFStringRef rows[] = {CFSTR("setupWorkoutSets"), CFSTR("setupWorkoutReps"), NULL};
 
     if (d->type == WorkoutStrength) {

@@ -50,8 +50,8 @@ typedef struct {
     time_t startTime;
     int index;
     const int size;
-    int16_t duration;
-    const short bodyweight;
+    int duration;
+    const int bodyweight;
     const unsigned char type;
     const unsigned char day;
     const bool testMax;

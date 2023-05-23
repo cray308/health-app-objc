@@ -111,7 +111,7 @@ static void showInputError(IVPair *pair, InputVC *d) {
 
 #pragma mark - VC - Public Functions
 
-void inputVC_addChild(id self, CFStringRef hint, int kb, short min, short max) {
+void inputVC_addChild(id self, CFStringRef hint, int kb, int min, int max) {
     InputVC *d = (InputVC *)((char *)self + VCSize);
     VCacheRef tbl = d->tbl;
 
@@ -149,7 +149,7 @@ void inputVC_addChild(id self, CFStringRef hint, int kb, short min, short max) {
     tbl->view.hide(v->errorLabel, tbl->view.shd, true);
 }
 
-void inputVC_updateFields(InputVC *self, const short *vals) {
+void inputVC_updateFields(InputVC *self, const int *vals) {
     CFLocaleRef l = CFLocaleCopyCurrent();
     if (isMetric(l)) {
         for (int i = 0; i < 4; ++i) {
@@ -162,7 +162,7 @@ void inputVC_updateFields(InputVC *self, const short *vals) {
         }
     } else {
         for (int i = 0; i < 4; ++i) {
-            short value = vals[i];
+            int value = vals[i];
             InputView *v = self->children[i].data;
             CFStringRef str = formatStr(l, CFSTR("%d"), value);
             self->tbl->field.setText(v->field, self->tbl->label.stxt, str);
@@ -264,8 +264,8 @@ void inputVC_viewDidAppear(id self, SEL _cmd, bool animated) {
         ((void(*)(HAInsets*,id,SEL))objc_msgSend_stret)(&insets, d->scrollView,
                                                         sel_getUid("contentInset"));
 #endif
-        d->topOffset = (short)insets.top;
-        d->bottomOffset = (short)insets.bottom;
+        d->topOffset = (int)insets.top;
+        d->bottomOffset = (int)insets.bottom;
     }
 }
 

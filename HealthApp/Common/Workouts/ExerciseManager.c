@@ -11,7 +11,7 @@ struct DictWrapper {
 };
 
 static int weekInPlan;
-static short bodyweight = 165;
+static int bodyweight = 165;
 
 static struct {
     CFStringRef const reps;
@@ -108,7 +108,7 @@ void getHealthData(void) {
             if (data && CFArrayGetCount(data)) {
                 id unit = clsF0(id, objc_getClass("HKUnit"), sel_getUid("poundUnit"));
                 id qty = msg0(id, (id)CFArrayGetValueAtIndex(data, 0), sel_getUid("quantity"));
-                bodyweight = (short)msg1(double, id, qty, sel_getUid("doubleValueForUnit:"), unit);
+                bodyweight = (int)msg1(double, id, qty, sel_getUid("doubleValueForUnit:"), unit);
             }
             Sels.objRel(store, Sels.rel);
         }));
@@ -153,7 +153,7 @@ static Workout *buildWorkout(CFArrayRef acts, WorkoutParams *params) {
     short customSets = 1, customReps = 0, customCircuitReps = 0;
     bool testMax = false;
     if (params->type == WorkoutStrength) {
-        const short *lifts = getUserInfo()->liftMaxes;
+        const int *lifts = getUserInfo()->liftMaxes;
         float multiplier = params->weight / 100.f;
 
         weights[0] = lifts[0] * multiplier;
@@ -251,7 +251,7 @@ static Workout *buildWorkout(CFArrayRef acts, WorkoutParams *params) {
 
         for (int j = 0; j < nExercises; ++j) {
             CFDictionaryRef exDict = CFArrayGetValueAtIndex(foundExercises, j);
-            short rest = 0, eReps = customReps;
+            short eReps = customReps;
             unsigned char eType;
 
             CFNumberGetValue(CFDictionaryGetValue(exDict, Keys.type), 7, &eType);
@@ -275,10 +275,10 @@ static Workout *buildWorkout(CFArrayRef acts, WorkoutParams *params) {
                 e.hRange.length = numrange.length;
             }
 
-            CFNumberGetValue(CFDictionaryGetValue(exDict, CFSTR("B")), 8, &rest);
+            int rest = 0, n;
+            CFNumberGetValue(CFDictionaryGetValue(exDict, CFSTR("B")), 9, &rest);
             if (rest) e.rest = formatStr(l, restFormat, rest);
 
-            int n;
             CFNumberGetValue(CFDictionaryGetValue(exDict, Keys.index), 9, &n);
             CFStringRef nameKey = formatStr(NULL, CFSTR("exNames%02d"), n);
             CFStringRef name = localize(nameKey);

@@ -37,7 +37,7 @@ typedef struct {
             int tag;
         } exerciseInfo;
     } savedInfo;
-    short weights[4];
+    int weights[4];
     bool done;
 } WorkoutVC;
 

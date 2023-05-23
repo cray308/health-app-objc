@@ -12,7 +12,7 @@ typedef struct {
     id planPicker;
     id switchContainer;
     id deleteButton;
-    short results[4];
+    int results[4];
 } SettingsVC;
 
 id settingsVC_init(VCacheRef tbl, CCacheRef clr);

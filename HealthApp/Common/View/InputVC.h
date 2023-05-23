@@ -43,8 +43,8 @@ typedef struct {
     id toolbar;
     int count;
     int scrollHeight;
-    short topOffset;
-    short bottomOffset;
+    int topOffset;
+    int bottomOffset;
     bool setKB;
 } InputVC;
 
@@ -54,8 +54,8 @@ void initValidatorStrings(Class Field);
 
 void inputView_deinit(id self, SEL _cmd);
 
-void inputVC_addChild(id self, CFStringRef hint CF_CONSUMED, int kb, short min, short max);
-void inputVC_updateFields(InputVC *self, const short *vals);
+void inputVC_addChild(id self, CFStringRef hint CF_CONSUMED, int kb, int min, int max);
+void inputVC_updateFields(InputVC *self, const int *vals);
 
 id inputVC_init(id self, SEL _cmd, VCacheRef tbl, CCacheRef clr);
 void inputVC_deinit(id self, SEL _cmd);

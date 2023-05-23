@@ -6,7 +6,7 @@
 #include "ColorCache.h"
 #include "ViewCache.h"
 
-extern void workoutVC_finishedBottomSheet(void *self, int index, short weight);
+extern void workoutVC_finishedBottomSheet(void *self, int index, int weight);
 
 extern Class StepperViewClass;
 extern Class UpdateMaxesVCClass;
@@ -24,7 +24,7 @@ typedef struct {
     void *parent;
     StepperView *stack;
     int index;
-    short bodyweight;
+    int bodyweight;
 } UpdateMaxesVC;
 
 void stepperView_deinit(id self, SEL _cmd);
@@ -32,7 +32,7 @@ void stepperView_updatedStepper(id self, SEL _cmd);
 void stepperView_increment(id self, SEL _cmd);
 void stepperView_decrement(id self, SEL _cmd);
 
-id updateMaxesVC_init(void *parent, int index, short bodyweight, VCacheRef tbl, CCacheRef clr);
+id updateMaxesVC_init(void *parent, int index, int bodyweight, VCacheRef tbl, CCacheRef clr);
 void updateMaxesVC_deinit(id self, SEL _cmd);
 void updateMaxesVC_viewDidLoad(id self, SEL _cmd);
 void updateMaxesVC_tappedFinish(id self, SEL _cmd);

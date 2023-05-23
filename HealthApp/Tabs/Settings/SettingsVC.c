@@ -3,9 +3,6 @@
 #include "InputVC.h"
 #include "Views.h"
 
-void updateUserInfo(unsigned char plan, unsigned char darkMode, short *weights);
-void deleteAppData(void);
-
 Class SettingsVCClass;
 
 id settingsVC_init(VCacheRef tbl, CCacheRef clr) {
@@ -161,9 +158,9 @@ void settingsVC_buttonTapped(id self, SEL _cmd _U_, id btn) {
     CFLocaleRef locale = CFLocaleCopyCurrent();
     float toSavedMass = getSavedMassFactor(locale);
     CFRelease(locale);
-    short *arr = d->results;
+    int *arr = d->results;
     for (int i = 0; i < 4; ++i) {
-        arr[i] = (short)lrintf(sup->children[i].data->result * toSavedMass);
+        arr[i] = (int)lrintf(sup->children[i].data->result * toSavedMass);
     }
     addAlertAction(ctrl, CFSTR("save"), 0, ^{ updateUserInfo(plan, dark, arr); });
     presentVC(ctrl);

@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
 
     InputVCClass = objc_allocateClassPair(VC, "InputVC", 0);
     class_addProtocol(InputVCClass, objc_getProtocol("UITextFieldDelegate"));
-    class_addIvar(InputVCClass, "validatorData", sizeof(InputVC), 0, "{?=@@[4{?=@@}]@@@@@iissB}");
+    class_addIvar(InputVCClass, "validatorData", sizeof(InputVC), 0, "{?=@@[4{?=@@}]@@@@@iiiiB}");
     class_addMethod(InputVCClass, sel_registerName("initWithVCache:cCache:"),
                     (IMP)inputVC_init, "@@:@@");
     class_addMethod(InputVCClass, deinit, (IMP)inputVC_deinit, voidSig);
@@ -69,7 +69,7 @@ int main(int argc, char *argv[]) {
     objc_registerClassPair(InputVCClass);
 
     SettingsVCClass = objc_allocateClassPair(InputVCClass, "SettingsVC", 0);
-    class_addIvar(SettingsVCClass, dataKey, sizeof(SettingsVC), 0, "{?=@@@@[4s]}");
+    class_addIvar(SettingsVCClass, dataKey, sizeof(SettingsVC), 0, "{?=@@@@[4i]}");
     class_addMethod(SettingsVCClass, viewLoad, (IMP)settingsVC_viewDidLoad, voidSig);
     class_addMethod(SettingsVCClass, btnTap, (IMP)settingsVC_buttonTapped, tapSig);
     objc_registerClassPair(SettingsVCClass);
@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
     objc_registerClassPair(SetupWorkoutVCClass);
 
     UpdateMaxesVCClass = objc_allocateClassPair(InputVCClass, "UpdateMaxesVC", 0);
-    class_addIvar(UpdateMaxesVCClass, dataKey, sizeof(UpdateMaxesVC), 0, "{?=@@is}");
+    class_addIvar(UpdateMaxesVCClass, dataKey, sizeof(UpdateMaxesVC), 0, "{?=@@ii}");
     class_addMethod(UpdateMaxesVCClass, deinit, (IMP)updateMaxesVC_deinit, voidSig);
     class_addMethod(UpdateMaxesVCClass, viewLoad, (IMP)updateMaxesVC_viewDidLoad, voidSig);
     class_addMethod(UpdateMaxesVCClass, sel_registerName("tappedFinish"),
@@ -115,7 +115,7 @@ int main(int argc, char *argv[]) {
     WorkoutVCClass = objc_allocateClassPair(VC, "WorkoutVC", 0);
     class_addIvar(WorkoutVCClass, dataKey, sizeof(WorkoutVC), 0,
                   "{?=@@[2{?={_opaque_pthread_mutex_t=q[56c]}{_opaque_pthread_cond_t=q[40c]}@qiiI"
-                  "{?=CCC}}][2^{_opaque_pthread_t}]@@@{?=i{?=ii}}[4s]B}");
+                  "{?=CCC}}][2^{_opaque_pthread_t}]@@@{?=i{?=ii}}[4i]B}");
     class_addMethod(WorkoutVCClass, deinit, (IMP)workoutVC_deinit, voidSig);
     class_addMethod(WorkoutVCClass, viewLoad, (IMP)workoutVC_viewDidLoad, voidSig);
     class_addMethod(WorkoutVCClass, sel_registerName("startEndWorkout:"),
@@ -127,13 +127,12 @@ int main(int argc, char *argv[]) {
 
     AppDelegateClass = objc_allocateClassPair(objc_getClass("UIResponder"), "AppDelegate", 0);
     class_addIvar(AppDelegateClass, "window", sizeof(id), 0, "@");
-    class_addIvar(AppDelegateClass, "context", sizeof(id), 0, "@");
     class_addIvar(AppDelegateClass, "children", 3 * sizeof(id), 0, "[3@]");
     class_addIvar(AppDelegateClass, "clr", sizeof(ColorCache), 0, "{?=#:?}");
     class_addIvar(AppDelegateClass, "tbl", sizeof(VCache), 0,
                   "{?={?=#::::????}{?=::::::::::::???????????}"
                   "{?=:::::?????}{?=::::????}{?=::::????}{?=:?}}");
-    class_addIvar(AppDelegateClass, "userData", sizeof(UserInfo), 0, "{?=qq[4s]CCC}");
+    class_addIvar(AppDelegateClass, "userData", sizeof(UserInfo), 0, "{?=qq[4i]CCC}");
     class_addMethod(AppDelegateClass, sel_getUid("application:didFinishLaunchingWithOptions:"),
                     (IMP)appDelegate_didFinishLaunching, appSig);
     SEL orient = sel_getUid("application:supportedInterfaceOrientationsForWindow:");
