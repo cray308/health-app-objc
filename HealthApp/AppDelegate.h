@@ -15,13 +15,6 @@ typedef struct {
 } UserInfo;
 
 typedef struct {
-    short totalWorkouts;
-    short durationByType[4];
-    short cumulativeDuration[4];
-    short weightArray[4];
-} WeekDataModel;
-
-typedef struct {
     Class isa;
     id window;
     id context;
@@ -32,7 +25,6 @@ typedef struct {
 } AppDelegate;
 
 typedef void (^Callback)(void);
-typedef void (*FetchHandler)(void*, CFArrayRef, WeekDataModel*, int, bool);
 
 UserInfo const *getUserInfo(void);
 

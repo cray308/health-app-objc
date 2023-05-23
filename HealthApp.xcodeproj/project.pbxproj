@@ -13,6 +13,8 @@
 		610B92CB270A7F4900358DBD /* ContainerView.h in Headers */ = {isa = PBXBuildFile; fileRef = 610B92C9270A7F4900358DBD /* ContainerView.h */; };
 		610B92CC270A7F4900358DBD /* ContainerView.c in Sources */ = {isa = PBXBuildFile; fileRef = 610B92CA270A7F4900358DBD /* ContainerView.c */; };
 		61115E842A1B06FC00BEB69B /* BaseMacros.h in Headers */ = {isa = PBXBuildFile; fileRef = 61115E832A1B06FC00BEB69B /* BaseMacros.h */; };
+		61115E872A1B0F4A00BEB69B /* HistoryModel.h in Headers */ = {isa = PBXBuildFile; fileRef = 61115E852A1B0F4A00BEB69B /* HistoryModel.h */; };
+		61115E882A1B0F4A00BEB69B /* HistoryModel.c in Sources */ = {isa = PBXBuildFile; fileRef = 61115E862A1B0F4A00BEB69B /* HistoryModel.c */; };
 		611EDDA32741F8750064B254 /* StatusView.h in Headers */ = {isa = PBXBuildFile; fileRef = 611EDDA12741F8750064B254 /* StatusView.h */; };
 		611EDDA42741F8750064B254 /* StatusView.c in Sources */ = {isa = PBXBuildFile; fileRef = 611EDDA22741F8750064B254 /* StatusView.c */; };
 		611EDDA9274355F10064B254 /* HomeVC.h in Headers */ = {isa = PBXBuildFile; fileRef = 611EDDA7274355F10064B254 /* HomeVC.h */; };
@@ -93,6 +95,8 @@
 		610B92C9270A7F4900358DBD /* ContainerView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ContainerView.h; sourceTree = "<group>"; };
 		610B92CA270A7F4900358DBD /* ContainerView.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = ContainerView.c; sourceTree = "<group>"; };
 		61115E832A1B06FC00BEB69B /* BaseMacros.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BaseMacros.h; sourceTree = "<group>"; };
+		61115E852A1B0F4A00BEB69B /* HistoryModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HistoryModel.h; sourceTree = "<group>"; };
+		61115E862A1B0F4A00BEB69B /* HistoryModel.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = HistoryModel.c; sourceTree = "<group>"; };
 		611EDDA12741F8750064B254 /* StatusView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StatusView.h; sourceTree = "<group>"; };
 		611EDDA22741F8750064B254 /* StatusView.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = StatusView.c; sourceTree = "<group>"; };
 		611EDDA7274355F10064B254 /* HomeVC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HomeVC.h; sourceTree = "<group>"; };
@@ -268,6 +272,8 @@
 		61C778EB26102458001326A1 /* History */ = {
 			isa = PBXGroup;
 			children = (
+				61115E862A1B0F4A00BEB69B /* HistoryModel.c */,
+				61115E852A1B0F4A00BEB69B /* HistoryModel.h */,
 				611EDDE727476ED50064B254 /* HistoryVC.c */,
 				611EDDE627476ED50064B254 /* HistoryVC.h */,
 			);
@@ -343,6 +349,7 @@
 				611EDDE827476ED50064B254 /* HistoryVC.h in Headers */,
 				611EDDA9274355F10064B254 /* HomeVC.h in Headers */,
 				611EDDBF2744A9F70064B254 /* SetupWorkoutVC.h in Headers */,
+				61115E872A1B0F4A00BEB69B /* HistoryModel.h in Headers */,
 				618782C827D96BC60075466C /* ViewCache.h in Headers */,
 				610B92B9270A6E9000358DBD /* Views.h in Headers */,
 				611EDDD02745FEA70064B254 /* WorkoutVC.h in Headers */,
@@ -463,6 +470,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				61115E882A1B0F4A00BEB69B /* HistoryModel.c in Sources */,
 				61594D1826068105000D01A1 /* HealthApp.xcdatamodeld in Sources */,
 				61BC6F56266EA9A80022D6F7 /* WeeklyData+CoreDataClass.m in Sources */,
 				6161838226AC80A0001587B2 /* CocoaHelpers.c in Sources */,

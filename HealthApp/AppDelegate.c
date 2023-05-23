@@ -198,7 +198,7 @@ static void createDummyData(id context) {
 }
 #endif
 
-static void fetchHistory(id context, void *model, FetchHandler handler, bool ltr) {
+static void fetchHistory(id context, HistoryModel *model) {
     ((void(*)(id,SEL,Callback))objc_msgSend)(context, sel_getUid("performBlock:"), ^{
         int count = 0;
         CFArrayRef data = context_fetchData(context, 1, &count);
@@ -214,18 +214,18 @@ static void fetchHistory(id context, void *model, FetchHandler handler, bool ltr
             CFDateFormatterRef f = CFDateFormatterCreate(NULL, l, 1, 0);
             CFRelease(l);
             CFMutableArrayRef strs = CFArrayCreateMutable(NULL, --count, &kCFTypeArrayCallBacks);
-            WeekDataModel *results = malloc((unsigned)count * sizeof(WeekDataModel));
+            WeeklyData *results = malloc((unsigned)count * sizeof(WeeklyData));
             customAssert(count > 0)
             for (int i = 0; i < count; ++i) {
                 id d = (id)CFArrayGetValueAtIndex(data, i);
-                WeekDataModel *r = &results[i];
+                WeeklyData *r = &results[i];
                 CFStringRef str = CFDateFormatterCreateStringWithAbsoluteTime(
                   NULL, f, msg0(int64_t, d, getStart) - 978307200);
                 CFArrayAppendValue(strs, str);
                 r->totalWorkouts = msg0(int16_t, d, getTotal);
                 for (int j = 0; j < 4; ++j) {
                     r->durationByType[j] = msg0(int16_t, d, timeSels[j]);
-                    r->weightArray[j] = msg0(int16_t, d, liftSels[j]);
+                    r->weights[j] = msg0(int16_t, d, liftSels[j]);
                 }
 
                 r->cumulativeDuration[0] = r->durationByType[0];
@@ -234,18 +234,13 @@ static void fetchHistory(id context, void *model, FetchHandler handler, bool ltr
                 }
                 CFRelease(str);
             }
-            if (!ltr) {
-                for (int i = 0, j = count - 1; i < j; ++i, --j) {
-                    CFArrayExchangeValuesAtIndices(strs, i, j);
-                }
-            }
             CFRelease(f);
-            handler(model, strs, results, count, ltr);
+            historyModel_populate(model, strs, results, count);
         }
     });
 }
 
-static void runStartupDataJob(id *cRef, void *m, FetchHandler h, time_t wStart, int tzDiff, bool ltr) {
+static void runStartupDataJob(id *cRef, HistoryModel *m, time_t wStart, int tzDiff) {
     service = msg1(id, CFStringRef, Sels.alloc(objc_getClass("NSPersistentContainer"), Sels.alo),
                    sel_getUid("initWithName:"), CFSTR("HealthApp"));
     msg1(void, void(^)(id,id), service,
@@ -315,7 +310,7 @@ static void runStartupDataJob(id *cRef, void *m, FetchHandler h, time_t wStart, 
         context_saveChanges(context);
 
     cleanup:
-        fetchHistory(context, m, h, ltr);
+        fetchHistory(context, m);
     });
 }
 
@@ -637,11 +632,11 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id app _U_,
     class_addMethod(SetupWorkoutVCClass, pickerSel, imps[2], "@@:@qq");
     class_addMethod(objc_getMetaClass("UIAlertController"),
                     sel_registerName("getCtrlWithTitle:message:"), imps[3], "@@:@@");
-    bool ltr = setupCharts(dm);
+    setupCharts(dm);
 
-    void *fetchArg; FetchHandler fetchHandler;
+    HistoryModel *historyModel;
     self->children[0] = homeVC_init(&self->tbl, &self->clr, weekStart + 43200);
-    self->children[1] = historyVC_init(&fetchArg, &fetchHandler, &self->tbl, &self->clr);
+    self->children[1] = historyVC_init(&historyModel, &self->tbl, &self->clr);
     self->children[2] = settingsVC_init(&self->tbl, &self->clr);
 
     Class Item = objc_getClass("UITabBarItem"), Image = objc_getClass("UIImage");
@@ -676,7 +671,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id app _U_,
     CFRelease(array);
     Sels.vcRel(tabVC, Sels.rel);
     msg0(void, self->window, sel_getUid("makeKeyAndVisible"));
-    runStartupDataJob(&self->context, fetchArg, fetchHandler, weekStart, tzDiff, ltr);
+    runStartupDataJob(&self->context, historyModel, weekStart, tzDiff);
     return true;
 }
 
