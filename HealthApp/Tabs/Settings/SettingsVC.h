@@ -16,7 +16,7 @@ typedef struct {
 } SettingsVC;
 
 id settingsVC_init(VCacheRef tbl, CCacheRef clr);
-void settingsVC_updateColors(id self, unsigned char darkMode);
+void settingsVC_updateColors(id self, bool darkMode);
 
 void settingsVC_viewDidLoad(id self, SEL _cmd);
 void settingsVC_buttonTapped(id self, SEL _cmd, id btn);

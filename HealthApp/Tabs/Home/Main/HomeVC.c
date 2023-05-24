@@ -1,5 +1,6 @@
 #include "HomeVC.h"
 #include <CoreGraphics/CoreGraphics.h>
+#include "AppDelegate.h"
 #include "SetupWorkoutVC.h"
 #include "StatusView.h"
 #include "Views.h"
@@ -9,27 +10,17 @@ extern id kCAEmitterLayerLine;
 
 Class HomeVCClass;
 
-static CFStringRef dayNames[7];
-
 #pragma mark - Public Functions
 
-id homeVC_init(VCacheRef tbl, CCacheRef clr, time_t startDate) {
+id homeVC_init(VCacheRef tbl, CCacheRef clr) {
     id self = Sels.new(HomeVCClass, Sels.nw);
     HomeVC *d = (HomeVC *)((char *)self + VCSize);
     d->tbl = tbl;
     d->clr = clr;
-    CFLocaleRef l = CFLocaleCopyCurrent();
-    CFDateFormatterRef f = CFDateFormatterCreate(NULL, l, 0, 0);
-    CFRelease(l);
-    CFDateFormatterSetFormat(f, CFSTR("EEEE"));
-    for (int i = 0; i < 7; ++i, startDate += 86400) {
-        dayNames[i] = CFDateFormatterCreateStringWithAbsoluteTime(NULL, f, startDate - 978307200);
-    }
-    CFRelease(f);
     return self;
 }
 
-void homeVC_updateWorkoutsList(HomeVC *self, unsigned char completed) {
+void homeVC_updateWorkoutsList(HomeVC *self, uint8_t completed) {
     id gray = self->clr->getColor(self->clr->cls, self->clr->sc, ColorGray);
     id green = self->clr->getColor(self->clr->cls, self->clr->sc, ColorGreen);
     VCacheRef tbl = self->tbl;
@@ -42,7 +33,7 @@ void homeVC_updateWorkoutsList(HomeVC *self, unsigned char completed) {
     }
 }
 
-void homeVC_createWorkoutsList(id self, const UserInfo *info) {
+void homeVC_createWorkoutsList(id self, UserData const *data) {
     HomeVC *d = (HomeVC *)((char *)self + VCSize);
     VCacheRef tbl = d->tbl;
 
@@ -53,29 +44,33 @@ void homeVC_createWorkoutsList(id self, const UserInfo *info) {
         tbl->view.rmSub((id)CFArrayGetValueAtIndex(views, i), tbl->view.rsv);
     }
 
-    if ((info->currentPlan & 128) || info->planStart > time(NULL)) {
-        tbl->view.hide(d->planContainer.view, tbl->view.shd, true);
-        tbl->view.hide(d->customContainer->divider, tbl->view.shd, true);
-        return;
-    }
+    bool shouldHide = data->plan > MaxValidChar || data->planStart > time(NULL);
+    tbl->view.hide(d->planContainer.view, tbl->view.shd, shouldHide);
+    tbl->view.hide(d->customContainer->divider, tbl->view.shd, shouldHide);
+    if (shouldHide) return;
 
+    CFLocaleRef locale = CFLocaleCopyCurrent();
+    CFDateFormatterRef formatter = CFDateFormatterCreate(NULL, locale, 0, 0);
+    CFDateFormatterSetFormat(formatter, CFSTR("EEEE"));
+    CFRelease(locale);
     CFStringRef workoutNames[7] = {0};
-    setWeeklyWorkoutNames(info->currentPlan, workoutNames);
+    setWeeklyWorkoutNames(data->plan, workoutNames);
 
     SEL btnTap = sel_getUid("buttonTapped:");
     StatusView *sv; SVArgs args = {d->tbl, d->clr, &sv};
-    for (int i = 0; i < 7; ++i) {
+    time_t date = data->weekStart + (DaySeconds >> 1);
+
+    for (int i = 0; i < 7; ++i, date += DaySeconds) {
         if (!workoutNames[i]) continue;
-        id btn = statusView_init(&args, dayNames[i], workoutNames[i], i, self, btnTap);
+        id btn = statusView_init(&args, formatDate(formatter, date), workoutNames[i], i, self, btnTap);
         statusView_updateAccessibility(sv, tbl);
         tbl->stack.addSub(d->planContainer.data->stack, tbl->stack.asv, btn);
         Sels.viewRel(btn, Sels.rel);
         d->numWorkouts += 1;
     }
+    CFRelease(formatter);
 
-    tbl->view.hide(d->planContainer.view, tbl->view.shd, false);
-    tbl->view.hide(d->customContainer->divider, tbl->view.shd, false);
-    homeVC_updateWorkoutsList(d, info->completedWorkouts);
+    homeVC_updateWorkoutsList(d, data->completedWorkouts);
 }
 
 void homeVC_updateColors(id self) {
@@ -148,10 +143,10 @@ void homeVC_viewDidLoad(id self, SEL _cmd) {
     Sels.viewRel(vStack, Sels.rel);
     Sels.viewRel(scrollView, Sels.rel);
 
-    homeVC_createWorkoutsList(self, getUserInfo());
+    homeVC_createWorkoutsList(self, getUserData());
 }
 
-void homeVC_navigateToAddWorkout(id self, void *workout) {
+void homeVC_navigateToWorkout(id self, Workout *workout) {
     HomeVC *d = (HomeVC *)((char *)self + VCSize);
     id vc = workoutVC_init(workout, d->tbl, d->clr);
     msg2(void, id, bool, msg0(id, self, sel_getUid("navigationController")),
@@ -162,16 +157,16 @@ void homeVC_navigateToAddWorkout(id self, void *workout) {
 void homeVC_workoutButtonTapped(id self, SEL _cmd _U_, id btn) {
     HomeVC *d = (HomeVC *)((char *)self + VCSize);
     int tag = (int)d->tbl->view.getTag(btn, d->tbl->view.gtg);
-    Workout *w = getWeeklyWorkout(getUserInfo()->currentPlan, tag);
-    homeVC_navigateToAddWorkout(self, w);
+    UserData const *data = getUserData();
+    homeVC_navigateToWorkout(self, getWeeklyWorkout(data->plan, tag, data->lifts));
 }
 
 void homeVC_customButtonTapped(id self, SEL _cmd _U_, id btn) {
     HomeVC *d = (HomeVC *)((char *)self + VCSize);
-    unsigned char index = (unsigned char)d->tbl->view.getTag(btn, d->tbl->view.gtg);
+    uint8_t index = (uint8_t)d->tbl->view.getTag(btn, d->tbl->view.gtg);
     if (!index) {
-        Workout *w = getWorkoutFromLibrary(&(WorkoutParams){2, 1, 1, 100, WorkoutStrength, 0xff});
-        homeVC_navigateToAddWorkout(self, w);
+        WorkoutParams params = {2, 1, 1, 100, WorkoutStrength, UCHAR_MAX};
+        homeVC_navigateToWorkout(self, getWorkoutFromLibrary(&params, getUserData()->lifts));
         return;
     }
 
@@ -258,7 +253,7 @@ static void showConfetti(id view, HomeVC *d) {
     });
 }
 
-void homeVC_handleFinishedWorkout(id self, unsigned char completed) {
+void homeVC_handleFinishedWorkout(id self, uint8_t completed) {
     HomeVC *d = (HomeVC *)((char *)self + VCSize);
     int total = 0;
     for (int i = 0; i < 7; ++i) {

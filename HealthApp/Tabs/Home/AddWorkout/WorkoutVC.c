@@ -1,6 +1,5 @@
 #include "WorkoutVC.h"
 #include "AppDelegate.h"
-#include "HomeVC.h"
 #include "StatusView.h"
 #include "UpdateMaxesVC.h"
 #include "Views.h"
@@ -268,7 +267,15 @@ static int findTransition(Workout *w, WorkoutTimer *timers, StatusView *v) {
     return t;
 }
 
+static inline void setDuration(Workout *w) {
+    w->duration = ((int)((time(NULL) - w->startTime) / 60.f)) + 1;
+#if TARGET_OS_SIMULATOR
+    w->duration *= 10;
+#endif
+}
+
 static bool isCompleted(Workout *w) {
+    setDuration(w);
     Circuit *group = w->group;
     int groupIndex = group->index;
     if (w->index != w->size - 1 || groupIndex != group->size - 1) return false;
@@ -279,14 +286,6 @@ static bool isCompleted(Workout *w) {
         return e->state == ExerciseStateResting && e->completedSets == e->sets - 1;
     }
     return false;
-}
-
-static inline bool setDuration(Workout *w) {
-    w->duration = ((int)((time(NULL) - w->startTime) / 60.f)) + 1;
-#if TARGET_OS_SIMULATOR
-    w->duration *= 10;
-#endif
-    return w->duration >= 15;
 }
 
 #pragma mark - VC init/free
@@ -300,7 +299,7 @@ id workoutVC_init(Workout *workout, VCacheRef tbl, CCacheRef clr) {
     d->containers = malloc((unsigned)workout->size * sizeof(CVPair));
 
     pthread_mutex_init(&timerLock, NULL);
-    for (unsigned char i = 0; i < 2; ++i) {
+    for (uint8_t i = 0; i < 2; ++i) {
         memcpy(&d->timers[i], &(WorkoutTimer){.info = {.type = i}}, sizeof(WorkoutTimer));
         pthread_mutex_init(&d->timers[i].lock, NULL);
         pthread_cond_init(&d->timers[i].cond, NULL);
@@ -354,24 +353,14 @@ void workoutVC_deinit(id self, SEL _cmd) {
     msgSup0(void, (&(struct objc_super){self, VC}), _cmd);
 }
 
-static void handleFinishedWorkout(WorkoutVC *d, bool longEnough) {
+static void handleFinishedWorkout(WorkoutVC *d, bool pop) {
     int *lifts = NULL;
-    if (d->weights[0]) {
+    if (d->weights[3]) {
         lifts = malloc(sizeof(int) << 2);
         memcpy(lifts, d->weights, sizeof(int) << 2);
-        longEnough = true;
+        d->workout->duration = max(d->workout->duration, MinWorkoutDuration);
     }
-
-    unsigned char completed = 0;
-    if (longEnough)
-        completed = addWorkoutData(d->workout->day, d->workout->type, d->workout->duration, lifts);
-
-    id navVC = msg0(id, (id)((char *)d - VCSize), sel_getUid("navigationController"));
-    if (completed) {
-        CFArrayRef ctrls = msg0(CFArrayRef, navVC, sel_getUid("viewControllers"));
-        homeVC_handleFinishedWorkout((id)CFArrayGetValueAtIndex(ctrls, 0), completed);
-    }
-    msg1(id, bool, navVC, sel_getUid("popViewControllerAnimated:"), true);
+    addWorkoutData(d->workout, d->workout->day, lifts, pop);
 }
 
 static void cleanupWorkoutNotifications(WorkoutVC *d) {
@@ -474,14 +463,10 @@ void workoutVC_startEndWorkout(id self, SEL _cmd _U_, id btn) {
         }
         cleanupWorkoutNotifications(d);
         pthread_mutex_unlock(&timerLock);
-        bool longEnough = setDuration(d->workout);
         if (isCompleted(d->workout)) {
-            handleFinishedWorkout(d, longEnough);
+            handleFinishedWorkout(d, true);
         } else {
-            if (longEnough)
-                addWorkoutData(0xff, d->workout->type, d->workout->duration, NULL);
-            msg1(id, bool, msg0(id, self, sel_getUid("navigationController")),
-                 sel_getUid("popViewControllerAnimated:"), true);
+            addWorkoutData(d->workout, UCHAR_MAX, NULL, true);
         }
     }
 }
@@ -494,11 +479,10 @@ void workoutVC_willDisappear(id self, SEL _cmd, bool animated) {
         if (!d->done) {
             cleanupWorkoutNotifications(d);
             if (d->workout->startTime) {
-                bool longEnough = setDuration(d->workout);
                 if (isCompleted(d->workout)) {
-                    handleFinishedWorkout(d, longEnough);
-                } else if (longEnough) {
-                    addWorkoutData(0xff, d->workout->type, d->workout->duration, NULL);
+                    handleFinishedWorkout(d, false);
+                } else {
+                    addWorkoutData(d->workout, UCHAR_MAX, NULL, false);
                 }
             }
         }
@@ -526,7 +510,7 @@ void handleEvent(WorkoutVC *d, int gIdx, int eIdx, int event) {
     CFArrayRef views = tbl->stack.getSub(d->first->stack, tbl->stack.gsv);
     StatusView *v = (StatusView *)((char *)CFArrayGetValueAtIndex(views, eIdx) + ViewSize);
     id nextView = nil;
-    bool longEnough, exerciseDone;
+    bool exerciseDone;
     int t = 0;
     switch (event) {
         case EventFinishGroup:
@@ -562,7 +546,7 @@ foundTransition:
     switch (t) {
         case TransitionCompletedWorkout:
             cleanupWorkoutNotifications(d);
-            longEnough = setDuration(w);
+            setDuration(w);
             pthread_mutex_unlock(&timerLock);
             if (UIAccessibilityIsVoiceOverRunning()) {
                 CFStringRef msg = localize(CFSTR("workoutCompleteMsg"));
@@ -571,7 +555,7 @@ foundTransition:
                     CFRelease(msg);
                 });
             }
-            handleFinishedWorkout(d, longEnough);
+            handleFinishedWorkout(d, true);
             return;
 
         case TransitionFinishedCircuitDeleteFirst:

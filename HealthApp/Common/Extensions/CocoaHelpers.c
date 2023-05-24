@@ -72,7 +72,7 @@ void initNSData(bool modern, ColorCache *r, Class **clsRefs, size_t **sizeRefs) 
     memcpy(r, &(ColorCache){Color, sc, (id(*)(Class,SEL,int))getImpC(Color, sc)}, sizeof(ColorCache));
 }
 
-void setupAppColors(Class Color, unsigned char darkMode, bool deleteOld) {
+void setupAppColors(Class Color, bool darkMode, bool deleteOld) {
     if (deleteOld) {
         for (int i = 0; i < 13; ++i) {
             Sels.objRel(appColors[i], Sels.rel);

@@ -43,6 +43,8 @@
 		6161838226AC80A0001587B2 /* CocoaHelpers.c in Sources */ = {isa = PBXBuildFile; fileRef = 6161838126AC80A0001587B2 /* CocoaHelpers.c */; };
 		617CA9A92A1C3A1D004EFA47 /* DatabaseManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 617CA9A72A1C3A1D004EFA47 /* DatabaseManager.h */; };
 		617CA9AA2A1C3A1D004EFA47 /* DatabaseManager.c in Sources */ = {isa = PBXBuildFile; fileRef = 617CA9A82A1C3A1D004EFA47 /* DatabaseManager.c */; };
+		617CA9AD2A1C46C1004EFA47 /* UserData.h in Headers */ = {isa = PBXBuildFile; fileRef = 617CA9AB2A1C46C1004EFA47 /* UserData.h */; };
+		617CA9AE2A1C46C1004EFA47 /* UserData.c in Sources */ = {isa = PBXBuildFile; fileRef = 617CA9AC2A1C46C1004EFA47 /* UserData.c */; };
 		618782C827D96BC60075466C /* ViewCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 618782C727D96BC60075466C /* ViewCache.h */; };
 		618782CA27DBF4BA0075466C /* ColorCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 618782C927DBF4BA0075466C /* ColorCache.h */; };
 		61C34508280107E600CA8B03 /* WorkoutData.plist in Resources */ = {isa = PBXBuildFile; fileRef = 61C34507280107E600CA8B03 /* WorkoutData.plist */; };
@@ -132,6 +134,8 @@
 		6161838126AC80A0001587B2 /* CocoaHelpers.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = CocoaHelpers.c; sourceTree = "<group>"; };
 		617CA9A72A1C3A1D004EFA47 /* DatabaseManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DatabaseManager.h; sourceTree = "<group>"; };
 		617CA9A82A1C3A1D004EFA47 /* DatabaseManager.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = DatabaseManager.c; sourceTree = "<group>"; };
+		617CA9AB2A1C46C1004EFA47 /* UserData.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UserData.h; sourceTree = "<group>"; };
+		617CA9AC2A1C46C1004EFA47 /* UserData.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = UserData.c; sourceTree = "<group>"; };
 		618782C727D96BC60075466C /* ViewCache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewCache.h; sourceTree = "<group>"; };
 		618782C927DBF4BA0075466C /* ColorCache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ColorCache.h; sourceTree = "<group>"; };
 		61C34507280107E600CA8B03 /* WorkoutData.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = WorkoutData.plist; sourceTree = "<group>"; };
@@ -237,6 +241,8 @@
 			children = (
 				617CA9A82A1C3A1D004EFA47 /* DatabaseManager.c */,
 				617CA9A72A1C3A1D004EFA47 /* DatabaseManager.h */,
+				617CA9AC2A1C46C1004EFA47 /* UserData.c */,
+				617CA9AB2A1C46C1004EFA47 /* UserData.h */,
 			);
 			path = AppData;
 			sourceTree = "<group>";
@@ -351,6 +357,7 @@
 				611EDDA9274355F10064B254 /* HomeVC.h in Headers */,
 				611EDDBF2744A9F70064B254 /* SetupWorkoutVC.h in Headers */,
 				61115E872A1B0F4A00BEB69B /* HistoryModel.h in Headers */,
+				617CA9AD2A1C46C1004EFA47 /* UserData.h in Headers */,
 				618782C827D96BC60075466C /* ViewCache.h in Headers */,
 				610B92B9270A6E9000358DBD /* Views.h in Headers */,
 				611EDDD02745FEA70064B254 /* WorkoutVC.h in Headers */,
@@ -485,6 +492,7 @@
 				611EDDAA274355F10064B254 /* HomeVC.c in Sources */,
 				611EDDC02744A9F70064B254 /* SetupWorkoutVC.c in Sources */,
 				611EDDE927476ED50064B254 /* HistoryVC.c in Sources */,
+				617CA9AE2A1C46C1004EFA47 /* UserData.c in Sources */,
 				611EDDD12745FEA70064B254 /* WorkoutVC.c in Sources */,
 				611EDDC72744CB2D0064B254 /* UpdateMaxesVC.c in Sources */,
 				61594D2026068106000D01A1 /* main.c in Sources */,

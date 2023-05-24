@@ -1,6 +1,6 @@
 #include "InputVC.h"
 #include <unicode/uregex.h>
-#include "AppDelegate.h"
+#include "UserData.h"
 #include "Views.h"
 
 extern CFStringRef UIKeyboardDidShowNotification;
@@ -205,11 +205,11 @@ void inputVC_viewDidLoad(id self, SEL _cmd) {
     d->tbl->stack.setMargins(d->vStack, d->tbl->stack.smr, (HAInsets){16, 8, 16, 8});
     d->toolbar = msg1(id, CGRect, Sels.alloc(objc_getClass("UIToolbar"), Sels.alo),
                       sel_getUid("initWithFrame:"), ((CGRect){{0}, {100, 100}}));
-    unsigned char dark = getUserInfo()->darkMode;
-    if (dark < 2) {
+    uint8_t darkMode = getUserData()->darkMode;
+    if (isCharValid(darkMode)) {
         msg1(void, id, d->toolbar, sel_getUid("setBarTintColor:"),
              clsF1(id, int, d->clr->cls, sel_getUid("getBarColorWithType:"), 1));
-        d->setKB = dark == 1;
+        d->setKB = darkMode == 1;
     }
     msg0(void, d->toolbar, sel_getUid("sizeToFit"));
 
@@ -393,7 +393,7 @@ bool inputVC_fieldChanged(id self, SEL _cmd _U_, id field, CFRange range, CFStri
     float newVal = -1;
     CFRelease(newText);
     if (num != NULL) {
-        CFNumberGetValue(num, 12, &newVal);
+        CFNumberGetValue(num, kCFNumberFloatType, &newVal);
         CFRelease(num);
     }
 

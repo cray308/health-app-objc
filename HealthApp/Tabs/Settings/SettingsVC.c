@@ -10,7 +10,7 @@ id settingsVC_init(VCacheRef tbl, CCacheRef clr) {
                 sel_getUid("initWithVCache:cCache:"), tbl, clr);
 }
 
-void settingsVC_updateColors(id self, unsigned char darkMode) {
+void settingsVC_updateColors(id self, bool darkMode) {
     InputVC *sup = (InputVC *)((char *)self + VCSize);
     SettingsVC *d = (SettingsVC *)((char *)sup + sizeof(InputVC));
     VCacheRef tbl = sup->tbl;
@@ -59,28 +59,26 @@ void settingsVC_viewDidLoad(id self, SEL _cmd) {
                     sup->clr->getColor(sup->clr->cls, sup->clr->sc, ColorPrimaryBGGrouped));
     setVCTitle(msg0(id, self, sel_getUid("navigationItem")), localize(CFSTR("settingsTitle")));
 
-    UserInfo const *info = getUserInfo();
-    const unsigned char darkMode = info->darkMode;
-    unsigned char segment = info->currentPlan + 1;
+    UserData const *data = getUserData();
     d->planLabel = createLabel(tbl, sup->clr, localize(CFSTR("planPickerTitle")),
                                UIFontTextStyleSubheadline, ColorLabel);
     tbl->label.setLines(d->planLabel, tbl->label.snl, 0);
     tbl->stack.addSub(sup->vStack, tbl->stack.asv, d->planLabel);
     tbl->stack.setSpaceAfter(sup->vStack, tbl->stack.scsp, 4, d->planLabel);
-    d->planPicker = createSegmentedControl(CFSTR("settingsSegment%d"), segment);
+    d->planPicker = createSegmentedControl(CFSTR("settingsSegment%d"), (uint8_t)(data->plan + 1));
     setHeight(&tbl->cc, d->planPicker, 44, true, false);
     tbl->stack.addSub(sup->vStack, tbl->stack.asv, d->planPicker);
     tbl->stack.setSpaceAfter(sup->vStack, tbl->stack.scsp, 20, d->planPicker);
 
     SEL setCorner = sel_getUid("setCornerRadius:");
-    if (darkMode < 2) {
-        updateSegmentedControl(sup->clr, d->planPicker, darkMode);
+    if (isCharValid(data->darkMode)) {
+        updateSegmentedControl(sup->clr, d->planPicker, data->darkMode);
         d->switchContainer = Sels.new(View, Sels.nw);
         tbl->view.setBG(d->switchContainer, tbl->view.sbg, viewBG);
         msg1(void, CGFloat, tbl->view.layer(d->switchContainer, tbl->view.glyr), setCorner, 5);
         setHeight(&tbl->cc, d->switchContainer, 44, true, false);
         id switchView = Sels.new(objc_getClass("UISwitch"), Sels.nw);
-        msg1(void, bool, switchView, sel_getUid("setOn:"), darkMode);
+        msg1(void, bool, switchView, sel_getUid("setOn:"), data->darkMode);
         id label = createLabel(tbl, sup->clr, localize(CFSTR("darkMode")),
                                UIFontTextStyleBody, ColorLabel);
         id sv = createHStack(tbl, (id []){label, switchView});
@@ -128,7 +126,7 @@ void settingsVC_viewDidLoad(id self, SEL _cmd) {
     setHeight(&tbl->cc, d->deleteButton, 44, true, false);
     tbl->stack.addSub(sup->vStack, tbl->stack.asv, d->deleteButton);
 
-    inputVC_updateFields(sup, info->liftMaxes);
+    inputVC_updateFields(sup, data->lifts);
 }
 
 void settingsVC_buttonTapped(id self, SEL _cmd _U_, id btn) {
@@ -145,15 +143,14 @@ void settingsVC_buttonTapped(id self, SEL _cmd _U_, id btn) {
         return;
     }
 
-    unsigned char dark = 0xff;
+    uint8_t darkMode = UCHAR_MAX;
     if (d->switchContainer) {
         id sv = (id)CFArrayGetValueAtIndex(
           msg0(CFArrayRef, d->switchContainer, sel_getUid("subviews")), 0);
         id switchView = (id)CFArrayGetValueAtIndex(tbl->stack.getSub(sv, tbl->stack.gsv), 1);
-        dark = msg0(bool, switchView, sel_getUid("isOn")) ? 1 : 0;
+        darkMode = msg0(bool, switchView, sel_getUid("isOn")) ? 1 : 0;
     }
-    unsigned char plan =
-      (unsigned char)(msg0(long, d->planPicker, sel_getUid("selectedSegmentIndex")) - 1);
+    uint8_t plan = (uint8_t)(msg0(long, d->planPicker, sel_getUid("selectedSegmentIndex")) - 1);
 
     CFLocaleRef locale = CFLocaleCopyCurrent();
     float toSavedMass = getSavedMassFactor(locale);
@@ -162,6 +159,6 @@ void settingsVC_buttonTapped(id self, SEL _cmd _U_, id btn) {
     for (int i = 0; i < 4; ++i) {
         arr[i] = (int)lrintf(sup->children[i].data->result * toSavedMass);
     }
-    addAlertAction(ctrl, CFSTR("save"), 0, ^{ updateUserInfo(plan, dark, arr); });
+    addAlertAction(ctrl, CFSTR("save"), 0, ^{ updateUserInfo(plan, darkMode, arr); });
     presentVC(ctrl);
 }

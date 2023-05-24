@@ -4,9 +4,10 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include <objc/objc.h>
 #include "ColorCache.h"
+#include "ExerciseManager.h"
 #include "ViewCache.h"
 
-extern void homeVC_navigateToAddWorkout(id self, void *workout);
+extern void homeVC_navigateToWorkout(id self, Workout *workout);
 
 extern Class SetupWorkoutVCClass;
 
@@ -17,10 +18,10 @@ typedef struct {
     CFDictionaryRef selectedDict;
     id workoutTextField;
     int index;
-    unsigned char type;
+    uint8_t type;
 } SetupWorkoutVC;
 
-id setupWorkoutVC_init(id parent, unsigned char type, VCacheRef tbl, CCacheRef clr);
+id setupWorkoutVC_init(id parent, uint8_t type, VCacheRef tbl, CCacheRef clr);
 void setupWorkoutVC_deinit(id self, SEL _cmd);
 void setupWorkoutVC_viewDidLoad(id self, SEL _cmd);
 void setupWorkoutVC_tappedButton(id self, SEL _cmd, id btn);

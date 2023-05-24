@@ -3,6 +3,8 @@
 
 #include <CoreFoundation/CoreFoundation.h>
 
+#define MinWorkoutDuration 15
+
 enum {
     LiftPullup = 1, LiftBench, LiftDeadlift
 };
@@ -28,8 +30,8 @@ typedef struct {
     const short reps;
     const short sets;
     short completedSets;
-    const unsigned char type;
-    unsigned char state;
+    const uint8_t type;
+    uint8_t state;
 } ExerciseEntry;
 
 typedef struct {
@@ -40,7 +42,7 @@ typedef struct {
     const int size;
     const short reps;
     short completedReps;
-    const unsigned char type;
+    const uint8_t type;
 } Circuit;
 
 typedef struct {
@@ -52,8 +54,8 @@ typedef struct {
     const int size;
     int duration;
     const int bodyweight;
-    const unsigned char type;
-    const unsigned char day;
+    const uint8_t type;
+    const uint8_t day;
     const bool testMax;
 } Workout;
 
@@ -62,15 +64,15 @@ typedef struct {
     const short sets;
     const short reps;
     const short weight;
-    const unsigned char type;
-    const unsigned char day;
+    const uint8_t type;
+    const uint8_t day;
 } WorkoutParams;
 
 void initExerciseData(int week);
 
-void setWeeklyWorkoutNames(unsigned char plan, CFStringRef *names);
-Workout *getWeeklyWorkout(unsigned char plan, int i);
-CFArrayRef createWorkoutNames(unsigned char type);
-Workout *getWorkoutFromLibrary(WorkoutParams *params);
+void setWeeklyWorkoutNames(uint8_t plan, CFStringRef *names);
+Workout *getWeeklyWorkout(uint8_t plan, int i, int const *lifts);
+CFArrayRef createWorkoutNames(uint8_t type);
+Workout *getWorkoutFromLibrary(WorkoutParams *params, int const *lifts);
 
 #endif /* ExerciseManager_h */

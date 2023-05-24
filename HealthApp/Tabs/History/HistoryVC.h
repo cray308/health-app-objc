@@ -21,6 +21,6 @@ void historyVC_viewDidLoad(id self, SEL _cmd);
 CFStringRef historyVC_stringForValue(id self, SEL _cmd, double value);
 
 void historyVC_clearData(id self);
-void historyVC_updateColors(id self, unsigned char darkMode);
+void historyVC_updateColors(id self, bool darkMode);
 
 #endif /* HistoryVC_h */

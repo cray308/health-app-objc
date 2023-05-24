@@ -2,17 +2,11 @@
 #define AppDelegate_h
 
 #include <objc/objc.h>
+#include "CocoaHelpers.h"
 #include "ColorCache.h"
+#include "ExerciseManager.h"
+#include "UserData.h"
 #include "ViewCache.h"
-
-typedef struct {
-    time_t planStart;
-    const time_t weekStart;
-    int liftMaxes[4];
-    unsigned char darkMode;
-    unsigned char currentPlan;
-    unsigned char completedWorkouts;
-} UserInfo;
 
 typedef struct {
     Class isa;
@@ -20,12 +14,8 @@ typedef struct {
     id children[3];
     ColorCache clr;
     VCache tbl;
-    UserInfo userData;
+    UserData userData;
 } AppDelegate;
-
-typedef void (^Callback)(void);
-
-UserInfo const *getUserInfo(void);
 
 void presentVC(id child);
 void presentModalVC(id modal);
@@ -37,8 +27,8 @@ void addAlertAction(id ctrl, CFStringRef titleKey, int style, Callback handler);
 bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd, id app, id opt);
 int appDelegate_supportedOrientations(AppDelegate *self, SEL _cmd, id app, id win);
 
-void updateUserInfo(unsigned char plan, unsigned char darkMode, int *weights);
+void updateUserInfo(uint8_t plan, uint8_t darkMode, int const *weights);
 void deleteAppData(void);
-unsigned char addWorkoutData(unsigned char day, unsigned char type, int duration, int *weights);
+void addWorkoutData(Workout const *workout, uint8_t day, int *weights, bool pop);
 
 #endif /* AppDelegate_h */

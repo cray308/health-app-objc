@@ -1,7 +1,7 @@
 #include "HistoryVC.h"
-#include "AppDelegate.h"
 #include "ContainerView.h"
 #include "SwiftBridging.h"
+#include "UserData.h"
 
 struct HistCache {
     const SEL slglb, slilm, sdt, rpe;
@@ -128,7 +128,6 @@ void historyVC_updateSegment(id self, SEL _cmd _U_, id picker) {
 void historyVC_viewDidLoad(id self, SEL _cmd) {
     msgSup0(void, (&(struct objc_super){self, VC}), _cmd);
 
-    const unsigned char darkMode = getUserInfo()->darkMode;
     HistoryVC *d = (HistoryVC *)((char *)self + VCSize);
     VCacheRef tbl = d->tbl;
     id view = msg0(id, self, sel_getUid("view"));
@@ -139,7 +138,8 @@ void historyVC_viewDidLoad(id self, SEL _cmd) {
     d->charts[ChartLifts] = createChartView(self, (long []){0, 1, 2, 3}, 4, 0);
     d->picker = createSegmentedControl(CFSTR("historySegment%d"), 0);
     tbl->button.addTarget(d->picker, tbl->button.atgt, self, sel_getUid("buttonTapped:"), 4096);
-    if (darkMode < 2) updateSegmentedControl(d->clr, d->picker, darkMode);
+    uint8_t darkMode = getUserData()->darkMode;
+    if (isCharValid(darkMode)) updateSegmentedControl(d->clr, d->picker, darkMode);
     msg1(void, id, msg0(id, self, sel_getUid("navigationItem")),
          sel_getUid("setTitleView:"), d->picker);
 
@@ -198,7 +198,7 @@ void historyVC_clearData(id self) {
     }
 }
 
-void historyVC_updateColors(id self, unsigned char darkMode) {
+void historyVC_updateColors(id self, bool darkMode) {
     HistoryVC *d = (HistoryVC *)((char *)self + VCSize);
     VCacheRef tbl = d->tbl;
     id view = msg0(id, self, sel_getUid("view"));

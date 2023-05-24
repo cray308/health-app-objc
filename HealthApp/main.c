@@ -132,7 +132,7 @@ int main(int argc, char *argv[]) {
     class_addIvar(AppDelegateClass, "tbl", sizeof(VCache), 0,
                   "{?={?=#::::????}{?=::::::::::::???????????}"
                   "{?=:::::?????}{?=::::????}{?=::::????}{?=:?}}");
-    class_addIvar(AppDelegateClass, "userData", sizeof(UserInfo), 0, "{?=qq[4i]CCC}");
+    class_addIvar(AppDelegateClass, "userData", sizeof(UserData), 0, "{?=qq[4i]CCC}");
     class_addMethod(AppDelegateClass, sel_getUid("application:didFinishLaunchingWithOptions:"),
                     (IMP)appDelegate_didFinishLaunching, appSig);
     SEL orient = sel_getUid("application:supportedInterfaceOrientationsForWindow:");

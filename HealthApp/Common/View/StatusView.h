@@ -23,8 +23,8 @@ typedef struct {
 
 void initStatVData(Class Button);
 
-id statusView_init(SVArgs *args,
-                   CFStringRef header, CFStringRef title CF_CONSUMED, int tag, id target, SEL action);
+id statusView_init(SVArgs *args, CFStringRef header CF_CONSUMED, CFStringRef title CF_CONSUMED,
+                   int tag, id target, SEL action);
 void statusView_deinit(id self, SEL _cmd);
 void statusView_updateAccessibility(StatusView *v, VCacheRef tbl);
 

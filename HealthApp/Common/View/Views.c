@@ -255,7 +255,7 @@ id createTextfield(VCacheRef tbl, CCacheRef clr, id delegate,
 
 #pragma mark - Color Updates
 
-void updateSegmentedControl(CCacheRef clr, id view, unsigned char darkMode) {
+void updateSegmentedControl(CCacheRef clr, id view, bool darkMode) {
     id fg = clr->getColor(clr->cls, clr->sc, ColorLabel);
     float redGreen = 0.78f, blue = 0.8f;
     if (darkMode) {

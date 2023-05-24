@@ -38,7 +38,7 @@ id createSegmentedControl(CFStringRef format, int startIndex);
 id createTextfield(VCacheRef tbl, CCacheRef clr,
                    id delegate, id accessory, CFStringRef hint CF_CONSUMED, int tag);
 
-void updateSegmentedControl(CCacheRef clr, id view, unsigned char darkMode);
+void updateSegmentedControl(CCacheRef clr, id view, bool darkMode);
 
 void addVStackToScrollView(VCacheRef tbl, id view, id vStack, id scrollView);
 void setNavButtons(id navItem, id *buttons);

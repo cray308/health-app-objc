@@ -1,14 +1,14 @@
 #include "SetupWorkoutVC.h"
 #include "AppDelegate.h"
-#include "ExerciseManager.h"
 #include "InputVC.h"
+#include "UserData.h"
 #include "Views.h"
 
 Class SetupWorkoutVCClass;
 
 #pragma mark - Lifecycle
 
-id setupWorkoutVC_init(id parent, unsigned char type, VCacheRef tbl, CCacheRef clr) {
+id setupWorkoutVC_init(id parent, uint8_t type, VCacheRef tbl, CCacheRef clr) {
     id self = msg2(id, VCacheRef, CCacheRef, Sels.alloc(SetupWorkoutVCClass, Sels.alo),
                    sel_getUid("initWithVCache:cCache:"), tbl, clr);
     SetupWorkoutVC *d = (SetupWorkoutVC *)((char *)self + VCSize + sizeof(InputVC));
@@ -128,9 +128,10 @@ void setupWorkoutVC_tappedButton(id self, SEL _cmd _U_, id btn) {
         default:
             break;
     }
-    Workout *w = getWorkoutFromLibrary(&(WorkoutParams){d->index, sets, reps, weight, d->type, 0xff});
+    WorkoutParams params = {d->index, sets, reps, weight, d->type, UCHAR_MAX};
+    Workout *workout = getWorkoutFromLibrary(&params, getUserData()->lifts);
     id parent = d->parent;
-    dismissPresentedVC(^{ homeVC_navigateToAddWorkout(parent, w); });
+    dismissPresentedVC(^{ homeVC_navigateToWorkout(parent, workout); });
 }
 
 #pragma mark - Picker Delegate

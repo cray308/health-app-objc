@@ -31,7 +31,6 @@ id statusView_init(SVArgs *args,
     tbl->view.setBG(v->button, tbl->view.sbg,
                     clr->getColor(clr->cls, clr->sc, ColorSecondaryBGGrouped));
     setHeight(&tbl->cc, v->button, 50, true, true);
-    if (header) CFRetain(header);
     v->header = createLabel(tbl, clr, header, UIFontTextStyleSubheadline, ColorLabel);
     tbl->label.setLines(v->header, tbl->label.snl, 0);
     tbl->view.setIsAcc(v->header, tbl->view.sace, false);

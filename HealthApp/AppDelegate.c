@@ -9,21 +9,8 @@
 #include "SwiftBridging.h"
 #include "WorkoutVC.h"
 
-#if TARGET_OS_SIMULATOR
-void exerciseManager_setCurrentWeek(int);
-#endif
 extern CGFloat UIFontWeightSemibold;
 
-enum {
-    IWeekStart, IPlanStart, ITzOffset, ICurrentPlan, ICompletedWorkouts, IDarkMode, ILiftArray
-};
-
-static CFStringRef const dictKey = CFSTR("userinfo");
-static const void *DictKeys[] = {
-    CFSTR("weekStart"), CFSTR("planStart"), CFSTR("tzOffset"),
-    CFSTR("currentPlan"), CFSTR("completedWorkouts"), CFSTR("darkMode"),
-    CFSTR("squatMax"), CFSTR("pullUpMax"), CFSTR("benchMax"), CFSTR("deadliftMax")
-};
 static int orientations;
 static int barStyle;
 static Class DMNavVC;
@@ -38,29 +25,7 @@ static AppDelegate *getAppDel(void) {
     return (AppDelegate *)delegateImp(app, delegate);
 }
 
-UserInfo const *getUserInfo(void) { return &getAppDel()->userData; }
-
-#pragma mark - User Defaults Helpers
-
-static CFMutableDictionaryRef createMutableDict(void) {
-    CFDictionaryRef saved = CFPreferencesCopyAppValue(dictKey, kCFPreferencesCurrentApplication);
-    CFMutableDictionaryRef newDict = CFDictionaryCreateMutableCopy(NULL, 10, saved);
-    CFRelease(saved);
-    return newDict;
-}
-
-static void saveChanges(CFMutableDictionaryRef dict CF_CONSUMED,
-                        CFStringRef *keys, CFNumberRef *values, int count) {
-    for (int i = 0; i < count; ++i) {
-        CFDictionaryReplaceValue(dict, keys[i], values[i]);
-    }
-    CFPreferencesSetAppValue(dictKey, dict, kCFPreferencesCurrentApplication);
-    CFPreferencesAppSynchronize(kCFPreferencesCurrentApplication);
-    CFRelease(dict);
-    for (int i = 0; i < count; ++i) {
-        CFRelease(values[i]);
-    }
-}
+UserData const *getUserData(void) { return &getAppDel()->userData; }
 
 #pragma mark - VC Helpers
 
@@ -207,33 +172,6 @@ void addAlertAction(id ctrl, CFStringRef titleKey, int style, Callback handler) 
 
 #pragma mark - Application Delegate
 
-static void handleFirstLaunch(AppDelegate *self, CFStringRef k, time_t start, int tzOff, bool modern) {
-    CFNumberRef hasLaunched = CFNumberCreate(NULL, 7, &(bool){true});
-    UserInfo data = {start, start, {0}, modern ? 0xff : 0, 0xff, 0};
-    const void *values[] = {
-        CFNumberCreate(NULL, 10, &start), CFNumberCreate(NULL, 10, &start),
-        CFNumberCreate(NULL, 9, &tzOff), CFNumberCreate(NULL, 7, &(unsigned char){0xff}),
-        CFNumberCreate(NULL, 7, &(unsigned char){0}), CFNumberCreate(NULL, 7, &data.darkMode),
-        CFNumberCreate(NULL, 9, &(int){0}), CFNumberCreate(NULL, 9, &(int){0}),
-        CFNumberCreate(NULL, 9, &(int){0}), CFNumberCreate(NULL, 9, &(int){0})
-    };
-    CFDictionaryRef dict = CFDictionaryCreate(NULL, DictKeys, values, 10,
-                                              &kCFCopyStringDictionaryKeyCallBacks, NULL);
-    CFPreferencesSetAppValue(k, hasLaunched, kCFPreferencesCurrentApplication);
-    CFPreferencesSetAppValue(dictKey, dict, kCFPreferencesCurrentApplication);
-    CFPreferencesAppSynchronize(kCFPreferencesCurrentApplication);
-    CFRelease(dict);
-    CFRelease(hasLaunched);
-    for (int i = 0; i < 10; ++i) {
-        CFRelease(values[i]);
-    }
-    memcpy(&self->userData, &data, sizeof(UserInfo));
-    id center = clsF0(id, objc_getClass("UNUserNotificationCenter"),
-                      sel_getUid("currentNotificationCenter"));
-    msg2(void, unsigned long, void(^)(bool,id), center,
-         sel_getUid("requestAuthorizationWithOptions:completionHandler:"), 6, ^(bool g _U_, id e _U_){});
-}
-
 bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id app _U_, id opt _U_) {
     DMNavVC = objc_allocateClassPair(objc_getClass("UINavigationController"), "DMNavVC", 0);
     objc_registerClassPair(DMNavVC);
@@ -248,107 +186,16 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id app _U_,
     orientations = msg0(long, clsF0(id, objc_getClass("UIDevice"), sel_getUid("currentDevice")),
                         sel_getUid("userInterfaceIdiom")) == 1 ? 26 : 2;
 
-    time_t now = time(NULL);
-    struct tm tmInfo;
-    localtime_r(&now, &tmInfo);
-    int tzOffset = (int)tmInfo.tm_gmtoff, tzDiff = 0, week = 0;
-    if (tmInfo.tm_wday != 1) {
-        now = now - WeekSeconds + (((8 - tmInfo.tm_wday) % 7) * 86400);
-        localtime_r(&now, &tmInfo);
-    }
-    time_t weekStart = now - ((tmInfo.tm_hour * 3600) + (tmInfo.tm_min * 60) + tmInfo.tm_sec);
-    unsigned char dm;
-
-    CFStringRef hlKey = CFSTR("hasLaunched");
-    CFBooleanRef saved = CFPreferencesCopyAppValue(hlKey, kCFPreferencesCurrentApplication);
-    if (saved != NULL) {
-        CFRelease(saved);
-        const int planLengths[] = {8, 13};
-        int savedTzOffset;
-        time_t savedWeekStart, planStart;
-        unsigned char changes = 0, plan, completed;
-        CFDictionaryRef dict = CFPreferencesCopyAppValue(dictKey, kCFPreferencesCurrentApplication);
-        CFNumberGetValue(CFDictionaryGetValue(dict, DictKeys[0]), 10, &savedWeekStart);
-        CFNumberGetValue(CFDictionaryGetValue(dict, DictKeys[1]), 10, &planStart);
-        CFNumberGetValue(CFDictionaryGetValue(dict, DictKeys[2]), 9, &savedTzOffset);
-        CFNumberGetValue(CFDictionaryGetValue(dict, DictKeys[3]), 7, &plan);
-        CFNumberGetValue(CFDictionaryGetValue(dict, DictKeys[4]), 7, &completed);
-        CFNumberGetValue(CFDictionaryGetValue(dict, DictKeys[5]), 7, &dm);
-
-        if ((tzDiff = savedTzOffset - tzOffset)) {
-            planStart += tzDiff;
-            if (weekStart != savedWeekStart) {
-                changes = 7;
-                savedWeekStart += tzDiff;
-            } else {
-                changes = 6;
-                tzDiff = 0;
-            }
-        }
-
-        week = (int)((weekStart - planStart) / WeekSeconds);
-        if (weekStart != savedWeekStart) {
-            changes |= 17;
-            completed = 0;
-
-            if (!(plan & 128) && week >= planLengths[plan]) {
-                if (!plan) {
-                    plan = 1;
-                    changes |= 8;
-                }
-                planStart = weekStart;
-                changes |= 2;
-                week = 0;
-            }
-        }
-
-        if (dm < 2 && TabAppear) {
-            dm = 0xff;
-            changes |= 32;
-        }
-
-        if (changes) {
-            CFStringRef keys[6];
-            CFNumberRef values[6];
-            int nChanges = 0;
-
-            if (changes & 1) {
-                keys[0] = DictKeys[IWeekStart];
-                values[nChanges++] = CFNumberCreate(NULL, 10, &weekStart);
-            }
-            if (changes & 2) {
-                keys[nChanges] = DictKeys[IPlanStart];
-                values[nChanges++] = CFNumberCreate(NULL, 10, &planStart);
-            }
-            if (changes & 4) {
-                keys[nChanges] = DictKeys[ITzOffset];
-                values[nChanges++] = CFNumberCreate(NULL, 9, &tzOffset);
-            }
-            if (changes & 8) {
-                keys[nChanges] = DictKeys[ICurrentPlan];
-                values[nChanges++] = CFNumberCreate(NULL, 7, &plan);
-            }
-            if (changes & 16) {
-                keys[nChanges] = DictKeys[ICompletedWorkouts];
-                values[nChanges++] = CFNumberCreate(NULL, 7, &completed);
-            }
-            if (changes & 32) {
-                keys[nChanges] = DictKeys[IDarkMode];
-                values[nChanges++] = CFNumberCreate(NULL, 7, &dm);
-            }
-            CFMutableDictionaryRef updates = CFDictionaryCreateMutableCopy(NULL, 10, dict);
-            saveChanges(updates, keys, values, nChanges);
-        }
-
-        UserInfo data = {planStart, weekStart, {0}, dm, plan, completed};
-        for (int i = 0; i < 4; ++i) {
-            CFNumberGetValue(CFDictionaryGetValue(dict, DictKeys[6 + i]), 9, &data.liftMaxes[i]);
-        }
-        memcpy(&self->userData, &data, sizeof(UserInfo));
-        CFRelease(dict);
+    int tzDiff = 0, week = 0;
+    id unCenter = clsF0(id, objc_getClass("UNUserNotificationCenter"),
+                        sel_getUid("currentNotificationCenter"));
+    CFDictionaryRef prefs = CFPreferencesCopyAppValue(PrefsKey, kCFPreferencesCurrentApplication);
+    if (prefs != NULL) {
+        tzDiff = userData_init(&self->userData, prefs, &week, TabAppear);
     } else {
-        handleFirstLaunch(self, hlKey, weekStart, tzOffset, TabAppear);
-        dm = self->userData.darkMode;
+        userData_create(&self->userData, TabAppear);
+        msg2(void, unsigned long, void(^)(bool,id), unCenter,
+             sel_getUid("requestAuthorizationWithOptions:completionHandler:"), 6, ^(bool g _U_, id e _U_){});
         createDB();
     }
 
@@ -362,14 +209,14 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id app _U_,
     };
     SEL pickerSel = sel_getUid("pickerView:titleForRow:forComponent:");
     if (!TabAppear) {
-        barStyle = dm ? 2 : 0;
+        barStyle = self->userData.darkMode ? 2 : 0;
         class_addMethod(DMNavVC, sel_getUid("preferredStatusBarStyle"), (IMP)getStatusBarStyle, "i@:");
         imps[0] = (IMP)setupWorkoutVC_numberOfComponentsLegacy;
         imps[1] = (IMP)setupWorkoutVC_didSelectRowLegacy;
         imps[2] = (IMP)setupWorkoutVC_getAttrTitle;
         imps[3] = (IMP)alertCtrlCreateLegacy;
         pickerSel = sel_getUid("pickerView:attributedTitleForRow:forComponent:");
-        setupAppColors(self->clr.cls, dm, false);
+        setupAppColors(self->clr.cls, self->userData.darkMode, false);
     }
     class_addMethod(SetupWorkoutVCClass, sel_getUid("numberOfComponentsInPickerView:"),
                     imps[0], "q@:@");
@@ -378,10 +225,10 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id app _U_,
     class_addMethod(SetupWorkoutVCClass, pickerSel, imps[2], "@@:@qq");
     class_addMethod(objc_getMetaClass("UIAlertController"),
                     sel_registerName("getCtrlWithTitle:message:"), imps[3], "@@:@@");
-    setupCharts(dm);
+    setupCharts(self->userData.darkMode);
 
     HistoryModel *historyModel;
-    self->children[0] = homeVC_init(&self->tbl, &self->clr, weekStart + 43200);
+    self->children[0] = homeVC_init(&self->tbl, &self->clr);
     self->children[1] = historyVC_init(&historyModel, &self->tbl, &self->clr);
     self->children[2] = settingsVC_init(&self->tbl, &self->clr);
 
@@ -417,7 +264,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id app _U_,
     CFRelease(array);
     Sels.vcRel(tabVC, Sels.rel);
     msg0(void, self->window, sel_getUid("makeKeyAndVisible"));
-    runStartupJob(historyModel, weekStart, tzDiff);
+    runStartupJob(historyModel, self->userData.weekStart, tzDiff);
     return true;
 }
 
@@ -427,53 +274,13 @@ int appDelegate_supportedOrientations(AppDelegate *self _U_, SEL _cmd _U_, id ap
 
 #pragma mark - Child VC Callbacks
 
-static int updateWeight(int *curr, int *weights, CFStringRef *keys, CFNumberRef *values) {
-    int nChanges = 0;
-    for (int i = 0, keyIndex = ILiftArray; i < 4; ++i, ++keyIndex) {
-        int new = weights[i];
-        if (new > curr[i]) {
-            curr[i] = new;
-            keys[nChanges] = DictKeys[keyIndex];
-            values[nChanges++] = CFNumberCreate(NULL, 9, &new);
-        }
-    }
-    return nChanges;
-}
-
-void updateUserInfo(unsigned char plan, unsigned char darkMode, int *weights) {
+void updateUserInfo(uint8_t plan, uint8_t darkMode, int const *weights) {
     AppDelegate *self = getAppDel();
-    int nChanges = 0;
-    CFStringRef keys[7];
-    CFNumberRef values[7];
-    unsigned char changes = plan != self->userData.currentPlan ? 1 : 0;
-    if (changes) {
-        keys[0] = DictKeys[ICurrentPlan];
-        values[nChanges++] = CFNumberCreate(NULL, 7, &plan);
-        self->userData.currentPlan = plan;
-        if (!(plan & 128)) {
-#if TARGET_OS_SIMULATOR
-            time_t newPlanStart = self->userData.weekStart;
-            exerciseManager_setCurrentWeek(0);
-#else
-            time_t newPlanStart = self->userData.weekStart + WeekSeconds;
-#endif
-            keys[1] = DictKeys[IPlanStart];
-            values[nChanges++] = CFNumberCreate(NULL, 10, &newPlanStart);
-            self->userData.planStart = newPlanStart;
-        }
-    }
+    uint8_t updates = userData_update(&self->userData, plan, darkMode, weights);
+    if (updates & MaskCurrentPlan)
+        homeVC_createWorkoutsList(self->children[0], &self->userData);
 
-    if (darkMode != self->userData.darkMode) {
-        changes |= 2;
-        keys[nChanges] = DictKeys[IDarkMode];
-        values[nChanges++] = CFNumberCreate(NULL, 7, &darkMode);
-        self->userData.darkMode = darkMode;
-    }
-
-    nChanges += updateWeight(self->userData.liftMaxes, weights, &keys[nChanges], &values[nChanges]);
-    if (nChanges) saveChanges(createMutableDict(), keys, values, nChanges);
-
-    if (changes & 2) {
+    if (updates & MaskDarkMode) {
         barStyle = darkMode ? 2 : 0;
         setupAppColors(self->clr.cls, darkMode, true);
         msg1(void, id, self->window, sel_getUid("setTintColor:"),
@@ -486,41 +293,33 @@ void updateUserInfo(unsigned char plan, unsigned char darkMode, int *weights) {
             historyVC_updateColors(self->children[1], darkMode);
         settingsVC_updateColors(self->children[2], darkMode);
     }
-    if (changes & 1) homeVC_createWorkoutsList(self->children[0], &self->userData);
 }
 
 void deleteAppData(void) {
     AppDelegate *self = getAppDel();
-    if (self->userData.completedWorkouts) {
-        self->userData.completedWorkouts = 0;
-        saveChanges(createMutableDict(), (CFStringRef[]){DictKeys[ICompletedWorkouts]},
-                    (CFNumberRef[]){CFNumberCreate(NULL, 7, &(unsigned char){0})}, 1);
+    if (userData_clear(&self->userData))
         homeVC_updateWorkoutsList((HomeVC *)((char *)self->children[0] + VCSize), 0);
-    }
     historyVC_clearData(self->children[1]);
     deleteStoredData();
 }
 
-unsigned char addWorkoutData(unsigned char day, unsigned char type, int duration, int *weights) {
+void addWorkoutData(Workout const *workout, uint8_t day, int *weights, bool pop) {
     AppDelegate *self = getAppDel();
-    unsigned char completed = 0;
-    CFStringRef keys[5];
-    CFNumberRef values[5];
-    int nChanges = 0;
-    if (weights && (nChanges = updateWeight(self->userData.liftMaxes, weights, keys, values))) {
+    if (workout->duration < MinWorkoutDuration) goto cleanup;
+
+    bool updatedWeights = false;
+    uint8_t completed = userData_addWorkoutData(&self->userData, day, weights, &updatedWeights);
+    if (completed) homeVC_handleFinishedWorkout(self->children[0], completed);
+    if (updatedWeights) {
         id vc = self->children[2];
         if (msg0(bool, vc, sel_getUid("isViewLoaded")))
-            inputVC_updateFields((InputVC *)((char *)vc + VCSize), self->userData.liftMaxes);
+            inputVC_updateFields((InputVC *)((char *)vc + VCSize), self->userData.lifts);
     }
-    if (day != 0xff) {
-        completed = self->userData.completedWorkouts;
-        completed |= (1 << day);
-        self->userData.completedWorkouts = completed;
-        keys[nChanges] = DictKeys[ICompletedWorkouts];
-        values[nChanges++] = CFNumberCreate(NULL, 7, &completed);
-    }
-    if (nChanges) saveChanges(createMutableDict(), keys, values, nChanges);
 
-    saveWorkoutData(duration, type, weights);
-    return completed;
+    saveWorkoutData(workout->duration, workout->type, weights);
+cleanup:
+    if (pop) {
+        id navVC = msg0(id, self->children[0], sel_getUid("navigationController"));
+        msg1(id, bool, navVC, sel_getUid("popViewControllerAnimated:"), true);
+    }
 }

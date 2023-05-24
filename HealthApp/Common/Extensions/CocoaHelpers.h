@@ -52,12 +52,14 @@ struct SelCache {
     void (*vcRel)(id,SEL);
 };
 
+typedef void (^Callback)(void);
+
 extern const CFArrayCallBacks retainedArrCallbacks;
 extern struct SelCache Sels;
 
 void initNSData(bool modern, ColorCache *r, Class **clsRefs, size_t **sizeRefs);
 
-void setupAppColors(Class Color, unsigned char darkMode, bool deleteOld);
+void setupAppColors(Class Color, bool darkMode, bool deleteOld);
 
 void fillStringArray(CFStringRef *arr, CFStringRef format, int count);
 CFArrayRef createSortDescriptors(CFStringRef key, bool ascending);
