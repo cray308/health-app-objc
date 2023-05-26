@@ -13,7 +13,7 @@
 
 "workoutNotificationTitle" = "Aggiornamento Allenamento";
 "workoutCompleteMsg" = "Allenamento completato";
-"exerciseProgressHint" = "Esercizio %1$d di %2$d";
+"exerciseProgress" = "Esercizio %1$d di %2$d";
 "exerciseDurationMessage" = "È stata raggiunta la durata minima dell'esercizio";
 
 "cancel" = "Annulla";
@@ -44,7 +44,7 @@
 "hourMinFmt" = "%1$do %2$dm";
 "minsFmt" = "%dm";
 
-"planPickerTitle" = "Cambia piano di allenamento";
+"planPicker" = "Cambia piano di allenamento";
 "darkMode" = "Aspetto scuro";
 "settingsSegment0" = "Nessuno";
 "settingsSegment1" = "Fondamenta";
@@ -65,8 +65,8 @@
 "setupWorkoutDuration" = "Durata in minuti";
 
 "updateMaxesTitle" = "Fornire Peso e Ripetizioni";
-"stepperLabelInit" = "Ripetizioni: %d";
-"stepperLabelDescr" = "Cambia il numero di ripetizioni completate";
+"stepperLabel" = "Ripetizioni: %d";
+"stepperDescription" = "Cambia il numero di ripetizioni completate";
 "exerciseHeader" = "Serie %1$d di %2$d";
 "exerciseTitleRest" = "Riposo: %d s";
 "exerciseTitleReps" = "%1$@ x %2$d";
@@ -81,7 +81,7 @@
 "circuitHeaderLocAndAMRAP" = "Circuito %1$d di %2$d - QPRP per %3$d min";
 "sets1" = "Serie 1";
 "rounds1" = "Giro 1";
-"sep" = "%1$@, %2$@";
+"separator" = "%1$@, %2$@";
 
 "exNames00" = "Accovacciarsi";
 "exNames01" = "Tira-su";

@@ -12,8 +12,8 @@ typedef struct {
     pthread_cond_t cond;
     void *parent;
     time_t refTime;
-    int container;
-    int exercise;
+    int section;
+    int row;
     unsigned duration;
     struct {
         const unsigned char type;
@@ -23,12 +23,9 @@ typedef struct {
 } WorkoutTimer;
 
 typedef struct {
-    CCacheRef clr;
-    VCacheRef tbl;
     WorkoutTimer timers[2];
     pthread_t threads[2];
     Workout *workout;
-    ContainerView *first;
     CVPair *containers;
     struct {
         int groupTag;
@@ -41,13 +38,13 @@ typedef struct {
     bool done;
 } WorkoutVC;
 
-void initWorkoutStrings(void);
+void initWorkoutData(int week);
 
-id workoutVC_init(Workout *workout, VCacheRef tbl, CCacheRef clr);
+id workoutVC_init(Workout *workout);
 void workoutVC_deinit(id self, SEL _cmd);
 void workoutVC_viewDidLoad(id self, SEL _cmd);
-void workoutVC_startEndWorkout(id self, SEL _cmd, id btn);
+void workoutVC_startEndWorkout(id self, SEL _cmd, id button);
 void workoutVC_willDisappear(id self, SEL _cmd, bool animated);
-void workoutVC_handleTap(id self, SEL _cmd, id btn);
+void workoutVC_handleTap(id self, SEL _cmd, id button);
 
 #endif /* WorkoutVC_h */

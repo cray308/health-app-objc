@@ -3,8 +3,6 @@
 
 #include <objc/objc.h>
 #include "ExerciseManager.h"
-#include "ColorCache.h"
-#include "ViewCache.h"
 
 extern Class StatusViewClass;
 
@@ -12,20 +10,14 @@ typedef struct {
     id button;
     id header;
     id box;
-    ExerciseEntry *entry;
+    ExerciseEntry *exercise;
 } StatusView;
 
-typedef struct {
-    VCacheRef tbl;
-    CCacheRef clr;
-    StatusView **v;
-} SVArgs;
+void initStatusViewData(void);
 
-void initStatVData(Class Button);
-
-id statusView_init(SVArgs *args, CFStringRef header CF_CONSUMED, CFStringRef title CF_CONSUMED,
+id statusView_init(StatusView **ref, CFStringRef header CF_CONSUMED, CFStringRef title CF_CONSUMED,
                    int tag, id target, SEL action);
 void statusView_deinit(id self, SEL _cmd);
-void statusView_updateAccessibility(StatusView *v, VCacheRef tbl);
+void statusView_updateAccessibility(StatusView *v);
 
 #endif /* StatusView_h */

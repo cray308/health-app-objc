@@ -1,11 +1,8 @@
 #ifndef SetupWorkoutVC_h
 #define SetupWorkoutVC_h
 
-#include <CoreFoundation/CoreFoundation.h>
 #include <objc/objc.h>
-#include "ColorCache.h"
 #include "ExerciseManager.h"
-#include "ViewCache.h"
 
 extern void homeVC_navigateToWorkout(id self, Workout *workout);
 
@@ -16,15 +13,17 @@ typedef struct {
     CFArrayRef names;
     CFDictionaryRef normalDict;
     CFDictionaryRef selectedDict;
-    id workoutTextField;
+    id workoutField;
     int index;
     uint8_t type;
 } SetupWorkoutVC;
 
-id setupWorkoutVC_init(id parent, uint8_t type, VCacheRef tbl, CCacheRef clr);
+void initSetupWorkoutData(void);
+
+id setupWorkoutVC_init(id parent, uint8_t type);
 void setupWorkoutVC_deinit(id self, SEL _cmd);
 void setupWorkoutVC_viewDidLoad(id self, SEL _cmd);
-void setupWorkoutVC_tappedButton(id self, SEL _cmd, id btn);
+void setupWorkoutVC_tappedButton(id self, SEL _cmd, id button);
 long setupWorkoutVC_numberOfComponents(id self, SEL _cmd, id p);
 long setupWorkoutVC_numberOfComponentsLegacy(id self, SEL _cmd, id picker);
 long setupWorkoutVC_numberOfRows(id self, SEL _cmd, id p, long s);

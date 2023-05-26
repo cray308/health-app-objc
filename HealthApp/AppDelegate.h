@@ -3,17 +3,13 @@
 
 #include <objc/objc.h>
 #include "CocoaHelpers.h"
-#include "ColorCache.h"
 #include "ExerciseManager.h"
 #include "UserData.h"
-#include "ViewCache.h"
 
 typedef struct {
     Class isa;
     id window;
-    id children[3];
-    ColorCache clr;
-    VCache tbl;
+    id tabs[3];
     UserData userData;
 } AppDelegate;
 

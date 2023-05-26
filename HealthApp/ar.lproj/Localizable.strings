@@ -13,7 +13,7 @@
 
 "workoutNotificationTitle" = "تحديث التمرين";
 "workoutCompleteMsg" = "اكتمل التمرين";
-"exerciseProgressHint" = "\U202Fالتمرين %1$d من %2$d\U202C";
+"exerciseProgress" = "\U202Fالتمرين %1$d من %2$d\U202C";
 "exerciseDurationMessage" = "تم الوصول إلى الحد الأدنى من مدة التمرين";
 
 "cancel" = "ألغى";
@@ -44,7 +44,7 @@
 "hourMinFmt" = "\U202F%1$d س %2$d د\U202C";
 "minsFmt" = "\U202F%d د\U202C";
 
-"planPickerTitle" = "تغيير خطة التمرين";
+"planPicker" = "تغيير خطة التمرين";
 "darkMode" = "مظهر داكن";
 "settingsSegment0" = "لا شيء";
 "settingsSegment1" = "تأسيس";
@@ -65,8 +65,8 @@
 "setupWorkoutDuration" = "المدة بالدقائق";
 
 "updateMaxesTitle" = "توفير الوزن والتكرار";
-"stepperLabelInit" = "\U202Fالتكرار: %d.\U202C";
-"stepperLabelDescr" = "تغيير عدد التكرارات المكتملة";
+"stepperLabel" = "\U202Fالتكرار: %d.\U202C";
+"stepperDescription" = "تغيير عدد التكرارات المكتملة";
 "exerciseHeader" = "\U202Fالمجموعة %1$d من %2$d\U202C";
 "exerciseTitleRest" = "\U202Fالراحة: %d ث\U202C";
 "exerciseTitleReps" = "\U202F%1$@ %2$d مرات\U202C";
@@ -81,7 +81,7 @@
 "circuitHeaderLocAndAMRAP" = "\U202Fالدائرة %1$d من %2$d - أكبر عدد ممكن من التكرارات لمدة %3$d د\U202C";
 "sets1" = "المجموعة ١";
 "rounds1" = "الجولة ١";
-"sep" = "%1$@ ،%2$@";
+"separator" = "%1$@ ،%2$@";
 
 "exNames00" = "قرفص";
 "exNames01" = "سحب ما يصل";

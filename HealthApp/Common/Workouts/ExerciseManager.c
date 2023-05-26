@@ -72,13 +72,13 @@ void initExerciseData(int week) {
         key = CFSTR("lb");
     }
     CFRelease(l);
-    id unit = msg1(id, CFStringRef, Sels.alloc(objc_getClass("NSUnit"), Sels.alo),
+    id unit = msg1(id, CFStringRef, alloc(objc_getClass("NSUnit")),
                    sel_getUid("initWithSymbol:"), key);
-    id formatter = Sels.new(objc_getClass("NSMeasurementFormatter"), Sels.nw);
+    id formatter = new(objc_getClass("NSMeasurementFormatter"));
     CFStringRef _unitStr = msg1(CFStringRef, id, formatter, sel_getUid("stringFromUnit:"), unit);
     weightUnit = CFStringCreateCopy(NULL, _unitStr);
-    Sels.objRel(unit, Sels.rel);
-    Sels.objRel(formatter, Sels.rel);
+    releaseObject(unit);
+    releaseObject(formatter);
 
     dispatch_async(dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0), ^{ getHealthData(); });
 }
@@ -87,7 +87,7 @@ void getHealthData(void) {
     Class storeClass = objc_getClass("HKHealthStore");
     if (!clsF0(bool, storeClass, sel_getUid("isHealthDataAvailable"))) return;
 
-    id store = Sels.new(storeClass, Sels.nw);
+    id store = new(storeClass);
     id weightType = clsF1(id, CFStringRef, objc_getClass("HKSampleType"),
                           sel_getUid("quantityTypeForIdentifier:"), HKQuantityTypeIdentifierBodyMass);
     CFSetRef set = CFSetCreate(NULL, (const void *[]){weightType}, 1, NULL);
@@ -95,12 +95,12 @@ void getHealthData(void) {
     SEL auth = sel_getUid("requestAuthorizationToShareTypes:readTypes:completion:");
     msg3(void, CFSetRef, CFSetRef, void(^)(bool,id), store, auth, NULL, set, ^(bool granted, id er _U_) {
         if (!granted) {
-            Sels.objRel(store, Sels.rel);
+            releaseObject(store);
             return;
         }
 
         CFArrayRef arr = createSortDescriptors(HKSampleSortIdentifierStartDate, false);
-        id _req = Sels.alloc(objc_getClass("HKSampleQuery"), Sels.alo);
+        id _req = alloc(objc_getClass("HKSampleQuery"));
         SEL qInit = sel_getUid("initWithSampleType:predicate:limit:sortDescriptors:resultsHandler:");
         id req = (((id(*)(id,SEL,id,id,unsigned long,CFArrayRef,void(^)(id,CFArrayRef,id)))objc_msgSend)
                   (_req, qInit, weightType, nil, 1, arr, ^(id q _U_, CFArrayRef data, id err2 _U_) {
@@ -109,11 +109,11 @@ void getHealthData(void) {
                 id qty = msg0(id, (id)CFArrayGetValueAtIndex(data, 0), sel_getUid("quantity"));
                 bodyweight = (int)msg1(double, id, qty, sel_getUid("doubleValueForUnit:"), unit);
             }
-            Sels.objRel(store, Sels.rel);
+            releaseObject(store);
         }));
         msg1(void, id, store, sel_getUid("executeQuery:"), req);
         CFRelease(arr);
-        Sels.objRel(req, Sels.rel);
+        releaseObject(req);
     });
     CFRelease(set);
 }
@@ -140,7 +140,7 @@ static CFArrayRef getCurrentWeekForPlan(struct DictWrapper *data, uint8_t plan) 
 }
 
 static CFStringRef createTitle(int type, int index) {
-    CFStringRef key = formatStr(NULL, CFSTR("wkNames%d%02d"), type, index);
+    CFStringRef key = createWorkoutTitleKey(type, index);
     CFStringRef title = localize(key);
     CFRelease(key);
     return title;
@@ -184,7 +184,7 @@ static Workout *buildWorkout(CFArrayRef acts, WorkoutParams *params, int const *
 
     Workout workout = {
         .activities = malloc((unsigned)nActivities * sizeof(Circuit)),
-        .title = createTitle(params->type, params->index), .size = nActivities,
+        .nameIdx = params->index, .size = nActivities,
         .bodyweight = bodyweight, .type = params->type, .day = params->day, .testMax = testMax
     };
     workout.group = &workout.activities[0];

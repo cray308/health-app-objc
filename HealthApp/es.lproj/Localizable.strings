@@ -13,7 +13,7 @@
 
 "workoutNotificationTitle" = "Actualización del Entrenamiento";
 "workoutCompleteMsg" = "Entrenamiento completado";
-"exerciseProgressHint" = "Ejercicio %1$d de %2$d";
+"exerciseProgress" = "Ejercicio %1$d de %2$d";
 "exerciseDurationMessage" = "Se ha alcanzado la duración mínima del ejercicio";
 
 "cancel" = "Cancelar";
@@ -44,7 +44,7 @@
 "hourMinFmt" = "%1$dh %2$dm";
 "minsFmt" = "%dm";
 
-"planPickerTitle" = "Cambiar el plan de entrenamiento";
+"planPicker" = "Cambiar el plan de entrenamiento";
 "darkMode" = "Modo oscuro";
 "settingsSegment0" = "Ninguno";
 "settingsSegment1" = "Fundamento";
@@ -65,8 +65,8 @@
 "setupWorkoutDuration" = "Duración en minutos";
 
 "updateMaxesTitle" = "Proporcione Peso y Repeticiones";
-"stepperLabelInit" = "Repeticiones: %d";
-"stepperLabelDescr" = "Cambiar el número de repeticiones completadas";
+"stepperLabel" = "Repeticiones: %d";
+"stepperDescription" = "Cambiar el número de repeticiones completadas";
 "exerciseHeader" = "Conjunto %1$d de %2$d";
 "exerciseTitleRest" = "Descanso: %d s";
 "exerciseTitleReps" = "%1$@ x %2$d";
@@ -81,7 +81,7 @@
 "circuitHeaderLocAndAMRAP" = "Circuito %1$d de %2$d - TRCSP por %3$d min";
 "sets1" = "Conjunto 1";
 "rounds1" = "Ronda 1";
-"sep" = "%1$@, %2$@";
+"separator" = "%1$@, %2$@";
 
 "exNames00" = "Sentadillas";
 "exNames01" = "Dominadas";

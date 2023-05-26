@@ -13,7 +13,7 @@
 
 "workoutNotificationTitle" = "Mise à Jour de l'Entraînement";
 "workoutCompleteMsg" = "Entraînement terminé";
-"exerciseProgressHint" = "Exercice %1$d sur %2$d";
+"exerciseProgress" = "Exercice %1$d sur %2$d";
 "exerciseDurationMessage" = "La durée minimale de l'exercice a été atteinte";
 
 "cancel" = "Annuler";
@@ -44,7 +44,7 @@
 "hourMinFmt" = "%1$dh %2$dm";
 "minsFmt" = "%dm";
 
-"planPickerTitle" = "Modifier le plan d'entraînement";
+"planPicker" = "Modifier le plan d'entraînement";
 "darkMode" = "Apparence sombre";
 "settingsSegment0" = "Aucuns";
 "settingsSegment1" = "Fondations";
@@ -65,8 +65,8 @@
 "setupWorkoutDuration" = "Durée en minutes";
 
 "updateMaxesTitle" = "Fournir du Poids et des Répétitions";
-"stepperLabelInit" = "Répétitions: %d";
-"stepperLabelDescr" = "Modifier le nombre de répétitions terminées";
+"stepperLabel" = "Répétitions: %d";
+"stepperDescription" = "Modifier le nombre de répétitions terminées";
 "exerciseHeader" = "Ensemble %1$d sur %2$d";
 "exerciseTitleRest" = "Repos: %d s";
 "exerciseTitleReps" = "%1$@ x %2$d";
@@ -81,7 +81,7 @@
 "circuitHeaderLocAndAMRAP" = "Circuit %1$d sur %2$d - ADRQP pendant %3$d min";
 "sets1" = "Ensemble 1";
 "rounds1" = "Tour 1";
-"sep" = "%1$@, %2$@";
+"separator" = "%1$@, %2$@";
 
 "exNames00" = "Position accroupie";
 "exNames01" = "Traction";

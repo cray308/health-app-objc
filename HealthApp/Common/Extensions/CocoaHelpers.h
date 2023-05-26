@@ -4,10 +4,6 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include <objc/message.h>
 #include "BaseMacros.h"
-#include "ColorCache.h"
-
-#define getImpC(cls, cmd) method_getImplementation(class_getClassMethod((cls), (cmd)))
-#define getImpO(cls, cmd) method_getImplementation(class_getInstanceMethod((cls), (cmd)))
 
 #define clsF0(rv, cls, cmd) (((rv(*)(Class,SEL))objc_msgSend)((cls),(cmd)))
 #define clsF1(rv, t, cls, cmd, a) (((rv(*)(Class,SEL,t))objc_msgSend)((cls),(cmd),(a)))
@@ -27,6 +23,8 @@
 #define msgSup0(rv, s, cmd) (((rv(*)(struct objc_super*,SEL))objc_msgSendSuper)(s, cmd))
 #define msgSup1(rv, t, s, cmd, a) (((rv(*)(struct objc_super*,SEL,t))objc_msgSendSuper)(s, cmd, a))
 
+#define getClassMethodImp(C, s) method_getImplementation(class_getClassMethod((C), (s)))
+
 enum {
     ColorDiv,
     ColorLabel,
@@ -40,26 +38,75 @@ enum {
     ColorPrimaryBGGrouped,
     ColorSecondaryBG,
     ColorSecondaryBGGrouped,
-    ColorTertiaryBG,
+    ColorTertiaryBG
 };
 
-struct SelCache {
-    const SEL alo, nw, rel;
-    id (*alloc)(Class,SEL);
-    id (*new)(Class,SEL);
-    void (*objRel)(id,SEL);
-    void (*viewRel)(id,SEL);
-    void (*vcRel)(id,SEL);
+enum {
+    BarColorNav,
+    BarColorModal
+};
+
+struct AppCache {
+    const struct {
+        SEL rts;
+        SEL sa, sn, ret, rel;
+        id (*objAlloc)(Class, SEL);
+        id (*objNew)(Class, SEL);
+        id (*viewRet)(id, SEL);
+        void (*objRel)(id, SEL);
+        void (*viewRel)(id, SEL);
+        void (*vcRel)(id, SEL);
+    } sels;
+    const struct ColorCache {
+        id (*colorFunc)(int);
+        id (*barFunc)(int);
+        SEL si;
+        id (*init)(id, SEL, CGFloat, CGFloat, CGFloat, CGFloat);
+        SEL sels[13];
+        id (*imps[13])(Class, SEL);
+    } color;
+    const struct {
+        SEL imn;
+        id (*named)(Class, SEL, CFStringRef);
+    } image;
+    const struct {
+        Class cls;
+        SEL cns, anr;
+        id (*current)(Class, SEL);
+        void (*add)(id, SEL, id, void(^)(id));
+    } unc;
 };
 
 typedef void (^Callback)(void);
 
-extern const CFArrayCallBacks retainedArrCallbacks;
-extern struct SelCache Sels;
+extern const CFArrayCallBacks RetainedArrCallbacks;
+extern struct AppCache AppTable;
+extern Class Color;
+extern Class Image;
 
-void initNSData(bool modern, ColorCache *r, Class **clsRefs, size_t **sizeRefs);
+#define ReleaseSel AppTable.sels.rel
 
-void setupAppColors(Class Color, bool darkMode, bool deleteOld);
+#define respondsToSelector(o, s) msg1(bool, SEL, (o), AppTable.sels.rts, (s))
+#define alloc(C) AppTable.sels.objAlloc((C), AppTable.sels.sa)
+#define new(C) AppTable.sels.objNew((C), AppTable.sels.sn)
+#define retainView(v) AppTable.sels.viewRet((v), AppTable.sels.ret)
+#define releaseView(v) AppTable.sels.viewRel(v, ReleaseSel)
+#define releaseObject(o) AppTable.sels.objRel(o, ReleaseSel)
+#define releaseVC(c) AppTable.sels.vcRel(c, ReleaseSel)
+
+#define createColor(r, g, b, a)\
+ AppTable.color.init(alloc(Color), AppTable.color.si, (r), (g), (b), (a))
+#define getColor(t) AppTable.color.colorFunc((t))
+#define getBarColor(t) AppTable.color.barFunc((t))
+
+#define getImage(n) AppTable.image.named(Image, AppTable.image.imn, (n))
+
+#define getNotificationCenter() AppTable.unc.current(AppTable.unc.cls, AppTable.unc.cns)
+#define addNotificationRequest(c, r) AppTable.unc.add((c), AppTable.unc.anr, (r), ^(id err _U_){})
+
+void initAppData(bool modern, Class **clsRefs, size_t **sizeRefs);
+
+void setupAppColors(bool darkMode);
 
 void fillStringArray(CFStringRef *arr, CFStringRef format, int count);
 CFArrayRef createSortDescriptors(CFStringRef key, bool ascending);

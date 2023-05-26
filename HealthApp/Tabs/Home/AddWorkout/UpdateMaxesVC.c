@@ -4,54 +4,70 @@
 #include "InputVC.h"
 #include "Views.h"
 
+#define StepperMin 1
+#define StepperMax 10
+
+#define setStepperValue(s, v) msg1(void, double, (s), sel_getUid("setValue:"), (v))
+
 extern uint64_t UIAccessibilityTraitAdjustable;
 
 Class StepperViewClass;
 Class UpdateMaxesVCClass;
 
+static Class Stepper;
+static SEL sgv;
+static double (*getValue)(id, SEL);
+
+void initUpdateMaxesData(void) {
+    Stepper = objc_getClass("UIStepper");
+    sgv = sel_getUid("value");
+    getValue = (double(*)(id, SEL))class_getMethodImplementation(Stepper, sgv);
+}
+
 #pragma mark - Stepper
 
-static id stepperView_init(StepperView **ref, CFLocaleRef l CF_CONSUMED, VCacheRef tbl, CCacheRef clr) {
-    id self = Sels.new(StepperViewClass, Sels.nw);
+static id stepperView_init(id *stepperRef, CFLocaleRef locale CF_CONSUMED) {
+    id self = new(StepperViewClass);
     StepperView *v = (StepperView *)((char *)self + ViewSize);
-    *ref = v;
-    v->stxt = tbl->label.stxt;
-    v->setText = tbl->label.setText;
-    tbl->view.setIsAcc(self, tbl->view.sace, true);
-    tbl->view.setTraits(self, tbl->view.satrs, UIAccessibilityTraitAdjustable);
-    CFStringRef stepperDescr = localize(CFSTR("stepperLabelDescr"));
-    tbl->view.setAcc(self, tbl->view.sacl, stepperDescr);
-    CFRelease(stepperDescr);
-    CFStringRef repsFmt = localize(CFSTR("stepperLabelInit"));
-    CFStringRef repsStr = formatStr(l, repsFmt, 1);
-    CFRelease(repsFmt);
-    CFStringRef one = formatStr(l, CFSTR("%d"), 1);
+
+    CFStringRef stepperDescription = localize(CFSTR("stepperDescription"));
+    CFStringRef one = formatStr(locale, CFSTR("%d"), 1);
+    CFStringRef repsFormat = localize(CFSTR("stepperLabel"));
+    CFStringRef reps = formatStr(locale, repsFormat, StepperMin);
     CFStringFindWithOptionsAndLocale(
-      repsStr, one, (CFRange){0, CFStringGetLength(repsStr)}, 0, l, &v->range);
+      reps, one, (CFRange){0, CFStringGetLength(reps)}, 0, locale, &v->range);
+    v->reps = CFStringCreateMutableCopy(NULL, 64, reps);
+    setIsAccessibilityElement(self, true);
+    setAccessibilityTraits(self, UIAccessibilityTraitAdjustable);
+    setAccessibilityLabel(self, stepperDescription);
+    setAccessibilityValue(self, reps);
+    setHeight(self, ViewHeightDefault, true, false);
+    CFRelease(stepperDescription);
     CFRelease(one);
-    CFRelease(l);
-    v->repsStr = CFStringCreateMutableCopy(NULL, 64, repsStr);
-    msg1(void, CFStringRef, self, sel_getUid("setAccessibilityValue:"), repsStr);
-    setHeight(&tbl->cc, self, 44, true, false);
-    v->label = createLabel(tbl, clr, repsStr, UIFontTextStyleBody, ColorLabel);
-    v->stepper = Sels.new(objc_getClass("UIStepper"), Sels.nw);
-    msg1(void, double, v->stepper, sel_getUid("setValue:"), 1);
-    msg1(void, double, v->stepper, sel_getUid("setMinimumValue:"), 1);
-    msg1(void, double, v->stepper, sel_getUid("setMaximumValue:"), 10);
-    tbl->button.addTarget(v->stepper, tbl->button.atgt, self, sel_getUid("stepperChanged"), 4096);
-    id stack = createHStack(tbl, (id []){v->label, v->stepper});
-    msg1(void, bool, stack, tbl->view.trans, false);
-    tbl->view.addSub(self, tbl->view.asv, stack);
-    pin(&tbl->cc, stack, self);
-    Sels.viewRel(stack, Sels.rel);
+    CFRelease(repsFormat);
+    CFRelease(locale);
+
+    v->label = createLabel(reps, UIFontTextStyleBody, ColorLabel);
+    v->stepper = new(Stepper);
+    *stepperRef = retainView(v->stepper);
+    setStepperValue(v->stepper, StepperMin);
+    msg1(void, double, v->stepper, sel_getUid("setMinimumValue:"), StepperMin);
+    msg1(void, double, v->stepper, sel_getUid("setMaximumValue:"), StepperMax);
+    addTarget(v->stepper, self, getValueChangedSel(), ControlEventValueChanged);
+
+    id stack = createHStack((id []){v->label, v->stepper});
+    useStackConstraints(stack);
+    addSubview(self, stack);
+    pin(stack, self);
+    releaseView(stack);
     return self;
 }
 
 void stepperView_deinit(id self, SEL _cmd) {
     StepperView *v = (StepperView *)((char *)self + ViewSize);
-    CFRelease(v->repsStr);
-    Sels.viewRel(v->stepper, Sels.rel);
-    Sels.viewRel(v->label, Sels.rel);
+    CFRelease(v->reps);
+    releaseView(v->stepper);
+    releaseView(v->label);
     msgSup0(void, (&(struct objc_super){self, View}), _cmd);
 }
 
@@ -59,23 +75,23 @@ static void handleNewStepperValue(id self, StepperView *v, int value) {
     CFLocaleRef l = CFLocaleCopyCurrent();
     CFStringRef newVal = formatStr(l, CFSTR("%d"), value);
     CFRelease(l);
-    CFStringReplace(v->repsStr, v->range, newVal);
+    CFStringReplace(v->reps, v->range, newVal);
     v->range.length = CFStringGetLength(newVal);
     CFRelease(newVal);
-    v->setText(v->label, v->stxt, v->repsStr);
-    msg1(void, CFStringRef, self, sel_getUid("setAccessibilityValue:"), v->repsStr);
+    setText(v->label, v->reps);
+    setAccessibilityValue(self, v->reps);
 }
 
 void stepperView_updatedStepper(id self, SEL _cmd _U_) {
     StepperView *v = (StepperView *)((char *)self + ViewSize);
-    handleNewStepperValue(self, v, (int)msg0(double, v->stepper, sel_getUid("value")));
+    handleNewStepperValue(self, v, (int)getValue(v->stepper, sgv));
 }
 
 static void stepperChangeGeneric(id self, int change) {
     StepperView *v = (StepperView *)((char *)self + ViewSize);
-    int value = (int)msg0(double, v->stepper, sel_getUid("value")) + change;
-    if (value > 0 && value < 11) {
-        msg1(void, double, v->stepper, sel_getUid("setValue:"), value);
+    int value = (int)getValue(v->stepper, sgv) + change;
+    if (value >= StepperMin && value <= StepperMax) {
+        setStepperValue(v->stepper, value);
         handleNewStepperValue(self, v, value);
     }
 }
@@ -86,9 +102,8 @@ void stepperView_decrement(id self, SEL _cmd _U_) { stepperChangeGeneric(self, -
 
 #pragma mark - VC
 
-id updateMaxesVC_init(void *parent, int index, int bodyweight, VCacheRef tbl, CCacheRef clr) {
-    id self = msg2(id, VCacheRef, CCacheRef, Sels.alloc(UpdateMaxesVCClass, Sels.alo),
-                   sel_getUid("initWithVCache:cCache:"), tbl, clr);
+id updateMaxesVC_init(void *parent, int index, int bodyweight) {
+    id self = new(UpdateMaxesVCClass);
     UpdateMaxesVC *d = (UpdateMaxesVC *)((char *)self + VCSize + sizeof(InputVC));
     d->parent = parent;
     d->index = index;
@@ -98,53 +113,47 @@ id updateMaxesVC_init(void *parent, int index, int bodyweight, VCacheRef tbl, CC
 
 void updateMaxesVC_deinit(id self, SEL _cmd) {
     UpdateMaxesVC *d = (UpdateMaxesVC *)((char *)self + VCSize + sizeof(InputVC));
-    Sels.viewRel((id)((char *)d->stack - ViewSize), Sels.rel);
+    releaseView(d->repsStepper);
     msgSup0(void, (&(struct objc_super){self, InputVCClass}), _cmd);
 }
 
 void updateMaxesVC_viewDidLoad(id self, SEL _cmd) {
-    msgSup0(void, (&(struct objc_super){self, InputVCClass}), _cmd);
+    inputVC_viewDidLoad(self, _cmd);
 
-    InputVC *sup = (InputVC *)((char *)self + VCSize);
-    VCacheRef tbl = sup->tbl;
-    UpdateMaxesVC *d = (UpdateMaxesVC *)((char *)sup + sizeof(InputVC));
-    id navItem = msg0(id, self, sel_getUid("navigationItem"));
-    tbl->view.setBG(msg0(id, self, sel_getUid("view")), tbl->view.sbg,
-                    sup->clr->getColor(sup->clr->cls, sup->clr->sc, ColorSecondaryBG));
-    setVCTitle(navItem, localize(CFSTR("updateMaxesTitle")));
+    InputVC *p = (InputVC *)((char *)self + VCSize);
+    UpdateMaxesVC *d = (UpdateMaxesVC *)((char *)p + sizeof(InputVC));
+    p->button = createButton(localize(CFSTR("finish")), ColorBlue, self, getTapSel());
+    setupNavItem(self, CFSTR("updateMaxesTitle"), (id []){nil, p->button});
+    setEnabled(p->button, false);
 
-    tbl->stack.setSpace(sup->vStack, tbl->stack.ssp, 20);
-    CFLocaleRef l = CFLocaleCopyCurrent();
-    CFStringRef liftKey = formatStr(NULL, CFSTR("exNames%02d"), d->index);
-    CFStringRef liftVal = localize(liftKey);
-    CFRelease(liftKey);
-    CFMutableStringRef adjLift = CFStringCreateMutableCopy(NULL, 128, liftVal);
-    CFRelease(liftVal);
-    CFStringLowercase(adjLift, l);
-    CFStringRef fieldKey = localize(CFSTR("maxWeight"));
-    int kbType = getKeyboardForLocale(l);
-    inputVC_addChild(self, formatStr(NULL, fieldKey, adjLift), kbType, 1, FieldMaxDefault);
-    CFRelease(adjLift);
-    CFRelease(fieldKey);
-
-    id stepperView = stepperView_init(&d->stack, l, tbl, sup->clr);
-    tbl->stack.addSub(sup->vStack, tbl->stack.asv, stepperView);
-
-    sup->button = createButton(tbl, sup->clr, localize(CFSTR("finish")),
-                               ColorBlue, UIFontTextStyleBody, self, sel_getUid("tappedFinish"));
-    setNavButtons(navItem, (id []){nil, sup->button});
-    tbl->button.setEnabled(sup->button, tbl->button.en, false);
-    if (objc_getClass("UINavigationBarAppearance"))
+    if (getTabBarAppearanceClass())
         msg1(void, bool, self, sel_getUid("setModalInPresentation:"), true);
+
+    setSpacing(p->vStack, GroupSpacing);
+    CFLocaleRef locale = CFLocaleCopyCurrent();
+    CFStringRef liftKey = formatStr(NULL, CFSTR("exNames%02d"), d->index);
+    CFStringRef liftName = localize(liftKey), fieldKey = localize(CFSTR("maxWeight"));
+    CFMutableStringRef adjustedName = CFStringCreateMutableCopy(NULL, 128, liftName);
+    CFStringLowercase(adjustedName, locale);
+    int kbType = getKeyboardForLocale(locale);
+    inputVC_addChild(self, formatStr(NULL, fieldKey, adjustedName), kbType, 1, FieldMaxDefault);
+    CFRelease(liftKey);
+    CFRelease(liftName);
+    CFRelease(fieldKey);
+    CFRelease(adjustedName);
+
+    id stepperView = stepperView_init(&d->repsStepper, locale);
+    addArrangedSubview(p->vStack, stepperView);
+    releaseView(stepperView);
 }
 
-void updateMaxesVC_tappedFinish(id self, SEL _cmd _U_) {
+void updateMaxesVC_tappedFinish(id self, SEL _cmd _U_, id button _U_) {
     InputVC *sup = (InputVC *)((char *)self + VCSize);
     UpdateMaxesVC *d = (UpdateMaxesVC *)((char *)sup + sizeof(InputVC));
     CFLocaleRef locale = CFLocaleCopyCurrent();
     int extra = d->index == LiftPullup ? d->bodyweight : 0;
     float initWeight = ((sup->children[0].data->result * getSavedMassFactor(locale)) + extra) * 36;
-    float reps = 37.f - (float)msg0(double, d->stack->stepper, sel_getUid("value"));
+    float reps = 37.f - (float)getValue(d->repsStepper, sgv);
     int weight = (int)lrintf(initWeight / reps) - extra;
     CFRelease(locale);
     void *parent = d->parent;

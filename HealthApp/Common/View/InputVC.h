@@ -3,8 +3,6 @@
 
 #include <CoreFoundation/CoreFoundation.h>
 #include <objc/objc.h>
-#include "ColorCache.h"
-#include "ViewCache.h"
 
 #define FieldMaxDefault 999
 
@@ -20,11 +18,11 @@ typedef struct {
     id hintLabel;
     id field;
     id errorLabel;
-    CFCharacterSetRef set;
-    int minVal;
-    int maxVal;
+    CFCharacterSetRef chars;
+    int min;
+    int max;
     float result;
-    bool valid;
+    uint8_t state;
 } InputView;
 
 typedef struct {
@@ -33,34 +31,31 @@ typedef struct {
 } IVPair;
 
 typedef struct {
-    CCacheRef clr;
-    VCacheRef tbl;
     IVPair children[4];
     id button;
-    id activeField;
     id scrollView;
     id vStack;
     id toolbar;
     int count;
-    int scrollHeight;
-    int topOffset;
-    int bottomOffset;
-    bool setKB;
+    int activeTag;
+    bool keyboardAppearance;
 } InputVC;
 
 #define getKeyboardForLocale(l) (isMetric(l) ? KeyboardTypeDecimalPad : KeyboardTypeNumberPad)
 
-void initValidatorStrings(Class Field);
+#define getJumpToPrevSel() sel_getUid("jumpToPrev")
+#define getJumpToNextSel() sel_getUid("jumpToNext")
+#define getDismissKeyboardSel() sel_getUid("dismissKeyboard")
+
+void initValidatorData(void);
 
 void inputView_deinit(id self, SEL _cmd);
 
 void inputVC_addChild(id self, CFStringRef hint CF_CONSUMED, int kb, int min, int max);
 void inputVC_updateFields(InputVC *self, const int *vals);
 
-id inputVC_init(id self, SEL _cmd, VCacheRef tbl, CCacheRef clr);
 void inputVC_deinit(id self, SEL _cmd);
 void inputVC_viewDidLoad(id self, SEL _cmd);
-void inputVC_viewDidAppear(id self, SEL _cmd, bool animated);
 void inputVC_dismissKeyboard(id self, SEL _cmd);
 void inputVC_jumpToPrev(id self, SEL _cmd);
 void inputVC_jumpToNext(id self, SEL _cmd);

@@ -13,7 +13,7 @@
 
 "workoutNotificationTitle" = "Trainings-Update";
 "workoutCompleteMsg" = "Training abgeschlossen";
-"exerciseProgressHint" = "Übung %1$d von %2$d";
+"exerciseProgress" = "Übung %1$d von %2$d";
 "exerciseDurationMessage" = "Die Mindestübungsdauer wurde erreicht.";
 
 "cancel" = "Streichen";
@@ -44,7 +44,7 @@
 "hourMinFmt" = "%1$dSek. %2$dMin.";
 "minsFmt" = "%dMin.";
 
-"planPickerTitle" = "Trainingsplan ändern";
+"planPicker" = "Trainingsplan ändern";
 "darkMode" = "Dunkles Aussehen";
 "settingsSegment0" = "Keines";
 "settingsSegment1" = "Gründung";
@@ -65,8 +65,8 @@
 "setupWorkoutDuration" = "Dauer in Minuten";
 
 "updateMaxesTitle" = "Gewicht und Wiederholungen bereitstellen";
-"stepperLabelInit" = "Wiederholungen: %d";
-"stepperLabelDescr" = "Ändern Sie die Anzahl der abgeschlossenen Wiederholungen";
+"stepperLabel" = "Wiederholungen: %d";
+"stepperDescription" = "Ändern Sie die Anzahl der abgeschlossenen Wiederholungen";
 "exerciseHeader" = "Set %1$d von %2$d";
 "exerciseTitleRest" = "Ruhe: %d Sek.";
 "exerciseTitleReps" = "%1$@ x %2$d";
@@ -81,7 +81,7 @@
 "circuitHeaderLocAndAMRAP" = "Schaltung %1$d von %2$d - SVWWM für %3$d Min.";
 "sets1" = "Set 1";
 "rounds1" = "Runde 1";
-"sep" = "%1$@, %2$@";
+"separator" = "%1$@, %2$@";
 
 "exNames00" = "Hocken";
 "exNames01" = "Platz zum Haltmachen";

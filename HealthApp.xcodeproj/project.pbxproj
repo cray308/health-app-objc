@@ -45,8 +45,6 @@
 		617CA9AA2A1C3A1D004EFA47 /* DatabaseManager.c in Sources */ = {isa = PBXBuildFile; fileRef = 617CA9A82A1C3A1D004EFA47 /* DatabaseManager.c */; };
 		617CA9AD2A1C46C1004EFA47 /* UserData.h in Headers */ = {isa = PBXBuildFile; fileRef = 617CA9AB2A1C46C1004EFA47 /* UserData.h */; };
 		617CA9AE2A1C46C1004EFA47 /* UserData.c in Sources */ = {isa = PBXBuildFile; fileRef = 617CA9AC2A1C46C1004EFA47 /* UserData.c */; };
-		618782C827D96BC60075466C /* ViewCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 618782C727D96BC60075466C /* ViewCache.h */; };
-		618782CA27DBF4BA0075466C /* ColorCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 618782C927DBF4BA0075466C /* ColorCache.h */; };
 		61C34508280107E600CA8B03 /* WorkoutData.plist in Resources */ = {isa = PBXBuildFile; fileRef = 61C34507280107E600CA8B03 /* WorkoutData.plist */; };
 		61C545F22810BAA60066CE39 /* Charts.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61C545F02810BAA10066CE39 /* Charts.xcframework */; };
 		61C545F32810BAA60066CE39 /* Charts.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 61C545F02810BAA10066CE39 /* Charts.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -136,8 +134,6 @@
 		617CA9A82A1C3A1D004EFA47 /* DatabaseManager.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = DatabaseManager.c; sourceTree = "<group>"; };
 		617CA9AB2A1C46C1004EFA47 /* UserData.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UserData.h; sourceTree = "<group>"; };
 		617CA9AC2A1C46C1004EFA47 /* UserData.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = UserData.c; sourceTree = "<group>"; };
-		618782C727D96BC60075466C /* ViewCache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewCache.h; sourceTree = "<group>"; };
-		618782C927DBF4BA0075466C /* ColorCache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ColorCache.h; sourceTree = "<group>"; };
 		61C34507280107E600CA8B03 /* WorkoutData.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = WorkoutData.plist; sourceTree = "<group>"; };
 		61C545F02810BAA10066CE39 /* Charts.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = Charts.xcframework; sourceTree = "<group>"; };
 		61E8ED6826FD60B400942368 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -229,7 +225,6 @@
 				611EDDB12743660C0064B254 /* InputVC.h */,
 				611EDDA22741F8750064B254 /* StatusView.c */,
 				611EDDA12741F8750064B254 /* StatusView.h */,
-				618782C727D96BC60075466C /* ViewCache.h */,
 				610B92B8270A6E9000358DBD /* Views.c */,
 				610B92B7270A6E9000358DBD /* Views.h */,
 			);
@@ -334,7 +329,6 @@
 				61115E832A1B06FC00BEB69B /* BaseMacros.h */,
 				6161838126AC80A0001587B2 /* CocoaHelpers.c */,
 				6161838026AC8089001587B2 /* CocoaHelpers.h */,
-				618782C927DBF4BA0075466C /* ColorCache.h */,
 				615086F026D3223400521269 /* SwiftBridging.h */,
 				615086EC26D3222500521269 /* SwiftBridging.m */,
 			);
@@ -358,14 +352,12 @@
 				611EDDBF2744A9F70064B254 /* SetupWorkoutVC.h in Headers */,
 				61115E872A1B0F4A00BEB69B /* HistoryModel.h in Headers */,
 				617CA9AD2A1C46C1004EFA47 /* UserData.h in Headers */,
-				618782C827D96BC60075466C /* ViewCache.h in Headers */,
 				610B92B9270A6E9000358DBD /* Views.h in Headers */,
 				611EDDD02745FEA70064B254 /* WorkoutVC.h in Headers */,
 				614DA69A270A8D1F00EC90C4 /* ExerciseManager.h in Headers */,
 				611EDDB32743660C0064B254 /* InputVC.h in Headers */,
 				611EDDA32741F8750064B254 /* StatusView.h in Headers */,
 				610B92CB270A7F4900358DBD /* ContainerView.h in Headers */,
-				618782CA27DBF4BA0075466C /* ColorCache.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

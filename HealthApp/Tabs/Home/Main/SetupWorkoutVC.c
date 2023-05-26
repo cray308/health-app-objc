@@ -6,25 +6,32 @@
 
 Class SetupWorkoutVCClass;
 
+static SEL prc;
+static void (*reloadComponent)(id, SEL, long);
+
+void initSetupWorkoutData(void) {
+    Class Picker = objc_getClass("UIPickerView");
+    prc = sel_getUid("reloadComponent:");
+    reloadComponent = (void(*)(id, SEL, long))class_getMethodImplementation(Picker, prc);
+}
+
 #pragma mark - Lifecycle
 
-id setupWorkoutVC_init(id parent, uint8_t type, VCacheRef tbl, CCacheRef clr) {
-    id self = msg2(id, VCacheRef, CCacheRef, Sels.alloc(SetupWorkoutVCClass, Sels.alo),
-                   sel_getUid("initWithVCache:cCache:"), tbl, clr);
+id setupWorkoutVC_init(id parent, uint8_t type) {
+    id self = new(SetupWorkoutVCClass);
     SetupWorkoutVC *d = (SetupWorkoutVC *)((char *)self + VCSize + sizeof(InputVC));
     d->parent = parent;
     d->names = createWorkoutNames(type);
     d->type = type;
-    if (!objc_getClass("UITabBarAppearance")) {
-        id font = clsF1(id, CFStringRef, objc_getClass("UIFont"),
-                        sel_getUid("preferredFontForTextStyle:"), UIFontTextStyleTitle3);
+    if (!getTabBarAppearanceClass()) {
+        id font = getPreferredFont(UIFontTextStyleTitle3);
         const void *keys[] = {NSFontAttributeName, NSForegroundColorAttributeName};
-         d->normalDict = CFDictionaryCreate(NULL, keys, (const void *[]){
-             font, clr->getColor(clr->cls, clr->sc, ColorDisabled)
-         }, 2, &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-         d->selectedDict = CFDictionaryCreate(NULL, keys, (const void *[]){
-             font, clr->getColor(clr->cls, clr->sc, ColorLabel)
-         }, 2, &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+        d->normalDict = CFDictionaryCreate(NULL, keys, (const void *[]){
+            font, getColor(ColorDisabled)
+        }, 2, &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+        d->selectedDict = CFDictionaryCreate(NULL, keys, (const void *[]){
+            font, getColor(ColorLabel)
+        }, 2, &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
     }
     return self;
 }
@@ -36,48 +43,39 @@ void setupWorkoutVC_deinit(id self, SEL _cmd) {
         CFRelease(d->normalDict);
         CFRelease(d->selectedDict);
     }
-    Sels.viewRel(d->workoutTextField, Sels.rel);
+    releaseView(d->workoutField);
     msgSup0(void, (&(struct objc_super){self, InputVCClass}), _cmd);
 }
 
 void setupWorkoutVC_viewDidLoad(id self, SEL _cmd) {
-    msgSup0(void, (&(struct objc_super){self, InputVCClass}), _cmd);
+    inputVC_viewDidLoad(self, _cmd);
 
-    InputVC *sup = (InputVC *)((char *)self + VCSize);
-    VCacheRef tbl = sup->tbl;
-    SetupWorkoutVC *d = (SetupWorkoutVC *)((char *)sup + sizeof(InputVC));
-    tbl->view.setBG(msg0(id, self, sel_getUid("view")), tbl->view.sbg,
-                    sup->clr->getColor(sup->clr->cls, sup->clr->sc, ColorSecondaryBG));
-    id navItem = msg0(id, self, sel_getUid("navigationItem"));
-    setVCTitle(navItem, localize(CFSTR("setupWorkoutTitle")));
+    InputVC *p = (InputVC *)((char *)self + VCSize);
+    SetupWorkoutVC *d = (SetupWorkoutVC *)((char *)p + sizeof(InputVC));
+    SEL tapSel = getTapSel();
+    id cancelButton = createButton(localize(CFSTR("cancel")), ColorBlue, self, tapSel);
+    p->button = createButton(localize(CFSTR("go")), ColorBlue, self, tapSel);
+    setTag(p->button, 1);
+    setupNavItem(self, CFSTR("setupWorkoutTitle"), (id []){cancelButton, p->button});
+    setEnabled(p->button, false);
 
     CFStringRef pickerTitle = localize(CFSTR("setupWorkoutPickerTitle"));
-    id workoutLabel = createLabel(tbl, sup->clr, CFRetain(pickerTitle),
-                                  UIFontTextStyleSubheadline, ColorLabel);
-    tbl->label.setLines(workoutLabel, tbl->label.snl, 0);
-    tbl->view.setIsAcc(workoutLabel, tbl->view.sace, false);
-    tbl->stack.addSub(sup->vStack, tbl->stack.asv, workoutLabel);
-    tbl->stack.setSpaceAfter(sup->vStack, tbl->stack.scsp, 4, workoutLabel);
+    id workoutLabel = createLabel(CFRetain(pickerTitle), UIFontTextStyleSubheadline, ColorLabel);
+    setIsAccessibilityElement(workoutLabel, false);
+    addArrangedSubview(p->vStack, workoutLabel);
+    setCustomSpacing(p->vStack, ViewSpacing, workoutLabel);
+    releaseView(workoutLabel);
 
-    d->workoutTextField = createTextfield(tbl, sup->clr, self, sup->toolbar, pickerTitle, -1);
-    tbl->field.setText(d->workoutTextField, tbl->label.stxt, CFArrayGetValueAtIndex(d->names, 0));
-    msg1(void, long, d->workoutTextField, sel_getUid("setTextAlignment:"), 1);
-    tbl->stack.addSub(sup->vStack, tbl->stack.asv, d->workoutTextField);
-    tbl->stack.setSpaceAfter(sup->vStack, tbl->stack.scsp, 20, d->workoutTextField);
+    d->workoutField = createTextfield(self, p->toolbar, pickerTitle, -1);
+    setFieldText(d->workoutField, CFArrayGetValueAtIndex(d->names, 0));
+    msg1(void, long, d->workoutField, sel_getUid("setTextAlignment:"), 1);
+    addArrangedSubview(p->vStack, d->workoutField);
+    setCustomSpacing(p->vStack, GroupSpacing, d->workoutField);
 
-    id workoutPicker = Sels.new(objc_getClass("UIPickerView"), Sels.nw);
-    msg1(void, id, workoutPicker, tbl->field.sdg, self);
-    msg1(void, id, d->workoutTextField, sel_getUid("setInputView:"), workoutPicker);
-
-    SEL tapSel = sel_getUid("buttonTapped:");
-    id cancelButton = createButton(tbl, sup->clr, localize(CFSTR("cancel")),
-                                   ColorBlue, UIFontTextStyleBody, self, tapSel);
-    sup->button = createButton(tbl, sup->clr, localize(CFSTR("go")),
-                               ColorBlue, UIFontTextStyleBody, self, tapSel);
-    tbl->view.setTag(sup->button, tbl->view.stg, 1);
-
-    setNavButtons(navItem, (id []){cancelButton, sup->button});
-    tbl->button.setEnabled(sup->button, tbl->button.en, false);
+    id workoutPicker = new(objc_getClass("UIPickerView"));
+    setDelegate(workoutPicker, self);
+    msg1(void, id, d->workoutField, sel_getUid("setInputView:"), workoutPicker);
+    releaseView(workoutPicker);
 
     int maxes[] = {5, 5, 100}, mins[] = {1, 1, 1};
     CFStringRef rows[] = {CFSTR("setupWorkoutSets"), CFSTR("setupWorkoutReps"), NULL};
@@ -94,21 +92,18 @@ void setupWorkoutVC_viewDidLoad(id self, SEL _cmd) {
         mins[1] = 15;
     } else {
         rows[0] = rows[1] = NULL;
-        tbl->button.setEnabled(sup->button, tbl->button.en, true);
+        setEnabled(p->button, true);
     }
 
     for (int i = 0; i < 3; ++i) {
         if (rows[i])
             inputVC_addChild(self, localize(rows[i]), KeyboardTypeNumberPad, mins[i], maxes[i]);
     }
-
-    Sels.viewRel(workoutLabel, Sels.rel);
-    Sels.viewRel(workoutPicker, Sels.rel);
 }
 
-void setupWorkoutVC_tappedButton(id self, SEL _cmd _U_, id btn) {
+void setupWorkoutVC_tappedButton(id self, SEL _cmd _U_, id button) {
     InputVC *sup = (InputVC *)((char *)self + VCSize);
-    if (!sup->tbl->view.getTag(btn, sup->tbl->view.gtg)) {
+    if (!getTag(button)) {
         dismissPresentedVC(nil);
         return;
     }
@@ -139,9 +134,7 @@ void setupWorkoutVC_tappedButton(id self, SEL _cmd _U_, id btn) {
 long setupWorkoutVC_numberOfComponents(id self _U_, SEL _cmd _U_, id p _U_) { return 1; }
 
 long setupWorkoutVC_numberOfComponentsLegacy(id self _U_, SEL _cmd _U_, id picker) {
-    InputVC *sup = (InputVC *)((char *)self + VCSize);
-    sup->tbl->view.setBG(picker, sup->tbl->view.sbg,
-                         sup->clr->getColor(sup->clr->cls, sup->clr->sc, ColorTertiaryBG));
+    setBackgroundColor(picker, getColor(ColorTertiaryBG));
     return 1;
 }
 
@@ -167,10 +160,10 @@ void setupWorkoutVC_didSelectRow(id self, SEL _cmd _U_, id p _U_, long row, long
     SetupWorkoutVC *d = (SetupWorkoutVC *)((char *)sup + sizeof(InputVC));
     d->index = (int)row;
     CFStringRef name = CFArrayGetValueAtIndex(d->names, row);
-    sup->tbl->field.setText(d->workoutTextField, sup->tbl->label.stxt, name);
+    setFieldText(d->workoutField, name);
 }
 
 void setupWorkoutVC_didSelectRowLegacy(id self, SEL _cmd _U_, id picker, long row, long s _U_) {
     setupWorkoutVC_didSelectRow(self, nil, picker, row, 0);
-    msg1(void, long, picker, sel_getUid("reloadComponent:"), 0);
+    reloadComponent(picker, prc, 0);
 }

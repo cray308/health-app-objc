@@ -13,7 +13,7 @@
 
 "workoutNotificationTitle" = "Workout Update";
 "workoutCompleteMsg" = "Workout completed";
-"exerciseProgressHint" = "Exercise %1$d of %2$d";
+"exerciseProgress" = "Exercise %1$d of %2$d";
 "exerciseDurationMessage" = "Minimum exercise duration met";
 
 "cancel" = "Cancel";
@@ -44,7 +44,7 @@
 "hourMinFmt" = "%1$dh %2$dm";
 "minsFmt" = "%dm";
 
-"planPickerTitle" = "Change workout plan";
+"planPicker" = "Change workout plan";
 "darkMode" = "Dark mode";
 "settingsSegment0" = "None";
 "settingsSegment1" = "Foundation";
@@ -65,8 +65,8 @@
 "setupWorkoutDuration" = "Duration in minutes";
 
 "updateMaxesTitle" = "Set Weight & Reps";
-"stepperLabelInit" = "Reps: %d";
-"stepperLabelDescr" = "Change the number of reps completed";
+"stepperLabel" = "Reps: %d";
+"stepperDescription" = "Change the number of reps completed";
 "exerciseHeader" = "Set %1$d of %2$d";
 "exerciseTitleRest" = "Rest: %d s";
 "exerciseTitleReps" = "%1$@ x %2$d";
@@ -81,7 +81,7 @@
 "circuitHeaderLocAndAMRAP" = "Circuit %1$d of %2$d - AMRAP %3$d min";
 "sets1" = "Set 1";
 "rounds1" = "Round 1";
-"sep" = "%1$@, %2$@";
+"separator" = "%1$@, %2$@";
 
 "exNames00" = "Squat";
 "exNames01" = "Pull-up";

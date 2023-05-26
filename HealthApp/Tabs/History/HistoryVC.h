@@ -1,22 +1,18 @@
 #ifndef HistoryVC_h
 #define HistoryVC_h
 
-#include "ColorCache.h"
 #include "HistoryModel.h"
-#include "ViewCache.h"
 
 extern Class HistoryVCClass;
 
 typedef struct {
-    CCacheRef clr;
-    VCacheRef tbl;
     HistoryModel model;
-    id picker;
+    id rangeControl;
     id charts[3];
 } HistoryVC;
 
-id historyVC_init(HistoryModel **ref, VCacheRef tbl, CCacheRef clr);
-void historyVC_updateSegment(id self, SEL _cmd, id picker);
+id historyVC_init(HistoryModel **ref);
+void historyVC_updateSegment(id self, SEL _cmd, id control);
 void historyVC_viewDidLoad(id self, SEL _cmd);
 CFStringRef historyVC_stringForValue(id self, SEL _cmd, double value);
 

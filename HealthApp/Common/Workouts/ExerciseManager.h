@@ -48,8 +48,8 @@ typedef struct {
 typedef struct {
     Circuit *activities;
     Circuit *group;
-    CFStringRef title;
     time_t startTime;
+    int nameIdx;
     int index;
     const int size;
     int duration;
@@ -67,6 +67,8 @@ typedef struct {
     const uint8_t type;
     const uint8_t day;
 } WorkoutParams;
+
+#define createWorkoutTitleKey(t, i) formatStr(NULL, CFSTR("wkNames%d%02d"), (t), (i))
 
 void initExerciseData(int week);
 
