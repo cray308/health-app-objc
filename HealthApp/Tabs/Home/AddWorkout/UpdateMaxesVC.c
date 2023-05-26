@@ -1,5 +1,4 @@
 #include "UpdateMaxesVC.h"
-#include "AppDelegate.h"
 #include "ExerciseManager.h"
 #include "InputVC.h"
 #include "Views.h"
@@ -102,7 +101,7 @@ void stepperView_decrement(id self, SEL _cmd _U_) { stepperChangeGeneric(self, -
 
 #pragma mark - VC
 
-id updateMaxesVC_init(void *parent, int index, int bodyweight) {
+id updateMaxesVC_init(id parent, int index, int bodyweight) {
     id self = new(UpdateMaxesVCClass);
     UpdateMaxesVC *d = (UpdateMaxesVC *)((char *)self + VCSize + sizeof(InputVC));
     d->parent = parent;
@@ -156,7 +155,5 @@ void updateMaxesVC_tappedFinish(id self, SEL _cmd _U_, id button _U_) {
     float reps = 37.f - (float)getValue(d->repsStepper, sgv);
     int weight = (int)lrintf(initWeight / reps) - extra;
     CFRelease(locale);
-    void *parent = d->parent;
-    int index = d->index;
-    dismissPresentedVC(^{ workoutVC_finishedBottomSheet(parent, index, weight); });
+    dismissPresentedVC(self, ^{ workoutVC_finishedBottomSheet(d->parent, d->index, weight); });
 }

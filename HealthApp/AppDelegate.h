@@ -2,7 +2,6 @@
 #define AppDelegate_h
 
 #include <objc/objc.h>
-#include "CocoaHelpers.h"
 #include "ExerciseManager.h"
 #include "UserData.h"
 
@@ -12,13 +11,6 @@ typedef struct {
     id tabs[3];
     UserData userData;
 } AppDelegate;
-
-void presentVC(id child);
-void presentModalVC(id modal);
-void dismissPresentedVC(Callback handler);
-
-id createAlertController(CFStringRef titleKey, CFStringRef msgKey);
-void addAlertAction(id ctrl, CFStringRef titleKey, int style, Callback handler);
 
 bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd, id app, id opt);
 int appDelegate_supportedOrientations(AppDelegate *self, SEL _cmd, id app, id win);

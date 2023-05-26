@@ -450,39 +450,3 @@ void updateSegmentedControl(id control, bool darkMode) {
     CFRelease(normalDict);
     CFRelease(selectedDict);
 }
-
-#pragma mark - VC Helpers
-
-void setupNavItem(id vc, CFStringRef titleKey, id const *buttons) {
-    id navItem = getNavItem(vc);
-    CFStringRef title = localize(titleKey);
-    msg1(void, CFStringRef, navItem, SetTitleSel, title);
-    CFRelease(title);
-    if (!buttons) return;
-
-    char *setters[] = {"setLeftBarButtonItem:", "setRightBarButtonItem:"};
-    for (int i = 0; i < 2; ++i) {
-        id btn = buttons[i];
-        if (btn) {
-            useConstraints(btn);
-            id barItem = createBarButtonItemWithView(btn);
-            msg1(void, id, navItem, sel_getUid(setters[i]), barItem);
-            releaseObject(barItem);
-        }
-    }
-}
-
-void setupHierarchy(id vc, id vStack, id scrollView, int backgroundColor) {
-    id view = getView(vc);
-    setBackgroundColor(view, getColor(backgroundColor));
-    useConstraints(scrollView);
-    useStackConstraints(vStack);
-    setLayoutMargins(vStack, (HAInsets){16, 8, 16, 8});
-    addSubview(view, scrollView);
-    addSubview(scrollView, vStack);
-    pinToMainView(scrollView, view);
-    pin(vStack, scrollView);
-    setActive(makeConstraint(vStack, LayoutAttributeWidth, 0, scrollView, LayoutAttributeWidth, 0));
-    releaseView(scrollView);
-    releaseView(vStack);
-}

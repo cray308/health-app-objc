@@ -173,6 +173,9 @@ extern size_t ViewSize;
 #define getNavVC(c) ViewTable.vc.navVC((c), ViewTable.vc.nc)
 #define getNavItem(c) msg0(id, (c), sel_getUid("navigationItem"))
 #define isViewLoaded(c) msg0(bool, (c), sel_getUid("isViewLoaded"))
+#define presentVC(p, c)                                                          \
+ msg3(void, id, bool, Callback, (p),                                             \
+      sel_getUid("presentViewController:animated:completion:"), (c), true, NULL)
 
 id getPreferredFont(CFStringRef style);
 id getSystemFont(int size, CGFloat weight);
@@ -290,7 +293,19 @@ static inline void updateButtonColors(id button, int titleColor) {
 
 void updateSegmentedControl(id control, bool darkMode);
 
-void setupNavItem(id vc, CFStringRef titleKey, id const *buttons);
-void setupHierarchy(id vc, id vStack, id scrollView, int backgroundColor);
+extern void setupNavItem(id vc, CFStringRef titleKey, id const *buttons);
+extern void setupHierarchy(id vc, id vStack, id scrollView, int backgroundColor);
+
+extern void presentModalVC(id vc, id modal);
+
+static inline void dismissPresentedVC(id vc, Callback handler) {
+    id presenter = msg0(id, getNavVC(vc), sel_getUid("presentingViewController"));
+    msg2(void, bool, Callback, presenter,
+         sel_getUid("dismissViewControllerAnimated:completion:"), true, handler);
+}
+
+extern id createAlert(CFStringRef titleKey, CFStringRef messageKey);
+extern void addAlertAction(id alert, CFStringRef titleKey, int style, Callback handler);
+extern void disableWindowTint(void);
 
 #endif /* Views_h */

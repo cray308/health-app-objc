@@ -29,7 +29,7 @@
 "homeHeader0" = "Workouts This Week";
 "homeHeader1" = "Add Custom Workout";
 "homeTestMax" = "Test Max";
-"homeAlertTitle" = "Nicely done!";
+"homeAlert" = "Nicely done!";
 "homeAlertMessage" = "Great job meeting your workout goal this week.";
 
 "historySegment0" = "6 Months";
@@ -52,10 +52,10 @@
 "maxWeight" = "Max %@ weight";
 "settingsSave" = "Save settings";
 "settingsDelete" = "Delete data";
-"settingsAlertTitle" = "Are you sure?";
+"settingsAlert" = "Are you sure?";
 "inputFieldError" = "Input must be between %1$d and %2$d.";
-"alertMsgSave" = "This will save the currently entered data.";
-"alertMsgDelete" = "This will delete all workout history.";
+"msgSave" = "This will save the currently entered data.";
+"msgDelete" = "This will delete all workout history.";
 
 "setupWorkoutTitle" = "Set up Workout";
 "setupWorkoutPickerTitle" = "Choose workout";

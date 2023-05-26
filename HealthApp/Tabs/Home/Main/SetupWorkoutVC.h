@@ -25,11 +25,9 @@ void setupWorkoutVC_deinit(id self, SEL _cmd);
 void setupWorkoutVC_viewDidLoad(id self, SEL _cmd);
 void setupWorkoutVC_tappedButton(id self, SEL _cmd, id button);
 long setupWorkoutVC_numberOfComponents(id self, SEL _cmd, id p);
-long setupWorkoutVC_numberOfComponentsLegacy(id self, SEL _cmd, id picker);
 long setupWorkoutVC_numberOfRows(id self, SEL _cmd, id p, long s);
 CFStringRef setupWorkoutVC_getTitle(id self, SEL _cmd, id p, long row, long s);
 CFAttributedStringRef setupWorkoutVC_getAttrTitle(id self, SEL _cmd, id p, long row, long s);
 void setupWorkoutVC_didSelectRow(id self, SEL _cmd, id p, long row, long s);
-void setupWorkoutVC_didSelectRowLegacy(id self, SEL _cmd, id picker, long row, long s);
 
 #endif /* SetupWorkoutVC_h */

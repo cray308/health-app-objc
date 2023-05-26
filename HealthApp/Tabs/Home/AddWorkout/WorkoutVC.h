@@ -10,7 +10,7 @@ extern Class WorkoutVCClass;
 typedef struct {
     pthread_mutex_t lock;
     pthread_cond_t cond;
-    void *parent;
+    id parent;
     time_t refTime;
     int section;
     int row;

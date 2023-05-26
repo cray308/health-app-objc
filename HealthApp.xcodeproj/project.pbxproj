@@ -41,6 +41,8 @@
 		61594D2026068106000D01A1 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 61594D1F26068106000D01A1 /* main.c */; };
 		61594D2A26068106000D01A1 /* HealthAppTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 61594D2926068106000D01A1 /* HealthAppTests.m */; };
 		6161838226AC80A0001587B2 /* CocoaHelpers.c in Sources */ = {isa = PBXBuildFile; fileRef = 6161838126AC80A0001587B2 /* CocoaHelpers.c */; };
+		6166D7FE2A2157470094C1EE /* Views_VCExt.h in Headers */ = {isa = PBXBuildFile; fileRef = 6166D7FC2A2157470094C1EE /* Views_VCExt.h */; };
+		6166D7FF2A2157470094C1EE /* Views_VCExt.c in Sources */ = {isa = PBXBuildFile; fileRef = 6166D7FD2A2157470094C1EE /* Views_VCExt.c */; };
 		617CA9A92A1C3A1D004EFA47 /* DatabaseManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 617CA9A72A1C3A1D004EFA47 /* DatabaseManager.h */; };
 		617CA9AA2A1C3A1D004EFA47 /* DatabaseManager.c in Sources */ = {isa = PBXBuildFile; fileRef = 617CA9A82A1C3A1D004EFA47 /* DatabaseManager.c */; };
 		617CA9AD2A1C46C1004EFA47 /* UserData.h in Headers */ = {isa = PBXBuildFile; fileRef = 617CA9AB2A1C46C1004EFA47 /* UserData.h */; };
@@ -118,7 +120,6 @@
 		614DA698270A8D1F00EC90C4 /* ExerciseManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ExerciseManager.h; sourceTree = "<group>"; };
 		614DA699270A8D1F00EC90C4 /* ExerciseManager.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = ExerciseManager.c; sourceTree = "<group>"; };
 		615086EC26D3222500521269 /* SwiftBridging.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SwiftBridging.m; sourceTree = "<group>"; };
-		615086F026D3223400521269 /* SwiftBridging.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SwiftBridging.h; sourceTree = "<group>"; };
 		61594D0726068105000D01A1 /* HealthApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HealthApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		61594D0B26068105000D01A1 /* AppDelegate.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = AppDelegate.c; sourceTree = "<group>"; };
 		61594D1926068106000D01A1 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -130,6 +131,8 @@
 		61594D2B26068106000D01A1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		6161838026AC8089001587B2 /* CocoaHelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CocoaHelpers.h; sourceTree = "<group>"; };
 		6161838126AC80A0001587B2 /* CocoaHelpers.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = CocoaHelpers.c; sourceTree = "<group>"; };
+		6166D7FC2A2157470094C1EE /* Views_VCExt.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Views_VCExt.h; sourceTree = "<group>"; };
+		6166D7FD2A2157470094C1EE /* Views_VCExt.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = Views_VCExt.c; sourceTree = "<group>"; };
 		617CA9A72A1C3A1D004EFA47 /* DatabaseManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DatabaseManager.h; sourceTree = "<group>"; };
 		617CA9A82A1C3A1D004EFA47 /* DatabaseManager.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = DatabaseManager.c; sourceTree = "<group>"; };
 		617CA9AB2A1C46C1004EFA47 /* UserData.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UserData.h; sourceTree = "<group>"; };
@@ -227,6 +230,8 @@
 				611EDDA12741F8750064B254 /* StatusView.h */,
 				610B92B8270A6E9000358DBD /* Views.c */,
 				610B92B7270A6E9000358DBD /* Views.h */,
+				6166D7FD2A2157470094C1EE /* Views_VCExt.c */,
+				6166D7FC2A2157470094C1EE /* Views_VCExt.h */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -329,7 +334,6 @@
 				61115E832A1B06FC00BEB69B /* BaseMacros.h */,
 				6161838126AC80A0001587B2 /* CocoaHelpers.c */,
 				6161838026AC8089001587B2 /* CocoaHelpers.h */,
-				615086F026D3223400521269 /* SwiftBridging.h */,
 				615086EC26D3222500521269 /* SwiftBridging.m */,
 			);
 			path = Extensions;
@@ -349,6 +353,7 @@
 				61FFEEA2272CCCB5002BFFA6 /* AppDelegate.h in Headers */,
 				611EDDE827476ED50064B254 /* HistoryVC.h in Headers */,
 				611EDDA9274355F10064B254 /* HomeVC.h in Headers */,
+				6166D7FE2A2157470094C1EE /* Views_VCExt.h in Headers */,
 				611EDDBF2744A9F70064B254 /* SetupWorkoutVC.h in Headers */,
 				61115E872A1B0F4A00BEB69B /* HistoryModel.h in Headers */,
 				617CA9AD2A1C46C1004EFA47 /* UserData.h in Headers */,
@@ -487,6 +492,7 @@
 				617CA9AE2A1C46C1004EFA47 /* UserData.c in Sources */,
 				611EDDD12745FEA70064B254 /* WorkoutVC.c in Sources */,
 				611EDDC72744CB2D0064B254 /* UpdateMaxesVC.c in Sources */,
+				6166D7FF2A2157470094C1EE /* Views_VCExt.c in Sources */,
 				61594D2026068106000D01A1 /* main.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

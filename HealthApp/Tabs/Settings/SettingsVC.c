@@ -129,29 +129,28 @@ void settingsVC_viewDidLoad(id self, SEL _cmd) {
 }
 
 void settingsVC_buttonTapped(id self, SEL _cmd _U_, id button) {
-    InputVC *sup = (InputVC *)((char *)self + VCSize);
-    SettingsVC *d = (SettingsVC *)((char *)sup + sizeof(InputVC));
     long tag = getTag(button);
-    id ctrl = createAlertController(
-      CFSTR("settingsAlertTitle"), tag ? CFSTR("alertMsgDelete") : CFSTR("alertMsgSave"));
-    addAlertAction(ctrl, CFSTR("cancel"), 1, NULL);
+    id alert = createAlert(CFSTR("settingsAlert"), tag ? CFSTR("msgDelete") : CFSTR("msgSave"));
+    addAlertAction(alert, CFSTR("cancel"), ActionStyleCancel, NULL);
     if (tag) {
-        addAlertAction(ctrl, CFSTR("delete"), 2, ^{ deleteAppData(); });
-        presentVC(ctrl);
-        return;
+        addAlertAction(alert, CFSTR("delete"), ActionStyleDestructive, ^{ deleteAppData(); });
+        goto end;
     }
 
+    InputVC *sup = (InputVC *)((char *)self + VCSize);
+    SettingsVC *d = (SettingsVC *)((char *)sup + sizeof(InputVC));
     uint8_t darkMode = UCHAR_MAX;
     if (d->darkModeSwitch.view) darkMode = isOn(d->darkModeSwitch.data->button, sio);
-    uint8_t plan = (uint8_t)(getSelectedSegmentIndex(d->planControl) - 1);
-
     CFLocaleRef locale = CFLocaleCopyCurrent();
     float toSavedMass = getSavedMassFactor(locale);
     CFRelease(locale);
-    int *arr = d->results;
     for (int i = 0; i < 4; ++i) {
-        arr[i] = (int)lrintf(sup->children[i].data->result * toSavedMass);
+        d->results[i] = (int)lrintf(sup->children[i].data->result * toSavedMass);
     }
-    addAlertAction(ctrl, CFSTR("save"), 0, ^{ updateUserInfo(plan, darkMode, arr); });
-    presentVC(ctrl);
+    addAlertAction(alert, CFSTR("save"), ActionStyleDefault, ^{
+        updateUserInfo((uint8_t)(getSelectedSegmentIndex(d->planControl) - 1), darkMode, d->results);
+    });
+end:
+    disableWindowTint();
+    presentVC(self, alert);
 }

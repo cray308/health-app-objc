@@ -1,6 +1,5 @@
 #include "HomeVC.h"
 #include <CoreGraphics/CoreGraphics.h>
-#include "AppDelegate.h"
 #include "SetupWorkoutVC.h"
 #include "StatusView.h"
 #include "Views.h"
@@ -138,7 +137,7 @@ void homeVC_customButtonTapped(id self, SEL _cmd _U_, id button) {
         return;
     }
 
-    presentModalVC(setupWorkoutVC_init(self, --index));
+    presentModalVC(self, setupWorkoutVC_init(self, --index));
 }
 
 #pragma mark - Navigate Back From Workout
@@ -219,9 +218,10 @@ static void showConfetti(id self) {
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 5000000000), dispatch_get_main_queue(), ^{
         removeFromSuperview(confetti);
         releaseView(confetti);
-        id ctrl = createAlertController(CFSTR("homeAlertTitle"), CFSTR("homeAlertMessage"));
-        addAlertAction(ctrl, CFSTR("ok"), 0, NULL);
-        presentVC(ctrl);
+        id alert = createAlert(CFSTR("homeAlert"), CFSTR("homeAlertMessage"));
+        addAlertAction(alert, CFSTR("ok"), ActionStyleDefault, NULL);
+        disableWindowTint();
+        presentVC(self, alert);
     });
 }
 

@@ -29,7 +29,7 @@
 "homeHeader0" = "Allenamenti Questa Settimana";
 "homeHeader1" = "Aggiungi Allenamento Personalizzato";
 "homeTestMax" = "Testa i Pesi Massimi";
-"homeAlertTitle" = "Ben fatto!";
+"homeAlert" = "Ben fatto!";
 "homeAlertMessage" = "Ottimo lavoro per raggiungere il tuo obiettivo di allenamento questa settimana.";
 
 "historySegment0" = "6 mesi";
@@ -52,10 +52,10 @@
 "maxWeight" = "Peso massimo %@";
 "settingsSave" = "Salva impostazioni";
 "settingsDelete" = "Elimina i dati";
-"settingsAlertTitle" = "Sei sicuro?";
+"settingsAlert" = "Sei sicuro?";
 "inputFieldError" = "L'ingresso deve essere compreso tra %1$d e %2$d.";
-"alertMsgSave" = "Questo salverà i dati forniti.";
-"alertMsgDelete" = "Questo eliminerà tutta la cronologia degli allenamenti.";
+"msgSave" = "Questo salverà i dati forniti.";
+"msgDelete" = "Questo eliminerà tutta la cronologia degli allenamenti.";
 
 "setupWorkoutTitle" = "Configura l'Allenamento";
 "setupWorkoutPickerTitle" = "Scegli l'allenamento";

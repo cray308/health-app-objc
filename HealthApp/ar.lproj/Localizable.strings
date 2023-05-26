@@ -29,7 +29,7 @@
 "homeHeader0" = "التدريبات هذا الأسبوع";
 "homeHeader1" = "أضف تمرينا مخصصا";
 "homeTestMax" = "اختبر الأوزان القصوى";
-"homeAlertTitle" = "\U202Fأحسنت صنعا!\U202C";
+"homeAlert" = "\U202Fأحسنت صنعا!\U202C";
 "homeAlertMessage" = "أحسنت صنعا في تحقيق هدف التمرين هذا الأسبوع";
 
 "historySegment0" = "٦ شهرا";
@@ -52,10 +52,10 @@
 "maxWeight" = "\U202Fالحد الأقصى لوزن %@\U202C";
 "settingsSave" = "حفظ الإعدادات";
 "settingsDelete" = "حذف البيانات";
-"settingsAlertTitle" = "هل أنت متأكد؟";
+"settingsAlert" = "هل أنت متأكد؟";
 "inputFieldError" = "\U202Fيجب أن تكون المدخلات بين %1$d و%2$d\U202C";
-"alertMsgSave" = "سيؤدي ذلك إلى حفظ البيانات المقدمة";
-"alertMsgDelete" = "سيؤدي ذلك إلى حذف كل سجل التمرين";
+"msgSave" = "سيؤدي ذلك إلى حفظ البيانات المقدمة";
+"msgDelete" = "سيؤدي ذلك إلى حذف كل سجل التمرين";
 
 "setupWorkoutTitle" = "تكوين التمرين";
 "setupWorkoutPickerTitle" = "اختر التمرين";

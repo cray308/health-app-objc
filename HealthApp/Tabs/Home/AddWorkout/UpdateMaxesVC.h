@@ -4,7 +4,7 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include <objc/objc.h>
 
-extern void workoutVC_finishedBottomSheet(void *self, int index, int weight);
+extern void workoutVC_finishedBottomSheet(id self, int index, int weight);
 
 extern Class StepperViewClass;
 extern Class UpdateMaxesVCClass;
@@ -17,7 +17,7 @@ typedef struct {
 } StepperView;
 
 typedef struct {
-    void *parent;
+    id parent;
     id repsStepper;
     int index;
     int bodyweight;
@@ -30,7 +30,7 @@ void stepperView_updatedStepper(id self, SEL _cmd);
 void stepperView_increment(id self, SEL _cmd);
 void stepperView_decrement(id self, SEL _cmd);
 
-id updateMaxesVC_init(void *parent, int index, int bodyweight);
+id updateMaxesVC_init(id parent, int index, int bodyweight);
 void updateMaxesVC_deinit(id self, SEL _cmd);
 void updateMaxesVC_viewDidLoad(id self, SEL _cmd);
 void updateMaxesVC_tappedFinish(id self, SEL _cmd, id button);

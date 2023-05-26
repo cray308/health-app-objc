@@ -81,8 +81,16 @@ int main(int argc, char *argv[]) {
     class_addMethod(SetupWorkoutVCClass, deinit, (IMP)setupWorkoutVC_deinit, voidSig);
     class_addMethod(SetupWorkoutVCClass, viewLoad, (IMP)setupWorkoutVC_viewDidLoad, voidSig);
     class_addMethod(SetupWorkoutVCClass, tap, (IMP)setupWorkoutVC_tappedButton, tapSig);
+    class_addMethod(SetupWorkoutVCClass, sel_getUid("numberOfComponentsInPickerView:"),
+                    (IMP)setupWorkoutVC_numberOfComponents, "q@:@");
     class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:numberOfRowsInComponent:"),
                     (IMP)setupWorkoutVC_numberOfRows, "q@:@q");
+    class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:titleForRow:forComponent:"),
+                    (IMP)setupWorkoutVC_getTitle, "@@:@qq");
+    class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:attributedTitleForRow:forComponent:"),
+                    (IMP)setupWorkoutVC_getAttrTitle, "@@:@qq");
+    class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:didSelectRow:inComponent:"),
+                    (IMP)setupWorkoutVC_didSelectRow, "v@:@qq");
     objc_registerClassPair(SetupWorkoutVCClass);
 
     UpdateMaxesVCClass = objc_allocateClassPair(InputVCClass, "UpdateMaxesVC", 0);
