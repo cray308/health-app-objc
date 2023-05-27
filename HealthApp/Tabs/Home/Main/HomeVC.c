@@ -83,7 +83,7 @@ void homeVC_updateColors(id self) {
 #pragma mark - Selectors/Methods
 
 void homeVC_viewDidLoad(id self, SEL _cmd) {
-    msgSup0(void, (&(struct objc_super){self, VC}), _cmd);
+    msgSupV(supSig(), self, VC, _cmd);
 
     HomeVC *d = (HomeVC *)((char *)self + VCSize);
     setupNavItem(self, CFSTR("tabs0"), NULL);
@@ -119,7 +119,7 @@ void homeVC_viewDidLoad(id self, SEL _cmd) {
 void homeVC_navigateToWorkout(id self, Workout *workout) {
     id workoutVC = workoutVC_init(workout);
     id navVC = getNavVC(self);
-    msg2(void, id, bool, navVC, sel_getUid("pushViewController:animated:"), workoutVC, true);
+    msgV(objSig(void, id, bool), navVC, sel_getUid("pushViewController:animated:"), workoutVC, true);
     releaseVC(workoutVC);
 }
 
@@ -151,10 +151,10 @@ static void showConfetti(id self) {
       (CGImageRef(*)(id, SEL))class_getMethodImplementation(Image, icgi);
 
     CGColorRef colors[] = {
-        msg0(CGColorRef, getColor(ColorRed), cgColor),
-        msg0(CGColorRef, getColor(ColorBlue), cgColor),
-        msg0(CGColorRef, getColor(ColorGreen), cgColor),
-        msg0(CGColorRef, getColor(ColorOrange), cgColor)
+        msgV(objSig(CGColorRef), getColor(ColorRed), cgColor),
+        msgV(objSig(CGColorRef), getColor(ColorBlue), cgColor),
+        msgV(objSig(CGColorRef), getColor(ColorGreen), cgColor),
+        msgV(objSig(CGColorRef), getColor(ColorOrange), cgColor)
     };
     CGImageRef images[] = {
         getCGImage(imageNamed(Image, iimn, CFSTR("cv0")), icgi),
@@ -176,17 +176,17 @@ static void showConfetti(id self) {
 
     for (int i = 0; i < 16; ++i) {
         cells[i] = new(cellClass);
-        msg1(void, float, cells[i], cellSels[0], 4);
-        msg1(void, float, cells[i], cellSels[1], 14);
+        msgV(objSig(void, float), cells[i], cellSels[0], 4);
+        msgV(objSig(void, float), cells[i], cellSels[1], 14);
         int velocity = velocities[arc4random_uniform(4)];
-        msg1(void, CGFloat, cells[i], cellSels[2], velocity);
-        msg1(void, CGFloat, cells[i], cellSels[3], M_PI);
-        msg1(void, CGFloat, cells[i], cellSels[4], 0.5);
-        msg1(void, CGFloat, cells[i], cellSels[5], 3.5);
-        msg1(void, CGColorRef, cells[i], cellSels[6], colors[i >> 2]);
-        msg1(void, id, cells[i], cellSels[7], (id)images[i % 4]);
-        msg1(void, CGFloat, cells[i], cellSels[8], 0.25);
-        msg1(void, CGFloat, cells[i], cellSels[9], 0.1);
+        msgV(objSig(void, CGFloat), cells[i], cellSels[2], velocity);
+        msgV(objSig(void, CGFloat), cells[i], cellSels[3], M_PI);
+        msgV(objSig(void, CGFloat), cells[i], cellSels[4], 0.5);
+        msgV(objSig(void, CGFloat), cells[i], cellSels[5], 3.5);
+        msgV(objSig(void, CGColorRef), cells[i], cellSels[6], colors[i >> 2]);
+        msgV(objSig(void, id), cells[i], cellSels[7], (id)images[i % 4]);
+        msgV(objSig(void, CGFloat), cells[i], cellSels[8], 0.25);
+        msgV(objSig(void, CGFloat), cells[i], cellSels[9], 0.1);
     }
 
     id view = getView(self);
@@ -195,20 +195,21 @@ static void showConfetti(id self) {
 
     id confetti = new(View);
     useConstraints(confetti);
-    setBackgroundColor(confetti, msg1(id, CGFloat, getColor(ColorGray),
+    setBackgroundColor(confetti, msgV(objSig(id, CGFloat), getColor(ColorGray),
                                       sel_getUid("colorWithAlphaComponent:"), 0.8));
 
-    CFArrayRef array = CFArrayCreate(NULL, (const void **)cells, 16, &RetainedArrCallbacks);
     id layer = new(objc_getClass("CAEmitterLayer"));
-    msg1(void, id, getLayer(confetti), sel_getUid("addSublayer:"), layer);
-    msg1(void, CGPoint, layer,
-         sel_getUid("setEmitterPosition:"), ((CGPoint){frame.size.width * 0.5, 0}));
-    msg1(void, id, layer, sel_getUid("setEmitterShape:"), kCAEmitterLayerLine);
-    msg1(void, CGSize, layer, sel_getUid("setEmitterSize:"), ((CGSize){frame.size.width - 16, 1}));
-    msg1(void, CFArrayRef, layer, sel_getUid("setEmitterCells:"), array);
+    msgV(objSig(void, id), getLayer(confetti), sel_getUid("addSublayer:"), layer);
+    CGPoint position = {frame.size.width * 0.5, 0};
+    msgV(objSig(void, CGPoint), layer, sel_getUid("setEmitterPosition:"), position);
+    msgV(objSig(void, id), layer, sel_getUid("setEmitterShape:"), kCAEmitterLayerLine);
+    CGSize size = {frame.size.width - 16, 1};
+    msgV(objSig(void, CGSize), layer, sel_getUid("setEmitterSize:"), size);
+    CFArrayRef cellArr = CFArrayCreate(NULL, (const void **)cells, 16, &RetainedArrCallbacks);
+    msgV(objSig(void, CFArrayRef), layer, sel_getUid("setEmitterCells:"), cellArr);
 
-    CFRelease(array);
-    msg0(void, layer, ReleaseSel);
+    CFRelease(cellArr);
+    msgV(objSig(void), layer, ReleaseSel);
     for (int i = 0; i < 16; ++i) {
         releaseObject(cells[i]);
     }

@@ -45,7 +45,7 @@ void statusView_deinit(id self, SEL _cmd) {
     StatusView *v = (StatusView *)((char *)self + ViewSize);
     releaseView(v->header);
     releaseView(v->box);
-    msgSup0(void, (&(struct objc_super){self, View}), _cmd);
+    msgSupV(supSig(), self, View, _cmd);
 }
 
 void statusView_updateAccessibility(StatusView *v) {

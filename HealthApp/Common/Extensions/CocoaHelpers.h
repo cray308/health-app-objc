@@ -5,23 +5,13 @@
 #include <objc/message.h>
 #include "BaseMacros.h"
 
-#define clsF0(rv, cls, cmd) (((rv(*)(Class,SEL))objc_msgSend)((cls),(cmd)))
-#define clsF1(rv, t, cls, cmd, a) (((rv(*)(Class,SEL,t))objc_msgSend)((cls),(cmd),(a)))
-#define clsF2(rv, t1, t2, cls, cmd, a1, a2)\
- (((rv(*)(Class,SEL,t1,t2))objc_msgSend)((cls),(cmd),(a1),(a2)))
-#define clsF3(rv, t1, t2, t3, cls, cmd, a1, a2, a3)\
- (((rv(*)(Class,SEL,t1,t2,t3))objc_msgSend)((cls),(cmd),(a1),(a2),(a3)))
+#define objcArgs(t) t self _U_, SEL _cmd _U_
+#define objSig(r, ...) (r(*)(id, SEL, ##__VA_ARGS__))
+#define clsSig(r, ...) (r(*)(Class, SEL, ##__VA_ARGS__))
+#define msgV(s, o, ...) ((s objc_msgSend) (o, ##__VA_ARGS__))
 
-#define msg0(rv, o, cmd) (((rv(*)(id,SEL))objc_msgSend)((o),(cmd)))
-#define msg1(rv, t, o, cmd, a) (((rv(*)(id,SEL,t))objc_msgSend)((o),(cmd),(a)))
-#define msg2(rv, t1, t2, o, cmd, a1, a2) (((rv(*)(id,SEL,t1,t2))objc_msgSend)((o),(cmd),(a1),(a2)))
-#define msg3(rv, t1, t2, t3, o, cmd, a1, a2, a3)\
- (((rv(*)(id,SEL,t1,t2,t3))objc_msgSend)((o),(cmd),(a1),(a2),(a3)))
-#define msg4(rv, t1, t2, t3, t4, o, cmd, a1, a2, a3, a4)\
- (((rv(*)(id,SEL,t1,t2,t3,t4))objc_msgSend)((o),(cmd),(a1),(a2),(a3),(a4)))
-
-#define msgSup0(rv, s, cmd) (((rv(*)(struct objc_super*,SEL))objc_msgSendSuper)(s, cmd))
-#define msgSup1(rv, t, s, cmd, a) (((rv(*)(struct objc_super*,SEL,t))objc_msgSendSuper)(s, cmd, a))
+#define supSig(...) ((void(*)(struct objc_super *, SEL, ##__VA_ARGS__)) objc_msgSendSuper)
+#define msgSupV(s, o, C, cmd, ...) (s (&(struct objc_super){o, C}, cmd, ##__VA_ARGS__))
 
 #define getClassMethodImp(C, s) method_getImplementation(class_getClassMethod((C), (s)))
 
@@ -86,7 +76,7 @@ extern Class Image;
 
 #define ReleaseSel AppTable.sels.rel
 
-#define respondsToSelector(o, s) msg1(bool, SEL, (o), AppTable.sels.rts, (s))
+#define respondsToSelector(o, s) msgV(objSig(bool, SEL), (o), AppTable.sels.rts, (s))
 #define alloc(C) AppTable.sels.objAlloc((C), AppTable.sels.sa)
 #define new(C) AppTable.sels.objNew((C), AppTable.sels.sn)
 #define retainView(v) AppTable.sels.viewRet((v), AppTable.sels.ret)

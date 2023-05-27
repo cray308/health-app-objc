@@ -72,10 +72,10 @@ void initExerciseData(int week) {
         key = CFSTR("lb");
     }
     CFRelease(l);
-    id unit = msg1(id, CFStringRef, alloc(objc_getClass("NSUnit")),
+    id unit = msgV(objSig(id, CFStringRef), alloc(objc_getClass("NSUnit")),
                    sel_getUid("initWithSymbol:"), key);
     id formatter = new(objc_getClass("NSMeasurementFormatter"));
-    CFStringRef _unitStr = msg1(CFStringRef, id, formatter, sel_getUid("stringFromUnit:"), unit);
+    CFStringRef _unitStr = msgV(objSig(CFStringRef, id), formatter, sel_getUid("stringFromUnit:"), unit);
     weightUnit = CFStringCreateCopy(NULL, _unitStr);
     releaseObject(unit);
     releaseObject(formatter);
@@ -85,15 +85,16 @@ void initExerciseData(int week) {
 
 void getHealthData(void) {
     Class storeClass = objc_getClass("HKHealthStore");
-    if (!clsF0(bool, storeClass, sel_getUid("isHealthDataAvailable"))) return;
+    if (!msgV(clsSig(bool), storeClass, sel_getUid("isHealthDataAvailable"))) return;
 
     id store = new(storeClass);
-    id weightType = clsF1(id, CFStringRef, objc_getClass("HKSampleType"),
+    id weightType = msgV(clsSig(id, CFStringRef), objc_getClass("HKSampleType"),
                           sel_getUid("quantityTypeForIdentifier:"), HKQuantityTypeIdentifierBodyMass);
     CFSetRef set = CFSetCreate(NULL, (const void *[]){weightType}, 1, NULL);
 
     SEL auth = sel_getUid("requestAuthorizationToShareTypes:readTypes:completion:");
-    msg3(void, CFSetRef, CFSetRef, void(^)(bool,id), store, auth, NULL, set, ^(bool granted, id er _U_) {
+    ((objSig(void, CFSetRef, CFSetRef, void(^)(bool, id))objc_msgSend)
+     (store, auth, NULL, set, ^(bool granted, id er _U_) {
         if (!granted) {
             releaseObject(store);
             return;
@@ -102,19 +103,19 @@ void getHealthData(void) {
         CFArrayRef arr = createSortDescriptors(HKSampleSortIdentifierStartDate, false);
         id _req = alloc(objc_getClass("HKSampleQuery"));
         SEL qInit = sel_getUid("initWithSampleType:predicate:limit:sortDescriptors:resultsHandler:");
-        id req = (((id(*)(id,SEL,id,id,unsigned long,CFArrayRef,void(^)(id,CFArrayRef,id)))objc_msgSend)
+        id req = ((objSig(id, id, id, u_long, CFArrayRef, void(^)(id, CFArrayRef, id))objc_msgSend)
                   (_req, qInit, weightType, nil, 1, arr, ^(id q _U_, CFArrayRef data, id err2 _U_) {
             if (data && CFArrayGetCount(data)) {
-                id unit = clsF0(id, objc_getClass("HKUnit"), sel_getUid("poundUnit"));
-                id qty = msg0(id, (id)CFArrayGetValueAtIndex(data, 0), sel_getUid("quantity"));
-                bodyweight = (int)msg1(double, id, qty, sel_getUid("doubleValueForUnit:"), unit);
+                id unit = msgV(clsSig(id), objc_getClass("HKUnit"), sel_getUid("poundUnit"));
+                id qty = msgV(objSig(id), (id)CFArrayGetValueAtIndex(data, 0), sel_getUid("quantity"));
+                bodyweight = (int)msgV(objSig(double, id), qty, sel_getUid("doubleValueForUnit:"), unit);
             }
             releaseObject(store);
         }));
-        msg1(void, id, store, sel_getUid("executeQuery:"), req);
+        msgV(objSig(void, id), store, sel_getUid("executeQuery:"), req);
         CFRelease(arr);
         releaseObject(req);
-    });
+    }));
     CFRelease(set);
 }
 

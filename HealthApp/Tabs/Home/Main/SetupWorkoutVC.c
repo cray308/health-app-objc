@@ -43,7 +43,7 @@ void setupWorkoutVC_deinit(id self, SEL _cmd) {
         CFRelease(d->selectedDict);
     }
     releaseView(d->workoutField);
-    msgSup0(void, (&(struct objc_super){self, InputVCClass}), _cmd);
+    msgSupV(supSig(), self, InputVCClass, _cmd);
 }
 
 void setupWorkoutVC_viewDidLoad(id self, SEL _cmd) {
@@ -67,13 +67,13 @@ void setupWorkoutVC_viewDidLoad(id self, SEL _cmd) {
 
     d->workoutField = createTextfield(self, p->toolbar, pickerTitle, -1);
     setFieldText(d->workoutField, CFArrayGetValueAtIndex(d->names, 0));
-    msg1(void, long, d->workoutField, sel_getUid("setTextAlignment:"), 1);
+    msgV(objSig(void, long), d->workoutField, sel_getUid("setTextAlignment:"), 1);
     addArrangedSubview(p->vStack, d->workoutField);
     setCustomSpacing(p->vStack, GroupSpacing, d->workoutField);
 
     id workoutPicker = new(objc_getClass("UIPickerView"));
     setDelegate(workoutPicker, self);
-    msg1(void, id, d->workoutField, sel_getUid("setInputView:"), workoutPicker);
+    msgV(objSig(void, id), d->workoutField, sel_getUid("setInputView:"), workoutPicker);
     releaseView(workoutPicker);
 
     int maxes[] = {5, 5, 100}, mins[] = {1, 1, 1};

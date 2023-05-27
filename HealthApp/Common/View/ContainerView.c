@@ -34,7 +34,7 @@ void containerView_deinit(id self, SEL _cmd) {
     releaseView(v->divider);
     releaseView(v->header);
     releaseView(v->stack);
-    msgSup0(void, (&(struct objc_super){self, View}), _cmd);
+    msgSupV(supSig(), self, View, _cmd);
 }
 
 void containerView_updateColors(ContainerView *v) {

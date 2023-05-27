@@ -28,7 +28,7 @@ static id colorCreate(int type) {
 
 static id barColorCreate(int type) {
     static CFStringRef const names[] = {CFSTR("navBarColor"), CFSTR("modalColor")};
-    return clsF1(id, CFStringRef, Color, sel_getUid("colorNamed:"), names[type]);
+    return msgV(clsSig(id, CFStringRef), Color, sel_getUid("colorNamed:"), names[type]);
 }
 
 void initAppData(bool modern, Class **clsRefs, size_t **sizeRefs) {
@@ -164,7 +164,7 @@ void fillStringArray(CFStringRef *arr, CFStringRef format, int count) {
 }
 
 CFArrayRef createSortDescriptors(CFStringRef key, bool ascending) {
-    id desc = msg2(id, CFStringRef, bool, alloc(objc_getClass("NSSortDescriptor")),
+    id desc = msgV(objSig(id, CFStringRef, bool), alloc(objc_getClass("NSSortDescriptor")),
                    sel_getUid("initWithKey:ascending:"), key, ascending);
     CFArrayRef arr = CFArrayCreate(NULL, (const void *[]){desc}, 1, &RetainedArrCallbacks);
     releaseObject(desc);

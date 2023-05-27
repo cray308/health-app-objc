@@ -337,7 +337,7 @@ void workoutVC_deinit(id self, SEL _cmd) {
     free(d->workout->activities);
     free(d->workout);
     free(d->containers);
-    msgSup0(void, (&(struct objc_super){self, VC}), _cmd);
+    msgSupV(supSig(), self, VC, _cmd);
 }
 
 static void handleFinishedWorkout(WorkoutVC *d, bool pop) {
@@ -358,14 +358,14 @@ static void cleanupWorkoutNotifications(id self, WorkoutVC *d) {
         pthread_kill(d->threads[TimerExercise], SignalExercise);
     CFNotificationCenterRemoveEveryObserver(CFNotificationCenterGetLocalCenter(), self);
     id center = getNotificationCenter();
-    msg0(void, center, sel_getUid("removeAllPendingNotificationRequests"));
-    msg0(void, center, sel_getUid("removeAllDeliveredNotifications"));
+    msgV(objSig(void), center, sel_getUid("removeAllPendingNotificationRequests"));
+    msgV(objSig(void), center, sel_getUid("removeAllDeliveredNotifications"));
 }
 
 #pragma mark - Lifecycle
 
 void workoutVC_viewDidLoad(id self, SEL _cmd) {
-    msgSup0(void, (&(struct objc_super){self, VC}), _cmd);
+    msgSupV(supSig(), self, VC, _cmd);
 
     WorkoutVC *d = (WorkoutVC *)((char *)self + VCSize);
     CFStringRef titleKey = createWorkoutTitleKey(d->workout->type, d->workout->nameIdx);
@@ -448,9 +448,9 @@ void workoutVC_startEndWorkout(id self, SEL _cmd _U_, id button) {
 }
 
 void workoutVC_willDisappear(id self, SEL _cmd, bool animated) {
-    msgSup1(void, bool, (&(struct objc_super){self, VC}), _cmd, animated);
+    msgSupV(supSig(bool), self, VC, _cmd, animated);
 
-    if (msg0(bool, self, sel_getUid("isMovingFromParentViewController"))) {
+    if (msgV(objSig(bool), self, sel_getUid("isMovingFromParentViewController"))) {
         WorkoutVC *d = (WorkoutVC *)((char *)self + VCSize);
         if (!d->done) {
             cleanupWorkoutNotifications(self, d);

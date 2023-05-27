@@ -98,7 +98,7 @@ void initVCData(uint8_t darkMode) {
 void setupNavItem(id vc, CFStringRef titleKey, id const *buttons) {
     id navItem = getNavItem(vc);
     CFStringRef title = localize(titleKey);
-    msg1(void, CFStringRef, navItem, SetTitleSel, title);
+    msgV(objSig(void, CFStringRef), navItem, SetTitleSel, title);
     CFRelease(title);
     if (!buttons) return;
 
@@ -108,7 +108,7 @@ void setupNavItem(id vc, CFStringRef titleKey, id const *buttons) {
         if (btn) {
             useConstraints(btn);
             id barItem = createBarButtonItemWithView(btn);
-            msg1(void, id, navItem, sel_getUid(setters[i]), barItem);
+            msgV(objSig(void, id), navItem, sel_getUid(setters[i]), barItem);
             releaseObject(barItem);
         }
     }
@@ -144,31 +144,31 @@ static void setupNavBarColor(id bar) {
 
 void setupBarGeneric(id bar, Class BarAppearance, id color) {
     if (!BarAppearance) {
-        msg1(void, bool, bar, pvcc.bar.setTranslucent, false);
+        msgV(objSig(void, bool), bar, pvcc.bar.setTranslucent, false);
         setBarTintColor(bar, color);
         return;
     }
 
     id appearance = new(BarAppearance);
-    msg0(void, appearance, pvcc.appear.configureWithOpaqueBackground);
-    msg1(void, id, appearance, SetBackgroundSel, color);
-    msg1(void, id, bar, pvcc.appear.setStandard, appearance);
+    msgV(objSig(void), appearance, pvcc.appear.configureWithOpaqueBackground);
+    msgV(objSig(void, id), appearance, SetBackgroundSel, color);
+    msgV(objSig(void, id), bar, pvcc.appear.setStandard, appearance);
     if (respondsToSelector(bar, pvcc.appear.setScrollEdge))
-        msg1(void, id, bar, pvcc.appear.setScrollEdge, appearance);
+        msgV(objSig(void, id), bar, pvcc.appear.setScrollEdge, appearance);
     releaseObject(appearance);
 }
 
 void setupTabVC(id vc, Class TabBarAppearance) {
-    id tabBar = msg0(id, vc, sel_getUid("tabBar"));
+    id tabBar = msgV(objSig(id), vc, sel_getUid("tabBar"));
     id color = getBarColor(BarColorNav);
     setupBarGeneric(tabBar, TabBarAppearance, color);
     if (!TabBarAppearance) {
         id tabBarColor = getColor(ColorGray);
-        msg1(void, id, tabBar, sel_getUid("setUnselectedItemTintColor:"), tabBarColor);
+        msgV(objSig(void, id), tabBar, sel_getUid("setUnselectedItemTintColor:"), tabBarColor);
     }
 
     Class NavBarAppearance = getNavBarAppearanceClass();
-    CFArrayRef controllers = msg0(CFArrayRef, vc, sel_getUid("viewControllers"));
+    CFArrayRef controllers = msgV(objSig(CFArrayRef), vc, sel_getUid("viewControllers"));
     for (int i = 0; i < 3; ++i) {
         id navVC = (id)CFArrayGetValueAtIndex(controllers, i);
         id navBar = getNavBar(navVC);
@@ -184,12 +184,12 @@ void handleTintChange(id window, bool darkMode) {
     barStyle = darkMode;
     setupAppColors(darkMode);
     setTintColor(window, getColor(ColorRed));
-    setupTabVC(msg0(id, window, sel_getUid("rootViewController")), Nil);
+    setupTabVC(msgV(objSig(id), window, sel_getUid("rootViewController")), Nil);
     setupCharts(darkMode);
 }
 
 void setupCharts(bool enabled) {
-    clsF1(void, bool, objc_getClass("Charts.ChartUtility"), sel_getUid("setup:"), enabled);
+    msgV(clsSig(void, bool), objc_getClass("Charts.ChartUtility"), sel_getUid("setup:"), enabled);
 }
 
 #pragma mark - VC Presentation
@@ -216,7 +216,7 @@ id createAlert(CFStringRef titleKey, CFStringRef messageKey) {
 }
 
 id alertCreate(CFStringRef title, CFStringRef message) {
-    return clsF3(id, CFStringRef, CFStringRef, long, pvcc.alert.cls,
+    return msgV(clsSig(id, CFStringRef, CFStringRef, long), pvcc.alert.cls,
                 sel_getUid("alertControllerWithTitle:message:preferredStyle:"),
                 title, message, AlertControllerStyleAlert);
 }

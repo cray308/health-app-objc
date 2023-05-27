@@ -6,7 +6,7 @@
 #define StepperMin 1
 #define StepperMax 10
 
-#define setStepperValue(s, v) msg1(void, double, (s), sel_getUid("setValue:"), (v))
+#define setStepperValue(s, v) msgV(objSig(void, double), (s), sel_getUid("setValue:"), (v))
 
 extern uint64_t UIAccessibilityTraitAdjustable;
 
@@ -50,8 +50,8 @@ static id stepperView_init(id *stepperRef, CFLocaleRef locale CF_CONSUMED) {
     v->stepper = new(Stepper);
     *stepperRef = retainView(v->stepper);
     setStepperValue(v->stepper, StepperMin);
-    msg1(void, double, v->stepper, sel_getUid("setMinimumValue:"), StepperMin);
-    msg1(void, double, v->stepper, sel_getUid("setMaximumValue:"), StepperMax);
+    msgV(objSig(void, double), v->stepper, sel_getUid("setMinimumValue:"), StepperMin);
+    msgV(objSig(void, double), v->stepper, sel_getUid("setMaximumValue:"), StepperMax);
     addTarget(v->stepper, self, getValueChangedSel(), ControlEventValueChanged);
 
     id stack = createHStack((id []){v->label, v->stepper});
@@ -67,7 +67,7 @@ void stepperView_deinit(id self, SEL _cmd) {
     CFRelease(v->reps);
     releaseView(v->stepper);
     releaseView(v->label);
-    msgSup0(void, (&(struct objc_super){self, View}), _cmd);
+    msgSupV(supSig(), self, View, _cmd);
 }
 
 static void handleNewStepperValue(id self, StepperView *v, int value) {
@@ -113,7 +113,7 @@ id updateMaxesVC_init(id parent, int index, int bodyweight) {
 void updateMaxesVC_deinit(id self, SEL _cmd) {
     UpdateMaxesVC *d = (UpdateMaxesVC *)((char *)self + VCSize + sizeof(InputVC));
     releaseView(d->repsStepper);
-    msgSup0(void, (&(struct objc_super){self, InputVCClass}), _cmd);
+    msgSupV(supSig(), self, InputVCClass, _cmd);
 }
 
 void updateMaxesVC_viewDidLoad(id self, SEL _cmd) {
@@ -126,7 +126,7 @@ void updateMaxesVC_viewDidLoad(id self, SEL _cmd) {
     setEnabled(p->button, false);
 
     if (getTabBarAppearanceClass())
-        msg1(void, bool, self, sel_getUid("setModalInPresentation:"), true);
+        msgV(objSig(void, bool), self, sel_getUid("setModalInPresentation:"), true);
 
     setSpacing(p->vStack, GroupSpacing);
     CFLocaleRef locale = CFLocaleCopyCurrent();

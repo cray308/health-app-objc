@@ -8,8 +8,8 @@
 #include "WorkoutVC.h"
 
 static AppDelegate *getAppDel(void) {
-    id shared = clsF0(id, objc_getClass("UIApplication"), sel_getUid("sharedApplication"));
-    return (AppDelegate *)msg0(id, shared, sel_getUid("delegate"));
+    id shared = msgV(clsSig(id), objc_getClass("UIApplication"), sel_getUid("sharedApplication"));
+    return (AppDelegate *)msgV(objSig(id), shared, sel_getUid("delegate"));
 }
 
 id getAppWindow(void) { return getAppDel()->window; }
@@ -27,7 +27,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id app _U_,
         tzDiff = userData_init(&self->userData, prefs, &week, TabBarAppearance);
     } else {
         userData_create(&self->userData, TabBarAppearance);
-        msg2(void, u_long, void(^)(bool, id), unCenter,
+        msgV(objSig(void, u_long, void(^)(bool, id)), unCenter,
              sel_getUid("requestAuthorizationWithOptions:completionHandler:"),
              6, ^(bool granted _U_, id err _U_){});
         createDB();
@@ -62,16 +62,16 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id app _U_,
     self->window = new(objc_getClass("UIWindow"));
     setTintColor(self->window, getColor(ColorRed));
     id tabVC = new(objc_getClass("UITabBarController"));
-    msg1(void, id, self->window, sel_getUid("setRootViewController:"), tabVC);
+    msgV(objSig(void, id), self->window, sel_getUid("setRootViewController:"), tabVC);
     CFArrayRef vcArr = CFArrayCreate(NULL, (const void **)controllers, 3, NULL);
-    msg1(void, CFArrayRef, tabVC, sel_getUid("setViewControllers:"), vcArr);
+    msgV(objSig(void, CFArrayRef), tabVC, sel_getUid("setViewControllers:"), vcArr);
     setupTabVC(tabVC, TabBarAppearance);
     for (int i = 0; i < 3; ++i) {
         releaseVC(controllers[i]);
     }
     CFRelease(vcArr);
     releaseVC(tabVC);
-    msg0(void, self->window, sel_getUid("makeKeyAndVisible"));
+    msgV(objSig(void), self->window, sel_getUid("makeKeyAndVisible"));
     runStartupJob(historyModel, self->userData.weekStart, tzDiff);
     return true;
 }
@@ -119,6 +119,6 @@ void addWorkoutData(Workout const *workout, uint8_t day, int *weights, bool pop)
 cleanup:
     if (pop) {
         id navVC = getNavVC(self->tabs[0]);
-        msg1(id, bool, navVC, sel_getUid("popViewControllerAnimated:"), true);
+        msgV(objSig(id, bool), navVC, sel_getUid("popViewControllerAnimated:"), true);
     }
 }

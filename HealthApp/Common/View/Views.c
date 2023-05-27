@@ -398,7 +398,7 @@ id createSegmentedControl(CFStringRef format, int startIndex) {
     CFStringRef segments[3];
     fillStringArray(segments, format, 3);
     CFArrayRef segs = CFArrayCreate(NULL, (const void **)segments, 3, NULL);
-    id control = msg1(id, CFArrayRef, alloc(pvc.seg.cls), sel_getUid("initWithItems:"), segs);
+    id control = msgV(objSig(id, CFArrayRef), alloc(pvc.seg.cls), sel_getUid("initWithItems:"), segs);
     setSelectedSegmentIndex(control, startIndex);
     CFRelease(segs);
     for (int i = 0; i < 3; ++i) {

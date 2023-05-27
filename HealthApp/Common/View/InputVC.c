@@ -58,7 +58,7 @@ void inputView_deinit(id self, SEL _cmd) {
     releaseView(v->hintLabel);
     releaseView(v->field);
     releaseView(v->errorLabel);
-    msgSup0(void, (&(struct objc_super){self, View}), _cmd);
+    msgSupV(supSig(), self, View, _cmd);
 }
 
 static void inputView_reset(InputView *v, float value) {
@@ -161,11 +161,11 @@ void inputVC_deinit(id self, SEL _cmd) {
     releaseView(d->scrollView);
     releaseView(d->vStack);
     CFNotificationCenterRemoveEveryObserver(CFNotificationCenterGetLocalCenter(), self);
-    msgSup0(void, (&(struct objc_super){self, VC}), _cmd);
+    msgSupV(supSig(), self, VC, _cmd);
 }
 
 void inputVC_viewDidLoad(id self, SEL _cmd) {
-    msgSup0(void, (&(struct objc_super){self, VC}), _cmd);
+    msgSupV(supSig(), self, VC, _cmd);
 
     InputVC *d = (InputVC *)((char *)self + VCSize);
     d->activeTag = -1;
@@ -174,26 +174,26 @@ void inputVC_viewDidLoad(id self, SEL _cmd) {
     id items[] = {
         createBarButtonItemWithImage(CFSTR("ico_chevron_up"), self, getJumpToPrevSel()),
         createBarButtonItemWithImage(CFSTR("ico_chevron_down"), self, getJumpToNextSel()),
-        msg3(id, long, id, SEL, alloc(BarButtonItem),
+        msgV(objSig(id, long, id, SEL), alloc(BarButtonItem),
              sel_getUid("initWithBarButtonSystemItem:target:action:"),
              5, nil, nil),
-        msg4(id, CFStringRef, long, id, SEL, alloc(BarButtonItem),
+        msgV(objSig(id, CFStringRef, long, id, SEL), alloc(BarButtonItem),
              sel_getUid("initWithTitle:style:target:action:"),
              doneText, 2, self, getDismissKeyboardSel())
     };
     CFRelease(doneText);
 
-    d->toolbar = msg1(id, CGRect, alloc(objc_getClass("UIToolbar")),
-                      sel_getUid("initWithFrame:"), ((CGRect){{0}, {100, 100}}));
+    d->toolbar = msgV(objSig(id, CGRect), alloc(objc_getClass("UIToolbar")),
+                      sel_getUid("initWithFrame:"), (CGRect){{0}, {100, 100}});
     uint8_t darkMode = getUserData()->darkMode;
     if (isCharValid(darkMode)) {
         setBarTintColor(d->toolbar, getBarColor(BarColorModal));
         d->keyboardAppearance = darkMode;
     }
     setTintColor(d->toolbar, getColor(ColorRed));
-    msg0(void, d->toolbar, sel_getUid("sizeToFit"));
+    msgV(objSig(void), d->toolbar, sel_getUid("sizeToFit"));
     CFArrayRef itemArr = CFArrayCreate(NULL, (const void **)items, 4, &RetainedArrCallbacks);
-    msg1(void, CFArrayRef, d->toolbar, sel_getUid("setItems:"), itemArr);
+    msgV(objSig(void, CFArrayRef), d->toolbar, sel_getUid("setItems:"), itemArr);
     CFRelease(itemArr);
     for (int i = 0; i < 4; ++i) {
         releaseObject(items[i]);
@@ -231,7 +231,7 @@ void keyboardWillHide(CFNotificationCenterRef ctr _U_, void *self,
 }
 
 void inputVC_dismissKeyboard(id self, SEL _cmd _U_) {
-    msg1(bool, bool, getView(self), sel_getUid("endEditing:"), true);
+    msgV(objSig(bool, bool), getView(self), sel_getUid("endEditing:"), true);
 }
 
 static void handleFieldChange(id self, int offset) {

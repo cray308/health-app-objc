@@ -171,10 +171,10 @@ extern size_t ViewSize;
 
 #define getView(c) ViewTable.vc.gView((c), ViewTable.vc.gv)
 #define getNavVC(c) ViewTable.vc.navVC((c), ViewTable.vc.nc)
-#define getNavItem(c) msg0(id, (c), sel_getUid("navigationItem"))
-#define isViewLoaded(c) msg0(bool, (c), sel_getUid("isViewLoaded"))
+#define getNavItem(c) msgV(objSig(id), (c), sel_getUid("navigationItem"))
+#define isViewLoaded(c) msgV(objSig(bool), (c), sel_getUid("isViewLoaded"))
 #define presentVC(p, c)                                                          \
- msg3(void, id, bool, Callback, (p),                                             \
+ msgV(objSig(void, id, bool, Callback), (p),                                     \
       sel_getUid("presentViewController:animated:completion:"), (c), true, NULL)
 
 id getPreferredFont(CFStringRef style);
@@ -186,18 +186,18 @@ id getSystemFont(int size, CGFloat weight);
 #define setActive(c) ViewTable.con.sActive((c), ViewTable.con.sa, true)
 
 #if defined(__arm64__)
-#define getRect(r, o, c) r = msg0(CGRect, (o), (c))
+#define getRect(r, o, c) r = msgV(objSig(CGRect), (o), (c))
 #define convertRect(r, b, d, s)\
- r = msg2(CGRect, CGRect, id, (d), ViewTable.common.cr, (b), (s))
+ r = msgV(objSig(CGRect, CGRect, id), (d), ViewTable.common.cr, (b), (s))
 #else
 #define getRect(r, o, c) ((void(*)(CGRect *, id, SEL))objc_msgSend_stret)(&r, (o), (c))
 #define convertRect(r, b, d, s)\
  ((void(*)(CGRect *, id, SEL, CGRect, id))objc_msgSend_stret)(&r, (d), ViewTable.common.cr, (b), (s))
 #endif
 
-#define setBarTintColor(o, c) msg1(void, id, (o), ViewTable.common.sbtc, (c))
-#define setTintColor(o, c) msg1(void, id, (o), ViewTable.common.stic, (c))
-#define setDelegate(o, d) msg1(void, id, (o), ViewTable.common.sd, (d))
+#define setBarTintColor(o, c) msgV(objSig(void, id), (o), ViewTable.common.sbtc, (c))
+#define setTintColor(o, c) msgV(objSig(void, id), (o), ViewTable.common.stic, (c))
+#define setDelegate(o, d) msgV(objSig(void, id), (o), ViewTable.common.sd, (d))
 #define useConstraints(v) ViewTable.view.setTranslates((v), ViewTable.common.stamic, false)
 #define setBackgroundColor(v, c) ViewTable.view.setBG((v), SetBackgroundSel, (c))
 #define addSubview(v, s) ViewTable.view.add((v), ViewTable.view.as, (s))
@@ -223,7 +223,7 @@ id getSystemFont(int size, CGFloat weight);
 #define setCustomSpacing(s, n, v) ViewTable.stack.setCustom((s), ViewTable.stack.scs, (n), (v))
 
 #define setText(l, t) ViewTable.label.sText((l), ViewTable.common.ste, (t))
-#define getText(l) msg0(CFStringRef, (l), ViewTable.common.gt)
+#define getText(l) msgV(objSig(CFStringRef), (l), ViewTable.common.gt)
 #define setTextColor(l, c) ViewTable.label.setColor((l), ViewTable.common.stec, (c))
 
 #define addTarget(v, t, a, e) ViewTable.button.add((v), ViewTable.button.at, (t), (a), (e))
@@ -236,7 +236,7 @@ id getSystemFont(int size, CGFloat weight);
 
 #define getSelectedSegmentIndex(s) ViewTable.seg.getSelected((s), ViewTable.seg.gssi)
 #define setSelectedSegmentIndex(s, i)\
- msg1(void, long, (s), sel_getUid("setSelectedSegmentIndex:"), (i))
+ msgV(objSig(void, long), (s), sel_getUid("setSelectedSegmentIndex:"), (i))
 
 #define createBarButtonItemWithImage(i, t, a)\
  ViewTable.bbi.iInit(alloc(BarButtonItem), ViewTable.bbi.sii, getImage(i), 0, (t), (a))
@@ -245,7 +245,7 @@ id getSystemFont(int size, CGFloat weight);
 #define setFieldText(f, t) ViewTable.field.sText((f), ViewTable.common.ste, (t))
 #define getFieldText(f) ViewTable.field.gText((f), ViewTable.common.gt)
 #define becomeFirstResponder(f) ViewTable.field.becomeFirst((f), ViewTable.field.bfr)
-#define setKeyboardType(f, t) msg1(void, long, (f), ViewTable.field.skt, (t))
+#define setKeyboardType(f, t) msgV(objSig(void, long), (f), ViewTable.field.skt, (t))
 #define setKeyboardAppearance(f, a) ViewTable.field.setAppearance((f), ViewTable.field.ska, (a))
 
 void setFieldBackgroundColor(id field, id color);
@@ -258,7 +258,7 @@ void initViewData(void (*inits[])(void));
 
 void pin(id view, id container);
 
-#define pinToMainView(c, v) pin((c), msg0(id, (v), sel_getUid("safeAreaLayoutGuide")))
+#define pinToMainView(c, v) pin((c), msgV(objSig(id), (v), sel_getUid("safeAreaLayoutGuide")))
 
 static inline void setHeight(id view, int height, bool greaterOrEqual, bool optional) {
     id constraint = makeConstraint(view, LayoutAttributeHeight, greaterOrEqual, nil, 0, height);
@@ -268,7 +268,7 @@ static inline void setHeight(id view, int height, bool greaterOrEqual, bool opti
 
 static inline id createScrollView(void) {
     id scroll = new(ViewTable.scroll.cls);
-    msg1(void, long, scroll, sel_getUid("setAutoresizingMask:"), AutoresizingFlexibleHeight);
+    msgV(objSig(void, long), scroll, sel_getUid("setAutoresizingMask:"), AutoresizingFlexibleHeight);
     return scroll;
 }
 
@@ -299,8 +299,8 @@ extern void setupHierarchy(id vc, id vStack, id scrollView, int backgroundColor)
 extern void presentModalVC(id vc, id modal);
 
 static inline void dismissPresentedVC(id vc, Callback handler) {
-    id presenter = msg0(id, getNavVC(vc), sel_getUid("presentingViewController"));
-    msg2(void, bool, Callback, presenter,
+    id presenter = msgV(objSig(id), getNavVC(vc), sel_getUid("presentingViewController"));
+    msgV(objSig(void, bool, Callback), presenter,
          sel_getUid("dismissViewControllerAnimated:completion:"), true, handler);
 }
 

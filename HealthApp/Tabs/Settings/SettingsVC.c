@@ -3,7 +3,7 @@
 #include "InputVC.h"
 #include "Views.h"
 
-#define setOn(s, o) msg1(void, bool, (s), sel_getUid("setOn:"), (o))
+#define setOn(s, o) msgV(objSig(void, bool), (s), sel_getUid("setOn:"), (o))
 
 Class SwitchViewClass;
 Class SettingsVCClass;

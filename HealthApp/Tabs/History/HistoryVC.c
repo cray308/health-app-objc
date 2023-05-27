@@ -100,7 +100,7 @@ void historyVC_updateSegment(id self, SEL _cmd _U_, id control) {
         for (int i = 0; i < 3; ++i) {
             hc.view.setData(d->charts[i], hc.view.sd, nil, 0);
         }
-        msg3(void, id, SEL, u_long, control,
+        msgV(objSig(void, id, SEL, u_long), control,
              sel_getUid("removeTarget:action:forControlEvents:"), nil, nil, ControlEventValueChanged);
         return;
     }
@@ -143,14 +143,14 @@ void historyVC_updateSegment(id self, SEL _cmd _U_, id control) {
 }
 
 void historyVC_viewDidLoad(id self, SEL _cmd) {
-    msgSup0(void, (&(struct objc_super){self, VC}), _cmd);
+    msgSupV(supSig(), self, VC, _cmd);
 
     HistoryVC *d = (HistoryVC *)((char *)self + VCSize);
     d->rangeControl = createSegmentedControl(CFSTR("historySegment%d"), 0);
     addTarget(d->rangeControl, self, getTapSel(), ControlEventValueChanged);
     uint8_t darkMode = getUserData()->darkMode;
     if (isCharValid(darkMode)) updateSegmentedControl(d->rangeControl, darkMode);
-    msg1(void, id, getNavItem(self), sel_getUid("setTitleView:"), d->rangeControl);
+    msgV(objSig(void, id), getNavItem(self), sel_getUid("setTitleView:"), d->rangeControl);
 
     Class Chart = getChartClass();
     SEL iChart = sel_getUid("initWithColors:count:xFormatter:options:");
