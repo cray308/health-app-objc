@@ -19,7 +19,7 @@ static id switchView_init(SwitchView **ref, bool darkMode) {
     isOn = (bool(*)(id, SEL))class_getMethodImplementation(Switch, sio);
 
     id self = new(SwitchViewClass);
-    SwitchView *v = (SwitchView *)((char *)self + ViewSize);
+    SwitchView *v = getIVV(SwitchView, self);
     *ref = v;
 
     CFStringRef labelText = localize(CFSTR("darkMode"));
@@ -43,13 +43,13 @@ static id switchView_init(SwitchView **ref, bool darkMode) {
 #pragma mark - VC
 
 void settingsVC_updateColors(id self, bool darkMode) {
-    InputVC *p = (InputVC *)((char *)self + VCSize);
-    SettingsVC *d = (SettingsVC *)((char *)p + sizeof(InputVC));
+    InputVC *p = getIVVC(InputVC, self);
+    SettingsVC *d = getIVVCS(SettingsVC, p);
     setBackgroundColor(getView(self), getColor(ColorPrimaryBGGrouped));
     id red = getColor(ColorRed), labelColor = getColor(ColorLabel);
     id fieldBackground = getColor(ColorTertiaryBG);
     setTextColor(d->planLabel, labelColor);
-    updateSegmentedControl(d->planControl, darkMode);
+    updateSegmentedControlColors(d->planControl, darkMode);
     setBackgroundColor(d->darkModeSwitch.view, getColor(ColorSecondaryBGGrouped));
     setTextColor(d->darkModeSwitch.data->label, labelColor);
     updateButtonColors(d->deleteButton, ColorRed);
@@ -69,8 +69,8 @@ void settingsVC_updateColors(id self, bool darkMode) {
 void settingsVC_viewDidLoad(id self, SEL _cmd) {
     inputVC_viewDidLoad(self, _cmd);
 
-    InputVC *p = (InputVC *)((char *)self + VCSize);
-    SettingsVC *d = (SettingsVC *)((char *)p + sizeof(InputVC));
+    InputVC *p = getIVVC(InputVC, self);
+    SettingsVC *d = getIVVCS(SettingsVC, p);
     setBackgroundColor(getView(self), getColor(ColorPrimaryBGGrouped));
     setupNavItem(self, CFSTR("settingsTitle"), NULL);
 
@@ -87,7 +87,7 @@ void settingsVC_viewDidLoad(id self, SEL _cmd) {
     d->planControl = planControl;
 
     if (isCharValid(data->darkMode)) {
-        updateSegmentedControl(planControl, data->darkMode);
+        updateSegmentedControlColors(planControl, data->darkMode);
         d->darkModeSwitch.view = switchView_init(&d->darkModeSwitch.data, data->darkMode);
         addArrangedSubview(p->vStack, d->darkModeSwitch.view);
         setCustomSpacing(p->vStack, GroupSpacing, d->darkModeSwitch.view);
@@ -100,7 +100,7 @@ void settingsVC_viewDidLoad(id self, SEL _cmd) {
     for (int i = 0; i < 4; ++i) {
         CFMutableStringRef adjustedName = CFStringCreateMutableCopy(NULL, 128, liftNames[i]);
         CFStringLowercase(adjustedName, locale);
-        inputVC_addChild(self, formatStr(NULL, fieldKey, adjustedName), kbType, 0, FieldMaxDefault);
+        inputVC_addField(self, formatStr(NULL, fieldKey, adjustedName), kbType, 0, FieldMaxDefault);
         CFRelease(liftNames[i]);
         CFRelease(adjustedName);
     }
@@ -137,15 +137,15 @@ void settingsVC_buttonTapped(id self, SEL _cmd _U_, id button) {
         goto end;
     }
 
-    InputVC *sup = (InputVC *)((char *)self + VCSize);
-    SettingsVC *d = (SettingsVC *)((char *)sup + sizeof(InputVC));
+    InputVC *p = getIVVC(InputVC, self);
+    SettingsVC *d = getIVVCS(SettingsVC, p);
     uint8_t darkMode = UCHAR_MAX;
     if (d->darkModeSwitch.view) darkMode = isOn(d->darkModeSwitch.data->button, sio);
     CFLocaleRef locale = CFLocaleCopyCurrent();
     float toSavedMass = getSavedMassFactor(locale);
     CFRelease(locale);
     for (int i = 0; i < 4; ++i) {
-        d->results[i] = (int)lrintf(sup->children[i].data->result * toSavedMass);
+        d->results[i] = (int)lrintf(p->children[i].data->result * toSavedMass);
     }
     addAlertAction(alert, CFSTR("save"), ActionStyleDefault, ^{
         updateUserInfo((uint8_t)(getSelectedSegmentIndex(d->planControl) - 1), darkMode, d->results);

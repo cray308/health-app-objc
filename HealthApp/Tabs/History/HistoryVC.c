@@ -16,9 +16,8 @@ static CFStringRef workoutTypeNames[4];
 static CFStringRef liftNames[4];
 static struct HistCache {
     const struct {
-        SEL sllt, sll, sd;
+        SEL sllt, sd;
         void (*setLegendLabel)(id, SEL, long, id);
-        void (*setLineLimit)(id, SEL, CGFloat);
         void (*setData)(id, SEL, id, CGFloat);
     } view;
     const struct {
@@ -37,25 +36,22 @@ id historyVC_init(HistoryModel **ref) {
     minsFormat = localize(CFSTR("minsFmt"));
 
     Class Chart = getChartClass();
-    SEL csllt = sel_getUid("setLegendLabel:text:"), csll = sel_getUid("setLineLimit:");
-    SEL csd = sel_getUid("setData:axisMax:");
+    SEL csllt = sel_getUid("setLegendLabel:text:"), csd = sel_getUid("setData:axisMax:");
 
     Class Set = objc_getClass("Charts.DataSet");
     SEL sre = sel_getUid("replaceEntries:count:"), iSet = sel_getUid("initWithColorVal:fillSet:");
 
     memcpy(&hc, &(struct HistCache){
         {
-            csllt, csll, csd,
+            csllt, csd,
             (void(*)(id, SEL, long, id))class_getMethodImplementation(Chart, csllt),
-            (void(*)(id, SEL, CGFloat))class_getMethodImplementation(Chart, csll),
             (void(*)(id, SEL, id, CGFloat))class_getMethodImplementation(Chart, csd)
         },
         {sre, (void(*)(id, SEL, CGPoint *, long))class_getMethodImplementation(Set, sre)}
     }, sizeof(struct HistCache));
 
     id self = new(HistoryVCClass);
-    HistoryVC *d = (HistoryVC *)((char *)self + VCSize);
-    HistoryModel *m = &d->model;
+    HistoryModel *m = &getIVVC(HistoryVC, self)->model;
     *ref = m;
 
     id (*setInit)(id, SEL, long, id) =
@@ -91,8 +87,8 @@ id historyVC_init(HistoryModel **ref) {
 
 #pragma mark - Selectors/Methods
 
-void historyVC_updateSegment(id self, SEL _cmd _U_, id control) {
-    HistoryVC *d = (HistoryVC *)((char *)self + VCSize);
+void historyVC_changedSegment(id self, SEL _cmd _U_, id control) {
+    HistoryVC *d = getIVVC(HistoryVC, self);
 
     long index = getSelectedSegmentIndex(control);
     int count = d->model.nEntries[index];
@@ -130,7 +126,8 @@ void historyVC_updateSegment(id self, SEL _cmd _U_, id control) {
     CFRelease(l);
 
     int ref = d->model.refIndices[index];
-    hc.view.setLineLimit(d->charts[ChartTotals], hc.view.sll, d->model.totals.avgs[index]);
+    msgV(objSig(void, CGFloat), d->charts[ChartTotals],
+         sel_getUid("setLineLimit:"), d->model.totals.avgs[index]);
     hc.set.replace(d->model.totals.set, hc.set.re, &d->model.totals.entries[ref], count);
     for (int i = 0; i < 4; ++i) {
         hc.set.replace(d->model.types.sets[i], hc.set.re, &d->model.types.entries[i][ref], count);
@@ -145,11 +142,11 @@ void historyVC_updateSegment(id self, SEL _cmd _U_, id control) {
 void historyVC_viewDidLoad(id self, SEL _cmd) {
     msgSupV(supSig(), self, VC, _cmd);
 
-    HistoryVC *d = (HistoryVC *)((char *)self + VCSize);
+    HistoryVC *d = getIVVC(HistoryVC, self);
     d->rangeControl = createSegmentedControl(CFSTR("historySegment%d"), 0);
     addTarget(d->rangeControl, self, getTapSel(), ControlEventValueChanged);
     uint8_t darkMode = getUserData()->darkMode;
-    if (isCharValid(darkMode)) updateSegmentedControl(d->rangeControl, darkMode);
+    if (isCharValid(darkMode)) updateSegmentedControlColors(d->rangeControl, darkMode);
     msgV(objSig(void, id), getNavItem(self), sel_getUid("setTitleView:"), d->rangeControl);
 
     Class Chart = getChartClass();
@@ -181,18 +178,17 @@ void historyVC_viewDidLoad(id self, SEL _cmd) {
         releaseView(containers[i]);
     }
 
-    historyVC_updateSegment(self, nil, d->rangeControl);
+    historyVC_changedSegment(self, nil, d->rangeControl);
 }
 
 CFStringRef historyVC_stringForValue(id self, SEL _cmd _U_, double value) {
-    CFArrayRef strs = ((HistoryVC *)((char *)self + VCSize))->model.axisStrs;
-    return CFArrayGetValueAtIndex(strs, (int)value);
+    return CFArrayGetValueAtIndex(getIVVC(HistoryVC, self)->model.axisStrs, (int)value);
 }
 
 #pragma mark - Public Functions
 
 void historyVC_clearData(id self) {
-    HistoryVC *d = (HistoryVC *)((char *)self + VCSize);
+    HistoryVC *d = getIVVC(HistoryVC, self);
     HistoryModel *model = &d->model;
     if (!model->nEntries[2]) return;
 
@@ -211,20 +207,18 @@ void historyVC_clearData(id self) {
 
     if (isViewLoaded(self)) {
         setSelectedSegmentIndex(d->rangeControl, 0);
-        historyVC_updateSegment(self, nil, d->rangeControl);
+        historyVC_changedSegment(self, nil, d->rangeControl);
     }
 }
 
 void historyVC_updateColors(id self, bool darkMode) {
-    HistoryVC *d = (HistoryVC *)((char *)self + VCSize);
     id view = getView(self);
     setBackgroundColor(view, getColor(ColorPrimaryBG));
-    updateSegmentedControl(d->rangeControl, darkMode);
+    updateSegmentedControlColors(getIVVC(HistoryVC, self)->rangeControl, darkMode);
     view = (id)CFArrayGetValueAtIndex(getSubviews(view), 0);
     view = (id)CFArrayGetValueAtIndex(getSubviews(view), 0);
     CFArrayRef views = getArrangedSubviews(view);
     for (int i = 0; i < 3; ++i) {
-        containerView_updateColors(
-          (ContainerView *)((char *)CFArrayGetValueAtIndex(views, i) + ViewSize));
+        containerView_updateColors(getIVV(ContainerView, CFArrayGetValueAtIndex(views, i)));
     }
 }

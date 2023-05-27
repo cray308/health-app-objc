@@ -75,15 +75,19 @@ struct VCache {
     const struct {
         SEL sbtc;
         SEL stic;
-        SEL stamic, sbc, ste, gt, stec, sd, cr, sti;
+        SEL stamic, sbc, ste, gt, stec, sd, sti;
     } common;
     const struct {
+        size_t classSize;
         SEL gv, nc;
         id (*gView)(id, SEL);
         id (*navVC)(id, SEL);
+        SEL sv;
+        void (*setVal)(id, SEL, id, CFStringRef);
     } vc;
     const struct {
-        SEL as, rfs, gl, scr, st, gt, sh, sal, sah, sav, sat, siae, vwt, lin;
+        size_t classSize;
+        SEL as, rfs, gl, scr, st, gt, sh, slm, suie, sal, sah, sav, sat, siae, vwt, gb, cr;
         void (*setTranslates)(id, SEL, bool);
         void (*setBG)(id, SEL, id);
         void (*add)(id, SEL, id);
@@ -93,46 +97,43 @@ struct VCache {
         void (*sTag)(id, SEL, long);
         long (*gTag)(id, SEL);
         void (*sHidden)(id, SEL, bool);
+        void (*setLayoutMargins)(id, SEL, HAInsets);
+        void (*setInteract)(id, SEL, bool);
         void (*setLabel)(id, SEL, CFStringRef);
         void (*setHint)(id, SEL, CFStringRef);
-        void (*setValue)(id, SEL, CFStringRef);
+        void (*setVal)(id, SEL, CFStringRef);
         void (*setTraits)(id, SEL, uint64_t);
         void (*setAccessible)(id, SEL, bool);
         id (*withTag)(id, SEL, long);
-        void (*layout)(id, SEL);
+        generateRectFunctionSignature(gBounds);
+        generateRectFunctionSignature(convert, CGRect, id);
         SEL gs;
         CFArrayRef (*subviews)(id, SEL);
     } view;
     const struct {
-        SEL aas, as, ss, scs, slm, slmra;
+        SEL aas, as, ss, scs, slmra;
         void (*setTranslates)(id, SEL, bool);
         void (*add)(id, SEL, id);
         CFArrayRef (*arranged)(id, SEL);
         void (*sSpacing)(id, SEL, CGFloat);
         void (*setCustom)(id, SEL, CGFloat, id);
-        void (*setLayoutMargins)(id, SEL, HAInsets);
         void (*setLayoutMarginsRelativeArrangement)(id, SEL, bool);
     } stack;
     const struct {
         void (*sText)(id, SEL, CFStringRef);
+        CFStringRef (*gText)(id, SEL);
         void (*setColor)(id, SEL, id);
     } label;
     const struct {
-        SEL at, se, suie, st, stc;
+        SEL at, se, st, stc, ct;
         void (*add)(id, SEL, id, SEL, u_long);
         void (*sEnabled)(id, SEL, bool);
-        void (*setInteract)(id, SEL, bool);
         void (*sTitle)(id, SEL, CFStringRef, u_long);
         void (*setColor)(id, SEL, id, u_long);
+        CFStringRef (*gTitle)(id, SEL);
         SEL ge;
         bool (*getEnabled)(id, SEL);
-        SEL ct;
-        CFStringRef (*gTitle)(id, SEL);
     } button;
-    const struct {
-        SEL gssi;
-        long (*getSelected)(id, SEL);
-    } seg;
     const struct {
         SEL sii, sic;
         id (*iInit)(id, SEL, id, long, id, SEL);
@@ -158,8 +159,11 @@ extern struct VCache ViewTable;
 extern Class VC;
 extern Class View;
 extern Class BarButtonItem;
-extern size_t VCSize;
-extern size_t ViewSize;
+
+#define getIVV(t, x) ((t *)((char *)(x) + ViewTable.view.classSize))
+#define getIVVC(t, x) ((t *)((char *)(x) + ViewTable.vc.classSize))
+#define getIVVCS(t, s) ((t *)((char *)(s) + sizeof(typeof(*s))))
+#define getIVVCC(t, s, x) ((t *)((char *)(x) + ViewTable.vc.classSize + sizeof(s)))
 
 #define SetBackgroundSel ViewTable.common.sbc
 #define SetTitleSel ViewTable.common.sti
@@ -171,6 +175,7 @@ extern size_t ViewSize;
 
 #define getView(c) ViewTable.vc.gView((c), ViewTable.vc.gv)
 #define getNavVC(c) ViewTable.vc.navVC((c), ViewTable.vc.nc)
+#define setValue(c, v, k) ViewTable.vc.setVal((c), ViewTable.vc.sv, v, k)
 #define getNavItem(c) msgV(objSig(id), (c), sel_getUid("navigationItem"))
 #define isViewLoaded(c) msgV(objSig(bool), (c), sel_getUid("isViewLoaded"))
 #define presentVC(p, c)                                                          \
@@ -185,15 +190,8 @@ id getSystemFont(int size, CGFloat weight);
 #define lowerPriority(c) ViewTable.con.setPriority((c), ViewTable.con.sp, LayoutPriorityRequired)
 #define setActive(c) ViewTable.con.sActive((c), ViewTable.con.sa, true)
 
-#if defined(__arm64__)
-#define getRect(r, o, c) r = msgV(objSig(CGRect), (o), (c))
-#define convertRect(r, b, d, s)\
- r = msgV(objSig(CGRect, CGRect, id), (d), ViewTable.common.cr, (b), (s))
-#else
-#define getRect(r, o, c) ((void(*)(CGRect *, id, SEL))objc_msgSend_stret)(&r, (o), (c))
-#define convertRect(r, b, d, s)\
- ((void(*)(CGRect *, id, SEL, CGRect, id))objc_msgSend_stret)(&r, (d), ViewTable.common.cr, (b), (s))
-#endif
+#define getBounds(r, v) callRectMethod(ViewTable.view.gBounds, r, v, ViewTable.view.gb)
+#define convertRect(r, d, b, s) callRectMethod(ViewTable.view.convert, r, d, ViewTable.view.cr, b, s)
 
 #define setBarTintColor(o, c) msgV(objSig(void, id), (o), ViewTable.common.sbtc, (c))
 #define setTintColor(o, c) msgV(objSig(void, id), (o), ViewTable.common.stic, (c))
@@ -208,13 +206,13 @@ id getSystemFont(int size, CGFloat weight);
 #define setTag(v, t) ViewTable.view.sTag((v), ViewTable.view.st, (t))
 #define getTag(v) ViewTable.view.gTag((v), ViewTable.view.gt)
 #define setHidden(v, h) ViewTable.view.sHidden((v), ViewTable.view.sh, (h))
+#define setUserInteractionEnabled(v, e) ViewTable.view.setInteract((v), ViewTable.view.suie, (e))
 #define setAccessibilityLabel(v, l) ViewTable.view.setLabel((v), ViewTable.view.sal, (l))
 #define setAccessibilityHint(v, h) ViewTable.view.setHint((v), ViewTable.view.sah, (h))
-#define setAccessibilityValue(v, a) ViewTable.view.setValue((v), ViewTable.view.sav, (a))
+#define setAccessibilityValue(v, a) ViewTable.view.setVal((v), ViewTable.view.sav, (a))
 #define setAccessibilityTraits(v, t) ViewTable.view.setTraits((v), ViewTable.view.sat, (t))
 #define setIsAccessibilityElement(v, a) ViewTable.view.setAccessible((v), ViewTable.view.siae, (a))
 #define viewWithTag(v, t) ViewTable.view.withTag((v), ViewTable.view.vwt, (t))
-#define layoutIfNeeded(v) ViewTable.view.layout((v), ViewTable.view.lin)
 
 #define useStackConstraints(s) ViewTable.stack.setTranslates((s), ViewTable.common.stamic, false)
 #define addArrangedSubview(s, o) ViewTable.stack.add((s), ViewTable.stack.aas, (o))
@@ -223,18 +221,17 @@ id getSystemFont(int size, CGFloat weight);
 #define setCustomSpacing(s, n, v) ViewTable.stack.setCustom((s), ViewTable.stack.scs, (n), (v))
 
 #define setText(l, t) ViewTable.label.sText((l), ViewTable.common.ste, (t))
-#define getText(l) msgV(objSig(CFStringRef), (l), ViewTable.common.gt)
+#define getText(l) ViewTable.label.gText((l), ViewTable.common.gt)
 #define setTextColor(l, c) ViewTable.label.setColor((l), ViewTable.common.stec, (c))
 
 #define addTarget(v, t, a, e) ViewTable.button.add((v), ViewTable.button.at, (t), (a), (e))
 #define setEnabled(b, e) ViewTable.button.sEnabled((b), ViewTable.button.se, (e))
 #define isEnabled(b) ViewTable.button.getEnabled((b), ViewTable.button.ge)
-#define setUserInteractionEnabled(b, e) ViewTable.button.setInteract((b), ViewTable.button.suie, (e))
 #define setTitle(b, t, s) ViewTable.button.sTitle((b), ViewTable.button.st, (t), (s))
 #define setTitleColor(b, c, s) ViewTable.button.setColor((b), ViewTable.button.stc, (c), (s))
 #define getCurrentTitle(b) ViewTable.button.gTitle((b), ViewTable.button.ct)
 
-#define getSelectedSegmentIndex(s) ViewTable.seg.getSelected((s), ViewTable.seg.gssi)
+#define getSelectedSegmentIndex(s) msgV(objSig(long), (s), sel_getUid("selectedSegmentIndex"))
 #define setSelectedSegmentIndex(s, i)\
  msgV(objSig(void, long), (s), sel_getUid("setSelectedSegmentIndex:"), (i))
 
@@ -258,7 +255,7 @@ void initViewData(void (*inits[])(void));
 
 void pin(id view, id container);
 
-#define pinToMainView(c, v) pin((c), msgV(objSig(id), (v), sel_getUid("safeAreaLayoutGuide")))
+#define pinToSafeArea(c, v) pin((c), msgV(objSig(id), (v), sel_getUid("safeAreaLayoutGuide")))
 
 static inline void setHeight(id view, int height, bool greaterOrEqual, bool optional) {
     id constraint = makeConstraint(view, LayoutAttributeHeight, greaterOrEqual, nil, 0, height);
@@ -276,14 +273,14 @@ id createHStack(id const *subviews);
 id createVStack(id const *subviews, int count);
 
 static inline void setLayoutMargins(id stack, HAInsets insets) {
-    ViewTable.stack.setLayoutMargins(stack, ViewTable.stack.slm, insets);
+    ViewTable.view.setLayoutMargins(stack, ViewTable.view.slm, insets);
     ViewTable.stack.setLayoutMarginsRelativeArrangement(stack, ViewTable.stack.slmra, true);
 }
 
-id createLabel(CFStringRef text CF_CONSUMED, CFStringRef style, int color);
+id createLabel(CFStringRef text CF_CONSUMED, CFStringRef style, int textColor);
 id createButton(CFStringRef title CF_CONSUMED, int titleColor, id target, SEL action);
 id createSegmentedControl(CFStringRef format, int startIndex);
-id createTextfield(id delegate, id accessory, CFStringRef hint CF_CONSUMED, int tag);
+id createTextField(id delegate, id accessory, CFStringRef hint CF_CONSUMED, int tag);
 
 static inline void updateButtonColors(id button, int titleColor) {
     setTitleColor(button, getColor(titleColor), ControlStateNormal);
@@ -291,7 +288,7 @@ static inline void updateButtonColors(id button, int titleColor) {
     setBackgroundColor(button, getColor(ColorSecondaryBGGrouped));
 }
 
-void updateSegmentedControl(id control, bool darkMode);
+void updateSegmentedControlColors(id control, bool darkMode);
 
 extern void setupNavItem(id vc, CFStringRef titleKey, id const *buttons);
 extern void setupHierarchy(id vc, id vStack, id scrollView, int backgroundColor);

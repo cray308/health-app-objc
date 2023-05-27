@@ -27,7 +27,7 @@ void initUpdateMaxesData(void) {
 
 static id stepperView_init(id *stepperRef, CFLocaleRef locale CF_CONSUMED) {
     id self = new(StepperViewClass);
-    StepperView *v = (StepperView *)((char *)self + ViewSize);
+    StepperView *v = getIVV(StepperView, self);
 
     CFStringRef stepperDescription = localize(CFSTR("stepperDescription"));
     CFStringRef one = formatStr(locale, CFSTR("%d"), 1);
@@ -63,14 +63,14 @@ static id stepperView_init(id *stepperRef, CFLocaleRef locale CF_CONSUMED) {
 }
 
 void stepperView_deinit(id self, SEL _cmd) {
-    StepperView *v = (StepperView *)((char *)self + ViewSize);
+    StepperView *v = getIVV(StepperView, self);
     CFRelease(v->reps);
     releaseView(v->stepper);
     releaseView(v->label);
     msgSupV(supSig(), self, View, _cmd);
 }
 
-static void handleNewStepperValue(id self, StepperView *v, int value) {
+static void updateStepperValue(id self, StepperView *v, int value) {
     CFLocaleRef l = CFLocaleCopyCurrent();
     CFStringRef newVal = formatStr(l, CFSTR("%d"), value);
     CFRelease(l);
@@ -81,46 +81,45 @@ static void handleNewStepperValue(id self, StepperView *v, int value) {
     setAccessibilityValue(self, v->reps);
 }
 
-void stepperView_updatedStepper(id self, SEL _cmd _U_) {
-    StepperView *v = (StepperView *)((char *)self + ViewSize);
-    handleNewStepperValue(self, v, (int)getValue(v->stepper, sgv));
+void stepperView_changedValue(id self, SEL _cmd _U_) {
+    StepperView *v = getIVV(StepperView, self);
+    updateStepperValue(self, v, (int)getValue(v->stepper, sgv));
 }
 
-static void stepperChangeGeneric(id self, int change) {
-    StepperView *v = (StepperView *)((char *)self + ViewSize);
-    int value = (int)getValue(v->stepper, sgv) + change;
+static void accessibilityChanged(id self, int offset) {
+    StepperView *v = getIVV(StepperView, self);
+    int value = (int)getValue(v->stepper, sgv) + offset;
     if (value >= StepperMin && value <= StepperMax) {
         setStepperValue(v->stepper, value);
-        handleNewStepperValue(self, v, value);
+        updateStepperValue(self, v, value);
     }
 }
 
-void stepperView_increment(id self, SEL _cmd _U_) { stepperChangeGeneric(self, 1); }
+void stepperView_accessibilityIncrement(id self, SEL _cmd _U_) { accessibilityChanged(self, 1); }
 
-void stepperView_decrement(id self, SEL _cmd _U_) { stepperChangeGeneric(self, -1); }
+void stepperView_accessibilityDecrement(id self, SEL _cmd _U_) { accessibilityChanged(self, -1); }
 
 #pragma mark - VC
 
-id updateMaxesVC_init(id parent, int index, int bodyweight) {
+id updateMaxesVC_init(id delegate, int index, int bodyweight) {
     id self = new(UpdateMaxesVCClass);
-    UpdateMaxesVC *d = (UpdateMaxesVC *)((char *)self + VCSize + sizeof(InputVC));
-    d->parent = parent;
+    UpdateMaxesVC *d = getIVVCC(UpdateMaxesVC, InputVC, self);
+    d->delegate = delegate;
     d->index = index;
     d->bodyweight = bodyweight;
     return self;
 }
 
 void updateMaxesVC_deinit(id self, SEL _cmd) {
-    UpdateMaxesVC *d = (UpdateMaxesVC *)((char *)self + VCSize + sizeof(InputVC));
-    releaseView(d->repsStepper);
-    msgSupV(supSig(), self, InputVCClass, _cmd);
+    releaseView(getIVVCC(UpdateMaxesVC, InputVC, self)->repsStepper);
+    inputVC_deinit(self, _cmd);
 }
 
 void updateMaxesVC_viewDidLoad(id self, SEL _cmd) {
     inputVC_viewDidLoad(self, _cmd);
 
-    InputVC *p = (InputVC *)((char *)self + VCSize);
-    UpdateMaxesVC *d = (UpdateMaxesVC *)((char *)p + sizeof(InputVC));
+    InputVC *p = getIVVC(InputVC, self);
+    UpdateMaxesVC *d = getIVVCS(UpdateMaxesVC, p);
     p->button = createButton(localize(CFSTR("finish")), ColorBlue, self, getTapSel());
     setupNavItem(self, CFSTR("updateMaxesTitle"), (id []){nil, p->button});
     setEnabled(p->button, false);
@@ -135,7 +134,7 @@ void updateMaxesVC_viewDidLoad(id self, SEL _cmd) {
     CFMutableStringRef adjustedName = CFStringCreateMutableCopy(NULL, 128, liftName);
     CFStringLowercase(adjustedName, locale);
     int kbType = getKeyboardForLocale(locale);
-    inputVC_addChild(self, formatStr(NULL, fieldKey, adjustedName), kbType, 1, FieldMaxDefault);
+    inputVC_addField(self, formatStr(NULL, fieldKey, adjustedName), kbType, 1, FieldMaxDefault);
     CFRelease(liftKey);
     CFRelease(liftName);
     CFRelease(fieldKey);
@@ -147,13 +146,13 @@ void updateMaxesVC_viewDidLoad(id self, SEL _cmd) {
 }
 
 void updateMaxesVC_tappedFinish(id self, SEL _cmd _U_, id button _U_) {
-    InputVC *sup = (InputVC *)((char *)self + VCSize);
-    UpdateMaxesVC *d = (UpdateMaxesVC *)((char *)sup + sizeof(InputVC));
+    InputVC *p = getIVVC(InputVC, self);
+    UpdateMaxesVC *d = getIVVCS(UpdateMaxesVC, p);
     CFLocaleRef locale = CFLocaleCopyCurrent();
     int extra = d->index == LiftPullup ? d->bodyweight : 0;
-    float initWeight = ((sup->children[0].data->result * getSavedMassFactor(locale)) + extra) * 36;
+    float initWeight = ((p->children[0].data->result * getSavedMassFactor(locale)) + extra) * 36;
     float reps = 37.f - (float)getValue(d->repsStepper, sgv);
     int weight = (int)lrintf(initWeight / reps) - extra;
     CFRelease(locale);
-    dismissPresentedVC(self, ^{ workoutVC_finishedBottomSheet(d->parent, d->index, weight); });
+    dismissPresentedVC(self, ^{ workoutVC_finishedBottomSheet(d->delegate, d->index, weight); });
 }

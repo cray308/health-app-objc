@@ -10,7 +10,7 @@ void initStatusViewData(void) { separatorFormat = localize(CFSTR("separator")); 
 id statusView_init(StatusView **ref,
                    CFStringRef header, CFStringRef title, int tag, id target, SEL action) {
     id self = new(StatusViewClass);
-    StatusView *v = (StatusView *)((char *)self + ViewSize);
+    StatusView *v = getIVV(StatusView, self);
     *ref = v;
 
     v->button = createButton(title, ColorLabel, target, action);
@@ -42,7 +42,7 @@ id statusView_init(StatusView **ref,
 }
 
 void statusView_deinit(id self, SEL _cmd) {
-    StatusView *v = (StatusView *)((char *)self + ViewSize);
+    StatusView *v = getIVV(StatusView, self);
     releaseView(v->header);
     releaseView(v->box);
     msgSupV(supSig(), self, View, _cmd);

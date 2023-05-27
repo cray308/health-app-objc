@@ -13,12 +13,12 @@ extern int UIApplicationMain(int, char *[], CFStringRef, CFStringRef);
 
 int main(int argc, char *argv[]) {
     Class TabBarAppearance = getTabBarAppearanceClass();
-    initAppData(TabBarAppearance, (Class *[]){&View, &VC}, (size_t *[]){&ViewSize, &VCSize});
+    initAppData(TabBarAppearance, (Class *[]){&View, &VC});
     initViewData((void(*[])(void)){
         initStatusViewData, initValidatorData, initUpdateMaxesData, initSetupWorkoutData
     });
     char const *dataKey = "data";
-    char const *voidSig = "v@:", *tapSig = "v@:@", *appSig = "i@:@@";
+    char const *voidSig = "v@:", *tapSig = "v@:@";
     SEL deinit = sel_getUid("dealloc");
     SEL viewLoad = sel_getUid("viewDidLoad");
     SEL tap = getTapSel(), customTap = getCustomButtonSel();
@@ -41,11 +41,11 @@ int main(int argc, char *argv[]) {
     StepperViewClass = objc_allocateClassPair(View, "StepperView", 0);
     class_addIvar(StepperViewClass, dataKey, sizeof(StepperView), 0, "{?=@@@{?=qq}}");
     class_addMethod(StepperViewClass, deinit, (IMP)stepperView_deinit, voidSig);
-    class_addMethod(StepperViewClass, getValueChangedSel(), (IMP)stepperView_updatedStepper, voidSig);
+    class_addMethod(StepperViewClass, getValueChangedSel(), (IMP)stepperView_changedValue, voidSig);
     class_addMethod(StepperViewClass, sel_getUid("accessibilityIncrement"),
-                    (IMP)stepperView_increment, voidSig);
+                    (IMP)stepperView_accessibilityIncrement, voidSig);
     class_addMethod(StepperViewClass, sel_getUid("accessibilityDecrement"),
-                    (IMP)stepperView_decrement, voidSig);
+                    (IMP)stepperView_accessibilityDecrement, voidSig);
     objc_registerClassPair(StepperViewClass);
 
     SwitchViewClass = objc_allocateClassPair(View, "SwitchView", 0);
@@ -61,11 +61,12 @@ int main(int argc, char *argv[]) {
     class_addMethod(InputVCClass, getJumpToPrevSel(), (IMP)inputVC_jumpToPrev, voidSig);
     class_addMethod(InputVCClass, getJumpToNextSel(), (IMP)inputVC_jumpToNext, voidSig);
     class_addMethod(InputVCClass, sel_getUid("textFieldDidBeginEditing:"),
-                    (IMP)inputVC_fieldBeganEditing, tapSig);
+                    (IMP)inputVC_textFieldDidBeginEditing, tapSig);
     class_addMethod(InputVCClass, sel_getUid("textFieldDidEndEditing:"),
-                    (IMP)inputVC_fieldStoppedEditing, tapSig);
-    SEL tfChange = sel_getUid("textField:shouldChangeCharactersInRange:replacementString:");
-    class_addMethod(InputVCClass, tfChange, (IMP)inputVC_fieldChanged, "i@:@{?=qq}@");
+                    (IMP)inputVC_textFieldDidEndEditing, tapSig);
+    class_addMethod(InputVCClass,
+                    sel_getUid("textField:shouldChangeCharactersInRange:replacementString:"),
+                    (IMP)inputVC_shouldChange, "B@:@{?=qq}@");
     objc_registerClassPair(InputVCClass);
 
     SettingsVCClass = objc_allocateClassPair(InputVCClass, "SettingsVC", 0);
@@ -82,13 +83,13 @@ int main(int argc, char *argv[]) {
     class_addMethod(SetupWorkoutVCClass, viewLoad, (IMP)setupWorkoutVC_viewDidLoad, voidSig);
     class_addMethod(SetupWorkoutVCClass, tap, (IMP)setupWorkoutVC_tappedButton, tapSig);
     class_addMethod(SetupWorkoutVCClass, sel_getUid("numberOfComponentsInPickerView:"),
-                    (IMP)setupWorkoutVC_numberOfComponents, "q@:@");
+                    (IMP)setupWorkoutVC_numberOfComponentsInPickerView, "q@:@");
     class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:numberOfRowsInComponent:"),
                     (IMP)setupWorkoutVC_numberOfRows, "q@:@q");
     class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:titleForRow:forComponent:"),
-                    (IMP)setupWorkoutVC_getTitle, "@@:@qq");
+                    (IMP)setupWorkoutVC_titleForRow, "@@:@qq");
     class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:attributedTitleForRow:forComponent:"),
-                    (IMP)setupWorkoutVC_getAttrTitle, "@@:@qq");
+                    (IMP)setupWorkoutVC_attributedTitle, "@@:@qq");
     class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:didSelectRow:inComponent:"),
                     (IMP)setupWorkoutVC_didSelectRow, "v@:@qq");
     objc_registerClassPair(SetupWorkoutVCClass);
@@ -103,7 +104,7 @@ int main(int argc, char *argv[]) {
     HomeVCClass = objc_allocateClassPair(VC, "HomeVC", 0);
     class_addIvar(HomeVCClass, dataKey, sizeof(HomeVC), 0, "{?={?=@@}{?=@@}}");
     class_addMethod(HomeVCClass, viewLoad, (IMP)homeVC_viewDidLoad, voidSig);
-    class_addMethod(HomeVCClass, tap, (IMP)homeVC_workoutButtonTapped, tapSig);
+    class_addMethod(HomeVCClass, tap, (IMP)homeVC_planButtonTapped, tapSig);
     class_addMethod(HomeVCClass, customTap, (IMP)homeVC_customButtonTapped, tapSig);
     objc_registerClassPair(HomeVCClass);
 
@@ -113,7 +114,7 @@ int main(int argc, char *argv[]) {
                   "{?={?={?=@@[3f]}{?=[5@][5@][3[4i]]}{?=[4@][4@][3[4f]]}"
                   "@[3@][3[3f]][3i][3i]}@[3@]}");
     class_addMethod(HistoryVCClass, viewLoad, (IMP)historyVC_viewDidLoad, voidSig);
-    class_addMethod(HistoryVCClass, tap, (IMP)historyVC_updateSegment, tapSig);
+    class_addMethod(HistoryVCClass, tap, (IMP)historyVC_changedSegment, tapSig);
     class_addMethod(HistoryVCClass, sel_getUid("stringForValue:"),
                     (IMP)historyVC_stringForValue, "@@:d");
     objc_registerClassPair(HistoryVCClass);
@@ -126,16 +127,17 @@ int main(int argc, char *argv[]) {
     class_addMethod(WorkoutVCClass, viewLoad, (IMP)workoutVC_viewDidLoad, voidSig);
     class_addMethod(WorkoutVCClass, customTap, (IMP)workoutVC_startEndWorkout, tapSig);
     class_addMethod(WorkoutVCClass, sel_getUid("viewWillDisappear:"),
-                    (IMP)workoutVC_willDisappear, "v@:B");
+                    (IMP)workoutVC_viewWillDisappear, "v@:B");
     class_addMethod(WorkoutVCClass, tap, (IMP)workoutVC_handleTap, tapSig);
     objc_registerClassPair(WorkoutVCClass);
 
     Class AppDelegateClass = objc_allocateClassPair(objc_getClass("UIResponder"), "AppDelegate", 0);
     class_addIvar(AppDelegateClass, dataKey, sizeof(AppDelegate), 0, "@[3@]{?=qq[4i]CCC}");
     class_addMethod(AppDelegateClass, sel_getUid("application:didFinishLaunchingWithOptions:"),
-                    (IMP)appDelegate_didFinishLaunching, appSig);
-    SEL orient = sel_getUid("application:supportedInterfaceOrientationsForWindow:");
-    class_addMethod(AppDelegateClass, orient, (IMP)appDelegate_supportedOrientations, appSig);
+                    (IMP)appDelegate_didFinishLaunching, "B@:@@");
+    class_addMethod(AppDelegateClass,
+                    sel_getUid("application:supportedInterfaceOrientationsForWindow:"),
+                    (IMP)appDelegate_supportedInterfaceOrientations, "Q@:@@");
     objc_registerClassPair(AppDelegateClass);
     return UIApplicationMain(argc, argv, nil, CFSTR("AppDelegate"));
 }

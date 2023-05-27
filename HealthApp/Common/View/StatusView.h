@@ -10,7 +10,7 @@ typedef struct {
     id button;
     id header;
     id box;
-    ExerciseEntry *exercise;
+    Exercise *exercise;
 } StatusView;
 
 void initStatusViewData(void);

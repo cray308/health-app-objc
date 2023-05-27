@@ -11,20 +11,20 @@ Class HomeVCClass;
 
 #pragma mark - Public Functions
 
-void homeVC_updateWorkoutsList(HomeVC *self, uint8_t completed) {
+void homeVC_updateWorkoutsList(HomeVC *d, uint8_t completedWorkouts) {
     id gray = getColor(ColorGray), green = getColor(ColorGreen);
-    CFArrayRef views = getArrangedSubviews(self->planContainer.data->stack);
+    CFArrayRef views = getArrangedSubviews(d->planContainer.data->stack);
     int count = (int)CFArrayGetCount(views);
     for (int i = 0; i < count; ++i) {
-        StatusView *v = (StatusView *)((char *)CFArrayGetValueAtIndex(views, i) + ViewSize);
-        bool enable = !(completed & (1 << getTag(v->button)));
+        StatusView *v = getIVV(StatusView, CFArrayGetValueAtIndex(views, i));
+        bool enable = !(completedWorkouts & (1 << getTag(v->button)));
         setEnabled(v->button, enable);
         setBackgroundColor(v->box, enable ? gray : green);
     }
 }
 
 void homeVC_createWorkoutsList(id self, UserData const *data) {
-    HomeVC *d = (HomeVC *)((char *)self + VCSize);
+    HomeVC *d = getIVVC(HomeVC, self);
 
     CFArrayRef views = getArrangedSubviews(d->planContainer.data->stack);
     int count = (int)CFArrayGetCount(views);
@@ -42,7 +42,7 @@ void homeVC_createWorkoutsList(id self, UserData const *data) {
     CFDateFormatterSetFormat(formatter, CFSTR("EEEE"));
     CFRelease(locale);
     CFStringRef workoutNames[7] = {0};
-    setWeeklyWorkoutNames(data->plan, workoutNames);
+    getWeeklyWorkoutNames(workoutNames, data->plan);
     SEL tapSel = getTapSel();
     StatusView *sv;
     time_t date = data->weekStart + (DaySeconds >> 1);
@@ -60,7 +60,7 @@ void homeVC_createWorkoutsList(id self, UserData const *data) {
 }
 
 void homeVC_updateColors(id self) {
-    HomeVC *d = (HomeVC *)((char *)self + VCSize);
+    HomeVC *d = getIVVC(HomeVC, self);
     id labelColor = getColor(ColorLabel), gray = getColor(ColorGray), green = getColor(ColorGreen);
     setBackgroundColor(getView(self), getColor(ColorPrimaryBGGrouped));
     containerView_updateColors(d->planContainer.data);
@@ -68,14 +68,14 @@ void homeVC_updateColors(id self) {
     CFArrayRef views = getArrangedSubviews(d->planContainer.data->stack);
     int count = (int)CFArrayGetCount(views);
     for (int i = 0; i < count; ++i) {
-        StatusView *v = (StatusView *)((char *)CFArrayGetValueAtIndex(views, i) + ViewSize);
+        StatusView *v = getIVV(StatusView, CFArrayGetValueAtIndex(views, i));
         setTextColor(v->header, labelColor);
         updateButtonColors(v->button, ColorLabel);
         setBackgroundColor(v->box, isEnabled(v->button) ? gray : green);
     }
     views = getArrangedSubviews(d->customContainer.data->stack);
     for (int i = 0; i < 5; ++i) {
-        StatusView *v = (StatusView *)((char *)CFArrayGetValueAtIndex(views, i) + ViewSize);
+        StatusView *v = getIVV(StatusView, CFArrayGetValueAtIndex(views, i));
         updateButtonColors(v->button, ColorLabel);
     }
 }
@@ -85,7 +85,7 @@ void homeVC_updateColors(id self) {
 void homeVC_viewDidLoad(id self, SEL _cmd) {
     msgSupV(supSig(), self, VC, _cmd);
 
-    HomeVC *d = (HomeVC *)((char *)self + VCSize);
+    HomeVC *d = getIVVC(HomeVC, self);
     setupNavItem(self, CFSTR("tabs0"), NULL);
 
     CFStringRef titles[5] = {[0] = localize(CFSTR("homeTestMax"))}, headers[2];
@@ -123,10 +123,9 @@ void homeVC_navigateToWorkout(id self, Workout *workout) {
     releaseVC(workoutVC);
 }
 
-void homeVC_workoutButtonTapped(id self, SEL _cmd _U_, id button) {
-    int tag = (int)getTag(button);
+void homeVC_planButtonTapped(id self, SEL _cmd _U_, id button) {
     UserData const *data = getUserData();
-    homeVC_navigateToWorkout(self, getWeeklyWorkout(data->plan, tag, data->lifts));
+    homeVC_navigateToWorkout(self, getWeeklyWorkout((int)getTag(button), data->plan, data->lifts));
 }
 
 void homeVC_customButtonTapped(id self, SEL _cmd _U_, id button) {
@@ -190,8 +189,8 @@ static void showConfetti(id self) {
     }
 
     id view = getView(self);
-    CGRect frame;
-    getRect(frame, view, sel_getUid("frame"));
+    CGRect bounds;
+    getBounds(bounds, view);
 
     id confetti = new(View);
     useConstraints(confetti);
@@ -200,10 +199,10 @@ static void showConfetti(id self) {
 
     id layer = new(objc_getClass("CAEmitterLayer"));
     msgV(objSig(void, id), getLayer(confetti), sel_getUid("addSublayer:"), layer);
-    CGPoint position = {frame.size.width * 0.5, 0};
+    CGPoint position = {bounds.size.width * 0.5, 0};
     msgV(objSig(void, CGPoint), layer, sel_getUid("setEmitterPosition:"), position);
     msgV(objSig(void, id), layer, sel_getUid("setEmitterShape:"), kCAEmitterLayerLine);
-    CGSize size = {frame.size.width - 16, 1};
+    CGSize size = {bounds.size.width - 16, 1};
     msgV(objSig(void, CGSize), layer, sel_getUid("setEmitterSize:"), size);
     CFArrayRef cellArr = CFArrayCreate(NULL, (const void **)cells, 16, &RetainedArrCallbacks);
     msgV(objSig(void, CFArrayRef), layer, sel_getUid("setEmitterCells:"), cellArr);
@@ -214,7 +213,7 @@ static void showConfetti(id self) {
         releaseObject(cells[i]);
     }
     addSubview(view, confetti);
-    pinToMainView(confetti, view);
+    pinToSafeArea(confetti, view);
 
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 5000000000), dispatch_get_main_queue(), ^{
         removeFromSuperview(confetti);
@@ -226,14 +225,14 @@ static void showConfetti(id self) {
     });
 }
 
-void homeVC_handleFinishedWorkout(id self, uint8_t completed) {
-    HomeVC *d = (HomeVC *)((char *)self + VCSize);
-    int total = 0;
+void homeVC_handleFinishedWorkout(id self, uint8_t completedWorkouts) {
+    HomeVC *d = getIVVC(HomeVC, self);
+    int totalCompleted = 0;
     for (int i = 0; i < 7; ++i) {
-        if ((1 << i) & completed) ++total;
+        if ((1 << i) & completedWorkouts) ++totalCompleted;
     }
-    homeVC_updateWorkoutsList(d, completed);
-    if (CFArrayGetCount(getArrangedSubviews(d->planContainer.data->stack)) == total) {
+    homeVC_updateWorkoutsList(d, completedWorkouts);
+    if (CFArrayGetCount(getArrangedSubviews(d->planContainer.data->stack)) == totalCompleted) {
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 2500000000), dispatch_get_main_queue(), ^{
             showConfetti(self);
         });

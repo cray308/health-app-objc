@@ -7,8 +7,6 @@ struct VCache ViewTable;
 Class VC;
 Class View;
 Class BarButtonItem;
-size_t VCSize;
-size_t ViewSize;
 
 enum {
     ButtonTypeSystem = 1
@@ -126,22 +124,23 @@ void initViewData(void (*inits[])(void)) {
     SEL cmsafstfw = sel_getUid("setAdjustsFontSizeToFitWidth:");
     SEL cmsaffcsc = sel_getUid("setAdjustsFontForContentSizeCategory:");
 
+    SEL vcsv = sel_getUid("setValue:forKey:");
     SEL vcgv = sel_getUid("view"), vcnc = sel_getUid("navigationController");
 
     SEL vgs = sel_getUid("subviews");
     SEL vas = sel_getUid("addSubview:"), vrfs = sel_getUid("removeFromSuperview");
     SEL vgl = sel_getUid("layer"), vscr = sel_getUid("setCornerRadius:"), vst = sel_getUid("setTag:");
     SEL vgt = sel_getUid("tag"), vsh = sel_getUid("setHidden:");
+    SEL vslm = sel_getUid("setLayoutMargins:"), vsuie = sel_getUid("setUserInteractionEnabled:");
     SEL vsal = sel_getUid("setAccessibilityLabel:"), vsah = sel_getUid("setAccessibilityHint:");
     SEL vsav = sel_getUid("setAccessibilityValue:"), vsat = sel_getUid("setAccessibilityTraits:");
     SEL vsiae = sel_getUid("setIsAccessibilityElement:"), vvwt = sel_getUid("viewWithTag:");
-    SEL vlin = sel_getUid("layoutIfNeeded");
+    SEL vgb = sel_getUid("bounds"), vcr = sel_getUid("convertRect:fromView:");
 
     Class Stack = objc_getClass("UIStackView");
     SEL iStack = sel_getUid("initWithArrangedSubviews:"), staas = sel_getUid("addArrangedSubview:");
     SEL stas = sel_getUid("arrangedSubviews");
     SEL stss = sel_getUid("setSpacing:"), stscs = sel_getUid("setCustomSpacing:afterView:");
-    SEL stslm = sel_getUid("setLayoutMargins:");
     SEL stslmra = sel_getUid("setLayoutMarginsRelativeArrangement:");
     SEL stsax = sel_getUid("setAxis:"), stsal = sel_getUid("setAlignment:");
 
@@ -152,13 +151,11 @@ void initViewData(void (*inits[])(void)) {
     Class Button = objc_getClass("UIButton");
     SEL bbwt = sel_getUid("buttonWithType:");
     SEL bge = sel_getUid("isEnabled");
-    SEL bct = sel_getUid("currentTitle");
     SEL bat = sel_getUid("addTarget:action:forControlEvents:"), bse = sel_getUid("setEnabled:");
-    SEL bsuie = sel_getUid("setUserInteractionEnabled:"), bst = sel_getUid("setTitle:forState:");
-    SEL bstc = sel_getUid("setTitleColor:forState:"), btl = sel_getUid("titleLabel");
+    SEL bst = sel_getUid("setTitle:forState:"), bstc = sel_getUid("setTitleColor:forState:");
+    SEL bct = sel_getUid("currentTitle"), btl = sel_getUid("titleLabel");
 
     Class Seg = objc_getClass("UISegmentedControl");
-    SEL sggssi = sel_getUid("selectedSegmentIndex");
     SEL sgstta = sel_getUid("setTitleTextAttributes:forState:");
 
     BarButtonItem = objc_getClass("UIBarButtonItem");
@@ -184,18 +181,22 @@ void initViewData(void (*inits[])(void)) {
         {
             sel_getUid("setBarTintColor:"),
             cmstic,
-            cmstamic, cmsbc, cmste, cmgt, cmstec, cmsd,
-            sel_getUid("convertRect:fromView:"), sel_getUid("setTitle:")
+            cmstamic, cmsbc, cmste, cmgt, cmstec, cmsd, sel_getUid("setTitle:")
         },
         {
-            vcgv, vcnc,
+            .sv = vcsv,
+            .setVal = (void(*)(id, SEL, id, CFStringRef))class_getMethodImplementation(VC, vcsv),
+            .classSize =
+            class_getInstanceSize(VC), vcgv, vcnc,
             (id(*)(id, SEL))class_getMethodImplementation(VC, vcgv),
             (id(*)(id, SEL))class_getMethodImplementation(VC, vcnc)
         },
         {
             .gs = vgs, .subviews = (CFArrayRef(*)(id, SEL))class_getMethodImplementation(View, vgs),
-            .as =
-            vas, vrfs, vgl, vscr, vst, vgt, vsh, vsal, vsah, vsav, vsat, vsiae, vvwt, vlin,
+            .classSize =
+            class_getInstanceSize(View),
+            vas, vrfs, vgl, vscr, vst, vgt, vsh, vslm, vsuie,
+            vsal, vsah, vsav, vsat, vsiae, vvwt, vgb, vcr,
             (void(*)(id, SEL, bool))class_getMethodImplementation(View, cmstamic),
             (void(*)(id, SEL, id))class_getMethodImplementation(View, cmsbc),
             (void(*)(id, SEL, id))class_getMethodImplementation(View, vas),
@@ -205,40 +206,41 @@ void initViewData(void (*inits[])(void)) {
             (void(*)(id, SEL, long))class_getMethodImplementation(View, vst),
             (long(*)(id, SEL))class_getMethodImplementation(View, vgt),
             (void(*)(id, SEL, bool))class_getMethodImplementation(View, vsh),
+            (void(*)(id, SEL, HAInsets))class_getMethodImplementation(View, vslm),
+            (void(*)(id, SEL, bool))class_getMethodImplementation(View, vsuie),
             (void(*)(id, SEL, CFStringRef))class_getMethodImplementation(View, vsal),
             (void(*)(id, SEL, CFStringRef))class_getMethodImplementation(View, vsah),
             (void(*)(id, SEL, CFStringRef))class_getMethodImplementation(View, vsav),
             (void(*)(id, SEL, uint64_t))class_getMethodImplementation(View, vsat),
             (void(*)(id, SEL, bool))class_getMethodImplementation(View, vsiae),
             (id(*)(id, SEL, long))class_getMethodImplementation(View, vvwt),
-            (void(*)(id, SEL))class_getMethodImplementation(View, vlin)
+            getRectMethodImplementation(View, vgb),
+            getRectMethodImplementation(View, vcr, CGRect, id)
         },
         {
-            staas, stas, stss, stscs, stslm, stslmra,
+            staas, stas, stss, stscs, stslmra,
             (void(*)(id, SEL, bool))class_getMethodImplementation(Stack, cmstamic),
             (void(*)(id, SEL, id))class_getMethodImplementation(Stack, staas),
             (CFArrayRef(*)(id, SEL))class_getMethodImplementation(Stack, stas),
             (void(*)(id, SEL, CGFloat))class_getMethodImplementation(Stack, stss),
             (void(*)(id, SEL, CGFloat, id))class_getMethodImplementation(Stack, stscs),
-            (void(*)(id, SEL, HAInsets))class_getMethodImplementation(Stack, stslm),
             (void(*)(id, SEL, bool))class_getMethodImplementation(Stack, stslmra)
         },
         {
             (void(*)(id, SEL, CFStringRef))class_getMethodImplementation(Label, cmste),
+            (CFStringRef(*)(id, SEL))class_getMethodImplementation(Label, cmgt),
             (void(*)(id, SEL, id))class_getMethodImplementation(Label, cmstec)
         },
         {
             .ge = bge, .getEnabled = (bool(*)(id, SEL))class_getMethodImplementation(Button, bge),
-            .ct = bct, .gTitle = (CFStringRef(*)(id, SEL))class_getMethodImplementation(Button, bct),
             .at =
-            bat, bse, bsuie, bst, bstc,
+            bat, bse, bst, bstc, bct,
             (void(*)(id, SEL, id, SEL, u_long))class_getMethodImplementation(Button, bat),
             (void(*)(id, SEL, bool))class_getMethodImplementation(Button, bse),
-            (void(*)(id, SEL, bool))class_getMethodImplementation(Button, bsuie),
             (void(*)(id, SEL, CFStringRef, u_long))class_getMethodImplementation(Button, bst),
-            (void(*)(id, SEL, id, u_long))class_getMethodImplementation(Button, bstc)
+            (void(*)(id, SEL, id, u_long))class_getMethodImplementation(Button, bstc),
+            (CFStringRef(*)(id, SEL))class_getMethodImplementation(Button, bct)
         },
-        {sggssi, (long(*)(id, SEL))class_getMethodImplementation(Seg, sggssi)},
         {
             iItemImg, iItemCustom,
             (id(*)(id, SEL, id, long, id, SEL))class_getMethodImplementation(BarButtonItem, iItemImg),
@@ -358,14 +360,14 @@ id createVStack(id const *subviews, int count) {
     return stack;
 }
 
-id createLabel(CFStringRef text, CFStringRef style, int color) {
+id createLabel(CFStringRef text, CFStringRef style, int textColor) {
     id label = new(pvc.label.cls);
     if (text) {
         setText(label, text);
         CFRelease(text);
     }
     setupLabelFont(label, pvc.font.preferred(pvc.font.cls, pvc.font.pf, style));
-    setTextColor(label, getColor(color));
+    setTextColor(label, getColor(textColor));
     pvc.label.setNumberOfLines(label, pvc.label.snl, 0);
     pvc.label.setLineBreakMode(label, pvc.label.slbm, LineBreakByWordWrapping);
     return label;
@@ -407,7 +409,7 @@ id createSegmentedControl(CFStringRef format, int startIndex) {
     return control;
 }
 
-id createTextfield(id delegate, id accessory, CFStringRef hint, int tag) {
+id createTextField(id delegate, id accessory, CFStringRef hint, int tag) {
     id field = new(pvc.field.cls);
     setTag(field, tag);
     pvc.field.setBG(field, SetBackgroundSel, getColor(ColorTertiaryBG));
@@ -428,7 +430,7 @@ id createTextfield(id delegate, id accessory, CFStringRef hint, int tag) {
 
 #pragma mark - Color Updates
 
-void updateSegmentedControl(id control, bool darkMode) {
+void updateSegmentedControlColors(id control, bool darkMode) {
     float redGreen = 0.78f, blue = 0.8f;
     if (darkMode) {
         redGreen = 0.28f;

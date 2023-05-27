@@ -25,13 +25,11 @@ static struct PrivVCData {
         SEL aa;
         void (*addAction)(id, SEL, id);
         id (*createFunc)(CFStringRef, CFStringRef);
-        SEL sv;
-        void (*setValue)(id, SEL, id, CFStringRef);
     } alert;
     const struct {
         Class cls;
         SEL cr;
-        id (*create)(Class, SEL, CFStringRef, long, void(^)(id));
+        id (*create)(Class, SEL, CFStringRef, long, ObjectBlock);
     } action;
 } pvcc;
 
@@ -43,13 +41,12 @@ static id alertCreateLegacy(CFStringRef, CFStringRef);
 void initVCData(uint8_t darkMode) {
     Class AlertVC = objc_getClass("UIAlertController");
     SEL acaa = sel_getUid("addAction:");
-    SEL acsv = sel_getUid("setValue:forKey:");
     id (*alertCreateFunc)(CFStringRef, CFStringRef) = alertCreate;
 
     if (isCharValid(darkMode)) {
         barStyle = darkMode;
         alertCreateFunc = alertCreateLegacy;
-        setupAppColors(darkMode);
+        updateAppColors(darkMode);
     }
 
     NavVC = objc_getClass("UINavigationController");
@@ -80,14 +77,12 @@ void initVCData(uint8_t darkMode) {
             sel_getUid("configureWithOpaqueBackground"), sel_getUid("setStandardAppearance:")
         },
         {
-            .createFunc = alertCreateFunc, .sv = acsv, .setValue =
-            (void(*)(id, SEL, id, CFStringRef))class_getMethodImplementation(AlertVC, acsv),
-            .cls =
+            .createFunc = alertCreateFunc, .cls =
             AlertVC, acaa, (void(*)(id, SEL, id))class_getMethodImplementation(AlertVC, acaa)
         },
         {
             Action, cAct,
-            (id(*)(Class, SEL, CFStringRef, long, void(^)(id)))getClassMethodImp(Action, cAct)
+            (id(*)(Class, SEL, CFStringRef, long, ObjectBlock))getClassMethodImp(Action, cAct)
         }
     }, sizeof(struct PrivVCData));
     setupCharts(darkMode);
@@ -122,7 +117,7 @@ void setupHierarchy(id vc, id vStack, id scrollView, int backgroundColor) {
     setLayoutMargins(vStack, (HAInsets){16, 8, 16, 8});
     addSubview(view, scrollView);
     addSubview(scrollView, vStack);
-    pinToMainView(scrollView, view);
+    pinToSafeArea(scrollView, view);
     pin(vStack, scrollView);
     setActive(makeConstraint(vStack, LayoutAttributeWidth, 0, scrollView, LayoutAttributeWidth, 0));
     releaseView(scrollView);
@@ -133,7 +128,7 @@ void setupHierarchy(id vc, id vStack, id scrollView, int backgroundColor) {
 
 long getPreferredStatusBarStyle(id self _U_, SEL _cmd _U_) { return barStyle; }
 
-static void setupNavBarColor(id bar) {
+static void setupNavBarTitleColor(id bar) {
     const void *keys[] = {NSForegroundColorAttributeName};
     CFDictionaryRef attrs = CFDictionaryCreate(NULL, keys, (const void *[]){
         getColor(ColorLabel)
@@ -142,7 +137,7 @@ static void setupNavBarColor(id bar) {
     CFRelease(attrs);
 }
 
-void setupBarGeneric(id bar, Class BarAppearance, id color) {
+void setupBar(id bar, Class BarAppearance, id color) {
     if (!BarAppearance) {
         msgV(objSig(void, bool), bar, pvcc.bar.setTranslucent, false);
         setBarTintColor(bar, color);
@@ -161,7 +156,7 @@ void setupBarGeneric(id bar, Class BarAppearance, id color) {
 void setupTabVC(id vc, Class TabBarAppearance) {
     id tabBar = msgV(objSig(id), vc, sel_getUid("tabBar"));
     id color = getBarColor(BarColorNav);
-    setupBarGeneric(tabBar, TabBarAppearance, color);
+    setupBar(tabBar, TabBarAppearance, color);
     if (!TabBarAppearance) {
         id tabBarColor = getColor(ColorGray);
         msgV(objSig(void, id), tabBar, sel_getUid("setUnselectedItemTintColor:"), tabBarColor);
@@ -172,9 +167,9 @@ void setupTabVC(id vc, Class TabBarAppearance) {
     for (int i = 0; i < 3; ++i) {
         id navVC = (id)CFArrayGetValueAtIndex(controllers, i);
         id navBar = getNavBar(navVC);
-        setupBarGeneric(navBar, NavBarAppearance, color);
+        setupBar(navBar, NavBarAppearance, color);
         if (!TabBarAppearance) {
-            setupNavBarColor(navBar);
+            setupNavBarTitleColor(navBar);
             pvcc.nav.setNeedsStatusBarAppearanceUpdate(navVC, pvcc.nav.snsbau);
         }
     }
@@ -182,7 +177,7 @@ void setupTabVC(id vc, Class TabBarAppearance) {
 
 void handleTintChange(id window, bool darkMode) {
     barStyle = darkMode;
-    setupAppColors(darkMode);
+    updateAppColors(darkMode);
     setTintColor(window, getColor(ColorRed));
     setupTabVC(msgV(objSig(id), window, sel_getUid("rootViewController")), Nil);
     setupCharts(darkMode);
@@ -198,8 +193,8 @@ void presentModalVC(id vc, id modal) {
     id navVC = createNavVC(modal);
     id navBar = getNavBar(navVC);
     Class NavBarAppearance = getNavBarAppearanceClass();
-    setupBarGeneric(navBar, NavBarAppearance, getBarColor(BarColorModal));
-    if (!NavBarAppearance) setupNavBarColor(navBar);
+    setupBar(navBar, NavBarAppearance, getBarColor(BarColorModal));
+    if (!NavBarAppearance) setupNavBarTitleColor(navBar);
     presentVC(vc, navVC);
     releaseVC(navVC);
     releaseVC(modal);
@@ -239,8 +234,8 @@ id alertCreateLegacy(CFStringRef title, CFStringRef message) {
     }, 2, &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
     CFAttributedStringRef titleString = CFAttributedStringCreate(NULL, title, titleDict);
     CFAttributedStringRef msgString = CFAttributedStringCreate(NULL, message, msgDict);
-    pvcc.alert.setValue(alert, pvcc.alert.sv, (id)titleString, CFSTR("attributedTitle"));
-    pvcc.alert.setValue(alert, pvcc.alert.sv, (id)msgString, CFSTR("attributedMessage"));
+    setValue(alert, (id)titleString, CFSTR("attributedTitle"));
+    setValue(alert, (id)msgString, CFSTR("attributedMessage"));
     CFRelease(titleDict);
     CFRelease(msgDict);
     CFRelease(titleString);

@@ -12,11 +12,11 @@ typedef struct {
     UserData userData;
 } AppDelegate;
 
-bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd, id app, id opt);
-int appDelegate_supportedOrientations(AppDelegate *self, SEL _cmd, id app, id win);
+bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd, id app, CFDictionaryRef options);
+u_long appDelegate_supportedInterfaceOrientations(id self, SEL _cmd, id app, id window);
 
 void updateUserInfo(uint8_t plan, uint8_t darkMode, int const *weights);
 void deleteAppData(void);
-void addWorkoutData(Workout const *workout, uint8_t day, int *weights, bool pop);
+void addWorkout(Workout const *workout, uint8_t day, int *weights, bool pop);
 
 #endif /* AppDelegate_h */

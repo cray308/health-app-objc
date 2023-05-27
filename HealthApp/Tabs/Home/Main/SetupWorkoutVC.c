@@ -16,10 +16,10 @@ void initSetupWorkoutData(void) {
 
 #pragma mark - Lifecycle
 
-id setupWorkoutVC_init(id parent, uint8_t type) {
+id setupWorkoutVC_init(id delegate, uint8_t type) {
     id self = new(SetupWorkoutVCClass);
-    SetupWorkoutVC *d = (SetupWorkoutVC *)((char *)self + VCSize + sizeof(InputVC));
-    d->parent = parent;
+    SetupWorkoutVC *d = getIVVCC(SetupWorkoutVC, InputVC, self);
+    d->delegate = delegate;
     d->names = createWorkoutNames(type);
     d->type = type;
     if (!getTabBarAppearanceClass()) {
@@ -36,21 +36,21 @@ id setupWorkoutVC_init(id parent, uint8_t type) {
 }
 
 void setupWorkoutVC_deinit(id self, SEL _cmd) {
-    SetupWorkoutVC *d = (SetupWorkoutVC *)((char *)self + VCSize + sizeof(InputVC));
+    SetupWorkoutVC *d = getIVVCC(SetupWorkoutVC, InputVC, self);
     CFRelease(d->names);
     if (d->normalDict) {
         CFRelease(d->normalDict);
         CFRelease(d->selectedDict);
     }
     releaseView(d->workoutField);
-    msgSupV(supSig(), self, InputVCClass, _cmd);
+    inputVC_deinit(self, _cmd);
 }
 
 void setupWorkoutVC_viewDidLoad(id self, SEL _cmd) {
     inputVC_viewDidLoad(self, _cmd);
 
-    InputVC *p = (InputVC *)((char *)self + VCSize);
-    SetupWorkoutVC *d = (SetupWorkoutVC *)((char *)p + sizeof(InputVC));
+    InputVC *p = getIVVC(InputVC, self);
+    SetupWorkoutVC *d = getIVVCS(SetupWorkoutVC, p);
     SEL tapSel = getTapSel();
     id cancelButton = createButton(localize(CFSTR("cancel")), ColorBlue, self, tapSel);
     p->button = createButton(localize(CFSTR("go")), ColorBlue, self, tapSel);
@@ -65,7 +65,7 @@ void setupWorkoutVC_viewDidLoad(id self, SEL _cmd) {
     setCustomSpacing(p->vStack, ViewSpacing, workoutLabel);
     releaseView(workoutLabel);
 
-    d->workoutField = createTextfield(self, p->toolbar, pickerTitle, -1);
+    d->workoutField = createTextField(self, p->toolbar, pickerTitle, -1);
     setFieldText(d->workoutField, CFArrayGetValueAtIndex(d->names, 0));
     msgV(objSig(void, long), d->workoutField, sel_getUid("setTextAlignment:"), 1);
     addArrangedSubview(p->vStack, d->workoutField);
@@ -73,6 +73,7 @@ void setupWorkoutVC_viewDidLoad(id self, SEL _cmd) {
 
     id workoutPicker = new(objc_getClass("UIPickerView"));
     setDelegate(workoutPicker, self);
+    msgV(objSig(void, id), workoutPicker, sel_getUid("setDataSource:"), self);
     msgV(objSig(void, id), d->workoutField, sel_getUid("setInputView:"), workoutPicker);
     releaseView(workoutPicker);
 
@@ -96,7 +97,7 @@ void setupWorkoutVC_viewDidLoad(id self, SEL _cmd) {
 
     for (int i = 0; i < 3; ++i) {
         if (rows[i])
-            inputVC_addChild(self, localize(rows[i]), KeyboardTypeNumberPad, mins[i], maxes[i]);
+            inputVC_addField(self, localize(rows[i]), KeyboardTypeNumberPad, mins[i], maxes[i]);
     }
 }
 
@@ -104,49 +105,48 @@ void setupWorkoutVC_tappedButton(id self, SEL _cmd _U_, id button) {
     Callback callback = NULL;
     if (!getTag(button)) goto end;
 
-    InputVC *sup = (InputVC *)((char *)self + VCSize);
-    SetupWorkoutVC *d = (SetupWorkoutVC *)((char *)sup + sizeof(InputVC));
-    short weight = 0, sets = 0, reps = 0;
+    InputVC *p = getIVVC(InputVC, self);
+    SetupWorkoutVC *d = getIVVCS(SetupWorkoutVC, p);
+    WorkoutParams params = {.index = d->index, .type = d->type, .day = UCHAR_MAX};
     switch (d->type) {
         case WorkoutStrength:
-            weight = (short)sup->children[2].data->result;
+            params.weight = (short)p->children[2].data->result;
         case WorkoutSE:
-            sets = (short)sup->children[0].data->result;
-            reps = (short)sup->children[1].data->result;
+            params.sets = (short)p->children[0].data->result;
+            params.reps = (short)p->children[1].data->result;
             break;
 
         case WorkoutEndurance:
-            reps = (short)sup->children[0].data->result;
+            params.reps = (short)p->children[0].data->result;
         default:
             break;
     }
-    WorkoutParams params = {d->index, sets, reps, weight, d->type, UCHAR_MAX};
     Workout *workout = getWorkoutFromLibrary(&params, getUserData()->lifts);
-    callback = ^{ homeVC_navigateToWorkout(d->parent, workout); };
+    callback = ^{ homeVC_navigateToWorkout(d->delegate, workout); };
 end:
     dismissPresentedVC(self, callback);
 }
 
 #pragma mark - Picker Delegate
 
-long setupWorkoutVC_numberOfComponents(id self _U_, SEL _cmd _U_, id picker _U_) {
-    SetupWorkoutVC *d = (SetupWorkoutVC *)((char *)self + VCSize + sizeof(InputVC));
-    if (d->normalDict)
+long setupWorkoutVC_numberOfComponentsInPickerView(id self _U_, SEL _cmd _U_, id picker _U_) {
+    if (getIVVCC(SetupWorkoutVC, InputVC, self)->normalDict)
         setBackgroundColor(picker, getColor(ColorTertiaryBG));
     return 1;
 }
 
-long setupWorkoutVC_numberOfRows(id self, SEL _cmd _U_, id p _U_, long s _U_) {
-    return CFArrayGetCount(((SetupWorkoutVC *)((char *)self + VCSize + sizeof(InputVC)))->names);
+long setupWorkoutVC_numberOfRows(id self, SEL _cmd _U_, id picker _U_, long component _U_) {
+    return CFArrayGetCount(getIVVCC(SetupWorkoutVC, InputVC, self)->names);
 }
 
-CFStringRef setupWorkoutVC_getTitle(id self, SEL _cmd _U_, id p _U_, long row, long s _U_) {
-    CFArrayRef names = ((SetupWorkoutVC *)((char *)self + VCSize + sizeof(InputVC)))->names;
-    return CFArrayGetValueAtIndex(names, row);
+CFStringRef setupWorkoutVC_titleForRow(id self, SEL _cmd _U_,
+                                       id picker _U_, long row, long component _U_) {
+    return CFArrayGetValueAtIndex(getIVVCC(SetupWorkoutVC, InputVC, self)->names, row);
 }
 
-CFAttributedStringRef setupWorkoutVC_getAttrTitle(id self, SEL _cmd _U_, id p _U_, long row, long s _U_) {
-    SetupWorkoutVC *d = (SetupWorkoutVC *)((char *)self + VCSize + sizeof(InputVC));
+CFAttributedStringRef setupWorkoutVC_attributedTitle(id self, SEL _cmd _U_,
+                                                     id picker _U_, long row, long component _U_) {
+    SetupWorkoutVC *d = getIVVCC(SetupWorkoutVC, InputVC, self);
     if (!d->normalDict) return NULL;
 
     CFAttributedStringRef attrString = CFAttributedStringCreate(
@@ -155,8 +155,9 @@ CFAttributedStringRef setupWorkoutVC_getAttrTitle(id self, SEL _cmd _U_, id p _U
     return attrString;
 }
 
-void setupWorkoutVC_didSelectRow(id self, SEL _cmd _U_, id picker _U_, long row, long s _U_) {
-    SetupWorkoutVC *d = (SetupWorkoutVC *)((char *)self + VCSize + sizeof(InputVC));
+void setupWorkoutVC_didSelectRow(id self, SEL _cmd _U_,
+                                 id picker _U_, long row, long component _U_) {
+    SetupWorkoutVC *d = getIVVCC(SetupWorkoutVC, InputVC, self);
     d->index = (int)row;
     setFieldText(d->workoutField, CFArrayGetValueAtIndex(d->names, row));
     if (d->normalDict) reloadComponent(picker, prc, 0);

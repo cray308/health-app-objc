@@ -21,7 +21,7 @@ extern Class NavVC;
 
 void initVCData(uint8_t darkMode);
 
-void setupBarGeneric(id bar, Class BarAppearance, id color);
+void setupBar(id bar, Class BarAppearance, id color);
 
 void setupTabVC(id vc, Class TabBarAppearance);
 void handleTintChange(id window, bool darkMode);

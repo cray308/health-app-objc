@@ -11,14 +11,14 @@ typedef struct {
     CVPair customContainer;
 } HomeVC;
 
-void homeVC_updateWorkoutsList(HomeVC *self, uint8_t completed);
+void homeVC_updateWorkoutsList(HomeVC *d, uint8_t completedWorkouts);
 void homeVC_createWorkoutsList(id self, UserData const *data);
 void homeVC_updateColors(id self);
 
 void homeVC_viewDidLoad(id self, SEL _cmd);
-void homeVC_workoutButtonTapped(id self, SEL _cmd, id button);
+void homeVC_planButtonTapped(id self, SEL _cmd, id button);
 void homeVC_customButtonTapped(id self, SEL _cmd, id button);
 
-void homeVC_handleFinishedWorkout(id self, uint8_t completed);
+void homeVC_handleFinishedWorkout(id self, uint8_t completedWorkouts);
 
 #endif /* HomeVC_h */

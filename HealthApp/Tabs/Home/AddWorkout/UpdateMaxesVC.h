@@ -17,7 +17,7 @@ typedef struct {
 } StepperView;
 
 typedef struct {
-    id parent;
+    id delegate;
     id repsStepper;
     int index;
     int bodyweight;
@@ -26,11 +26,11 @@ typedef struct {
 void initUpdateMaxesData(void);
 
 void stepperView_deinit(id self, SEL _cmd);
-void stepperView_updatedStepper(id self, SEL _cmd);
-void stepperView_increment(id self, SEL _cmd);
-void stepperView_decrement(id self, SEL _cmd);
+void stepperView_changedValue(id self, SEL _cmd);
+void stepperView_accessibilityIncrement(id self, SEL _cmd);
+void stepperView_accessibilityDecrement(id self, SEL _cmd);
 
-id updateMaxesVC_init(id parent, int index, int bodyweight);
+id updateMaxesVC_init(id delegate, int index, int bodyweight);
 void updateMaxesVC_deinit(id self, SEL _cmd);
 void updateMaxesVC_viewDidLoad(id self, SEL _cmd);
 void updateMaxesVC_tappedFinish(id self, SEL _cmd, id button);

@@ -12,7 +12,7 @@ typedef struct {
 } HistoryVC;
 
 id historyVC_init(HistoryModel **ref);
-void historyVC_updateSegment(id self, SEL _cmd, id control);
+void historyVC_changedSegment(id self, SEL _cmd, id control);
 void historyVC_viewDidLoad(id self, SEL _cmd);
 CFStringRef historyVC_stringForValue(id self, SEL _cmd, double value);
 

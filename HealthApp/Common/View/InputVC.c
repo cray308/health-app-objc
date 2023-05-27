@@ -15,13 +15,13 @@ static CFStringRef inputErrorFormat;
 static CFCharacterSetRef metricChars;
 static CFNumberFormatterRef formatter;
 static URegularExpression *regex;
-static SEL boundsSel;
-static SEL cgRectValueSel;
+static SEL vcrv;
+static generateRectFunctionSignature(cgRectValue);
 
 static void keyboardShown(CFNotificationCenterRef, void *,
-                          CFNotificationName, const void *, CFDictionaryRef);
+                          CFStringRef, const void *, CFDictionaryRef);
 static void keyboardWillHide(CFNotificationCenterRef, void *,
-                             CFNotificationName, const void *, CFDictionaryRef);
+                             CFStringRef, const void *, CFDictionaryRef);
 
 void initValidatorData(void) {
     CFLocaleRef locale = CFLocaleCopyCurrent();
@@ -38,64 +38,48 @@ void initValidatorData(void) {
     formatter = CFNumberFormatterCreate(NULL, locale, kCFNumberFormatterDecimalStyle);
     CFRelease(locale);
     inputErrorFormat = localize(CFSTR("inputFieldError"));
-    boundsSel = sel_getUid("bounds");
-    cgRectValueSel = sel_getUid("CGRectValue");
+    vcrv = sel_getUid("CGRectValue");
+    cgRectValue = getRectMethodImplementation(objc_getClass("NSValue"), vcrv);
 }
 
-static void checkScrollPos(id scroll, id child) {
+static void scrollToView(id scrollView, id child) {
     CGRect fieldRect, fieldInView;
-    getRect(fieldRect, child, boundsSel);
-    convertRect(fieldInView, fieldRect, scroll, child);
+    getBounds(fieldRect, child);
+    convertRect(fieldInView, scrollView, fieldRect, child);
     fieldInView.size.height += 32;
     fieldInView.origin.y -= 16;
-    scrollRectToVisible(scroll, fieldInView);
+    scrollRectToVisible(scrollView, fieldInView);
 }
 
 #pragma mark - Input View
 
 void inputView_deinit(id self, SEL _cmd) {
-    InputView *v = (InputView *)((char *)self + ViewSize);
+    InputView *v = getIVV(InputView, self);
     releaseView(v->hintLabel);
     releaseView(v->field);
     releaseView(v->errorLabel);
     msgSupV(supSig(), self, View, _cmd);
 }
 
-static void inputView_reset(InputView *v, float value) {
+static void resetInput(InputView *v, float value) {
     if (!v->state) setHidden(v->errorLabel, true);
     v->state = 1;
     v->result = value;
 }
 
-static void showInputError(IVPair *pair, InputVC *d) {
-    if (pair->data->state) {
-        setEnabled(d->button, false);
-        pair->data->state = 0;
-        setHidden(pair->data->errorLabel, false);
-        layoutIfNeeded(pair->view);
-    }
-    checkScrollPos(d->scrollView, pair->view);
-    if (UIAccessibilityIsVoiceOverRunning()) {
-        CFStringRef message = getText(pair->data->errorLabel);
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1500000000), dispatch_get_main_queue(), ^{
-            UIAccessibilityPostNotification(UIAccessibilityAnnouncementNotification, (id)message);
-        });
-    }
-}
-
 #pragma mark - VC - Public Functions
 
-void inputVC_addChild(id self, CFStringRef hint, int kb, int min, int max) {
-    InputVC *d = (InputVC *)((char *)self + VCSize);
+void inputVC_addField(id self, CFStringRef hint, int keyboardType, int min, int max) {
+    InputVC *d = getIVVC(InputVC, self);
 
     int index = d->count++;
     IVPair *pair = &d->children[index];
     pair->view = new(InputViewClass);
-    pair->data = (InputView *)((char *)pair->view + ViewSize);
+    pair->data = getIVV(InputView, pair->view);
     pair->data->min = min;
     pair->data->max = max;
     pair->data->state = UCHAR_MAX;
-    pair->data->chars = kb == KeyboardTypeNumberPad
+    pair->data->chars = keyboardType == KeyboardTypeNumberPad
                         ? CFCharacterSetGetPredefined(kCFCharacterSetDecimalDigit) : metricChars;
 
     CFLocaleRef locale = CFLocaleCopyCurrent();
@@ -106,8 +90,8 @@ void inputVC_addChild(id self, CFStringRef hint, int kb, int min, int max) {
     setIsAccessibilityElement(hintLabel, false);
     pair->data->hintLabel = hintLabel;
 
-    pair->data->field = createTextfield(self, d->toolbar, hint, index);
-    setKeyboardType(pair->data->field, kb);
+    pair->data->field = createTextField(self, d->toolbar, hint, index);
+    setKeyboardType(pair->data->field, keyboardType);
     setAccessibilityHint(pair->data->field, errorText);
     setKeyboardAppearance(pair->data->field, d->keyboardAppearance);
 
@@ -125,35 +109,34 @@ void inputVC_addChild(id self, CFStringRef hint, int kb, int min, int max) {
     releaseView(vStack);
 }
 
-void inputVC_updateFields(InputVC *self, const int *vals) {
+void inputVC_updateFields(InputVC *d, int const *values) {
     CFLocaleRef l = CFLocaleCopyCurrent();
     if (isMetric(l)) {
         for (int i = 0; i < 4; ++i) {
-            float value = vals[i] * ToKg;
-            InputView *v = self->children[i].data;
+            InputView *v = d->children[i].data;
+            float value = values[i] * ToKg;
             CFStringRef str = formatStr(l, CFSTR("%.2f"), value);
             setFieldText(v->field, str);
-            inputView_reset(v, value);
+            resetInput(v, value);
             CFRelease(str);
         }
     } else {
         for (int i = 0; i < 4; ++i) {
-            int value = vals[i];
-            InputView *v = self->children[i].data;
-            CFStringRef str = formatStr(l, CFSTR("%d"), value);
+            InputView *v = d->children[i].data;
+            CFStringRef str = formatStr(l, CFSTR("%d"), values[i]);
             setFieldText(v->field, str);
-            inputView_reset(v, value);
+            resetInput(v, values[i]);
             CFRelease(str);
         }
     }
-    setEnabled(self->button, true);
+    setEnabled(d->button, true);
     CFRelease(l);
 }
 
 #pragma mark - Lifecycle
 
 void inputVC_deinit(id self, SEL _cmd) {
-    InputVC *d = (InputVC *)((char *)self + VCSize);
+    InputVC *d = getIVVC(InputVC, self);
     for (int i = 0; i < 4; ++i) {
         if (d->children[i].view) releaseView(d->children[i].view);
     }
@@ -167,7 +150,7 @@ void inputVC_deinit(id self, SEL _cmd) {
 void inputVC_viewDidLoad(id self, SEL _cmd) {
     msgSupV(supSig(), self, VC, _cmd);
 
-    InputVC *d = (InputVC *)((char *)self + VCSize);
+    InputVC *d = getIVVC(InputVC, self);
     d->activeTag = -1;
 
     CFStringRef doneText = localize(CFSTR("done"));
@@ -212,30 +195,29 @@ void inputVC_viewDidLoad(id self, SEL _cmd) {
 
 #pragma mark - Keyboard
 
-void keyboardShown(CFNotificationCenterRef ctr _U_, void *self,
-                   CFNotificationName name _U_, const void *obj _U_, CFDictionaryRef info) {
-    InputVC *d = (InputVC *)((char *)self + VCSize);
+void keyboardShown(CFNotificationCenterRef center _U_, void *self,
+                   CFStringRef name _U_, const void *object _U_, CFDictionaryRef userInfo) {
+    InputVC *d = getIVVC(InputVC, self);
     if (d->activeTag < 0) return;
 
-    id value = (id)CFDictionaryGetValue(info, UIKeyboardFrameEndUserInfoKey);
+    id value = (id)CFDictionaryGetValue(userInfo, UIKeyboardFrameEndUserInfoKey);
     CGRect kbRect;
-    getRect(kbRect, value, cgRectValueSel);
+    callRectMethod(cgRectValue, kbRect, value, vcrv);
     setContentInset(d->scrollView, ((HAInsets){.bottom = kbRect.size.height}));
-    checkScrollPos(d->scrollView, d->children[d->activeTag].view);
+    scrollToView(d->scrollView, d->children[d->activeTag].view);
 }
 
-void keyboardWillHide(CFNotificationCenterRef ctr _U_, void *self,
-                      CFNotificationName name _U_, const void *obj _U_, CFDictionaryRef info _U_) {
-    InputVC *d = (InputVC *)((char *)self + VCSize);
-    setContentInset(d->scrollView, ((HAInsets){0}));
+void keyboardWillHide(CFNotificationCenterRef center _U_, void *self,
+                      CFStringRef name _U_, const void *object _U_, CFDictionaryRef userInfo _U_) {
+    setContentInset(getIVVC(InputVC, self)->scrollView, ((HAInsets){0}));
 }
 
 void inputVC_dismissKeyboard(id self, SEL _cmd _U_) {
     msgV(objSig(bool, bool), getView(self), sel_getUid("endEditing:"), true);
 }
 
-static void handleFieldChange(id self, int offset) {
-    InputVC *d = (InputVC *)((char *)self + VCSize);
+static void changeFocusedField(id self, int offset) {
+    InputVC *d = getIVVC(InputVC, self);
     int nextTag = d->activeTag + offset;
     if (!nextTag) {
         if (d->count) {
@@ -254,23 +236,39 @@ static void handleFieldChange(id self, int offset) {
     }
 }
 
-void inputVC_jumpToPrev(id self, SEL _cmd _U_) { handleFieldChange(self, -1); }
+void inputVC_jumpToPrev(id self, SEL _cmd _U_) { changeFocusedField(self, -1); }
 
-void inputVC_jumpToNext(id self, SEL _cmd _U_) { handleFieldChange(self, 1); }
+void inputVC_jumpToNext(id self, SEL _cmd _U_) { changeFocusedField(self, 1); }
 
 #pragma mark - UITextFieldDelegate
 
-void inputVC_fieldBeganEditing(id self, SEL _cmd _U_, id field) {
-    ((InputVC *)((char *)self + VCSize))->activeTag = (int)getTag(field);
+void inputVC_textFieldDidBeginEditing(id self, SEL _cmd _U_, id field) {
+    getIVVC(InputVC, self)->activeTag = (int)getTag(field);
 }
 
-void inputVC_fieldStoppedEditing(id self, SEL _cmd _U_, id field _U_) {
-    ((InputVC *)((char *)self + VCSize))->activeTag = -2;
+void inputVC_textFieldDidEndEditing(id self, SEL _cmd _U_, id field _U_) {
+    getIVVC(InputVC, self)->activeTag = -2;
 }
 
-bool inputVC_fieldChanged(id self, SEL _cmd _U_, id field, CFRange range, CFStringRef replacement) {
+static void showError(InputVC *d, IVPair *pair) {
+    if (pair->data->state) {
+        setEnabled(d->button, false);
+        pair->data->state = 0;
+        setHidden(pair->data->errorLabel, false);
+        msgV(objSig(void), pair->view, sel_getUid("layoutIfNeeded"));
+    }
+    scrollToView(d->scrollView, pair->view);
+    if (UIAccessibilityIsVoiceOverRunning()) {
+        CFStringRef message = getText(pair->data->errorLabel);
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1500000000), dispatch_get_main_queue(), ^{
+            UIAccessibilityPostNotification(UIAccessibilityAnnouncementNotification, (id)message);
+        });
+    }
+}
+
+bool inputVC_shouldChange(id self, SEL _cmd _U_, id field, CFRange range, CFStringRef replacement) {
     static UChar buffer[32];
-    InputVC *d = (InputVC *)((char *)self + VCSize);
+    InputVC *d = getIVVC(InputVC, self);
 
     IVPair *pair = &d->children[d->activeTag];
     int len = (int)CFStringGetLength(replacement);
@@ -289,7 +287,7 @@ bool inputVC_fieldChanged(id self, SEL _cmd _U_, id field, CFRange range, CFStri
     int newLen = (int)(oldLen + len - range.length);
     if (newLen > 16) return false;
     if (!newLen) {
-        showInputError(pair, d);
+        showError(d, pair);
         return true;
     }
 
@@ -318,11 +316,11 @@ bool inputVC_fieldChanged(id self, SEL _cmd _U_, id field, CFRange range, CFStri
     }
 
     if (newVal < pair->data->min || newVal > pair->data->max) {
-        showInputError(pair, d);
+        showError(d, pair);
         return true;
     }
 
-    inputView_reset(pair->data, newVal);
+    resetInput(pair->data, newVal);
     for (int i = 0; i < d->count; ++i) {
         if (d->children[i].data->state != 1) return true;
     }

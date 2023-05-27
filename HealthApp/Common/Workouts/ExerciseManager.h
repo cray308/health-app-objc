@@ -25,56 +25,56 @@ typedef struct {
     CFMutableStringRef title;
     CFMutableStringRef header;
     CFStringRef rest;
-    CFRange tRange;
-    CFRange hRange;
-    const short reps;
-    const short sets;
+    CFRange titleRange;
+    CFRange headerRange;
+    short reps;
+    short sets;
     short completedSets;
-    const uint8_t type;
+    uint8_t type;
     uint8_t state;
-} ExerciseEntry;
+} Exercise;
 
 typedef struct {
-    ExerciseEntry *exercises;
+    Exercise *exercises;
     CFMutableStringRef header;
     CFRange range;
     int index;
-    const int size;
-    const short reps;
+    int size;
+    short reps;
     short completedReps;
-    const uint8_t type;
+    uint8_t type;
 } Circuit;
 
 typedef struct {
-    Circuit *activities;
+    Circuit *circuits;
     Circuit *group;
     time_t startTime;
-    int nameIdx;
     int index;
-    const int size;
+    int nameIdx;
+    int size;
     int duration;
-    const int bodyweight;
-    const uint8_t type;
-    const uint8_t day;
-    const bool testMax;
+    int bodyweight;
+    uint8_t type;
+    uint8_t day;
+    bool testMax;
 } Workout;
 
 typedef struct {
-    const int index;
-    const short sets;
-    const short reps;
-    const short weight;
-    const uint8_t type;
-    const uint8_t day;
+    int index;
+    short sets;
+    short reps;
+    short weight;
+    uint8_t type;
+    uint8_t day;
 } WorkoutParams;
 
 #define createWorkoutTitleKey(t, i) formatStr(NULL, CFSTR("wkNames%d%02d"), (t), (i))
 
 void initExerciseData(int week);
 
-void setWeeklyWorkoutNames(uint8_t plan, CFStringRef *names);
-Workout *getWeeklyWorkout(uint8_t plan, int i, int const *lifts);
+void getWeeklyWorkoutNames(CFStringRef *names, uint8_t plan);
+Workout *getWeeklyWorkout(int index, uint8_t plan, int const *lifts);
 CFArrayRef createWorkoutNames(uint8_t type);
-Workout *getWorkoutFromLibrary(WorkoutParams *params, int const *lifts);
+Workout *getWorkoutFromLibrary(WorkoutParams const *params, int const *lifts);
 
 #endif /* ExerciseManager_h */

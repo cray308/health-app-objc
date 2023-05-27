@@ -7,7 +7,7 @@ Class ContainerViewClass;
 
 id containerView_init(ContainerView **ref, CFStringRef header) {
     id self = new(ContainerViewClass);
-    ContainerView *v = (ContainerView *)((char *)self + ViewSize);
+    ContainerView *v = getIVV(ContainerView, self);
     *ref = v;
 
     v->divider = new(View);
@@ -30,7 +30,7 @@ id containerView_init(ContainerView **ref, CFStringRef header) {
 }
 
 void containerView_deinit(id self, SEL _cmd) {
-    ContainerView *v = (ContainerView *)((char *)self + ViewSize);
+    ContainerView *v = getIVV(ContainerView, self);
     releaseView(v->divider);
     releaseView(v->header);
     releaseView(v->stack);

@@ -1,45 +1,46 @@
 #include "CocoaHelpers.h"
 
 static const void *cocoaRetain(CFAllocatorRef, const void *);
-static void cocoaRel(CFAllocatorRef, const void *);
+static void cocoaRelease(CFAllocatorRef, const void *);
 
-const CFArrayCallBacks RetainedArrCallbacks = {0, cocoaRetain, cocoaRel, NULL, NULL};
+const CFArrayCallBacks RetainedArrCallbacks = {0, cocoaRetain, cocoaRelease, NULL, NULL};
 struct AppCache AppTable;
-Class Color;
 Class Image;
 
 static id appColors[13];
 static id barColors[2];
 static id (*objRetain)(id, SEL);
 
-const void *cocoaRetain(CFAllocatorRef alo _U_, const void *value) {
+const void *cocoaRetain(CFAllocatorRef allocator _U_, const void *value) {
     return objRetain((id)value, AppTable.sels.ret);
 }
 
-void cocoaRel(CFAllocatorRef alo _U_, const void *value) { releaseObject((id)value); }
+void cocoaRelease(CFAllocatorRef allocator _U_, const void *value) { releaseObject((id)value); }
 
 static id colorCreateLegacy(int type) { return appColors[type]; }
 
 static id barColorCreateLegacy(int type) { return barColors[type]; }
 
 static id colorCreate(int type) {
-    return AppTable.color.imps[type](Color, AppTable.color.sels[type]);
+    return AppTable.color.imps[type](AppTable.color.cls, AppTable.color.sels[type]);
 }
 
 static id barColorCreate(int type) {
     static CFStringRef const names[] = {CFSTR("navBarColor"), CFSTR("modalColor")};
-    return msgV(clsSig(id, CFStringRef), Color, sel_getUid("colorNamed:"), names[type]);
+    return msgV(clsSig(id, CFStringRef), AppTable.color.cls, sel_getUid("colorNamed:"), names[type]);
 }
 
-void initAppData(bool modern, Class **clsRefs, size_t **sizeRefs) {
+void initAppData(bool modern, Class **clsRefs) {
     SEL sa = sel_getUid("alloc"), sn = sel_getUid("new"), ret = sel_getUid("retain");
     SEL rel = sel_getUid("release");
+    SEL rts = sel_getUid("respondsToSelector:");
     Class Object = objc_getClass("NSObject"), View = objc_getClass("UIView");
     Class VC = objc_getClass("UIViewController");
 
-    Color = objc_getClass("UIColor");
+    Class Color = objc_getClass("UIColor");
     SEL iColor = sel_getUid("initWithRed:green:blue:alpha:");
     struct ColorCache colorCache = {
+        .cls = Color,
         .colorFunc = colorCreate,
         .barFunc = barColorCreate,
         .si = iColor,
@@ -82,7 +83,7 @@ void initAppData(bool modern, Class **clsRefs, size_t **sizeRefs) {
 
     memcpy(&AppTable, &(struct AppCache){
         {
-            sel_getUid("respondsToSelector:"),
+            rts, (bool(*)(id, SEL, SEL))class_getMethodImplementation(Object, rts),
             sa, sn, ret, rel,
             (id(*)(Class, SEL))getClassMethodImp(Object, sa),
             (id(*)(Class, SEL))getClassMethodImp(Object, sn),
@@ -96,16 +97,14 @@ void initAppData(bool modern, Class **clsRefs, size_t **sizeRefs) {
         {
             Center, ccns, canr,
             (id(*)(Class, SEL))getClassMethodImp(Center, ccns),
-            (void(*)(id, SEL, id, void(^)(id)))class_getMethodImplementation(Center, canr)
+            (void(*)(id, SEL, id, ObjectBlock))class_getMethodImplementation(Center, canr)
         }
     }, sizeof(struct AppCache));
     *clsRefs[0] = View;
     *clsRefs[1] = VC;
-    *sizeRefs[0] = class_getInstanceSize(View);
-    *sizeRefs[1] = class_getInstanceSize(VC);
 }
 
-void setupAppColors(bool darkMode) {
+void updateAppColors(bool darkMode) {
     if (appColors[0]) {
         for (int i = 0; i < 13; ++i) {
             releaseObject(appColors[i]);

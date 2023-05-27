@@ -7,18 +7,19 @@
 #include "Views_VCExt.h"
 #include "WorkoutVC.h"
 
-static AppDelegate *getAppDel(void) {
+static AppDelegate *getAppDelegate(void) {
     id shared = msgV(clsSig(id), objc_getClass("UIApplication"), sel_getUid("sharedApplication"));
     return (AppDelegate *)msgV(objSig(id), shared, sel_getUid("delegate"));
 }
 
-id getAppWindow(void) { return getAppDel()->window; }
+id getAppWindow(void) { return getAppDelegate()->window; }
 
-UserData const *getUserData(void) { return &getAppDel()->userData; }
+UserData const *getUserData(void) { return &getAppDelegate()->userData; }
 
 #pragma mark - Application Delegate
 
-bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id app _U_, id opt _U_) {
+bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
+                                    id app _U_, CFDictionaryRef options _U_) {
     Class TabBarAppearance = getTabBarAppearanceClass();
     int tzDiff = 0, week = 0;
     id unCenter = getNotificationCenter();
@@ -76,14 +77,15 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_, id app _U_,
     return true;
 }
 
-int appDelegate_supportedOrientations(AppDelegate *self _U_, SEL _cmd _U_, id app _U_, id win _U_) {
+u_long appDelegate_supportedInterfaceOrientations(id self _U_, SEL _cmd _U_,
+                                                  id app _U_, id window _U_) {
     return 2;
 }
 
 #pragma mark - Child VC Callbacks
 
 void updateUserInfo(uint8_t plan, uint8_t darkMode, int const *weights) {
-    AppDelegate *self = getAppDel();
+    AppDelegate *self = getAppDelegate();
     uint8_t updates = userData_update(&self->userData, plan, darkMode, weights);
     if (updates & MaskCurrentPlan)
         homeVC_createWorkoutsList(self->tabs[0], &self->userData);
@@ -98,22 +100,22 @@ void updateUserInfo(uint8_t plan, uint8_t darkMode, int const *weights) {
 }
 
 void deleteAppData(void) {
-    AppDelegate *self = getAppDel();
+    AppDelegate *self = getAppDelegate();
     if (userData_clear(&self->userData))
-        homeVC_updateWorkoutsList((HomeVC *)((char *)self->tabs[0] + VCSize), 0);
+        homeVC_updateWorkoutsList(getIVVC(HomeVC, self->tabs[0]), 0);
     historyVC_clearData(self->tabs[1]);
     deleteStoredData();
 }
 
-void addWorkoutData(Workout const *workout, uint8_t day, int *weights, bool pop) {
-    AppDelegate *self = getAppDel();
+void addWorkout(Workout const *workout, uint8_t day, int *weights, bool pop) {
+    AppDelegate *self = getAppDelegate();
     if (workout->duration < MinWorkoutDuration) goto cleanup;
 
     bool updatedWeights = false;
     uint8_t completed = userData_addWorkoutData(&self->userData, day, weights, &updatedWeights);
     if (completed) homeVC_handleFinishedWorkout(self->tabs[0], completed);
     if (updatedWeights && isViewLoaded(self->tabs[2]))
-        inputVC_updateFields((InputVC *)((char *)self->tabs[2] + VCSize), self->userData.lifts);
+        inputVC_updateFields(getIVVC(InputVC, self->tabs[2]), self->userData.lifts);
 
     saveWorkoutData(workout->duration, workout->type, weights);
 cleanup:

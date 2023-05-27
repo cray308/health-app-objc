@@ -51,16 +51,16 @@ void initValidatorData(void);
 
 void inputView_deinit(id self, SEL _cmd);
 
-void inputVC_addChild(id self, CFStringRef hint CF_CONSUMED, int kb, int min, int max);
-void inputVC_updateFields(InputVC *self, const int *vals);
+void inputVC_addField(id self, CFStringRef hint CF_CONSUMED, int keyboardType, int min, int max);
+void inputVC_updateFields(InputVC *d, int const *values);
 
 void inputVC_deinit(id self, SEL _cmd);
 void inputVC_viewDidLoad(id self, SEL _cmd);
 void inputVC_dismissKeyboard(id self, SEL _cmd);
 void inputVC_jumpToPrev(id self, SEL _cmd);
 void inputVC_jumpToNext(id self, SEL _cmd);
-void inputVC_fieldBeganEditing(id self, SEL _cmd, id field);
-void inputVC_fieldStoppedEditing(id self, SEL _cmd, id field);
-bool inputVC_fieldChanged(id self, SEL _cmd, id field, CFRange range, CFStringRef replacement);
+void inputVC_textFieldDidBeginEditing(id self, SEL _cmd, id field);
+void inputVC_textFieldDidEndEditing(id self, SEL _cmd, id field);
+bool inputVC_shouldChange(id self, SEL _cmd, id field, CFRange range, CFStringRef replacement);
 
 #endif /* InputVC_h */

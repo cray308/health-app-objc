@@ -9,7 +9,7 @@ extern void homeVC_navigateToWorkout(id self, Workout *workout);
 extern Class SetupWorkoutVCClass;
 
 typedef struct {
-    id parent;
+    id delegate;
     CFArrayRef names;
     CFDictionaryRef normalDict;
     CFDictionaryRef selectedDict;
@@ -20,14 +20,15 @@ typedef struct {
 
 void initSetupWorkoutData(void);
 
-id setupWorkoutVC_init(id parent, uint8_t type);
+id setupWorkoutVC_init(id delegate, uint8_t type);
 void setupWorkoutVC_deinit(id self, SEL _cmd);
 void setupWorkoutVC_viewDidLoad(id self, SEL _cmd);
 void setupWorkoutVC_tappedButton(id self, SEL _cmd, id button);
-long setupWorkoutVC_numberOfComponents(id self, SEL _cmd, id p);
-long setupWorkoutVC_numberOfRows(id self, SEL _cmd, id p, long s);
-CFStringRef setupWorkoutVC_getTitle(id self, SEL _cmd, id p, long row, long s);
-CFAttributedStringRef setupWorkoutVC_getAttrTitle(id self, SEL _cmd, id p, long row, long s);
-void setupWorkoutVC_didSelectRow(id self, SEL _cmd, id p, long row, long s);
+long setupWorkoutVC_numberOfComponentsInPickerView(id self, SEL _cmd, id picker);
+long setupWorkoutVC_numberOfRows(id self, SEL _cmd, id picker, long component);
+CFStringRef setupWorkoutVC_titleForRow(id self, SEL _cmd, id picker, long row, long component);
+CFAttributedStringRef setupWorkoutVC_attributedTitle(id self, SEL _cmd,
+                                                     id picker, long row, long component);
+void setupWorkoutVC_didSelectRow(id self, SEL _cmd, id picker, long row, long component);
 
 #endif /* SetupWorkoutVC_h */
