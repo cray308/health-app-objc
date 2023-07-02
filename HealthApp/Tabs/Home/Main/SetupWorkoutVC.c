@@ -5,6 +5,20 @@
 
 Class SetupWorkoutVCClass;
 
+enum {
+    TextAlignmentCenter = 1
+};
+
+enum {
+    AutocorrectionTypeNo = 1
+};
+
+enum {
+    IndexSets,
+    IndexReps,
+    IndexWeight
+};
+
 static SEL prc;
 static void (*reloadComponent)(id, SEL, long);
 
@@ -67,9 +81,9 @@ void setupWorkoutVC_viewDidLoad(id self, SEL _cmd) {
 
     d->workoutField = createTextField(self, p->toolbar, pickerTitle, -1);
     setFieldText(d->workoutField, CFArrayGetValueAtIndex(d->names, 0));
-    msgV(objSig(void, long), d->workoutField, sel_getUid("setTextAlignment:"), 1);
+    msgV(objSig(void, long), d->workoutField, sel_getUid("setTextAlignment:"), TextAlignmentCenter);
     msgV(objSig(void, long), d->workoutField,
-         sel_getUid("setAutocorrectionType:"), 1);
+         sel_getUid("setAutocorrectionType:"), AutocorrectionTypeNo);
     addArrangedSubview(p->vStack, d->workoutField);
     setCustomSpacing(p->vStack, GroupSpacing, d->workoutField);
 
@@ -83,15 +97,15 @@ void setupWorkoutVC_viewDidLoad(id self, SEL _cmd) {
     CFStringRef rows[] = {CFSTR("setupWorkoutSets"), CFSTR("setupWorkoutReps"), NULL};
 
     if (d->type == WorkoutStrength) {
-        rows[2] = CFSTR("setupWorkoutMaxWeight");
+        rows[IndexWeight] = CFSTR("setupWorkoutMaxWeight");
     } else if (d->type == WorkoutSE) {
-        maxes[0] = 3;
-        maxes[1] = 50;
+        maxes[IndexSets] = 3;
+        maxes[IndexReps] = 50;
     } else if (d->type == WorkoutEndurance) {
-        rows[0] = NULL;
-        rows[1] = CFSTR("setupWorkoutDuration");
-        maxes[1] = 180;
-        mins[1] = 15;
+        rows[IndexSets] = NULL;
+        rows[IndexReps] = CFSTR("setupWorkoutDuration");
+        maxes[IndexReps] = 180;
+        mins[IndexReps] = MinWorkoutDuration;
     } else {
         rows[0] = rows[1] = NULL;
         setEnabled(p->button, true);
@@ -112,10 +126,10 @@ void setupWorkoutVC_tappedButton(id self, SEL _cmd _U_, id button) {
     WorkoutParams params = {.index = d->index, .type = d->type, .day = UCHAR_MAX};
     switch (d->type) {
         case WorkoutStrength:
-            params.weight = (short)p->children[2].data->result;
+            params.weight = (short)p->children[IndexWeight].data->result;
         case WorkoutSE:
-            params.sets = (short)p->children[0].data->result;
-            params.reps = (short)p->children[1].data->result;
+            params.sets = (short)p->children[IndexSets].data->result;
+            params.reps = (short)p->children[IndexReps].data->result;
             break;
 
         case WorkoutEndurance:

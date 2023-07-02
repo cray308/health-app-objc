@@ -41,13 +41,13 @@ void homeVC_createWorkoutsList(id self, UserData const *data) {
     CFDateFormatterRef formatter = CFDateFormatterCreate(NULL, locale, 0, 0);
     CFDateFormatterSetFormat(formatter, CFSTR("EEEE"));
     CFRelease(locale);
-    CFStringRef workoutNames[7] = {0};
+    CFStringRef workoutNames[6] = {0};
     getWeeklyWorkoutNames(workoutNames, data->plan);
     SEL tapSel = getTapSel();
     StatusView *sv;
     time_t date = data->weekStart + (DaySeconds >> 1);
 
-    for (int i = 0; i < 7; ++i, date += DaySeconds) {
+    for (int i = 0; i < 6; ++i, date += DaySeconds) {
         if (!workoutNames[i]) continue;
         id btn = statusView_init(&sv, formatDate(formatter, date), workoutNames[i], i, self, tapSel);
         addArrangedSubview(d->planContainer.data->stack, btn);
@@ -129,7 +129,7 @@ void homeVC_planButtonTapped(id self, SEL _cmd _U_, id button) {
 void homeVC_customButtonTapped(id self, SEL _cmd _U_, id button) {
     uint8_t index = (uint8_t)getTag(button);
     if (!index) {
-        WorkoutParams params = {2, 1, 1, 100, WorkoutStrength, UCHAR_MAX};
+        WorkoutParams params = {StrengthIndexTestMax, 1, 1, 100, WorkoutStrength, UCHAR_MAX};
         homeVC_navigateToWorkout(self, getWorkoutFromLibrary(&params, getUserData()->lifts));
         return;
     }
@@ -213,7 +213,7 @@ static void showConfetti(id self) {
     addSubview(view, confetti);
     pinToSafeArea(confetti, view);
 
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 5000000000), dispatch_get_main_queue(), ^{
+    dispatch_after(dispatch_time(0, 5000000000), dispatch_get_main_queue(), ^{
         removeFromSuperview(confetti);
         releaseView(confetti);
         id alert = createAlert(CFSTR("homeAlert"), CFSTR("homeAlertMessage"));
@@ -226,12 +226,12 @@ static void showConfetti(id self) {
 void homeVC_handleFinishedWorkout(id self, uint8_t completedWorkouts) {
     HomeVC *d = getIVVC(HomeVC, self);
     int totalCompleted = 0;
-    for (int i = 0; i < 7; ++i) {
+    for (int i = 0; i < 6; ++i) {
         if ((1 << i) & completedWorkouts) ++totalCompleted;
     }
     homeVC_updateWorkoutsList(d, completedWorkouts);
     if (CFArrayGetCount(getArrangedSubviews(d->planContainer.data->stack)) == totalCompleted) {
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 2500000000), dispatch_get_main_queue(), ^{
+        dispatch_after(dispatch_time(0, 2500000000), dispatch_get_main_queue(), ^{
             showConfetti(self);
         });
     }

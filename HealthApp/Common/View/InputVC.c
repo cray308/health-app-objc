@@ -11,6 +11,14 @@ extern CFStringRef UIFontTextStyleFootnote;
 Class InputViewClass;
 Class InputVCClass;
 
+enum {
+    ItemStyleDone = 2
+};
+
+enum {
+    SystemItemFlexibleSpace = 5
+};
+
 static CFStringRef inputErrorFormat;
 static CFCharacterSetRef metricChars;
 static CFNumberFormatterRef formatter;
@@ -159,10 +167,10 @@ void inputVC_viewDidLoad(id self, SEL _cmd) {
         createBarButtonItemWithImage(CFSTR("chevron.down"), self, getJumpToNextSel()),
         msgV(objSig(id, long, id, SEL), alloc(BarButtonItem),
              sel_getUid("initWithBarButtonSystemItem:target:action:"),
-             5, nil, nil),
+             SystemItemFlexibleSpace, nil, nil),
         msgV(objSig(id, CFStringRef, long, id, SEL), alloc(BarButtonItem),
              sel_getUid("initWithTitle:style:target:action:"),
-             doneText, 2, self, getDismissKeyboardSel())
+             doneText, ItemStyleDone, self, getDismissKeyboardSel())
     };
     CFRelease(doneText);
 
@@ -264,7 +272,7 @@ static void showError(InputVC *d, IVPair *pair) {
     scrollToView(d->scrollView, pair->view);
     if (UIAccessibilityIsVoiceOverRunning()) {
         CFStringRef message = getText(pair->data->errorLabel);
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1500000000), dispatch_get_main_queue(), ^{
+        dispatch_after(dispatch_time(0, 1500000000), dispatch_get_main_queue(), ^{
             UIAccessibilityPostNotification(UIAccessibilityAnnouncementNotification, (id)message);
         });
     }

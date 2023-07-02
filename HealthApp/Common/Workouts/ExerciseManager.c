@@ -54,14 +54,13 @@ static Workout *buildWorkout(WorkoutPlist *data, WorkoutParams const *params, in
     CFLocaleRef locale = CFLocaleCopyCurrent();
     float weights[4] = {[3] = 0};
     short customSets = 1, customReps = 0, customCircuitReps = 0;
-    bool testMax = false;
     if (params->type == WorkoutStrength) {
         float multiplier = params->weight / 100.f;
 
         weights[0] = lifts[0] * multiplier;
-        if (params->index <= 1) {
+        if (params->index < StrengthIndexTestMax) {
             weights[1] = lifts[LiftBench] * multiplier;
-            if (params->index == 0) {
+            if (params->index == StrengthIndexMain) {
                 float weight = ((lifts[LiftPullup] + Bodyweight) * multiplier) - Bodyweight;
                 weights[2] = max(weight, 0);
             } else {
@@ -69,7 +68,6 @@ static Workout *buildWorkout(WorkoutPlist *data, WorkoutParams const *params, in
             }
         } else {
             for (int i = 1; i < 4; ++i) weights[i] = lifts[i];
-            testMax = true;
         }
         if (isMetric(locale)) {
             for (int i = 0; i < 4; ++i) weights[i] *= ToKg;
@@ -121,7 +119,7 @@ static Workout *buildWorkout(WorkoutPlist *data, WorkoutParams const *params, in
     workout->nameIdx = params->index;
     workout->type = params->type;
     workout->day = params->day;
-    workout->testMax = testMax;
+    workout->testMax = params->type == WorkoutStrength && params->index == StrengthIndexTestMax;
     bool multiple = nActivities > 1;
 
     for (int i = 0; i < nActivities; ++i) {
@@ -141,7 +139,7 @@ static Workout *buildWorkout(WorkoutPlist *data, WorkoutParams const *params, in
         int nExercises = (int)CFArrayGetCount(foundExercises);
         customAssert(nExercises > 0)
 
-        if (params->type == WorkoutHIC && !c->type && nExercises == 1) {
+        if (params->type == WorkoutHIC && c->type == CircuitRounds && nExercises == 1) {
             exerciseSets = c->reps;
             c->reps = 1;
         }
@@ -202,7 +200,7 @@ static Workout *buildWorkout(WorkoutPlist *data, WorkoutParams const *params, in
             CFStringRef titleStr;
 
             if (e->type == ExerciseReps) {
-                if (!workout->type) {
+                if (workout->type == WorkoutStrength) {
                     titleStr = formatStr(locale, weightFormat, name, e->reps, weights[j], weightUnit);
                 } else {
                     titleStr = formatStr(locale, repsFormat, name, e->reps);
@@ -264,10 +262,10 @@ void getWeeklyWorkoutNames(CFStringRef *names, uint8_t plan) {
     int index = 0;
     uint8_t type;
 
-    for (int i = 0; i < 7; ++i) {
+    for (int i = 0; i < 6; ++i) {
         CFDictionaryRef day = CFArrayGetValueAtIndex(currWeek, i);
         getDictValue(day, EMKeys.type, kCFNumberCharType, &type);
-        if (type > 3) continue;
+        if (type > WorkoutHIC) continue;
 
         getDictValue(day, EMKeys.index, kCFNumberIntType, &index);
         names[i] = createTitle(type, index);

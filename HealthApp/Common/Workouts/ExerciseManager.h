@@ -6,19 +6,32 @@
 #define MinWorkoutDuration 15
 
 enum {
-    LiftPullup = 1, LiftBench, LiftDeadlift
+    StrengthIndexMain,
+    StrengthIndexTestMax = 2
 };
 
 enum {
-    WorkoutStrength, WorkoutSE, WorkoutEndurance, WorkoutHIC
+    LiftPullup = 1,
+    LiftBench,
+    LiftDeadlift
 };
 
 enum {
-    CircuitRounds, CircuitAMRAP, CircuitDecrement
+    WorkoutStrength,
+    WorkoutSE,
+    WorkoutEndurance,
+    WorkoutHIC
 };
 
 enum {
-    ExerciseReps, ExerciseDuration
+    CircuitRounds,
+    CircuitAMRAP,
+    CircuitDecrement
+};
+
+enum {
+    ExerciseReps,
+    ExerciseDuration
 };
 
 typedef struct {

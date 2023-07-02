@@ -216,7 +216,7 @@ void handleEvent(id self, WorkoutVC *d, int section, int row, int event) {
         workout_setDuration(d->workout);
         if (UIAccessibilityIsVoiceOverRunning()) {
             CFStringRef msg = localize(CFSTR("workoutCompleteMsg"));
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 4000000000), dispatch_get_main_queue(), ^{
+            dispatch_after(dispatch_time(0, 4000000000), dispatch_get_main_queue(), ^{
                 UIAccessibilityPostNotification(UIAccessibilityAnnouncementNotification, (id)msg);
                 CFRelease(msg);
             });

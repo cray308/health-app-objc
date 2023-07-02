@@ -7,6 +7,21 @@
 #include "Views_VCExt.h"
 #include "WorkoutVC.h"
 
+enum {
+    OrientationMaskPortrait = 2
+};
+
+enum {
+    AuthorizationOptionSound = 2,
+    AuthorizationOptionAlert = 4
+};
+
+enum {
+    TabHome,
+    TabHistory,
+    TabSettings
+};
+
 static AppDelegate *getAppDelegate(void) {
     id shared = msgV(clsSig(id), objc_getClass("UIApplication"), sel_getUid("sharedApplication"));
     return (AppDelegate *)msgV(objSig(id), shared, sel_getUid("delegate"));
@@ -30,7 +45,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
         userData_create(&self->userData, TabBarAppearance);
         msgV(objSig(void, u_long, void(^)(bool, id)), unCenter,
              sel_getUid("requestAuthorizationWithOptions:completionHandler:"),
-             6, ^(bool granted _U_, id err _U_){});
+             AuthorizationOptionSound | AuthorizationOptionAlert, ^(bool granted _U_, id err _U_){});
         createDB();
     }
 
@@ -38,9 +53,9 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
     initWorkoutData(week);
 
     HistoryModel *historyModel;
-    self->tabs[0] = new(HomeVCClass);
-    self->tabs[1] = historyVC_init(&historyModel);
-    self->tabs[2] = new(SettingsVCClass);
+    self->tabs[TabHome] = new(HomeVCClass);
+    self->tabs[TabHistory] = historyVC_init(&historyModel);
+    self->tabs[TabSettings] = new(SettingsVCClass);
 
     Class TabBarItem = objc_getClass("UITabBarItem");
     SEL iItem = sel_getUid("initWithTitle:image:tag:");
@@ -80,14 +95,14 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
 
 u_long appDelegate_supportedInterfaceOrientations(id self _U_, SEL _cmd _U_,
                                                   id app _U_, id window _U_) {
-    return 2;
+    return OrientationMaskPortrait;
 }
 
 void appDelegate_willPresentNotification(AppDelegate *self, SEL _cmd _U_,
                                          id center _U_, id notification, void (^callback)(u_long)) {
     id req = msgV(objSig(id), notification, sel_getUid("request"));
     int identifier = CFStringGetIntValue(msgV(objSig(CFStringRef), req, sel_getUid("identifier")));
-    id navVC = getNavVC(self->tabs[0]);
+    id navVC = getNavVC(self->tabs[TabHome]);
     CFArrayRef controllers = msgV(objSig(CFArrayRef), navVC, sel_getUid("viewControllers"));
     if (CFArrayGetCount(controllers) == 2)
         workoutVC_receivedNotification((id)CFArrayGetValueAtIndex(controllers, 1), identifier);
@@ -100,22 +115,22 @@ void updateUserInfo(uint8_t plan, uint8_t darkMode, int const *weights) {
     AppDelegate *self = getAppDelegate();
     uint8_t updates = userData_update(&self->userData, plan, darkMode, weights);
     if (updates & MaskCurrentPlan)
-        homeVC_createWorkoutsList(self->tabs[0], &self->userData);
+        homeVC_createWorkoutsList(self->tabs[TabHome], &self->userData);
 
     if (updates & MaskDarkMode) {
         handleTintChange(self->window, darkMode);
-        homeVC_updateColors(self->tabs[0]);
-        if (isViewLoaded(self->tabs[1]))
-            historyVC_updateColors(self->tabs[1], darkMode);
-        settingsVC_updateColors(self->tabs[2], darkMode);
+        homeVC_updateColors(self->tabs[TabHome]);
+        if (isViewLoaded(self->tabs[TabHistory]))
+            historyVC_updateColors(self->tabs[TabHistory], darkMode);
+        settingsVC_updateColors(self->tabs[TabSettings], darkMode);
     }
 }
 
 void deleteAppData(void) {
     AppDelegate *self = getAppDelegate();
     if (userData_clear(&self->userData))
-        homeVC_updateWorkoutsList(getIVVC(HomeVC, self->tabs[0]), 0);
-    historyVC_clearData(self->tabs[1]);
+        homeVC_updateWorkoutsList(getIVVC(HomeVC, self->tabs[TabHome]), 0);
+    historyVC_clearData(self->tabs[TabHistory]);
     deleteStoredData();
 }
 
@@ -125,14 +140,14 @@ void addWorkout(Workout const *workout, uint8_t day, int *weights, bool pop) {
 
     bool updatedWeights = false;
     uint8_t completed = userData_addWorkoutData(&self->userData, day, weights, &updatedWeights);
-    if (completed) homeVC_handleFinishedWorkout(self->tabs[0], completed);
-    if (updatedWeights && isViewLoaded(self->tabs[2]))
-        inputVC_updateFields(getIVVC(InputVC, self->tabs[2]), self->userData.lifts);
+    if (completed) homeVC_handleFinishedWorkout(self->tabs[TabHome], completed);
+    if (updatedWeights && isViewLoaded(self->tabs[TabSettings]))
+        inputVC_updateFields(getIVVC(InputVC, self->tabs[TabSettings]), self->userData.lifts);
 
     saveWorkoutData(workout->duration, workout->type, weights);
 cleanup:
     if (pop) {
-        id navVC = getNavVC(self->tabs[0]);
+        id navVC = getNavVC(self->tabs[TabHome]);
         msgV(objSig(id, bool), navVC, sel_getUid("popViewControllerAnimated:"), true);
     }
 }
