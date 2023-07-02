@@ -47,7 +47,6 @@ typedef struct {
 
 typedef struct {
     Circuit *circuits;
-    Circuit *group;
     time_t startTime;
     int index;
     int nameIdx;

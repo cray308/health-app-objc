@@ -3,18 +3,9 @@
 
 #include "ContainerView.h"
 #include "ExerciseManager.h"
+#include "WorkoutTimer.h"
 
 extern Class WorkoutVCClass;
-
-typedef struct {
-    time_t refTime;
-    int identifier;
-    int section;
-    int row;
-    int duration;
-    uint8_t type;
-    uint8_t active;
-} WorkoutTimer;
 
 typedef struct {
     WorkoutTimer timers[2];

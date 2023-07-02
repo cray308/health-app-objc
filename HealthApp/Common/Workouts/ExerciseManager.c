@@ -122,7 +122,6 @@ static Workout *buildWorkout(WorkoutPlist *data, WorkoutParams const *params, in
     workout->type = params->type;
     workout->day = params->day;
     workout->testMax = testMax;
-    workout->group = &workout->circuits[0];
     bool multiple = nActivities > 1;
 
     for (int i = 0; i < nActivities; ++i) {
