@@ -125,10 +125,7 @@ static bool cycleExerciseEntry(Exercise *e, WorkoutTimer *timers) {
                 e->state = ExerciseStateActiveMult;
                 CFLocaleRef l = CFLocaleCopyCurrent();
                 CFStringRef sets = formatStr(l, CFSTR("%d"), e->completedSets + 1);
-                CFRelease(l);
-                CFStringReplace(e->header, e->headerRange, sets);
-                e->headerRange.length = CFStringGetLength(sets);
-                CFRelease(sets);
+                updateRange(e->header, &e->headerRange, sets, l);
                 if (e->type == ExerciseDuration) {
                     workoutTimer_start(&timers[TimerExercise], e->reps, true);
                 }
@@ -195,15 +192,13 @@ static bool didFinishCircuit(Circuit *c) {
 
         CFLocaleRef l = CFLocaleCopyCurrent();
         CFStringRef reps = formatStr(l, CFSTR("%d"), c->completedReps);
-        CFRelease(l);
-        long len = CFStringGetLength(reps);
         Exercise *end = &c->exercises[c->size];
         for (Exercise *e = c->exercises; e < end; ++e) {
             if (e->type == ExerciseReps) {
-                CFStringReplace(e->title, e->titleRange, reps);
-                e->titleRange.length = len;
+                updateRange(e->title, &e->titleRange, CFRetain(reps), CFRetain(l));
             }
         }
+        CFRelease(l);
         CFRelease(reps);
     }
     return false;
@@ -469,12 +464,9 @@ foundTransition:
 
         case TransitionFinishedCircuit:
             if (w->group->reps > 1 && w->group->type == CircuitRounds) {
-                CFLocaleRef l = CFLocaleCopyCurrent();
-                CFStringRef newNumber = formatStr(l, CFSTR("%d"), w->group->completedReps + 1);
-                CFRelease(l);
-                CFStringReplace(w->group->header, w->group->range, newNumber);
-                w->group->range.length = CFStringGetLength(newNumber);
-                CFRelease(newNumber);
+                CFLocaleRef locale = CFLocaleCopyCurrent();
+                CFStringRef newNumber = formatStr(locale, CFSTR("%d"), w->group->completedReps + 1);
+                updateRange(w->group->header, &w->group->range, newNumber, locale);
                 setText(pair->data->header, w->group->header);
                 nextView = pair->data->header;
             }

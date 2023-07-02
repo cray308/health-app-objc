@@ -29,12 +29,10 @@ static id stepperView_init(id *stepperRef, CFLocaleRef locale CF_CONSUMED) {
     id self = new(StepperViewClass);
     StepperView *v = getIVV(StepperView, self);
 
-    CFStringRef stepperDescription = localize(CFSTR("stepperDescription"));
-    CFStringRef one = formatStr(locale, CFSTR("%d"), 1);
+    CFStringRef stepperDescription = localize(CFSTR("stepperDescription")), one = getOneStr(locale);
     CFStringRef repsFormat = localize(CFSTR("stepperLabel"));
     CFStringRef reps = formatStr(locale, repsFormat, StepperMin);
-    CFStringFindWithOptionsAndLocale(
-      reps, one, (CFRange){0, CFStringGetLength(reps)}, 0, locale, &v->range);
+    v->range = findNumber(reps, locale, one, NULL);
     v->reps = CFStringCreateMutableCopy(NULL, 64, reps);
     setIsAccessibilityElement(self, true);
     setAccessibilityTraits(self, UIAccessibilityTraitAdjustable);
@@ -76,12 +74,8 @@ void stepperView_deinit(id self, SEL _cmd) {
 }
 
 static void updateStepperValue(id self, StepperView *v, int value) {
-    CFLocaleRef l = CFLocaleCopyCurrent();
-    CFStringRef newVal = formatStr(l, CFSTR("%d"), value);
-    CFRelease(l);
-    CFStringReplace(v->reps, v->range, newVal);
-    v->range.length = CFStringGetLength(newVal);
-    CFRelease(newVal);
+    CFLocaleRef locale = CFLocaleCopyCurrent();
+    updateRange(v->reps, &v->range, formatStr(locale, CFSTR("%d"), value), locale);
     setText(v->label, v->reps);
     setAccessibilityValue(self, v->reps);
 }

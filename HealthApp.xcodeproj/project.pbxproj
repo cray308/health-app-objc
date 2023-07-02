@@ -50,6 +50,8 @@
 		61C34508280107E600CA8B03 /* WorkoutData.plist in Resources */ = {isa = PBXBuildFile; fileRef = 61C34507280107E600CA8B03 /* WorkoutData.plist */; };
 		61C545F22810BAA60066CE39 /* Charts.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61C545F02810BAA10066CE39 /* Charts.xcframework */; };
 		61C545F32810BAA60066CE39 /* Charts.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 61C545F02810BAA10066CE39 /* Charts.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		61DAC9F12A5216890048C1C0 /* StringUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = 61DAC9EF2A5216890048C1C0 /* StringUtils.h */; };
+		61DAC9F22A5216890048C1C0 /* StringUtils.c in Sources */ = {isa = PBXBuildFile; fileRef = 61DAC9F02A5216890048C1C0 /* StringUtils.c */; };
 		61E8ED6726FD60B400942368 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 61E8ED6926FD60B400942368 /* Localizable.strings */; };
 		61FFEEA2272CCCB5002BFFA6 /* AppDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 61FFEEA1272CCCAE002BFFA6 /* AppDelegate.h */; };
 /* End PBXBuildFile section */
@@ -139,6 +141,8 @@
 		617CA9AC2A1C46C1004EFA47 /* UserData.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = UserData.c; sourceTree = "<group>"; };
 		61C34507280107E600CA8B03 /* WorkoutData.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = WorkoutData.plist; sourceTree = "<group>"; };
 		61C545F02810BAA10066CE39 /* Charts.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = Charts.xcframework; sourceTree = "<group>"; };
+		61DAC9EF2A5216890048C1C0 /* StringUtils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StringUtils.h; sourceTree = "<group>"; };
+		61DAC9F02A5216890048C1C0 /* StringUtils.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = StringUtils.c; sourceTree = "<group>"; };
 		61E8ED6826FD60B400942368 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		61FFEEA1272CCCAE002BFFA6 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -334,6 +338,8 @@
 				61115E832A1B06FC00BEB69B /* BaseMacros.h */,
 				6161838126AC80A0001587B2 /* CocoaHelpers.c */,
 				6161838026AC8089001587B2 /* CocoaHelpers.h */,
+				61DAC9F02A5216890048C1C0 /* StringUtils.c */,
+				61DAC9EF2A5216890048C1C0 /* StringUtils.h */,
 				615086EC26D3222500521269 /* SwiftBridging.m */,
 			);
 			path = Extensions;
@@ -359,6 +365,7 @@
 				617CA9AD2A1C46C1004EFA47 /* UserData.h in Headers */,
 				610B92B9270A6E9000358DBD /* Views.h in Headers */,
 				611EDDD02745FEA70064B254 /* WorkoutVC.h in Headers */,
+				61DAC9F12A5216890048C1C0 /* StringUtils.h in Headers */,
 				614DA69A270A8D1F00EC90C4 /* ExerciseManager.h in Headers */,
 				611EDDB32743660C0064B254 /* InputVC.h in Headers */,
 				611EDDA32741F8750064B254 /* StatusView.h in Headers */,
@@ -481,6 +488,7 @@
 				615086ED26D3222500521269 /* SwiftBridging.m in Sources */,
 				617CA9AA2A1C3A1D004EFA47 /* DatabaseManager.c in Sources */,
 				61594D0C26068105000D01A1 /* AppDelegate.c in Sources */,
+				61DAC9F22A5216890048C1C0 /* StringUtils.c in Sources */,
 				614DA69B270A8D1F00EC90C4 /* ExerciseManager.c in Sources */,
 				611EDDA42741F8750064B254 /* StatusView.c in Sources */,
 				610B92CC270A7F4900358DBD /* ContainerView.c in Sources */,

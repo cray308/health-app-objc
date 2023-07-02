@@ -154,14 +154,6 @@ void updateAppColors(bool darkMode) {
     }
 }
 
-void fillStringArray(CFStringRef *arr, CFStringRef format, int count) {
-    for (int i = 0; i < count; ++i) {
-        CFStringRef key = formatStr(NULL, format, i);
-        arr[i] = localize(key);
-        CFRelease(key);
-    }
-}
-
 CFArrayRef createSortDescriptors(CFStringRef key, bool ascending) {
     id desc = msgV(objSig(id, CFStringRef, bool), alloc(objc_getClass("NSSortDescriptor")),
                    sel_getUid("initWithKey:ascending:"), key, ascending);

@@ -1,9 +1,8 @@
 #ifndef CocoaBridging_h
 #define CocoaBridging_h
 
-#include <CoreFoundation/CoreFoundation.h>
 #include <objc/message.h>
-#include "BaseMacros.h"
+#include "StringUtils.h"
 
 #define objSig(r, ...) (r(*)(id, SEL, ##__VA_ARGS__))
 #define clsSig(r, ...) (r(*)(Class, SEL, ##__VA_ARGS__))
@@ -111,7 +110,6 @@ void initAppData(bool modern, Class **clsRefs);
 
 void updateAppColors(bool darkMode);
 
-void fillStringArray(CFStringRef *arr, CFStringRef format, int count);
 CFArrayRef createSortDescriptors(CFStringRef key, bool ascending);
 
 #endif /* CocoaBridging_h */
