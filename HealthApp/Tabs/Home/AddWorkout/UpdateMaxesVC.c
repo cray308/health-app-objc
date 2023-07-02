@@ -53,6 +53,11 @@ static id stepperView_init(id *stepperRef, CFLocaleRef locale CF_CONSUMED) {
     msgV(objSig(void, double), v->stepper, sel_getUid("setMinimumValue:"), StepperMin);
     msgV(objSig(void, double), v->stepper, sel_getUid("setMaximumValue:"), StepperMax);
     addTarget(v->stepper, self, getValueChangedSel(), ControlEventValueChanged);
+    msgV(objSig(void, float, long), v->stepper, sel_getUid("setContentHuggingPriority:forAxis:"),
+         LayoutPriorityRequired, ConstraintAxisHorizontal);
+    msgV(objSig(void, float, long), v->stepper,
+         sel_getUid("setContentCompressionResistancePriority:forAxis:"),
+         LayoutPriorityRequired, ConstraintAxisHorizontal);
 
     id stack = createHStack((id []){v->label, v->stepper});
     useStackConstraints(stack);

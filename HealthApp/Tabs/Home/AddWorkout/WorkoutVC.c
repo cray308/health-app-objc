@@ -10,7 +10,11 @@ extern uint32_t UIAccessibilityLayoutChangedNotification;
 Class WorkoutVCClass;
 
 enum {
-    ExerciseStateDisabled, ExerciseStateActive, ExerciseStateResting, ExerciseStateCompleted
+    ExerciseStateDisabled,
+    ExerciseStateActive,
+    ExerciseStateActiveMult,
+    ExerciseStateResting,
+    ExerciseStateCompleted
 };
 
 enum {
@@ -106,7 +110,7 @@ static bool cycleExerciseEntry(Exercise *e, WorkoutTimer *timers) {
             }
             break;
 
-        case ExerciseStateActive:
+        case ExerciseStateActive ... ExerciseStateActiveMult:
             if (e->rest) {
                 e->state = ExerciseStateResting;
                 break;
@@ -118,7 +122,7 @@ static bool cycleExerciseEntry(Exercise *e, WorkoutTimer *timers) {
                 ++timers[TimerExercise].row;
                 return true;
             } else {
-                e->state = ExerciseStateActive;
+                e->state = ExerciseStateActiveMult;
                 CFLocaleRef l = CFLocaleCopyCurrent();
                 CFStringRef sets = formatStr(l, CFSTR("%d"), e->completedSets + 1);
                 CFRelease(l);
@@ -152,31 +156,35 @@ static void startGroup(Circuit *c, WorkoutTimer *timers, bool startTimer) {
 
 static void exerciseView_configure(StatusView *v) {
     Exercise *e = v->exercise;
-
-    if (e->state == ExerciseStateResting) {
-        setTitle(v->button, e->rest, 0);
-    } else {
-        setTitle(v->button, e->title, 0);
-    }
-
     switch (e->state) {
         case ExerciseStateDisabled:
             setBackgroundColor(v->box, getColor(ColorGray));
-            setEnabled(v->button, false);
             break;
         case ExerciseStateActive:
-            setText(v->header, e->header);
-            if (e->type == ExerciseDuration)
-                setUserInteractionEnabled(v->button, false);
-        case ExerciseStateResting:
             setEnabled(v->button, true);
             setBackgroundColor(v->box, getColor(ColorOrange));
+        case ExerciseStateActiveMult:
+            if (e->type == ExerciseDuration) setUserInteractionEnabled(v->button, false);
+            if (e->completedSets) {
+                setTitle(v->button, e->title, ControlStateNormal);
+                setText(v->header, e->header);
+                statusView_updateAccessibility(v);
+            }
             break;
+
+        case ExerciseStateResting:
+            setTitle(v->button, e->rest, ControlStateNormal);
+            if (e->sets > 1) statusView_updateAccessibility(v);
+            break;
+
         case ExerciseStateCompleted:
             setEnabled(v->button, false);
             setBackgroundColor(v->box, getColor(ColorGreen));
+            if (e->rest) {
+                setTitle(v->button, e->title, ControlStateNormal);
+                if (e->sets > 1) statusView_updateAccessibility(v);
+            }
     }
-    statusView_updateAccessibility(v);
 }
 
 static bool didFinishCircuit(Circuit *c) {
@@ -455,7 +463,10 @@ foundTransition:
             (pair++)->view = nil;
             views = getArrangedSubviews(pair->data->stack);
             setHidden(pair->data->divider, true);
+            exerciseView_configure(getIVV(StatusView, CFArrayGetValueAtIndex(views, 0)));
             nextView = pair->data->header;
+            break;
+
         case TransitionFinishedCircuit:
             if (w->group->reps > 1 && w->group->type == CircuitRounds) {
                 CFLocaleRef l = CFLocaleCopyCurrent();
@@ -468,11 +479,18 @@ foundTransition:
                 nextView = pair->data->header;
             }
 
+            bool refreshButtons = w->group->type == CircuitDecrement;
             for (int i = 0; i < w->group->size; ++i) {
                 v = getIVV(StatusView, CFArrayGetValueAtIndex(views, i));
-                setEnabled(v->button, true);
+                if (refreshButtons && v->exercise->type == ExerciseReps) {
+                    setEnabled(v->button, true);
+                    setTitle(v->button,
+                             v->exercise->title, ControlStateNormal | ControlStateDisabled);
+                    setEnabled(v->button, false);
+                }
                 exerciseView_configure(v);
             }
+
             if (!nextView)
                 nextView = getIVV(StatusView, CFArrayGetValueAtIndex(views, 0))->button;
             break;

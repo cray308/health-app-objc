@@ -50,7 +50,6 @@ void homeVC_createWorkoutsList(id self, UserData const *data) {
     for (int i = 0; i < 7; ++i, date += DaySeconds) {
         if (!workoutNames[i]) continue;
         id btn = statusView_init(&sv, formatDate(formatter, date), workoutNames[i], i, self, tapSel);
-        statusView_updateAccessibility(sv);
         addArrangedSubview(d->planContainer.data->stack, btn);
         releaseView(btn);
     }
@@ -104,7 +103,6 @@ void homeVC_viewDidLoad(id self, SEL _cmd) {
     for (int i = 0; i < 5; ++i) {
         id btn = statusView_init(&sv, NULL, titles[i], i, self, tapSel);
         setHidden(sv->box, true);
-        statusView_updateAccessibility(sv);
         addArrangedSubview(customContainer.data->stack, btn);
         releaseView(btn);
     }

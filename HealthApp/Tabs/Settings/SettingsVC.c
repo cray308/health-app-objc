@@ -5,6 +5,8 @@
 
 #define setOn(s, o) msgV(objSig(void, bool), (s), sel_getUid("setOn:"), (o))
 
+extern uint64_t UIAccessibilityTraitButton;
+
 Class SwitchViewClass;
 Class SettingsVCClass;
 
@@ -12,6 +14,14 @@ static SEL sio;
 static bool (*isOn)(id, SEL);
 
 #pragma mark - Dark Mode Switch
+
+static void updateSwitchAccessibility(id self, int value) {
+    CFLocaleRef locale = CFLocaleCopyCurrent();
+    CFStringRef newValue = formatStr(locale, CFSTR("%d"), value);
+    setAccessibilityValue(self, newValue);
+    CFRelease(locale);
+    CFRelease(newValue);
+}
 
 static id switchView_init(SwitchView **ref, bool darkMode) {
     Class Switch = objc_getClass("UISwitch");
@@ -23,6 +33,9 @@ static id switchView_init(SwitchView **ref, bool darkMode) {
     *ref = v;
 
     CFStringRef labelText = localize(CFSTR("darkMode"));
+    setIsAccessibilityElement(self, true);
+    setAccessibilityTraits(self, UIAccessibilityTraitButton);
+    setAccessibilityLabel(self, labelText);
     setBackgroundColor(self, getColor(ColorSecondaryBGGrouped));
     addCornerRadius(self);
     setHeight(self, ViewHeightDefault, true, false);
@@ -30,14 +43,33 @@ static id switchView_init(SwitchView **ref, bool darkMode) {
     v->label = createLabel(labelText, UIFontTextStyleBody, ColorLabel);
     v->button = new(Switch);
     setOn(v->button, darkMode);
+    addTarget(v->button, self, getValueChangedSel(), ControlEventValueChanged);
+    msgV(objSig(void, float, long), v->button, sel_getUid("setContentHuggingPriority:forAxis:"),
+         LayoutPriorityRequired, ConstraintAxisHorizontal);
+    msgV(objSig(void, float, long), v->button,
+         sel_getUid("setContentCompressionResistancePriority:forAxis:"),
+         LayoutPriorityRequired, ConstraintAxisHorizontal);
 
     id stack = createHStack((id []){v->label, v->button});
     useStackConstraints(stack);
     setLayoutMargins(stack, (HAInsets){0, 8, 0, 8});
     addSubview(self, stack);
     pin(stack, self);
+    updateSwitchAccessibility(self, darkMode);
     releaseView(stack);
     return self;
+}
+
+void switchView_changedValue(id self, SEL _cmd _U_) {
+    updateSwitchAccessibility(self, isOn(getIVV(SwitchView, self)->button, sio));
+}
+
+bool switchView_accessibilityActivate(id self, SEL _cmd _U_) {
+    id switchView = getIVV(SwitchView, self)->button;
+    bool newValue = !isOn(switchView, sio);
+    setOn(switchView, newValue);
+    updateSwitchAccessibility(self, newValue);
+    return true;
 }
 
 #pragma mark - VC

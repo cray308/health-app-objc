@@ -50,6 +50,9 @@ int main(int argc, char *argv[]) {
 
     SwitchViewClass = objc_allocateClassPair(View, "SwitchView", 0);
     class_addIvar(SwitchViewClass, dataKey, sizeof(SwitchView), 0, "{?=@@}");
+    class_addMethod(SwitchViewClass, getValueChangedSel(), (IMP)switchView_changedValue, voidSig);
+    class_addMethod(SwitchViewClass, sel_getUid("accessibilityActivate"),
+                    (IMP)switchView_accessibilityActivate, "B@:");
     objc_registerClassPair(SwitchViewClass);
 
     InputVCClass = objc_allocateClassPair(VC, "InputVC", 0);
@@ -64,6 +67,8 @@ int main(int argc, char *argv[]) {
                     (IMP)inputVC_textFieldDidBeginEditing, tapSig);
     class_addMethod(InputVCClass, sel_getUid("textFieldDidEndEditing:"),
                     (IMP)inputVC_textFieldDidEndEditing, tapSig);
+    class_addMethod(InputVCClass, sel_getUid("textFieldShouldReturn:"),
+                    (IMP)inputVC_textFieldShouldReturn, "B@:@");
     class_addMethod(InputVCClass,
                     sel_getUid("textField:shouldChangeCharactersInRange:replacementString:"),
                     (IMP)inputVC_shouldChange, "B@:@{?=qq}@");

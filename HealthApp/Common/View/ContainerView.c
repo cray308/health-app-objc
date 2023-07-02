@@ -2,6 +2,7 @@
 #include "Views.h"
 
 extern uint64_t UIAccessibilityTraitHeader;
+extern uint64_t UIAccessibilityTraitStaticText;
 
 Class ContainerViewClass;
 
@@ -15,7 +16,7 @@ id containerView_init(ContainerView **ref, CFStringRef header) {
     setHeight(v->divider, 1, false, true);
 
     v->header = createLabel(header, UIFontTextStyleTitle3, ColorLabel);
-    setAccessibilityTraits(v->header, UIAccessibilityTraitHeader);
+    setAccessibilityTraits(v->header, UIAccessibilityTraitStaticText | UIAccessibilityTraitHeader);
 
     v->stack = createVStack(NULL, 0);
     setLayoutMargins(v->stack, (HAInsets){.top = 4});

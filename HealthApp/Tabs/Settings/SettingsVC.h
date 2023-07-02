@@ -22,6 +22,9 @@ typedef struct {
     int results[4];
 } SettingsVC;
 
+void switchView_changedValue(id self, SEL _cmd);
+bool switchView_accessibilityActivate(id self, SEL _cmd);
+
 void settingsVC_updateColors(id self, bool darkMode);
 
 void settingsVC_viewDidLoad(id self, SEL _cmd);

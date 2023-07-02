@@ -68,6 +68,8 @@ void setupWorkoutVC_viewDidLoad(id self, SEL _cmd) {
     d->workoutField = createTextField(self, p->toolbar, pickerTitle, -1);
     setFieldText(d->workoutField, CFArrayGetValueAtIndex(d->names, 0));
     msgV(objSig(void, long), d->workoutField, sel_getUid("setTextAlignment:"), 1);
+    msgV(objSig(void, long), d->workoutField,
+         sel_getUid("setAutocorrectionType:"), 1);
     addArrangedSubview(p->vStack, d->workoutField);
     setCustomSpacing(p->vStack, GroupSpacing, d->workoutField);
 

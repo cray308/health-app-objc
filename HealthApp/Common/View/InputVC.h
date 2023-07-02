@@ -61,6 +61,7 @@ void inputVC_jumpToPrev(id self, SEL _cmd);
 void inputVC_jumpToNext(id self, SEL _cmd);
 void inputVC_textFieldDidBeginEditing(id self, SEL _cmd, id field);
 void inputVC_textFieldDidEndEditing(id self, SEL _cmd, id field);
+bool inputVC_textFieldShouldReturn(id self, SEL _cmd, id field);
 bool inputVC_shouldChange(id self, SEL _cmd, id field, CFRange range, CFStringRef replacement);
 
 #endif /* InputVC_h */

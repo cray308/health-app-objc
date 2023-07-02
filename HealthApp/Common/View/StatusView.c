@@ -19,6 +19,7 @@ id statusView_init(StatusView **ref,
     setBackgroundColor(v->button, getColor(ColorSecondaryBGGrouped));
     setHeight(v->button, 50, true, true);
 
+    bool updateAccessibility = header;
     v->header = createLabel(header, UIFontTextStyleSubheadline, ColorLabel);
     setIsAccessibilityElement(v->header, false);
 
@@ -36,6 +37,7 @@ id statusView_init(StatusView **ref,
     setSpacing(vStack, ViewSpacing);
     addSubview(self, vStack);
     pin(vStack, self);
+    if (updateAccessibility) statusView_updateAccessibility(v);
     releaseView(hStack);
     releaseView(vStack);
     return self;
@@ -49,13 +51,8 @@ void statusView_deinit(id self, SEL _cmd) {
 }
 
 void statusView_updateAccessibility(StatusView *v) {
-    CFStringRef header = getText(v->header);
     CFStringRef title = getCurrentTitle(v->button);
-    if (!header) {
-        setAccessibilityLabel(v->button, title);
-        return;
-    }
-    CFStringRef label = formatStr(NULL, separatorFormat, header, title);
+    CFStringRef label = formatStr(NULL, separatorFormat, getText(v->header), title);
     setAccessibilityLabel(v->button, label);
     CFRelease(label);
 }

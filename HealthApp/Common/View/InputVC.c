@@ -250,6 +250,10 @@ void inputVC_textFieldDidEndEditing(id self, SEL _cmd _U_, id field _U_) {
     getIVVC(InputVC, self)->activeTag = -2;
 }
 
+bool inputVC_textFieldShouldReturn(id self _U_, SEL _cmd _U_, id field) {
+    return msgV(objSig(bool), field, sel_getUid("resignFirstResponder"));
+}
+
 static void showError(InputVC *d, IVPair *pair) {
     if (pair->data->state) {
         setEnabled(d->button, false);
