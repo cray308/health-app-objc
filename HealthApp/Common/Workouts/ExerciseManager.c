@@ -1,8 +1,8 @@
 #include "ExerciseManager.h"
-#include "CocoaHelpers.h"
+#include "HealthDataManager.h"
+#include "StringUtils.h"
 
-extern CFStringRef HKQuantityTypeIdentifierBodyMass;
-extern CFStringRef HKSampleSortIdentifierStartDate;
+int Bodyweight = 165;
 
 typedef struct {
     CFDictionaryRef root;
@@ -10,113 +10,16 @@ typedef struct {
 } WorkoutPlist;
 
 static int weekInPlan;
-static int bodyweight = 165;
-
+static CFStringRef weightUnit;
 static struct {
     CFStringRef reps;
     CFStringRef type;
     CFStringRef index;
 } const EMKeys = {CFSTR("R"), CFSTR("T"), CFSTR("I")};
 
-static CFStringRef repsFormat;
-static CFStringRef setsFormat;
-static CFStringRef roundsFormat;
-static CFStringRef restFormat;
-static CFStringRef weightFormat;
-static CFStringRef durationMinsFormat;
-static CFStringRef durationSecsFormat;
-static CFStringRef distanceFormat;
-static CFStringRef amrapFormat;
-static CFStringRef circuitProgressFmt;
-static CFStringRef roundsLoc;
-static CFStringRef amrapLoc;
-static CFStringRef weightUnit;
-static CFStringRef sets1;
-static CFStringRef rounds1;
-
-static void getHealthData(void);
-
 void initExerciseData(int week) {
-    restFormat = localize(CFSTR("exerciseTitleRest"));
-    repsFormat = localize(CFSTR("exerciseTitleReps"));
-    setsFormat = localize(CFSTR("exerciseHeader"));
-    weightFormat = localize(CFSTR("exerciseTitleRepsWithWeight"));
-    durationMinsFormat = localize(CFSTR("exerciseTitleDurationMinutes"));
-    durationSecsFormat = localize(CFSTR("exerciseTitleDurationSeconds"));
-    distanceFormat = localize(CFSTR("exerciseTitleDistance"));
-    roundsFormat = localize(CFSTR("circuitHeaderRounds"));
-    amrapFormat = localize(CFSTR("circuitHeaderAMRAP"));
-    circuitProgressFmt = localize(CFSTR("circuitProgressHint"));
-    roundsLoc = localize(CFSTR("circuitHeaderLocAndRounds"));
-    amrapLoc = localize(CFSTR("circuitHeaderLocAndAMRAP"));
     weekInPlan = week;
-
-    CFStringRef *refs[] = {&sets1, &rounds1};
-    CFStringRef arr[] = {localize(CFSTR("sets1")), localize(CFSTR("rounds1"))};
-    for (int i = 0; i < 2; ++i) {
-        CFMutableStringRef m = CFStringCreateMutableCopy(NULL, CFStringGetLength(arr[i]) + 2, arr[i]);
-        if (CFStringHasPrefix(m, CFSTR("\U0000202e")) || CFStringHasPrefix(m, CFSTR("\U0000202f")))
-            CFStringDelete(m, (CFRange){0, 1});
-        if (CFStringHasSuffix(m, CFSTR("\U0000202c")))
-            CFStringDelete(m, (CFRange){CFStringGetLength(m) - 1, 1});
-        *refs[i] = CFStringCreateCopy(NULL, m);
-        CFRelease(arr[i]);
-        CFRelease(m);
-    }
-
-    CFLocaleRef l = CFLocaleCopyCurrent();
-    CFStringRef key;
-    if (isMetric(l)) {
-        key = CFSTR("kg");
-    } else {
-        key = CFSTR("lb");
-    }
-    CFRelease(l);
-    id unit = msgV(objSig(id, CFStringRef), alloc(objc_getClass("NSUnit")),
-                   sel_getUid("initWithSymbol:"), key);
-    id formatter = new(objc_getClass("NSMeasurementFormatter"));
-    CFStringRef _unitStr = msgV(objSig(CFStringRef, id), formatter, sel_getUid("stringFromUnit:"), unit);
-    weightUnit = CFStringCreateCopy(NULL, _unitStr);
-    releaseObject(unit);
-    releaseObject(formatter);
-
-    dispatch_async(dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0), ^{ getHealthData(); });
-}
-
-void getHealthData(void) {
-    Class storeClass = objc_getClass("HKHealthStore");
-    if (!msgV(clsSig(bool), storeClass, sel_getUid("isHealthDataAvailable"))) return;
-
-    id store = new(storeClass);
-    id weightType = msgV(clsSig(id, CFStringRef), objc_getClass("HKSampleType"),
-                          sel_getUid("quantityTypeForIdentifier:"), HKQuantityTypeIdentifierBodyMass);
-    CFSetRef set = CFSetCreate(NULL, (const void *[]){weightType}, 1, NULL);
-
-    SEL auth = sel_getUid("requestAuthorizationToShareTypes:readTypes:completion:");
-    ((objSig(void, CFSetRef, CFSetRef, void(^)(bool, id))objc_msgSend)
-     (store, auth, NULL, set, ^(bool granted, id er _U_) {
-        if (!granted) {
-            releaseObject(store);
-            return;
-        }
-
-        CFArrayRef arr = createSortDescriptors(HKSampleSortIdentifierStartDate, false);
-        id _req = alloc(objc_getClass("HKSampleQuery"));
-        SEL qInit = sel_getUid("initWithSampleType:predicate:limit:sortDescriptors:resultsHandler:");
-        id req = ((objSig(id, id, id, u_long, CFArrayRef, void(^)(id, CFArrayRef, id))objc_msgSend)
-                  (_req, qInit, weightType, nil, 1, arr, ^(id q _U_, CFArrayRef data, id err2 _U_) {
-            if (data && CFArrayGetCount(data)) {
-                id unit = msgV(clsSig(id), objc_getClass("HKUnit"), sel_getUid("poundUnit"));
-                id qty = msgV(objSig(id), (id)CFArrayGetValueAtIndex(data, 0), sel_getUid("quantity"));
-                bodyweight = (int)msgV(objSig(double, id), qty, sel_getUid("doubleValueForUnit:"), unit);
-            }
-            releaseObject(store);
-        }));
-        msgV(objSig(void, id), store, sel_getUid("executeQuery:"), req);
-        CFRelease(arr);
-        releaseObject(req);
-    }));
-    CFRelease(set);
+    getMassData(&Bodyweight, &weightUnit);
 }
 
 static void createPlist(WorkoutPlist *data) {
@@ -159,7 +62,7 @@ static Workout *buildWorkout(WorkoutPlist *data, WorkoutParams const *params, in
         if (params->index <= 1) {
             weights[1] = lifts[LiftBench] * multiplier;
             if (params->index == 0) {
-                int weight = (int)((lifts[LiftPullup] + bodyweight) * multiplier) - bodyweight;
+                float weight = ((lifts[LiftPullup] + Bodyweight) * multiplier) - Bodyweight;
                 weights[2] = max(weight, 0);
             } else {
                 weights[2] = lifts[LiftDeadlift] * multiplier;
@@ -180,6 +83,33 @@ static Workout *buildWorkout(WorkoutPlist *data, WorkoutParams const *params, in
         customReps = params->reps * 60;
     }
 
+    CFStringRef one = getOneStr(locale), restFormat = localize(CFSTR("exerciseTitleRest"));
+    CFStringRef repsFormat = localize(CFSTR("exerciseTitleReps"));
+    CFStringRef setsFormat = localize(CFSTR("exerciseHeader"));
+    CFStringRef weightFormat = localize(CFSTR("exerciseTitleRepsWithWeight"));
+    CFStringRef durationMinsFormat = localize(CFSTR("exerciseTitleDurationMinutes"));
+    CFStringRef durationSecsFormat = localize(CFSTR("exerciseTitleDurationSeconds"));
+    CFStringRef distanceFormat = localize(CFSTR("exerciseTitleDistance"));
+    CFStringRef roundsFormat = localize(CFSTR("circuitHeaderRounds"));
+    CFStringRef amrapFormat = localize(CFSTR("circuitHeaderAMRAP"));
+    CFStringRef circuitProgressFormat = localize(CFSTR("circuitProgressHint"));
+    CFStringRef roundsMultipleFormat = localize(CFSTR("circuitHeaderRoundsMultiple"));
+    CFStringRef amrapMultipleFormat = localize(CFSTR("circuitHeaderAMRAPMultiple"));
+
+    CFStringRef sets1, rounds1;
+    CFStringRef *refs[] = {&sets1, &rounds1}, substrs[] = {CFSTR("sets1"), CFSTR("rounds1")};
+    for (int i = 0; i < 2; ++i) {
+        CFStringRef sub = localize(substrs[i]);
+        CFMutableStringRef s = CFStringCreateMutableCopy(NULL, CFStringGetLength(sub) + 2, sub);
+        if (CFStringHasPrefix(s, CFSTR("\U0000202e")) || CFStringHasPrefix(s, CFSTR("\U0000202f")))
+            CFStringDelete(s, (CFRange){0, 1});
+        if (CFStringHasSuffix(s, CFSTR("\U0000202c")))
+            CFStringDelete(s, (CFRange){CFStringGetLength(s) - 1, 1});
+        *refs[i] = CFStringCreateCopy(NULL, s);
+        CFRelease(sub);
+        CFRelease(s);
+    }
+
     CFArrayRef lib = CFArrayGetValueAtIndex(data->lib, params->type);
     CFArrayRef activities = CFArrayGetValueAtIndex(lib, params->index);
     int nActivities = (int)CFArrayGetCount(activities);
@@ -189,18 +119,16 @@ static Workout *buildWorkout(WorkoutPlist *data, WorkoutParams const *params, in
     workout->size = nActivities;
     workout->circuits = calloc((unsigned)nActivities, sizeof(Circuit));
     workout->nameIdx = params->index;
-    workout->bodyweight = bodyweight;
     workout->type = params->type;
     workout->day = params->day;
     workout->testMax = testMax;
     workout->group = &workout->circuits[0];
     bool multiple = nActivities > 1;
-    CFStringRef one = getOneStr(locale);
 
     for (int i = 0; i < nActivities; ++i) {
         CFDictionaryRef act = CFArrayGetValueAtIndex(activities, i);
         Circuit *c = &workout->circuits[i];
-        CFStringRef circuitHeader = NULL;
+        CFStringRef cHeader = NULL;
         short exerciseSets = customSets;
 
         getDictValue(act, EMKeys.type, kCFNumberCharType, &c->type);
@@ -224,25 +152,25 @@ static Workout *buildWorkout(WorkoutPlist *data, WorkoutParams const *params, in
 
         if (c->type == CircuitAMRAP) {
             if (multiple) {
-                circuitHeader = formatStr(locale, amrapLoc, i + 1, nActivities, c->reps);
+                cHeader = formatStr(locale, amrapMultipleFormat, i + 1, nActivities, c->reps);
             } else {
-                circuitHeader = formatStr(locale, amrapFormat, c->reps);
+                cHeader = formatStr(locale, amrapFormat, c->reps);
             }
         } else if (c->reps > 1) {
             if (multiple) {
-                circuitHeader = formatStr(locale, roundsLoc, i + 1, nActivities, 1, c->reps);
+                cHeader = formatStr(locale, roundsMultipleFormat, i + 1, nActivities, 1, c->reps);
             } else {
-                circuitHeader = formatStr(locale, roundsFormat, 1, c->reps);
+                cHeader = formatStr(locale, roundsFormat, 1, c->reps);
             }
-            c->range = findNumber(circuitHeader, locale, one, rounds1);
+            c->range = findNumber(cHeader, locale, one, rounds1);
         } else if (multiple) {
-            circuitHeader = formatStr(locale, circuitProgressFmt, i + 1, nActivities);
+            cHeader = formatStr(locale, circuitProgressFormat, i + 1, nActivities);
         }
 
-        if (circuitHeader) {
-            c->header = CFStringCreateMutableCopy(NULL, 80, circuitHeader);
+        if (cHeader) {
+            c->header = CFStringCreateMutableCopy(NULL, 80, cHeader);
             CFRetain(c->header);
-            CFRelease(circuitHeader);
+            CFRelease(cHeader);
         }
 
         for (int j = 0; j < nExercises; ++j) {
@@ -306,8 +234,22 @@ static Workout *buildWorkout(WorkoutPlist *data, WorkoutParams const *params, in
             CFRelease(ten);
         }
     }
-    CFRelease(one);
     CFRelease(locale);
+    CFRelease(one);
+    CFRelease(restFormat);
+    CFRelease(repsFormat);
+    CFRelease(setsFormat);
+    CFRelease(weightFormat);
+    CFRelease(durationMinsFormat);
+    CFRelease(durationSecsFormat);
+    CFRelease(distanceFormat);
+    CFRelease(roundsFormat);
+    CFRelease(amrapFormat);
+    CFRelease(circuitProgressFormat);
+    CFRelease(roundsMultipleFormat);
+    CFRelease(amrapMultipleFormat);
+    CFRelease(sets1);
+    CFRelease(rounds1);
     CFRelease(data->root);
     return workout;
 }

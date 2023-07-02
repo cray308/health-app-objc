@@ -495,7 +495,7 @@ foundTransition:
 
         default:
             if (w->testMax) {
-                presentModalVC(self, updateMaxesVC_init(self, row, w->bodyweight));
+                presentModalVC(self, updateMaxesVC_init(self, row));
                 return;
             }
             break;

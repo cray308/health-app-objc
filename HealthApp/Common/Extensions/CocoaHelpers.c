@@ -153,11 +153,3 @@ void updateAppColors(bool darkMode) {
         appColors[ColorTertiaryBG] = createColor(0.17f, 0.17f, 0.18f, 1);
     }
 }
-
-CFArrayRef createSortDescriptors(CFStringRef key, bool ascending) {
-    id desc = msgV(objSig(id, CFStringRef, bool), alloc(objc_getClass("NSSortDescriptor")),
-                   sel_getUid("initWithKey:ascending:"), key, ascending);
-    CFArrayRef arr = CFArrayCreate(NULL, (const void *[]){desc}, 1, &RetainedArrCallbacks);
-    releaseObject(desc);
-    return arr;
-}

@@ -77,8 +77,8 @@
 "circuitProgressHint" = "Circuit %1$d sur %2$d";
 "circuitHeaderRounds" = "Tour %1$d sur %2$d";
 "circuitHeaderAMRAP" = "ADRQP pendant %d min";
-"circuitHeaderLocAndRounds" = "Circuit %1$d sur %2$d - Tour %3$d sur %4$d";
-"circuitHeaderLocAndAMRAP" = "Circuit %1$d sur %2$d - ADRQP pendant %3$d min";
+"circuitHeaderRoundsMultiple" = "Circuit %1$d sur %2$d - Tour %3$d sur %4$d";
+"circuitHeaderAMRAPMultiple" = "Circuit %1$d sur %2$d - ADRQP pendant %3$d min";
 "sets1" = "Ensemble 1";
 "rounds1" = "Tour 1";
 "separator" = "%1$@, %2$@";

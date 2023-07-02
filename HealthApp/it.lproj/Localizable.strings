@@ -77,8 +77,8 @@
 "circuitProgressHint" = "Circuito %1$d di %2$d";
 "circuitHeaderRounds" = "Giro %1$d di %2$d";
 "circuitHeaderAMRAP" = "QPRP per %d min";
-"circuitHeaderLocAndRounds" = "Circuito %1$d di %2$d - Giro %3$d di %4$d";
-"circuitHeaderLocAndAMRAP" = "Circuito %1$d di %2$d - QPRP per %3$d min";
+"circuitHeaderRoundsMultiple" = "Circuito %1$d di %2$d - Giro %3$d di %4$d";
+"circuitHeaderAMRAPMultiple" = "Circuito %1$d di %2$d - QPRP per %3$d min";
 "sets1" = "Serie 1";
 "rounds1" = "Giro 1";
 "separator" = "%1$@, %2$@";

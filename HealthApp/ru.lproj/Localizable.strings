@@ -77,8 +77,8 @@
 "circuitProgressHint" = "Схема %1$d из %2$d";
 "circuitHeaderRounds" = "Раунд %1$d из %2$d";
 "circuitHeaderAMRAP" = "МКПВ течение %d мин";
-"circuitHeaderLocAndRounds" = "Схема %1$d из %2$d - Раунд %3$d из %4$d";
-"circuitHeaderLocAndAMRAP" = "Схема %1$d из %2$d - МКПВ течение %3$d мин";
+"circuitHeaderRoundsMultiple" = "Схема %1$d из %2$d - Раунд %3$d из %4$d";
+"circuitHeaderAMRAPMultiple" = "Схема %1$d из %2$d - МКПВ течение %3$d мин";
 "sets1" = "Набор 1";
 "rounds1" = "Раунд 1";
 "separator" = "%1$@, %2$@";

@@ -77,8 +77,8 @@
 "circuitProgressHint" = "Circuit %1$d of %2$d";
 "circuitHeaderRounds" = "Round %1$d of %2$d";
 "circuitHeaderAMRAP" = "AMRAP %d min";
-"circuitHeaderLocAndRounds" = "Circuit %1$d of %2$d - Round %3$d of %4$d";
-"circuitHeaderLocAndAMRAP" = "Circuit %1$d of %2$d - AMRAP %3$d min";
+"circuitHeaderRoundsMultiple" = "Circuit %1$d of %2$d - Round %3$d of %4$d";
+"circuitHeaderAMRAPMultiple" = "Circuit %1$d of %2$d - AMRAP %3$d min";
 "sets1" = "Set 1";
 "rounds1" = "Round 1";
 "separator" = "%1$@, %2$@";

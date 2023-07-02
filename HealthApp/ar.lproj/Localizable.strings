@@ -77,8 +77,8 @@
 "circuitProgressHint" = "\U202Fالدائرة %1$d من %2$d\U202C";
 "circuitHeaderRounds" = "\U202Fالجولة %1$d من %2$d\U202C";
 "circuitHeaderAMRAP" = "\U202Fأكبر عدد ممكن من التكرار لمدة %d د\U202C";
-"circuitHeaderLocAndRounds" = "\U202Fالدائرة %1$d من %2$d - الجولة %3$d من %4$d\U202C";
-"circuitHeaderLocAndAMRAP" = "\U202Fالدائرة %1$d من %2$d - أكبر عدد ممكن من التكرارات لمدة %3$d د\U202C";
+"circuitHeaderRoundsMultiple" = "\U202Fالدائرة %1$d من %2$d - الجولة %3$d من %4$d\U202C";
+"circuitHeaderAMRAPMultiple" = "\U202Fالدائرة %1$d من %2$d - أكبر عدد ممكن من التكرارات لمدة %3$d د\U202C";
 "sets1" = "المجموعة ١";
 "rounds1" = "الجولة ١";
 "separator" = "%1$@ ،%2$@";

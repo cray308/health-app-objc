@@ -53,7 +53,6 @@ typedef struct {
     int nameIdx;
     int size;
     int duration;
-    int bodyweight;
     uint8_t type;
     uint8_t day;
     bool testMax;
@@ -67,6 +66,8 @@ typedef struct {
     uint8_t type;
     uint8_t day;
 } WorkoutParams;
+
+extern int Bodyweight;
 
 #define createWorkoutTitleKey(t, i) formatStr(NULL, CFSTR("wkNames%d%02d"), (t), (i))
 

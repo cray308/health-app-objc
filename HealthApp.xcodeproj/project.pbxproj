@@ -52,6 +52,8 @@
 		61C545F32810BAA60066CE39 /* Charts.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 61C545F02810BAA10066CE39 /* Charts.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		61DAC9F12A5216890048C1C0 /* StringUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = 61DAC9EF2A5216890048C1C0 /* StringUtils.h */; };
 		61DAC9F22A5216890048C1C0 /* StringUtils.c in Sources */ = {isa = PBXBuildFile; fileRef = 61DAC9F02A5216890048C1C0 /* StringUtils.c */; };
+		61DAC9F52A5219130048C1C0 /* HealthDataManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 61DAC9F32A5219130048C1C0 /* HealthDataManager.h */; };
+		61DAC9F62A5219130048C1C0 /* HealthDataManager.c in Sources */ = {isa = PBXBuildFile; fileRef = 61DAC9F42A5219130048C1C0 /* HealthDataManager.c */; };
 		61E8ED6726FD60B400942368 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 61E8ED6926FD60B400942368 /* Localizable.strings */; };
 		61FFEEA2272CCCB5002BFFA6 /* AppDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 61FFEEA1272CCCAE002BFFA6 /* AppDelegate.h */; };
 /* End PBXBuildFile section */
@@ -143,6 +145,8 @@
 		61C545F02810BAA10066CE39 /* Charts.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = Charts.xcframework; sourceTree = "<group>"; };
 		61DAC9EF2A5216890048C1C0 /* StringUtils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StringUtils.h; sourceTree = "<group>"; };
 		61DAC9F02A5216890048C1C0 /* StringUtils.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = StringUtils.c; sourceTree = "<group>"; };
+		61DAC9F32A5219130048C1C0 /* HealthDataManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HealthDataManager.h; sourceTree = "<group>"; };
+		61DAC9F42A5219130048C1C0 /* HealthDataManager.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = HealthDataManager.c; sourceTree = "<group>"; };
 		61E8ED6826FD60B400942368 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		61FFEEA1272CCCAE002BFFA6 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -172,6 +176,8 @@
 			children = (
 				614DA699270A8D1F00EC90C4 /* ExerciseManager.c */,
 				614DA698270A8D1F00EC90C4 /* ExerciseManager.h */,
+				61DAC9F42A5219130048C1C0 /* HealthDataManager.c */,
+				61DAC9F32A5219130048C1C0 /* HealthDataManager.h */,
 				61C34507280107E600CA8B03 /* WorkoutData.plist */,
 			);
 			path = Workouts;
@@ -357,6 +363,7 @@
 				61115E842A1B06FC00BEB69B /* BaseMacros.h in Headers */,
 				611EDDC62744CB2D0064B254 /* UpdateMaxesVC.h in Headers */,
 				61FFEEA2272CCCB5002BFFA6 /* AppDelegate.h in Headers */,
+				61DAC9F52A5219130048C1C0 /* HealthDataManager.h in Headers */,
 				611EDDE827476ED50064B254 /* HistoryVC.h in Headers */,
 				611EDDA9274355F10064B254 /* HomeVC.h in Headers */,
 				6166D7FE2A2157470094C1EE /* Views_VCExt.h in Headers */,
@@ -484,6 +491,7 @@
 			files = (
 				61115E882A1B0F4A00BEB69B /* HistoryModel.c in Sources */,
 				6161838226AC80A0001587B2 /* CocoaHelpers.c in Sources */,
+				61DAC9F62A5219130048C1C0 /* HealthDataManager.c in Sources */,
 				610B92BA270A6E9000358DBD /* Views.c in Sources */,
 				615086ED26D3222500521269 /* SwiftBridging.m in Sources */,
 				617CA9AA2A1C3A1D004EFA47 /* DatabaseManager.c in Sources */,

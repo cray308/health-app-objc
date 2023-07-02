@@ -77,8 +77,8 @@
 "circuitProgressHint" = "Schaltung %1$d von %2$d";
 "circuitHeaderRounds" = "Runde %1$d von %2$d";
 "circuitHeaderAMRAP" = "SVWWM für %d Min.";
-"circuitHeaderLocAndRounds" = "Schaltung %1$d von %2$d - Runde %3$d von %4$d";
-"circuitHeaderLocAndAMRAP" = "Schaltung %1$d von %2$d - SVWWM für %3$d Min.";
+"circuitHeaderRoundsMultiple" = "Schaltung %1$d von %2$d - Runde %3$d von %4$d";
+"circuitHeaderAMRAPMultiple" = "Schaltung %1$d von %2$d - SVWWM für %3$d Min.";
 "sets1" = "Set 1";
 "rounds1" = "Runde 1";
 "separator" = "%1$@, %2$@";

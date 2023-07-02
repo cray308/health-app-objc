@@ -77,8 +77,8 @@
 "circuitProgressHint" = "Circuito %1$d de %2$d";
 "circuitHeaderRounds" = "Ronda %1$d de %2$d";
 "circuitHeaderAMRAP" = "TRCSP por %d min";
-"circuitHeaderLocAndRounds" = "Circuito %1$d de %2$d - Ronda %3$d de %4$d";
-"circuitHeaderLocAndAMRAP" = "Circuito %1$d de %2$d - TRCSP por %3$d min";
+"circuitHeaderRoundsMultiple" = "Circuito %1$d de %2$d - Ronda %3$d de %4$d";
+"circuitHeaderAMRAPMultiple" = "Circuito %1$d de %2$d - TRCSP por %3$d min";
 "sets1" = "Conjunto 1";
 "rounds1" = "Ronda 1";
 "separator" = "%1$@, %2$@";

@@ -110,6 +110,4 @@ void initAppData(bool modern, Class **clsRefs);
 
 void updateAppColors(bool darkMode);
 
-CFArrayRef createSortDescriptors(CFStringRef key, bool ascending);
-
 #endif /* CocoaBridging_h */

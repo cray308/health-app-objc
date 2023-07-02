@@ -100,12 +100,11 @@ void stepperView_accessibilityDecrement(id self, SEL _cmd _U_) { accessibilityCh
 
 #pragma mark - VC
 
-id updateMaxesVC_init(id delegate, int index, int bodyweight) {
+id updateMaxesVC_init(id delegate, int index) {
     id self = new(UpdateMaxesVCClass);
     UpdateMaxesVC *d = getIVVCC(UpdateMaxesVC, InputVC, self);
     d->delegate = delegate;
     d->index = index;
-    d->bodyweight = bodyweight;
     return self;
 }
 
@@ -148,7 +147,7 @@ void updateMaxesVC_tappedFinish(id self, SEL _cmd _U_, id button _U_) {
     InputVC *p = getIVVC(InputVC, self);
     UpdateMaxesVC *d = getIVVCS(UpdateMaxesVC, p);
     CFLocaleRef locale = CFLocaleCopyCurrent();
-    int extra = d->index == LiftPullup ? d->bodyweight : 0;
+    int extra = d->index == LiftPullup ? Bodyweight : 0;
     float initWeight = ((p->children[0].data->result * getSavedMassFactor(locale)) + extra) * 36;
     float reps = 37.f - (float)getValue(d->repsStepper, sgv);
     int weight = (int)lrintf(initWeight / reps) - extra;
