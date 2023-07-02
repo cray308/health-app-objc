@@ -120,9 +120,7 @@ int main(int argc, char *argv[]) {
     objc_registerClassPair(HistoryVCClass);
 
     WorkoutVCClass = objc_allocateClassPair(VC, "WorkoutVC", 0);
-    class_addIvar(WorkoutVCClass, dataKey, sizeof(WorkoutVC), 0,
-                  "{?=[2{?={_opaque_pthread_mutex_t=q[56c]}{_opaque_pthread_cond_t=q[40c]}@qiiI"
-                  "{?=CCC}}][2^{_opaque_pthread_t}]@@{?=i{?=ii}}[4i]B}");
+    class_addIvar(WorkoutVCClass, dataKey, sizeof(WorkoutVC), 0, "{?=[2{?=qiiiiCC}]@@[4i]B}");
     class_addMethod(WorkoutVCClass, deinit, (IMP)workoutVC_deinit, voidSig);
     class_addMethod(WorkoutVCClass, viewLoad, (IMP)workoutVC_viewDidLoad, voidSig);
     class_addMethod(WorkoutVCClass, customTap, (IMP)workoutVC_startEndWorkout, tapSig);
@@ -132,12 +130,16 @@ int main(int argc, char *argv[]) {
     objc_registerClassPair(WorkoutVCClass);
 
     Class AppDelegateClass = objc_allocateClassPair(objc_getClass("UIResponder"), "AppDelegate", 0);
+    class_addProtocol(AppDelegateClass, objc_getProtocol("UNUserNotificationCenterDelegate"));
     class_addIvar(AppDelegateClass, dataKey, sizeof(AppDelegate), 0, "@[3@]{?=qq[4i]CCC}");
     class_addMethod(AppDelegateClass, sel_getUid("application:didFinishLaunchingWithOptions:"),
                     (IMP)appDelegate_didFinishLaunching, "B@:@@");
     class_addMethod(AppDelegateClass,
                     sel_getUid("application:supportedInterfaceOrientationsForWindow:"),
                     (IMP)appDelegate_supportedInterfaceOrientations, "Q@:@@");
+    class_addMethod(AppDelegateClass, sel_getUid("userNotificationCenter:"
+                                                 "willPresentNotification:withCompletionHandler:"),
+                    (IMP)appDelegate_willPresentNotification, "v@:@@?");
     objc_registerClassPair(AppDelegateClass);
     return UIApplicationMain(argc, argv, nil, CFSTR("AppDelegate"));
 }

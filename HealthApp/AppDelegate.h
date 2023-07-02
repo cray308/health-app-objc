@@ -14,6 +14,8 @@ typedef struct {
 
 bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd, id app, CFDictionaryRef options);
 u_long appDelegate_supportedInterfaceOrientations(id self, SEL _cmd, id app, id window);
+void appDelegate_willPresentNotification(AppDelegate *self, SEL _cmd,
+                                         id center, id notification, void (^callback)(u_long));
 
 void updateUserInfo(uint8_t plan, uint8_t darkMode, int const *weights);
 void deleteAppData(void);

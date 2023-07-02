@@ -73,6 +73,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
     CFRelease(vcArr);
     releaseVC(tabVC);
     msgV(objSig(void), self->window, sel_getUid("makeKeyAndVisible"));
+    setDelegate(unCenter, (id)self);
     runStartupJob(historyModel, self->userData.weekStart, tzDiff);
     return true;
 }
@@ -80,6 +81,17 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
 u_long appDelegate_supportedInterfaceOrientations(id self _U_, SEL _cmd _U_,
                                                   id app _U_, id window _U_) {
     return 2;
+}
+
+void appDelegate_willPresentNotification(AppDelegate *self, SEL _cmd _U_,
+                                         id center _U_, id notification, void (^callback)(u_long)) {
+    id req = msgV(objSig(id), notification, sel_getUid("request"));
+    int identifier = CFStringGetIntValue(msgV(objSig(CFStringRef), req, sel_getUid("identifier")));
+    id navVC = getNavVC(self->tabs[0]);
+    CFArrayRef controllers = msgV(objSig(CFArrayRef), navVC, sel_getUid("viewControllers"));
+    if (CFArrayGetCount(controllers) == 2)
+        workoutVC_receivedNotification((id)CFArrayGetValueAtIndex(controllers, 1), identifier);
+    callback(0);
 }
 
 #pragma mark - Child VC Callbacks

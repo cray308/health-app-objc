@@ -1,39 +1,25 @@
 #ifndef WorkoutVC_h
 #define WorkoutVC_h
 
-#include <pthread.h>
 #include "ContainerView.h"
 #include "ExerciseManager.h"
 
 extern Class WorkoutVCClass;
 
 typedef struct {
-    pthread_mutex_t lock;
-    pthread_cond_t cond;
-    id parent;
     time_t refTime;
+    int identifier;
     int section;
     int row;
-    unsigned duration;
-    struct {
-        const unsigned char type;
-        unsigned char active;
-        unsigned char stop;
-    } info;
+    int duration;
+    uint8_t type;
+    uint8_t active;
 } WorkoutTimer;
 
 typedef struct {
     WorkoutTimer timers[2];
-    pthread_t threads[2];
     Workout *workout;
     CVPair *containers;
-    struct {
-        int groupTag;
-        struct {
-            int group;
-            int tag;
-        } exerciseInfo;
-    } savedInfo;
     int weights[4];
     bool done;
 } WorkoutVC;
@@ -46,5 +32,7 @@ void workoutVC_viewDidLoad(id self, SEL _cmd);
 void workoutVC_startEndWorkout(id self, SEL _cmd, id button);
 void workoutVC_viewWillDisappear(id self, SEL _cmd, bool animated);
 void workoutVC_handleTap(id self, SEL _cmd, id button);
+
+void workoutVC_receivedNotification(id self, int identifier);
 
 #endif /* WorkoutVC_h */
