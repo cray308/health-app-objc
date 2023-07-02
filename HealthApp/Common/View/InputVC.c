@@ -155,8 +155,8 @@ void inputVC_viewDidLoad(id self, SEL _cmd) {
 
     CFStringRef doneText = localize(CFSTR("done"));
     id items[] = {
-        createBarButtonItemWithImage(CFSTR("ico_chevron_up"), self, getJumpToPrevSel()),
-        createBarButtonItemWithImage(CFSTR("ico_chevron_down"), self, getJumpToNextSel()),
+        createBarButtonItemWithImage(CFSTR("chevron.up"), self, getJumpToPrevSel()),
+        createBarButtonItemWithImage(CFSTR("chevron.down"), self, getJumpToNextSel()),
         msgV(objSig(id, long, id, SEL), alloc(BarButtonItem),
              sel_getUid("initWithBarButtonSystemItem:target:action:"),
              5, nil, nil),

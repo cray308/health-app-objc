@@ -1,0 +1,4284 @@
+{
+  "ABIRoot": {
+    "kind": "Root",
+    "name": "TopLevel",
+    "printedName": "TopLevel",
+    "children": [
+      {
+        "kind": "Import",
+        "name": "UIKit",
+        "printedName": "UIKit",
+        "declKind": "Import",
+        "moduleName": "Charts"
+      },
+      {
+        "kind": "Import",
+        "name": "CoreGraphics",
+        "printedName": "CoreGraphics",
+        "declKind": "Import",
+        "moduleName": "Charts"
+      },
+      {
+        "kind": "Import",
+        "name": "QuartzCore",
+        "printedName": "QuartzCore",
+        "declKind": "Import",
+        "moduleName": "Charts"
+      },
+      {
+        "kind": "Import",
+        "name": "UIKit",
+        "printedName": "UIKit",
+        "declKind": "Import",
+        "moduleName": "Charts"
+      },
+      {
+        "kind": "Import",
+        "name": "CoreGraphics",
+        "printedName": "CoreGraphics",
+        "declKind": "Import",
+        "moduleName": "Charts"
+      },
+      {
+        "kind": "Import",
+        "name": "UIKit",
+        "printedName": "UIKit",
+        "declKind": "Import",
+        "moduleName": "Charts"
+      },
+      {
+        "kind": "Import",
+        "name": "CoreGraphics",
+        "printedName": "CoreGraphics",
+        "declKind": "Import",
+        "moduleName": "Charts"
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "LineChart",
+        "printedName": "LineChart",
+        "children": [
+          {
+            "kind": "Function",
+            "name": "setData",
+            "printedName": "setData(_:axisMax:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Charts.ChartData?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "ChartData",
+                    "printedName": "Charts.ChartData",
+                    "usr": "c:@M@Charts@objc(cs)ChartData"
+                  }
+                ],
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "CGFloat",
+                "printedName": "CoreGraphics.CGFloat",
+                "usr": "s:14CoreFoundation7CGFloatV"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@Charts@objc(cs)LineChart(im)setData:axisMax:",
+            "mangledName": "$s6Charts9LineChartC7setData_7axisMaxyAA0cE0CSg_12CoreGraphics7CGFloatVtF",
+            "moduleName": "Charts",
+            "declAttributes": [
+              "Custom",
+              "AccessControl",
+              "ObjC"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "setLegendLabel",
+            "printedName": "setLegendLabel(_:text:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Int",
+                "printedName": "Swift.Int",
+                "usr": "s:Si"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@Charts@objc(cs)LineChart(im)setLegendLabel:text:",
+            "mangledName": "$s6Charts9LineChartC14setLegendLabel_4textySi_SStF",
+            "moduleName": "Charts",
+            "declAttributes": [
+              "Custom",
+              "AccessControl",
+              "ObjC"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init(colors:count:xFormatter:options:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "LineChart",
+                "printedName": "Charts.LineChart",
+                "usr": "c:@M@Charts@objc(cs)LineChart"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "UnsafePointer",
+                "printedName": "Swift.UnsafePointer<Swift.Int>",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Int",
+                    "printedName": "Swift.Int",
+                    "usr": "s:Si"
+                  }
+                ],
+                "usr": "s:SP"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Int",
+                "printedName": "Swift.Int",
+                "usr": "s:Si"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "ValueFormatter",
+                "printedName": "Charts.ValueFormatter",
+                "usr": "c:@M@Charts@objc(pl)ValueFormatter"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "UInt8",
+                "printedName": "Swift.UInt8",
+                "usr": "s:s5UInt8V"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "c:@M@Charts@objc(cs)LineChart(im)initWithColors:count:xFormatter:options:",
+            "mangledName": "$s6Charts9LineChartC6colors5count10xFormatter7optionsACSPySiG_SiAA05ValueF0_ps5UInt8Vtcfc",
+            "moduleName": "Charts",
+            "objc_name": "initWithColors:count:xFormatter:options:",
+            "declAttributes": [
+              "Custom",
+              "AccessControl",
+              "ObjC"
+            ],
+            "init_kind": "Designated"
+          },
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init(frame:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "LineChart",
+                "printedName": "Charts.LineChart",
+                "usr": "c:@M@Charts@objc(cs)LineChart"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "CGRect",
+                "printedName": "CoreFoundation.CGRect",
+                "usr": "c:@S@CGRect"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "c:@M@Charts@objc(cs)LineChart(im)initWithFrame:",
+            "mangledName": "$s6Charts9LineChartC5frameACSo6CGRectV_tcfc",
+            "moduleName": "Charts",
+            "overriding": true,
+            "objc_name": "initWithFrame:",
+            "declAttributes": [
+              "Dynamic",
+              "ObjC",
+              "Custom",
+              "Override",
+              "AccessControl"
+            ],
+            "init_kind": "Designated"
+          },
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init(coder:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Charts.LineChart?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "LineChart",
+                    "printedName": "Charts.LineChart",
+                    "usr": "c:@M@Charts@objc(cs)LineChart"
+                  }
+                ],
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "NSCoder",
+                "printedName": "Foundation.NSCoder",
+                "usr": "c:objc(cs)NSCoder"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "c:@M@Charts@objc(cs)LineChart(im)initWithCoder:",
+            "mangledName": "$s6Charts9LineChartC5coderACSgSo7NSCoderC_tcfc",
+            "moduleName": "Charts",
+            "overriding": true,
+            "objc_name": "initWithCoder:",
+            "declAttributes": [
+              "Dynamic",
+              "ObjC",
+              "Custom",
+              "Required",
+              "AccessControl"
+            ],
+            "init_kind": "Designated"
+          },
+          {
+            "kind": "Function",
+            "name": "tintColorDidChange",
+            "printedName": "tintColorDidChange()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@Charts@objc(cs)LineChart(im)tintColorDidChange",
+            "mangledName": "$s6Charts9LineChartC18tintColorDidChangeyyF",
+            "moduleName": "Charts",
+            "overriding": true,
+            "objc_name": "tintColorDidChange",
+            "declAttributes": [
+              "Dynamic",
+              "ObjC",
+              "Custom",
+              "Override",
+              "AccessControl"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "setLineLimit",
+            "printedName": "setLineLimit(_:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "CGFloat",
+                "printedName": "CoreGraphics.CGFloat",
+                "usr": "s:14CoreFoundation7CGFloatV"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@Charts@objc(cs)LineChart(im)setLineLimit:",
+            "mangledName": "$s6Charts9LineChartC03setB5Limityy12CoreGraphics7CGFloatVF",
+            "moduleName": "Charts",
+            "declAttributes": [
+              "Custom",
+              "AccessControl",
+              "ObjC"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "observeValue",
+            "printedName": "observeValue(forKeyPath:of:change:context:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Swift.String?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Any?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "ProtocolComposition",
+                    "printedName": "Any"
+                  }
+                ],
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "[Foundation.NSKeyValueChangeKey : Any]?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Dictionary",
+                    "printedName": "[Foundation.NSKeyValueChangeKey : Any]",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "NSKeyValueChangeKey",
+                        "printedName": "Foundation.NSKeyValueChangeKey",
+                        "usr": "c:@T@NSKeyValueChangeKey"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "ProtocolComposition",
+                        "printedName": "Any"
+                      }
+                    ],
+                    "usr": "s:SD"
+                  }
+                ],
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Swift.UnsafeMutableRawPointer?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "UnsafeMutableRawPointer",
+                    "printedName": "Swift.UnsafeMutableRawPointer",
+                    "usr": "s:Sv"
+                  }
+                ],
+                "usr": "s:Sq"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@Charts@objc(cs)LineChart(im)observeValueForKeyPath:ofObject:change:context:",
+            "mangledName": "$s6Charts9LineChartC12observeValue10forKeyPath2of6change7contextySSSg_ypSgSDySo05NSKeye6ChangeG0aypGSgSvSgtF",
+            "moduleName": "Charts",
+            "overriding": true,
+            "objc_name": "observeValueForKeyPath:ofObject:change:context:",
+            "declAttributes": [
+              "Dynamic",
+              "ObjC",
+              "Custom",
+              "Override",
+              "AccessControl"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "draw",
+            "printedName": "draw(_:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "CGRect",
+                "printedName": "CoreFoundation.CGRect",
+                "usr": "c:@S@CGRect"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@Charts@objc(cs)LineChart(im)drawRect:",
+            "mangledName": "$s6Charts9LineChartC4drawyySo6CGRectVF",
+            "moduleName": "Charts",
+            "overriding": true,
+            "objc_name": "drawRect:",
+            "declAttributes": [
+              "Dynamic",
+              "ObjC",
+              "Custom",
+              "Override",
+              "AccessControl"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "gestureRecognizerShouldBegin",
+            "printedName": "gestureRecognizerShouldBegin(_:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "usr": "s:Sb"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "UIGestureRecognizer",
+                "printedName": "UIKit.UIGestureRecognizer",
+                "usr": "c:objc(cs)UIGestureRecognizer"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@Charts@objc(cs)LineChart(im)gestureRecognizerShouldBegin:",
+            "mangledName": "$s6Charts9LineChartC28gestureRecognizerShouldBeginySbSo09UIGestureE0CF",
+            "moduleName": "Charts",
+            "overriding": true,
+            "objc_name": "gestureRecognizerShouldBegin:",
+            "declAttributes": [
+              "Dynamic",
+              "ObjC",
+              "Custom",
+              "Override",
+              "AccessControl"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "gestureRecognizer",
+            "printedName": "gestureRecognizer(_:shouldRecognizeSimultaneouslyWith:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "usr": "s:Sb"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "UIGestureRecognizer",
+                "printedName": "UIKit.UIGestureRecognizer",
+                "usr": "c:objc(cs)UIGestureRecognizer"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "UIGestureRecognizer",
+                "printedName": "UIKit.UIGestureRecognizer",
+                "usr": "c:objc(cs)UIGestureRecognizer"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@Charts@objc(cs)LineChart(im)gestureRecognizer:shouldRecognizeSimultaneouslyWithGestureRecognizer:",
+            "mangledName": "$s6Charts9LineChartC17gestureRecognizer_33shouldRecognizeSimultaneouslyWithSbSo09UIGestureE0C_AGtF",
+            "moduleName": "Charts",
+            "objc_name": "gestureRecognizer:shouldRecognizeSimultaneouslyWithGestureRecognizer:",
+            "declAttributes": [
+              "ObjC",
+              "Custom",
+              "AccessControl"
+            ],
+            "funcSelfKind": "NonMutating"
+          }
+        ],
+        "declKind": "Class",
+        "usr": "c:@M@Charts@objc(cs)LineChart",
+        "mangledName": "$s6Charts9LineChartC",
+        "moduleName": "Charts",
+        "declAttributes": [
+          "Custom",
+          "AccessControl",
+          "ObjC"
+        ],
+        "superclassUsr": "c:objc(cs)UIView",
+        "inheritsConvenienceInitializers": true,
+        "superclassNames": [
+          "UIKit.UIView",
+          "UIKit.UIResponder",
+          "ObjectiveC.NSObject"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "Equatable",
+            "printedName": "Equatable",
+            "usr": "s:SQ",
+            "mangledName": "$sSQ"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Hashable",
+            "printedName": "Hashable",
+            "usr": "s:SH",
+            "mangledName": "$sSH"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CVarArg",
+            "printedName": "CVarArg",
+            "usr": "s:s7CVarArgP",
+            "mangledName": "$ss7CVarArgP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObservingPublishing",
+            "printedName": "_KeyValueCodingAndObservingPublishing",
+            "usr": "s:10Foundation37_KeyValueCodingAndObservingPublishingP",
+            "mangledName": "$s10Foundation37_KeyValueCodingAndObservingPublishingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObserving",
+            "printedName": "_KeyValueCodingAndObserving",
+            "usr": "s:10Foundation27_KeyValueCodingAndObservingP",
+            "mangledName": "$s10Foundation27_KeyValueCodingAndObservingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomStringConvertible",
+            "printedName": "CustomStringConvertible",
+            "usr": "s:s23CustomStringConvertibleP",
+            "mangledName": "$ss23CustomStringConvertibleP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomDebugStringConvertible",
+            "printedName": "CustomDebugStringConvertible",
+            "usr": "s:s28CustomDebugStringConvertibleP",
+            "mangledName": "$ss28CustomDebugStringConvertibleP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "__DefaultCustomPlaygroundQuickLookable",
+            "printedName": "__DefaultCustomPlaygroundQuickLookable",
+            "usr": "s:s38__DefaultCustomPlaygroundQuickLookableP",
+            "mangledName": "$ss38__DefaultCustomPlaygroundQuickLookableP"
+          }
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "UIKit",
+        "printedName": "UIKit",
+        "declKind": "Import",
+        "moduleName": "Charts"
+      },
+      {
+        "kind": "Import",
+        "name": "CoreGraphics",
+        "printedName": "CoreGraphics",
+        "declKind": "Import",
+        "moduleName": "Charts"
+      },
+      {
+        "kind": "Import",
+        "name": "UIKit",
+        "printedName": "UIKit",
+        "declKind": "Import",
+        "moduleName": "Charts"
+      },
+      {
+        "kind": "Import",
+        "name": "CoreGraphics",
+        "printedName": "CoreGraphics",
+        "declKind": "Import",
+        "moduleName": "Charts"
+      },
+      {
+        "kind": "Import",
+        "name": "UIKit",
+        "printedName": "UIKit",
+        "declKind": "Import",
+        "moduleName": "Charts"
+      },
+      {
+        "kind": "Import",
+        "name": "CoreGraphics",
+        "printedName": "CoreGraphics",
+        "declKind": "Import",
+        "moduleName": "Charts"
+      },
+      {
+        "kind": "Import",
+        "name": "UIKit",
+        "printedName": "UIKit",
+        "declKind": "Import",
+        "moduleName": "Charts"
+      },
+      {
+        "kind": "Import",
+        "name": "CoreGraphics",
+        "printedName": "CoreGraphics",
+        "declKind": "Import",
+        "moduleName": "Charts"
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "ChartUtility",
+        "printedName": "ChartUtility",
+        "children": [
+          {
+            "kind": "Function",
+            "name": "setup",
+            "printedName": "setup(_:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "usr": "s:Sb"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@Charts@objc(cs)ChartUtility(cm)setup:",
+            "mangledName": "$s6Charts12ChartUtilityC5setupyySbFZ",
+            "moduleName": "Charts",
+            "static": true,
+            "declAttributes": [
+              "AccessControl",
+              "ObjC"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "ChartUtility",
+                "printedName": "Charts.ChartUtility",
+                "usr": "c:@M@Charts@objc(cs)ChartUtility"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "c:@M@Charts@objc(cs)ChartUtility(im)init",
+            "mangledName": "$s6Charts12ChartUtilityCACycfc",
+            "moduleName": "Charts",
+            "overriding": true,
+            "implicit": true,
+            "objc_name": "init",
+            "declAttributes": [
+              "Dynamic",
+              "ObjC",
+              "Override"
+            ],
+            "init_kind": "Designated"
+          }
+        ],
+        "declKind": "Class",
+        "usr": "c:@M@Charts@objc(cs)ChartUtility",
+        "mangledName": "$s6Charts12ChartUtilityC",
+        "moduleName": "Charts",
+        "declAttributes": [
+          "AccessControl",
+          "ObjC"
+        ],
+        "superclassUsr": "c:objc(cs)NSObject",
+        "inheritsConvenienceInitializers": true,
+        "superclassNames": [
+          "ObjectiveC.NSObject"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "Equatable",
+            "printedName": "Equatable",
+            "usr": "s:SQ",
+            "mangledName": "$sSQ"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Hashable",
+            "printedName": "Hashable",
+            "usr": "s:SH",
+            "mangledName": "$sSH"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CVarArg",
+            "printedName": "CVarArg",
+            "usr": "s:s7CVarArgP",
+            "mangledName": "$ss7CVarArgP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObservingPublishing",
+            "printedName": "_KeyValueCodingAndObservingPublishing",
+            "usr": "s:10Foundation37_KeyValueCodingAndObservingPublishingP",
+            "mangledName": "$s10Foundation37_KeyValueCodingAndObservingPublishingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObserving",
+            "printedName": "_KeyValueCodingAndObserving",
+            "usr": "s:10Foundation27_KeyValueCodingAndObservingP",
+            "mangledName": "$s10Foundation27_KeyValueCodingAndObservingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomStringConvertible",
+            "printedName": "CustomStringConvertible",
+            "usr": "s:s23CustomStringConvertibleP",
+            "mangledName": "$ss23CustomStringConvertibleP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomDebugStringConvertible",
+            "printedName": "CustomDebugStringConvertible",
+            "usr": "s:s28CustomDebugStringConvertibleP",
+            "mangledName": "$ss28CustomDebugStringConvertibleP"
+          }
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "UIKit",
+        "printedName": "UIKit",
+        "declKind": "Import",
+        "moduleName": "Charts"
+      },
+      {
+        "kind": "Import",
+        "name": "CoreGraphics",
+        "printedName": "CoreGraphics",
+        "declKind": "Import",
+        "moduleName": "Charts"
+      },
+      {
+        "kind": "Import",
+        "name": "UIKit",
+        "printedName": "UIKit",
+        "declKind": "Import",
+        "moduleName": "Charts"
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "ChartData",
+        "printedName": "ChartData",
+        "children": [
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "ChartData",
+                "printedName": "Charts.ChartData",
+                "usr": "c:@M@Charts@objc(cs)ChartData"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "c:@M@Charts@objc(cs)ChartData(im)init",
+            "mangledName": "$s6Charts9ChartDataCACycfc",
+            "moduleName": "Charts",
+            "overriding": true,
+            "objc_name": "init",
+            "declAttributes": [
+              "Dynamic",
+              "ObjC",
+              "Override",
+              "Required",
+              "AccessControl"
+            ],
+            "init_kind": "Designated"
+          },
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init(dataSets:lineWidth:options:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "ChartData",
+                "printedName": "Charts.ChartData",
+                "usr": "c:@M@Charts@objc(cs)ChartData"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Array",
+                "printedName": "[Charts.DataSet]",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "DataSet",
+                    "printedName": "Charts.DataSet",
+                    "usr": "c:@M@Charts@objc(cs)DataSet"
+                  }
+                ],
+                "usr": "s:Sa"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Int",
+                "printedName": "Swift.Int",
+                "usr": "s:Si"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "UInt8",
+                "printedName": "Swift.UInt8",
+                "usr": "s:s5UInt8V"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "c:@M@Charts@objc(cs)ChartData(im)initWithDataSets:lineWidth:options:",
+            "mangledName": "$s6Charts9ChartDataC8dataSets9lineWidth7optionsACSayAA0C3SetCG_Sis5UInt8Vtcfc",
+            "moduleName": "Charts",
+            "objc_name": "initWithDataSets:lineWidth:options:",
+            "declAttributes": [
+              "AccessControl",
+              "ObjC"
+            ],
+            "init_kind": "Designated"
+          }
+        ],
+        "declKind": "Class",
+        "usr": "c:@M@Charts@objc(cs)ChartData",
+        "mangledName": "$s6Charts9ChartDataC",
+        "moduleName": "Charts",
+        "declAttributes": [
+          "AccessControl",
+          "ObjC"
+        ],
+        "superclassUsr": "c:objc(cs)NSObject",
+        "inheritsConvenienceInitializers": true,
+        "superclassNames": [
+          "ObjectiveC.NSObject"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "Equatable",
+            "printedName": "Equatable",
+            "usr": "s:SQ",
+            "mangledName": "$sSQ"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Hashable",
+            "printedName": "Hashable",
+            "usr": "s:SH",
+            "mangledName": "$sSH"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CVarArg",
+            "printedName": "CVarArg",
+            "usr": "s:s7CVarArgP",
+            "mangledName": "$ss7CVarArgP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObservingPublishing",
+            "printedName": "_KeyValueCodingAndObservingPublishing",
+            "usr": "s:10Foundation37_KeyValueCodingAndObservingPublishingP",
+            "mangledName": "$s10Foundation37_KeyValueCodingAndObservingPublishingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObserving",
+            "printedName": "_KeyValueCodingAndObserving",
+            "usr": "s:10Foundation27_KeyValueCodingAndObservingP",
+            "mangledName": "$s10Foundation27_KeyValueCodingAndObservingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomStringConvertible",
+            "printedName": "CustomStringConvertible",
+            "usr": "s:s23CustomStringConvertibleP",
+            "mangledName": "$ss23CustomStringConvertibleP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomDebugStringConvertible",
+            "printedName": "CustomDebugStringConvertible",
+            "usr": "s:s28CustomDebugStringConvertibleP",
+            "mangledName": "$ss28CustomDebugStringConvertibleP"
+          }
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "UIKit",
+        "printedName": "UIKit",
+        "declKind": "Import",
+        "moduleName": "Charts"
+      },
+      {
+        "kind": "Import",
+        "name": "CoreGraphics",
+        "printedName": "CoreGraphics",
+        "declKind": "Import",
+        "moduleName": "Charts"
+      },
+      {
+        "kind": "Import",
+        "name": "UIKit",
+        "printedName": "UIKit",
+        "declKind": "Import",
+        "moduleName": "Charts"
+      },
+      {
+        "kind": "Import",
+        "name": "CoreGraphics",
+        "printedName": "CoreGraphics",
+        "declKind": "Import",
+        "moduleName": "Charts"
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "DataSet",
+        "printedName": "DataSet",
+        "children": [
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "DataSet",
+                "printedName": "Charts.DataSet",
+                "usr": "c:@M@Charts@objc(cs)DataSet"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "c:@M@Charts@objc(cs)DataSet(im)init",
+            "mangledName": "$s6Charts7DataSetCACycfc",
+            "moduleName": "Charts",
+            "overriding": true,
+            "objc_name": "init",
+            "declAttributes": [
+              "Dynamic",
+              "ObjC",
+              "Override",
+              "Required",
+              "AccessControl"
+            ],
+            "init_kind": "Designated"
+          },
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init(colorVal:fillSet:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "DataSet",
+                "printedName": "Charts.DataSet",
+                "usr": "c:@M@Charts@objc(cs)DataSet"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Int",
+                "printedName": "Swift.Int",
+                "usr": "s:Si"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Charts.DataSet?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "DataSet",
+                    "printedName": "Charts.DataSet",
+                    "usr": "c:@M@Charts@objc(cs)DataSet"
+                  }
+                ],
+                "usr": "s:Sq"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "c:@M@Charts@objc(cs)DataSet(im)initWithColorVal:fillSet:",
+            "mangledName": "$s6Charts7DataSetC8colorVal04fillC0ACSi_ACSgtcfc",
+            "moduleName": "Charts",
+            "objc_name": "initWithColorVal:fillSet:",
+            "declAttributes": [
+              "AccessControl",
+              "ObjC"
+            ],
+            "init_kind": "Designated"
+          },
+          {
+            "kind": "Function",
+            "name": "replaceEntries",
+            "printedName": "replaceEntries(_:count:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "UnsafePointer",
+                "printedName": "Swift.UnsafePointer<CoreFoundation.CGPoint>",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "CGPoint",
+                    "printedName": "CoreFoundation.CGPoint",
+                    "usr": "c:@S@CGPoint"
+                  }
+                ],
+                "usr": "s:SP"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Int",
+                "printedName": "Swift.Int",
+                "usr": "s:Si"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@Charts@objc(cs)DataSet(im)replaceEntries:count:",
+            "mangledName": "$s6Charts7DataSetC14replaceEntries_5countySPySo7CGPointVG_SitF",
+            "moduleName": "Charts",
+            "declAttributes": [
+              "AccessControl",
+              "ObjC"
+            ],
+            "funcSelfKind": "NonMutating"
+          }
+        ],
+        "declKind": "Class",
+        "usr": "c:@M@Charts@objc(cs)DataSet",
+        "mangledName": "$s6Charts7DataSetC",
+        "moduleName": "Charts",
+        "declAttributes": [
+          "AccessControl",
+          "ObjC"
+        ],
+        "superclassUsr": "c:objc(cs)NSObject",
+        "inheritsConvenienceInitializers": true,
+        "superclassNames": [
+          "ObjectiveC.NSObject"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "Equatable",
+            "printedName": "Equatable",
+            "usr": "s:SQ",
+            "mangledName": "$sSQ"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Hashable",
+            "printedName": "Hashable",
+            "usr": "s:SH",
+            "mangledName": "$sSH"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CVarArg",
+            "printedName": "CVarArg",
+            "usr": "s:s7CVarArgP",
+            "mangledName": "$ss7CVarArgP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObservingPublishing",
+            "printedName": "_KeyValueCodingAndObservingPublishing",
+            "usr": "s:10Foundation37_KeyValueCodingAndObservingPublishingP",
+            "mangledName": "$s10Foundation37_KeyValueCodingAndObservingPublishingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObserving",
+            "printedName": "_KeyValueCodingAndObserving",
+            "usr": "s:10Foundation27_KeyValueCodingAndObservingP",
+            "mangledName": "$s10Foundation27_KeyValueCodingAndObservingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomStringConvertible",
+            "printedName": "CustomStringConvertible",
+            "usr": "s:s23CustomStringConvertibleP",
+            "mangledName": "$ss23CustomStringConvertibleP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomDebugStringConvertible",
+            "printedName": "CustomDebugStringConvertible",
+            "usr": "s:s28CustomDebugStringConvertibleP",
+            "mangledName": "$ss28CustomDebugStringConvertibleP"
+          }
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "UIKit",
+        "printedName": "UIKit",
+        "declKind": "Import",
+        "moduleName": "Charts"
+      },
+      {
+        "kind": "Import",
+        "name": "CoreGraphics",
+        "printedName": "CoreGraphics",
+        "declKind": "Import",
+        "moduleName": "Charts"
+      },
+      {
+        "kind": "Import",
+        "name": "UIKit",
+        "printedName": "UIKit",
+        "declKind": "Import",
+        "moduleName": "Charts"
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "ValueFormatter",
+        "printedName": "ValueFormatter",
+        "children": [
+          {
+            "kind": "Function",
+            "name": "stringForValue",
+            "printedName": "stringForValue(_:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "CGFloat",
+                "printedName": "CoreGraphics.CGFloat",
+                "usr": "s:14CoreFoundation7CGFloatV"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@Charts@objc(pl)ValueFormatter(im)stringForValue:",
+            "mangledName": "$s6Charts14ValueFormatterP09stringForB0ySS12CoreGraphics7CGFloatVF",
+            "moduleName": "Charts",
+            "genericSig": "<τ_0_0 where τ_0_0 : Charts.ValueFormatter>",
+            "sugared_genericSig": "<Self where Self : Charts.ValueFormatter>",
+            "protocolReq": true,
+            "declAttributes": [
+              "ObjC"
+            ],
+            "reqNewWitnessTableEntry": true,
+            "funcSelfKind": "NonMutating"
+          }
+        ],
+        "declKind": "Protocol",
+        "usr": "c:@M@Charts@objc(pl)ValueFormatter",
+        "mangledName": "$s6Charts14ValueFormatterP",
+        "moduleName": "Charts",
+        "genericSig": "<τ_0_0 : AnyObject>",
+        "sugared_genericSig": "<Self : AnyObject>",
+        "declAttributes": [
+          "AccessControl",
+          "ObjC"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "UIKit",
+        "printedName": "UIKit",
+        "declKind": "Import",
+        "moduleName": "Charts"
+      },
+      {
+        "kind": "Import",
+        "name": "UIKit",
+        "printedName": "UIKit",
+        "declKind": "Import",
+        "moduleName": "Charts"
+      },
+      {
+        "kind": "Import",
+        "name": "CoreGraphics",
+        "printedName": "CoreGraphics",
+        "declKind": "Import",
+        "moduleName": "Charts"
+      },
+      {
+        "kind": "Import",
+        "name": "UIKit",
+        "printedName": "UIKit",
+        "declKind": "Import",
+        "moduleName": "Charts"
+      },
+      {
+        "kind": "Import",
+        "name": "CoreGraphics",
+        "printedName": "CoreGraphics",
+        "declKind": "Import",
+        "moduleName": "Charts"
+      }
+    ],
+    "json_format_version": 8
+  },
+  "ConstValues": [
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/Animator.swift",
+      "kind": "IntegerLiteral",
+      "offset": 225,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/Animator.swift",
+      "kind": "FloatLiteral",
+      "offset": 271,
+      "length": 3,
+      "value": "0.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/Animator.swift",
+      "kind": "FloatLiteral",
+      "offset": 363,
+      "length": 3,
+      "value": "0.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/Animator.swift",
+      "kind": "FloatLiteral",
+      "offset": 408,
+      "length": 3,
+      "value": "0.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/Animator.swift",
+      "kind": "BooleanLiteral",
+      "offset": 446,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/Animator.swift",
+      "kind": "BooleanLiteral",
+      "offset": 664,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/Animator.swift",
+      "kind": "FloatLiteral",
+      "offset": 692,
+      "length": 3,
+      "value": "1.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/Animator.swift",
+      "kind": "FloatLiteral",
+      "offset": 719,
+      "length": 3,
+      "value": "1.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/Animator.swift",
+      "kind": "FloatLiteral",
+      "offset": 1168,
+      "length": 4,
+      "value": "-0.5"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/Animator.swift",
+      "kind": "FloatLiteral",
+      "offset": 1198,
+      "length": 3,
+      "value": "1.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/Animator.swift",
+      "kind": "FloatLiteral",
+      "offset": 1689,
+      "length": 3,
+      "value": "0.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ViewPortHandler.swift",
+      "kind": "IntegerLiteral",
+      "offset": 194,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ViewPortHandler.swift",
+      "kind": "IntegerLiteral",
+      "offset": 227,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ViewPortHandler.swift",
+      "kind": "IntegerLiteral",
+      "offset": 268,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ViewPortHandler.swift",
+      "kind": "IntegerLiteral",
+      "offset": 309,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ViewPortHandler.swift",
+      "kind": "IntegerLiteral",
+      "offset": 350,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ViewPortHandler.swift",
+      "kind": "IntegerLiteral",
+      "offset": 391,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ViewPortHandler.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1244,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ViewPortHandler.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1314,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ViewPortHandler.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1415,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ViewPortHandler.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1471,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ViewPortHandler.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1529,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ViewPortHandler.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1585,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ViewPortHandler.swift",
+      "kind": "BooleanLiteral",
+      "offset": 1928,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ViewPortHandler.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1972,
+      "length": 3,
+      "value": "100"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ViewPortHandler.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1979,
+      "length": 3,
+      "value": "100"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ViewPortHandler.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2160,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ViewPortHandler.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2244,
+      "length": 3,
+      "value": "100"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ViewPortHandler.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2251,
+      "length": 3,
+      "value": "100"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ViewPortHandler.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2325,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ViewPortHandler.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2488,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ViewPortHandler.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2558,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "BooleanLiteral",
+      "offset": 392,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "IntegerLiteral",
+      "offset": 537,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "IntegerLiteral",
+      "offset": 556,
+      "length": 1,
+      "value": "7"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "IntegerLiteral",
+      "offset": 720,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "IntegerLiteral",
+      "offset": 731,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "IntegerLiteral",
+      "offset": 737,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "IntegerLiteral",
+      "offset": 743,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "FloatLiteral",
+      "offset": 801,
+      "length": 3,
+      "value": "1.5"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "FloatLiteral",
+      "offset": 807,
+      "length": 3,
+      "value": "2.5"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "BooleanLiteral",
+      "offset": 973,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "BooleanLiteral",
+      "offset": 1007,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "FloatLiteral",
+      "offset": 1216,
+      "length": 3,
+      "value": "0.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "BooleanLiteral",
+      "offset": 1535,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2105,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2229,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2264,
+      "length": 3,
+      "value": "0x1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2272,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2376,
+      "length": 3,
+      "value": "0x2"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2384,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2473,
+      "length": 3,
+      "value": "0x4"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2481,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "StringLiteral",
+      "offset": 2903,
+      "length": 8,
+      "value": "\"bounds\""
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "StringLiteral",
+      "offset": 2954,
+      "length": 7,
+      "value": "\"frame\""
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "StringLiteral",
+      "offset": 3065,
+      "length": 8,
+      "value": "\"bounds\""
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "StringLiteral",
+      "offset": 3142,
+      "length": 7,
+      "value": "\"frame\""
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "IntegerLiteral",
+      "offset": 3869,
+      "length": 1,
+      "value": "2"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "BooleanLiteral",
+      "offset": 4447,
+      "length": 4,
+      "value": "true"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "BooleanLiteral",
+      "offset": 4494,
+      "length": 4,
+      "value": "true"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "BooleanLiteral",
+      "offset": 4543,
+      "length": 4,
+      "value": "true"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "IntegerLiteral",
+      "offset": 5277,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "StringLiteral",
+      "offset": 5866,
+      "length": 8,
+      "value": "\"bounds\""
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "StringLiteral",
+      "offset": 5889,
+      "length": 7,
+      "value": "\"frame\""
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "StringLiteral",
+      "offset": 6917,
+      "length": 23,
+      "value": "\"No data is available.\""
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "IntegerLiteral",
+      "offset": 7005,
+      "length": 1,
+      "value": "2"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "IntegerLiteral",
+      "offset": 7027,
+      "length": 1,
+      "value": "2"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "IntegerLiteral",
+      "offset": 7112,
+      "length": 2,
+      "value": "12"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "BooleanLiteral",
+      "offset": 7302,
+      "length": 4,
+      "value": "true"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "IntegerLiteral",
+      "offset": 8320,
+      "length": 1,
+      "value": "4"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "FloatLiteral",
+      "offset": 8568,
+      "length": 3,
+      "value": "0.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "FloatLiteral",
+      "offset": 8592,
+      "length": 3,
+      "value": "0.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "FloatLiteral",
+      "offset": 9136,
+      "length": 4,
+      "value": "0.95"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "IntegerLiteral",
+      "offset": 9228,
+      "length": 2,
+      "value": "10"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "IntegerLiteral",
+      "offset": 9347,
+      "length": 2,
+      "value": "10"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "IntegerLiteral",
+      "offset": 9377,
+      "length": 2,
+      "value": "10"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "FloatLiteral",
+      "offset": 9809,
+      "length": 3,
+      "value": "0.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "FloatLiteral",
+      "offset": 9877,
+      "length": 3,
+      "value": "0.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "IntegerLiteral",
+      "offset": 10040,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "IntegerLiteral",
+      "offset": 10242,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "FloatLiteral",
+      "offset": 10516,
+      "length": 3,
+      "value": "1.4"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "FloatLiteral",
+      "offset": 10529,
+      "length": 3,
+      "value": "1.4"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "BooleanLiteral",
+      "offset": 10823,
+      "length": 4,
+      "value": "true"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "IntegerLiteral",
+      "offset": 10951,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "IntegerLiteral",
+      "offset": 11090,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "BooleanLiteral",
+      "offset": 11285,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "IntegerLiteral",
+      "offset": 11463,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "IntegerLiteral",
+      "offset": 11553,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "IntegerLiteral",
+      "offset": 11694,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "FloatLiteral",
+      "offset": 12387,
+      "length": 3,
+      "value": "1.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "FloatLiteral",
+      "offset": 12458,
+      "length": 3,
+      "value": "1.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "FloatLiteral",
+      "offset": 12936,
+      "length": 3,
+      "value": "1.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "IntegerLiteral",
+      "offset": 13151,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "BooleanLiteral",
+      "offset": 13313,
+      "length": 4,
+      "value": "true"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "FloatLiteral",
+      "offset": 13436,
+      "length": 3,
+      "value": "0.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "FloatLiteral",
+      "offset": 13460,
+      "length": 3,
+      "value": "0.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "BooleanLiteral",
+      "offset": 13676,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "BooleanLiteral",
+      "offset": 13836,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "BooleanLiteral",
+      "offset": 13996,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "BooleanLiteral",
+      "offset": 15031,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "BooleanLiteral",
+      "offset": 15143,
+      "length": 4,
+      "value": "true"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "FloatLiteral",
+      "offset": 16021,
+      "length": 3,
+      "value": "0.9"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "FloatLiteral",
+      "offset": 16059,
+      "length": 3,
+      "value": "0.9"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "IntegerLiteral",
+      "offset": 16372,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "IntegerLiteral",
+      "offset": 16411,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "FloatLiteral",
+      "offset": 16508,
+      "length": 5,
+      "value": "0.001"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "FloatLiteral",
+      "offset": 16547,
+      "length": 5,
+      "value": "0.001"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "BooleanLiteral",
+      "offset": 16861,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "BooleanLiteral",
+      "offset": 17014,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "BooleanLiteral",
+      "offset": 17173,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "BooleanLiteral",
+      "offset": 17236,
+      "length": 4,
+      "value": "true"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "BooleanLiteral",
+      "offset": 17719,
+      "length": 4,
+      "value": "true"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "BooleanLiteral",
+      "offset": 18393,
+      "length": 4,
+      "value": "true"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "BooleanLiteral",
+      "offset": 18756,
+      "length": 4,
+      "value": "true"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Charts\/LineChart.swift",
+      "kind": "BooleanLiteral",
+      "offset": 18800,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/Fill.swift",
+      "kind": "Array",
+      "offset": 330,
+      "length": 8,
+      "value": "[0.8, 0]"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/Fill.swift",
+      "kind": "IntegerLiteral",
+      "offset": 535,
+      "length": 1,
+      "value": "2"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LegendRenderer.swift",
+      "kind": "StringLiteral",
+      "offset": 143,
+      "length": 2,
+      "value": "\"\""
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LegendRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 431,
+      "length": 2,
+      "value": "16"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LegendRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 466,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LegendRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 500,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LegendRenderer.swift",
+      "kind": "Array",
+      "offset": 564,
+      "length": 2,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LegendRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 726,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LegendRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 761,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LegendRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 919,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LegendRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1008,
+      "length": 2,
+      "value": "25"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LegendRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1040,
+      "length": 2,
+      "value": "30"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LegendRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1139,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LegendRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1255,
+      "length": 2,
+      "value": "30"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LegendRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1303,
+      "length": 2,
+      "value": "25"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LegendRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1394,
+      "length": 1,
+      "value": "5"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LegendRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1431,
+      "length": 1,
+      "value": "3"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LegendRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1620,
+      "length": 2,
+      "value": "10"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LegendRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1655,
+      "length": 1,
+      "value": "2"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LegendRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1675,
+      "length": 1,
+      "value": "2"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LegendRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1708,
+      "length": 2,
+      "value": "25"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LegendRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1780,
+      "length": 1,
+      "value": "2"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LegendRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1800,
+      "length": 1,
+      "value": "2"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LegendRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1805,
+      "length": 2,
+      "value": "30"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LegendRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1838,
+      "length": 1,
+      "value": "5"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LegendRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1915,
+      "length": 1,
+      "value": "3"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LegendRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1936,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LegendRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2126,
+      "length": 2,
+      "value": "20"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LegendRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2138,
+      "length": 2,
+      "value": "20"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LegendRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2336,
+      "length": 2,
+      "value": "30"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 73,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 85,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 96,
+      "length": 1,
+      "value": "2"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 108,
+      "length": 1,
+      "value": "3"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 119,
+      "length": 1,
+      "value": "4"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 130,
+      "length": 1,
+      "value": "5"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 139,
+      "length": 2,
+      "value": "-1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "StringLiteral",
+      "offset": 367,
+      "length": 13,
+      "value": "\"AccentColor\""
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "StringLiteral",
+      "offset": 425,
+      "length": 23,
+      "value": "\"chartColor\""
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "StringLiteral",
+      "offset": 447,
+      "length": 1,
+      "value": "\"\""
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "FloatLiteral",
+      "offset": 689,
+      "length": 5,
+      "value": "0.333"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "FloatLiteral",
+      "offset": 723,
+      "length": 5,
+      "value": "0.584"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "FloatLiteral",
+      "offset": 756,
+      "length": 5,
+      "value": "0.933"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "FloatLiteral",
+      "offset": 818,
+      "length": 5,
+      "value": "0.463"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "FloatLiteral",
+      "offset": 852,
+      "length": 5,
+      "value": "0.933"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "FloatLiteral",
+      "offset": 885,
+      "length": 5,
+      "value": "0.333"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "FloatLiteral",
+      "offset": 946,
+      "length": 5,
+      "value": "0.933"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "FloatLiteral",
+      "offset": 980,
+      "length": 5,
+      "value": "0.573"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "FloatLiteral",
+      "offset": 1013,
+      "length": 5,
+      "value": "0.333"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "FloatLiteral",
+      "offset": 1075,
+      "length": 5,
+      "value": "0.937"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "FloatLiteral",
+      "offset": 1109,
+      "length": 5,
+      "value": "0.333"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "FloatLiteral",
+      "offset": 1142,
+      "length": 5,
+      "value": "0.459"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "FloatLiteral",
+      "offset": 1203,
+      "length": 5,
+      "value": "0.227"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1237,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "FloatLiteral",
+      "offset": 1266,
+      "length": 4,
+      "value": "0.38"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1326,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "FloatLiteral",
+      "offset": 1356,
+      "length": 4,
+      "value": "0.27"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "FloatLiteral",
+      "offset": 1388,
+      "length": 4,
+      "value": "0.23"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1576,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "FloatLiteral",
+      "offset": 1606,
+      "length": 5,
+      "value": "0.455"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "FloatLiteral",
+      "offset": 1639,
+      "length": 5,
+      "value": "0.708"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "FloatLiteral",
+      "offset": 1701,
+      "length": 5,
+      "value": "0.040"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "FloatLiteral",
+      "offset": 1735,
+      "length": 5,
+      "value": "0.557"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "FloatLiteral",
+      "offset": 1768,
+      "length": 5,
+      "value": "0.126"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "FloatLiteral",
+      "offset": 1829,
+      "length": 5,
+      "value": "0.858"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "FloatLiteral",
+      "offset": 1863,
+      "length": 5,
+      "value": "0.084"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "FloatLiteral",
+      "offset": 1896,
+      "length": 5,
+      "value": "0.090"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "FloatLiteral",
+      "offset": 1958,
+      "length": 5,
+      "value": "0.680"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "FloatLiteral",
+      "offset": 1992,
+      "length": 5,
+      "value": "0.123"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "FloatLiteral",
+      "offset": 2025,
+      "length": 5,
+      "value": "0.936"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "FloatLiteral",
+      "offset": 2086,
+      "length": 5,
+      "value": "0.067"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "FloatLiteral",
+      "offset": 2120,
+      "length": 5,
+      "value": "0.365"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "FloatLiteral",
+      "offset": 2153,
+      "length": 5,
+      "value": "0.126"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2214,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "FloatLiteral",
+      "offset": 2244,
+      "length": 4,
+      "value": "0.23"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "FloatLiteral",
+      "offset": 2276,
+      "length": 4,
+      "value": "0.19"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2442,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 73,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 85,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 96,
+      "length": 1,
+      "value": "2"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 108,
+      "length": 1,
+      "value": "3"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 119,
+      "length": 1,
+      "value": "4"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 130,
+      "length": 1,
+      "value": "5"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 139,
+      "length": 1,
+      "value": "-1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 73,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 85,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 96,
+      "length": 1,
+      "value": "2"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 108,
+      "length": 1,
+      "value": "3"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 119,
+      "length": 1,
+      "value": "4"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 130,
+      "length": 1,
+      "value": "5"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 139,
+      "length": 1,
+      "value": "-1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "BooleanLiteral",
+      "offset": 2536,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2909,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2967,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 3003,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "FloatLiteral",
+      "offset": 3042,
+      "length": 4,
+      "value": "10.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "StringLiteral",
+      "offset": 3283,
+      "length": 2,
+      "value": "\"\""
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 3740,
+      "length": 2,
+      "value": "10"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ChartUtils.swift",
+      "kind": "FloatLiteral",
+      "offset": 4241,
+      "length": 3,
+      "value": "0.5"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/FillFormatter.swift",
+      "kind": "FloatLiteral",
+      "offset": 306,
+      "length": 3,
+      "value": "0.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/FillFormatter.swift",
+      "kind": "FloatLiteral",
+      "offset": 337,
+      "length": 3,
+      "value": "0.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/FillFormatter.swift",
+      "kind": "FloatLiteral",
+      "offset": 359,
+      "length": 3,
+      "value": "0.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/FillFormatter.swift",
+      "kind": "FloatLiteral",
+      "offset": 387,
+      "length": 3,
+      "value": "0.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/FillFormatter.swift",
+      "kind": "FloatLiteral",
+      "offset": 474,
+      "length": 3,
+      "value": "0.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/FillFormatter.swift",
+      "kind": "FloatLiteral",
+      "offset": 480,
+      "length": 3,
+      "value": "0.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/FillFormatter.swift",
+      "kind": "FloatLiteral",
+      "offset": 558,
+      "length": 3,
+      "value": "0.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/FillFormatter.swift",
+      "kind": "IntegerLiteral",
+      "offset": 564,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Data\/ChartData.swift",
+      "kind": "FloatLiteral",
+      "offset": 476,
+      "length": 4,
+      "value": "0.33"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Data\/ChartData.swift",
+      "kind": "IntegerLiteral",
+      "offset": 510,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Data\/ChartData.swift",
+      "kind": "BooleanLiteral",
+      "offset": 540,
+      "length": 4,
+      "value": "true"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Data\/ChartData.swift",
+      "kind": "BooleanLiteral",
+      "offset": 573,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Data\/ChartData.swift",
+      "kind": "BooleanLiteral",
+      "offset": 608,
+      "length": 4,
+      "value": "true"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Data\/ChartData.swift",
+      "kind": "IntegerLiteral",
+      "offset": 908,
+      "length": 3,
+      "value": "0x1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Data\/ChartData.swift",
+      "kind": "IntegerLiteral",
+      "offset": 916,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Data\/ChartData.swift",
+      "kind": "BooleanLiteral",
+      "offset": 952,
+      "length": 4,
+      "value": "true"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Data\/ChartData.swift",
+      "kind": "FloatLiteral",
+      "offset": 981,
+      "length": 4,
+      "value": "0.75"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Data\/ChartData.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1018,
+      "length": 3,
+      "value": "0x2"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Data\/ChartData.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1026,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Data\/ChartData.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1089,
+      "length": 3,
+      "value": "0x4"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Data\/ChartData.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1097,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 168,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 678,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 698,
+      "length": 2,
+      "value": "10"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1146,
+      "length": 1,
+      "value": "5"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1152,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1263,
+      "length": 1,
+      "value": "5"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1269,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1300,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1434,
+      "length": 1,
+      "value": "6"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 1691,
+      "length": 3,
+      "value": "0.5"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 1731,
+      "length": 3,
+      "value": "0.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "Array",
+      "offset": 1745,
+      "length": 2,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 2321,
+      "length": 4,
+      "value": "0.25"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 2361,
+      "length": 3,
+      "value": "0.5"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "BooleanLiteral",
+      "offset": 2439,
+      "length": 4,
+      "value": "true"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 2533,
+      "length": 3,
+      "value": "0.5"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 2607,
+      "length": 3,
+      "value": "0.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "Array",
+      "offset": 2621,
+      "length": 2,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 3093,
+      "length": 3,
+      "value": "0.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 3464,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 3502,
+      "length": 1,
+      "value": "2"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 3578,
+      "length": 3,
+      "value": "0.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 3941,
+      "length": 1,
+      "value": "2"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 3979,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "Array",
+      "offset": 3991,
+      "length": 6,
+      "value": "[5, 5]"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 4204,
+      "length": 4,
+      "value": "10.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 4672,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "BooleanLiteral",
+      "offset": 4749,
+      "length": 4,
+      "value": "true"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 4819,
+      "length": 1,
+      "value": "6"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 4920,
+      "length": 4,
+      "value": "10.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 5079,
+      "length": 1,
+      "value": "5"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 5112,
+      "length": 4,
+      "value": "10.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 5165,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 5199,
+      "length": 3,
+      "value": "0.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 5205,
+      "length": 3,
+      "value": "0.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 5274,
+      "length": 3,
+      "value": "0.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 5280,
+      "length": 3,
+      "value": "0.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 5352,
+      "length": 3,
+      "value": "0.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 5454,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "BooleanLiteral",
+      "offset": 5517,
+      "length": 4,
+      "value": "true"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 5637,
+      "length": 3,
+      "value": "0.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 5643,
+      "length": 3,
+      "value": "0.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 5733,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/YAxisRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 5841,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Data\/DataSet.swift",
+      "kind": "Array",
+      "offset": 388,
+      "length": 2,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Data\/DataSet.swift",
+      "kind": "IntegerLiteral",
+      "offset": 643,
+      "length": 3,
+      "value": "128"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Data\/DataSet.swift",
+      "kind": "IntegerLiteral",
+      "offset": 759,
+      "length": 2,
+      "value": "-1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Data\/DataSet.swift",
+      "kind": "BooleanLiteral",
+      "offset": 1075,
+      "length": 4,
+      "value": "true"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Data\/DataSet.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1098,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 191,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 264,
+      "length": 5,
+      "value": "0.785"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 272,
+      "length": 6,
+      "value": "-0.785"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 622,
+      "length": 2,
+      "value": "10"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1082,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "BooleanLiteral",
+      "offset": 1159,
+      "length": 4,
+      "value": "true"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1229,
+      "length": 1,
+      "value": "6"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1304,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 1344,
+      "length": 4,
+      "value": "10.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1503,
+      "length": 1,
+      "value": "5"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 1536,
+      "length": 4,
+      "value": "10.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1589,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 1623,
+      "length": 3,
+      "value": "0.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 1629,
+      "length": 3,
+      "value": "0.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 1698,
+      "length": 3,
+      "value": "0.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 1704,
+      "length": 3,
+      "value": "0.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 1776,
+      "length": 3,
+      "value": "0.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1878,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "BooleanLiteral",
+      "offset": 1941,
+      "length": 4,
+      "value": "true"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 2086,
+      "length": 3,
+      "value": "0.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 2092,
+      "length": 3,
+      "value": "0.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2174,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2282,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 2464,
+      "length": 4,
+      "value": "0.71"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 2472,
+      "length": 5,
+      "value": "15.48"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 2649,
+      "length": 3,
+      "value": "0.5"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 2689,
+      "length": 3,
+      "value": "0.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "Array",
+      "offset": 2703,
+      "length": 2,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 3209,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 3284,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 3474,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 3492,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 3747,
+      "length": 3,
+      "value": "2.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 3863,
+      "length": 3,
+      "value": "2.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 3912,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 4147,
+      "length": 3,
+      "value": "2.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 4410,
+      "length": 3,
+      "value": "0.5"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 4418,
+      "length": 5,
+      "value": "-5.97"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 4585,
+      "length": 4,
+      "value": "0.36"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 4592,
+      "length": 4,
+      "value": "4.24"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 5039,
+      "length": 4,
+      "value": "0.75"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 5078,
+      "length": 3,
+      "value": "1.5"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "BooleanLiteral",
+      "offset": 5156,
+      "length": 4,
+      "value": "true"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 5250,
+      "length": 3,
+      "value": "1.5"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 5324,
+      "length": 3,
+      "value": "0.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/XAxisRenderer.swift",
+      "kind": "Array",
+      "offset": 5338,
+      "length": 2,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ValueFormatter.swift",
+      "kind": "StringLiteral",
+      "offset": 227,
+      "length": 12,
+      "value": "\"hourMinFmt\""
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ValueFormatter.swift",
+      "kind": "StringLiteral",
+      "offset": 326,
+      "length": 9,
+      "value": "\"minsFmt\""
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ValueFormatter.swift",
+      "kind": "IntegerLiteral",
+      "offset": 474,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ValueFormatter.swift",
+      "kind": "StringLiteral",
+      "offset": 490,
+      "length": 2,
+      "value": "\"\""
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ValueFormatter.swift",
+      "kind": "IntegerLiteral",
+      "offset": 517,
+      "length": 2,
+      "value": "60"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ValueFormatter.swift",
+      "kind": "IntegerLiteral",
+      "offset": 649,
+      "length": 2,
+      "value": "60"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ValueFormatter.swift",
+      "kind": "IntegerLiteral",
+      "offset": 685,
+      "length": 2,
+      "value": "60"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ValueFormatter.swift",
+      "kind": "IntegerLiteral",
+      "offset": 931,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ValueFormatter.swift",
+      "kind": "IntegerLiteral",
+      "offset": 975,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ValueFormatter.swift",
+      "kind": "BooleanLiteral",
+      "offset": 1055,
+      "length": 4,
+      "value": "true"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Utils\/ValueFormatter.swift",
+      "kind": "StringLiteral",
+      "offset": 1201,
+      "length": 2,
+      "value": "\"\""
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/AreaChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 250,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/AreaChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1055,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/AreaChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1099,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/AreaChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1434,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/AreaChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1505,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/AreaChartRenderer.swift",
+      "kind": "StringLiteral",
+      "offset": 267,
+      "length": 17,
+      "value": "\"Charts.AreaChartRenderer\""
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Components\/AxisBase.swift",
+      "kind": "FloatLiteral",
+      "offset": 116,
+      "length": 3,
+      "value": "0.9"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Components\/AxisBase.swift",
+      "kind": "IntegerLiteral",
+      "offset": 189,
+      "length": 2,
+      "value": "12"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Components\/AxisBase.swift",
+      "kind": "StringLiteral",
+      "offset": 267,
+      "length": 2,
+      "value": "\"\""
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Components\/AxisBase.swift",
+      "kind": "IntegerLiteral",
+      "offset": 329,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Components\/AxisBase.swift",
+      "kind": "StringLiteral",
+      "offset": 352,
+      "length": 2,
+      "value": "\"\""
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Components\/AxisBase.swift",
+      "kind": "IntegerLiteral",
+      "offset": 372,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Components\/AxisBase.swift",
+      "kind": "BooleanLiteral",
+      "offset": 1090,
+      "length": 4,
+      "value": "true"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Components\/AxisBase.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1199,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Components\/AxisBase.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1232,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Components\/AxisBase.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1263,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Components\/AxisBase.swift",
+      "kind": "BooleanLiteral",
+      "offset": 1295,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Components\/AxisBase.swift",
+      "kind": "FloatLiteral",
+      "offset": 1475,
+      "length": 3,
+      "value": "0.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Components\/AxisBase.swift",
+      "kind": "BooleanLiteral",
+      "offset": 1507,
+      "length": 4,
+      "value": "true"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Components\/AxisBase.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1531,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Components\/AxisBase.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1552,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Components\/AxisBase.swift",
+      "kind": "StringLiteral",
+      "offset": 1749,
+      "length": 2,
+      "value": "\"\""
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 101,
+      "length": 2,
+      "value": "11"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "Array",
+      "offset": 233,
+      "length": 2,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "Array",
+      "offset": 331,
+      "length": 2,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 635,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 660,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 687,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 809,
+      "length": 3,
+      "value": "0.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 824,
+      "length": 3,
+      "value": "1.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "Array",
+      "offset": 1398,
+      "length": 6,
+      "value": "[0, 0]"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1426,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1430,
+      "length": 1,
+      "value": "2"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1497,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1535,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1649,
+      "length": 1,
+      "value": "2"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1760,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1897,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 2036,
+      "length": 3,
+      "value": "0.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 2118,
+      "length": 3,
+      "value": "0.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2162,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2292,
+      "length": 2,
+      "value": "-1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2391,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2465,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2506,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2624,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2665,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2770,
+      "length": 2,
+      "value": "-1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2783,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2825,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2854,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "FloatLiteral",
+      "offset": 3404,
+      "length": 3,
+      "value": "0.0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "Array",
+      "offset": 3418,
+      "length": 2,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "BooleanLiteral",
+      "offset": 4149,
+      "length": 4,
+      "value": "true"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 4275,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 4330,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 4334,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 4343,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "BooleanLiteral",
+      "offset": 4476,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 5503,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 5547,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 7031,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 7091,
+      "length": 3,
+      "value": "100"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 7368,
+      "length": 2,
+      "value": "17"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 7373,
+      "length": 2,
+      "value": "15"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 7394,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 8553,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 8619,
+      "length": 2,
+      "value": "12"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 8631,
+      "length": 2,
+      "value": "12"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 8697,
+      "length": 1,
+      "value": "4"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 8708,
+      "length": 1,
+      "value": "4"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "BooleanLiteral",
+      "offset": 8772,
+      "length": 4,
+      "value": "true"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "StringLiteral",
+      "offset": 8995,
+      "length": 12,
+      "value": "\"Line Chart\""
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "StringLiteral",
+      "offset": 9010,
+      "length": 45,
+      "value": "\". \""
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "StringLiteral",
+      "offset": 9021,
+      "length": 7,
+      "value": "\" dataset\""
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 9040,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "StringLiteral",
+      "offset": 9044,
+      "length": 2,
+      "value": "\"\""
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "StringLiteral",
+      "offset": 9049,
+      "length": 3,
+      "value": "\"s\""
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "StringLiteral",
+      "offset": 9053,
+      "length": 1,
+      "value": "\".\""
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 9413,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 10006,
+      "length": 1,
+      "value": "6"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 10019,
+      "length": 1,
+      "value": "6"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "StringLiteral",
+      "offset": 10316,
+      "length": 58,
+      "value": "\"\""
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "StringLiteral",
+      "offset": 10334,
+      "length": 2,
+      "value": "\"\""
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "StringLiteral",
+      "offset": 10340,
+      "length": 4,
+      "value": "\", \""
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "StringLiteral",
+      "offset": 10347,
+      "length": 2,
+      "value": "\"\""
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "StringLiteral",
+      "offset": 10350,
+      "length": 1,
+      "value": "\" \""
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "StringLiteral",
+      "offset": 10359,
+      "length": 1,
+      "value": "\": \""
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "StringLiteral",
+      "offset": 10373,
+      "length": 1,
+      "value": "\"\""
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 10785,
+      "length": 1,
+      "value": "2"
+    },
+    {
+      "filePath": "\/Users\/chrisray\/Programs\/ios\/Charts\/Charts\/Source\/Renderers\/LineChartRenderer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 10798,
+      "length": 1,
+      "value": "2"
+    }
+  ]
+}

@@ -49,7 +49,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
     SEL nstbi = sel_getUid("setTabBarItem:");
     void (*setItem)(id, SEL, id) = (void(*)(id, SEL, id))class_getMethodImplementation(NavVC, nstbi);
     id controllers[3];
-    CFStringRef imageNames[] = {CFSTR("ico_house"), CFSTR("ico_chart"), CFSTR("ico_gear")}, titles[3];
+    CFStringRef imageNames[] = {CFSTR("house"), CFSTR("chart.bar"), CFSTR("gear")}, titles[3];
     fillStringArray(titles, CFSTR("tabs%d"), 3);
 
     for (int i = 0; i < 3; ++i) {

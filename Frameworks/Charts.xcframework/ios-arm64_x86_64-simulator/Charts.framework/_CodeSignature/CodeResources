@@ -6,7 +6,7 @@
 	<dict>
 		<key>Headers/Charts-Swift.h</key>
 		<data>
-		EcZBGGL0nWWYk/kHg/41rMUpwh8=
+		VD3TS0PZ7sxV/DoG/9HR159jNAg=
 		</data>
 		<key>Headers/Charts.h</key>
 		<data>
@@ -14,35 +14,51 @@
 		</data>
 		<key>Info.plist</key>
 		<data>
-		ZMb50bzsJ79vLYnZuQUAluYVfbw=
+		CA8MLUC50UozV40FczqLCzFPp0k=
+		</data>
+		<key>Modules/Charts.swiftmodule/arm64-apple-ios-simulator.abi.json</key>
+		<data>
+		B3LxRTlby4r7RPvvsSAe9o3V/vk=
+		</data>
+		<key>Modules/Charts.swiftmodule/arm64-apple-ios-simulator.private.swiftinterface</key>
+		<data>
+		jvIt9NGTmAheDQL7VBh/POr5fEI=
 		</data>
 		<key>Modules/Charts.swiftmodule/arm64-apple-ios-simulator.swiftdoc</key>
 		<data>
-		EjlmTbtwEBhN3rlSS9xY6t896Yk=
+		4t+eZmg2Ka8koflR+HsQ4ylGZlM=
 		</data>
 		<key>Modules/Charts.swiftmodule/arm64-apple-ios-simulator.swiftinterface</key>
 		<data>
-		lX/xNjMeGUAxgSO3vbzaC7eKtV8=
+		jvIt9NGTmAheDQL7VBh/POr5fEI=
 		</data>
 		<key>Modules/Charts.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		wGPfKj2LU+1mMTdxzNssZwje+NU=
+		CptDg048npO/zSusnqQHkv5sxqE=
+		</data>
+		<key>Modules/Charts.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
+		<data>
+		B3LxRTlby4r7RPvvsSAe9o3V/vk=
+		</data>
+		<key>Modules/Charts.swiftmodule/x86_64-apple-ios-simulator.private.swiftinterface</key>
+		<data>
+		esD6bKpFIdpO78vIu1zdWrf4yMU=
 		</data>
 		<key>Modules/Charts.swiftmodule/x86_64-apple-ios-simulator.swiftdoc</key>
 		<data>
-		UHriLv49TFQwjbZhxDVn7xS3SUI=
+		n+3BD7OOTCXhYIkzeaWvQJZbxgA=
 		</data>
 		<key>Modules/Charts.swiftmodule/x86_64-apple-ios-simulator.swiftinterface</key>
 		<data>
-		4ZiiZv1bnye1L8rCBF9POrYaSW0=
+		esD6bKpFIdpO78vIu1zdWrf4yMU=
 		</data>
 		<key>Modules/Charts.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		0qg7SwCsKrXaUtvTWiQF3YFZWSE=
+		3tYN71X7vatXxoU8K0p4ebsXWjI=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
-		XLVguyNN6xbHpuYAeAwqwBUdprU=
+		KiMSgJnjUBd/uGLp5GedpkwXoOM=
 		</data>
 	</dict>
 	<key>files2</key>
@@ -51,7 +67,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			fVfwNRIKpkwi5BfjquYsYDinxfzePMy429lZxNrJCW4=
+			uUTKbp0hNa7n+GzCSmyTpHJsS+1V+3ui0wGIFuKtRyk=
 			</data>
 		</dict>
 		<key>Headers/Charts.h</key>
@@ -61,53 +77,81 @@
 			VEq7V1cbS22ZtbdLX3ZjAKzMNBuP5DQSW9jS33Npk9Q=
 			</data>
 		</dict>
+		<key>Modules/Charts.swiftmodule/arm64-apple-ios-simulator.abi.json</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			ksPltZlXGTBHFe84A/qk6cx0pyfUeyoY1o55D2FCq4o=
+			</data>
+		</dict>
+		<key>Modules/Charts.swiftmodule/arm64-apple-ios-simulator.private.swiftinterface</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			i+3xYtLwz8+8jfQFmNCnZsDp0bLtT4JYUWIaBNuRlSk=
+			</data>
+		</dict>
 		<key>Modules/Charts.swiftmodule/arm64-apple-ios-simulator.swiftdoc</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			/bRaA1tcut2ADljf6g1Jx1C4G6HbrR0l1pZTgxSnUMU=
+			VQKGswJvTohiBJWRL+yRAw9z4MmJXX74b9JHnwSjWQQ=
 			</data>
 		</dict>
 		<key>Modules/Charts.swiftmodule/arm64-apple-ios-simulator.swiftinterface</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			7ZQC+Y9Qv7DH9I12JsxMmOJlkf3xr9Sd0QErnFLzcUc=
+			i+3xYtLwz8+8jfQFmNCnZsDp0bLtT4JYUWIaBNuRlSk=
 			</data>
 		</dict>
 		<key>Modules/Charts.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			+AaznGKh+wfFaSfW5CzYDH2OghM8I5wQeSifScu98VM=
+			YQ65g7l0OPWD1hGsq0PREvoJNEc2RZgMVF0sfRQWWtI=
+			</data>
+		</dict>
+		<key>Modules/Charts.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			ksPltZlXGTBHFe84A/qk6cx0pyfUeyoY1o55D2FCq4o=
+			</data>
+		</dict>
+		<key>Modules/Charts.swiftmodule/x86_64-apple-ios-simulator.private.swiftinterface</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			IsDI/BRuttIKcYxL2Phn70XDioOkLPsFqhP4X8nuPLg=
 			</data>
 		</dict>
 		<key>Modules/Charts.swiftmodule/x86_64-apple-ios-simulator.swiftdoc</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			hntmOe1Z6890eG96qbSGorLDMavVzVU7j83MsBleK3E=
+			IiNKPvWDaUKbChOLsgmSnTG9rdmEqyeIwFcFYOx0HMQ=
 			</data>
 		</dict>
 		<key>Modules/Charts.swiftmodule/x86_64-apple-ios-simulator.swiftinterface</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			UbOBFyAoeJB4vbiCs7Jn6suGuDBX2hmGdmRUq8PSEWg=
+			IsDI/BRuttIKcYxL2Phn70XDioOkLPsFqhP4X8nuPLg=
 			</data>
 		</dict>
 		<key>Modules/Charts.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			jWZ2pjO0Sk2nnb5gpbIDhXC20hoI+uWtBTObUPfgs/0=
+			rhk6dhc6EKv8g29eSFfOXcBoAzHyyz/L4QvpuNs+XbM=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			5h7Vh5FwPT4/uXxeSgx3JoqzQQPABeK/6tsWZYdtJD4=
+			EZcWqWKz3VJC+tSvmOGXWb2nlPX7G1/IdGijSNgW2wM=
 			</data>
 		</dict>
 	</dict>
