@@ -293,13 +293,6 @@ SWIFT_CLASS("_TtC6Charts9ChartData")
 @end
 
 
-SWIFT_CLASS("_TtC6Charts12ChartUtility")
-@interface ChartUtility : NSObject
-+ (void)setup:(BOOL)enabled;
-- (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
-@end
-
-
 SWIFT_CLASS("_TtC6Charts7DataSet")
 @interface DataSet : NSObject
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
@@ -633,13 +626,6 @@ SWIFT_CLASS("_TtC6Charts9ChartData")
 @interface ChartData : NSObject
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 - (nonnull instancetype)initWithDataSets:(NSArray<DataSet *> * _Nonnull)dataSets lineWidth:(NSInteger)lineWidth options:(uint8_t)options OBJC_DESIGNATED_INITIALIZER;
-@end
-
-
-SWIFT_CLASS("_TtC6Charts12ChartUtility")
-@interface ChartUtility : NSObject
-+ (void)setup:(BOOL)enabled;
-- (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
 

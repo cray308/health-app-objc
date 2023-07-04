@@ -63,7 +63,7 @@ void initAppData(bool modern, Class **clsRefs) {
     }
 
     Image = objc_getClass("UIImage");
-    SEL iimn = sel_getUid("imageNamed:");
+    SEL iimn = sel_getUid("systemImageNamed:");
 
     Class Center = objc_getClass("UNUserNotificationCenter");
     SEL ccns = sel_getUid("currentNotificationCenter");
