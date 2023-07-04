@@ -3,8 +3,6 @@
 
 #include "Views.h"
 
-extern id getAppWindow(void);
-
 struct VCCache {
     SEL si, nb;
     id (*init)(id, SEL, id);

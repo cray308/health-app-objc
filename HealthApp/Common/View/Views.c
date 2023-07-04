@@ -97,7 +97,6 @@ void initViewData(void (*inits[])(void)) {
     SEL cnsa = sel_getUid("setActive:"), cnsp = sel_getUid("setPriority:");
     SEL cnac = sel_getUid("activateConstraints:");
 
-    SEL cmstic = sel_getUid("setTintColor:");
     SEL cmstamic = sel_getUid("setTranslatesAutoresizingMaskIntoConstraints:");
     SEL cmsbc = sel_getUid("setBackgroundColor:"), cmste = sel_getUid("setText:");
     SEL cmgt = sel_getUid("text"), cmstec = sel_getUid("setTextColor:");
@@ -153,7 +152,6 @@ void initViewData(void (*inits[])(void)) {
             (void(*)(id, SEL, float))class_getMethodImplementation(Constraint, cnsp)
         },
         {
-            cmstic,
             cmstamic, cmsbc, cmste, cmgt, cmstec, cmsd, sel_getUid("setTitle:")
         },
         {

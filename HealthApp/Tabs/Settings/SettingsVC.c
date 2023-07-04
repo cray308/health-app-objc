@@ -80,6 +80,5 @@ void settingsVC_buttonTapped(id self, SEL _cmd _U_, id button) {
         updateUserInfo((uint8_t)(getSelectedSegmentIndex(d->planControl) - 1), d->results);
     });
 end:
-    disableWindowTint();
     presentVC(self, alert);
 }

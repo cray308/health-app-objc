@@ -217,7 +217,6 @@ static void showConfetti(id self) {
         releaseView(confetti);
         id alert = createAlert(CFSTR("homeAlert"), CFSTR("homeAlertMessage"));
         addAlertAction(alert, CFSTR("ok"), ActionStyleDefault, NULL);
-        disableWindowTint();
         presentVC(self, alert);
     });
 }

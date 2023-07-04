@@ -128,10 +128,7 @@ void addAlertAction(id alert, CFStringRef titleKey, int style, Callback handler)
     CFStringRef title = localize(titleKey);
     id action = pvcc.action.create(pvcc.action.cls, pvcc.action.cr, title, style, ^(id act _U_) {
         if (handler) handler();
-        setTintColor(getAppWindow(), getColor(ColorRed));
     });
     pvcc.alert.addAction(alert, pvcc.alert.aa, action);
     CFRelease(title);
 }
-
-void disableWindowTint(void) { setTintColor(getAppWindow(), nil); }

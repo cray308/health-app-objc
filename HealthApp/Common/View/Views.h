@@ -64,7 +64,6 @@ struct VCache {
         void (*setPriority)(id, SEL, float);
     } con;
     const struct {
-        SEL stic;
         SEL stamic, sbc, ste, gt, stec, sd, sti;
     } common;
     const struct {
@@ -170,7 +169,6 @@ extern Class BarButtonItem;
 #define getBounds(r, v) callRectMethod(ViewTable.view.gBounds, r, v, ViewTable.view.gb)
 #define convertRect(r, d, b, s) callRectMethod(ViewTable.view.convert, r, d, ViewTable.view.cr, b, s)
 
-#define setTintColor(o, c) msgV(objSig(void, id), (o), ViewTable.common.stic, (c))
 #define setDelegate(o, d) msgV(objSig(void, id), (o), ViewTable.common.sd, (d))
 #define useConstraints(v) ViewTable.view.setTranslates((v), ViewTable.common.stamic, false)
 #define setBackgroundColor(v, c) ViewTable.view.setBG((v), SetBackgroundSel, (c))
@@ -265,6 +263,5 @@ static inline void dismissPresentedVC(id vc, Callback handler) {
 
 extern id createAlert(CFStringRef titleKey, CFStringRef messageKey);
 extern void addAlertAction(id alert, CFStringRef titleKey, int style, Callback handler);
-extern void disableWindowTint(void);
 
 #endif /* Views_h */
