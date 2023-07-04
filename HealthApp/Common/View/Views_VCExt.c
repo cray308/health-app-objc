@@ -110,6 +110,9 @@ void setupNavItem(id vc, CFStringRef titleKey, id const *buttons) {
 }
 
 void setupHierarchy(id vc, id vStack, id scrollView, int backgroundColor) {
+    setIDFormatted(scrollView, CFSTR("scroll_%@"), CFAutorelease(
+      CFStringCreateWithCString(NULL, object_getClassName(vc), kCFStringEncodingUTF8)))
+
     id view = getView(vc);
     setBackgroundColor(view, getColor(backgroundColor));
     useConstraints(scrollView);

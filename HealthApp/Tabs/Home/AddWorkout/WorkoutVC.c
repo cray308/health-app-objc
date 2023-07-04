@@ -89,7 +89,7 @@ void workoutVC_viewDidLoad(id self, SEL _cmd) {
     id stack = createVStack(NULL, 0);
     setSpacing(stack, GroupSpacing);
 
-    CFLocaleRef locale = CFLocaleCopyCurrent();
+    CFLocaleRef locale = copyLocale();
     CFStringRef exerciseProgressFormat = localize(CFSTR("exerciseProgress"));
     SEL tapSel = getTapSel();
     StatusView *sv;
@@ -98,6 +98,7 @@ void workoutVC_viewDidLoad(id self, SEL _cmd) {
         CVPair *cv = &d->containers[i];
         cv->view = containerView_init(&cv->data, c->header);
         addArrangedSubview(stack, cv->view);
+        setIDFormatted(cv->view, CFSTR("container_%d"), i)
 
         bool addHint = c->size > 1;
         for (int j = 0; j < c->size; ++j) {
@@ -233,7 +234,7 @@ void handleEvent(id self, WorkoutVC *d, int section, int row, int event) {
         nextView = pair->data->header;
     } else if (transition == TransitionFinishedCircuit) {
         if (circuit->reps > 1 && circuit->type == CircuitRounds) {
-            CFLocaleRef locale = CFLocaleCopyCurrent();
+            CFLocaleRef locale = copyLocale();
             CFStringRef newNumber = formatStr(locale, CFSTR("%d"), circuit->completedReps + 1);
             updateRange(circuit->header, &circuit->range, newNumber, locale);
             setText(pair->data->header, circuit->header);

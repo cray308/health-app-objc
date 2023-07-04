@@ -32,7 +32,7 @@ static void keyboardWillHide(CFNotificationCenterRef, void *,
                              CFStringRef, const void *, CFDictionaryRef);
 
 void initValidatorData(void) {
-    CFLocaleRef locale = CFLocaleCopyCurrent();
+    CFLocaleRef locale = copyLocale();
     if (isMetric(locale)) {
         CFCharacterSetRef baseSet = CFCharacterSetGetPredefined(kCFCharacterSetDecimalDigit);
         CFMutableCharacterSetRef mutableSet = CFCharacterSetCreateMutableCopy(NULL, baseSet);
@@ -90,7 +90,7 @@ void inputVC_addField(id self, CFStringRef hint, int keyboardType, int min, int 
     pair->data->chars = keyboardType == KeyboardTypeNumberPad
                         ? CFCharacterSetGetPredefined(kCFCharacterSetDecimalDigit) : metricChars;
 
-    CFLocaleRef locale = CFLocaleCopyCurrent();
+    CFLocaleRef locale = copyLocale();
     CFStringRef errorText = formatStr(locale, inputErrorFormat, min, max);
     CFRelease(locale);
 
@@ -118,7 +118,7 @@ void inputVC_addField(id self, CFStringRef hint, int keyboardType, int min, int 
 }
 
 void inputVC_updateFields(InputVC *d, int const *values) {
-    CFLocaleRef l = CFLocaleCopyCurrent();
+    CFLocaleRef l = copyLocale();
     if (isMetric(l)) {
         for (int i = 0; i < 4; ++i) {
             InputView *v = d->children[i].data;

@@ -98,7 +98,7 @@ bool exercise_cycle(Exercise *e, WorkoutTimer *timers) {
                 return true;
             } else {
                 e->state = ExerciseStateActiveMult;
-                CFLocaleRef locale = CFLocaleCopyCurrent();
+                CFLocaleRef locale = copyLocale();
                 CFStringRef sets = formatStr(locale, CFSTR("%d"), e->completedSets + 1);
                 updateRange(e->header, &e->headerRange, sets, locale);
                 if (e->type == ExerciseDuration)
@@ -173,7 +173,7 @@ int circuit_increment(Circuit *c, WorkoutTimer *timers, Exercise *exercise) {
         case CircuitDecrement:
             if ((endCircuit = (--c->completedReps == 0))) break;
 
-            CFLocaleRef locale = CFLocaleCopyCurrent();
+            CFLocaleRef locale = copyLocale();
             CFStringRef reps = formatStr(locale, CFSTR("%d"), c->completedReps);
             Exercise *end = &c->exercises[c->size];
             for (Exercise *e = c->exercises; e < end; ++e) {

@@ -51,7 +51,7 @@ static CFStringRef createTitle(int type, int index) {
 }
 
 static Workout *buildWorkout(WorkoutPlist *data, WorkoutParams const *params, int const *lifts) {
-    CFLocaleRef locale = CFLocaleCopyCurrent();
+    CFLocaleRef locale = copyLocale();
     float weights[4] = {[3] = 0};
     short customSets = 1, customReps = 0, customCircuitReps = 0;
     if (params->type == WorkoutStrength) {
@@ -132,7 +132,7 @@ static Workout *buildWorkout(WorkoutPlist *data, WorkoutParams const *params, in
         c->reps = customCircuitReps;
         if (!c->reps) getDictValue(act, EMKeys.reps, kCFNumberShortType, &c->reps);
 #if TARGET_OS_SIMULATOR
-        if (c->type == CircuitAMRAP) c->reps = nActivities > 1 ? 1 : 2;
+        if (c->type == CircuitAMRAP) c->reps = 1;
 #endif
 
         CFArrayRef foundExercises = CFDictionaryGetValue(act, CFSTR("E"));
@@ -179,7 +179,7 @@ static Workout *buildWorkout(WorkoutPlist *data, WorkoutParams const *params, in
             e->reps = customReps;
             if (!e->reps) getDictValue(exDict, EMKeys.reps, kCFNumberShortType, &e->reps);
 #if TARGET_OS_SIMULATOR
-            if (e->type == ExerciseDuration) e->reps = workout->type == WorkoutHIC ? 15 : 120;
+            if (e->type == ExerciseDuration) e->reps = workout->type == WorkoutHIC ? 5 : 60;
 #endif
 
             if (exerciseSets > 1) {

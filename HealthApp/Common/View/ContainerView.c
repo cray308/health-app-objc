@@ -17,6 +17,7 @@ id containerView_init(ContainerView **ref, CFStringRef header) {
 
     v->header = createLabel(header, UIFontTextStyleTitle3, ColorLabel);
     setAccessibilityTraits(v->header, UIAccessibilityTraitStaticText | UIAccessibilityTraitHeader);
+    setID(v->header, CFSTR("containerHeader"))
 
     v->stack = createVStack(NULL, 0);
     setLayoutMargins(v->stack, (HAInsets){.top = 4});

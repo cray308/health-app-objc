@@ -37,7 +37,7 @@ void homeVC_createWorkoutsList(id self, UserData const *data) {
     setHidden(d->customContainer.data->divider, shouldHide);
     if (shouldHide) return;
 
-    CFLocaleRef locale = CFLocaleCopyCurrent();
+    CFLocaleRef locale = copyLocale();
     CFDateFormatterRef formatter = CFDateFormatterCreate(NULL, locale, 0, 0);
     CFDateFormatterSetFormat(formatter, CFSTR("EEEE"));
     CFRelease(locale);
@@ -93,9 +93,11 @@ void homeVC_viewDidLoad(id self, SEL _cmd) {
 
     d->planContainer.view = containerView_init(&d->planContainer.data, headers[0]);
     setHidden(d->planContainer.data->divider, true);
+    setID(d->planContainer.view, CFSTR("planContainer"))
     CVPair customContainer;
     customContainer.view = containerView_init(&customContainer.data, headers[1]);
     setSpacing(customContainer.data->stack, ViewSpacing);
+    setID(customContainer.view, CFSTR("customContainer"))
     memcpy(&d->customContainer, &customContainer, sizeof(CVPair));
 
     SEL tapSel = getCustomButtonSel();
@@ -192,6 +194,7 @@ static void showConfetti(id self) {
 
     id confetti = new(View);
     useConstraints(confetti);
+    setID(confetti, CFSTR("confetti"))
     setBackgroundColor(confetti, msgV(objSig(id, CGFloat), getColor(ColorGray),
                                       sel_getUid("colorWithAlphaComponent:"), 0.8));
 

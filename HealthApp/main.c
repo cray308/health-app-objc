@@ -12,6 +12,7 @@
 extern int UIApplicationMain(int, char *[], CFStringRef, CFStringRef);
 
 int main(int argc, char *argv[]) {
+    checkMainArgs(argc)
     Class TabBarAppearance = getTabBarAppearanceClass();
     initAppData(TabBarAppearance, (Class *[]){&View, &VC});
     initViewData((void(*[])(void)){

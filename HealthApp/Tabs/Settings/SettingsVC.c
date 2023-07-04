@@ -16,7 +16,7 @@ static bool (*isOn)(id, SEL);
 #pragma mark - Dark Mode Switch
 
 static void updateSwitchAccessibility(id self, int value) {
-    CFLocaleRef locale = CFLocaleCopyCurrent();
+    CFLocaleRef locale = copyLocale();
     CFStringRef newValue = formatStr(locale, CFSTR("%d"), value);
     setAccessibilityValue(self, newValue);
     CFRelease(locale);
@@ -33,7 +33,7 @@ static id switchView_init(SwitchView **ref, bool darkMode) {
     *ref = v;
 
     CFStringRef labelText = localize(CFSTR("darkMode"));
-    setIsAccessibilityElement(self, true);
+    makeCustomViewAccessible(self)
     setAccessibilityTraits(self, UIAccessibilityTraitButton);
     setAccessibilityLabel(self, labelText);
     setBackgroundColor(self, getColor(ColorSecondaryBGGrouped));
@@ -125,7 +125,7 @@ void settingsVC_viewDidLoad(id self, SEL _cmd) {
         setCustomSpacing(p->vStack, GroupSpacing, d->darkModeSwitch.view);
     }
 
-    CFLocaleRef locale = CFLocaleCopyCurrent();
+    CFLocaleRef locale = copyLocale();
     int kbType = getKeyboardForLocale(locale);
     CFStringRef fieldKey = localize(CFSTR("maxWeight")), liftNames[4];
     fillStringArray(liftNames, CFSTR("exNames%02d"), 4);
@@ -173,7 +173,7 @@ void settingsVC_buttonTapped(id self, SEL _cmd _U_, id button) {
     SettingsVC *d = getIVVCS(SettingsVC, p);
     uint8_t darkMode = UCHAR_MAX;
     if (d->darkModeSwitch.view) darkMode = isOn(d->darkModeSwitch.data->button, sio);
-    CFLocaleRef locale = CFLocaleCopyCurrent();
+    CFLocaleRef locale = copyLocale();
     float toSavedMass = getSavedMassFactor(locale);
     CFRelease(locale);
     for (int i = 0; i < 4; ++i) {

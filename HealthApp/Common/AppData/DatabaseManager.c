@@ -171,7 +171,7 @@ void createDB(void) {
 static void fetchHistory(sqlite3 *db, HistoryModel *historyModel) {
     int count = 0;
     WeeklyData *weeks = malloc(105 * sizeof(WeeklyData));
-    CFLocaleRef locale = CFLocaleCopyCurrent();
+    CFLocaleRef locale = copyLocale();
     CFDateFormatterRef formatter = CFDateFormatterCreate(NULL, locale, kCFDateFormatterShortStyle, 0);
     CFRelease(locale);
     CFMutableArrayRef axisStrs = CFArrayCreateMutable(NULL, 105, &kCFTypeArrayCallBacks);

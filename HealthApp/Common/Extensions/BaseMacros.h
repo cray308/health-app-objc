@@ -4,8 +4,24 @@
 #if DEBUG
 #include <assert.h>
 #define customAssert(x) assert(x);
+extern int _HATestIsMetric;
+#define checkMainArgs(c) _HATestIsMetric = (c > 5);
+#define copyLocale() (_HATestIsMetric ? CFLocaleCreate(NULL, CFSTR("en_CA")) : CFLocaleCopyCurrent())
+#define makeCustomViewAccessible(v)
+#define setID(v, x) msgV(objSig(void, CFStringRef), v, sel_getUid("setAccessibilityIdentifier:"), x);
+#define setIDFormatted(v, f, i)                                                              \
+do {                                                                                         \
+    CFStringRef _idStr = CFStringCreateWithFormat(NULL, NULL, f, (i));                       \
+    msgV(objSig(void, CFStringRef), (v), sel_getUid("setAccessibilityIdentifier:"), _idStr); \
+    CFRelease(_idStr);                                                                       \
+} while (0);
 #else
 #define customAssert(x)
+#define checkMainArgs(c)
+#define copyLocale() CFLocaleCopyCurrent()
+#define makeCustomViewAccessible(v) setIsAccessibilityElement(v, true);
+#define setID(v, x)
+#define setIDFormatted(v, f, i)
 #endif
 
 #define _U_ __attribute__((__unused__))

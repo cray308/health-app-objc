@@ -47,7 +47,7 @@ static void getBodyWeight(int *weight) {
 void getMassData(int *weight, CFStringRef *unitName) {
     Class Mass = objc_getClass("NSUnitMass");
     id unit = msgV(clsSig(id), Mass, sel_getUid("poundsMass"));
-    CFLocaleRef locale = CFLocaleCopyCurrent();
+    CFLocaleRef locale = copyLocale();
     if (isMetric(locale)) unit = msgV(clsSig(id), Mass, sel_getUid("kilograms"));
     CFRelease(locale);
     id formatter = new(objc_getClass("NSMeasurementFormatter"));

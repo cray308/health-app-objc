@@ -34,7 +34,7 @@ static id stepperView_init(id *stepperRef, CFLocaleRef locale CF_CONSUMED) {
     CFStringRef reps = formatStr(locale, repsFormat, StepperMin);
     v->range = findNumber(reps, locale, one, NULL);
     v->reps = CFStringCreateMutableCopy(NULL, 64, reps);
-    setIsAccessibilityElement(self, true);
+    makeCustomViewAccessible(self)
     setAccessibilityTraits(self, UIAccessibilityTraitAdjustable);
     setAccessibilityLabel(self, stepperDescription);
     setAccessibilityValue(self, reps);
@@ -74,7 +74,7 @@ void stepperView_deinit(id self, SEL _cmd) {
 }
 
 static void updateStepperValue(id self, StepperView *v, int value) {
-    CFLocaleRef locale = CFLocaleCopyCurrent();
+    CFLocaleRef locale = copyLocale();
     updateRange(v->reps, &v->range, formatStr(locale, CFSTR("%d"), value), locale);
     setText(v->label, v->reps);
     setAccessibilityValue(self, v->reps);
@@ -126,7 +126,7 @@ void updateMaxesVC_viewDidLoad(id self, SEL _cmd) {
         msgV(objSig(void, bool), self, sel_getUid("setModalInPresentation:"), true);
 
     setSpacing(p->vStack, GroupSpacing);
-    CFLocaleRef locale = CFLocaleCopyCurrent();
+    CFLocaleRef locale = copyLocale();
     CFStringRef liftKey = formatStr(NULL, CFSTR("exNames%02d"), d->index);
     CFStringRef liftName = localize(liftKey), fieldKey = localize(CFSTR("maxWeight"));
     CFMutableStringRef adjustedName = CFStringCreateMutableCopy(NULL, 128, liftName);
@@ -146,7 +146,7 @@ void updateMaxesVC_viewDidLoad(id self, SEL _cmd) {
 void updateMaxesVC_tappedFinish(id self, SEL _cmd _U_, id button _U_) {
     InputVC *p = getIVVC(InputVC, self);
     UpdateMaxesVC *d = getIVVCS(UpdateMaxesVC, p);
-    CFLocaleRef locale = CFLocaleCopyCurrent();
+    CFLocaleRef locale = copyLocale();
     int extra = d->index == LiftPullup ? Bodyweight : 0;
     float initWeight = ((p->children[0].data->result * getSavedMassFactor(locale)) + extra) * 36;
     float reps = 37.f - (float)getValue(d->repsStepper, sgv);

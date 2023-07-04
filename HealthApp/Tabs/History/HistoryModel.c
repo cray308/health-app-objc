@@ -8,7 +8,7 @@ void historyModel_populate(HistoryModel *m,
     refIndices[1] = max(refIndices[1], 0);
     memcpy(m->nEntries, (int []){size - refIndices[1], size - refIndices[2], size}, 3 * sizeof(int));
 
-    CFLocaleRef locale = CFLocaleCopyCurrent();
+    CFLocaleRef locale = copyLocale();
     bool ltr = CFLocaleGetLanguageCharacterDirection(CFLocaleGetValue(locale, kCFLocaleLanguageCode))
                == kCFLocaleLanguageDirectionLeftToRight;
     if (ltr) {

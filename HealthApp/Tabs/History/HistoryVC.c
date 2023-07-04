@@ -101,7 +101,7 @@ void historyVC_changedSegment(id self, SEL _cmd _U_, id control) {
         return;
     }
 
-    CFLocaleRef l = CFLocaleCopyCurrent();
+    CFLocaleRef l = copyLocale();
     CFStringRef label = formatStr(l, totalWorkoutsFormat, d->model.totals.avgs[index]);
     hc.view.setLegendLabel(d->charts[ChartTotals], hc.view.sllt, 0, (id)label);
     CFRelease(label);
