@@ -2,8 +2,6 @@
 #define BaseMacros_h
 
 #if DEBUG
-#include <assert.h>
-#define customAssert(x) assert(x);
 extern int _HATestIsMetric;
 #define checkMainArgs(c) _HATestIsMetric = (c > 5);
 #define copyLocale() (_HATestIsMetric ? CFLocaleCreate(NULL, CFSTR("en_CA")) : CFLocaleCopyCurrent())
@@ -16,7 +14,6 @@ do {                                                                            
     CFRelease(_idStr);                                                                       \
 } while (0);
 #else
-#define customAssert(x)
 #define checkMainArgs(c)
 #define copyLocale() CFLocaleCopyCurrent()
 #define makeCustomViewAccessible(v) setIsAccessibilityElement(v, true);

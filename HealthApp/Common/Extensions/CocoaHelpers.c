@@ -1,21 +1,11 @@
 #include "CocoaHelpers.h"
 
-static const void *cocoaRetain(CFAllocatorRef, const void *);
-static void cocoaRelease(CFAllocatorRef, const void *);
-
-const CFArrayCallBacks RetainedArrCallbacks = {0, cocoaRetain, cocoaRelease, NULL, NULL};
 struct AppCache AppTable;
 Class Image;
 
 static id appColors[13];
 static id barColors[2];
 static id (*objRetain)(id, SEL);
-
-const void *cocoaRetain(CFAllocatorRef allocator _U_, const void *value) {
-    return objRetain((id)value, AppTable.sels.ret);
-}
-
-void cocoaRelease(CFAllocatorRef allocator _U_, const void *value) { releaseObject((id)value); }
 
 static id colorCreateLegacy(int type) { return appColors[type]; }
 
@@ -26,7 +16,7 @@ static id colorCreate(int type) {
 }
 
 static id barColorCreate(int type) {
-    static CFStringRef const names[] = {CFSTR("navBarColor"), CFSTR("modalColor")};
+    CFStringRef names[] = {CFSTR("navBarColor"), CFSTR("modalColor")};
     return msgV(clsSig(id, CFStringRef), AppTable.color.cls, sel_getUid("colorNamed:"), names[type]);
 }
 

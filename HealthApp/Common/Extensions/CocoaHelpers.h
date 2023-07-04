@@ -82,7 +82,6 @@ struct AppCache {
     } unc;
 };
 
-extern const CFArrayCallBacks RetainedArrCallbacks;
 extern struct AppCache AppTable;
 extern Class Image;
 

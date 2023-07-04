@@ -183,7 +183,7 @@ void inputVC_viewDidLoad(id self, SEL _cmd) {
     }
     setTintColor(d->toolbar, getColor(ColorRed));
     msgV(objSig(void), d->toolbar, sel_getUid("sizeToFit"));
-    CFArrayRef itemArr = CFArrayCreate(NULL, (const void **)items, 4, &RetainedArrCallbacks);
+    CFArrayRef itemArr = CFArrayCreate(NULL, (const void **)items, 4, &kCFTypeArrayCallBacks);
     msgV(objSig(void, CFArrayRef), d->toolbar, sel_getUid("setItems:"), itemArr);
     CFRelease(itemArr);
     for (int i = 0; i < 4; ++i) {

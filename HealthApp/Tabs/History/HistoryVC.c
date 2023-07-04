@@ -189,21 +189,20 @@ CFStringRef historyVC_stringForValue(id self, SEL _cmd _U_, double value) {
 
 void historyVC_clearData(id self) {
     HistoryVC *d = getIVVC(HistoryVC, self);
-    HistoryModel *model = &d->model;
-    if (!model->nEntries[2]) return;
+    if (!d->model.nEntries[2]) return;
 
-    CFRelease(model->axisStrs);
-    memset(model->nEntries, 0, 3 * sizeof(int));
-    free(model->totals.entries);
-    hc.set.replace(model->totals.set, hc.set.re, NULL, 0);
+    CFRelease(d->model.axisStrs);
+    memset(d->model.nEntries, 0, 3 * sizeof(int));
+    free(d->model.totals.entries);
+    hc.set.replace(d->model.totals.set, hc.set.re, NULL, 0);
     for (int i = 0; i < 4; ++i) {
-        free(model->types.entries[i]);
-        free(model->lifts.entries[i]);
-        hc.set.replace(model->types.sets[i], hc.set.re, NULL, 0);
-        hc.set.replace(model->lifts.sets[i], hc.set.re, NULL, 0);
+        free(d->model.types.entries[i]);
+        free(d->model.lifts.entries[i]);
+        hc.set.replace(d->model.types.sets[i], hc.set.re, NULL, 0);
+        hc.set.replace(d->model.lifts.sets[i], hc.set.re, NULL, 0);
     }
-    free(model->types.entries[4]);
-    hc.set.replace(model->types.sets[4], hc.set.re, NULL, 0);
+    free(d->model.types.entries[4]);
+    hc.set.replace(d->model.types.sets[4], hc.set.re, NULL, 0);
 
     if (isViewLoaded(self)) {
         setSelectedSegmentIndex(d->rangeControl, 0);

@@ -68,7 +68,6 @@ static struct PrivVData {
         id (*titleLabel)(id, SEL);
     } button;
     const struct {
-        Class cls;
         SEL stta;
         void (*setTint)(id, SEL, id);
         void (*setTitleTextAttributes)(id, SEL, CFDictionaryRef, u_long);
@@ -295,7 +294,7 @@ void initViewData(void (*inits[])(void)) {
             (id(*)(id, SEL))class_getMethodImplementation(Button, btl)
         },
         {
-            Seg, sgstta,
+            sgstta,
             (void(*)(id, SEL, id))class_getMethodImplementation(Seg, cmstic),
             (void(*)(id, SEL, CFDictionaryRef, u_long))class_getMethodImplementation(Seg, sgstta)
         },
@@ -400,7 +399,8 @@ id createSegmentedControl(CFStringRef format, int startIndex) {
     CFStringRef segments[3];
     fillStringArray(segments, format, 3);
     CFArrayRef segs = CFArrayCreate(NULL, (const void **)segments, 3, NULL);
-    id control = msgV(objSig(id, CFArrayRef), alloc(pvc.seg.cls), sel_getUid("initWithItems:"), segs);
+    id control = msgV(objSig(id, CFArrayRef), alloc(objc_getClass("UISegmentedControl")),
+                      sel_getUid("initWithItems:"), segs);
     setSelectedSegmentIndex(control, startIndex);
     CFRelease(segs);
     for (int i = 0; i < 3; ++i) {

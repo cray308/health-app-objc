@@ -110,24 +110,21 @@ static Workout *buildWorkout(WorkoutPlist *data, WorkoutParams const *params, in
 
     CFArrayRef lib = CFArrayGetValueAtIndex(data->lib, params->type);
     CFArrayRef activities = CFArrayGetValueAtIndex(lib, params->index);
-    int nActivities = (int)CFArrayGetCount(activities);
-    customAssert(nActivities > 0)
-
     Workout *workout = calloc(1, sizeof(Workout));
-    workout->size = nActivities;
-    workout->circuits = calloc((unsigned)nActivities, sizeof(Circuit));
+    workout->size = (int)CFArrayGetCount(activities);
+    workout->circuits = calloc((unsigned)workout->size, sizeof(Circuit));
     workout->nameIdx = params->index;
     workout->type = params->type;
     workout->day = params->day;
     workout->testMax = params->type == WorkoutStrength && params->index == StrengthIndexTestMax;
-    bool multiple = nActivities > 1;
+    bool multiple = workout->size > 1;
 
-    for (int i = 0; i < nActivities; ++i) {
+    for (int i = 0; i < workout->size; ++i) {
         CFDictionaryRef act = CFArrayGetValueAtIndex(activities, i);
+        CFArrayRef exercises = CFDictionaryGetValue(act, CFSTR("E"));
         Circuit *c = &workout->circuits[i];
-        CFStringRef cHeader = NULL;
-        short exerciseSets = customSets;
-
+        c->size = (int)CFArrayGetCount(exercises);
+        c->exercises = calloc((unsigned)c->size, sizeof(Exercise));
         getDictValue(act, EMKeys.type, kCFNumberCharType, &c->type);
         c->reps = customCircuitReps;
         if (!c->reps) getDictValue(act, EMKeys.reps, kCFNumberShortType, &c->reps);
@@ -135,33 +132,29 @@ static Workout *buildWorkout(WorkoutPlist *data, WorkoutParams const *params, in
         if (c->type == CircuitAMRAP) c->reps = 1;
 #endif
 
-        CFArrayRef foundExercises = CFDictionaryGetValue(act, CFSTR("E"));
-        int nExercises = (int)CFArrayGetCount(foundExercises);
-        customAssert(nExercises > 0)
+        CFStringRef cHeader = NULL;
+        short exerciseSets = customSets;
 
-        if (params->type == WorkoutHIC && c->type == CircuitRounds && nExercises == 1) {
+        if (params->type == WorkoutHIC && c->type == CircuitRounds && c->size == 1) {
             exerciseSets = c->reps;
             c->reps = 1;
         }
 
-        c->exercises = calloc((unsigned)nExercises, sizeof(Exercise));
-        c->size = nExercises;
-
         if (c->type == CircuitAMRAP) {
             if (multiple) {
-                cHeader = formatStr(locale, amrapMultipleFormat, i + 1, nActivities, c->reps);
+                cHeader = formatStr(locale, amrapMultipleFormat, i + 1, workout->size, c->reps);
             } else {
                 cHeader = formatStr(locale, amrapFormat, c->reps);
             }
         } else if (c->reps > 1) {
             if (multiple) {
-                cHeader = formatStr(locale, roundsMultipleFormat, i + 1, nActivities, 1, c->reps);
+                cHeader = formatStr(locale, roundsMultipleFormat, i + 1, workout->size, 1, c->reps);
             } else {
                 cHeader = formatStr(locale, roundsFormat, 1, c->reps);
             }
             c->range = findNumber(cHeader, locale, one, rounds1);
         } else if (multiple) {
-            cHeader = formatStr(locale, circuitProgressFormat, i + 1, nActivities);
+            cHeader = formatStr(locale, circuitProgressFormat, i + 1, workout->size);
         }
 
         if (cHeader) {
@@ -170,8 +163,8 @@ static Workout *buildWorkout(WorkoutPlist *data, WorkoutParams const *params, in
             CFRelease(cHeader);
         }
 
-        for (int j = 0; j < nExercises; ++j) {
-            CFDictionaryRef exDict = CFArrayGetValueAtIndex(foundExercises, j);
+        for (int j = 0; j < c->size; ++j) {
+            CFDictionaryRef exDict = CFArrayGetValueAtIndex(exercises, j);
             Exercise *e = &c->exercises[j];
 
             getDictValue(exDict, EMKeys.type, kCFNumberCharType, &e->type);
@@ -287,8 +280,7 @@ Workout *getWeeklyWorkout(int index, uint8_t plan, int const *lifts) {
 }
 
 CFArrayRef createWorkoutNames(uint8_t type) {
-    static const int counts[] = {2, 8, 1, 27};
-    int len = counts[type];
+    int len = (int []){2, 8, 1, 27}[type];
     CFMutableArrayRef results = CFArrayCreateMutable(NULL, len, &kCFTypeArrayCallBacks);
     for (int i = 0; i < len; ++i) {
         CFStringRef t = createTitle(type, i);

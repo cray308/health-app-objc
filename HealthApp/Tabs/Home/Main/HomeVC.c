@@ -171,21 +171,23 @@ static void showConfetti(id self) {
     };
 
     int const velocities[] = {100, 90, 150, 200};
-    id cells[16];
+    CFMutableArrayRef cells = CFArrayCreateMutable(NULL, 16, &kCFTypeArrayCallBacks);
 
     for (int i = 0; i < 16; ++i) {
-        cells[i] = new(cellClass);
-        msgV(objSig(void, float), cells[i], cellSels[0], 4);
-        msgV(objSig(void, float), cells[i], cellSels[1], 14);
+        id cell = new(cellClass);
+        msgV(objSig(void, float), cell, cellSels[0], 4);
+        msgV(objSig(void, float), cell, cellSels[1], 14);
         int velocity = velocities[arc4random_uniform(4)];
-        msgV(objSig(void, CGFloat), cells[i], cellSels[2], velocity);
-        msgV(objSig(void, CGFloat), cells[i], cellSels[3], M_PI);
-        msgV(objSig(void, CGFloat), cells[i], cellSels[4], 0.5);
-        msgV(objSig(void, CGFloat), cells[i], cellSels[5], 3.5);
-        msgV(objSig(void, CGColorRef), cells[i], cellSels[6], colors[i >> 2]);
-        msgV(objSig(void, id), cells[i], cellSels[7], (id)images[i % 4]);
-        msgV(objSig(void, CGFloat), cells[i], cellSels[8], 0.25);
-        msgV(objSig(void, CGFloat), cells[i], cellSels[9], 0.1);
+        msgV(objSig(void, CGFloat), cell, cellSels[2], velocity);
+        msgV(objSig(void, CGFloat), cell, cellSels[3], M_PI);
+        msgV(objSig(void, CGFloat), cell, cellSels[4], 0.5);
+        msgV(objSig(void, CGFloat), cell, cellSels[5], 3.5);
+        msgV(objSig(void, CGColorRef), cell, cellSels[6], colors[i >> 2]);
+        msgV(objSig(void, id), cell, cellSels[7], (id)images[i % 4]);
+        msgV(objSig(void, CGFloat), cell, cellSels[8], 0.25);
+        msgV(objSig(void, CGFloat), cell, cellSels[9], 0.1);
+        CFArrayAppendValue(cells, cell);
+        releaseObject(cell);
     }
 
     id view = getView(self);
@@ -205,14 +207,10 @@ static void showConfetti(id self) {
     msgV(objSig(void, id), layer, sel_getUid("setEmitterShape:"), kCAEmitterLayerLine);
     CGSize size = {bounds.size.width - 16, 1};
     msgV(objSig(void, CGSize), layer, sel_getUid("setEmitterSize:"), size);
-    CFArrayRef cellArr = CFArrayCreate(NULL, (const void **)cells, 16, &RetainedArrCallbacks);
-    msgV(objSig(void, CFArrayRef), layer, sel_getUid("setEmitterCells:"), cellArr);
+    msgV(objSig(void, CFArrayRef), layer, sel_getUid("setEmitterCells:"), cells);
 
-    CFRelease(cellArr);
+    CFRelease(cells);
     msgV(objSig(void), layer, ReleaseSel);
-    for (int i = 0; i < 16; ++i) {
-        releaseObject(cells[i]);
-    }
     addSubview(view, confetti);
     pinToSafeArea(confetti, view);
 
