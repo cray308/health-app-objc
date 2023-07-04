@@ -8,12 +8,11 @@ extern Class HomeVCClass;
 
 typedef struct {
     CVPair planContainer;
-    CVPair customContainer;
+    id divider;
 } HomeVC;
 
 void homeVC_updateWorkoutsList(HomeVC *d, uint8_t completedWorkouts);
 void homeVC_createWorkoutsList(id self, UserData const *data);
-void homeVC_updateColors(id self);
 
 void homeVC_viewDidLoad(id self, SEL _cmd);
 void homeVC_planButtonTapped(id self, SEL _cmd, id button);

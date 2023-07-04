@@ -6,18 +6,16 @@
 #include "SetupWorkoutVC.h"
 #include "StatusView.h"
 #include "UpdateMaxesVC.h"
-#include "Views.h"
+#include "Views_VCExt.h"
 #include "WorkoutVC.h"
 
 extern int UIApplicationMain(int, char *[], CFStringRef, CFStringRef);
 
 int main(int argc, char *argv[]) {
     checkMainArgs(argc)
-    Class TabBarAppearance = getTabBarAppearanceClass();
-    initAppData(TabBarAppearance, (Class *[]){&View, &VC});
-    initViewData((void(*[])(void)){
-        initStatusViewData, initValidatorData, initUpdateMaxesData, initSetupWorkoutData
-    });
+    initAppData((Class *[]){&View, &VC});
+    initViewData((void(*[])(void)){initStatusViewData, initValidatorData, initUpdateMaxesData});
+    initVCData();
     char *dataKey = "data", *voidSig = "v@:", *tapSig = "v@:@";
     SEL deinit = sel_getUid("dealloc"), viewLoad = sel_getUid("viewDidLoad");
     SEL tap = getTapSel(), customTap = getCustomButtonSel();
@@ -33,7 +31,7 @@ int main(int argc, char *argv[]) {
     objc_registerClassPair(ContainerViewClass);
 
     InputViewClass = objc_allocateClassPair(View, "InputView", 0);
-    class_addIvar(InputViewClass, dataKey, sizeof(InputView), 0, "{?=@@@@iifC}");
+    class_addIvar(InputViewClass, dataKey, sizeof(InputView), 0, "{?=@@@iifC}");
     class_addMethod(InputViewClass, deinit, (IMP)inputView_deinit, voidSig);
     objc_registerClassPair(InputViewClass);
 
@@ -47,16 +45,9 @@ int main(int argc, char *argv[]) {
                     (IMP)stepperView_accessibilityDecrement, voidSig);
     objc_registerClassPair(StepperViewClass);
 
-    SwitchViewClass = objc_allocateClassPair(View, "SwitchView", 0);
-    class_addIvar(SwitchViewClass, dataKey, sizeof(SwitchView), 0, "{?=@@}");
-    class_addMethod(SwitchViewClass, getValueChangedSel(), (IMP)switchView_changedValue, voidSig);
-    class_addMethod(SwitchViewClass, sel_getUid("accessibilityActivate"),
-                    (IMP)switchView_accessibilityActivate, "B@:");
-    objc_registerClassPair(SwitchViewClass);
-
     InputVCClass = objc_allocateClassPair(VC, "InputVC", 0);
     class_addProtocol(InputVCClass, objc_getProtocol("UITextFieldDelegate"));
-    class_addIvar(InputVCClass, "validatorData", sizeof(InputVC), 0, "{?=[4{?=@@}]@@@@iiB}");
+    class_addIvar(InputVCClass, "validatorData", sizeof(InputVC), 0, "{?=[4{?=@@}]@@@@ii}");
     class_addMethod(InputVCClass, deinit, (IMP)inputVC_deinit, voidSig);
     class_addMethod(InputVCClass, viewLoad, (IMP)inputVC_viewDidLoad, voidSig);
     class_addMethod(InputVCClass, getDismissKeyboardSel(), (IMP)inputVC_dismissKeyboard, voidSig);
@@ -74,7 +65,7 @@ int main(int argc, char *argv[]) {
     objc_registerClassPair(InputVCClass);
 
     SettingsVCClass = objc_allocateClassPair(InputVCClass, "SettingsVC", 0);
-    class_addIvar(SettingsVCClass, dataKey, sizeof(SettingsVC), 0, "{?=@@{?=@@}@[4i]}");
+    class_addIvar(SettingsVCClass, dataKey, sizeof(SettingsVC), 0, "{?=@[4i]}");
     class_addMethod(SettingsVCClass, viewLoad, (IMP)settingsVC_viewDidLoad, voidSig);
     class_addMethod(SettingsVCClass, tap, (IMP)settingsVC_buttonTapped, tapSig);
     objc_registerClassPair(SettingsVCClass);
@@ -82,7 +73,7 @@ int main(int argc, char *argv[]) {
     SetupWorkoutVCClass = objc_allocateClassPair(InputVCClass, "SetupWorkoutVC", 0);
     class_addProtocol(SetupWorkoutVCClass, objc_getProtocol("UIPickerViewDelegate"));
     class_addProtocol(SetupWorkoutVCClass, objc_getProtocol("UIPickerViewDataSource"));
-    class_addIvar(SetupWorkoutVCClass, dataKey, sizeof(SetupWorkoutVC), 0, "{?=@@@@@iC}");
+    class_addIvar(SetupWorkoutVCClass, dataKey, sizeof(SetupWorkoutVC), 0, "{?=@@@iC}");
     class_addMethod(SetupWorkoutVCClass, deinit, (IMP)setupWorkoutVC_deinit, voidSig);
     class_addMethod(SetupWorkoutVCClass, viewLoad, (IMP)setupWorkoutVC_viewDidLoad, voidSig);
     class_addMethod(SetupWorkoutVCClass, tap, (IMP)setupWorkoutVC_tappedButton, tapSig);
@@ -92,8 +83,6 @@ int main(int argc, char *argv[]) {
                     (IMP)setupWorkoutVC_numberOfRows, "q@:@q");
     class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:titleForRow:forComponent:"),
                     (IMP)setupWorkoutVC_titleForRow, "@@:@qq");
-    class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:attributedTitleForRow:forComponent:"),
-                    (IMP)setupWorkoutVC_attributedTitle, "@@:@qq");
     class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:didSelectRow:inComponent:"),
                     (IMP)setupWorkoutVC_didSelectRow, "v@:@qq");
     objc_registerClassPair(SetupWorkoutVCClass);
@@ -106,7 +95,7 @@ int main(int argc, char *argv[]) {
     objc_registerClassPair(UpdateMaxesVCClass);
 
     HomeVCClass = objc_allocateClassPair(VC, "HomeVC", 0);
-    class_addIvar(HomeVCClass, dataKey, sizeof(HomeVC), 0, "{?={?=@@}{?=@@}}");
+    class_addIvar(HomeVCClass, dataKey, sizeof(HomeVC), 0, "{?={?=@@}@}");
     class_addMethod(HomeVCClass, viewLoad, (IMP)homeVC_viewDidLoad, voidSig);
     class_addMethod(HomeVCClass, tap, (IMP)homeVC_planButtonTapped, tapSig);
     class_addMethod(HomeVCClass, customTap, (IMP)homeVC_customButtonTapped, tapSig);
@@ -135,7 +124,7 @@ int main(int argc, char *argv[]) {
 
     Class AppDelegateClass = objc_allocateClassPair(objc_getClass("UIResponder"), "AppDelegate", 0);
     class_addProtocol(AppDelegateClass, objc_getProtocol("UNUserNotificationCenterDelegate"));
-    class_addIvar(AppDelegateClass, dataKey, sizeof(AppDelegate), 0, "@[3@]{?=qq[4i]CCC}");
+    class_addIvar(AppDelegateClass, dataKey, sizeof(AppDelegate), 0, "@[3@]{?=qq[4i]CC}");
     class_addMethod(AppDelegateClass, sel_getUid("application:didFinishLaunchingWithOptions:"),
                     (IMP)appDelegate_didFinishLaunching, "B@:@@");
     class_addMethod(AppDelegateClass,

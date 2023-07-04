@@ -41,11 +41,6 @@ enum {
     ColorTertiaryBG
 };
 
-enum {
-    BarColorNav,
-    BarColorModal
-};
-
 typedef void (^Callback)(void);
 typedef void (^ObjectBlock)(id);
 
@@ -63,10 +58,6 @@ struct AppCache {
     } sels;
     const struct ColorCache {
         Class cls;
-        id (*colorFunc)(int);
-        id (*barFunc)(int);
-        SEL si;
-        id (*init)(id, SEL, CGFloat, CGFloat, CGFloat, CGFloat);
         SEL sels[13];
         id (*imps[13])(Class, SEL);
     } color;
@@ -95,18 +86,15 @@ extern Class Image;
 #define releaseObject(o) AppTable.sels.objRel(o, ReleaseSel)
 #define releaseVC(c) AppTable.sels.vcRel(c, ReleaseSel)
 
-#define createColor(r, g, b, a)\
- AppTable.color.init(alloc(AppTable.color.cls), AppTable.color.si, (r), (g), (b), (a))
-#define getColor(t) AppTable.color.colorFunc((t))
-#define getBarColor(t) AppTable.color.barFunc((t))
+#define getColor(t) AppTable.color.imps[(t)](AppTable.color.cls, AppTable.color.sels[(t)])
+#define getBarColor(n)\
+ msgV(clsSig(id, CFStringRef), AppTable.color.cls, sel_getUid("colorNamed:"), (n))
 
 #define getImage(n) AppTable.image.named(Image, AppTable.image.imn, (n))
 
 #define getNotificationCenter() AppTable.unc.current(AppTable.unc.cls, AppTable.unc.cns)
 #define addNotificationRequest(c, r) AppTable.unc.add((c), AppTable.unc.anr, (r), ^(id err _U_){})
 
-void initAppData(bool modern, Class **clsRefs);
-
-void updateAppColors(bool darkMode);
+void initAppData(Class **clsRefs);
 
 #endif /* CocoaBridging_h */

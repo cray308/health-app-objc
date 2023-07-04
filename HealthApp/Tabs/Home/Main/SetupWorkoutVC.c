@@ -19,15 +19,6 @@ enum {
     IndexWeight
 };
 
-static SEL prc;
-static void (*reloadComponent)(id, SEL, long);
-
-void initSetupWorkoutData(void) {
-    Class Picker = objc_getClass("UIPickerView");
-    prc = sel_getUid("reloadComponent:");
-    reloadComponent = (void(*)(id, SEL, long))class_getMethodImplementation(Picker, prc);
-}
-
 #pragma mark - Lifecycle
 
 id setupWorkoutVC_init(id delegate, uint8_t type) {
@@ -36,26 +27,12 @@ id setupWorkoutVC_init(id delegate, uint8_t type) {
     d->delegate = delegate;
     d->names = createWorkoutNames(type);
     d->type = type;
-    if (!getTabBarAppearanceClass()) {
-        id font = getPreferredFont(UIFontTextStyleTitle3);
-        const void *keys[] = {NSFontAttributeName, NSForegroundColorAttributeName};
-        d->normalDict = CFDictionaryCreate(NULL, keys, (const void *[]){
-            font, getColor(ColorDisabled)
-        }, 2, &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-        d->selectedDict = CFDictionaryCreate(NULL, keys, (const void *[]){
-            font, getColor(ColorLabel)
-        }, 2, &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-    }
     return self;
 }
 
 void setupWorkoutVC_deinit(id self, SEL _cmd) {
     SetupWorkoutVC *d = getIVVCC(SetupWorkoutVC, InputVC, self);
     CFRelease(d->names);
-    if (d->normalDict) {
-        CFRelease(d->normalDict);
-        CFRelease(d->selectedDict);
-    }
     releaseView(d->workoutField);
     inputVC_deinit(self, _cmd);
 }
@@ -146,8 +123,6 @@ end:
 #pragma mark - Picker Delegate
 
 long setupWorkoutVC_numberOfComponentsInPickerView(id self _U_, SEL _cmd _U_, id picker _U_) {
-    if (getIVVCC(SetupWorkoutVC, InputVC, self)->normalDict)
-        setBackgroundColor(picker, getColor(ColorTertiaryBG));
     return 1;
 }
 
@@ -160,21 +135,9 @@ CFStringRef setupWorkoutVC_titleForRow(id self, SEL _cmd _U_,
     return CFArrayGetValueAtIndex(getIVVCC(SetupWorkoutVC, InputVC, self)->names, row);
 }
 
-CFAttributedStringRef setupWorkoutVC_attributedTitle(id self, SEL _cmd _U_,
-                                                     id picker _U_, long row, long component _U_) {
-    SetupWorkoutVC *d = getIVVCC(SetupWorkoutVC, InputVC, self);
-    if (!d->normalDict) return NULL;
-
-    CFAttributedStringRef attrString = CFAttributedStringCreate(
-      NULL, CFArrayGetValueAtIndex(d->names, row), row == d->index ? d->selectedDict : d->normalDict);
-    CFAutorelease(attrString);
-    return attrString;
-}
-
 void setupWorkoutVC_didSelectRow(id self, SEL _cmd _U_,
                                  id picker _U_, long row, long component _U_) {
     SetupWorkoutVC *d = getIVVCC(SetupWorkoutVC, InputVC, self);
     d->index = (int)row;
     setFieldText(d->workoutField, CFArrayGetValueAtIndex(d->names, row));
-    if (d->normalDict) reloadComponent(picker, prc, 0);
 }

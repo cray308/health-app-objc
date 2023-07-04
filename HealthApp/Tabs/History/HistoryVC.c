@@ -1,6 +1,5 @@
 #include "HistoryVC.h"
 #include "ContainerView.h"
-#include "UserData.h"
 #include "Views.h"
 
 #define getChartClass() objc_getClass("Charts.LineChart")
@@ -145,8 +144,6 @@ void historyVC_viewDidLoad(id self, SEL _cmd) {
     HistoryVC *d = getIVVC(HistoryVC, self);
     d->rangeControl = createSegmentedControl(CFSTR("historySegment%d"), 0);
     addTarget(d->rangeControl, self, getTapSel(), ControlEventValueChanged);
-    uint8_t darkMode = getUserData()->darkMode;
-    if (isCharValid(darkMode)) updateSegmentedControlColors(d->rangeControl, darkMode);
     msgV(objSig(void, id), getNavItem(self), sel_getUid("setTitleView:"), d->rangeControl);
 
     Class Chart = getChartClass();
@@ -207,17 +204,5 @@ void historyVC_clearData(id self) {
     if (isViewLoaded(self)) {
         setSelectedSegmentIndex(d->rangeControl, 0);
         historyVC_changedSegment(self, nil, d->rangeControl);
-    }
-}
-
-void historyVC_updateColors(id self, bool darkMode) {
-    id view = getView(self);
-    setBackgroundColor(view, getColor(ColorPrimaryBG));
-    updateSegmentedControlColors(getIVVC(HistoryVC, self)->rangeControl, darkMode);
-    view = (id)CFArrayGetValueAtIndex(getSubviews(view), 0);
-    view = (id)CFArrayGetValueAtIndex(getSubviews(view), 0);
-    CFArrayRef views = getArrangedSubviews(view);
-    for (int i = 0; i < 3; ++i) {
-        containerView_updateColors(getIVV(ContainerView, CFArrayGetValueAtIndex(views, i)));
     }
 }

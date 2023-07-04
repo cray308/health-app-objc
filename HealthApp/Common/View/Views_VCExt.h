@@ -19,11 +19,8 @@ extern Class NavVC;
 #define createNavVC(r) VCTable.init(alloc(NavVC), VCTable.si, (r))
 #define getNavBar(c) VCTable.navBar((c), VCTable.nb)
 
-void initVCData(uint8_t darkMode);
+void initVCData(void);
 
 void setupBar(id bar, Class BarAppearance, id color);
-
-void setupTabVC(id vc, Class TabBarAppearance);
-void handleTintChange(id window, bool darkMode);
 
 #endif /* Views_VCExt_h */

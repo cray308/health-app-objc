@@ -1,6 +1,5 @@
 #include "InputVC.h"
 #include <unicode/uregex.h>
-#include "UserData.h"
 #include "Views.h"
 
 extern CFStringRef UIKeyboardDidShowNotification;
@@ -63,7 +62,6 @@ static void scrollToView(id scrollView, id child) {
 
 void inputView_deinit(id self, SEL _cmd) {
     InputView *v = getIVV(InputView, self);
-    releaseView(v->hintLabel);
     releaseView(v->field);
     releaseView(v->errorLabel);
     msgSupV(supSig(), self, View, _cmd);
@@ -96,12 +94,10 @@ void inputVC_addField(id self, CFStringRef hint, int keyboardType, int min, int 
 
     id hintLabel = createLabel(CFRetain(hint), UIFontTextStyleSubheadline, ColorLabel);
     setIsAccessibilityElement(hintLabel, false);
-    pair->data->hintLabel = hintLabel;
 
     pair->data->field = createTextField(self, d->toolbar, hint, index);
     setKeyboardType(pair->data->field, keyboardType);
     setAccessibilityHint(pair->data->field, errorText);
-    setKeyboardAppearance(pair->data->field, d->keyboardAppearance);
 
     pair->data->errorLabel = createLabel(errorText, UIFontTextStyleFootnote, ColorRed);
     setIsAccessibilityElement(pair->data->errorLabel, false);
@@ -114,6 +110,7 @@ void inputVC_addField(id self, CFStringRef hint, int keyboardType, int min, int 
     addSubview(pair->view, vStack);
     pin(vStack, pair->view);
     addArrangedSubview(d->vStack, pair->view);
+    releaseView(hintLabel);
     releaseView(vStack);
 }
 
@@ -176,11 +173,6 @@ void inputVC_viewDidLoad(id self, SEL _cmd) {
 
     d->toolbar = msgV(objSig(id, CGRect), alloc(objc_getClass("UIToolbar")),
                       sel_getUid("initWithFrame:"), (CGRect){{0}, {100, 100}});
-    uint8_t darkMode = getUserData()->darkMode;
-    if (isCharValid(darkMode)) {
-        setBarTintColor(d->toolbar, getBarColor(BarColorModal));
-        d->keyboardAppearance = darkMode;
-    }
     setTintColor(d->toolbar, getColor(ColorRed));
     msgV(objSig(void), d->toolbar, sel_getUid("sizeToFit"));
     CFArrayRef itemArr = CFArrayCreate(NULL, (const void **)items, 4, &kCFTypeArrayCallBacks);

@@ -1,7 +1,8 @@
 #include "Views.h"
 
 extern CFStringRef UIFontTextStyleHeadline;
-extern CGFloat UIFontWeightMedium;
+extern CGFloat UIFontWeightSemibold;
+extern CGFloat UIFontWeightRegular;
 
 struct VCache ViewTable;
 Class VC;
@@ -68,11 +69,6 @@ static struct PrivVData {
         id (*titleLabel)(id, SEL);
     } button;
     const struct {
-        SEL stta;
-        void (*setTint)(id, SEL, id);
-        void (*setTitleTextAttributes)(id, SEL, CFDictionaryRef, u_long);
-    } seg;
-    const struct {
         Class cls;
         SEL smfs, sbs, siav;
         void (*setFont)(id, SEL, id);
@@ -86,20 +82,6 @@ static struct PrivVData {
         void (*setInputAccessoryView)(id, SEL, id);
     } field;
 } pvc;
-
-id getPreferredFont(CFStringRef style) {
-    return pvc.font.preferred(pvc.font.cls, pvc.font.pf, style);
-}
-
-id getSystemFont(int size, CGFloat weight) {
-    return pvc.font.system(pvc.font.cls, pvc.font.sf, size, weight);
-}
-
-void setFieldBackgroundColor(id field, id color) { pvc.field.setBG(field, SetBackgroundSel, color); }
-
-void setFieldTextColor(id field, id color) {
-    pvc.field.sTextColor(field, ViewTable.common.stec, color);
-}
 
 void initViewData(void (*inits[])(void)) {
     Class Font = objc_getClass("UIFont");
@@ -123,10 +105,8 @@ void initViewData(void (*inits[])(void)) {
     SEL cmsafstfw = sel_getUid("setAdjustsFontSizeToFitWidth:");
     SEL cmsaffcsc = sel_getUid("setAdjustsFontForContentSizeCategory:");
 
-    SEL vcsv = sel_getUid("setValue:forKey:");
     SEL vcgv = sel_getUid("view"), vcnc = sel_getUid("navigationController");
 
-    SEL vgs = sel_getUid("subviews");
     SEL vas = sel_getUid("addSubview:"), vrfs = sel_getUid("removeFromSuperview");
     SEL vgl = sel_getUid("layer"), vscr = sel_getUid("setCornerRadius:"), vst = sel_getUid("setTag:");
     SEL vgt = sel_getUid("tag"), vsh = sel_getUid("setHidden:");
@@ -149,20 +129,15 @@ void initViewData(void (*inits[])(void)) {
 
     Class Button = objc_getClass("UIButton");
     SEL bbwt = sel_getUid("buttonWithType:");
-    SEL bge = sel_getUid("isEnabled");
     SEL bat = sel_getUid("addTarget:action:forControlEvents:"), bse = sel_getUid("setEnabled:");
     SEL bst = sel_getUid("setTitle:forState:"), bstc = sel_getUid("setTitleColor:forState:");
     SEL bct = sel_getUid("currentTitle"), btl = sel_getUid("titleLabel");
-
-    Class Seg = objc_getClass("UISegmentedControl");
-    SEL sgstta = sel_getUid("setTitleTextAttributes:forState:");
 
     BarButtonItem = objc_getClass("UIBarButtonItem");
     SEL iItemImg = sel_getUid("initWithImage:style:target:action:");
     SEL iItemCustom = sel_getUid("initWithCustomView:");
 
     Class Field = objc_getClass("UITextField");
-    SEL tfska = sel_getUid("setKeyboardAppearance:");
     SEL tfbfr = sel_getUid("becomeFirstResponder"), tfsmfs = sel_getUid("setMinimumFontSize:");
     SEL tfsbs = sel_getUid("setBorderStyle:"), tfsiav = sel_getUid("setInputAccessoryView:");
 
@@ -178,21 +153,15 @@ void initViewData(void (*inits[])(void)) {
             (void(*)(id, SEL, float))class_getMethodImplementation(Constraint, cnsp)
         },
         {
-            sel_getUid("setBarTintColor:"),
             cmstic,
             cmstamic, cmsbc, cmste, cmgt, cmstec, cmsd, sel_getUid("setTitle:")
         },
         {
-            .sv = vcsv,
-            .setVal = (void(*)(id, SEL, id, CFStringRef))class_getMethodImplementation(VC, vcsv),
-            .classSize =
             class_getInstanceSize(VC), vcgv, vcnc,
             (id(*)(id, SEL))class_getMethodImplementation(VC, vcgv),
             (id(*)(id, SEL))class_getMethodImplementation(VC, vcnc)
         },
         {
-            .gs = vgs, .subviews = (CFArrayRef(*)(id, SEL))class_getMethodImplementation(View, vgs),
-            .classSize =
             class_getInstanceSize(View),
             vas, vrfs, vgl, vscr, vst, vgt, vsh, vslm, vsuie,
             vsal, vsah, vsav, vsat, vsiae, vvwt, vgb, vcr,
@@ -231,8 +200,6 @@ void initViewData(void (*inits[])(void)) {
             (void(*)(id, SEL, id))class_getMethodImplementation(Label, cmstec)
         },
         {
-            .ge = bge, .getEnabled = (bool(*)(id, SEL))class_getMethodImplementation(Button, bge),
-            .at =
             bat, bse, bst, bstc, bct,
             (void(*)(id, SEL, id, SEL, u_long))class_getMethodImplementation(Button, bat),
             (void(*)(id, SEL, bool))class_getMethodImplementation(Button, bse),
@@ -246,9 +213,6 @@ void initViewData(void (*inits[])(void)) {
             (id(*)(id, SEL, id))class_getMethodImplementation(BarButtonItem, iItemCustom)
         },
         {
-            .ska = tfska,
-            .setAppearance = (void(*)(id, SEL, long))class_getMethodImplementation(Field, tfska),
-            .skt =
             sel_getUid("setKeyboardType:"), tfbfr,
             (void(*)(id, SEL, CFStringRef))class_getMethodImplementation(Field, cmste),
             (CFStringRef(*)(id, SEL))class_getMethodImplementation(Field, cmgt),
@@ -294,11 +258,6 @@ void initViewData(void (*inits[])(void)) {
             (id(*)(id, SEL))class_getMethodImplementation(Button, btl)
         },
         {
-            sgstta,
-            (void(*)(id, SEL, id))class_getMethodImplementation(Seg, cmstic),
-            (void(*)(id, SEL, CFDictionaryRef, u_long))class_getMethodImplementation(Seg, sgstta)
-        },
-        {
             Field, tfsmfs, tfsbs, tfsiav,
             (void(*)(id, SEL, id))class_getMethodImplementation(Field, cmsf),
             (void(*)(id, SEL, bool))class_getMethodImplementation(Field, cmsafstfw),
@@ -314,7 +273,6 @@ void initViewData(void (*inits[])(void)) {
     inits[0]();
     inits[1]();
     inits[2]();
-    inits[3]();
 }
 
 static void setupLabelFont(id label, id font) {
@@ -426,29 +384,4 @@ id createTextField(id delegate, id accessory, CFStringRef hint, int tag) {
     setAccessibilityLabel(field, hint);
     CFRelease(hint);
     return field;
-}
-
-#pragma mark - Color Updates
-
-void updateSegmentedControlColors(id control, bool darkMode) {
-    float redGreen = 0.78f, blue = 0.8f;
-    if (darkMode) {
-        redGreen = 0.28f;
-        blue = 0.29f;
-    }
-    id tint = createColor(redGreen, redGreen, blue, 1), foreground = getColor(ColorLabel);
-    pvc.seg.setTint(control, ViewTable.common.stic, tint);
-    releaseObject(tint);
-
-    const void *keys[] = {NSForegroundColorAttributeName, NSFontAttributeName};
-    CFDictionaryRef normalDict = CFDictionaryCreate(NULL, keys, (const void *[]){
-        foreground, pvc.font.system(pvc.font.cls, pvc.font.sf, FontSizeSmall, UIFontWeightRegular)
-    }, 2, &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-    CFDictionaryRef selectedDict = CFDictionaryCreate(NULL, keys, (const void *[]){
-        foreground, pvc.font.system(pvc.font.cls, pvc.font.sf, FontSizeSmall, UIFontWeightMedium)
-    }, 2, &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-    pvc.seg.setTitleTextAttributes(control, pvc.seg.stta, normalDict, ControlStateNormal);
-    pvc.seg.setTitleTextAttributes(control, pvc.seg.stta, selectedDict, ControlStateSelected);
-    CFRelease(normalDict);
-    CFRelease(selectedDict);
 }

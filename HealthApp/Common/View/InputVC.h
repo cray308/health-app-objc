@@ -15,7 +15,6 @@ extern Class InputViewClass;
 extern Class InputVCClass;
 
 typedef struct {
-    id hintLabel;
     id field;
     id errorLabel;
     CFCharacterSetRef chars;
@@ -38,7 +37,6 @@ typedef struct {
     id toolbar;
     int count;
     int activeTag;
-    bool keyboardAppearance;
 } InputVC;
 
 #define getKeyboardForLocale(l) (isMetric(l) ? KeyboardTypeDecimalPad : KeyboardTypeNumberPad)

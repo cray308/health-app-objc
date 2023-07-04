@@ -34,7 +34,7 @@ void homeVC_createWorkoutsList(id self, UserData const *data) {
 
     bool shouldHide = data->plan > MaxValidChar || data->planStart > time(NULL);
     setHidden(d->planContainer.view, shouldHide);
-    setHidden(d->customContainer.data->divider, shouldHide);
+    setHidden(d->divider, shouldHide);
     if (shouldHide) return;
 
     CFLocaleRef locale = copyLocale();
@@ -58,27 +58,6 @@ void homeVC_createWorkoutsList(id self, UserData const *data) {
     homeVC_updateWorkoutsList(d, data->completedWorkouts);
 }
 
-void homeVC_updateColors(id self) {
-    HomeVC *d = getIVVC(HomeVC, self);
-    id labelColor = getColor(ColorLabel), gray = getColor(ColorGray), green = getColor(ColorGreen);
-    setBackgroundColor(getView(self), getColor(ColorPrimaryBGGrouped));
-    containerView_updateColors(d->planContainer.data);
-    containerView_updateColors(d->customContainer.data);
-    CFArrayRef views = getArrangedSubviews(d->planContainer.data->stack);
-    int count = (int)CFArrayGetCount(views);
-    for (int i = 0; i < count; ++i) {
-        StatusView *v = getIVV(StatusView, CFArrayGetValueAtIndex(views, i));
-        setTextColor(v->header, labelColor);
-        updateButtonColors(v->button, ColorLabel);
-        setBackgroundColor(v->box, isEnabled(v->button) ? gray : green);
-    }
-    views = getArrangedSubviews(d->customContainer.data->stack);
-    for (int i = 0; i < 5; ++i) {
-        StatusView *v = getIVV(StatusView, CFArrayGetValueAtIndex(views, i));
-        updateButtonColors(v->button, ColorLabel);
-    }
-}
-
 #pragma mark - Selectors/Methods
 
 void homeVC_viewDidLoad(id self, SEL _cmd) {
@@ -98,7 +77,7 @@ void homeVC_viewDidLoad(id self, SEL _cmd) {
     customContainer.view = containerView_init(&customContainer.data, headers[1]);
     setSpacing(customContainer.data->stack, ViewSpacing);
     setID(customContainer.view, CFSTR("customContainer"))
-    memcpy(&d->customContainer, &customContainer, sizeof(CVPair));
+    d->divider = retainView(customContainer.data->divider);
 
     SEL tapSel = getCustomButtonSel();
     StatusView *sv;
@@ -112,6 +91,7 @@ void homeVC_viewDidLoad(id self, SEL _cmd) {
     id vStack = createVStack((id []){d->planContainer.view, customContainer.view}, 2);
     setSpacing(vStack, GroupSpacing);
     setupHierarchy(self, vStack, createScrollView(), ColorPrimaryBGGrouped);
+    releaseView(customContainer.view);
 
     homeVC_createWorkoutsList(self, getUserData());
 }

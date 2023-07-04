@@ -1,6 +1,7 @@
 #include "ContainerView.h"
 #include "Views.h"
 
+extern CFStringRef UIFontTextStyleTitle3;
 extern uint64_t UIAccessibilityTraitHeader;
 extern uint64_t UIAccessibilityTraitStaticText;
 
@@ -37,9 +38,4 @@ void containerView_deinit(id self, SEL _cmd) {
     releaseView(v->header);
     releaseView(v->stack);
     msgSupV(supSig(), self, View, _cmd);
-}
-
-void containerView_updateColors(ContainerView *v) {
-    setTextColor(v->header, getColor(ColorLabel));
-    setBackgroundColor(v->divider, getColor(ColorDiv));
 }

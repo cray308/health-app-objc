@@ -7,7 +7,6 @@
 #define ViewSpacing 4
 #define ViewHeightDefault 44
 #define LayoutPriorityRequired 999
-#define FontSizeSmall 13
 
 enum {
     LayoutAttributeTop = 3,
@@ -29,7 +28,6 @@ enum {
 
 enum {
     ControlStateNormal,
-    ControlStateSelected = 4,
     ControlStateDisabled = 2
 };
 
@@ -44,15 +42,8 @@ enum {
     ActionStyleDestructive
 };
 
-extern CFStringRef NSForegroundColorAttributeName;
-extern CFStringRef NSFontAttributeName;
-
-extern CFStringRef UIFontTextStyleTitle3;
 extern CFStringRef UIFontTextStyleSubheadline;
 extern CFStringRef UIFontTextStyleBody;
-
-extern CGFloat UIFontWeightSemibold;
-extern CGFloat UIFontWeightRegular;
 
 extern uint32_t UIAccessibilityAnnouncementNotification;
 extern void UIAccessibilityPostNotification(uint32_t, id);
@@ -73,7 +64,6 @@ struct VCache {
         void (*setPriority)(id, SEL, float);
     } con;
     const struct {
-        SEL sbtc;
         SEL stic;
         SEL stamic, sbc, ste, gt, stec, sd, sti;
     } common;
@@ -82,8 +72,6 @@ struct VCache {
         SEL gv, nc;
         id (*gView)(id, SEL);
         id (*navVC)(id, SEL);
-        SEL sv;
-        void (*setVal)(id, SEL, id, CFStringRef);
     } vc;
     const struct {
         size_t classSize;
@@ -107,8 +95,6 @@ struct VCache {
         id (*withTag)(id, SEL, long);
         generateRectFunctionSignature(gBounds);
         generateRectFunctionSignature(convert, CGRect, id);
-        SEL gs;
-        CFArrayRef (*subviews)(id, SEL);
     } view;
     const struct {
         SEL aas, as, ss, scs, slmra;
@@ -131,8 +117,6 @@ struct VCache {
         void (*sTitle)(id, SEL, CFStringRef, u_long);
         void (*setColor)(id, SEL, id, u_long);
         CFStringRef (*gTitle)(id, SEL);
-        SEL ge;
-        bool (*getEnabled)(id, SEL);
     } button;
     const struct {
         SEL sii, sic;
@@ -144,8 +128,6 @@ struct VCache {
         void (*sText)(id, SEL, CFStringRef);
         CFStringRef (*gText)(id, SEL);
         bool (*becomeFirst)(id, SEL);
-        SEL ska;
-        void (*setAppearance)(id, SEL, long);
     } field;
     const struct {
         Class cls;
@@ -168,22 +150,17 @@ extern Class BarButtonItem;
 #define SetBackgroundSel ViewTable.common.sbc
 #define SetTitleSel ViewTable.common.sti
 
-#define getTabBarAppearanceClass() objc_getClass("UITabBarAppearance")
 #define getTapSel() sel_getUid("buttonTapped:")
 #define getCustomButtonSel() sel_getUid("customButtonTapped:")
 #define getValueChangedSel() sel_getUid("valueDidChange")
 
 #define getView(c) ViewTable.vc.gView((c), ViewTable.vc.gv)
 #define getNavVC(c) ViewTable.vc.navVC((c), ViewTable.vc.nc)
-#define setValue(c, v, k) ViewTable.vc.setVal((c), ViewTable.vc.sv, v, k)
 #define getNavItem(c) msgV(objSig(id), (c), sel_getUid("navigationItem"))
 #define isViewLoaded(c) msgV(objSig(bool), (c), sel_getUid("isViewLoaded"))
 #define presentVC(p, c)                                                          \
  msgV(objSig(void, id, bool, Callback), (p),                                     \
       sel_getUid("presentViewController:animated:completion:"), (c), true, NULL)
-
-id getPreferredFont(CFStringRef style);
-id getSystemFont(int size, CGFloat weight);
 
 #define makeConstraint(v, d1, t, o, d2, c)\
  ViewTable.con.withItem(ViewTable.con.cls, ViewTable.con.cwi, (v), (d1), (t), (o), (d2), 1, (c))
@@ -193,14 +170,12 @@ id getSystemFont(int size, CGFloat weight);
 #define getBounds(r, v) callRectMethod(ViewTable.view.gBounds, r, v, ViewTable.view.gb)
 #define convertRect(r, d, b, s) callRectMethod(ViewTable.view.convert, r, d, ViewTable.view.cr, b, s)
 
-#define setBarTintColor(o, c) msgV(objSig(void, id), (o), ViewTable.common.sbtc, (c))
 #define setTintColor(o, c) msgV(objSig(void, id), (o), ViewTable.common.stic, (c))
 #define setDelegate(o, d) msgV(objSig(void, id), (o), ViewTable.common.sd, (d))
 #define useConstraints(v) ViewTable.view.setTranslates((v), ViewTable.common.stamic, false)
 #define setBackgroundColor(v, c) ViewTable.view.setBG((v), SetBackgroundSel, (c))
 #define addSubview(v, s) ViewTable.view.add((v), ViewTable.view.as, (s))
 #define removeFromSuperview(v) ViewTable.view.remove((v), ViewTable.view.rfs)
-#define getSubviews(v) ViewTable.view.subviews((v), ViewTable.view.gs)
 #define getLayer(v) ViewTable.view.layer((v), ViewTable.view.gl)
 #define addCornerRadius(v) ViewTable.view.setCorner(getLayer(v), ViewTable.view.scr, 5)
 #define setTag(v, t) ViewTable.view.sTag((v), ViewTable.view.st, (t))
@@ -226,7 +201,6 @@ id getSystemFont(int size, CGFloat weight);
 
 #define addTarget(v, t, a, e) ViewTable.button.add((v), ViewTable.button.at, (t), (a), (e))
 #define setEnabled(b, e) ViewTable.button.sEnabled((b), ViewTable.button.se, (e))
-#define isEnabled(b) ViewTable.button.getEnabled((b), ViewTable.button.ge)
 #define setTitle(b, t, s) ViewTable.button.sTitle((b), ViewTable.button.st, (t), (s))
 #define setTitleColor(b, c, s) ViewTable.button.setColor((b), ViewTable.button.stc, (c), (s))
 #define getCurrentTitle(b) ViewTable.button.gTitle((b), ViewTable.button.ct)
@@ -243,10 +217,6 @@ id getSystemFont(int size, CGFloat weight);
 #define getFieldText(f) ViewTable.field.gText((f), ViewTable.common.gt)
 #define becomeFirstResponder(f) ViewTable.field.becomeFirst((f), ViewTable.field.bfr)
 #define setKeyboardType(f, t) msgV(objSig(void, long), (f), ViewTable.field.skt, (t))
-#define setKeyboardAppearance(f, a) ViewTable.field.setAppearance((f), ViewTable.field.ska, (a))
-
-void setFieldBackgroundColor(id field, id color);
-void setFieldTextColor(id field, id color);
 
 #define setContentInset(s, i) ViewTable.scroll.setInset((s), ViewTable.scroll.sci, (i))
 #define scrollRectToVisible(s, r) ViewTable.scroll.scroll((s), ViewTable.scroll.sr, (r), true)
@@ -281,14 +251,6 @@ id createLabel(CFStringRef text CF_CONSUMED, CFStringRef style, int textColor);
 id createButton(CFStringRef title CF_CONSUMED, int titleColor, id target, SEL action);
 id createSegmentedControl(CFStringRef format, int startIndex);
 id createTextField(id delegate, id accessory, CFStringRef hint CF_CONSUMED, int tag);
-
-static inline void updateButtonColors(id button, int titleColor) {
-    setTitleColor(button, getColor(titleColor), ControlStateNormal);
-    setTitleColor(button, getColor(ColorDisabled), ControlStateDisabled);
-    setBackgroundColor(button, getColor(ColorSecondaryBGGrouped));
-}
-
-void updateSegmentedControlColors(id control, bool darkMode);
 
 extern void setupNavItem(id vc, CFStringRef titleKey, id const *buttons);
 extern void setupHierarchy(id vc, id vStack, id scrollView, int backgroundColor);

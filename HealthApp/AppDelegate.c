@@ -35,21 +35,19 @@ UserData const *getUserData(void) { return &getAppDelegate()->userData; }
 
 bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
                                     id app _U_, CFDictionaryRef options _U_) {
-    Class TabBarAppearance = getTabBarAppearanceClass();
     int tzDiff = 0, week = 0;
     id unCenter = getNotificationCenter();
     CFDictionaryRef prefs = CFPreferencesCopyAppValue(PrefsKey, kCFPreferencesCurrentApplication);
     if (prefs != NULL) {
-        tzDiff = userData_init(&self->userData, prefs, &week, TabBarAppearance);
+        tzDiff = userData_init(&self->userData, prefs, &week);
     } else {
-        userData_create(&self->userData, TabBarAppearance);
+        userData_create(&self->userData);
         msgV(objSig(void, u_long, void(^)(bool, id)), unCenter,
              sel_getUid("requestAuthorizationWithOptions:completionHandler:"),
              AuthorizationOptionSound | AuthorizationOptionAlert, ^(bool granted _U_, id err _U_){});
         createDB();
     }
 
-    initVCData(self->userData.darkMode);
     initWorkoutData(week);
 
     HistoryModel *historyModel;
@@ -81,8 +79,13 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
     msgV(objSig(void, id), self->window, sel_getUid("setRootViewController:"), tabVC);
     CFArrayRef vcArr = CFArrayCreate(NULL, (const void **)controllers, 3, NULL);
     msgV(objSig(void, CFArrayRef), tabVC, sel_getUid("setViewControllers:"), vcArr);
-    setupTabVC(tabVC, TabBarAppearance);
+
+    id barColor = getBarColor(CFSTR("navBarColor"));
+    id tabBar = msgV(objSig(id), tabVC, sel_getUid("tabBar"));
+    setupBar(tabBar, objc_getClass("UITabBarAppearance"), barColor);
+    Class NavBarAppearance = getNavBarAppearanceClass();
     for (int i = 0; i < 3; ++i) {
+        setupBar(getNavBar(controllers[i]), NavBarAppearance, barColor);
         releaseVC(controllers[i]);
     }
     CFRelease(vcArr);
@@ -111,19 +114,10 @@ void appDelegate_willPresentNotification(AppDelegate *self, SEL _cmd _U_,
 
 #pragma mark - Child VC Callbacks
 
-void updateUserInfo(uint8_t plan, uint8_t darkMode, int const *weights) {
+void updateUserInfo(uint8_t plan, int const *weights) {
     AppDelegate *self = getAppDelegate();
-    uint8_t updates = userData_update(&self->userData, plan, darkMode, weights);
-    if (updates & MaskCurrentPlan)
+    if (userData_update(&self->userData, plan, weights))
         homeVC_createWorkoutsList(self->tabs[TabHome], &self->userData);
-
-    if (updates & MaskDarkMode) {
-        handleTintChange(self->window, darkMode);
-        homeVC_updateColors(self->tabs[TabHome]);
-        if (isViewLoaded(self->tabs[TabHistory]))
-            historyVC_updateColors(self->tabs[TabHistory], darkMode);
-        settingsVC_updateColors(self->tabs[TabSettings], darkMode);
-    }
 }
 
 void deleteAppData(void) {

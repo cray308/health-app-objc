@@ -19,6 +19,5 @@ typedef struct {
 
 id containerView_init(ContainerView **ref, CFStringRef header CF_CONSUMED);
 void containerView_deinit(id self, SEL _cmd);
-void containerView_updateColors(ContainerView *v);
 
 #endif /* ContainerView_h */
