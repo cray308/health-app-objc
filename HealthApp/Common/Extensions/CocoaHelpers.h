@@ -46,8 +46,6 @@ typedef void (^ObjectBlock)(id);
 
 struct AppCache {
     const struct {
-        SEL rts;
-        bool (*responds)(id, SEL, SEL);
         SEL sa, sn, ret, rel;
         id (*objAlloc)(Class, SEL);
         id (*objNew)(Class, SEL);
@@ -78,7 +76,6 @@ extern Class Image;
 
 #define ReleaseSel AppTable.sels.rel
 
-#define respondsToSelector(o, s) AppTable.sels.responds((o), AppTable.sels.rts, s)
 #define alloc(C) AppTable.sels.objAlloc((C), AppTable.sels.sa)
 #define new(C) AppTable.sels.objNew((C), AppTable.sels.sn)
 #define retainView(v) AppTable.sels.viewRet((v), AppTable.sels.ret)

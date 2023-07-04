@@ -97,8 +97,7 @@ void setupBar(id bar, Class BarAppearance, id color) {
     msgV(objSig(void), appearance, pvcc.appear.configureWithOpaqueBackground);
     msgV(objSig(void, id), appearance, SetBackgroundSel, color);
     msgV(objSig(void, id), bar, pvcc.appear.setStandard, appearance);
-    if (respondsToSelector(bar, pvcc.appear.setScrollEdge))
-        msgV(objSig(void, id), bar, pvcc.appear.setScrollEdge, appearance);
+    msgV(objSig(void, id), bar, pvcc.appear.setScrollEdge, appearance);
     releaseObject(appearance);
 }
 

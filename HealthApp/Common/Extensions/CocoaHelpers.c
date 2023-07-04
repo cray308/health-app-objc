@@ -6,7 +6,6 @@ Class Image;
 void initAppData(Class **clsRefs) {
     SEL sa = sel_getUid("alloc"), sn = sel_getUid("new"), ret = sel_getUid("retain");
     SEL rel = sel_getUid("release");
-    SEL rts = sel_getUid("respondsToSelector:");
     Class Object = objc_getClass("NSObject"), View = objc_getClass("UIView");
     Class VC = objc_getClass("UIViewController");
 
@@ -43,7 +42,6 @@ void initAppData(Class **clsRefs) {
 
     memcpy(&AppTable, &(struct AppCache){
         {
-            rts, (bool(*)(id, SEL, SEL))class_getMethodImplementation(Object, rts),
             sa, sn, ret, rel,
             (id(*)(Class, SEL))getClassMethodImp(Object, sa),
             (id(*)(Class, SEL))getClassMethodImp(Object, sn),
