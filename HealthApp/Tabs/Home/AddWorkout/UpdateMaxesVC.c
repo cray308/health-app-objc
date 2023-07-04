@@ -148,9 +148,9 @@ void updateMaxesVC_tappedFinish(id self, SEL _cmd _U_, id button _U_) {
     UpdateMaxesVC *d = getIVVCS(UpdateMaxesVC, p);
     CFLocaleRef locale = copyLocale();
     int extra = d->index == LiftPullup ? Bodyweight : 0;
-    float initWeight = ((p->children[0].data->result * getSavedMassFactor(locale)) + extra) * 36;
+    float initialWeight = ((p->children[0].data->result * getSavedMassFactor(locale)) + extra) * 36;
     float reps = 37.f - (float)getValue(d->repsStepper, sgv);
-    int weight = (int)lrintf(initWeight / reps) - extra;
+    int weight = (int)lrintf(initialWeight / reps) - extra;
     CFRelease(locale);
     dismissPresentedVC(self, ^{ workoutVC_finishedBottomSheet(d->delegate, d->index, weight); });
 }

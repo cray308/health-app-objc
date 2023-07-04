@@ -12,9 +12,9 @@
 "workoutTypes3" = "تكييف";
 
 "workoutNotificationTitle" = "تحديث التمرين";
-"workoutCompleteMsg" = "اكتمل التمرين";
+"workoutComplete" = "اكتمل التمرين";
 "exerciseProgress" = "\U202Fالتمرين %1$d من %2$d\U202C";
-"exerciseDurationMessage" = "تم الوصول إلى الحد الأدنى من مدة التمرين";
+"exerciseDuration" = "تم الوصول إلى الحد الأدنى من مدة التمرين";
 
 "cancel" = "ألغى";
 "go" = "ذهب";

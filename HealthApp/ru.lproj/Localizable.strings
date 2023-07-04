@@ -12,9 +12,9 @@
 "workoutTypes3" = "Кондиционирование";
 
 "workoutNotificationTitle" = "Тренировка Завершена";
-"workoutCompleteMsg" = "Тренировка завершена";
+"workoutComplete" = "Тренировка завершена";
 "exerciseProgress" = "Упражнение %1$d из %2$d";
-"exerciseDurationMessage" = "Достигнута минимальная продолжительность упражнений";
+"exerciseDuration" = "Достигнута минимальная продолжительность упражнений";
 
 "cancel" = "Отмена";
 "go" = "Ближайший";

@@ -51,12 +51,12 @@ void initValidatorData(void) {
 }
 
 static void scrollToView(id scrollView, id child) {
-    CGRect fieldRect, fieldInView;
-    getBounds(fieldRect, child);
-    convertRect(fieldInView, scrollView, fieldRect, child);
-    fieldInView.size.height += 32;
-    fieldInView.origin.y -= 16;
-    scrollRectToVisible(scrollView, fieldInView);
+    CGRect bounds, converted;
+    getBounds(bounds, child);
+    convertRect(converted, scrollView, bounds, child);
+    converted.size.height += 32;
+    converted.origin.y -= 16;
+    scrollRectToVisible(scrollView, converted);
 }
 
 #pragma mark - Input View
@@ -118,27 +118,27 @@ void inputVC_addField(id self, CFStringRef hint, int keyboardType, int min, int 
 }
 
 void inputVC_updateFields(InputVC *d, int const *values) {
-    CFLocaleRef l = copyLocale();
-    if (isMetric(l)) {
+    CFLocaleRef locale = copyLocale();
+    if (isMetric(locale)) {
         for (int i = 0; i < 4; ++i) {
             InputView *v = d->children[i].data;
             float value = values[i] * ToKg;
-            CFStringRef str = formatStr(l, CFSTR("%.2f"), value);
-            setFieldText(v->field, str);
+            CFStringRef valStr = formatStr(locale, CFSTR("%.2f"), value);
+            setFieldText(v->field, valStr);
             resetInput(v, value);
-            CFRelease(str);
+            CFRelease(valStr);
         }
     } else {
         for (int i = 0; i < 4; ++i) {
             InputView *v = d->children[i].data;
-            CFStringRef str = formatStr(l, CFSTR("%d"), values[i]);
-            setFieldText(v->field, str);
+            CFStringRef valStr = formatStr(locale, CFSTR("%d"), values[i]);
+            setFieldText(v->field, valStr);
             resetInput(v, values[i]);
-            CFRelease(str);
+            CFRelease(valStr);
         }
     }
     setEnabled(d->button, true);
-    CFRelease(l);
+    CFRelease(locale);
 }
 
 #pragma mark - Lifecycle
@@ -279,26 +279,27 @@ static void showError(InputVC *d, IVPair *pair) {
 }
 
 bool inputVC_shouldChange(id self, SEL _cmd _U_, id field, CFRange range, CFStringRef replacement) {
+    static CFStringInlineBuffer inlineBuf;
     static UChar buffer[32];
     InputVC *d = getIVVC(InputVC, self);
 
     IVPair *pair = &d->children[d->activeTag];
     int len = (int)CFStringGetLength(replacement);
     if (len) {
-        CFStringInlineBuffer buf;
-        CFStringInitInlineBuffer(replacement, &buf, CFRangeMake(0, len));
-        for (int c = 0; c < len; ++c) {
-            if (!CFCharacterSetIsCharacterMember(
-                   pair->data->chars, CFStringGetCharacterFromInlineBuffer(&buf, c))) return false;
+        CFStringInitInlineBuffer(replacement, &inlineBuf, (CFRange){0, len});
+        for (int i = 0; i < len; ++i) {
+            UniChar c = CFStringGetCharacterFromInlineBuffer(&inlineBuf, i);
+            if (!CFCharacterSetIsCharacterMember(pair->data->chars, c)) return false;
         }
     }
 
     CFStringRef text = getFieldText(field);
     long oldLen = CFStringGetLength(text);
     if (range.location + range.length > oldLen) return false;
+
     int newLen = (int)(oldLen + len - range.length);
     if (newLen > 16) return false;
-    if (!newLen) {
+    else if (!newLen) {
         showError(d, pair);
         return true;
     }
@@ -319,20 +320,20 @@ bool inputVC_shouldChange(id self, SEL _cmd _U_, id field, CFRange range, CFStri
         }
     }
 
-    CFNumberRef num = CFNumberFormatterCreateNumberFromString(NULL, formatter, newText, NULL, 0);
-    float newVal = -1;
+    float newValue = -1;
+    CFNumberRef number = CFNumberFormatterCreateNumberFromString(NULL, formatter, newText, NULL, 0);
     CFRelease(newText);
-    if (num != NULL) {
-        CFNumberGetValue(num, kCFNumberFloatType, &newVal);
-        CFRelease(num);
+    if (number != NULL) {
+        CFNumberGetValue(number, kCFNumberFloatType, &newValue);
+        CFRelease(number);
     }
 
-    if (newVal < pair->data->min || newVal > pair->data->max) {
+    if (newValue < pair->data->min || newValue > pair->data->max) {
         showError(d, pair);
         return true;
     }
 
-    resetInput(pair->data, newVal);
+    resetInput(pair->data, newValue);
     for (int i = 0; i < d->count; ++i) {
         if (d->children[i].data->state != 1) return true;
     }

@@ -18,10 +18,8 @@ int main(int argc, char *argv[]) {
     initViewData((void(*[])(void)){
         initStatusViewData, initValidatorData, initUpdateMaxesData, initSetupWorkoutData
     });
-    char const *dataKey = "data";
-    char const *voidSig = "v@:", *tapSig = "v@:@";
-    SEL deinit = sel_getUid("dealloc");
-    SEL viewLoad = sel_getUid("viewDidLoad");
+    char *dataKey = "data", *voidSig = "v@:", *tapSig = "v@:@";
+    SEL deinit = sel_getUid("dealloc"), viewLoad = sel_getUid("viewDidLoad");
     SEL tap = getTapSel(), customTap = getCustomButtonSel();
 
     StatusViewClass = objc_allocateClassPair(View, "StatusView", 0);

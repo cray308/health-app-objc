@@ -101,39 +101,39 @@ void historyVC_changedSegment(id self, SEL _cmd _U_, id control) {
         return;
     }
 
-    CFLocaleRef l = copyLocale();
-    CFStringRef label = formatStr(l, totalWorkoutsFormat, d->model.totals.avgs[index]);
-    hc.view.setLegendLabel(d->charts[ChartTotals], hc.view.sllt, 0, (id)label);
-    CFRelease(label);
+    CFLocaleRef locale = copyLocale();
+    CFStringRef legendText = formatStr(locale, totalWorkoutsFormat, d->model.totals.avgs[index]);
+    hc.view.setLegendLabel(d->charts[ChartTotals], hc.view.sllt, 0, (id)legendText);
+    CFRelease(legendText);
 
     for (int i = 0; i < 4; ++i) {
-        int typeAverage = d->model.types.avgs[index][i];
         CFStringRef duration;
+        int typeAverage = d->model.types.avgs[index][i];
         if (typeAverage > 59) {
-            duration = formatStr(l, hourMinsFormat, typeAverage / 60, typeAverage % 60);
+            duration = formatStr(locale, hourMinsFormat, typeAverage / 60, typeAverage % 60);
         } else {
-            duration = formatStr(l, minsFormat, typeAverage);
+            duration = formatStr(locale, minsFormat, typeAverage);
         }
-        label = formatStr(l, workoutTypeFormat, workoutTypeNames[i], duration);
+        legendText = formatStr(locale, workoutTypeFormat, workoutTypeNames[i], duration);
+        hc.view.setLegendLabel(d->charts[ChartTypes], hc.view.sllt, i, (id)legendText);
         CFRelease(duration);
-        hc.view.setLegendLabel(d->charts[ChartTypes], hc.view.sllt, i, (id)label);
-        CFRelease(label);
+        CFRelease(legendText);
 
-        label = formatStr(l, liftFormat, liftNames[i], d->model.lifts.avgs[index][i]);
-        hc.view.setLegendLabel(d->charts[ChartLifts], hc.view.sllt, i, (id)label);
-        CFRelease(label);
+        legendText = formatStr(locale, liftFormat, liftNames[i], d->model.lifts.avgs[index][i]);
+        hc.view.setLegendLabel(d->charts[ChartLifts], hc.view.sllt, i, (id)legendText);
+        CFRelease(legendText);
     }
-    CFRelease(l);
+    CFRelease(locale);
 
-    int ref = d->model.refIndices[index];
+    int refIdx = d->model.refIndices[index];
     msgV(objSig(void, CGFloat), d->charts[ChartTotals],
          sel_getUid("setLineLimit:"), d->model.totals.avgs[index]);
-    hc.set.replace(d->model.totals.set, hc.set.re, &d->model.totals.entries[ref], count);
+    hc.set.replace(d->model.totals.set, hc.set.re, &d->model.totals.entries[refIdx], count);
     for (int i = 0; i < 4; ++i) {
-        hc.set.replace(d->model.types.sets[i], hc.set.re, &d->model.types.entries[i][ref], count);
-        hc.set.replace(d->model.lifts.sets[i], hc.set.re, &d->model.lifts.entries[i][ref], count);
+        hc.set.replace(d->model.types.sets[i], hc.set.re, &d->model.types.entries[i][refIdx], count);
+        hc.set.replace(d->model.lifts.sets[i], hc.set.re, &d->model.lifts.entries[i][refIdx], count);
     }
-    hc.set.replace(d->model.types.sets[4], hc.set.re, &d->model.types.entries[4][ref], count);
+    hc.set.replace(d->model.types.sets[4], hc.set.re, &d->model.types.entries[4][refIdx], count);
     for (int i = 0; i < 3; ++i) {
         hc.view.setData(d->charts[i], hc.view.sd, d->model.data[i], d->model.maxes[i][index]);
     }

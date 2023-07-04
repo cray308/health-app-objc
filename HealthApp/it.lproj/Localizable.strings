@@ -12,9 +12,9 @@
 "workoutTypes3" = "Condizionamento";
 
 "workoutNotificationTitle" = "Aggiornamento Allenamento";
-"workoutCompleteMsg" = "Allenamento completato";
+"workoutComplete" = "Allenamento completato";
 "exerciseProgress" = "Esercizio %1$d di %2$d";
-"exerciseDurationMessage" = "È stata raggiunta la durata minima dell'esercizio";
+"exerciseDuration" = "È stata raggiunta la durata minima dell'esercizio";
 
 "cancel" = "Annulla";
 "go" = "Andare";

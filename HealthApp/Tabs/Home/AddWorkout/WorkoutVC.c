@@ -130,9 +130,9 @@ void workoutVC_viewDidLoad(id self, SEL _cmd) {
 void workoutVC_startEndWorkout(id self, SEL _cmd _U_, id button) {
     WorkoutVC *d = getIVVC(WorkoutVC, self);
     if (!getTag(button)) {
-        CFStringRef str = localize(CFSTR("end"));
-        setTitle(button, str, ControlStateNormal);
-        CFRelease(str);
+        CFStringRef newTitle = localize(CFSTR("end"));
+        setTitle(button, newTitle, ControlStateNormal);
+        CFRelease(newTitle);
         setTitleColor(button, getColor(ColorRed), ControlStateNormal);
         setTag(button, 1);
         d->workout->startTime = time(NULL);
@@ -195,9 +195,9 @@ void handleEvent(id self, WorkoutVC *d, int section, int row, int event) {
             setUserInteractionEnabled(v->button, true);
             if (d->workout->type == WorkoutEndurance) {
                 setTextColor(v->header, getColor(ColorGreen));
-                CFStringRef msg = localize(CFSTR("exerciseDurationMessage"));
-                setText(v->header, msg);
-                CFRelease(msg);
+                CFStringRef durationMsg = localize(CFSTR("exerciseDuration"));
+                setText(v->header, durationMsg);
+                CFRelease(durationMsg);
                 statusView_updateAccessibility(v);
                 nextView = v->button;
                 break;
@@ -216,7 +216,7 @@ void handleEvent(id self, WorkoutVC *d, int section, int row, int event) {
         cleanupNotifications(self, d);
         workout_setDuration(d->workout);
         if (UIAccessibilityIsVoiceOverRunning()) {
-            CFStringRef msg = localize(CFSTR("workoutCompleteMsg"));
+            CFStringRef msg = localize(CFSTR("workoutComplete"));
             dispatch_after(dispatch_time(0, 4000000000), dispatch_get_main_queue(), ^{
                 UIAccessibilityPostNotification(UIAccessibilityAnnouncementNotification, (id)msg);
                 CFRelease(msg);
@@ -235,8 +235,8 @@ void handleEvent(id self, WorkoutVC *d, int section, int row, int event) {
     } else if (transition == TransitionFinishedCircuit) {
         if (circuit->reps > 1 && circuit->type == CircuitRounds) {
             CFLocaleRef locale = copyLocale();
-            CFStringRef newNumber = formatStr(locale, CFSTR("%d"), circuit->completedReps + 1);
-            updateRange(circuit->header, &circuit->range, newNumber, locale);
+            CFStringRef reps = formatStr(locale, CFSTR("%d"), circuit->completedReps + 1);
+            updateRange(circuit->header, &circuit->range, reps, locale);
             setText(pair->data->header, circuit->header);
             nextView = pair->data->header;
         }

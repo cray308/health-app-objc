@@ -162,30 +162,48 @@ static void showConfetti(id self) {
         getCGImage(imageNamed(Image, iimn, CFSTR("cv3")), icgi)
     };
 
-    Class cellClass = objc_getClass("CAEmitterCell");
-    SEL cellSels[10] = {
-        sel_getUid("setBirthRate:"), sel_getUid("setLifetime:"), sel_getUid("setVelocity:"),
-        sel_getUid("setEmissionLongitude:"), sel_getUid("setEmissionRange:"), sel_getUid("setSpin:"),
-        sel_getUid("setColor:"), sel_getUid("setContents:"),
-        sel_getUid("setScaleRange:"), sel_getUid("setScale:")
-    };
+    Class Cell = objc_getClass("CAEmitterCell");
+    SEL esbr = sel_getUid("setBirthRate:"), esl = sel_getUid("setLifetime:");
+    SEL esv = sel_getUid("setVelocity:"), esel = sel_getUid("setEmissionLongitude:");
+    SEL eser = sel_getUid("setEmissionRange:"), ess = sel_getUid("setSpin:");
+    SEL escl = sel_getUid("setColor:"), escn = sel_getUid("setContents:");
+    SEL esscr = sel_getUid("setScaleRange:"), essc = sel_getUid("setScale:");
+    void (*setBirthRate)(id, SEL, float) =
+      (void(*)(id, SEL, float))class_getMethodImplementation(Cell, esbr);
+    void (*setLifetime)(id, SEL, float) =
+      (void(*)(id, SEL, float))class_getMethodImplementation(Cell, esl);
+    void (*setVelocity)(id, SEL, CGFloat) =
+      (void(*)(id, SEL, CGFloat))class_getMethodImplementation(Cell, esv);
+    void (*setEmissionLongitude)(id, SEL, CGFloat) =
+      (void(*)(id, SEL, CGFloat))class_getMethodImplementation(Cell, esel);
+    void (*setEmissionRange)(id, SEL, CGFloat) =
+      (void(*)(id, SEL, CGFloat))class_getMethodImplementation(Cell, eser);
+    void (*setSpin)(id, SEL, CGFloat) =
+      (void(*)(id, SEL, CGFloat))class_getMethodImplementation(Cell, ess);
+    void (*setColor)(id, SEL, CGColorRef) =
+      (void(*)(id, SEL, CGColorRef))class_getMethodImplementation(Cell, escl);
+    void (*setContents)(id, SEL, id) =
+      (void(*)(id, SEL, id))class_getMethodImplementation(Cell, escn);
+    void (*setScaleRange)(id, SEL, CGFloat) =
+      (void(*)(id, SEL, CGFloat))class_getMethodImplementation(Cell, esscr);
+    void (*setScale)(id, SEL, CGFloat) =
+      (void(*)(id, SEL, CGFloat))class_getMethodImplementation(Cell, essc);
 
-    int const velocities[] = {100, 90, 150, 200};
+    int velocities[] = {100, 90, 150, 200};
     CFMutableArrayRef cells = CFArrayCreateMutable(NULL, 16, &kCFTypeArrayCallBacks);
 
     for (int i = 0; i < 16; ++i) {
-        id cell = new(cellClass);
-        msgV(objSig(void, float), cell, cellSels[0], 4);
-        msgV(objSig(void, float), cell, cellSels[1], 14);
-        int velocity = velocities[arc4random_uniform(4)];
-        msgV(objSig(void, CGFloat), cell, cellSels[2], velocity);
-        msgV(objSig(void, CGFloat), cell, cellSels[3], M_PI);
-        msgV(objSig(void, CGFloat), cell, cellSels[4], 0.5);
-        msgV(objSig(void, CGFloat), cell, cellSels[5], 3.5);
-        msgV(objSig(void, CGColorRef), cell, cellSels[6], colors[i >> 2]);
-        msgV(objSig(void, id), cell, cellSels[7], (id)images[i % 4]);
-        msgV(objSig(void, CGFloat), cell, cellSels[8], 0.25);
-        msgV(objSig(void, CGFloat), cell, cellSels[9], 0.1);
+        id cell = new(Cell);
+        setBirthRate(cell, esbr, 4);
+        setLifetime(cell, esl, 14);
+        setVelocity(cell, esv, velocities[arc4random_uniform(4)]);
+        setEmissionLongitude(cell, esel, M_PI);
+        setEmissionRange(cell, eser, 0.5);
+        setSpin(cell, ess, 3.5);
+        setColor(cell, escl, colors[i >> 2]);
+        setContents(cell, escn, (id)images[i % 4]);
+        setScaleRange(cell, esscr, 0.25);
+        setScale(cell, essc, 0.1);
         CFArrayAppendValue(cells, cell);
         releaseObject(cell);
     }
