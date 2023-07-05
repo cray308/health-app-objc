@@ -39,6 +39,10 @@ enum {
 };
 
 enum {
+    TextAlignmentCenter = 1
+};
+
+enum {
     ActionStyleDefault,
     ActionStyleCancel,
     ActionStyleDestructive
@@ -48,11 +52,16 @@ extern CFStringRef NSForegroundColorAttributeName;
 extern CFStringRef NSFontAttributeName;
 
 extern CFStringRef UIFontTextStyleTitle3;
+extern CFStringRef UIFontTextStyleHeadline;
 extern CFStringRef UIFontTextStyleSubheadline;
 extern CFStringRef UIFontTextStyleBody;
 
 extern CGFloat UIFontWeightSemibold;
 extern CGFloat UIFontWeightRegular;
+
+extern uint64_t UIAccessibilityTraitButton;
+extern uint64_t UIAccessibilityTraitHeader;
+extern uint64_t UIAccessibilityTraitStaticText;
 
 extern uint32_t UIAccessibilityAnnouncementNotification;
 extern void UIAccessibilityPostNotification(uint32_t, id);
@@ -67,15 +76,21 @@ typedef struct {
 struct VCache {
     const struct {
         Class cls;
-        SEL cwi, sa, sp;
+        SEL pf;
+        id (*preferred)(Class, SEL, CFStringRef);
+    } font;
+    const struct {
+        Class cls;
+        SEL cwi, ac, sa, sp;
         id (*withItem)(Class, SEL, id, long, long, id, long, CGFloat, CGFloat);
+        void (*activate)(Class, SEL, CFArrayRef);
         void (*sActive)(id, SEL, bool);
         void (*setPriority)(id, SEL, float);
     } con;
     const struct {
         SEL sbtc;
         SEL stic;
-        SEL stamic, sbc, ste, gt, stec, sd, sti;
+        SEL stamic, sbc, ste, gt, stec, sta, sd, sti;
     } common;
     const struct {
         size_t classSize;
@@ -87,16 +102,19 @@ struct VCache {
     } vc;
     const struct {
         size_t classSize;
-        SEL as, rfs, gl, scr, st, gt, sh, slm, suie, sal, sah, sav, sat, siae, vwt, gb, cr;
+        SEL as, gl, scr, st, gt, sh, sa, schp, sccrp, slm, suie;
+        SEL sal, sah, sav, sat, siae, vwt, gb, cr;
         void (*setTranslates)(id, SEL, bool);
         void (*setBG)(id, SEL, id);
         void (*add)(id, SEL, id);
-        void (*remove)(id, SEL);
         id (*layer)(id, SEL);
         void (*setCorner)(id, SEL, CGFloat);
         void (*sTag)(id, SEL, long);
         long (*gTag)(id, SEL);
         void (*sHidden)(id, SEL, bool);
+        void (*sAlpha)(id, SEL, CGFloat);
+        void (*setHugging)(id, SEL, float, long);
+        void (*setResistance)(id, SEL, float, long);
         void (*setLayoutMargins)(id, SEL, HAInsets);
         void (*setInteract)(id, SEL, bool);
         void (*setLabel)(id, SEL, CFStringRef);
@@ -111,10 +129,9 @@ struct VCache {
         CFArrayRef (*subviews)(id, SEL);
     } view;
     const struct {
-        SEL aas, as, ss, scs, slmra;
+        SEL aas, ss, scs, slmra;
         void (*setTranslates)(id, SEL, bool);
         void (*add)(id, SEL, id);
-        CFArrayRef (*arranged)(id, SEL);
         void (*sSpacing)(id, SEL, CGFloat);
         void (*setCustom)(id, SEL, CGFloat, id);
         void (*setLayoutMarginsRelativeArrangement)(id, SEL, bool);
@@ -125,14 +142,14 @@ struct VCache {
         void (*setColor)(id, SEL, id);
     } label;
     const struct {
-        SEL at, se, st, stc, ct;
+        SEL at, se, ge, st, stc, snl, ct;
         void (*add)(id, SEL, id, SEL, u_long);
         void (*sEnabled)(id, SEL, bool);
+        bool (*getEnabled)(id, SEL);
         void (*sTitle)(id, SEL, CFStringRef, u_long);
         void (*setColor)(id, SEL, id, u_long);
+        void (*needsLayout)(id, SEL);
         CFStringRef (*gTitle)(id, SEL);
-        SEL ge;
-        bool (*getEnabled)(id, SEL);
     } button;
     const struct {
         SEL sii, sic;
@@ -158,6 +175,7 @@ struct VCache {
 extern struct VCache ViewTable;
 extern Class VC;
 extern Class View;
+extern Class Button;
 extern Class BarButtonItem;
 
 #define getIVV(t, x) ((t *)((char *)(x) + ViewTable.view.classSize))
@@ -169,8 +187,8 @@ extern Class BarButtonItem;
 #define SetTitleSel ViewTable.common.sti
 
 #define getTabBarAppearanceClass() objc_getClass("UITabBarAppearance")
+#define getViewInitSel() sel_getUid("initWithFrame:")
 #define getTapSel() sel_getUid("buttonTapped:")
-#define getCustomButtonSel() sel_getUid("customButtonTapped:")
 #define getValueChangedSel() sel_getUid("valueDidChange")
 
 #define getView(c) ViewTable.vc.gView((c), ViewTable.vc.gv)
@@ -182,11 +200,13 @@ extern Class BarButtonItem;
  msgV(objSig(void, id, bool, Callback), (p),                                     \
       sel_getUid("presentViewController:animated:completion:"), (c), true, NULL)
 
-id getPreferredFont(CFStringRef style);
+#define getPreferredFont(s) ViewTable.font.preferred(ViewTable.font.cls, ViewTable.font.pf, s)
+
 id getSystemFont(int size, CGFloat weight);
 
 #define makeConstraint(v, d1, t, o, d2, c)\
  ViewTable.con.withItem(ViewTable.con.cls, ViewTable.con.cwi, (v), (d1), (t), (o), (d2), 1, (c))
+#define activateConstraints(a) ViewTable.con.activate(ViewTable.con.cls, ViewTable.con.ac, (a))
 #define lowerPriority(c) ViewTable.con.setPriority((c), ViewTable.con.sp, LayoutPriorityRequired)
 #define setActive(c) ViewTable.con.sActive((c), ViewTable.con.sa, true)
 
@@ -195,17 +215,22 @@ id getSystemFont(int size, CGFloat weight);
 
 #define setBarTintColor(o, c) msgV(objSig(void, id), (o), ViewTable.common.sbtc, (c))
 #define setTintColor(o, c) msgV(objSig(void, id), (o), ViewTable.common.stic, (c))
+#define setTextAlignment(o, a) msgV(objSig(void, long), (o), ViewTable.common.sta, (a))
 #define setDelegate(o, d) msgV(objSig(void, id), (o), ViewTable.common.sd, (d))
+#define setDataSource(o, d) msgV(objSig(void, id), (o), sel_getUid("setDataSource:"), (d))
 #define useConstraints(v) ViewTable.view.setTranslates((v), ViewTable.common.stamic, false)
 #define setBackgroundColor(v, c) ViewTable.view.setBG((v), SetBackgroundSel, (c))
 #define addSubview(v, s) ViewTable.view.add((v), ViewTable.view.as, (s))
-#define removeFromSuperview(v) ViewTable.view.remove((v), ViewTable.view.rfs)
 #define getSubviews(v) ViewTable.view.subviews((v), ViewTable.view.gs)
 #define getLayer(v) ViewTable.view.layer((v), ViewTable.view.gl)
 #define addCornerRadius(v) ViewTable.view.setCorner(getLayer(v), ViewTable.view.scr, 5)
 #define setTag(v, t) ViewTable.view.sTag((v), ViewTable.view.st, (t))
 #define getTag(v) ViewTable.view.gTag((v), ViewTable.view.gt)
 #define setHidden(v, h) ViewTable.view.sHidden((v), ViewTable.view.sh, (h))
+#define setAlpha(v, a) ViewTable.view.sAlpha((v), ViewTable.view.sa, a)
+#define setContentHuggingPriority(v, p, a) ViewTable.view.setHugging((v), ViewTable.view.schp, p, a)
+#define setContentCompressionResistancePriority(v, p, a)\
+ ViewTable.view.setResistance((v), ViewTable.view.sccrp, p, a)
 #define setUserInteractionEnabled(v, e) ViewTable.view.setInteract((v), ViewTable.view.suie, (e))
 #define setAccessibilityLabel(v, l) ViewTable.view.setLabel((v), ViewTable.view.sal, (l))
 #define setAccessibilityHint(v, h) ViewTable.view.setHint((v), ViewTable.view.sah, (h))
@@ -216,7 +241,6 @@ id getSystemFont(int size, CGFloat weight);
 
 #define useStackConstraints(s) ViewTable.stack.setTranslates((s), ViewTable.common.stamic, false)
 #define addArrangedSubview(s, o) ViewTable.stack.add((s), ViewTable.stack.aas, (o))
-#define getArrangedSubviews(s) ViewTable.stack.arranged((s), ViewTable.stack.as)
 #define setSpacing(s, n) ViewTable.stack.sSpacing((s), ViewTable.stack.ss, (n))
 #define setCustomSpacing(s, n, v) ViewTable.stack.setCustom((s), ViewTable.stack.scs, (n), (v))
 
@@ -229,6 +253,7 @@ id getSystemFont(int size, CGFloat weight);
 #define isEnabled(b) ViewTable.button.getEnabled((b), ViewTable.button.ge)
 #define setTitle(b, t, s) ViewTable.button.sTitle((b), ViewTable.button.st, (t), (s))
 #define setTitleColor(b, c, s) ViewTable.button.setColor((b), ViewTable.button.stc, (c), (s))
+#define setNeedsLayout(b) ViewTable.button.needsLayout((b), ViewTable.button.snl)
 #define getCurrentTitle(b) ViewTable.button.gTitle((b), ViewTable.button.ct)
 
 #define getSelectedSegmentIndex(s) msgV(objSig(long), (s), sel_getUid("selectedSegmentIndex"))
@@ -251,7 +276,7 @@ void setFieldTextColor(id field, id color);
 #define setContentInset(s, i) ViewTable.scroll.setInset((s), ViewTable.scroll.sci, (i))
 #define scrollRectToVisible(s, r) ViewTable.scroll.scroll((s), ViewTable.scroll.sr, (r), true)
 
-void initViewData(void (*inits[])(void));
+void initViewData(void (*inits[])(void), int count);
 
 void pin(id view, id container);
 
@@ -278,7 +303,8 @@ static inline void setLayoutMargins(id stack, HAInsets insets) {
 }
 
 id createLabel(CFStringRef text CF_CONSUMED, CFStringRef style, int textColor);
-id createButton(CFStringRef title CF_CONSUMED, int titleColor, id target, SEL action);
+id createButton(CFStringRef title CF_CONSUMED, int titleColor,
+                bool singleLine, id target, SEL action);
 id createSegmentedControl(CFStringRef format, int startIndex);
 id createTextField(id delegate, id accessory, CFStringRef hint CF_CONSUMED, int tag);
 

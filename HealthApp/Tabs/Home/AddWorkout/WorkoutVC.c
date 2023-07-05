@@ -1,7 +1,8 @@
 #include "WorkoutVC.h"
 #include "AppDelegate.h"
+#include "CollectionVC.h"
+#include "HeaderView.h"
 #include "UpdateMaxesVC.h"
-#include "Views.h"
 #include "WorkoutVC_Ext.h"
 
 extern CFStringRef UIApplicationDidBecomeActiveNotification;
@@ -14,7 +15,7 @@ enum {
     EventFinishExercise
 };
 
-static void handleEvent(id, WorkoutVC *, int, int, int);
+static void handleEvent(id, CollectionVC *, WorkoutVC *, int, id);
 static void restartTimers(CFNotificationCenterRef, void *,
                           CFStringRef, const void *, CFDictionaryRef);
 
@@ -25,35 +26,36 @@ void initWorkoutData(int week) {
 
 #pragma mark - VC init/free
 
-id workoutVC_init(Workout *workout) {
-    id self = new(WorkoutVCClass);
-    WorkoutVC *d = getIVVC(WorkoutVC, self);
+id workoutVC_init(Workout *workout, CFMutableStringRef *headers) {
+    int *itemCounts = malloc((unsigned)workout->size * sizeof(int));
+    for (int i = 0; i < workout->size; ++i) {
+        itemCounts[i] = workout->circuits[i].size;
+    }
+    id self = collectionVC_init(WorkoutVCClass, headers, workout->size, itemCounts);
+    WorkoutVC *d = getIVVCC(WorkoutVC, CollectionVC, self);
     d->workout = workout;
-    d->containers = malloc((unsigned)workout->size * sizeof(CVPair));
     d->timers[0].type = 0;
     d->timers[1].type = 1;
     return self;
 }
 
 void workoutVC_deinit(id self, SEL _cmd) {
-    WorkoutVC *d = getIVVC(WorkoutVC, self);
+    WorkoutVC *d = getIVVCC(WorkoutVC, CollectionVC, self);
 
     for (int i = 0; i < d->workout->size; ++i) {
         Circuit *c = &d->workout->circuits[i];
-        if (c->header) CFRelease(c->header);
         Exercise *eEnd = &c->exercises[c->size];
         for (Exercise *e = c->exercises; e < eEnd; ++e) {
             CFRelease(e->title);
             if (e->rest) CFRelease(e->rest);
             if (e->header) CFRelease(e->header);
+            if (e->hint) CFRelease(e->hint);
         }
         free(c->exercises);
-        if (d->containers[i].view) releaseView(d->containers[i].view);
     }
     free(d->workout->circuits);
     free(d->workout);
-    free(d->containers);
-    msgSupV(supSig(), self, VC, _cmd);
+    collectionVC_deinit(self, _cmd);
 }
 
 static void handleFinishedWorkout(WorkoutVC *d, bool pop) {
@@ -78,57 +80,35 @@ static void cleanupNotifications(id self, WorkoutVC *d) {
 #pragma mark - Lifecycle
 
 void workoutVC_viewDidLoad(id self, SEL _cmd) {
-    msgSupV(supSig(), self, VC, _cmd);
+    collectionVC_viewDidLoad(self, _cmd);
 
-    WorkoutVC *d = getIVVC(WorkoutVC, self);
+    CollectionVC *p = getIVVC(CollectionVC, self);
+    WorkoutVC *d = getIVVCS(WorkoutVC, p);
     CFStringRef titleKey = createWorkoutTitleKey(d->workout->type, d->workout->nameIdx);
-    id startButton = createButton(localize(CFSTR("start")), ColorGreen, self, getCustomButtonSel());
+    id startButton = createButton(localize(CFSTR("start")), ColorGreen, true, self, getTapSel());
     setupNavItem(self, titleKey, (id []){nil, startButton});
     CFRelease(titleKey);
 
-    id stack = createVStack(NULL, 0);
-    setSpacing(stack, GroupSpacing);
-
-    CFLocaleRef locale = copyLocale();
-    CFStringRef exerciseProgressFormat = localize(CFSTR("exerciseProgress"));
-    SEL tapSel = getTapSel();
-    StatusView *sv;
-    for (int i = 0; i < d->workout->size; ++i) {
+    for (int i = 0; i < p->totalSections; ++i) {
         Circuit *c = &d->workout->circuits[i];
-        CVPair *cv = &d->containers[i];
-        cv->view = containerView_init(&cv->data, c->header);
-        addArrangedSubview(stack, cv->view);
-        setIDFormatted(cv->view, CFSTR("container_%d"), i)
-
-        bool addHint = c->size > 1;
         for (int j = 0; j < c->size; ++j) {
             Exercise *e = &c->exercises[j];
-            id btn = statusView_init(&sv, e->header, e->title, (int)((i << 8) | j), self, tapSel);
-            sv->exercise = e;
-            setTitle(sv->button, e->title, ControlStateDisabled);
-            setEnabled(sv->button, false);
-            if (addHint) {
-                CFStringRef exerciseHint = formatStr(locale, exerciseProgressFormat, j + 1, c->size);
-                setAccessibilityHint(sv->button, exerciseHint);
-                CFRelease(exerciseHint);
-            }
-            exerciseView_configure(sv);
-            addArrangedSubview(cv->data->stack, btn);
-            releaseView(btn);
+            p->titles[i][j] = CFStringCreateCopy(NULL, e->title);
+            if (e->header) p->labels[i][j] = CFStringCreateCopy(NULL, e->header);
         }
     }
-    CFRelease(locale);
-    CFRelease(exerciseProgressFormat);
-    setHidden(d->containers[0].data->divider, true);
 
-    setupHierarchy(self, stack, createScrollView(), ColorPrimaryBGGrouped);
+    collectionVC_calculateHeights(p, -1);
+    setDataSource(p->collectionView, self);
+    setDelegate(p->collectionView, self);
     CFNotificationCenterAddObserver(CFNotificationCenterGetLocalCenter(), self, restartTimers,
                                     UIApplicationDidBecomeActiveNotification, NULL,
                                     CFNotificationSuspensionBehaviorDrop);
 }
 
 void workoutVC_startEndWorkout(id self, SEL _cmd _U_, id button) {
-    WorkoutVC *d = getIVVC(WorkoutVC, self);
+    CollectionVC *p = getIVVC(CollectionVC, self);
+    WorkoutVC *d = getIVVCS(WorkoutVC, p);
     if (!getTag(button)) {
         CFStringRef newTitle = localize(CFSTR("end"));
         setTitle(button, newTitle, ControlStateNormal);
@@ -137,11 +117,22 @@ void workoutVC_startEndWorkout(id self, SEL _cmd _U_, id button) {
         setTag(button, 1);
         d->workout->startTime = time(NULL);
         circuit_start(d->workout->circuits, d->timers, true);
-        CFArrayRef views = getArrangedSubviews(d->containers[0].data->stack);
-        StatusView *sv = getIVV(StatusView, CFArrayGetValueAtIndex(views, 0));
-        exerciseView_configure(sv);
-        id nextView = d->workout->circuits[0].header ? d->containers[0].data->header : sv->button;
-        UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, nextView);
+        id nextView = nil;
+        id indexPath = makeIndexPath(0, 0);
+        id cell = cellForItem(p->collectionView, indexPath);
+        if (cell) {
+            StatusCell *v = getIVC(cell);
+            statusCell_configure(v, d->workout->circuits->exercises);
+            nextView = v->button;
+        }
+
+        if (p->headers[0]) {
+            id header = supplementaryView(p->collectionView, indexPath);
+            if (header) nextView = getIVR(header)->label;
+        }
+
+        if (nextView)
+            UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, nextView);
     } else {
         cleanupNotifications(self, d);
         if (workout_isCompleted(d->workout)) {
@@ -153,10 +144,10 @@ void workoutVC_startEndWorkout(id self, SEL _cmd _U_, id button) {
 }
 
 void workoutVC_viewWillDisappear(id self, SEL _cmd, bool animated) {
-    msgSupV(supSig(bool), self, VC, _cmd, animated);
+    msgSupV(supSig(void, bool), self, VC, _cmd, animated);
 
     if (msgV(objSig(bool), self, sel_getUid("isMovingFromParentViewController"))) {
-        WorkoutVC *d = getIVVC(WorkoutVC, self);
+        WorkoutVC *d = getIVVCC(WorkoutVC, CollectionVC, self);
         if (!d->done) {
             cleanupNotifications(self, d);
             if (d->workout->startTime) {
@@ -170,47 +161,71 @@ void workoutVC_viewWillDisappear(id self, SEL _cmd, bool animated) {
     }
 }
 
-#pragma mark - Event Handling
+#pragma mark - Collection Data Source
 
-void workoutVC_handleTap(id self, SEL _cmd _U_, id button) {
-    int tag = (int)getTag(button);
-    int section = (tag & 0xff00) >> 8, row = tag & UCHAR_MAX;
-    handleEvent(self, getIVVC(WorkoutVC, self), section, row, 0);
+id workoutVC_cellForItemAtIndexPath(id self, SEL _cmd _U_, id collectionView, id indexPath) {
+    WorkoutVC *d = getIVVCC(WorkoutVC, CollectionVC, self);
+    long section = getSection(indexPath), item = getItem(indexPath);
+    Exercise *exercise = &d->workout->circuits[section].exercises[item];
+    CFStringRef cellId = exercise->header ? FullCellID : BasicCellID;
+    id cell = dequeueReusableCell(collectionView, cellId, indexPath);
+    StatusCell *v = getIVC(cell);
+    if (exercise->header && d->workout->type == WorkoutEndurance)
+        setTextColor(v->header, getColor(ColorGreen));
+
+    statusCell_configure(v, exercise);
+    setIDFormatted(cell, CFSTR("cell_%ld_%ld"), section, item)
+    return cell;
 }
 
-void handleEvent(id self, WorkoutVC *d, int section, int row, int event) {
+#pragma mark - Collection Delegate
+
+bool workoutVC_shouldSelectItem(id self, SEL _cmd _U_, id collectionView _U_, id indexPath) {
+    WorkoutVC *d = getIVVCC(WorkoutVC, CollectionVC, self);
+    return d->workout->circuits[getSection(indexPath)].exercises[getItem(indexPath)].interactive;
+}
+
+void workoutVC_didSelectItemAtIndexPath(id self, SEL _cmd _U_, id collectionView, id indexPath) {
+    CollectionVC *p = getIVVC(CollectionVC, self);
+    deselectItem(collectionView, indexPath);
+    handleEvent(self, p, getIVVCS(WorkoutVC, p), 0, indexPath);
+}
+
+#pragma mark - Event Handling
+
+void handleEvent(id self, CollectionVC *p, WorkoutVC *d, int type, id indexPath) {
+    long section = getSection(indexPath), item = getItem(indexPath);
     Circuit *circuit = &d->workout->circuits[section];
-    CVPair *pair = &d->containers[section];
-    CFArrayRef views = getArrangedSubviews(pair->data->stack);
-    StatusView *v = getIVV(StatusView, CFArrayGetValueAtIndex(views, row));
-    id nextView = nil;
+    Exercise *exercise = &circuit->exercises[item];
+    id cell = cellForItem(p->collectionView, indexPath);
+    id pathToReload = nil, nextPath = nil;
     bool exerciseDone;
     int transition = 0;
-    switch (event) {
+    switch (type) {
         case EventFinishCircuit:
             transition = workout_increment(d->workout, d->timers);
             break;
 
         case EventFinishExercise:
-            setUserInteractionEnabled(v->button, true);
+            exercise->interactive = true;
             if (d->workout->type == WorkoutEndurance) {
-                setTextColor(v->header, getColor(ColorGreen));
                 CFStringRef durationMsg = localize(CFSTR("exerciseDuration"));
-                setText(v->header, durationMsg);
-                CFRelease(durationMsg);
-                statusView_updateAccessibility(v);
-                nextView = v->button;
+                exercise->header = CFStringCreateMutableCopy(NULL, 128, durationMsg);
+                p->labels[0][0] = durationMsg;
+                pathToReload = nextPath = indexPath;
                 break;
             }
         default:
-            exerciseDone = exercise_cycle(v->exercise, d->timers);
-            exerciseView_configure(v);
+            exerciseDone = exercise_cycle(exercise, d->timers);
+            if (cell) statusCell_configure(getIVC(cell), exercise);
             if (exerciseDone) {
-                transition = circuit_increment(circuit, d->timers, v->exercise);
+                transition = circuit_increment(circuit, d->timers, exercise);
                 if (transition == TransitionFinishedCircuitDeleteFirst)
                     transition = workout_increment(d->workout, d->timers);
             }
     }
+
+    bool isSectionPath = false;
 
     if (transition == TransitionCompletedWorkout) {
         cleanupNotifications(self, d);
@@ -225,51 +240,72 @@ void handleEvent(id self, WorkoutVC *d, int section, int row, int event) {
         handleFinishedWorkout(d, true);
         return;
     } else if (transition == TransitionFinishedCircuitDeleteFirst) {
-        removeFromSuperview(pair->view);
-        releaseView(pair->view);
-        (pair++)->view = nil;
-        views = getArrangedSubviews(pair->data->stack);
-        setHidden(pair->data->divider, true);
-        exerciseView_configure(getIVV(StatusView, CFArrayGetValueAtIndex(views, 0)));
-        nextView = pair->data->header;
+        ++p->firstSection;
+        nextPath = makeIndexPath(0, section + 1);
+        isSectionPath = true;
+        id header = supplementaryView(p->collectionView, nextPath);
+        if (header) setAlpha(getIVR(header)->divider, 0);
+        cell = cellForItem(p->collectionView, nextPath);
+        if (cell) statusCell_configure(getIVC(cell), (++circuit)->exercises);
     } else if (transition == TransitionFinishedCircuit) {
         if (circuit->reps > 1 && circuit->type == CircuitRounds) {
             CFLocaleRef locale = copyLocale();
             CFStringRef reps = formatStr(locale, CFSTR("%d"), circuit->completedReps + 1);
-            updateRange(circuit->header, &circuit->range, reps, locale);
-            setText(pair->data->header, circuit->header);
-            nextView = pair->data->header;
+            updateRange(p->headers[section], &circuit->range, reps, locale);
+
+            nextPath = makeIndexPath(0, section);
+            isSectionPath = true;
+            id header = supplementaryView(p->collectionView, nextPath);
+            if (header) setText(getIVR(header)->label, p->headers[section]);
         }
 
-        bool refreshButtons = circuit->type == CircuitDecrement;
         for (int i = 0; i < circuit->size; ++i) {
-            v = getIVV(StatusView, CFArrayGetValueAtIndex(views, i));
-            if (refreshButtons && v->exercise->type == ExerciseReps) {
-                setEnabled(v->button, true);
-                setTitle(v->button,
-                         v->exercise->title, ControlStateNormal | ControlStateDisabled);
-                setEnabled(v->button, false);
-            }
-            exerciseView_configure(v);
+            cell = cellForItem(p->collectionView, makeIndexPath(i, section));
+            if (cell) statusCell_configure(getIVC(cell), &circuit->exercises[i]);
         }
 
-        if (!nextView) nextView = getIVV(StatusView, CFArrayGetValueAtIndex(views, 0))->button;
+        if (!nextPath) nextPath = makeIndexPath(0, section);
     } else if (transition == TransitionFinishedExercise) {
-        v = getIVV(StatusView, CFArrayGetValueAtIndex(views, circuit->index));
-        exerciseView_configure(v);
-        nextView = v->button;
+        nextPath = makeIndexPath(circuit->index, section);
+        cell = cellForItem(p->collectionView, nextPath);
+        if (cell) statusCell_configure(getIVC(cell), &circuit->exercises[circuit->index]);
     } else if (d->workout->testMax) {
-        presentModalVC(self, updateMaxesVC_init(self, row));
+        presentModalVC(self, updateMaxesVC_init(self, (int)item));
     }
 
-    if (nextView) UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, nextView);
+    if (transition == TransitionFinishedCircuitDeleteFirst) {
+        reloadSections(p->collectionView, (u_long)section);
+    } else if (pathToReload) {
+        collectionVC_calculateHeights(p, -1);
+        CFArrayRef paths = CFArrayCreate(NULL, (const void *[]){pathToReload}, 1, NULL);
+        msgV(objSig(void, CFArrayRef), p->collectionView,
+             sel_getUid("reloadItemsAtIndexPaths:"), paths);
+        CFRelease(paths);
+    }
+
+    if (nextPath) {
+        dispatch_after(dispatch_time(0, 100000000), dispatch_get_main_queue(), ^{
+            id nextView = nil;
+            if (isSectionPath) {
+                id header = supplementaryView(p->collectionView, nextPath);
+                if (header) nextView = getIVR(header)->label;
+            } else {
+                id nextCell = cellForItem(p->collectionView, nextPath);
+                if (nextCell) nextView = getIVC(nextCell)->button;
+            }
+
+            if (nextView)
+                UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, nextView);
+        });
+    }
 }
 
 #pragma mark - Notifications
 
 void restartTimers(CFNotificationCenterRef center _U_, void *self,
                    CFStringRef name _U_, const void *object _U_, CFDictionaryRef userInfo _U_) {
-    WorkoutVC *d = getIVVC(WorkoutVC, self);
+    CollectionVC *p = getIVVC(CollectionVC, self);
+    WorkoutVC *d = getIVVCS(WorkoutVC, p);
     time_t now = time(NULL);
     for (int i = 1; i >= 0; --i) {
         WorkoutTimer *t = &d->timers[i];
@@ -277,7 +313,7 @@ void restartTimers(CFNotificationCenterRef center _U_, void *self,
             int diff = (int)(now - t->refTime);
             if (diff >= t->duration) {
                 t->active = 0;
-                handleEvent(self, d, t->section, t->row, i + 1);
+                handleEvent(self, p, d, i + 1, makeIndexPath(t->row, t->section));
             } else {
                 workoutTimer_start(t, t->duration - diff, false);
             }
@@ -286,7 +322,8 @@ void restartTimers(CFNotificationCenterRef center _U_, void *self,
 }
 
 void workoutVC_receivedNotification(id self, int identifier) {
-    WorkoutVC *d = getIVVC(WorkoutVC, self);
+    CollectionVC *p = getIVVC(CollectionVC, self);
+    WorkoutVC *d = getIVVCS(WorkoutVC, p);
     int type = identifier % 2;
     WorkoutTimer *timer = &d->timers[type];
     if (!timer->active || timer->identifier != identifier) return;
@@ -302,13 +339,14 @@ void workoutVC_receivedNotification(id self, int identifier) {
         CFRelease(ids);
     }
 
-    handleEvent(self, d, timer->section, timer->row, type + 1);
+    handleEvent(self, p, d, type + 1, makeIndexPath(timer->row, timer->section));
 }
 
 #pragma mark - Modal Delegate
 
 void workoutVC_finishedBottomSheet(id self, int index, int weight) {
-    WorkoutVC *d = getIVVC(WorkoutVC, self);
+    CollectionVC *p = getIVVC(CollectionVC, self);
+    WorkoutVC *d = getIVVCS(WorkoutVC, p);
     d->weights[index] = weight;
-    handleEvent(self, d, 0, index, 0);
+    handleEvent(self, p, d, 0, makeIndexPath(index, 0));
 }

@@ -38,6 +38,7 @@ typedef struct {
     CFMutableStringRef title;
     CFMutableStringRef header;
     CFStringRef rest;
+    CFStringRef hint;
     CFRange titleRange;
     CFRange headerRange;
     short reps;
@@ -45,11 +46,11 @@ typedef struct {
     short completedSets;
     uint8_t type;
     uint8_t state;
+    bool interactive;
 } Exercise;
 
 typedef struct {
     Exercise *exercises;
-    CFMutableStringRef header;
     CFRange range;
     int index;
     int size;
@@ -86,8 +87,9 @@ extern int Bodyweight;
 void initExerciseData(int week);
 
 void getWeeklyWorkoutNames(CFStringRef *names, uint8_t plan);
-Workout *getWeeklyWorkout(int index, uint8_t plan, int const *lifts);
+Workout *getWeeklyWorkout(int index, uint8_t plan, int const *lifts, CFMutableStringRef **headers);
 CFArrayRef createWorkoutNames(uint8_t type);
-Workout *getWorkoutFromLibrary(WorkoutParams const *params, int const *lifts);
+Workout *getWorkoutFromLibrary(WorkoutParams const *params,
+                               int const *lifts, CFMutableStringRef **headers);
 
 #endif /* ExerciseManager_h */

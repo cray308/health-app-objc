@@ -7,9 +7,9 @@ extern int _HATestIsMetric;
 #define copyLocale() (_HATestIsMetric ? CFLocaleCreate(NULL, CFSTR("en_CA")) : CFLocaleCopyCurrent())
 #define makeCustomViewAccessible(v)
 #define setID(v, x) msgV(objSig(void, CFStringRef), v, sel_getUid("setAccessibilityIdentifier:"), x);
-#define setIDFormatted(v, f, i)                                                              \
+#define setIDFormatted(v, f, ...)                                                            \
 do {                                                                                         \
-    CFStringRef _idStr = CFStringCreateWithFormat(NULL, NULL, f, (i));                       \
+    CFStringRef _idStr = CFStringCreateWithFormat(NULL, NULL, f, ##__VA_ARGS__);             \
     msgV(objSig(void, CFStringRef), (v), sel_getUid("setAccessibilityIdentifier:"), _idStr); \
     CFRelease(_idStr);                                                                       \
 } while (0);
@@ -18,7 +18,7 @@ do {                                                                            
 #define copyLocale() CFLocaleCopyCurrent()
 #define makeCustomViewAccessible(v) setIsAccessibilityElement(v, true);
 #define setID(v, x)
-#define setIDFormatted(v, f, i)
+#define setIDFormatted(v, f, ...)
 #endif
 
 #define _U_ __attribute__((__unused__))

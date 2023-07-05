@@ -51,11 +51,9 @@ static id stepperView_init(id *stepperRef, CFLocaleRef locale CF_CONSUMED) {
     msgV(objSig(void, double), v->stepper, sel_getUid("setMinimumValue:"), StepperMin);
     msgV(objSig(void, double), v->stepper, sel_getUid("setMaximumValue:"), StepperMax);
     addTarget(v->stepper, self, getValueChangedSel(), ControlEventValueChanged);
-    msgV(objSig(void, float, long), v->stepper, sel_getUid("setContentHuggingPriority:forAxis:"),
-         LayoutPriorityRequired, ConstraintAxisHorizontal);
-    msgV(objSig(void, float, long), v->stepper,
-         sel_getUid("setContentCompressionResistancePriority:forAxis:"),
-         LayoutPriorityRequired, ConstraintAxisHorizontal);
+    setContentHuggingPriority(v->stepper, LayoutPriorityRequired, ConstraintAxisHorizontal);
+    setContentCompressionResistancePriority(v->stepper,
+                                            LayoutPriorityRequired, ConstraintAxisHorizontal);
 
     id stack = createHStack((id []){v->label, v->stepper});
     useStackConstraints(stack);
@@ -70,7 +68,7 @@ void stepperView_deinit(id self, SEL _cmd) {
     CFRelease(v->reps);
     releaseView(v->stepper);
     releaseView(v->label);
-    msgSupV(supSig(), self, View, _cmd);
+    msgSupV(supSig(void), self, View, _cmd);
 }
 
 static void updateStepperValue(id self, StepperView *v, int value) {
@@ -118,7 +116,7 @@ void updateMaxesVC_viewDidLoad(id self, SEL _cmd) {
 
     InputVC *p = getIVVC(InputVC, self);
     UpdateMaxesVC *d = getIVVCS(UpdateMaxesVC, p);
-    p->button = createButton(localize(CFSTR("finish")), ColorBlue, self, getTapSel());
+    p->button = createButton(localize(CFSTR("finish")), ColorBlue, true, self, getTapSel());
     setupNavItem(self, CFSTR("updateMaxesTitle"), (id []){nil, p->button});
     setEnabled(p->button, false);
 

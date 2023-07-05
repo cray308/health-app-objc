@@ -100,29 +100,52 @@ static NSString *settingsTitles[] = {
     [number release];
 }
 
-- (void)checkContainerWithHeading:(NSString *)heading titles:(NSArray<NSString *> *)titles {
-    [self checkContainerWithHeading:heading titles:titles labels:nil];
+- (XCUIElement *)headerForSection:(int)section {
+    NSString *headerId = [[NSString alloc] initWithFormat:@"header_%d", section];
+    XCUIElement *label = self.staticTexts[headerId];
+    [headerId release];
+    return label;
 }
 
-- (void)checkContainerWithHeading:(NSString *)heading
-                           titles:(NSArray<NSString *> *)titles
-                           labels:(NSArray<NSString *> *)labels {
+- (XCUIElementQuery *)defaultCells { return [self cellsInSection:0]; }
+
+- (XCUIElementQuery *)cellsInSection:(int)section {
+    NSString *cellId = [[NSString alloc] initWithFormat:@"cell_%d_", section];
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"identifier BEGINSWITH %@", cellId];
+    [cellId release];
+    return [self.cells matchingPredicate:predicate].buttons;
+}
+
+- (void)checkSectionWithHeading:(NSString *)heading titles:(NSArray<NSString *> *)titles {
+    [self checkSectionAtIndex:0 heading:heading titles:titles labels:nil];
+}
+
+- (void)checkSectionWithHeading:(NSString *)heading
+                         titles:(NSArray<NSString *> *)titles
+                         labels:(NSArray<NSString *> *)labels {
+    [self checkSectionAtIndex:0 heading:heading titles:titles labels:labels];
+}
+
+- (void)checkSectionAtIndex:(int)index
+                    heading:(NSString *)heading
+                     titles:(NSArray<NSString *> *)titles
+                     labels:(NSArray<NSString *> *)labels {
     if (heading) {
-        XCTAssert([self.staticTexts[@"containerHeader"] labelEquals:heading]);
+        XCTAssert([[self headerForSection:index] labelEquals:heading]);
     } else {
-        XCTAssert(!self.staticTexts[@"containerHeader"].exists);
+        XCTAssert(![self headerForSection:index].exists);
     }
 
     int count = (int)titles.count;
-    XCUIElementQuery *buttons = self.buttons;
+    XCUIElementQuery *cells = [self cellsInSection:index];
     for (int i = 0; i < count; ++i) {
-        XCUIElement *button = [buttons elementBoundByIndex:i];
+        XCUIElement *cell = [cells elementBoundByIndex:i];
         if (labels) {
             NSString *label = [[NSString alloc] initWithFormat:@"%@, %@", labels[i], titles[i]];
-            XCTAssert([button labelEquals:label]);
+            XCTAssert([cell labelEquals:label]);
             [label release];
         } else {
-            XCTAssert([button labelEquals:titles[i]]);
+            XCTAssert([cell labelEquals:titles[i]]);
         }
     }
 }
@@ -176,9 +199,8 @@ static NSString *settingsTitles[] = {
 @public
     XCUIApplication *app;
     XCUIElementQuery *tabs;
-    XCUIElement *homeScroll;
+    XCUIElement *homeCollection;
     XCUIElement *settingsScroll;
-    XCUIElement *customContainer;
     XCUIElementQuery *settingsSegments;
     XCUIElementQuery *settingsFields;
     XCUIElement *settingsSaveButton;
@@ -198,8 +220,7 @@ static NSString *settingsTitles[] = {
 - (void)setupProperties {
     [app launch];
     tabs = app.tabBars.firstMatch.buttons;
-    homeScroll = app.scrollViews[@"scroll_HomeVC"];
-    customContainer = homeScroll.otherElements[@"customContainer"];
+    homeCollection = app.collectionViews[@"collection_HomeVC"];
 }
 
 - (void)takePhotoWithName:(NSString *)name {
@@ -239,13 +260,13 @@ static NSString *settingsTitles[] = {
     settingsSaveButton = settingsScroll.buttons[@"Save settings"];
 }
 
-- (XCUIElement *)planContainer { return homeScroll.otherElements[@"planContainer"]; }
+- (XCUIElement *)planHeader { return [homeCollection headerForSection:0]; }
 
-- (XCUIElement *)workoutScroll { return app.scrollViews[@"scroll_WorkoutVC"]; }
+- (XCUIElementQuery *)planCells { return [homeCollection cellsInSection:0]; }
 
-- (XCUIElement *)firstContainerInScrollView:(XCUIElement *)scroll {
-    return scroll.otherElements[@"container_0"];
-}
+- (XCUIElementQuery *)customWorkoutCells { return [homeCollection cellsInSection:1]; }
+
+- (XCUIElement *)workoutCollection { return app.collectionViews[@"collection_WorkoutVC"]; }
 
 - (void)tapDown { [[app.toolbars.buttons elementBoundByIndex:1] tap]; }
 
@@ -394,7 +415,7 @@ static NSString *settingsTitles[] = {
                            maxes:(NSArray<NSNumber *> *)maxes
                     valuesToType:(NSArray<NSNumber *> *)values {
     [XCTContext runActivityNamed:@"checkSetupWorkout" block:^(id<XCTActivity> _Nonnull activity) {
-        [[customContainer.buttons elementBoundByIndex:type] tap];
+        [[[self customWorkoutCells] elementBoundByIndex:type] tap];
         sleep(2);
 
         int count = values ? (int)values.count : 0;
@@ -444,19 +465,19 @@ static NSString *settingsTitles[] = {
                           valuesToType:values];
 
         [self checkNavBarWithTitles:@[@"", title, @"Start"] enabled:true];
-        XCUIElement *container = [self firstContainerInScrollView:[self workoutScroll]];
-        XCUIElementQuery *buttons = container.buttons;
+        XCUIElement *collection = [self workoutCollection];
+        XCUIElementQuery *cells = [collection defaultCells];
         NSString *setsStr = [NSString stringWithFormat:@"Set 1 of %d", sets];
-        [container checkContainerWithHeading:nil
-                                      titles:@[
+        [collection checkSectionWithHeading:nil
+                                     titles:@[
             [NSString stringWithFormat:@"Squat x %d @ %@ %@", reps, weights[0], unit],
             [NSString stringWithFormat:@"Bench x %d @ %@ %@", reps, weights[1], unit],
             [NSString stringWithFormat:@"%@ x %d @ %@ %@", exercise, reps, weights[2], unit]]
-                                      labels:@[setsStr, setsStr, setsStr]];
+                                     labels:@[setsStr, setsStr, setsStr]];
         [self tapStart];
 
         for (int i = 0; i < 3; ++i) {
-            [[buttons elementBoundByIndex:i] checkExerciseWithSets:sets rest:120 checkAfter:i < 2];
+            [[cells elementBoundByIndex:i] checkExerciseWithSets:sets rest:120 checkAfter:i < 2];
         }
         sleep(2);
     }];
@@ -469,8 +490,8 @@ static NSString *settingsTitles[] = {
     [XCTContext runActivityNamed:@"checkSE" block:^(id<XCTActivity> _Nonnull activity) {
         int count = (int)labels.count;
         [self checkNavBarWithTitles:@[@"", title, @"Start"] enabled:true];
-        XCUIElement *container = [self firstContainerInScrollView:[self workoutScroll]];
-        XCUIElementQuery *buttons = container.buttons;
+        XCUIElement *collection = [self workoutCollection];
+        XCUIElementQuery *cells = [collection defaultCells];
         [self tapStart];
 
         for (int i = 0; i < rounds; ++i) {
@@ -478,23 +499,23 @@ static NSString *settingsTitles[] = {
             NSString *header = nil;
             if (rounds > 1)
                 header = [[NSString alloc] initWithFormat:@"Round %d of %d", i + 1, rounds];
-            [container checkContainerWithHeading:header titles:labels labels:nil];
+            [collection checkSectionWithHeading:header titles:labels];
             if (header) [header release];
 
             for (int j = 0; j < count; ++j) {
                 bool lastEx = j == count - 1;
                 int rest = lastEx ? 180 : 90;
-                XCUIElement *button = [buttons elementBoundByIndex:j];
+                XCUIElement *cell = [cells elementBoundByIndex:j];
                 bool checkAfter = !(lastGroup && lastEx);
                 if (!checkAfter && dismissType != DismissExercise) {
-                    [button tap];
+                    [cell tap];
                     NSString *restStr = [[NSString alloc] initWithFormat:@"Rest: %d s", rest];
-                    XCTAssert([button.label hasSuffix:restStr]);
+                    XCTAssert([cell.label hasSuffix:restStr]);
                     [restStr release];
                     [self tapButtonForDismissalType:dismissType];
                     break;
                 }
-                [button checkExerciseWithSets:1 rest:rest checkAfter:checkAfter];
+                [cell checkExerciseWithSets:1 rest:rest checkAfter:checkAfter];
             }
         }
         sleep(2);
@@ -504,14 +525,14 @@ static NSString *settingsTitles[] = {
 - (void)checkEnduranceWithDismissalType:(int)dismissType {
     [XCTContext runActivityNamed:@"checkEndurance" block:^(id<XCTActivity> _Nonnull activity) {
         [self checkNavBarWithTitles:@[@"", @"Endurance", @"Start"] enabled:true];
-        XCUIElement *container = [self firstContainerInScrollView:[self workoutScroll]];
-        XCUIElement *button = container.buttons.firstMatch;
-        [container checkContainerWithHeading:nil titles:@[@"Run/row for 60 s"] labels:nil];
+        XCUIElement *collection = [self workoutCollection];
+        XCUIElement *cell = [collection defaultCells].firstMatch;
+        [collection checkSectionWithHeading:nil titles:@[@"Run/row for 60 s"] labels:nil];
         [self tapStart];
 
-        [button checkExerciseWithSets:1 duration:60 rest:0 checkAfter:false];
+        [cell checkExerciseWithSets:1 duration:60 rest:0 checkAfter:false];
         if (dismissType == DismissExercise) {
-            [button tap];
+            [cell tap];
         } else {
             [self tapButtonForDismissalType:dismissType];
         }
@@ -521,8 +542,8 @@ static NSString *settingsTitles[] = {
 
 - (void)runKB2WithDismissalType:(int)dismissType {
     [XCTContext runActivityNamed:@"checkKB2" block:^(id<XCTActivity> _Nonnull activity) {
-        XCUIElement *button = [[self planContainer].buttons elementBoundByIndex:3];
-        [button tap];
+        XCUIElement *cell = [[self planCells] elementBoundByIndex:3];
+        [cell tap];
         sleep(2);
         [self checkSEWithTitle:@"KB 2"
                         labels:@[@"KB swing x 20",
@@ -532,18 +553,18 @@ static NSString *settingsTitles[] = {
                                  @"KB floor press x 20"]
                         rounds:2
                    dismissType:dismissType];
-        XCTAssert(!button.isEnabled);
+        XCTAssert(!cell.isEnabled);
     }];
 }
 
 - (void)checkUpdateMaxesWithOptions:(int)options weightsAfter:(NSArray<NSString *> *)values {
     [XCTContext runActivityNamed:@"checkUpdateMaxes" block:^(id<XCTActivity> _Nonnull activity) {
-        [[customContainer.buttons elementBoundByIndex:0] tap];
+        [[[self customWorkoutCells] elementBoundByIndex:0] tap];
         sleep(2);
 
         [self checkNavBarWithTitles:@[@"", @"Test Day", @"Start"] enabled:true];
         [self tapStart];
-        [[[self firstContainerInScrollView:[self workoutScroll]].buttons elementBoundByIndex:0] tap];
+        [[[[self workoutCollection] defaultCells] elementBoundByIndex:0] tap];
         sleep(2);
 
         [self checkNavBarWithTitles:@[@"", @"Set Weight & Reps", @"Finish"] enabled:false];
@@ -592,27 +613,26 @@ static NSString *settingsTitles[] = {
                               weightsAfter:(NSArray<NSString *> *)after
                                       unit:(NSString *)unit {
     [XCTContext runActivityNamed:@"checkUpdateMaxesFull" block:^(id<XCTActivity> _Nonnull activity) {
-        [[customContainer.buttons elementBoundByIndex:0] tap];
+        [[[self customWorkoutCells] elementBoundByIndex:0] tap];
         sleep(2);
 
-        XCUIElement *container = [self firstContainerInScrollView:[self workoutScroll]];
-        XCUIElementQuery *buttons = container.buttons;
+        XCUIElement *collection = [self workoutCollection];
+        XCUIElementQuery *cells = [collection defaultCells];
         NSString *hints[] = {
             @"Max squat weight", @"Max pull-up weight", @"Max bench weight", @"Max deadlift weight"
         };
-        [container checkContainerWithHeading:nil
-                                      titles:@[
+        [collection checkSectionWithHeading:nil
+                                     titles:@[
             [NSString stringWithFormat:@"Squat x 1 @ %@ %@", before[0], unit],
             [NSString stringWithFormat:@"Pull-up x 1 @ %@ %@", before[1], unit],
             [NSString stringWithFormat:@"Bench x 1 @ %@ %@", before[2], unit],
-            [NSString stringWithFormat:@"Deadlift x 1 @ %@ %@", before[3], unit]]
-                                      labels:nil];
+            [NSString stringWithFormat:@"Deadlift x 1 @ %@ %@", before[3], unit]]];
         [self tapStart];
 
         for (int i = 0; i < 4; ++i) {
-            XCUIElement *button = [buttons elementBoundByIndex:i];
-            XCTAssert(button.isEnabled);
-            [button tap];
+            XCUIElement *cell = [cells elementBoundByIndex:i];
+            XCTAssert(cell.isEnabled);
+            [cell tap];
             sleep(2);
 
             XCUIElement *scroll = app.scrollViews[@"scroll_UpdateMaxesVC"];
@@ -634,7 +654,7 @@ static NSString *settingsTitles[] = {
             [app.navigationBars.buttons[@"Finish"] tap];
             sleep(2);
 
-            if (i < 3) XCTAssert(!button.isEnabled);
+            if (i < 3) XCTAssert(!cell.isEnabled);
         }
         sleep(2);
 
@@ -693,11 +713,13 @@ static NSString *settingsTitles[] = {
 - (void)testB {
     [self setupProperties];
     [self checkNavBarWithTitles:@[@"", @"Home", @""] enabled:true];
-    XCTAssert(![self planContainer].exists);
-    [customContainer checkContainerWithHeading:@"Add Custom Workout"
-                                        titles:@[
+    XCTAssert(![self planHeader].exists);
+    XCTAssert([self planCells].count == 0);
+    [homeCollection checkSectionAtIndex:1
+                                heading:@"Add Custom Workout"
+                                 titles:@[
         @"Test Max", @"Strength", @"Strength-Endurance", @"Endurance", @"Conditioning"]
-                                        labels:nil];
+                                 labels:nil];
     [self takePhotoWithName:@"home_customContainerOnly"];
 
     [[tabs elementBoundByIndex:2] tap];
@@ -731,28 +753,28 @@ static NSString *settingsTitles[] = {
     [self dismissAlertWithActionName:@"Cancel"];
 
     [[tabs elementBoundByIndex:0] tap];
-    XCTAssert(![self planContainer].exists);
+    XCTAssert(![self planHeader].exists);
+    XCTAssert([self planCells].count == 0);
 
     [[tabs elementBoundByIndex:2] tap];
     [settingsSaveButton tap];
     [self dismissAlertWithActionName:@"Save"];
 
     [[tabs elementBoundByIndex:0] tap];
-    XCUIElement *planContainer = [self planContainer];
-    [planContainer checkContainerWithHeading:@"Workouts This Week"
-                                      titles:@[
+    [homeCollection checkSectionWithHeading:@"Workouts This Week"
+                                     titles:@[
         @"KB 1", @"Endurance", @"Endurance", @"KB 2", @"Endurance"]
-                                      labels:@[
+                                     labels:@[
         @"Monday", @"Tuesday", @"Wednesday", @"Thursday", @"Saturday"]];
     [self takePhotoWithName:@"home_bothContainers"];
     [self runKB2WithDismissalType:DismissExercise];
-    XCTAssert(homeScroll.isHittable);
+    XCTAssert(homeCollection.isHittable);
 }
 
 - (void)testC {
     [self setupProperties];
-    XCUIElementQuery *planButtons = [self planContainer].buttons;
-    XCTAssert(![planButtons elementBoundByIndex:3].isEnabled);
+    XCUIElementQuery *planCells = [self planCells];
+    XCTAssert(![planCells elementBoundByIndex:3].isEnabled);
 
     [[tabs elementBoundByIndex:2] tap];
     [self setupSettingsProperties];
@@ -768,7 +790,7 @@ static NSString *settingsTitles[] = {
         [self dismissAlertWithActionName:@"Cancel"];
 
         [[tabs elementBoundByIndex:0] tap];
-        XCTAssert(![planButtons elementBoundByIndex:3].isEnabled);
+        XCTAssert(![planCells elementBoundByIndex:3].isEnabled);
 
         [[tabs elementBoundByIndex:2] tap];
         [deleteButton tap];
@@ -778,8 +800,8 @@ static NSString *settingsTitles[] = {
     [self checkHistory];
 
     [[tabs elementBoundByIndex:0] tap];
-    XCTAssert([planButtons elementBoundByIndex:3].isEnabled);
-    [[planButtons elementBoundByIndex:0] tap];
+    XCTAssert([planCells elementBoundByIndex:3].isEnabled);
+    [[planCells elementBoundByIndex:0] tap];
     sleep(2);
     [self checkSEWithTitle:@"KB 1"
                     labels:@[@"KB swing x 20",
@@ -790,29 +812,29 @@ static NSString *settingsTitles[] = {
                     rounds:3
                dismissType:DismissEnd];
 
-    XCTAssert(![planButtons elementBoundByIndex:0].isEnabled);
-    [[planButtons elementBoundByIndex:4] tap];
+    XCTAssert(![planCells elementBoundByIndex:0].isEnabled);
+    [[planCells elementBoundByIndex:4] tap];
     sleep(2);
     [self checkEnduranceWithDismissalType:DismissExercise];
 
-    XCTAssert(homeScroll.isHittable);
-    XCTAssert(![planButtons elementBoundByIndex:4].isEnabled);
+    XCTAssert(homeCollection.isHittable);
+    XCTAssert(![planCells elementBoundByIndex:4].isEnabled);
 }
 
 - (void)testD {
     [self setupProperties];
-    XCUIElementQuery *planButtons = [self planContainer].buttons;
-    XCTAssert(![planButtons elementBoundByIndex:0].isEnabled);
-    XCTAssert(![planButtons elementBoundByIndex:4].isEnabled);
+    XCUIElementQuery *planCells = [self planCells];
+    XCTAssert(![planCells elementBoundByIndex:0].isEnabled);
+    XCTAssert(![planCells elementBoundByIndex:4].isEnabled);
 
     [self runKB2WithDismissalType:DismissBack];
 
-    [[planButtons elementBoundByIndex:2] tap];
+    [[planCells elementBoundByIndex:2] tap];
     sleep(2);
     [self checkEnduranceWithDismissalType:DismissEnd];
-    XCTAssert(![planButtons elementBoundByIndex:2].isEnabled);
+    XCTAssert(![planCells elementBoundByIndex:2].isEnabled);
 
-    [[planButtons elementBoundByIndex:1] tap];
+    [[planCells elementBoundByIndex:1] tap];
     sleep(2);
     [self checkEnduranceWithDismissalType:DismissBack];
     sleep(2);
@@ -821,15 +843,15 @@ static NSString *settingsTitles[] = {
     [self takePhotoWithName:@"homeConfetti"];
     sleep(5);
     [self dismissAlertWithActionName:@"OK"];
-    XCTAssert(homeScroll.isHittable);
-    XCTAssert(![planButtons elementBoundByIndex:1].isEnabled);
+    XCTAssert(homeCollection.isHittable);
+    XCTAssert(![planCells elementBoundByIndex:1].isEnabled);
 }
 
 - (void)testE {
     [self setupProperties];
-    XCUIElementQuery *planButtons = [self planContainer].buttons;
+    XCUIElementQuery *planCells = [self planCells];
     for (int i = 0; i < 5; ++i) {
-        XCTAssert(![planButtons elementBoundByIndex:i].isEnabled);
+        XCTAssert(![planCells elementBoundByIndex:i].isEnabled);
     }
 
     [[tabs elementBoundByIndex:2] tap];
@@ -839,7 +861,8 @@ static NSString *settingsTitles[] = {
     [self dismissAlertWithActionName:@"Save"];
 
     [[tabs elementBoundByIndex:0] tap];
-    XCTAssert(![self planContainer].exists);
+    XCTAssert(![self planHeader].exists);
+    XCTAssert([self planCells].count == 0);
     [self takePhotoWithName:@"home_noPlan"];
 
     [[tabs elementBoundByIndex:2] tap];
@@ -848,12 +871,13 @@ static NSString *settingsTitles[] = {
     [self dismissAlertWithActionName:@"Save"];
 
     [[tabs elementBoundByIndex:0] tap];
-    planButtons = [self planContainer].buttons;
+    planCells = [self planCells];
     for (int i = 0; i < 5; ++i) {
-        XCTAssert(![planButtons elementBoundByIndex:i].isEnabled);
+        XCTAssert(![planCells elementBoundByIndex:i].isEnabled);
     }
 
     [self takePhotoWithName:@"home_allCompleted"];
+    [homeCollection swipeUp];
     [self checkUpdateMaxesWithOptions:0 weightsAfter:@[@"50", @"0", @"20", @"0"]];
     [self checkUpdateMaxesWithInitialWeights:@[@"50.00", @"0.00", @"20.00", @"0.00"]
                                 valuesToType:@[@"40", @"50", @"135", @"225"]
@@ -871,13 +895,14 @@ static NSString *settingsTitles[] = {
 
 - (void)testF {
     [self setupProperties];
+    [homeCollection swipeUp];
     [self checkStrengthWithTitle:@"Aux Strength"
                     valuesToType:@[@4, @2, @85]
                          weights:@[@"243.95", @"153.00", @"196.35"]
                         exercise:@"Deadlift"
                             unit:@"pounds"];
 
-    [[customContainer.buttons elementBoundByIndex:2] tap];
+    [[[self customWorkoutCells] elementBoundByIndex:2] tap];
     sleep(2);
     [app.navigationBars.buttons[@"Cancel"] tap];
     sleep(2);
@@ -912,39 +937,38 @@ static NSString *settingsTitles[] = {
 
     {
         [self checkNavBarWithTitles:@[@"", @"GC 8", @"Start"] enabled:true];
-        XCUIElement *scroll = [self workoutScroll];
-        XCUIElement *firstContainer = [self firstContainerInScrollView:scroll];
-        XCUIElement *secondContainer = scroll.otherElements[@"container_1"];
-        XCUIElementQuery *firstButtons = firstContainer.buttons;
+        XCUIElement *collection = [self workoutCollection];
+        XCUIElementQuery *cells = [collection defaultCells];
         [self tapStart];
         [self takePhotoWithName:@"gc8_bothContainers"];
         for (int i = 0; i < 4; ++i) {
             bool lastGroup = i == 3;
             NSString *header = [[NSString alloc] initWithFormat:@"Circuit 1 of 2 - Round %d of 4",
                                 i + 1];
-            [firstContainer checkContainerWithHeading:header
-                                               titles:@[@"KB snatch x 20",
-                                                        @"Box jump x 25",
-                                                        @"Hanging knee-to-elbow x 25",
-                                                        @"Dip x 25",
-                                                        @"Burpee x 5"]
-                                               labels:nil];
-            [secondContainer checkContainerWithHeading:@"Circuit 2 of 2"
-                                                titles:@[@"Handstand hold for 5 s"]
-                                                labels:@[@"Set 1 of 3"]];
+            [collection checkSectionWithHeading:header
+                                         titles:@[@"KB snatch x 20",
+                                                  @"Box jump x 25",
+                                                  @"Hanging knee-to-elbow x 25",
+                                                  @"Dip x 25",
+                                                  @"Burpee x 5"]];
+            [collection checkSectionAtIndex:1
+                                    heading:@"Circuit 2 of 2"
+                                     titles:@[@"Handstand hold for 5 s"]
+                                     labels:@[@"Set 1 of 3"]];
             [header release];
             for (int j = 0; j < 5; ++j) {
-                XCUIElement *button = [firstButtons elementBoundByIndex:j];
-                [button checkExerciseWithSets:1 rest:0 checkAfter:!(lastGroup && j == 4)];
+                XCUIElement *cell = [cells elementBoundByIndex:j];
+                [cell checkExerciseWithSets:1 rest:0 checkAfter:!(lastGroup && j == 4)];
             }
         }
 
-        [secondContainer checkContainerWithHeading:@"Circuit 2 of 2"
-                                            titles:@[@"Handstand hold for 5 s"]
-                                            labels:@[@"Set 1 of 3"]];
+        [collection checkSectionAtIndex:1
+                                heading:@"Circuit 2 of 2"
+                                 titles:@[@"Handstand hold for 5 s"]
+                                 labels:@[@"Set 1 of 3"]];
         [self takePhotoWithName:@"gc8_onlySecondContainer"];
-        XCUIElement *button = secondContainer.buttons.firstMatch;
-        [button checkExerciseWithSets:3 duration:5 rest:180 checkAfter:false];
+        XCUIElement *cell = [collection cellsInSection:1].firstMatch;
+        [cell checkExerciseWithSets:3 duration:5 rest:180 checkAfter:false];
         sleep(2);
     }
 
@@ -952,19 +976,18 @@ static NSString *settingsTitles[] = {
 
     {
         [self checkNavBarWithTitles:@[@"", @"Sprint 10 to 1s", @"Start"] enabled:true];
-        XCUIElement *container = [self firstContainerInScrollView:[self workoutScroll]];
-        XCUIElementQuery *buttons = container.buttons;
+        XCUIElement *collection = [self workoutCollection];
+        XCUIElementQuery *cells = [collection defaultCells];
         [self tapStart];
         for (int i = 10; i > 0; --i) {
             bool lastGroup = i == 1;
-            [container checkContainerWithHeading:nil
-                                          titles:@[[NSString stringWithFormat:@"Burpee x %d", i],
-                                                   [NSString stringWithFormat:@"Squat x %d", i],
-                                                   @"Sprint/row 100/125 m"]
-                                          labels:nil];
+            [collection checkSectionWithHeading:nil
+                                         titles:@[[NSString stringWithFormat:@"Burpee x %d", i],
+                                                  [NSString stringWithFormat:@"Squat x %d", i],
+                                                  @"Sprint/row 100/125 m"]];
             for (int j = 0; j < 3; ++j) {
-                XCUIElement *button = [buttons elementBoundByIndex:j];
-                [button checkExerciseWithSets:1 rest:0 checkAfter:!(lastGroup && j == 2)];
+                XCUIElement *cell = [cells elementBoundByIndex:j];
+                [cell checkExerciseWithSets:1 rest:0 checkAfter:!(lastGroup && j == 2)];
             }
         }
         sleep(2);
@@ -974,28 +997,26 @@ static NSString *settingsTitles[] = {
 
     {
         [self checkNavBarWithTitles:@[@"", @"Track Intervals", @"Start"] enabled:true];
-        XCUIElement *container = [self firstContainerInScrollView:[self workoutScroll]];
-        XCUIElementQuery *buttons = container.buttons;
-        XCUIElement *firstButton = [buttons elementBoundByIndex:0];
-        [container checkContainerWithHeading:@"AMRAP 1 min"
-                                      titles:@[
-            @"Run/row for 5 s", @"KB swing x 20", @"Run/row for 5 s", @"KB snatch x 20"]
-                                      labels:nil];
+        XCUIElement *collection = [self workoutCollection];
+        XCUIElementQuery *cells = [collection defaultCells];
+        [collection checkSectionWithHeading:@"AMRAP 1 min"
+                                     titles:@[
+            @"Run/row for 5 s", @"KB swing x 20", @"Run/row for 5 s", @"KB snatch x 20"]];
         [self tapStart];
         for (int i = 0; i < 2; ++i) {
             for (int j = 0; j < 2; ++j) {
                 int i1 = j << 1;
-                XCUIElement *curr = [buttons elementBoundByIndex:i1];
-                [curr checkExerciseWithSets:1 duration:5 rest:0 checkAfter:true];
-                [[buttons elementBoundByIndex:i1 + 1] checkExerciseWithSets:1 rest:0 checkAfter:true];
+                XCUIElement *cell = [cells elementBoundByIndex:i1];
+                [cell checkExerciseWithSets:1 duration:5 rest:0 checkAfter:true];
+                [[cells elementBoundByIndex:i1 + 1] checkExerciseWithSets:1 rest:0 checkAfter:true];
             }
         }
 
-        [firstButton checkExerciseWithSets:1 duration:5 rest:0 checkAfter:true];
-        sleep(37);
+        [[cells elementBoundByIndex:0] checkExerciseWithSets:1 duration:5 rest:0 checkAfter:true];
+        sleep(31);
     }
 
-    XCTAssert(homeScroll.isHittable);
+    XCTAssert(homeCollection.isHittable);
 }
 
 #pragma mark - Locale Testing
@@ -1013,6 +1034,7 @@ static NSString *settingsTitles[] = {
     [self dismissAlertWithActionName:@"Save"];
 
     [[tabs elementBoundByIndex:0] tap];
+    [homeCollection swipeUp];
     [self checkUpdateMaxesWithOptions:InputDecimal
                          weightsAfter:@[@"130.18", @"30.39", @"81.65", @"104.78"]];
     [self checkUpdateMaxesWithInitialWeights:@[@"130.18", @"30.39", @"81.65", @"104.78"]

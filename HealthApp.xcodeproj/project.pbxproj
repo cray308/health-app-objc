@@ -13,10 +13,6 @@
 		610656D42888947700E904BB /* BaseMacros.h in Headers */ = {isa = PBXBuildFile; fileRef = 610656D32888947700E904BB /* BaseMacros.h */; };
 		610B92B9270A6E9000358DBD /* Views.h in Headers */ = {isa = PBXBuildFile; fileRef = 610B92B7270A6E9000358DBD /* Views.h */; };
 		610B92BA270A6E9000358DBD /* Views.c in Sources */ = {isa = PBXBuildFile; fileRef = 610B92B8270A6E9000358DBD /* Views.c */; };
-		610B92CB270A7F4900358DBD /* ContainerView.h in Headers */ = {isa = PBXBuildFile; fileRef = 610B92C9270A7F4900358DBD /* ContainerView.h */; };
-		610B92CC270A7F4900358DBD /* ContainerView.c in Sources */ = {isa = PBXBuildFile; fileRef = 610B92CA270A7F4900358DBD /* ContainerView.c */; };
-		611EDDA32741F8750064B254 /* StatusView.h in Headers */ = {isa = PBXBuildFile; fileRef = 611EDDA12741F8750064B254 /* StatusView.h */; };
-		611EDDA42741F8750064B254 /* StatusView.c in Sources */ = {isa = PBXBuildFile; fileRef = 611EDDA22741F8750064B254 /* StatusView.c */; };
 		611EDDA9274355F10064B254 /* HomeVC.h in Headers */ = {isa = PBXBuildFile; fileRef = 611EDDA7274355F10064B254 /* HomeVC.h */; };
 		611EDDAA274355F10064B254 /* HomeVC.c in Sources */ = {isa = PBXBuildFile; fileRef = 611EDDA8274355F10064B254 /* HomeVC.c */; };
 		611EDDB32743660C0064B254 /* InputVC.h in Headers */ = {isa = PBXBuildFile; fileRef = 611EDDB12743660C0064B254 /* InputVC.h */; };
@@ -32,6 +28,14 @@
 		611EDDE827476ED50064B254 /* HistoryVC.h in Headers */ = {isa = PBXBuildFile; fileRef = 611EDDE627476ED50064B254 /* HistoryVC.h */; };
 		611EDDE927476ED50064B254 /* HistoryVC.c in Sources */ = {isa = PBXBuildFile; fileRef = 611EDDE727476ED50064B254 /* HistoryVC.c */; };
 		6122434027934B0D006709E8 /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6122433F27934B0D006709E8 /* HealthKit.framework */; };
+		613139462A54A53F001F0AE9 /* CollectionVC.h in Headers */ = {isa = PBXBuildFile; fileRef = 613139442A54A53F001F0AE9 /* CollectionVC.h */; };
+		613139472A54A53F001F0AE9 /* CollectionVC.c in Sources */ = {isa = PBXBuildFile; fileRef = 613139452A54A53F001F0AE9 /* CollectionVC.c */; };
+		6131394A2A54A554001F0AE9 /* CustomButton.h in Headers */ = {isa = PBXBuildFile; fileRef = 613139482A54A554001F0AE9 /* CustomButton.h */; };
+		6131394B2A54A554001F0AE9 /* CustomButton.c in Sources */ = {isa = PBXBuildFile; fileRef = 613139492A54A554001F0AE9 /* CustomButton.c */; };
+		6131394E2A54A568001F0AE9 /* HeaderView.h in Headers */ = {isa = PBXBuildFile; fileRef = 6131394C2A54A568001F0AE9 /* HeaderView.h */; };
+		6131394F2A54A568001F0AE9 /* HeaderView.c in Sources */ = {isa = PBXBuildFile; fileRef = 6131394D2A54A568001F0AE9 /* HeaderView.c */; };
+		613139522A54A57D001F0AE9 /* StatusCell.h in Headers */ = {isa = PBXBuildFile; fileRef = 613139502A54A57D001F0AE9 /* StatusCell.h */; };
+		613139532A54A57D001F0AE9 /* StatusCell.c in Sources */ = {isa = PBXBuildFile; fileRef = 613139512A54A57D001F0AE9 /* StatusCell.c */; };
 		613F0BB9288E3A91008AABF8 /* WorkoutVC_Ext.h in Headers */ = {isa = PBXBuildFile; fileRef = 613F0BB7288E3A91008AABF8 /* WorkoutVC_Ext.h */; };
 		613F0BBA288E3A91008AABF8 /* WorkoutVC_Ext.c in Sources */ = {isa = PBXBuildFile; fileRef = 613F0BB8288E3A91008AABF8 /* WorkoutVC_Ext.c */; };
 		613F0BBC288E3ABC008AABF8 /* WorkoutTimer.h in Headers */ = {isa = PBXBuildFile; fileRef = 613F0BBB288E3ABC008AABF8 /* WorkoutTimer.h */; };
@@ -104,10 +108,6 @@
 		610656D32888947700E904BB /* BaseMacros.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BaseMacros.h; sourceTree = "<group>"; };
 		610B92B7270A6E9000358DBD /* Views.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Views.h; sourceTree = "<group>"; };
 		610B92B8270A6E9000358DBD /* Views.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = Views.c; sourceTree = "<group>"; };
-		610B92C9270A7F4900358DBD /* ContainerView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ContainerView.h; sourceTree = "<group>"; };
-		610B92CA270A7F4900358DBD /* ContainerView.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = ContainerView.c; sourceTree = "<group>"; };
-		611EDDA12741F8750064B254 /* StatusView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StatusView.h; sourceTree = "<group>"; };
-		611EDDA22741F8750064B254 /* StatusView.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = StatusView.c; sourceTree = "<group>"; };
 		611EDDA7274355F10064B254 /* HomeVC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HomeVC.h; sourceTree = "<group>"; };
 		611EDDA8274355F10064B254 /* HomeVC.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = HomeVC.c; sourceTree = "<group>"; };
 		611EDDB12743660C0064B254 /* InputVC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = InputVC.h; sourceTree = "<group>"; };
@@ -124,6 +124,14 @@
 		611EDDE727476ED50064B254 /* HistoryVC.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = HistoryVC.c; sourceTree = "<group>"; };
 		6122433E27934B0D006709E8 /* HealthApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HealthApp.entitlements; sourceTree = "<group>"; };
 		6122433F27934B0D006709E8 /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
+		613139442A54A53F001F0AE9 /* CollectionVC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CollectionVC.h; sourceTree = "<group>"; };
+		613139452A54A53F001F0AE9 /* CollectionVC.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = CollectionVC.c; sourceTree = "<group>"; };
+		613139482A54A554001F0AE9 /* CustomButton.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CustomButton.h; sourceTree = "<group>"; };
+		613139492A54A554001F0AE9 /* CustomButton.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = CustomButton.c; sourceTree = "<group>"; };
+		6131394C2A54A568001F0AE9 /* HeaderView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HeaderView.h; sourceTree = "<group>"; };
+		6131394D2A54A568001F0AE9 /* HeaderView.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = HeaderView.c; sourceTree = "<group>"; };
+		613139502A54A57D001F0AE9 /* StatusCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StatusCell.h; sourceTree = "<group>"; };
+		613139512A54A57D001F0AE9 /* StatusCell.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = StatusCell.c; sourceTree = "<group>"; };
 		613D881E28AB113E00D82689 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		613F0BB7288E3A91008AABF8 /* WorkoutVC_Ext.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WorkoutVC_Ext.h; sourceTree = "<group>"; };
 		613F0BB8288E3A91008AABF8 /* WorkoutVC_Ext.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = WorkoutVC_Ext.c; sourceTree = "<group>"; };
@@ -238,12 +246,16 @@
 		617BDE1926FE48CB00BDDB73 /* View */ = {
 			isa = PBXGroup;
 			children = (
-				610B92CA270A7F4900358DBD /* ContainerView.c */,
-				610B92C9270A7F4900358DBD /* ContainerView.h */,
+				613139452A54A53F001F0AE9 /* CollectionVC.c */,
+				613139442A54A53F001F0AE9 /* CollectionVC.h */,
+				613139492A54A554001F0AE9 /* CustomButton.c */,
+				613139482A54A554001F0AE9 /* CustomButton.h */,
+				6131394D2A54A568001F0AE9 /* HeaderView.c */,
+				6131394C2A54A568001F0AE9 /* HeaderView.h */,
 				611EDDB22743660C0064B254 /* InputVC.c */,
 				611EDDB12743660C0064B254 /* InputVC.h */,
-				611EDDA22741F8750064B254 /* StatusView.c */,
-				611EDDA12741F8750064B254 /* StatusView.h */,
+				613139512A54A57D001F0AE9 /* StatusCell.c */,
+				613139502A54A57D001F0AE9 /* StatusCell.h */,
 				610B92B8270A6E9000358DBD /* Views.c */,
 				610B92B7270A6E9000358DBD /* Views.h */,
 				613F0BC2288E49F8008AABF8 /* Views_VCExt.c */,
@@ -373,11 +385,14 @@
 				611EDDC62744CB2D0064B254 /* UpdateMaxesVC.h in Headers */,
 				610656D42888947700E904BB /* BaseMacros.h in Headers */,
 				614BC73E2888C37D00F43BB2 /* HealthDataManager.h in Headers */,
+				6131394E2A54A568001F0AE9 /* HeaderView.h in Headers */,
 				61FFEEA2272CCCB5002BFFA6 /* AppDelegate.h in Headers */,
 				611EDDE827476ED50064B254 /* HistoryVC.h in Headers */,
 				613F0BB9288E3A91008AABF8 /* WorkoutVC_Ext.h in Headers */,
 				614BC7482888D6B100F43BB2 /* HistoryModel.h in Headers */,
 				613F0BBF288E3AEB008AABF8 /* DatabaseManager.h in Headers */,
+				6131394A2A54A554001F0AE9 /* CustomButton.h in Headers */,
+				613139462A54A53F001F0AE9 /* CollectionVC.h in Headers */,
 				611EDDA9274355F10064B254 /* HomeVC.h in Headers */,
 				610656D128878A1700E904BB /* UserData.h in Headers */,
 				613F0BC3288E49F8008AABF8 /* Views_VCExt.h in Headers */,
@@ -385,9 +400,8 @@
 				610B92B9270A6E9000358DBD /* Views.h in Headers */,
 				611EDDD02745FEA70064B254 /* WorkoutVC.h in Headers */,
 				614DA69A270A8D1F00EC90C4 /* ExerciseManager.h in Headers */,
+				613139522A54A57D001F0AE9 /* StatusCell.h in Headers */,
 				611EDDB32743660C0064B254 /* InputVC.h in Headers */,
-				611EDDA32741F8750064B254 /* StatusView.h in Headers */,
-				610B92CB270A7F4900358DBD /* ContainerView.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -519,8 +533,10 @@
 				613F0BC0288E3AEB008AABF8 /* DatabaseManager.c in Sources */,
 				613F0BC4288E49F8008AABF8 /* Views_VCExt.c in Sources */,
 				61594D0C26068105000D01A1 /* AppDelegate.c in Sources */,
-				611EDDA42741F8750064B254 /* StatusView.c in Sources */,
-				610B92CC270A7F4900358DBD /* ContainerView.c in Sources */,
+				6131394B2A54A554001F0AE9 /* CustomButton.c in Sources */,
+				613139532A54A57D001F0AE9 /* StatusCell.c in Sources */,
+				6131394F2A54A568001F0AE9 /* HeaderView.c in Sources */,
+				613139472A54A53F001F0AE9 /* CollectionVC.c in Sources */,
 				611EDDB42743660C0064B254 /* InputVC.c in Sources */,
 				611EDDBB274487010064B254 /* SettingsVC.c in Sources */,
 				611EDDAA274355F10064B254 /* HomeVC.c in Sources */,

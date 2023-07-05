@@ -1,15 +1,15 @@
 #ifndef WorkoutVC_Ext_h
 #define WorkoutVC_Ext_h
 
-#include "StatusView.h"
+#include "ExerciseManager.h"
+#include "StatusCell.h"
 #include "WorkoutTimer.h"
 
 enum {
     ExerciseStateDisabled,
     ExerciseStateActive,
-    ExerciseStateActiveMult,
     ExerciseStateResting,
-    ExerciseStateCompleted
+    ExerciseStateCompleted = 4
 };
 
 enum {
@@ -28,7 +28,7 @@ void initNotificationCache(void);
 
 void workoutTimer_start(WorkoutTimer *t, int duration, bool scheduleNotification);
 bool exercise_cycle(Exercise *e, WorkoutTimer *timers);
-void exerciseView_configure(StatusView *v);
+void statusCell_configure(StatusCell *v, Exercise *exercise);
 void circuit_start(Circuit *c, WorkoutTimer *timers, bool startTimer);
 int circuit_increment(Circuit *c, WorkoutTimer *timers, Exercise *exercise);
 int workout_increment(Workout *w, WorkoutTimer *timers);

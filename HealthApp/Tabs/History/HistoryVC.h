@@ -3,7 +3,13 @@
 
 #include "HistoryModel.h"
 
+extern Class ChartContainerClass;
 extern Class HistoryVCClass;
+
+typedef struct {
+    id divider;
+    id header;
+} ChartContainer;
 
 typedef struct {
     HistoryModel model;

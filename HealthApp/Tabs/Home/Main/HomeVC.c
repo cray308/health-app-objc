@@ -1,41 +1,74 @@
 #include "HomeVC.h"
 #include <CoreGraphics/CoreGraphics.h>
+#include "CollectionVC.h"
+#include "HeaderView.h"
 #include "SetupWorkoutVC.h"
-#include "StatusView.h"
-#include "Views.h"
+#include "StatusCell.h"
 #include "WorkoutVC.h"
 
 extern id kCAEmitterLayerLine;
 
 Class HomeVCClass;
 
-#pragma mark - Public Functions
+enum {
+    SectionPlan,
+    SectionCustom
+};
 
-void homeVC_updateWorkoutsList(HomeVC *d, uint8_t completedWorkouts) {
-    id gray = getColor(ColorGray), green = getColor(ColorGreen);
-    CFArrayRef views = getArrangedSubviews(d->planContainer.data->stack);
-    int count = (int)CFArrayGetCount(views);
-    for (int i = 0; i < count; ++i) {
-        StatusView *v = getIVV(StatusView, CFArrayGetValueAtIndex(views, i));
-        bool enable = !(completedWorkouts & (1 << getTag(v->button)));
-        setEnabled(v->button, enable);
-        setBackgroundColor(v->box, enable ? gray : green);
-    }
+static CFStringRef cellIDs[2];
+
+static void updateCellBox(StatusCell *v, bool enabled) {
+    setEnabled(v->button, enabled);
+    setBackgroundColor(v->box, enabled ? getColor(ColorGray) : getColor(ColorGreen));
 }
 
-void homeVC_createWorkoutsList(id self, UserData const *data) {
-    HomeVC *d = getIVVC(HomeVC, self);
+static void updateCellColors(id cell, StatusCell *v) {
+    if (v->header) setTextColor(v->header, getColor(ColorLabel));
 
-    CFArrayRef views = getArrangedSubviews(d->planContainer.data->stack);
-    int count = (int)CFArrayGetCount(views);
-    for (int i = 0; i < count; ++i) {
-        removeFromSuperview((id)CFArrayGetValueAtIndex(views, i));
+    setBackgroundColor(getBackgroundView(cell), getColor(ColorSecondaryBGGrouped));
+    setBackgroundColor(getSelectedBackgroundView(cell), colorWithAlphaComponent(ColorLabel, 0.5));
+    setTitleColor(v->button, getColor(ColorLabel), ControlStateNormal);
+    setTitleColor(v->button, getColor(ColorDisabled), ControlStateDisabled);
+}
+
+void updateHeaderColors(HeaderView *v) {
+    setBackgroundColor(v->divider, getColor(ColorDiv));
+    setTextColor(v->label, getColor(ColorLabel));
+}
+
+#pragma mark - Lifecycle
+
+id homeVC_init(void) {
+    memcpy(cellIDs, &(CFStringRef []){FullCellID, BasicCellID}, 2 * sizeof(CFStringRef));
+
+    CFStringRef readOnlyHeaders[2];
+    fillStringArray(readOnlyHeaders, CFSTR("homeHeader%d"), 2);
+    CFMutableStringRef *headers = malloc(2 * sizeof(CFMutableStringRef));
+    for (int i = 0; i < 2; ++i) {
+        headers[i] = CFStringCreateMutableCopy(NULL, 64, readOnlyHeaders[i]);
+        CFRelease(readOnlyHeaders[i]);
+    }
+    int *itemCounts = malloc(2 * sizeof(int));
+    memcpy(itemCounts, &(int []){6, 5}, 2 * sizeof(int));
+    return collectionVC_init(HomeVCClass, headers, 2, itemCounts);
+}
+
+static void loadSections(CollectionVC *p, HomeVC *d, UserData const *data) {
+    int items = p->itemCounts[SectionPlan];
+    p->itemCounts[SectionPlan] = 0;
+    for (int i = 0; i < items; ++i) {
+        if (p->labels[SectionPlan][i]) {
+            CFRelease(p->labels[SectionPlan][i]);
+            p->labels[SectionPlan][i] = NULL;
+        }
+        if (p->titles[SectionPlan][i]) {
+            CFRelease(p->titles[SectionPlan][i]);
+            p->titles[SectionPlan][i] = NULL;
+        }
     }
 
-    bool shouldHide = data->plan > MaxValidChar || data->planStart > time(NULL);
-    setHidden(d->planContainer.view, shouldHide);
-    setHidden(d->customContainer.data->divider, shouldHide);
-    if (shouldHide) return;
+    p->firstSection = data->plan > MaxValidChar || data->planStart > time(NULL);
+    if (p->firstSection == SectionCustom) return;
 
     CFLocaleRef locale = copyLocale();
     CFDateFormatterRef formatter = CFDateFormatterCreate(NULL, locale, 0, 0);
@@ -43,100 +76,163 @@ void homeVC_createWorkoutsList(id self, UserData const *data) {
     CFRelease(locale);
     CFStringRef workoutNames[6] = {0};
     getWeeklyWorkoutNames(workoutNames, data->plan);
-    SEL tapSel = getTapSel();
-    StatusView *sv;
     time_t date = data->weekStart + (DaySeconds >> 1);
 
-    for (int i = 0; i < 6; ++i, date += DaySeconds) {
+    for (int i = 0, itemIndex = 0; i < 6; ++i, date += DaySeconds) {
         if (!workoutNames[i]) continue;
-        id btn = statusView_init(&sv, formatDate(formatter, date), workoutNames[i], i, self, tapSel);
-        addArrangedSubview(d->planContainer.data->stack, btn);
-        releaseView(btn);
+        ++p->itemCounts[SectionPlan];
+        p->labels[SectionPlan][itemIndex] = formatDate(formatter, date);
+        p->titles[SectionPlan][itemIndex] = workoutNames[i];
+        d->indexMapping[itemIndex++] = i;
     }
     CFRelease(formatter);
 
-    homeVC_updateWorkoutsList(d, data->completedWorkouts);
+    d->completedWorkouts = data->completedWorkouts;
+    collectionVC_calculateHeights(p, SectionPlan);
 }
-
-void homeVC_updateColors(id self) {
-    HomeVC *d = getIVVC(HomeVC, self);
-    id labelColor = getColor(ColorLabel), gray = getColor(ColorGray), green = getColor(ColorGreen);
-    setBackgroundColor(getView(self), getColor(ColorPrimaryBGGrouped));
-    containerView_updateColors(d->planContainer.data);
-    containerView_updateColors(d->customContainer.data);
-    CFArrayRef views = getArrangedSubviews(d->planContainer.data->stack);
-    int count = (int)CFArrayGetCount(views);
-    for (int i = 0; i < count; ++i) {
-        StatusView *v = getIVV(StatusView, CFArrayGetValueAtIndex(views, i));
-        setTextColor(v->header, labelColor);
-        updateButtonColors(v->button, ColorLabel);
-        setBackgroundColor(v->box, isEnabled(v->button) ? gray : green);
-    }
-    views = getArrangedSubviews(d->customContainer.data->stack);
-    for (int i = 0; i < 5; ++i) {
-        StatusView *v = getIVV(StatusView, CFArrayGetValueAtIndex(views, i));
-        updateButtonColors(v->button, ColorLabel);
-    }
-}
-
-#pragma mark - Selectors/Methods
 
 void homeVC_viewDidLoad(id self, SEL _cmd) {
-    msgSupV(supSig(), self, VC, _cmd);
+    collectionVC_viewDidLoad(self, _cmd);
 
-    HomeVC *d = getIVVC(HomeVC, self);
+    CollectionVC *p = getIVVC(CollectionVC, self);
+    HomeVC *d = getIVVCS(HomeVC, p);
     setupNavItem(self, CFSTR("tabs0"), NULL);
 
-    CFStringRef titles[5] = {[0] = localize(CFSTR("homeTestMax"))}, headers[2];
-    fillStringArray(&titles[1], CFSTR("workoutTypes%d"), 4);
-    fillStringArray(headers, CFSTR("homeHeader%d"), 2);
+    p->titles[SectionCustom][0] = localize(CFSTR("homeTestMax"));
+    fillStringArray(&p->titles[SectionCustom][1], CFSTR("workoutTypes%d"), 4);
+    d->indexMapping[5] = 5;
+    collectionVC_calculateHeights(p, -1);
+    loadSections(p, d, getUserData());
 
-    d->planContainer.view = containerView_init(&d->planContainer.data, headers[0]);
-    setHidden(d->planContainer.data->divider, true);
-    setID(d->planContainer.view, CFSTR("planContainer"))
-    CVPair customContainer;
-    customContainer.view = containerView_init(&customContainer.data, headers[1]);
-    setSpacing(customContainer.data->stack, ViewSpacing);
-    setID(customContainer.view, CFSTR("customContainer"))
-    memcpy(&d->customContainer, &customContainer, sizeof(CVPair));
-
-    SEL tapSel = getCustomButtonSel();
-    StatusView *sv;
-    for (int i = 0; i < 5; ++i) {
-        id btn = statusView_init(&sv, NULL, titles[i], i, self, tapSel);
-        setHidden(sv->box, true);
-        addArrangedSubview(customContainer.data->stack, btn);
-        releaseView(btn);
-    }
-
-    id vStack = createVStack((id []){d->planContainer.view, customContainer.view}, 2);
-    setSpacing(vStack, GroupSpacing);
-    setupHierarchy(self, vStack, createScrollView(), ColorPrimaryBGGrouped);
-
-    homeVC_createWorkoutsList(self, getUserData());
+    setDataSource(p->collectionView, self);
+    setDelegate(p->collectionView, self);
 }
 
-void homeVC_navigateToWorkout(id self, Workout *workout) {
-    id workoutVC = workoutVC_init(workout);
+#pragma mark - Collection Data Source
+
+id homeVC_cellForItemAtIndexPath(id self, SEL _cmd _U_, id collectionView, id indexPath) {
+    CollectionVC *p = getIVVC(CollectionVC, self);
+    HomeVC *d = getIVVCS(HomeVC, p);
+    long section = getSection(indexPath), item = getItem(indexPath);
+    id cell = dequeueReusableCell(collectionView, cellIDs[section], indexPath);
+    StatusCell *v = getIVC(cell);
+    if (section == SectionPlan) {
+        setText(v->header, p->labels[SectionPlan][item]);
+        updateCellBox(v, !(d->completedWorkouts & (1 << d->indexMapping[item])));
+    } else {
+        setHidden(v->box, true);
+    }
+
+    setTitle(v->button, p->titles[section][item], ControlStateNormal);
+    if (d->refreshItemColors[section] & (1 << item)) {
+        updateCellColors(cell, v);
+        d->refreshItemColors[section] &= ~(1 << item);
+    }
+
+    if (v->header) statusCell_updateAccessibility(v);
+    setIDFormatted(cell, CFSTR("cell_%ld_%ld"), section, item)
+    return cell;
+}
+
+id homeVC_viewForSupplementaryElement(id self, SEL _cmd _U_,
+                                      id collectionView, CFStringRef kind _U_, id indexPath) {
+    HomeVC *d = getIVVCC(HomeVC, CollectionVC, self);
+    id header = collectionVC_viewForSupplementaryElement(self, nil, collectionView, kind, indexPath);
+    long section = getSection(indexPath);
+    if (d->refreshHeaderColors & (1 << section)) {
+        updateHeaderColors(getIVR(header));
+        d->refreshHeaderColors &= ~(1 << section);
+    }
+    return header;
+}
+
+#pragma mark - Collection Delegate
+
+bool homeVC_shouldSelectItem(id self, SEL _cmd _U_, id collectionView _U_, id indexPath) {
+    if (getSection(indexPath) == 1) return true;
+
+    HomeVC *d = getIVVCC(HomeVC, CollectionVC, self);
+    return !(d->completedWorkouts & (1 << d->indexMapping[getItem(indexPath)]));
+}
+
+void homeVC_didSelectItemAtIndexPath(id self, SEL _cmd _U_, id collectionView, id indexPath) {
+    HomeVC *d = getIVVCC(HomeVC, CollectionVC, self);
+    long section = getSection(indexPath);
+    uint8_t index = (uint8_t)getItem(indexPath);
+    deselectItem(collectionView, indexPath);
+    CFMutableStringRef *headers;
+    if (section == SectionPlan) {
+        d->selectedIndex = (int)index;
+        UserData const *data = getUserData();
+        Workout *workout = getWeeklyWorkout(d->indexMapping[index],
+                                            data->plan, data->lifts, &headers);
+        homeVC_navigateToWorkout(self, workout, headers);
+    } else if (!index) {
+        WorkoutParams params = {StrengthIndexTestMax, 1, 1, 100, WorkoutStrength, UCHAR_MAX};
+        Workout *workout = getWorkoutFromLibrary(&params, getUserData()->lifts, &headers);
+        homeVC_navigateToWorkout(self, workout, headers);
+    } else {
+        presentModalVC(self, setupWorkoutVC_init(self, --index));
+    }
+}
+
+#pragma mark - Public Functions
+
+void homeVC_navigateToWorkout(id self, Workout *workout, CFMutableStringRef *headers) {
+    id workoutVC = workoutVC_init(workout, headers);
     id navVC = getNavVC(self);
     msgV(objSig(void, id, bool), navVC, sel_getUid("pushViewController:animated:"), workoutVC, true);
     releaseVC(workoutVC);
 }
 
-void homeVC_planButtonTapped(id self, SEL _cmd _U_, id button) {
-    UserData const *data = getUserData();
-    homeVC_navigateToWorkout(self, getWeeklyWorkout((int)getTag(button), data->plan, data->lifts));
+void homeVC_createWorkoutsList(id self, UserData const *data) {
+    CollectionVC *p = getIVVC(CollectionVC, self);
+    loadSections(p, getIVVCS(HomeVC, p), data);
+    id customWorkoutsHeader = supplementaryView(p->collectionView, makeIndexPath(0, SectionCustom));
+    if (customWorkoutsHeader)
+        setAlpha(getIVR(customWorkoutsHeader)->divider, p->firstSection == SectionPlan);
+
+    reloadSections(p->collectionView, 0);
 }
 
-void homeVC_customButtonTapped(id self, SEL _cmd _U_, id button) {
-    uint8_t index = (uint8_t)getTag(button);
-    if (!index) {
-        WorkoutParams params = {StrengthIndexTestMax, 1, 1, 100, WorkoutStrength, UCHAR_MAX};
-        homeVC_navigateToWorkout(self, getWorkoutFromLibrary(&params, getUserData()->lifts));
-        return;
+void homeVC_updateWorkoutsList(id self, uint8_t completedWorkouts) {
+    CollectionVC *p = getIVVC(CollectionVC, self);
+    HomeVC *d = getIVVCS(HomeVC, p);
+    d->completedWorkouts = completedWorkouts;
+    int items = p->itemCounts[SectionPlan];
+    for (int i = 0; i < items; ++i) {
+        id cell = cellForItem(p->collectionView, makeIndexPath(i, SectionPlan));
+        if (cell) updateCellBox(getIVC(cell), !(d->completedWorkouts & (1 << d->indexMapping[i])));
     }
+}
 
-    presentModalVC(self, setupWorkoutVC_init(self, --index));
+void homeVC_updateColors(id self) {
+    CollectionVC *p = getIVVC(CollectionVC, self);
+    HomeVC *d = getIVVCS(HomeVC, p);
+    setBackgroundColor(p->collectionView, getColor(ColorPrimaryBGGrouped));
+    for (int i = p->firstSection; i < p->totalSections; ++i) {
+        id indexPath = makeIndexPath(0, i);
+        id header = supplementaryView(p->collectionView, indexPath);
+        if (header) {
+            updateHeaderColors(getIVR(header));
+        } else {
+            d->refreshHeaderColors |= (1 << i);
+        }
+
+        int items = p->itemCounts[i];
+        for (int j = 0; j < items; ++j) {
+            indexPath = makeIndexPath(j, i);
+            id cell = cellForItem(p->collectionView, indexPath);
+            if (cell) {
+                StatusCell *v = getIVC(cell);
+                if (i == SectionPlan)
+                    updateCellBox(v, !(d->completedWorkouts & (1 << d->indexMapping[i])));
+                updateCellColors(cell, v);
+            } else {
+                d->refreshItemColors[i] |= (1 << j);
+            }
+        }
+    }
 }
 
 #pragma mark - Navigate Back From Workout
@@ -162,38 +258,38 @@ static void showConfetti(id self) {
         getCGImage(imageNamed(Image, iimn, CFSTR("cv3")), icgi)
     };
 
-    Class Cell = objc_getClass("CAEmitterCell");
+    Class EmitterCell = objc_getClass("CAEmitterCell");
     SEL esbr = sel_getUid("setBirthRate:"), esl = sel_getUid("setLifetime:");
     SEL esv = sel_getUid("setVelocity:"), esel = sel_getUid("setEmissionLongitude:");
     SEL eser = sel_getUid("setEmissionRange:"), ess = sel_getUid("setSpin:");
     SEL escl = sel_getUid("setColor:"), escn = sel_getUid("setContents:");
     SEL esscr = sel_getUid("setScaleRange:"), essc = sel_getUid("setScale:");
     void (*setBirthRate)(id, SEL, float) =
-      (void(*)(id, SEL, float))class_getMethodImplementation(Cell, esbr);
+      (void(*)(id, SEL, float))class_getMethodImplementation(EmitterCell, esbr);
     void (*setLifetime)(id, SEL, float) =
-      (void(*)(id, SEL, float))class_getMethodImplementation(Cell, esl);
+      (void(*)(id, SEL, float))class_getMethodImplementation(EmitterCell, esl);
     void (*setVelocity)(id, SEL, CGFloat) =
-      (void(*)(id, SEL, CGFloat))class_getMethodImplementation(Cell, esv);
+      (void(*)(id, SEL, CGFloat))class_getMethodImplementation(EmitterCell, esv);
     void (*setEmissionLongitude)(id, SEL, CGFloat) =
-      (void(*)(id, SEL, CGFloat))class_getMethodImplementation(Cell, esel);
+      (void(*)(id, SEL, CGFloat))class_getMethodImplementation(EmitterCell, esel);
     void (*setEmissionRange)(id, SEL, CGFloat) =
-      (void(*)(id, SEL, CGFloat))class_getMethodImplementation(Cell, eser);
+      (void(*)(id, SEL, CGFloat))class_getMethodImplementation(EmitterCell, eser);
     void (*setSpin)(id, SEL, CGFloat) =
-      (void(*)(id, SEL, CGFloat))class_getMethodImplementation(Cell, ess);
+      (void(*)(id, SEL, CGFloat))class_getMethodImplementation(EmitterCell, ess);
     void (*setColor)(id, SEL, CGColorRef) =
-      (void(*)(id, SEL, CGColorRef))class_getMethodImplementation(Cell, escl);
+      (void(*)(id, SEL, CGColorRef))class_getMethodImplementation(EmitterCell, escl);
     void (*setContents)(id, SEL, id) =
-      (void(*)(id, SEL, id))class_getMethodImplementation(Cell, escn);
+      (void(*)(id, SEL, id))class_getMethodImplementation(EmitterCell, escn);
     void (*setScaleRange)(id, SEL, CGFloat) =
-      (void(*)(id, SEL, CGFloat))class_getMethodImplementation(Cell, esscr);
+      (void(*)(id, SEL, CGFloat))class_getMethodImplementation(EmitterCell, esscr);
     void (*setScale)(id, SEL, CGFloat) =
-      (void(*)(id, SEL, CGFloat))class_getMethodImplementation(Cell, essc);
+      (void(*)(id, SEL, CGFloat))class_getMethodImplementation(EmitterCell, essc);
 
     int velocities[] = {100, 90, 150, 200};
     CFMutableArrayRef cells = CFArrayCreateMutable(NULL, 16, &kCFTypeArrayCallBacks);
 
     for (int i = 0; i < 16; ++i) {
-        id cell = new(Cell);
+        id cell = new(EmitterCell);
         setBirthRate(cell, esbr, 4);
         setLifetime(cell, esl, 14);
         setVelocity(cell, esv, velocities[arc4random_uniform(4)]);
@@ -215,8 +311,7 @@ static void showConfetti(id self) {
     id confetti = new(View);
     useConstraints(confetti);
     setID(confetti, CFSTR("confetti"))
-    setBackgroundColor(confetti, msgV(objSig(id, CGFloat), getColor(ColorGray),
-                                      sel_getUid("colorWithAlphaComponent:"), 0.8));
+    setBackgroundColor(confetti, colorWithAlphaComponent(ColorGray, 0.8));
 
     id layer = new(objc_getClass("CAEmitterLayer"));
     msgV(objSig(void, id), getLayer(confetti), sel_getUid("addSublayer:"), layer);
@@ -233,7 +328,7 @@ static void showConfetti(id self) {
     pinToSafeArea(confetti, view);
 
     dispatch_after(dispatch_time(0, 5000000000), dispatch_get_main_queue(), ^{
-        removeFromSuperview(confetti);
+        msgV(objSig(void), confetti, sel_getUid("removeFromSuperview"));
         releaseView(confetti);
         id alert = createAlert(CFSTR("homeAlert"), CFSTR("homeAlertMessage"));
         addAlertAction(alert, CFSTR("ok"), ActionStyleDefault, NULL);
@@ -243,13 +338,13 @@ static void showConfetti(id self) {
 }
 
 void homeVC_handleFinishedWorkout(id self, uint8_t completedWorkouts) {
-    HomeVC *d = getIVVC(HomeVC, self);
+    CollectionVC *p = getIVVC(CollectionVC, self);
     int totalCompleted = 0;
     for (int i = 0; i < 6; ++i) {
         if ((1 << i) & completedWorkouts) ++totalCompleted;
     }
-    homeVC_updateWorkoutsList(d, completedWorkouts);
-    if (CFArrayGetCount(getArrangedSubviews(d->planContainer.data->stack)) == totalCompleted) {
+    homeVC_updateWorkoutsList(self, completedWorkouts);
+    if (p->itemCounts[SectionPlan] == totalCompleted) {
         dispatch_after(dispatch_time(0, 2500000000), dispatch_get_main_queue(), ^{
             showConfetti(self);
         });

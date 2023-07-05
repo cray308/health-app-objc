@@ -23,8 +23,7 @@ enum {
 };
 
 static AppDelegate *getAppDelegate(void) {
-    id shared = msgV(clsSig(id), objc_getClass("UIApplication"), sel_getUid("sharedApplication"));
-    return (AppDelegate *)msgV(objSig(id), shared, sel_getUid("delegate"));
+    return (AppDelegate *)msgV(objSig(id), getSharedApplication(), sel_getUid("delegate"));
 }
 
 id getAppWindow(void) { return getAppDelegate()->window; }
@@ -53,7 +52,7 @@ bool appDelegate_didFinishLaunching(AppDelegate *self, SEL _cmd _U_,
     initWorkoutData(week);
 
     HistoryModel *historyModel;
-    self->tabs[TabHome] = new(HomeVCClass);
+    self->tabs[TabHome] = homeVC_init();
     self->tabs[TabHistory] = historyVC_init(&historyModel);
     self->tabs[TabSettings] = new(SettingsVCClass);
 
@@ -128,8 +127,7 @@ void updateUserInfo(uint8_t plan, uint8_t darkMode, int const *weights) {
 
 void deleteAppData(void) {
     AppDelegate *self = getAppDelegate();
-    if (userData_clear(&self->userData))
-        homeVC_updateWorkoutsList(getIVVC(HomeVC, self->tabs[TabHome]), 0);
+    if (userData_clear(&self->userData)) homeVC_updateWorkoutsList(self->tabs[TabHome], 0);
     historyVC_clearData(self->tabs[TabHistory]);
     deleteStoredData();
 }

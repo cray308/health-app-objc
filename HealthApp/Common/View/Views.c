@@ -1,11 +1,11 @@
 #include "Views.h"
 
-extern CFStringRef UIFontTextStyleHeadline;
 extern CGFloat UIFontWeightMedium;
 
 struct VCache ViewTable;
 Class VC;
 Class View;
+Class Button;
 Class BarButtonItem;
 
 enum {
@@ -32,15 +32,9 @@ static struct PrivVData {
         id (*scaledFont)(id, SEL, id, CGFloat);
     } metrics;
     const struct {
-        Class cls;
-        SEL pf, sf;
-        id (*preferred)(Class, SEL, CFStringRef);
+        SEL sf;
         id (*system)(Class, SEL, CGFloat, CGFloat);
     } font;
-    const struct {
-        SEL ac;
-        void (*activateConstraints)(Class, SEL, CFArrayRef);
-    } con;
     const struct {
         SEL sf, safstfw, saffcsc;
     } common;
@@ -59,10 +53,10 @@ static struct PrivVData {
         void (*setAdjustsFontForContentSizeCategory)(id, SEL, bool);
         void (*setNumberOfLines)(id, SEL, long);
         void (*setLineBreakMode)(id, SEL, long);
+        void (*sTextAlignment)(id, SEL, long);
         void (*setMinimumScaleFactor)(id, SEL, CGFloat);
     } label;
     const struct {
-        Class cls;
         SEL bwt, tl;
         id (*withType)(Class, SEL, long);
         id (*titleLabel)(id, SEL);
@@ -87,12 +81,8 @@ static struct PrivVData {
     } field;
 } pvc;
 
-id getPreferredFont(CFStringRef style) {
-    return pvc.font.preferred(pvc.font.cls, pvc.font.pf, style);
-}
-
 id getSystemFont(int size, CGFloat weight) {
-    return pvc.font.system(pvc.font.cls, pvc.font.sf, size, weight);
+    return pvc.font.system(ViewTable.font.cls, pvc.font.sf, size, weight);
 }
 
 void setFieldBackgroundColor(id field, id color) { pvc.field.setBG(field, SetBackgroundSel, color); }
@@ -101,7 +91,7 @@ void setFieldTextColor(id field, id color) {
     pvc.field.sTextColor(field, ViewTable.common.stec, color);
 }
 
-void initViewData(void (*inits[])(void)) {
+void initViewData(void (*inits[])(void), int count) {
     Class Font = objc_getClass("UIFont");
     SEL fpf = sel_getUid("preferredFontForTextStyle:"), fsf = sel_getUid("systemFontOfSize:weight:");
 
@@ -119,17 +109,19 @@ void initViewData(void (*inits[])(void)) {
     SEL cmstamic = sel_getUid("setTranslatesAutoresizingMaskIntoConstraints:");
     SEL cmsbc = sel_getUid("setBackgroundColor:"), cmste = sel_getUid("setText:");
     SEL cmgt = sel_getUid("text"), cmstec = sel_getUid("setTextColor:");
-    SEL cmsd = sel_getUid("setDelegate:"), cmsf = sel_getUid("setFont:");
-    SEL cmsafstfw = sel_getUid("setAdjustsFontSizeToFitWidth:");
+    SEL cmsta = sel_getUid("setTextAlignment:"), cmsd = sel_getUid("setDelegate:");
+    SEL cmsf = sel_getUid("setFont:"), cmsafstfw = sel_getUid("setAdjustsFontSizeToFitWidth:");
     SEL cmsaffcsc = sel_getUid("setAdjustsFontForContentSizeCategory:");
 
     SEL vcsv = sel_getUid("setValue:forKey:");
     SEL vcgv = sel_getUid("view"), vcnc = sel_getUid("navigationController");
 
     SEL vgs = sel_getUid("subviews");
-    SEL vas = sel_getUid("addSubview:"), vrfs = sel_getUid("removeFromSuperview");
+    SEL vas = sel_getUid("addSubview:");
     SEL vgl = sel_getUid("layer"), vscr = sel_getUid("setCornerRadius:"), vst = sel_getUid("setTag:");
-    SEL vgt = sel_getUid("tag"), vsh = sel_getUid("setHidden:");
+    SEL vgt = sel_getUid("tag"), vsh = sel_getUid("setHidden:"), vsa = sel_getUid("setAlpha:");
+    SEL vschp = sel_getUid("setContentHuggingPriority:forAxis:");
+    SEL vsccrp = sel_getUid("setContentCompressionResistancePriority:forAxis:");
     SEL vslm = sel_getUid("setLayoutMargins:"), vsuie = sel_getUid("setUserInteractionEnabled:");
     SEL vsal = sel_getUid("setAccessibilityLabel:"), vsah = sel_getUid("setAccessibilityHint:");
     SEL vsav = sel_getUid("setAccessibilityValue:"), vsat = sel_getUid("setAccessibilityTraits:");
@@ -138,7 +130,6 @@ void initViewData(void (*inits[])(void)) {
 
     Class Stack = objc_getClass("UIStackView");
     SEL iStack = sel_getUid("initWithArrangedSubviews:"), staas = sel_getUid("addArrangedSubview:");
-    SEL stas = sel_getUid("arrangedSubviews");
     SEL stss = sel_getUid("setSpacing:"), stscs = sel_getUid("setCustomSpacing:afterView:");
     SEL stslmra = sel_getUid("setLayoutMarginsRelativeArrangement:");
     SEL stsax = sel_getUid("setAxis:"), stsal = sel_getUid("setAlignment:");
@@ -147,9 +138,9 @@ void initViewData(void (*inits[])(void)) {
     SEL lsnl = sel_getUid("setNumberOfLines:"), lslbm = sel_getUid("setLineBreakMode:");
     SEL lsmsf = sel_getUid("setMinimumScaleFactor:");
 
-    Class Button = objc_getClass("UIButton");
+    Button = objc_getClass("UIButton");
     SEL bbwt = sel_getUid("buttonWithType:");
-    SEL bge = sel_getUid("isEnabled");
+    SEL bge = sel_getUid("isEnabled"), bsnl = sel_getUid("setNeedsLayout");
     SEL bat = sel_getUid("addTarget:action:forControlEvents:"), bse = sel_getUid("setEnabled:");
     SEL bst = sel_getUid("setTitle:forState:"), bstc = sel_getUid("setTitleColor:forState:");
     SEL bct = sel_getUid("currentTitle"), btl = sel_getUid("titleLabel");
@@ -170,17 +161,19 @@ void initViewData(void (*inits[])(void)) {
     SEL scsci = sel_getUid("setContentInset:"), scsr = sel_getUid("scrollRectToVisible:animated:");
 
     memcpy(&ViewTable, &(struct VCache){
+        {Font, fpf, (id(*)(Class, SEL, CFStringRef))getClassMethodImp(Font, fpf)},
         {
-            Constraint, cncwi, cnsa, cnsp,
+            Constraint, cncwi, cnac, cnsa, cnsp,
             ((id(*)(Class, SEL, id, long, long, id, long, CGFloat, CGFloat))
              getClassMethodImp(Constraint, cncwi)),
+            (void(*)(Class, SEL, CFArrayRef))getClassMethodImp(Constraint, cnac),
             (void(*)(id, SEL, bool))class_getMethodImplementation(Constraint, cnsa),
             (void(*)(id, SEL, float))class_getMethodImplementation(Constraint, cnsp)
         },
         {
             sel_getUid("setBarTintColor:"),
             cmstic,
-            cmstamic, cmsbc, cmste, cmgt, cmstec, cmsd, sel_getUid("setTitle:")
+            cmstamic, cmsbc, cmste, cmgt, cmstec, cmsta, cmsd, sel_getUid("setTitle:")
         },
         {
             .sv = vcsv,
@@ -194,17 +187,19 @@ void initViewData(void (*inits[])(void)) {
             .gs = vgs, .subviews = (CFArrayRef(*)(id, SEL))class_getMethodImplementation(View, vgs),
             .classSize =
             class_getInstanceSize(View),
-            vas, vrfs, vgl, vscr, vst, vgt, vsh, vslm, vsuie,
+            vas, vgl, vscr, vst, vgt, vsh, vsa, vschp, vsccrp, vslm, vsuie,
             vsal, vsah, vsav, vsat, vsiae, vvwt, vgb, vcr,
             (void(*)(id, SEL, bool))class_getMethodImplementation(View, cmstamic),
             (void(*)(id, SEL, id))class_getMethodImplementation(View, cmsbc),
             (void(*)(id, SEL, id))class_getMethodImplementation(View, vas),
-            (void(*)(id, SEL))class_getMethodImplementation(View, vrfs),
             (id(*)(id, SEL))class_getMethodImplementation(View, vgl),
             (void(*)(id, SEL, CGFloat))class_getMethodImplementation(objc_getClass("CALayer"), vscr),
             (void(*)(id, SEL, long))class_getMethodImplementation(View, vst),
             (long(*)(id, SEL))class_getMethodImplementation(View, vgt),
             (void(*)(id, SEL, bool))class_getMethodImplementation(View, vsh),
+            (void(*)(id, SEL, CGFloat))class_getMethodImplementation(View, vsa),
+            (void(*)(id, SEL, float, long))class_getMethodImplementation(View, vschp),
+            (void(*)(id, SEL, float, long))class_getMethodImplementation(View, vsccrp),
             (void(*)(id, SEL, HAInsets))class_getMethodImplementation(View, vslm),
             (void(*)(id, SEL, bool))class_getMethodImplementation(View, vsuie),
             (void(*)(id, SEL, CFStringRef))class_getMethodImplementation(View, vsal),
@@ -217,10 +212,9 @@ void initViewData(void (*inits[])(void)) {
             getRectMethodImplementation(View, vcr, CGRect, id)
         },
         {
-            staas, stas, stss, stscs, stslmra,
+            staas, stss, stscs, stslmra,
             (void(*)(id, SEL, bool))class_getMethodImplementation(Stack, cmstamic),
             (void(*)(id, SEL, id))class_getMethodImplementation(Stack, staas),
-            (CFArrayRef(*)(id, SEL))class_getMethodImplementation(Stack, stas),
             (void(*)(id, SEL, CGFloat))class_getMethodImplementation(Stack, stss),
             (void(*)(id, SEL, CGFloat, id))class_getMethodImplementation(Stack, stscs),
             (void(*)(id, SEL, bool))class_getMethodImplementation(Stack, stslmra)
@@ -231,13 +225,13 @@ void initViewData(void (*inits[])(void)) {
             (void(*)(id, SEL, id))class_getMethodImplementation(Label, cmstec)
         },
         {
-            .ge = bge, .getEnabled = (bool(*)(id, SEL))class_getMethodImplementation(Button, bge),
-            .at =
-            bat, bse, bst, bstc, bct,
+            bat, bse, bge, bst, bstc, bsnl, bct,
             (void(*)(id, SEL, id, SEL, u_long))class_getMethodImplementation(Button, bat),
             (void(*)(id, SEL, bool))class_getMethodImplementation(Button, bse),
+            (bool(*)(id, SEL))class_getMethodImplementation(Button, bge),
             (void(*)(id, SEL, CFStringRef, u_long))class_getMethodImplementation(Button, bst),
             (void(*)(id, SEL, id, u_long))class_getMethodImplementation(Button, bstc),
+            (void(*)(id, SEL))class_getMethodImplementation(Button, bsnl),
             (CFStringRef(*)(id, SEL))class_getMethodImplementation(Button, bct)
         },
         {
@@ -266,12 +260,7 @@ void initViewData(void (*inits[])(void)) {
             (id(*)(id, SEL, CFStringRef))class_getMethodImplementation(Metrics, iMet),
             (id(*)(id, SEL, id, CGFloat))class_getMethodImplementation(Metrics, msf)
         },
-        {
-            Font, fpf, fsf,
-            (id(*)(Class, SEL, CFStringRef))getClassMethodImp(Font, fpf),
-            (id(*)(Class, SEL, CGFloat, CGFloat))getClassMethodImp(Font, fsf)
-        },
-        {cnac, (void(*)(Class, SEL, CFArrayRef))getClassMethodImp(Constraint, cnac)},
+        {fsf, (id(*)(Class, SEL, CGFloat, CGFloat))getClassMethodImp(Font, fsf)},
         {cmsf, cmsafstfw, cmsaffcsc},
         {
             Stack, iStack, stsax, stsal,
@@ -286,10 +275,11 @@ void initViewData(void (*inits[])(void)) {
             (void(*)(id, SEL, bool))class_getMethodImplementation(Label, cmsaffcsc),
             (void(*)(id, SEL, long))class_getMethodImplementation(Label, lsnl),
             (void(*)(id, SEL, long))class_getMethodImplementation(Label, lslbm),
+            (void(*)(id, SEL, long))class_getMethodImplementation(Label, cmsta),
             (void(*)(id, SEL, CGFloat))class_getMethodImplementation(Label, lsmsf)
         },
         {
-            Button, bbwt, btl,
+            bbwt, btl,
             (id(*)(Class, SEL, long))getClassMethodImp(Button, bbwt),
             (id(*)(id, SEL))class_getMethodImplementation(Button, btl)
         },
@@ -311,10 +301,10 @@ void initViewData(void (*inits[])(void)) {
             (void(*)(id, SEL, id))class_getMethodImplementation(Field, tfsiav)
         }
     }, sizeof(struct PrivVData));
-    inits[0]();
-    inits[1]();
-    inits[2]();
-    inits[3]();
+
+    for (int i = 0; i < count; ++i) {
+        inits[i]();
+    }
 }
 
 static void setupLabelFont(id label, id font) {
@@ -322,6 +312,12 @@ static void setupLabelFont(id label, id font) {
     pvc.label.setAdjustsFontSizeToFitWidth(label, pvc.common.safstfw, true);
     pvc.label.setAdjustsFontForContentSizeCategory(label, pvc.common.saffcsc, true);
     pvc.label.setMinimumScaleFactor(label, pvc.label.smsf, 0.35);
+}
+
+static void configureMultilineLabel(id label, id font) {
+    setupLabelFont(label, font);
+    pvc.label.setNumberOfLines(label, pvc.label.snl, 0);
+    pvc.label.setLineBreakMode(label, pvc.label.slbm, LineBreakByWordWrapping);
 }
 
 #pragma mark - Constraints
@@ -333,7 +329,7 @@ void pin(id view, id container) {
         makeConstraint(view, LayoutAttributeLeading, 0, container, LayoutAttributeLeading, 0),
         makeConstraint(view, LayoutAttributeTrailing, 0, container, LayoutAttributeTrailing, 0)
     }, 4, NULL);
-    pvc.con.activateConstraints(ViewTable.con.cls, pvc.con.ac, constraints);
+    activateConstraints(constraints);
     CFRelease(constraints);
 }
 
@@ -365,33 +361,52 @@ id createLabel(CFStringRef text, CFStringRef style, int textColor) {
         setText(label, text);
         CFRelease(text);
     }
-    setupLabelFont(label, pvc.font.preferred(pvc.font.cls, pvc.font.pf, style));
     setTextColor(label, getColor(textColor));
-    pvc.label.setNumberOfLines(label, pvc.label.snl, 0);
-    pvc.label.setLineBreakMode(label, pvc.label.slbm, LineBreakByWordWrapping);
+    configureMultilineLabel(label, getPreferredFont(style));
     return label;
 }
 
-id createButton(CFStringRef title, int titleColor, id target, SEL action) {
-    id button = pvc.button.withType(pvc.button.cls, pvc.button.bwt, ButtonTypeSystem);
+static void configureMultilineButton(id button, CFStringRef style) {
+    id label = pvc.button.titleLabel(button, pvc.button.tl);
+    configureMultilineLabel(label, getPreferredFont(style));
+    pvc.label.sTextAlignment(label, ViewTable.common.sta, TextAlignmentCenter);
+    setContentHuggingPriority(button, 249, ConstraintAxisVertical);
+    setContentCompressionResistancePriority(button, 745, ConstraintAxisVertical);
+    CFArrayRef constraints = CFArrayCreate(NULL, (const void *[]){
+        makeConstraint(label, LayoutAttributeTop, 1, button, LayoutAttributeTop, 0),
+        makeConstraint(label, LayoutAttributeBottom, -1, button, LayoutAttributeBottom, 0),
+        makeConstraint(label, LayoutAttributeLeading, 1, button, LayoutAttributeLeading, 0),
+        makeConstraint(label, LayoutAttributeTrailing, -1, button, LayoutAttributeTrailing, 0)
+    }, 4, NULL);
+    activateConstraints(constraints);
+    CFRelease(constraints);
+}
+
+id createButton(CFStringRef title, int titleColor, bool singleLine, id target, SEL action) {
+    id button = pvc.button.withType(Button, pvc.button.bwt, ButtonTypeSystem);
     setTitle(button, title, ControlStateNormal);
     CFRelease(title);
     setTitleColor(button, getColor(titleColor), ControlStateNormal);
     setTitleColor(button, getColor(ColorDisabled), ControlStateDisabled);
     addTarget(button, target, action, ControlEventTouchUpInside);
 
-    CFStringRef style = UIFontTextStyleBody;
-    CGFloat weight = UIFontWeightRegular;
-    if (titleColor == ColorLabel) {
-        style = UIFontTextStyleHeadline;
-        weight = UIFontWeightSemibold;
+    if (singleLine) {
+        id metrics = pvc.metrics.init(alloc(pvc.metrics.cls), pvc.metrics.si, UIFontTextStyleBody);
+        id baseFont = pvc.font.system(ViewTable.font.cls, pvc.font.sf, 17, UIFontWeightRegular);
+        id scaledFont = pvc.metrics.scaledFont(metrics, pvc.metrics.sf, baseFont, 23);
+        setupLabelFont(pvc.button.titleLabel(button, pvc.button.tl), scaledFont);
+        releaseObject(metrics);
+    } else {
+        configureMultilineButton(button, UIFontTextStyleBody);
     }
+    return button;
+}
 
-    id metrics = pvc.metrics.init(alloc(pvc.metrics.cls), pvc.metrics.si, style);
-    id baseFont = pvc.font.system(pvc.font.cls, pvc.font.sf, 17, weight);
-    id scaledFont = pvc.metrics.scaledFont(metrics, pvc.metrics.sf, baseFont, 23);
-    setupLabelFont(pvc.button.titleLabel(button, pvc.button.tl), scaledFont);
-    releaseObject(metrics);
+id createCustomButton(Class ButtonClass) {
+    id button = pvc.button.withType(ButtonClass, pvc.button.bwt, ButtonTypeSystem);
+    setTitleColor(button, getColor(ColorLabel), ControlStateNormal);
+    setTitleColor(button, getColor(ColorDisabled), ControlStateDisabled);
+    configureMultilineButton(button, UIFontTextStyleHeadline);
     return button;
 }
 
@@ -413,8 +428,7 @@ id createTextField(id delegate, id accessory, CFStringRef hint, int tag) {
     id field = new(pvc.field.cls);
     setTag(field, tag);
     pvc.field.setBG(field, SetBackgroundSel, getColor(ColorTertiaryBG));
-    id font = pvc.font.preferred(pvc.font.cls, pvc.font.pf, UIFontTextStyleBody);
-    pvc.field.setFont(field, pvc.common.sf, font);
+    pvc.field.setFont(field, pvc.common.sf, getPreferredFont(UIFontTextStyleBody));
     pvc.field.setAdjustsFontSizeToFitWidth(field, pvc.common.safstfw, true);
     pvc.field.setAdjustsFontForContentSizeCategory(field, pvc.common.saffcsc, true);
     pvc.field.setMinimumFontSize(field, pvc.field.smfs, 14);
@@ -442,10 +456,12 @@ void updateSegmentedControlColors(id control, bool darkMode) {
 
     const void *keys[] = {NSForegroundColorAttributeName, NSFontAttributeName};
     CFDictionaryRef normalDict = CFDictionaryCreate(NULL, keys, (const void *[]){
-        foreground, pvc.font.system(pvc.font.cls, pvc.font.sf, FontSizeSmall, UIFontWeightRegular)
+        foreground,
+        pvc.font.system(ViewTable.font.cls, pvc.font.sf, FontSizeSmall, UIFontWeightRegular)
     }, 2, &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
     CFDictionaryRef selectedDict = CFDictionaryCreate(NULL, keys, (const void *[]){
-        foreground, pvc.font.system(pvc.font.cls, pvc.font.sf, FontSizeSmall, UIFontWeightMedium)
+        foreground,
+        pvc.font.system(ViewTable.font.cls, pvc.font.sf, FontSizeSmall, UIFontWeightMedium)
     }, 2, &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
     pvc.seg.setTitleTextAttributes(control, pvc.seg.stta, normalDict, ControlStateNormal);
     pvc.seg.setTitleTextAttributes(control, pvc.seg.stta, selectedDict, ControlStateSelected);

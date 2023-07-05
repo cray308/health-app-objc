@@ -5,8 +5,6 @@
 
 #define setOn(s, o) msgV(objSig(void, bool), (s), sel_getUid("setOn:"), (o))
 
-extern uint64_t UIAccessibilityTraitButton;
-
 Class SwitchViewClass;
 Class SettingsVCClass;
 
@@ -44,11 +42,9 @@ static id switchView_init(SwitchView **ref, bool darkMode) {
     v->button = new(Switch);
     setOn(v->button, darkMode);
     addTarget(v->button, self, getValueChangedSel(), ControlEventValueChanged);
-    msgV(objSig(void, float, long), v->button, sel_getUid("setContentHuggingPriority:forAxis:"),
-         LayoutPriorityRequired, ConstraintAxisHorizontal);
-    msgV(objSig(void, float, long), v->button,
-         sel_getUid("setContentCompressionResistancePriority:forAxis:"),
-         LayoutPriorityRequired, ConstraintAxisHorizontal);
+    setContentHuggingPriority(v->button, LayoutPriorityRequired, ConstraintAxisHorizontal);
+    setContentCompressionResistancePriority(v->button,
+                                            LayoutPriorityRequired, ConstraintAxisHorizontal);
 
     id stack = createHStack((id []){v->label, v->button});
     useStackConstraints(stack);
@@ -142,14 +138,14 @@ void settingsVC_viewDidLoad(id self, SEL _cmd) {
 
     id buttonBackground = getColor(ColorSecondaryBGGrouped);
     SEL tapSel = getTapSel();
-    p->button = createButton(localize(CFSTR("settingsSave")), ColorBlue, self, tapSel);
+    p->button = createButton(localize(CFSTR("settingsSave")), ColorBlue, false, self, tapSel);
     setBackgroundColor(p->button, buttonBackground);
     addCornerRadius(p->button);
     setHeight(p->button, ViewHeightDefault, true, false);
     addArrangedSubview(p->vStack, p->button);
     setCustomSpacing(p->vStack, GroupSpacing, p->button);
 
-    id deleteButton = createButton(localize(CFSTR("settingsDelete")), ColorRed, self, tapSel);
+    id deleteButton = createButton(localize(CFSTR("settingsDelete")), ColorRed, false, self, tapSel);
     setTag(deleteButton, 1);
     setBackgroundColor(deleteButton, buttonBackground);
     addCornerRadius(deleteButton);

@@ -6,10 +6,6 @@
 Class SetupWorkoutVCClass;
 
 enum {
-    TextAlignmentCenter = 1
-};
-
-enum {
     AutocorrectionTypeNo = 1
 };
 
@@ -66,8 +62,8 @@ void setupWorkoutVC_viewDidLoad(id self, SEL _cmd) {
     InputVC *p = getIVVC(InputVC, self);
     SetupWorkoutVC *d = getIVVCS(SetupWorkoutVC, p);
     SEL tapSel = getTapSel();
-    id cancelButton = createButton(localize(CFSTR("cancel")), ColorBlue, self, tapSel);
-    p->button = createButton(localize(CFSTR("go")), ColorBlue, self, tapSel);
+    id cancelButton = createButton(localize(CFSTR("cancel")), ColorBlue, true, self, tapSel);
+    p->button = createButton(localize(CFSTR("go")), ColorBlue, true, self, tapSel);
     setTag(p->button, 1);
     setupNavItem(self, CFSTR("setupWorkoutTitle"), (id []){cancelButton, p->button});
     setEnabled(p->button, false);
@@ -81,7 +77,7 @@ void setupWorkoutVC_viewDidLoad(id self, SEL _cmd) {
 
     d->workoutField = createTextField(self, p->toolbar, pickerTitle, -1);
     setFieldText(d->workoutField, CFArrayGetValueAtIndex(d->names, 0));
-    msgV(objSig(void, long), d->workoutField, sel_getUid("setTextAlignment:"), TextAlignmentCenter);
+    setTextAlignment(d->workoutField, TextAlignmentCenter);
     msgV(objSig(void, long), d->workoutField,
          sel_getUid("setAutocorrectionType:"), AutocorrectionTypeNo);
     addArrangedSubview(p->vStack, d->workoutField);
@@ -89,7 +85,7 @@ void setupWorkoutVC_viewDidLoad(id self, SEL _cmd) {
 
     id workoutPicker = new(objc_getClass("UIPickerView"));
     setDelegate(workoutPicker, self);
-    msgV(objSig(void, id), workoutPicker, sel_getUid("setDataSource:"), self);
+    setDataSource(workoutPicker, self);
     msgV(objSig(void, id), d->workoutField, sel_getUid("setInputView:"), workoutPicker);
     releaseView(workoutPicker);
 
@@ -137,8 +133,9 @@ void setupWorkoutVC_tappedButton(id self, SEL _cmd _U_, id button) {
         default:
             break;
     }
-    Workout *workout = getWorkoutFromLibrary(&params, getUserData()->lifts);
-    callback = ^{ homeVC_navigateToWorkout(d->delegate, workout); };
+    CFMutableStringRef *headers;
+    Workout *workout = getWorkoutFromLibrary(&params, getUserData()->lifts, &headers);
+    callback = ^{ homeVC_navigateToWorkout(d->delegate, workout, headers); };
 end:
     dismissPresentedVC(self, callback);
 }

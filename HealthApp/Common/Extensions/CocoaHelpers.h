@@ -8,7 +8,7 @@
 #define clsSig(r, ...) (r(*)(Class, SEL, ##__VA_ARGS__))
 #define msgV(s, o, ...) ((s objc_msgSend) (o, ##__VA_ARGS__))
 
-#define supSig(...) ((void(*)(struct objc_super *, SEL, ##__VA_ARGS__)) objc_msgSendSuper)
+#define supSig(r, ...) ((r(*)(struct objc_super *, SEL, ##__VA_ARGS__)) objc_msgSendSuper)
 #define msgSupV(s, o, C, cmd, ...) (s (&(struct objc_super){o, C}, cmd, ##__VA_ARGS__))
 
 #define getClassMethodImp(C, s) method_getImplementation(class_getClassMethod((C), (s)))
@@ -67,6 +67,7 @@ struct AppCache {
         id (*barFunc)(int);
         SEL si;
         id (*init)(id, SEL, CGFloat, CGFloat, CGFloat, CGFloat);
+        SEL cwac;
         SEL sels[13];
         id (*imps[13])(Class, SEL);
     } color;
@@ -99,11 +100,15 @@ extern Class Image;
  AppTable.color.init(alloc(AppTable.color.cls), AppTable.color.si, (r), (g), (b), (a))
 #define getColor(t) AppTable.color.colorFunc((t))
 #define getBarColor(t) AppTable.color.barFunc((t))
+#define colorWithAlphaComponent(t, a) msgV(objSig(id, CGFloat), getColor(t), AppTable.color.cwac, a)
 
 #define getImage(n) AppTable.image.named(Image, AppTable.image.imn, (n))
 
 #define getNotificationCenter() AppTable.unc.current(AppTable.unc.cls, AppTable.unc.cns)
 #define addNotificationRequest(c, r) AppTable.unc.add((c), AppTable.unc.anr, (r), ^(id err _U_){})
+
+#define getSharedApplication()\
+ msgV(clsSig(id), objc_getClass("UIApplication"), sel_getUid("sharedApplication"))
 
 void initAppData(bool modern, Class **clsRefs);
 

@@ -4,7 +4,7 @@
 #include <objc/objc.h>
 #include "ExerciseManager.h"
 
-extern void homeVC_navigateToWorkout(id self, Workout *workout);
+extern void homeVC_navigateToWorkout(id self, Workout *workout, CFMutableStringRef *headers);
 
 extern Class SetupWorkoutVCClass;
 

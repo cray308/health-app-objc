@@ -50,7 +50,8 @@ static CFStringRef createTitle(int type, int index) {
     return title;
 }
 
-static Workout *buildWorkout(WorkoutPlist *data, WorkoutParams const *params, int const *lifts) {
+static Workout *buildWorkout(WorkoutPlist *data, WorkoutParams const *params,
+                             int const *lifts, CFMutableStringRef **headers) {
     CFLocaleRef locale = copyLocale();
     float weights[4] = {[3] = 0};
     short customSets = 1, customReps = 0, customCircuitReps = 0;
@@ -87,6 +88,7 @@ static Workout *buildWorkout(WorkoutPlist *data, WorkoutParams const *params, in
     }
 
     CFStringRef one = getOneStr(locale), restFormat = localize(CFSTR("exerciseTitleRest"));
+    CFStringRef hintFormat = localize(CFSTR("exerciseProgress"));
     CFStringRef repsFormat = localize(CFSTR("exerciseTitleReps"));
     CFStringRef setsFormat = localize(CFSTR("exerciseHeader"));
     CFStringRef weightFormat = localize(CFSTR("exerciseTitleRepsWithWeight"));
@@ -122,6 +124,8 @@ static Workout *buildWorkout(WorkoutPlist *data, WorkoutParams const *params, in
     workout->type = params->type;
     workout->day = params->day;
     workout->testMax = params->type == WorkoutStrength && params->index == StrengthIndexTestMax;
+
+    *headers = calloc((unsigned)workout->size, sizeof(CFMutableStringRef));
     bool multiple = workout->size > 1;
 
     for (int i = 0; i < workout->size; ++i) {
@@ -163,10 +167,11 @@ static Workout *buildWorkout(WorkoutPlist *data, WorkoutParams const *params, in
         }
 
         if (cHeader) {
-            c->header = CFStringCreateMutableCopy(NULL, 80, cHeader);
-            CFRetain(c->header);
+            (*headers)[i] = CFStringCreateMutableCopy(NULL, 80, cHeader);
             CFRelease(cHeader);
         }
+
+        bool addHint = c->size > 1;
 
         for (int j = 0; j < c->size; ++j) {
             CFDictionaryRef exDict = CFArrayGetValueAtIndex(exercises, j);
@@ -186,6 +191,8 @@ static Workout *buildWorkout(WorkoutPlist *data, WorkoutParams const *params, in
                 CFRetain(e->header);
                 CFRelease(header);
             }
+
+            if (addHint) e->hint = formatStr(locale, hintFormat, j + 1, c->size);
 
             int rest, nameIdx;
             getDictValue(exDict, CFSTR("B"), kCFNumberIntType, &rest);
@@ -211,7 +218,6 @@ static Workout *buildWorkout(WorkoutPlist *data, WorkoutParams const *params, in
                 exTitle = formatStr(locale, distanceFormat, name, e->reps, (5 * e->reps) >> 2);
             }
             e->title = CFStringCreateMutableCopy(NULL, 64, exTitle);
-            CFRetain(e->title);
             CFRelease(nameKey);
             CFRelease(name);
             CFRelease(exTitle);
@@ -230,6 +236,7 @@ static Workout *buildWorkout(WorkoutPlist *data, WorkoutParams const *params, in
     CFRelease(locale);
     CFRelease(one);
     CFRelease(restFormat);
+    CFRelease(hintFormat);
     CFRelease(repsFormat);
     CFRelease(setsFormat);
     CFRelease(weightFormat);
@@ -269,7 +276,7 @@ void getWeeklyWorkoutNames(CFStringRef *names, uint8_t plan) {
     CFRelease(plist.root);
 }
 
-Workout *getWeeklyWorkout(int index, uint8_t plan, int const *lifts) {
+Workout *getWeeklyWorkout(int index, uint8_t plan, int const *lifts, CFMutableStringRef **headers) {
     WorkoutPlist plist;
     createPlist(&plist);
     WorkoutParams params = {.day = (uint8_t)index};
@@ -279,7 +286,7 @@ Workout *getWeeklyWorkout(int index, uint8_t plan, int const *lifts) {
     getDictValue(day, CFSTR("S"), kCFNumberShortType, &params.sets);
     getDictValue(day, EMKeys.reps, kCFNumberShortType, &params.reps);
     getDictValue(day, CFSTR("W"), kCFNumberShortType, &params.weight);
-    return buildWorkout(&plist, &params, lifts);
+    return buildWorkout(&plist, &params, lifts, headers);
 }
 
 CFArrayRef createWorkoutNames(uint8_t type) {
@@ -293,8 +300,9 @@ CFArrayRef createWorkoutNames(uint8_t type) {
     return results;
 }
 
-Workout *getWorkoutFromLibrary(WorkoutParams const *params, int const *lifts) {
+Workout *getWorkoutFromLibrary(WorkoutParams const *params,
+                               int const *lifts, CFMutableStringRef **headers) {
     WorkoutPlist plist;
     createPlist(&plist);
-    return buildWorkout(&plist, params, lifts);
+    return buildWorkout(&plist, params, lifts, headers);
 }

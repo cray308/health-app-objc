@@ -1,6 +1,10 @@
 #include "WorkoutVC_Ext.h"
 #include "Views.h"
 
+enum {
+    ExerciseMaskActive = 3
+};
+
 static CFStringRef notificationMessages[2];
 static CFStringRef notificationTitle;
 static struct WorkoutCache {
@@ -82,27 +86,34 @@ bool exercise_cycle(Exercise *e, WorkoutTimer *timers) {
     switch (e->state) {
         case ExerciseStateDisabled:
             e->state = ExerciseStateActive;
-            if (e->type == ExerciseDuration)
+            if (e->type == ExerciseDuration) {
+                e->interactive = false;
                 workoutTimer_start(&timers[TimerExercise], e->reps, true);
+            } else {
+                e->interactive = true;
+            }
             break;
 
-        case ExerciseStateActive ... ExerciseStateActiveMult:
+        case ExerciseStateActive:
             if (e->rest) {
                 e->state = ExerciseStateResting;
                 break;
             }
         case ExerciseStateResting:
             if (++e->completedSets == e->sets) {
+                e->interactive = false;
                 e->state = ExerciseStateCompleted;
                 ++timers[TimerExercise].row;
                 return true;
             } else {
-                e->state = ExerciseStateActiveMult;
+                e->state = ExerciseStateActive;
                 CFLocaleRef locale = copyLocale();
                 CFStringRef sets = formatStr(locale, CFSTR("%d"), e->completedSets + 1);
                 updateRange(e->header, &e->headerRange, sets, locale);
-                if (e->type == ExerciseDuration)
+                if (e->type == ExerciseDuration) {
+                    e->interactive = false;
                     workoutTimer_start(&timers[TimerExercise], e->reps, true);
+                }
             }
         default:
             break;
@@ -110,36 +121,17 @@ bool exercise_cycle(Exercise *e, WorkoutTimer *timers) {
     return false;
 }
 
-void exerciseView_configure(StatusView *v) {
-    switch (v->exercise->state) {
-        case ExerciseStateDisabled:
-            setBackgroundColor(v->box, getColor(ColorGray));
-            break;
-
-        case ExerciseStateActive:
-            setEnabled(v->button, true);
-            setBackgroundColor(v->box, getColor(ColorOrange));
-        case ExerciseStateActiveMult:
-            if (v->exercise->type == ExerciseDuration) setUserInteractionEnabled(v->button, false);
-            if (v->exercise->completedSets) {
-                setTitle(v->button, v->exercise->title, ControlStateNormal);
-                setText(v->header, v->exercise->header);
-                statusView_updateAccessibility(v);
-            }
-            break;
-
-        case ExerciseStateResting:
-            setTitle(v->button, v->exercise->rest, ControlStateNormal);
-            if (v->exercise->sets > 1) statusView_updateAccessibility(v);
-            break;
-
-        case ExerciseStateCompleted:
-            setEnabled(v->button, false);
-            setBackgroundColor(v->box, getColor(ColorGreen));
-            if (v->exercise->rest) {
-                setTitle(v->button, v->exercise->title, ControlStateNormal);
-                if (v->exercise->sets > 1) statusView_updateAccessibility(v);
-            }
+void statusCell_configure(StatusCell *v, Exercise *exercise) {
+    static int boxColors[] = {ColorGray, ColorOrange, ColorOrange, 0, ColorGreen};
+    CFStringRef title = exercise->state == ExerciseStateResting ? exercise->rest : exercise->title;
+    setTitle(v->button, title, ControlStateNormal);
+    setEnabled(v->button, exercise->state & ExerciseMaskActive);
+    setNeedsLayout(v->button);
+    setBackgroundColor(v->box, getColor(boxColors[exercise->state]));
+    setAccessibilityHint(v->button, exercise->hint);
+    if (exercise->header) {
+        setText(v->header, exercise->header);
+        statusCell_updateAccessibility(v);
     }
 }
 
@@ -149,6 +141,7 @@ void circuit_start(Circuit *c, WorkoutTimer *timers, bool startTimer) {
     Exercise *end = &c->exercises[c->size];
     for (Exercise *e = c->exercises; e < end; ++e) {
         e->state = ExerciseStateDisabled;
+        e->interactive = false;
         e->completedSets = 0;
     }
 

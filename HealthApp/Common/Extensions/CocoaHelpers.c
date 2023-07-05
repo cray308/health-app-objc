@@ -34,6 +34,7 @@ void initAppData(bool modern, Class **clsRefs) {
         .colorFunc = colorCreate,
         .barFunc = barColorCreate,
         .si = iColor,
+        .cwac = sel_getUid("colorWithAlphaComponent:"),
         .init = ((id(*)(id, SEL, CGFloat, CGFloat, CGFloat, CGFloat))
                  class_getMethodImplementation(Color, iColor)),
         .sels = {

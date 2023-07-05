@@ -66,7 +66,7 @@ void inputView_deinit(id self, SEL _cmd) {
     releaseView(v->hintLabel);
     releaseView(v->field);
     releaseView(v->errorLabel);
-    msgSupV(supSig(), self, View, _cmd);
+    msgSupV(supSig(void), self, View, _cmd);
 }
 
 static void resetInput(InputView *v, float value) {
@@ -152,11 +152,11 @@ void inputVC_deinit(id self, SEL _cmd) {
     releaseView(d->scrollView);
     releaseView(d->vStack);
     CFNotificationCenterRemoveEveryObserver(CFNotificationCenterGetLocalCenter(), self);
-    msgSupV(supSig(), self, VC, _cmd);
+    msgSupV(supSig(void), self, VC, _cmd);
 }
 
 void inputVC_viewDidLoad(id self, SEL _cmd) {
-    msgSupV(supSig(), self, VC, _cmd);
+    msgSupV(supSig(void), self, VC, _cmd);
 
     InputVC *d = getIVVC(InputVC, self);
     d->activeTag = -1;
@@ -175,7 +175,7 @@ void inputVC_viewDidLoad(id self, SEL _cmd) {
     CFRelease(doneText);
 
     d->toolbar = msgV(objSig(id, CGRect), alloc(objc_getClass("UIToolbar")),
-                      sel_getUid("initWithFrame:"), (CGRect){{0}, {100, 100}});
+                      getViewInitSel(), (CGRect){{0}, {100, 100}});
     uint8_t darkMode = getUserData()->darkMode;
     if (isCharValid(darkMode)) {
         setBarTintColor(d->toolbar, getBarColor(BarColorModal));
