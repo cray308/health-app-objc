@@ -4,31 +4,21 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include <objc/objc.h>
 
-struct CellCache {
-    size_t classSize;
-    SEL gbv, gsbv;
-    id (*getBG)(id, SEL);
-    id (*getSelected)(id, SEL);
-};
-
 typedef struct {
     id button;
     id header;
     id box;
 } StatusCell;
 
-extern struct CellCache CellTable;
 extern Class Cell;
 extern Class RootCell;
 extern Class BasicCell;
 extern Class FullCell;
+extern size_t CellSize;
 extern CFStringRef const BasicCellID;
 extern CFStringRef const FullCellID;
 
-#define getIVC(x) ((StatusCell *)((char *)(x) + CellTable.classSize))
-
-#define getBackgroundView(c) CellTable.getBG((c), CellTable.gbv)
-#define getSelectedBackgroundView(c) CellTable.getSelected((c), CellTable.gsbv)
+#define getIVC(x) ((StatusCell *)((char *)(x) + CellSize))
 
 void initCellData(void);
 

@@ -7,6 +7,7 @@
  msgV(objSig(void), (msgV(objSig(id), (c), sel_getUid("collectionViewLayout"))), \
       sel_getUid("invalidateLayout"))
 
+extern CFStringRef NSFontAttributeName;
 extern CFStringRef UIContentSizeCategoryDidChangeNotification;
 
 struct CVCache CVTable;

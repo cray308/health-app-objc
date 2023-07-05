@@ -1,7 +1,7 @@
 #include "UserData.h"
 #include "BaseMacros.h"
 
-#define NKeys 11
+#define NKeys 10
 
 #if TARGET_OS_SIMULATOR
 void exerciseManager_setCurrentWeek(int week);
@@ -23,7 +23,6 @@ enum {
     IndexDST,
     IndexCurrentPlan,
     IndexCompletedWorkouts,
-    IndexDarkMode,
     IndexLifts
 };
 
@@ -39,7 +38,6 @@ static const void *UDKeys[] = {
     CFSTR("isDST"),
     CFSTR("currentPlan"),
     CFSTR("completedWorkouts"),
-    CFSTR("darkMode"),
     CFSTR("squatMax"),
     CFSTR("pullUpMax"),
     CFSTR("benchMax"),
@@ -90,13 +88,12 @@ static time_t getWeekStart(time_t date, int *tzOffset, bool *isDST) {
     return date - (tmInfo.tm_hour * HourSeconds) - (tmInfo.tm_min * 60) - tmInfo.tm_sec;
 }
 
-void userData_create(UserData *res, bool modern) {
+void userData_create(UserData *res) {
     int tzOffset;
     bool isDST;
     time_t weekStart = getWeekStart(time(NULL), &tzOffset, &isDST);
     res->weekStart = res->planStart = weekStart;
     res->plan = UCHAR_MAX;
-    res->darkMode = modern ? UCHAR_MAX : 0;
 
     const void *values[] = {
         CFNumberCreate(NULL, kCFNumberLongType, &weekStart),
@@ -105,7 +102,6 @@ void userData_create(UserData *res, bool modern) {
         CFNumberCreate(NULL, kCFNumberCharType, &isDST),
         CFNumberCreate(NULL, kCFNumberCharType, &(uint8_t){UCHAR_MAX}),
         CFNumberCreate(NULL, kCFNumberCharType, &(uint8_t){0}),
-        CFNumberCreate(NULL, kCFNumberCharType, &res->darkMode),
         CFNumberCreate(NULL, kCFNumberIntType, &(int){0}),
         CFNumberCreate(NULL, kCFNumberIntType, &(int){0}),
         CFNumberCreate(NULL, kCFNumberIntType, &(int){0}),
@@ -121,7 +117,7 @@ void userData_create(UserData *res, bool modern) {
     }
 }
 
-int userData_init(UserData *res, CFDictionaryRef prefs, int *week, bool modern) {
+int userData_init(UserData *res, CFDictionaryRef prefs, int *week) {
     int tzOffset, savedOffset;
     bool isDST, wasDST;
     res->weekStart = getWeekStart(time(NULL), &tzOffset, &isDST);
@@ -170,12 +166,6 @@ int userData_init(UserData *res, CFDictionaryRef prefs, int *week, bool modern) 
         }
     }
 
-    getDictValue(prefs, UDKeys[IndexDarkMode], kCFNumberCharType, &res->darkMode);
-    if (isCharValid(res->darkMode) && modern) {
-        res->darkMode = UCHAR_MAX;
-        changes |= MaskDarkMode;
-    }
-
     if (changes) {
         CFStringRef keys[IndexLifts];
         CFNumberRef values[IndexLifts];
@@ -185,11 +175,9 @@ int userData_init(UserData *res, CFDictionaryRef prefs, int *week, bool modern) 
             kCFNumberIntType,
             kCFNumberCharType,
             kCFNumberCharType,
-            kCFNumberCharType,
             kCFNumberCharType
         };
         void *valueRefs[] = {
-            [6] = &res->darkMode, [0] =
             &res->weekStart, &res->planStart, &tzOffset, &isDST, &res->plan, &res->completedWorkouts
         };
         int nChanges = 0;
@@ -210,11 +198,11 @@ int userData_init(UserData *res, CFDictionaryRef prefs, int *week, bool modern) 
     return tzDiff;
 }
 
-uint8_t userData_update(UserData *m, uint8_t plan, uint8_t darkMode, int const *weights) {
+bool userData_update(UserData *m, uint8_t plan, int const *weights) {
     CFStringRef keys[IndexLifts];
     CFNumberRef values[IndexLifts];
     int nChanges = 0;
-    uint8_t res = plan != m->plan ? MaskCurrentPlan : 0;
+    bool res = plan != m->plan;
     if (res) {
         keys[0] = UDKeys[IndexCurrentPlan];
         values[nChanges++] = CFNumberCreate(NULL, kCFNumberCharType, &plan);
@@ -225,13 +213,6 @@ uint8_t userData_update(UserData *m, uint8_t plan, uint8_t darkMode, int const *
             keys[1] = UDKeys[IndexPlanStart];
             values[nChanges++] = CFNumberCreate(NULL, kCFNumberLongType, &m->planStart);
         }
-    }
-
-    if (darkMode != m->darkMode) {
-        res |= MaskDarkMode;
-        keys[nChanges] = UDKeys[IndexDarkMode];
-        values[nChanges++] = CFNumberCreate(NULL, kCFNumberCharType, &darkMode);
-        m->darkMode = darkMode;
     }
 
     nChanges += updateWeights(m->lifts, weights, &keys[nChanges], &values[nChanges], true);

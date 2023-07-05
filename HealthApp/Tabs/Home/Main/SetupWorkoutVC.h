@@ -11,14 +11,10 @@ extern Class SetupWorkoutVCClass;
 typedef struct {
     id delegate;
     CFArrayRef names;
-    CFDictionaryRef normalDict;
-    CFDictionaryRef selectedDict;
     id workoutField;
     int index;
     uint8_t type;
 } SetupWorkoutVC;
-
-void initSetupWorkoutData(void);
 
 id setupWorkoutVC_init(id delegate, uint8_t type);
 void setupWorkoutVC_deinit(id self, SEL _cmd);
@@ -27,8 +23,6 @@ void setupWorkoutVC_tappedButton(id self, SEL _cmd, id button);
 long setupWorkoutVC_numberOfComponentsInPickerView(id self, SEL _cmd, id picker);
 long setupWorkoutVC_numberOfRows(id self, SEL _cmd, id picker, long component);
 CFStringRef setupWorkoutVC_titleForRow(id self, SEL _cmd, id picker, long row, long component);
-CFAttributedStringRef setupWorkoutVC_attributedTitle(id self, SEL _cmd,
-                                                     id picker, long row, long component);
 void setupWorkoutVC_didSelectRow(id self, SEL _cmd, id picker, long row, long component);
 
 #endif /* SetupWorkoutVC_h */

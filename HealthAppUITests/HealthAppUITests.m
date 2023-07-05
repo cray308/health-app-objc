@@ -689,13 +689,6 @@ static NSString *settingsTitles[] = {
     [self setupSettingsProperties];
     [[settingsSegments elementBoundByIndex:0] tap];
 
-    if (@available(iOS 13, *)) {
-    } else {
-        XCUIElement *darkModeSwitch = settingsScroll.switches.firstMatch;
-        if ([darkModeSwitch valueEquals:@"1"]) [darkModeSwitch tap];
-        XCTAssert([darkModeSwitch valueEquals:@"0"]);
-    }
-
     [settingsFields[settingsTitles[0]] tapField];
     for (int i = 0; i < 4; ++i) {
         XCUIElement *field = settingsFields[settingsTitles[i]];
@@ -734,16 +727,6 @@ static NSString *settingsTitles[] = {
 
         XCTAssert([settingsSegments elementBoundByIndex:0].isSelected);
         [[settingsSegments elementBoundByIndex:1] tap];
-
-        if (@available(iOS 13, *)) {
-        } else {
-            XCTAssert([settingsScroll
-                       descendantsMatchingType:XCUIElementTypeAny][@"Dark mode"].exists);
-            XCUIElement *darkModeSwitch = settingsScroll.switches.firstMatch;
-            XCTAssert([darkModeSwitch valueEquals:@"0"]);
-            [darkModeSwitch tap];
-            XCTAssert([darkModeSwitch valueEquals:@"1"]);
-        }
     }
 
     [self checkSettingsFieldsEqualValues:@[@"0", @"0", @"0", @"0"]
@@ -779,10 +762,6 @@ static NSString *settingsTitles[] = {
     [[tabs elementBoundByIndex:2] tap];
     [self setupSettingsProperties];
     {
-        if (@available(iOS 13, *)) {
-        } else {
-            XCTAssert([settingsScroll.switches.firstMatch valueEquals:@"1"]);
-        }
         XCTAssert([settingsSegments elementBoundByIndex:1].isSelected);
         [self checkSettingsFieldsEqualValues:@[@"50", @"0", @"20", @"0"]];
         XCUIElement *deleteButton = settingsScroll.buttons[@"Delete data"];

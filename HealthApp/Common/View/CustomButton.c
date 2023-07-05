@@ -1,6 +1,7 @@
 #include "CustomButton.h"
 #include "Views.h"
 
+extern uint64_t UIAccessibilityTraitButton;
 extern uint64_t UIAccessibilityTraitNotEnabled;
 
 Class CustomButton;

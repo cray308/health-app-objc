@@ -1,10 +1,8 @@
 #include "HistoryVC.h"
-#include "UserData.h"
 #include "Views.h"
 
 #define getChartClass() objc_getClass("Charts.LineChart")
 
-Class ChartContainerClass;
 Class HistoryVCClass;
 
 static CFStringRef totalWorkoutsFormat;
@@ -145,8 +143,6 @@ void historyVC_viewDidLoad(id self, SEL _cmd) {
     HistoryVC *d = getIVVC(HistoryVC, self);
     d->rangeControl = createSegmentedControl(CFSTR("historySegment%d"), 0);
     addTarget(d->rangeControl, self, getTapSel(), ControlEventValueChanged);
-    uint8_t darkMode = getUserData()->darkMode;
-    if (isCharValid(darkMode)) updateSegmentedControlColors(d->rangeControl, darkMode);
     msgV(objSig(void, id), getNavItem(self), sel_getUid("setTitleView:"), d->rangeControl);
 
     Class Chart = getChartClass();
@@ -164,28 +160,21 @@ void historyVC_viewDidLoad(id self, SEL _cmd) {
     CFStringRef titles[3];
     fillStringArray(titles, CFSTR("chartHeader%d"), 3);
     for (int i = 0; i < 3; ++i) {
-        id container = new(ChartContainerClass);
-        ChartContainer *v = getIVV(ChartContainer, container);
-
         id divider = new(View);
         setBackgroundColor(divider, getColor(ColorDiv));
         setHeight(divider, 1, false, true);
         if (!i) setHidden(divider, true);
-        v->divider = divider;
 
         id header = createLabel(titles[i], UIFontTextStyleTitle3, ColorLabel);
         setAccessibilityTraits(header, UIAccessibilityTraitStaticText | UIAccessibilityTraitHeader);
-        v->header = header;
 
         id stack = createVStack((id []){divider, header, d->charts[i]}, 3);
-        useStackConstraints(stack);
         setCustomSpacing(stack, GroupSpacing, divider);
         setCustomSpacing(stack, ViewSpacing, header);
-        addSubview(container, stack);
-        pin(stack, container);
         setHeight(d->charts[i], heights[i], false, false);
-        releaseView(stack);
-        containers[i] = container;
+        releaseView(divider);
+        releaseView(header);
+        containers[i] = stack;
     }
 
     id vStack = createVStack(containers, 3);
@@ -224,20 +213,5 @@ void historyVC_clearData(id self) {
     if (isViewLoaded(self)) {
         setSelectedSegmentIndex(d->rangeControl, 0);
         historyVC_changedSegment(self, nil, d->rangeControl);
-    }
-}
-
-void historyVC_updateColors(id self, bool darkMode) {
-    id view = getView(self);
-    setBackgroundColor(view, getColor(ColorPrimaryBG));
-    updateSegmentedControlColors(getIVVC(HistoryVC, self)->rangeControl, darkMode);
-    view = (id)CFArrayGetValueAtIndex(getSubviews(view), 0);
-    view = (id)CFArrayGetValueAtIndex(getSubviews(view), 0);
-    CFArrayRef views = msgV(objSig(CFArrayRef), view, sel_getUid("arrangedSubviews"));
-    id labelColor = getColor(ColorLabel), divColor = getColor(ColorDiv);
-    for (int i = 0; i < 3; ++i) {
-        ChartContainer *v = getIVV(ChartContainer, CFArrayGetValueAtIndex(views, i));
-        setTextColor(v->header, labelColor);
-        setBackgroundColor(v->divider, divColor);
     }
 }

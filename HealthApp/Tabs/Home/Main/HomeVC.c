@@ -22,20 +22,6 @@ static void updateCellBox(StatusCell *v, bool enabled) {
     setBackgroundColor(v->box, enabled ? getColor(ColorGray) : getColor(ColorGreen));
 }
 
-static void updateCellColors(id cell, StatusCell *v) {
-    if (v->header) setTextColor(v->header, getColor(ColorLabel));
-
-    setBackgroundColor(getBackgroundView(cell), getColor(ColorSecondaryBGGrouped));
-    setBackgroundColor(getSelectedBackgroundView(cell), colorWithAlphaComponent(ColorLabel, 0.5));
-    setTitleColor(v->button, getColor(ColorLabel), ControlStateNormal);
-    setTitleColor(v->button, getColor(ColorDisabled), ControlStateDisabled);
-}
-
-void updateHeaderColors(HeaderView *v) {
-    setBackgroundColor(v->divider, getColor(ColorDiv));
-    setTextColor(v->label, getColor(ColorLabel));
-}
-
 #pragma mark - Lifecycle
 
 id homeVC_init(void) {
@@ -124,26 +110,9 @@ id homeVC_cellForItemAtIndexPath(id self, SEL _cmd _U_, id collectionView, id in
     }
 
     setTitle(v->button, p->titles[section][item], ControlStateNormal);
-    if (d->refreshItemColors[section] & (1 << item)) {
-        updateCellColors(cell, v);
-        d->refreshItemColors[section] &= ~(1 << item);
-    }
-
     if (v->header) statusCell_updateAccessibility(v);
     setIDFormatted(cell, CFSTR("cell_%ld_%ld"), section, item)
     return cell;
-}
-
-id homeVC_viewForSupplementaryElement(id self, SEL _cmd _U_,
-                                      id collectionView, CFStringRef kind _U_, id indexPath) {
-    HomeVC *d = getIVVCC(HomeVC, CollectionVC, self);
-    id header = collectionVC_viewForSupplementaryElement(self, nil, collectionView, kind, indexPath);
-    long section = getSection(indexPath);
-    if (d->refreshHeaderColors & (1 << section)) {
-        updateHeaderColors(getIVR(header));
-        d->refreshHeaderColors &= ~(1 << section);
-    }
-    return header;
 }
 
 #pragma mark - Collection Delegate
@@ -203,35 +172,6 @@ void homeVC_updateWorkoutsList(id self, uint8_t completedWorkouts) {
     for (int i = 0; i < items; ++i) {
         id cell = cellForItem(p->collectionView, makeIndexPath(i, SectionPlan));
         if (cell) updateCellBox(getIVC(cell), !(d->completedWorkouts & (1 << d->indexMapping[i])));
-    }
-}
-
-void homeVC_updateColors(id self) {
-    CollectionVC *p = getIVVC(CollectionVC, self);
-    HomeVC *d = getIVVCS(HomeVC, p);
-    setBackgroundColor(p->collectionView, getColor(ColorPrimaryBGGrouped));
-    for (int i = p->firstSection; i < p->totalSections; ++i) {
-        id indexPath = makeIndexPath(0, i);
-        id header = supplementaryView(p->collectionView, indexPath);
-        if (header) {
-            updateHeaderColors(getIVR(header));
-        } else {
-            d->refreshHeaderColors |= (1 << i);
-        }
-
-        int items = p->itemCounts[i];
-        for (int j = 0; j < items; ++j) {
-            indexPath = makeIndexPath(j, i);
-            id cell = cellForItem(p->collectionView, indexPath);
-            if (cell) {
-                StatusCell *v = getIVC(cell);
-                if (i == SectionPlan)
-                    updateCellBox(v, !(d->completedWorkouts & (1 << d->indexMapping[i])));
-                updateCellColors(cell, v);
-            } else {
-                d->refreshItemColors[i] |= (1 << j);
-            }
-        }
     }
 }
 

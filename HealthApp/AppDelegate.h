@@ -17,7 +17,7 @@ u_long appDelegate_supportedInterfaceOrientations(id self, SEL _cmd, id app, id 
 void appDelegate_willPresentNotification(AppDelegate *self, SEL _cmd,
                                          id center, id notification, void (^callback)(u_long));
 
-void updateUserInfo(uint8_t plan, uint8_t darkMode, int const *weights);
+void updateUserInfo(uint8_t plan, int const *weights);
 void deleteAppData(void);
 void addWorkout(Workout const *workout, uint8_t day, int *weights, bool pop);
 

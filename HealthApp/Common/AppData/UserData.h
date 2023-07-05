@@ -10,7 +10,6 @@ enum {
     MaskPlanStart = 2,
     MaskTzOffset = 4,
     MaskDST = 8,
-    MaskDarkMode = 64,
     MaskCurrentPlan = 16,
     MaskCompletedWorkouts = 32
 };
@@ -19,15 +18,14 @@ typedef struct {
     time_t planStart;
     time_t weekStart;
     int lifts[4];
-    uint8_t darkMode;
     uint8_t plan;
     uint8_t completedWorkouts;
 } UserData;
 
-void userData_create(UserData *res, bool modern);
-int userData_init(UserData *res, CFDictionaryRef prefs CF_CONSUMED, int *week, bool modern);
+void userData_create(UserData *res);
+int userData_init(UserData *res, CFDictionaryRef prefs CF_CONSUMED, int *week);
 
-uint8_t userData_update(UserData *m, uint8_t plan, uint8_t darkMode, int const *weights);
+bool userData_update(UserData *m, uint8_t plan, int const *weights);
 bool userData_clear(UserData *m);
 uint8_t userData_addWorkoutData(UserData *m, uint8_t day, int const *weights, bool *updatedWeights);
 

@@ -119,9 +119,7 @@ void updateMaxesVC_viewDidLoad(id self, SEL _cmd) {
     p->button = createButton(localize(CFSTR("finish")), ColorBlue, true, self, getTapSel());
     setupNavItem(self, CFSTR("updateMaxesTitle"), (id []){nil, p->button});
     setEnabled(p->button, false);
-
-    if (getTabBarAppearanceClass())
-        msgV(objSig(void, bool), self, sel_getUid("setModalInPresentation:"), true);
+    msgV(objSig(void, bool), self, sel_getUid("setModalInPresentation:"), true);
 
     setSpacing(p->vStack, GroupSpacing);
     CFLocaleRef locale = copyLocale();

@@ -9,28 +9,24 @@
 #include "SetupWorkoutVC.h"
 #include "StatusCell.h"
 #include "UpdateMaxesVC.h"
+#include "Views_VCExt.h"
 #include "WorkoutVC.h"
 
 extern int UIApplicationMain(int, char *[], CFStringRef, CFStringRef);
 
 int main(int argc, char *argv[]) {
     checkMainArgs(argc)
-    Class TabBarAppearance = getTabBarAppearanceClass();
-    initAppData(TabBarAppearance, (Class *[]){&View, &VC});
+    initAppData((Class *[]){&View, &VC});
     initViewData((void(*[])(void)){
-        initCellData,
-        initValidatorData,
-        initCollectionData,
-        initUpdateMaxesData,
-        initSetupWorkoutData
-    }, 5);
+        initCellData, initValidatorData, initCollectionData, initUpdateMaxesData
+    }, 4);
+    initVCData();
     char *superKey = "parentData", *dataKey = "data", *voidSig = "v@:", *tapSig = "v@:@";
-    char *cellSig = "@@:@@", *headerSig = "@@:@@@", *selectSig = "v@:@@", *sizeSig = "{?=dd}@:@@@";
+    char *cellSig = "@@:@@", *selectSig = "v@:@@", *sizeSig = "{?=dd}@:@@@";
     char *initSig = "@@:{?={?=dd}{?=dd}}", *bool2Arg = "B@:@@";
     SEL init = getViewInitSel(), deinit = sel_getUid("dealloc");
     SEL viewLoad = sel_getUid("viewDidLoad"), tap = getTapSel();
     SEL getCell = sel_getUid("collectionView:cellForItemAtIndexPath:");
-    SEL getHeader = sel_getUid("collectionView:viewForSupplementaryElementOfKind:atIndexPath:");
     SEL shouldSelect = sel_getUid("collectionView:shouldSelectItemAtIndexPath:");
     SEL didSelect = sel_getUid("collectionView:didSelectItemAtIndexPath:");
 
@@ -61,12 +57,8 @@ int main(int argc, char *argv[]) {
     class_addMethod(HeaderViewClass, deinit, (IMP)headerView_deinit, voidSig);
     objc_registerClassPair(HeaderViewClass);
 
-    ChartContainerClass = objc_allocateClassPair(View, "ChartContainer", 0);
-    class_addIvar(ChartContainerClass, dataKey, sizeof(ChartContainer), 0, "{?=@@}");
-    objc_registerClassPair(ChartContainerClass);
-
     InputViewClass = objc_allocateClassPair(View, "InputView", 0);
-    class_addIvar(InputViewClass, dataKey, sizeof(InputView), 0, "{?=@@@@iifC}");
+    class_addIvar(InputViewClass, dataKey, sizeof(InputView), 0, "{?=@@@iifC}");
     class_addMethod(InputViewClass, deinit, (IMP)inputView_deinit, voidSig);
     objc_registerClassPair(InputViewClass);
 
@@ -80,16 +72,9 @@ int main(int argc, char *argv[]) {
                     (IMP)stepperView_accessibilityDecrement, voidSig);
     objc_registerClassPair(StepperViewClass);
 
-    SwitchViewClass = objc_allocateClassPair(View, "SwitchView", 0);
-    class_addIvar(SwitchViewClass, dataKey, sizeof(SwitchView), 0, "{?=@@}");
-    class_addMethod(SwitchViewClass, getValueChangedSel(), (IMP)switchView_changedValue, voidSig);
-    class_addMethod(SwitchViewClass, sel_getUid("accessibilityActivate"),
-                    (IMP)switchView_accessibilityActivate, "B@:");
-    objc_registerClassPair(SwitchViewClass);
-
     InputVCClass = objc_allocateClassPair(VC, "InputVC", 0);
     class_addProtocol(InputVCClass, objc_getProtocol("UITextFieldDelegate"));
-    class_addIvar(InputVCClass, superKey, sizeof(InputVC), 0, "{?=[4{?=@@}]@@@@iiB}");
+    class_addIvar(InputVCClass, superKey, sizeof(InputVC), 0, "{?=[4{?=@@}]@@@@ii}");
     class_addMethod(InputVCClass, deinit, (IMP)inputVC_deinit, voidSig);
     class_addMethod(InputVCClass, viewLoad, (IMP)inputVC_viewDidLoad, voidSig);
     class_addMethod(InputVCClass, getDismissKeyboardSel(), (IMP)inputVC_dismissKeyboard, voidSig);
@@ -107,7 +92,7 @@ int main(int argc, char *argv[]) {
     objc_registerClassPair(InputVCClass);
 
     SettingsVCClass = objc_allocateClassPair(InputVCClass, "SettingsVC", 0);
-    class_addIvar(SettingsVCClass, dataKey, sizeof(SettingsVC), 0, "{?=@@{?=@@}@[4i]}");
+    class_addIvar(SettingsVCClass, dataKey, sizeof(SettingsVC), 0, "{?=@[4i]}");
     class_addMethod(SettingsVCClass, viewLoad, (IMP)settingsVC_viewDidLoad, voidSig);
     class_addMethod(SettingsVCClass, tap, (IMP)settingsVC_buttonTapped, tapSig);
     objc_registerClassPair(SettingsVCClass);
@@ -115,7 +100,7 @@ int main(int argc, char *argv[]) {
     SetupWorkoutVCClass = objc_allocateClassPair(InputVCClass, "SetupWorkoutVC", 0);
     class_addProtocol(SetupWorkoutVCClass, objc_getProtocol("UIPickerViewDelegate"));
     class_addProtocol(SetupWorkoutVCClass, objc_getProtocol("UIPickerViewDataSource"));
-    class_addIvar(SetupWorkoutVCClass, dataKey, sizeof(SetupWorkoutVC), 0, "{?=@@@@@iC}");
+    class_addIvar(SetupWorkoutVCClass, dataKey, sizeof(SetupWorkoutVC), 0, "{?=@@@iC}");
     class_addMethod(SetupWorkoutVCClass, deinit, (IMP)setupWorkoutVC_deinit, voidSig);
     class_addMethod(SetupWorkoutVCClass, viewLoad, (IMP)setupWorkoutVC_viewDidLoad, voidSig);
     class_addMethod(SetupWorkoutVCClass, tap, (IMP)setupWorkoutVC_tappedButton, tapSig);
@@ -125,8 +110,6 @@ int main(int argc, char *argv[]) {
                     (IMP)setupWorkoutVC_numberOfRows, "q@:@q");
     class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:titleForRow:forComponent:"),
                     (IMP)setupWorkoutVC_titleForRow, "@@:@qq");
-    class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:attributedTitleForRow:forComponent:"),
-                    (IMP)setupWorkoutVC_attributedTitle, "@@:@qq");
     class_addMethod(SetupWorkoutVCClass, sel_getUid("pickerView:didSelectRow:inComponent:"),
                     (IMP)setupWorkoutVC_didSelectRow, "v@:@qq");
     objc_registerClassPair(SetupWorkoutVCClass);
@@ -159,10 +142,9 @@ int main(int argc, char *argv[]) {
     objc_registerClassPair(CollectionVCClass);
 
     HomeVCClass = objc_allocateClassPair(CollectionVCClass, "HomeVC", 0);
-    class_addIvar(HomeVCClass, dataKey, sizeof(HomeVC), 0, "{?=[6i]iCC[2C]}");
+    class_addIvar(HomeVCClass, dataKey, sizeof(HomeVC), 0, "{?=[6i]iC}");
     class_addMethod(HomeVCClass, viewLoad, (IMP)homeVC_viewDidLoad, voidSig);
     class_addMethod(HomeVCClass, getCell, (IMP)homeVC_cellForItemAtIndexPath, cellSig);
-    class_addMethod(HomeVCClass, getHeader, (IMP)homeVC_viewForSupplementaryElement, headerSig);
     class_addMethod(HomeVCClass, shouldSelect, (IMP)homeVC_shouldSelectItem, bool2Arg);
     class_addMethod(HomeVCClass, didSelect, (IMP)homeVC_didSelectItemAtIndexPath, selectSig);
 
@@ -174,8 +156,6 @@ int main(int argc, char *argv[]) {
     class_addMethod(WorkoutVCClass, sel_getUid("viewWillDisappear:"),
                     (IMP)workoutVC_viewWillDisappear, "v@:B");
     class_addMethod(WorkoutVCClass, getCell, (IMP)workoutVC_cellForItemAtIndexPath, cellSig);
-    class_addMethod(WorkoutVCClass, getHeader,
-                    (IMP)collectionVC_viewForSupplementaryElement, headerSig);
     class_addMethod(WorkoutVCClass, shouldSelect, (IMP)workoutVC_shouldSelectItem, bool2Arg);
     class_addMethod(WorkoutVCClass, didSelect, (IMP)workoutVC_didSelectItemAtIndexPath, selectSig);
 
@@ -190,6 +170,9 @@ int main(int argc, char *argv[]) {
                         (IMP)collectionVC_numberOfSectionsInCollectionView, "q@:");
         class_addMethod(class, sel_getUid("collectionView:numberOfItemsInSection:"),
                         (IMP)collectionVC_numberOfItemsInSection, "q@:@q");
+        class_addMethod(class,
+                        sel_getUid("collectionView:viewForSupplementaryElementOfKind:atIndexPath:"),
+                        (IMP)collectionVC_viewForSupplementaryElement, "@@:@@@");
         class_addMethod(class, sel_getUid("collectionView:layout:sizeForItemAtIndexPath:"),
                         (IMP)collectionVC_sizeForItem, sizeSig);
         class_addMethod(class, sel_getUid("collectionView:layout:insetForSectionAtIndex:"),
@@ -203,7 +186,7 @@ int main(int argc, char *argv[]) {
 
     Class AppDelegateClass = objc_allocateClassPair(objc_getClass("UIResponder"), "AppDelegate", 0);
     class_addProtocol(AppDelegateClass, objc_getProtocol("UNUserNotificationCenterDelegate"));
-    class_addIvar(AppDelegateClass, dataKey, sizeof(AppDelegate), 0, "@[3@]{?=qq[4i]CCC}");
+    class_addIvar(AppDelegateClass, dataKey, sizeof(AppDelegate), 0, "@[3@]{?=qq[4i]CC}");
     class_addMethod(AppDelegateClass, sel_getUid("application:didFinishLaunchingWithOptions:"),
                     (IMP)appDelegate_didFinishLaunching, bool2Arg);
     class_addMethod(AppDelegateClass,

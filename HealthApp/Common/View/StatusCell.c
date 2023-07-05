@@ -2,11 +2,11 @@
 #include "CustomButton.h"
 #include "Views.h"
 
-struct CellCache CellTable;
 Class Cell;
 Class RootCell;
 Class BasicCell;
 Class FullCell;
+size_t CellSize;
 CFStringRef const BasicCellID = CFSTR("BasicCell");
 CFStringRef const FullCellID = CFSTR("FullCell");
 
@@ -20,12 +20,7 @@ static void (*setSelectedBackgroundView)(id, SEL, id);
 
 void initCellData(void) {
     Cell = objc_getClass("UICollectionViewCell");
-    SEL gbv = sel_getUid("backgroundView"), gsbv = sel_getUid("selectedBackgroundView");
-    memcpy(&CellTable, &(struct CellCache){
-        class_getInstanceSize(Cell), gbv, gsbv,
-        (id(*)(id, SEL))class_getMethodImplementation(Cell, gbv),
-        (id(*)(id, SEL))class_getMethodImplementation(Cell, gsbv)
-    }, sizeof(struct CellCache));
+    CellSize = class_getInstanceSize(Cell);
 
     separatorFormat = localize(CFSTR("separator"));
     cv = sel_getUid("contentView");
